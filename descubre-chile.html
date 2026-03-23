@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,721 +8,300 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* ================================================================
-       DESCUBRE CHILE — Explore Chile's History, Geography & Culture
-       ================================================================ */
-
-    :root {
-      --bg-deep: #0A0F1C;
-      --bg-surface: #111827;
-      --bg-card: #1A2234;
-      --border-subtle: rgba(255,255,255,0.07);
-
-      --chile-red: #D93636;
-      --chile-red-glow: rgba(217, 54, 54, 0.35);
-      --chile-blue: #0039A6;
-      --chile-blue-glow: rgba(0, 57, 166, 0.35);
-      --andes-gold: #E8A838;
-      --andes-gold-glow: rgba(232, 168, 56, 0.4);
-      --patagonia-teal: #2CB5A0;
-      --patagonia-glow: rgba(44, 181, 160, 0.35);
-      --atacama-orange: #E87040;
-      --atacama-glow: rgba(232, 112, 64, 0.35);
-      --snow-white: #F0F4FF;
-      --green: #34D399;
-      --green-glow: rgba(52,211,153,0.4);
-      --red: #F87171;
-      --red-glow: rgba(248,113,113,0.35);
-
-      --text: #F0EDFF;
-      --text-muted: #8B95B0;
-
-      --font-display: 'Baloo 2', 'Nunito', cursive;
-      --font-body: 'Nunito', system-ui, sans-serif;
-      --radius: 20px;
-      --radius-sm: 14px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { height: 100%; font-size: 16px; }
-
-    body {
-      min-height: 100%;
-      font-family: var(--font-body);
-      background: var(--bg-deep);
-      color: var(--text);
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* ---- Mountain silhouette background ---- */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 30% 40%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(2px 2px at 55% 12%, rgba(232,168,56,0.6), transparent),
-        radial-gradient(1px 1px at 70% 50%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1.5px 1.5px at 85% 25%, rgba(217,54,54,0.5), transparent),
-        radial-gradient(1px 1px at 15% 75%, rgba(44,181,160,0.4), transparent),
-        radial-gradient(1.5px 1.5px at 45% 65%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.3), transparent);
-      pointer-events: none;
-      z-index: 0;
-      animation: twinkle 7s ease-in-out infinite alternate;
-    }
-    @keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
-
-    /* Decorative mountain gradient at bottom */
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 200px;
-      background: linear-gradient(to top, rgba(10,15,28,0.95), transparent);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ---- Atmosphere blobs ---- */
-    .atmo { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; animation: drift 22s ease-in-out infinite alternate; }
-    .atmo-1 { width: 400px; height: 400px; background: rgba(217,54,54,0.08); top: -80px; right: -60px; }
-    .atmo-2 { width: 350px; height: 350px; background: rgba(0,57,166,0.08); bottom: 10%; left: -70px; animation-delay: -6s; }
-    .atmo-3 { width: 300px; height: 300px; background: rgba(44,181,160,0.06); top: 40%; left: 40%; animation-delay: -12s; }
-    @keyframes drift {
-      0% { transform: translate(0,0) scale(1); }
-      50% { transform: translate(20px,-15px) scale(1.06); }
-      100% { transform: translate(-10px,10px) scale(0.97); }
-    }
-
-    /* ---- App shell ---- */
-    .app {
-      position: relative; z-index: 1; width: 100%; max-width: 640px;
-      padding: 24px 20px 40px; min-height: 100vh;
-      display: flex; flex-direction: column;
-    }
-
-    /* ---- Home button ---- */
-    .home-btn {
-      position: absolute; top: 24px; left: 20px;
-      width: 42px; height: 42px; border-radius: 12px;
-      border: 1.5px solid var(--border-subtle); background: var(--bg-card);
-      color: var(--text-muted); display: flex; align-items: center; justify-content: center;
-      font-size: 20px; text-decoration: none; transition: all 0.25s ease; z-index: 10;
-    }
-    .home-btn:hover { border-color: var(--chile-red); color: var(--chile-red); transform: scale(1.08); }
-
-    /* ---- User badge ---- */
-    .user-badge {
-      position: absolute; top: 24px; right: 20px;
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 14px 6px 8px;
-      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
-      border-radius: 99px; z-index: 10;
-      font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; color: var(--text);
-    }
-    .user-badge-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid; }
-
-    /* ---- Screen management ---- */
-    .screen { display: none; flex-direction: column; align-items: center; }
-    .screen.active { display: flex; }
-
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-    /* ================================================================
-       TOPIC SELECT SCREEN
-       ================================================================ */
-    .topic-header {
-      text-align: center; margin: 40px 0 28px; animation: fadeUp 0.6s ease-out both;
-    }
-    .topic-header .flag { font-size: 56px; display: block; margin-bottom: 4px; animation: flagWave 3s ease-in-out infinite; }
-    @keyframes flagWave {
-      0%,100% { transform: rotate(-3deg); }
-      50% { transform: rotate(3deg); }
-    }
-    .topic-header h1 {
-      font-family: var(--font-display); font-size: clamp(2rem, 6vw, 2.8rem); font-weight: 800;
-      background: linear-gradient(135deg, var(--chile-red), var(--snow-white), var(--chile-blue));
-      background-size: 200% 200%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      animation: gradShift 5s ease-in-out infinite;
-    }
-    @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-    .topic-header p { color: var(--text-muted); font-weight: 600; margin-top: 6px; font-size: 1rem; }
-    .topic-header .greeting { color: var(--andes-gold); font-weight: 700; font-size: 0.9rem; }
-
-    .topics-grid {
-      width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-    }
-    .topic-card {
-      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
-      border-radius: var(--radius); padding: 22px 18px; text-align: center;
-      cursor: pointer; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
-      animation: fadeUp 0.5s ease-out both; position: relative; overflow: hidden;
-    }
-    .topic-card:nth-child(1) { animation-delay: 0.1s; }
-    .topic-card:nth-child(2) { animation-delay: 0.15s; }
-    .topic-card:nth-child(3) { animation-delay: 0.2s; }
-    .topic-card:nth-child(4) { animation-delay: 0.25s; }
-    .topic-card:nth-child(5) { animation-delay: 0.3s; }
-    .topic-card:nth-child(6) { animation-delay: 0.35s; }
-
-    .topic-card:hover {
-      transform: translateY(-5px) scale(1.03);
-      border-color: var(--topic-color); box-shadow: 0 12px 40px -10px var(--topic-glow);
-    }
-    .topic-card .topic-icon { font-size: 40px; display: block; margin-bottom: 8px; transition: transform 0.3s ease; }
-    .topic-card:hover .topic-icon { transform: scale(1.15) rotate(-5deg); }
-    .topic-card .topic-name { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--topic-color); }
-    .topic-card .topic-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
-    .topic-card .topic-progress { display: inline-block; margin-top: 8px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
-    .topic-progress.done { background: rgba(52,211,153,0.12); color: var(--green); }
-    .topic-progress.pending { background: rgba(255,255,255,0.04); color: var(--text-muted); }
-
-    /* Age-based suggestion badge */
-    .topic-rec {
-      display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 99px;
-      font-size: 0.65rem; font-weight: 700;
-      background: rgba(44,181,160,0.1); color: var(--patagonia-teal);
-    }
-
-    /* Per-topic colors */
-    .t-geography { --topic-color: var(--patagonia-teal); --topic-glow: var(--patagonia-glow); }
-    .t-indigenous { --topic-color: var(--andes-gold); --topic-glow: var(--andes-gold-glow); }
-    .t-history { --topic-color: var(--chile-red); --topic-glow: var(--chile-red-glow); }
-    .t-culture { --topic-color: var(--atacama-orange); --topic-glow: var(--atacama-glow); }
-    .t-nature { --topic-color: #34D399; --topic-glow: rgba(52,211,153,0.35); }
-    .t-famous { --topic-color: #A78BFA; --topic-glow: rgba(167,139,250,0.35); }
-
-    /* ================================================================
-       STORY SCREEN — Learn about the topic
-       ================================================================ */
-    .story-header {
-      display: flex; align-items: center; gap: 12px;
-      margin: 24px 0 20px; animation: fadeUp 0.4s ease-out;
-    }
-    .story-back {
-      width: 38px; height: 38px; border-radius: 10px; border: 1.5px solid var(--border-subtle);
-      background: var(--bg-card); color: var(--text-muted); display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-    }
-    .story-back:hover { border-color: var(--chile-red); color: var(--chile-red); }
-    .story-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; }
-    .story-icon { font-size: 28px; }
-
-    .story-cards {
-      display: flex; flex-direction: column; gap: 16px;
-      margin-bottom: 24px; animation: fadeUp 0.5s ease-out 0.1s both;
-    }
-    .story-card {
-      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
-      border-radius: var(--radius); padding: 24px; line-height: 1.7;
-    }
-    .story-card h3 {
-      font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
-      margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
-    }
-    .story-card p { color: var(--text-muted); font-size: 0.92rem; font-weight: 600; }
-    .story-card .fun-fact {
-      margin-top: 12px; padding: 10px 14px; border-radius: var(--radius-sm);
-      background: rgba(232,168,56,0.08); border-left: 3px solid var(--andes-gold);
-      font-size: 0.85rem; color: var(--andes-gold);
-    }
-
-    .start-quiz-btn {
-      width: 100%; padding: 18px; border-radius: var(--radius-sm); border: none;
-      background: linear-gradient(135deg, var(--chile-red), var(--atacama-orange));
-      color: #fff; font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
-      cursor: pointer; transition: all 0.25s ease;
-      box-shadow: 0 4px 20px var(--chile-red-glow);
-      animation: fadeUp 0.5s ease-out 0.2s both;
-    }
-    .start-quiz-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--chile-red-glow); }
-
-    /* ================================================================
-       QUIZ SCREEN
-       ================================================================ */
-    .quiz-top {
-      width: 100%; display: flex; align-items: center; justify-content: space-between;
-      margin: 24px 0 16px; padding: 0 4px;
-    }
-    .quiz-badge {
-      font-family: var(--font-display); font-size: 0.9rem; font-weight: 700;
-      padding: 6px 14px; border-radius: 99px;
-      background: rgba(217,54,54,0.12); color: var(--chile-red);
-    }
-    .quiz-score { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--andes-gold); }
-
-    .quiz-progress-wrap {
-      width: 100%; height: 10px; background: var(--bg-card); border-radius: 99px;
-      overflow: hidden; margin-bottom: 28px; border: 1px solid var(--border-subtle);
-    }
-    .quiz-progress-fill {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, var(--chile-red), var(--atacama-orange));
-      transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
-      box-shadow: 0 0 12px var(--chile-red-glow);
-    }
-
-    .quiz-card {
-      width: 100%; background: var(--bg-card); border: 1.5px solid var(--border-subtle);
-      border-radius: var(--radius); padding: 32px 24px; text-align: center;
-      margin-bottom: 24px; min-height: 140px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .quiz-card.correct { border-color: var(--green); box-shadow: 0 0 30px var(--green-glow); }
-    .quiz-card.wrong { border-color: var(--red); box-shadow: 0 0 30px var(--red-glow); animation: shake 0.4s ease; }
-    @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
-
-    .quiz-q-label { font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; color: var(--chile-red); text-transform: uppercase; letter-spacing: 0.06em; }
-    .quiz-q-text { font-family: var(--font-display); font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 800; line-height: 1.4; }
-
-    .quiz-options { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-    .quiz-opt-btn {
-      width: 100%; padding: 16px; border-radius: var(--radius-sm);
-      border: 1.5px solid var(--border-subtle); background: var(--bg-card);
-      color: var(--text); font-family: var(--font-body); font-size: 1rem;
-      font-weight: 700; cursor: pointer; text-align: left;
-      transition: all 0.25s ease;
-    }
-    .quiz-opt-btn:hover { border-color: var(--chile-red); background: rgba(217,54,54,0.06); }
-    .quiz-opt-btn.disabled { pointer-events: none; }
-    .quiz-opt-btn.sel-correct { background: var(--green); border-color: var(--green); color: #fff; }
-    .quiz-opt-btn.sel-wrong { background: var(--red); border-color: var(--red); color: #fff; }
-    .quiz-opt-btn.reveal { border-color: var(--green); color: var(--green); }
-
-    /* ================================================================
-       RESULTS SCREEN
-       ================================================================ */
-    .results-wrap {
-      text-align: center; display: flex; flex-direction: column; align-items: center;
-      gap: 16px; padding: 60px 0 40px; animation: fadeUp 0.6s ease-out;
-    }
-    .results-emoji { font-size: 72px; animation: flagWave 3s ease-in-out infinite; }
-    .results-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; }
-    .results-sub { font-size: 1rem; color: var(--text-muted); font-weight: 600; max-width: 350px; }
-    .results-stars { display: flex; gap: 8px; }
-    .results-stars .star { font-size: 36px; }
-
-    .results-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-    .action-btn {
-      padding: 14px 24px; border-radius: var(--radius-sm); border: none;
-      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
-      cursor: pointer; transition: all 0.25s ease;
-    }
-    .btn-primary { background: linear-gradient(135deg, var(--chile-red), var(--atacama-orange)); color: #fff; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--chile-red-glow); }
-    .btn-secondary { background: var(--bg-card); color: var(--text-muted); border: 1.5px solid var(--border-subtle); }
-    .btn-secondary:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
-
-    /* Feedback */
-    .feedback {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-      font-size: 80px; pointer-events: none; z-index: 100;
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; opacity: 0;
-    }
-    .feedback.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-
-    /* ---- Mobile ---- */
-    @media (max-width: 480px) {
-      .app { padding: 16px 14px 32px; }
-      .topics-grid { gap: 12px; }
-      .topic-card { padding: 18px 14px; }
-      .story-card { padding: 20px; }
-    }
-
-    /* Scrollbar styling */
-    .app::-webkit-scrollbar { width: 6px; }
-    .app::-webkit-scrollbar-track { background: transparent; }
-    .app::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    :root{--bg-deep:#0A0F1C;--bg-surface:#111827;--bg-card:#1A2234;--border-subtle:rgba(255,255,255,0.07);--chile-red:#D93636;--chile-red-glow:rgba(217,54,54,0.35);--chile-blue:#0039A6;--andes-gold:#E8A838;--andes-gold-glow:rgba(232,168,56,0.4);--patagonia-teal:#2CB5A0;--atacama-orange:#E87040;--snow-white:#F0F4FF;--green:#34D399;--green-glow:rgba(52,211,153,0.4);--red:#F87171;--red-glow:rgba(248,113,113,0.35);--text:#F0EDFF;--text-muted:#8B95B0;--font-display:'Baloo 2','Nunito',cursive;--font-body:'Nunito',system-ui,sans-serif;--radius:20px;--radius-sm:14px}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{height:100%;font-size:16px}
+    body{min-height:100%;font-family:var(--font-body);background:var(--bg-deep);color:var(--text);overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,0.6),transparent),radial-gradient(1px 1px at 30% 40%,rgba(255,255,255,0.4),transparent),radial-gradient(2px 2px at 55% 12%,rgba(232,168,56,0.6),transparent),radial-gradient(1px 1px at 70% 50%,rgba(255,255,255,0.3),transparent),radial-gradient(1.5px 1.5px at 85% 25%,rgba(217,54,54,0.5),transparent),radial-gradient(1px 1px at 15% 75%,rgba(44,181,160,0.4),transparent);pointer-events:none;z-index:0;animation:twinkle 7s ease-in-out infinite alternate}
+    @keyframes twinkle{0%{opacity:0.5}100%{opacity:1}}
+    .atmo{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;animation:drift 22s ease-in-out infinite alternate}
+    .atmo-1{width:400px;height:400px;background:rgba(217,54,54,0.08);top:-80px;right:-60px}
+    .atmo-2{width:350px;height:350px;background:rgba(0,57,166,0.08);bottom:10%;left:-70px;animation-delay:-6s}
+    @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-15px) scale(1.06)}100%{transform:translate(-10px,10px) scale(0.97)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes popIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+    @keyframes flagWave{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+    @keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .app{position:relative;z-index:1;width:100%;max-width:640px;padding:24px 20px 40px;min-height:100vh;display:flex;flex-direction:column}
+    .home-btn{position:absolute;top:24px;left:20px;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:20px;text-decoration:none;transition:all 0.25s ease;z-index:10}
+    .home-btn:hover{border-color:var(--chile-red);color:var(--chile-red);transform:scale(1.08)}
+    .user-badge{position:absolute;top:24px;right:20px;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:99px;z-index:10;font-family:var(--font-display);font-size:0.85rem;font-weight:700;color:var(--text)}
+    .user-badge-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid}
+    .app-header{text-align:center;margin:50px 0 12px;animation:fadeUp 0.6s ease-out both}
+    .app-header .flag{font-size:48px;display:block;margin-bottom:4px;animation:flagWave 3s ease-in-out infinite}
+    .app-header h1{font-family:var(--font-display);font-size:clamp(1.8rem,5vw,2.4rem);font-weight:800;background:linear-gradient(135deg,var(--chile-red),var(--snow-white),var(--chile-blue));background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradShift 5s ease-in-out infinite}
+    .app-header p{color:var(--text-muted);font-weight:600;font-size:0.9rem}
+    .app-header .greeting{color:var(--andes-gold);font-weight:700;font-size:0.85rem}
+    .progress-bar{width:100%;height:8px;background:var(--bg-card);border-radius:99px;overflow:hidden;margin:8px 0 4px;border:1px solid var(--border-subtle)}
+    .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--chile-red),var(--andes-gold));transition:width 0.6s ease;box-shadow:0 0 10px var(--chile-red-glow)}
+    .progress-label{font-size:0.72rem;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:12px}
+    .tab-bar{display:flex;gap:4px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:4px;margin-bottom:20px;overflow-x:auto;scrollbar-width:none}
+    .tab-bar::-webkit-scrollbar{display:none}
+    .tab-btn{flex:1;padding:10px 8px;border-radius:10px;border:none;background:none;color:var(--text-muted);font-family:var(--font-display);font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;text-align:center}
+    .tab-btn:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+    .tab-btn.active{background:var(--chile-red);color:#fff;box-shadow:0 2px 12px var(--chile-red-glow)}
+    .tab-content{display:none;flex-direction:column;align-items:center;width:100%;animation:fadeUp 0.4s ease-out}
+    .tab-content.active{display:flex}
+    .map-wrap{width:100%;max-width:280px;margin:0 auto 20px}
+    .map-svg{width:100%;height:auto}
+    .map-region{cursor:pointer;transition:all 0.3s ease;stroke:#1A2234;stroke-width:2}
+    .map-region:hover{filter:brightness(1.2);stroke:var(--andes-gold);stroke-width:3}
+    .map-region.visited{stroke:var(--green);stroke-width:2.5}
+    .region-label{font-family:var(--font-display);font-size:8px;font-weight:700;fill:var(--text);pointer-events:none;text-anchor:middle}
+    .map-legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+    .map-legend-item{display:flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:600;color:var(--text-muted)}
+    .map-legend-dot{width:10px;height:10px;border-radius:50%}
+    .region-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;padding:20px}
+    .region-modal.active{display:flex}
+    .region-card{background:var(--bg-surface);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:28px;width:100%;max-width:460px;max-height:80vh;overflow-y:auto;animation:popIn 0.3s ease-out;position:relative}
+    .region-card h2{font-family:var(--font-display);font-size:1.4rem;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+    .region-card .region-sub{color:var(--text-muted);font-size:0.85rem;font-weight:600;margin-bottom:16px}
+    .region-card .fact-item{padding:12px 0;border-top:1px solid rgba(255,255,255,0.05)}
+    .region-card .fact-item h4{font-family:var(--font-display);font-size:0.95rem;font-weight:700;margin-bottom:4px}
+    .region-card .fact-item p{color:var(--text-muted);font-size:0.85rem;line-height:1.6;font-weight:600}
+    .fun-fact{margin-top:8px;padding:8px 12px;border-radius:var(--radius-sm);background:rgba(232,168,56,0.06);border-left:3px solid var(--andes-gold);font-size:0.8rem;color:var(--andes-gold)}
+    .close-modal{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);background:none;color:var(--text-muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .close-modal:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+    .story-list{display:flex;flex-direction:column;gap:14px;width:100%}
+    .story-card{background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:var(--radius);padding:22px;line-height:1.7;cursor:pointer;transition:all 0.25s ease}
+    .story-card:hover{border-color:var(--chile-red);transform:translateY(-2px)}
+    .story-card h3{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:6px}
+    .story-card p{color:var(--text-muted);font-size:0.88rem;font-weight:600}
+    .story-card:not(.expanded) p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .story-card:not(.expanded) .fun-fact{display:none}
+    .topic-select{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:16px}
+    .topic-btn{padding:10px 16px;border-radius:99px;border:1.5px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);font-family:var(--font-display);font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.25s}
+    .topic-btn:hover{border-color:var(--chile-red);color:var(--text)}
+    .topic-btn.active{background:var(--chile-red);border-color:var(--chile-red);color:#fff}
+    .memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:400px;margin:0 auto}
+    .memory-card{aspect-ratio:3/4;border-radius:var(--radius-sm);cursor:pointer;perspective:600px;position:relative}
+    .memory-card-inner{width:100%;height:100%;position:relative;transition:transform 0.5s ease;transform-style:preserve-3d}
+    .memory-card.flipped .memory-card-inner,.memory-card.matched .memory-card-inner{transform:rotateY(180deg)}
+    .memory-card.matched{opacity:0.7;pointer-events:none}
+    .memory-front,.memory-back{position:absolute;inset:0;border-radius:var(--radius-sm);backface-visibility:hidden;display:flex;align-items:center;justify-content:center;padding:8px;text-align:center}
+    .memory-back{background:linear-gradient(135deg,var(--chile-red),var(--andes-gold));font-size:28px;border:2px solid rgba(255,255,255,0.15)}
+    .memory-front{background:var(--bg-card);border:2px solid var(--border-subtle);transform:rotateY(180deg);flex-direction:column;gap:4px}
+    .memory-front .mf-icon{font-size:24px}
+    .memory-front .mf-text{font-family:var(--font-display);font-size:0.65rem;font-weight:700;color:var(--text);line-height:1.2}
+    .memory-stats{display:flex;gap:16px;justify-content:center;margin:16px 0;font-family:var(--font-display);font-weight:700;color:var(--text-muted);font-size:0.9rem}
+    .memory-stats span{color:var(--andes-gold)}
+    .memory-msg{text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;min-height:28px;margin:8px 0}
+    .quiz-progress-wrap{width:100%;height:10px;background:var(--bg-card);border-radius:99px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border-subtle)}
+    .quiz-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--chile-red),var(--atacama-orange));transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 0 12px var(--chile-red-glow)}
+    .quiz-top{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .quiz-badge{font-family:var(--font-display);font-size:0.85rem;font-weight:700;padding:6px 14px;border-radius:99px;background:rgba(217,54,54,0.12);color:var(--chile-red)}
+    .quiz-score{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--andes-gold)}
+    .quiz-card{width:100%;background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:var(--radius);padding:28px 20px;text-align:center;margin-bottom:16px;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:border-color 0.3s,box-shadow 0.3s}
+    .quiz-card.correct{border-color:var(--green);box-shadow:0 0 24px var(--green-glow)}
+    .quiz-card.wrong{border-color:var(--red);box-shadow:0 0 24px var(--red-glow);animation:shake 0.4s ease}
+    .quiz-q-text{font-family:var(--font-display);font-size:clamp(1.1rem,3.5vw,1.4rem);font-weight:800;line-height:1.4}
+    .quiz-opts{width:100%;display:flex;flex-direction:column;gap:8px}
+    .quiz-opt-btn{width:100%;padding:14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-subtle);background:var(--bg-card);color:var(--text);font-family:var(--font-body);font-size:0.92rem;font-weight:700;cursor:pointer;text-align:left;transition:all 0.25s}
+    .quiz-opt-btn:hover{border-color:var(--chile-red);background:rgba(217,54,54,0.06)}
+    .quiz-opt-btn.disabled{pointer-events:none}
+    .quiz-opt-btn.sel-correct{background:var(--green);border-color:var(--green);color:#fff}
+    .quiz-opt-btn.sel-wrong{background:var(--red);border-color:var(--red);color:#fff}
+    .quiz-opt-btn.reveal{border-color:var(--green);color:var(--green)}
+    .results-box{text-align:center;padding:40px 20px;animation:fadeUp 0.5s ease-out}
+    .results-box .r-emoji{font-size:64px;display:block;margin-bottom:8px}
+    .results-box .r-title{font-family:var(--font-display);font-size:1.6rem;font-weight:800}
+    .results-box .r-sub{color:var(--text-muted);font-weight:600;margin:8px 0 20px}
+    .results-box .r-stars{font-size:32px;display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+    .btn-red{padding:14px 24px;border-radius:var(--radius-sm);border:none;background:linear-gradient(135deg,var(--chile-red),var(--atacama-orange));color:#fff;font-family:var(--font-display);font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.25s;box-shadow:0 4px 16px var(--chile-red-glow)}
+    .btn-red:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--chile-red-glow)}
+    .btn-ghost{padding:14px 24px;border-radius:var(--radius-sm);border:1.5px solid var(--border-subtle);background:none;color:var(--text-muted);font-family:var(--font-display);font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.25s}
+    .btn-ghost:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+    .feedback-float{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-size:80px;pointer-events:none;z-index:2000;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;opacity:0}
+    .feedback-float.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+    @media(max-width:480px){.app{padding:16px 14px 32px}.memory-grid{grid-template-columns:repeat(3,1fr);gap:8px}.map-wrap{max-width:240px}}
   </style>
 </head>
 <body>
-
-  <div class="atmo atmo-1"></div>
-  <div class="atmo atmo-2"></div>
-  <div class="atmo atmo-3"></div>
-
-  <div class="app">
-    <a class="home-btn" href="index.html" title="Back to apps">🏠</a>
-    <div class="user-badge" id="userBadge" style="display:none">
-      <div class="user-badge-avatar" id="ubAvatar"></div>
-      <span id="ubName"></span>
+<div class="atmo atmo-1"></div><div class="atmo atmo-2"></div>
+<div class="app">
+  <a class="home-btn" href="index.html">🏠</a>
+  <div class="user-badge" id="userBadge" style="display:none"><div class="user-badge-avatar" id="ubAvatar"></div><span id="ubName"></span></div>
+  <div class="app-header"><span class="flag">🇨🇱</span><h1>Descubre Chile</h1><p>¡Aprende jugando sobre un país increíble!</p><div class="greeting" id="greeting"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-label" id="progressLabel">Chile explorado: 0%</div>
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="mapa">🗺️ Mapa</button>
+    <button class="tab-btn" data-tab="historia">📖 Historia</button>
+    <button class="tab-btn" data-tab="juegos">🎮 Juegos</button>
+    <button class="tab-btn" data-tab="quiz">⭐ Quiz</button>
+  </div>
+  <!-- MAPA -->
+  <div class="tab-content active" id="tab-mapa">
+    <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;font-weight:600;margin-bottom:12px">¡Toca una región para explorarla!</p>
+    <div class="map-wrap">
+      <svg viewBox="0 0 200 600" class="map-svg">
+        <path class="map-region" id="reg-norte" d="M70,10 L130,10 L135,50 L140,100 L130,140 L110,150 L90,145 L75,130 L65,90 L60,50 Z" fill="#E87040" onclick="openRegion('norte')"/>
+        <text class="region-label" x="100" y="80">Norte</text>
+        <path class="map-region" id="reg-centro" d="M90,145 L110,150 L130,140 L125,200 L120,250 L105,260 L85,255 L80,220 L78,180 Z" fill="#D93636" onclick="openRegion('centro')"/>
+        <text class="region-label" x="102" y="200">Centro</text>
+        <path class="map-region" id="reg-sur" d="M85,255 L105,260 L120,250 L115,330 L108,370 L95,380 L80,365 L75,320 L78,280 Z" fill="#2CB5A0" onclick="openRegion('sur')"/>
+        <text class="region-label" x="97" y="315">Sur</text>
+        <path class="map-region" id="reg-patagonia" d="M80,365 L95,380 L108,370 L105,440 L100,500 L95,540 L85,555 L78,530 L72,480 L70,430 L75,390 Z" fill="#0039A6" onclick="openRegion('patagonia')"/>
+        <text class="region-label" x="90" y="465">Patagonia</text>
+        <ellipse class="map-region" id="reg-pascua" cx="170" cy="280" rx="22" ry="18" fill="#E8A838" onclick="openRegion('pascua')"/>
+        <text class="region-label" x="170" y="283" style="font-size:6px">Rapa Nui</text>
+        <path d="M130,10 L140,100 L130,140 L125,200 L120,250 L115,330 L108,370 L105,440 L100,500 L95,540" fill="none" stroke="rgba(232,168,56,0.4)" stroke-width="3" stroke-dasharray="6,4"/>
+        <text x="148" y="200" style="font-size:6px;fill:var(--andes-gold);font-weight:700" transform="rotate(10,148,200)">Los Andes</text>
+      </svg>
     </div>
-
-    <!-- ============ TOPIC SELECT ============ -->
-    <div class="screen active" id="screen-topics">
-      <div class="topic-header">
-        <span class="flag">🇨🇱</span>
-        <h1>Descubre Chile</h1>
-        <p>Learn about an amazing country!</p>
-        <div class="greeting" id="greeting"></div>
-      </div>
-      <div class="topics-grid" id="topics-grid"></div>
-    </div>
-
-    <!-- ============ STORY ============ -->
-    <div class="screen" id="screen-story">
-      <div class="story-header">
-        <button class="story-back" onclick="goTopics()">←</button>
-        <span class="story-icon" id="storyIcon"></span>
-        <div class="story-title" id="storyTitle"></div>
-      </div>
-      <div class="story-cards" id="storyCards"></div>
-      <button class="start-quiz-btn" onclick="startQuiz()">Take the Quiz! 🧠</button>
-    </div>
-
-    <!-- ============ QUIZ ============ -->
-    <div class="screen" id="screen-quiz">
-      <div class="quiz-top">
-        <div class="quiz-badge" id="quizBadge"></div>
-        <div class="quiz-score" id="quizScore">⭐ 0</div>
-      </div>
-      <div class="quiz-progress-wrap">
-        <div class="quiz-progress-fill" id="quizProgress" style="width:0%"></div>
-      </div>
-      <div class="quiz-card" id="quizCard">
-        <div class="quiz-q-label" id="quizLabel"></div>
-        <div class="quiz-q-text" id="quizText"></div>
-      </div>
-      <div class="quiz-options" id="quizOptions"></div>
-    </div>
-
-    <!-- ============ RESULTS ============ -->
-    <div class="screen" id="screen-results">
-      <div class="results-wrap">
-        <span class="results-emoji" id="rEmoji"></span>
-        <div class="results-title" id="rTitle"></div>
-        <div class="results-sub" id="rSub"></div>
-        <div class="results-stars" id="rStars"></div>
-        <div class="results-actions">
-          <button class="action-btn btn-primary" onclick="retryQuiz()">Try Again 🔁</button>
-          <button class="action-btn btn-secondary" onclick="goTopics()">More Topics 🇨🇱</button>
-        </div>
-      </div>
+    <div class="map-legend">
+      <div class="map-legend-item"><div class="map-legend-dot" style="background:#E87040"></div>Norte</div>
+      <div class="map-legend-item"><div class="map-legend-dot" style="background:#D93636"></div>Centro</div>
+      <div class="map-legend-item"><div class="map-legend-dot" style="background:#2CB5A0"></div>Sur</div>
+      <div class="map-legend-item"><div class="map-legend-dot" style="background:#0039A6"></div>Patagonia</div>
+      <div class="map-legend-item"><div class="map-legend-dot" style="background:#E8A838"></div>Rapa Nui</div>
     </div>
   </div>
-
-  <div class="feedback" id="feedback">
-    <span class="feedback-emoji" id="feedbackEmoji"></span>
+  <!-- HISTORIA -->
+  <div class="tab-content" id="tab-historia"><div class="topic-select" id="historyTopics"></div><div class="story-list" id="storyList"></div></div>
+  <!-- JUEGOS -->
+  <div class="tab-content" id="tab-juegos">
+    <p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px">🃏 Memoria de Pioneros</p>
+    <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;font-weight:600;margin-bottom:12px">Encuentra las parejas: personaje ↔ logro</p>
+    <div class="memory-stats">Movimientos: <span id="memMoves">0</span> &nbsp;|&nbsp; Parejas: <span id="memPairs">0</span>/<span id="memTotal">0</span></div>
+    <div class="memory-grid" id="memoryGrid"></div>
+    <div class="memory-msg" id="memoryMsg"></div>
+    <div style="text-align:center;margin-top:12px"><button class="btn-red" onclick="initMemory()">🔄 Jugar de nuevo</button></div>
   </div>
+  <!-- QUIZ -->
+  <div class="tab-content" id="tab-quiz"><div id="quizArea"></div></div>
+</div>
+<div class="region-modal" id="regionModal" onclick="if(event.target===this)closeRegion()"><div class="region-card"><button class="close-modal" onclick="closeRegion()">✕</button><h2 id="rmTitle"></h2><div class="region-sub" id="rmSub"></div><div id="rmFacts"></div><div style="text-align:center;margin-top:16px"><button class="btn-red" onclick="closeRegion()">¡Entendido! ✓</button></div></div></div>
+<div class="feedback-float" id="feedback"><span id="feedbackEmoji"></span></div>
+<script>
+function getActiveUser(){try{return JSON.parse(localStorage.getItem('zs_active_user'))}catch{return null}}
+function getUserKey(){const u=getActiveUser();return u?'zs_chile_'+u.name.toLowerCase().replace(/\s+/g,'_'):null}
+function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
+function saveTopicProgress(id,stars,pct){const k=getUserKey();if(!k)return;const p=getUserProgress();const prev=p[id]||{bestStars:0,bestPct:0};p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};localStorage.setItem(k,JSON.stringify(p))}
+function saveVisited(id){const k=getUserKey();if(!k)return;const p=getUserProgress();if(!p.vr)p.vr=[];if(!p.vr.includes(id))p.vr.push(id);localStorage.setItem(k,JSON.stringify(p))}
+function saveMemBest(m){const k=getUserKey();if(!k)return;const p=getUserProgress();if(!p.memBest||m<p.memBest)p.memBest=m;localStorage.setItem(k,JSON.stringify(p))}
+function showFeedback(e){const el=document.getElementById('feedback');document.getElementById('feedbackEmoji').textContent=e;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),900)}
 
-  <script>
-    /* ================================================================
-       DESCUBRE CHILE — Data & Engine
-       ================================================================ */
+// Tab nav
+document.getElementById('tabBar').addEventListener('click',e=>{
+  if(!e.target.dataset.tab)return;
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+e.target.dataset.tab).classList.add('active');
+  e.target.classList.add('active');
+});
 
-    /* ---- Shared user system ---- */
-    function getActiveUser() { try { return JSON.parse(localStorage.getItem('zs_active_user')); } catch { return null; } }
-    function getUserKey() { const u = getActiveUser(); return u ? `zs_chile_${u.name.toLowerCase().replace(/\s+/g,'_')}` : null; }
-    function getUserProgress() { const k = getUserKey(); if (!k) return {}; try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } }
-    function saveTopicProgress(topicId, stars, pct) {
-      const k = getUserKey(); if (!k) return;
-      const prog = getUserProgress();
-      const prev = prog[topicId] || { bestStars: 0, bestPct: 0 };
-      prog[topicId] = { bestStars: Math.max(prev.bestStars, stars), bestPct: Math.max(prev.bestPct, pct), lastPlayed: new Date().toISOString() };
-      localStorage.setItem(k, JSON.stringify(prog));
-    }
+function updateProgress(){
+  const p=getUserProgress();const regs=(p.vr||[]).length;
+  const topics=Object.keys(p).filter(k=>k!=='vr'&&k!=='memBest'&&p[k].bestStars>0).length;
+  const mem=p.memBest?1:0;const total=regs+topics+mem;const max=5+6+1;
+  const pct=Math.min(100,Math.round((total/max)*100));
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent='Chile explorado: '+pct+'%';
+  (p.vr||[]).forEach(id=>{const el=document.getElementById('reg-'+id);if(el)el.classList.add('visited')});
+}
 
-    /* ---- Topic Data ---- */
-    const TOPICS = [
-      {
-        id: 'geography', icon: '🏔️', name: 'Geography', sub: 'From the driest desert to icy glaciers',
-        cssClass: 't-geography',
-        stories: [
-          { title: '🌎 Chile\'s Shape', text: 'Chile is one of the longest, narrowest countries in the world — stretching over 4,300 km from north to south but averaging only 177 km wide. Imagine a ribbon along the Pacific coast of South America!', fact: 'If you placed Chile on a map of Europe, it would reach from Norway to the Sahara Desert!' },
-          { title: '🏜️ The Atacama Desert', text: 'The northern part of Chile is home to the Atacama Desert, one of the driest places on Earth. Some weather stations there have never recorded rain! Despite being so dry, it\'s full of stunning salt flats, geysers, and even flamingos at high-altitude lakes.', fact: 'NASA tests Mars rovers in the Atacama because its soil is so similar to the surface of Mars!' },
-          { title: '🗻 The Andes Mountains', text: 'The mighty Andes run along Chile\'s entire eastern border. Some peaks reach over 6,000 meters high. These mountains are home to condors, volcanoes, and world-class ski resorts.', fact: 'Chile has over 2,000 volcanoes, and about 90 of them are active!' },
-          { title: '🧊 Patagonia & Glaciers', text: 'In the far south, Chile transforms into a land of glaciers, fjords, and windswept plains called Patagonia. Torres del Paine National Park is one of the most beautiful places on Earth, with its towering granite peaks and turquoise lakes.', fact: 'The Grey Glacier in Torres del Paine is over 6 km wide and thousands of years old.' },
-        ],
-        quiz: [
-          { q: 'How long is Chile from north to south?', a: 'Over 4,300 km', opts: ['Over 4,300 km', 'About 1,000 km', 'Around 2,500 km', 'Less than 500 km'] },
-          { q: 'What desert in Chile is one of the driest on Earth?', a: 'Atacama', opts: ['Atacama', 'Sahara', 'Gobi', 'Kalahari'] },
-          { q: 'What mountains run along Chile\'s eastern border?', a: 'The Andes', opts: ['The Andes', 'The Rockies', 'The Alps', 'The Himalayas'] },
-          { q: 'Where is Torres del Paine National Park?', a: 'Patagonia (southern Chile)', opts: ['Patagonia (southern Chile)', 'The Atacama Desert', 'Central Santiago', 'Easter Island'] },
-          { q: 'Why does NASA test rovers in the Atacama?', a: 'The soil is similar to Mars', opts: ['The soil is similar to Mars', 'It has many craters', 'It is very cold', 'There is no gravity'] },
-        ]
-      },
-      {
-        id: 'indigenous', icon: '🪶', name: 'Indigenous Peoples', sub: 'The Mapuche, Rapa Nui & more',
-        cssClass: 't-indigenous',
-        stories: [
-          { title: '🪶 The Mapuche', text: 'The Mapuche (meaning "People of the Land") are Chile\'s largest indigenous group. They lived in south-central Chile for thousands of years and are famous for being the only indigenous people in South America who were never conquered by the Spanish Empire.', fact: 'The Mapuche successfully defended their lands for over 300 years, from 1536 until 1883!' },
-          { title: '🗿 Rapa Nui (Easter Island)', text: 'Easter Island, called Rapa Nui by its people, belongs to Chile but sits 3,700 km off the coast in the Pacific Ocean. The Rapa Nui people carved nearly 1,000 giant stone statues called Moai, some weighing over 80 tons!', fact: 'Nobody knows for certain how the Rapa Nui moved the giant Moai across the island — some scientists think they "walked" them by rocking them side to side!' },
-          { title: '🏝️ The Aymara & Diaguita', text: 'In northern Chile, the Aymara people have lived in the high Andes for thousands of years, herding llamas and alpacas. The Diaguita were skilled potters who created beautiful geometric designs on their ceramics. Their art is considered some of the finest pre-Columbian pottery in South America.', fact: 'The Aymara people celebrate the Machaq Mara (Aymara New Year) on June 21st during the winter solstice.' },
-        ],
-        quiz: [
-          { q: 'What does "Mapuche" mean?', a: 'People of the Land', opts: ['People of the Land', 'Warriors of the Mountain', 'Children of the Sun', 'Forest Guardians'] },
-          { q: 'What are the giant stone statues on Easter Island called?', a: 'Moai', opts: ['Moai', 'Totems', 'Obelisks', 'Pillars'] },
-          { q: 'How long did the Mapuche resist the Spanish?', a: 'Over 300 years', opts: ['Over 300 years', 'About 50 years', '10 years', '1,000 years'] },
-          { q: 'Which indigenous group is known for herding llamas in the Andes?', a: 'The Aymara', opts: ['The Aymara', 'The Mapuche', 'The Rapa Nui', 'The Inca'] },
-          { q: 'How far is Easter Island from mainland Chile?', a: '3,700 km', opts: ['3,700 km', '100 km', '500 km', '10,000 km'] },
-        ]
-      },
-      {
-        id: 'history', icon: '⚔️', name: 'History', sub: 'From colonies to independence',
-        cssClass: 't-history',
-        stories: [
-          { title: '🚢 Spanish Arrival', text: 'In 1540, Spanish conquistador Pedro de Valdivia led an expedition south from Peru and founded Santiago on February 12, 1541. Chile became part of the Spanish Empire for nearly 300 years. Spanish colonists built churches, farms, and cities.', fact: 'Santiago was founded next to the Mapocho River and the Santa Lucía hill, which you can still visit today!' },
-          { title: '🗡️ The Fight for Independence', text: 'By the early 1800s, Chileans wanted freedom from Spain. On September 18, 1810, Chile took its first step toward independence with the creation of a national governing council. Full independence was declared on February 12, 1818 after the Battle of Maipú.', fact: 'September 18 is Chile\'s biggest national holiday — called Fiestas Patrias — celebrated with traditional food, cueca dancing, and kites!' },
-          { title: '🇨🇱 Bernardo O\'Higgins', text: 'Bernardo O\'Higgins is known as the Father of Chile. His father was Irish, and his mother was Chilean. He fought bravely alongside Argentine hero José de San Martín to defeat the Spanish forces and became Chile\'s first Supreme Director (like a president).', fact: 'Despite being half-Irish, Bernardo O\'Higgins is one of the most celebrated Chilean heroes of all time!' },
-        ],
-        quiz: [
-          { q: 'Who founded the city of Santiago?', a: 'Pedro de Valdivia', opts: ['Pedro de Valdivia', 'Bernardo O\'Higgins', 'Christopher Columbus', 'Simón Bolívar'] },
-          { q: 'When is Chile\'s national holiday (Fiestas Patrias)?', a: 'September 18', opts: ['September 18', 'July 4', 'December 25', 'February 12'] },
-          { q: 'Who is known as the Father of Chile?', a: 'Bernardo O\'Higgins', opts: ['Bernardo O\'Higgins', 'Pedro de Valdivia', 'Arturo Prat', 'Salvador Allende'] },
-          { q: 'When did Chile fully declare independence?', a: '1818', opts: ['1818', '1776', '1910', '1541'] },
-          { q: 'What nationality was O\'Higgins\' father?', a: 'Irish', opts: ['Irish', 'Spanish', 'English', 'French'] },
-        ]
-      },
-      {
-        id: 'culture', icon: '🥘', name: 'Culture & Food', sub: 'Empanadas, cueca & traditions',
-        cssClass: 't-culture',
-        stories: [
-          { title: '🥟 Empanadas de Pino', text: 'Chile\'s most famous food is the empanada de pino — a baked pastry filled with ground beef, onions, hard-boiled egg, olives, and raisins. They\'re eaten year-round but especially during Fiestas Patrias in September.', fact: 'Chilean bakeries sell over 300 million empanadas during the Fiestas Patrias season!' },
-          { title: '💃 La Cueca', text: 'The cueca is Chile\'s national dance, performed by couples waving handkerchiefs in the air. It represents the courtship between a rooster and a hen! The dancers stomp and twirl while musicians play guitar and sing.', fact: 'The cueca was declared Chile\'s official national dance in 1979.' },
-          { title: '🫖 Once — Chilean Tea Time', text: 'Chileans have a unique tradition called "once" (pronounced ON-say), which is an evening tea/coffee with sandwiches and pastries, usually around 5-7 PM. It\'s like a lighter dinner combined with afternoon tea.', fact: 'The word "once" means "eleven" in Spanish, and one theory says it comes from the 11 letters in "aguardiente" (a spirit) that workers would sneak during tea time!' },
-          { title: '🧑‍🍳 Completos & Mote con Huesillo', text: 'Chile has amazing street food! "Completos" are huge hot dogs loaded with avocado, tomatoes, and mayo. And "mote con huesillo" is a refreshing summer drink made with wheat berries and dried peaches in sweet syrup.', fact: 'A Chilean completo can be over 30 cm long — much bigger than a regular hot dog!' },
-        ],
-        quiz: [
-          { q: 'What is the main filling in empanada de pino?', a: 'Ground beef with onion, egg & olives', opts: ['Ground beef with onion, egg & olives', 'Chicken and cheese', 'Beans and rice', 'Fish and lemon'] },
-          { q: 'What animal courtship does the cueca represent?', a: 'Rooster and hen', opts: ['Rooster and hen', 'Eagle and condor', 'Cat and mouse', 'Horse and mare'] },
-          { q: 'What is "once" in Chile?', a: 'An evening tea-time meal', opts: ['An evening tea-time meal', 'A type of dance', 'A soccer move', 'A dessert'] },
-          { q: 'What is a "completo"?', a: 'A loaded hot dog with avocado', opts: ['A loaded hot dog with avocado', 'A complete breakfast', 'A dessert cake', 'A soccer tournament'] },
-          { q: 'When are the most empanadas eaten?', a: 'During Fiestas Patrias (September)', opts: ['During Fiestas Patrias (September)', 'On Christmas', 'During Easter', 'On New Year\'s'] },
-        ]
-      },
-      {
-        id: 'nature', icon: '🦅', name: 'Nature & Wildlife', sub: 'Condors, pumas & ancient trees',
-        cssClass: 't-nature',
-        stories: [
-          { title: '🦅 The Andean Condor', text: 'The Andean Condor is one of the world\'s largest flying birds with a wingspan of over 3 meters! It appears on Chile\'s national coat of arms and is considered sacred by Andean peoples. Condors can soar for hours without flapping their wings.', fact: 'Andean Condors can live for over 70 years, making them one of the longest-lived birds!' },
-          { title: '🌲 The Araucaria Tree', text: 'The Araucaria (also called the Monkey Puzzle tree) is a prehistoric tree that has existed for over 200 million years — it lived alongside dinosaurs! It\'s Chile\'s national tree and produces large nutritious seeds called piñones that are a traditional Mapuche food.', fact: 'The Araucaria is considered a "living fossil" because it has barely changed since the age of the dinosaurs.' },
-          { title: '🐆 Pumas & Huemules', text: 'Chile is home to beautiful wildlife. Pumas (mountain lions) roam the southern forests and are the top predator in Torres del Paine. The huemul is a shy, endangered deer that appears on Chile\'s coat of arms alongside the condor.', fact: 'Torres del Paine has one of the densest populations of pumas in the world — you have a good chance of spotting one!' },
-          { title: '🐧 Penguins in Chile', text: 'Chile is home to several penguin species! Magellanic penguins live along the southern coast, and Humboldt penguins are found in the north. You can even see them near the Atacama Desert!', fact: 'The Humboldt penguin is named after the cold Humboldt ocean current that flows along Chile\'s coast from Antarctica.' },
-        ],
-        quiz: [
-          { q: 'What is the wingspan of an Andean Condor?', a: 'Over 3 meters', opts: ['Over 3 meters', 'About 1 meter', '50 centimeters', '10 meters'] },
-          { q: 'How old is the Araucaria tree species?', a: 'Over 200 million years', opts: ['Over 200 million years', 'About 1,000 years', '50 years', '1 million years'] },
-          { q: 'What two animals appear on Chile\'s coat of arms?', a: 'Condor and huemul', opts: ['Condor and huemul', 'Puma and eagle', 'Llama and condor', 'Penguin and flamingo'] },
-          { q: 'Where in Chile can you find pumas?', a: 'Torres del Paine', opts: ['Torres del Paine', 'The Atacama Desert', 'Santiago city center', 'Easter Island'] },
-          { q: 'What ocean current brings cold water along Chile\'s coast?', a: 'The Humboldt Current', opts: ['The Humboldt Current', 'The Gulf Stream', 'The Pacific Ring', 'The Chile Flow'] },
-        ]
-      },
-      {
-        id: 'famous', icon: '🌟', name: 'Famous Chileans', sub: 'Poets, explorers & champions',
-        cssClass: 't-famous',
-        stories: [
-          { title: '📝 Pablo Neruda', text: 'Pablo Neruda is Chile\'s most famous poet and won the Nobel Prize in Literature in 1971. His real name was Ricardo Eliécer Neftalí Reyes Basoalto — he used a pen name! He wrote beautiful poems about love, nature, and Chile. His houses in Santiago, Valparaíso, and Isla Negra are now museums.', fact: 'Neruda collected unusual objects — one of his houses has a bar shaped like a ship and rooms full of seashells and figureheads!' },
-          { title: '📖 Gabriela Mistral', text: 'Gabriela Mistral was the first Latin American to win the Nobel Prize in Literature, in 1945 — before Neruda! She was also a teacher and diplomat who fought for children\'s education and rights. Her poems about love and nature are read around the world.', fact: 'Gabriela Mistral\'s face appears on the Chilean 5,000 peso bill!' },
-          { title: '⚽ Alexis Sánchez & Chilean Sports', text: 'Chile has produced world-class athletes. Alexis Sánchez became one of the best soccer players in the world, playing for Barcelona and Arsenal. Chile\'s national team won the Copa América in 2015 and 2016! Chile also excels in tennis, skiing, and surfing.', fact: 'Marcelo Ríos was the first Latin American tennis player to reach #1 in the world rankings, in 1998.' },
-        ],
-        quiz: [
-          { q: 'Which Chilean poet won the Nobel Prize in 1971?', a: 'Pablo Neruda', opts: ['Pablo Neruda', 'Gabriela Mistral', 'Isabel Allende', 'Vicente Huidobro'] },
-          { q: 'Who was the first Latin American Nobel Literature laureate?', a: 'Gabriela Mistral', opts: ['Gabriela Mistral', 'Pablo Neruda', 'García Márquez', 'Mario Vargas Llosa'] },
-          { q: 'Which Chilean soccer star played for Barcelona?', a: 'Alexis Sánchez', opts: ['Alexis Sánchez', 'Arturo Vidal', 'Marcelo Ríos', 'Claudio Bravo'] },
-          { q: 'When did Chile win their first Copa América?', a: '2015', opts: ['2015', '2000', '1990', '1970'] },
-          { q: 'Whose face is on the 5,000 peso bill?', a: 'Gabriela Mistral', opts: ['Gabriela Mistral', 'Pablo Neruda', 'Bernardo O\'Higgins', 'Alexis Sánchez'] },
-        ]
-      },
-    ];
+// ── MAP DATA ──
+const REGIONS={
+  norte:{icon:'🏜️',title:'Norte Grande',sub:'El desierto más seco del mundo',facts:[
+    {t:'🏜️ Desierto de Atacama',p:'El norte de Chile alberga el Desierto de Atacama, uno de los lugares más secos del planeta. Tiene salares, géiseres y flamencos en lagos de altura.',f:'¡La NASA prueba sus robots para Marte en el Atacama porque el suelo es muy parecido!'},
+    {t:'⭐ Cielos estrellados',p:'El Atacama tiene los cielos más limpios del mundo para observar estrellas. Chile tiene los telescopios más grandes del planeta.',f:'Desde el norte de Chile puedes ver más de 5.000 estrellas a simple vista.'},
+    {t:'🦩 Altiplano',p:'En las alturas del norte viven flamencos, vicuñas y llamas. Los pueblos aymaras han habitado esta zona por miles de años.',f:'Los géiseres del Tatio (a 4.300 m) son los más altos del mundo.'}
+  ]},
+  centro:{icon:'🏙️',title:'Chile Central',sub:'Santiago, Valparaíso y los valles',facts:[
+    {t:'🏙️ Santiago',p:'La capital fue fundada en 1541 por Pedro de Valdivia junto al río Mapocho. Hoy tiene más de 7 millones de habitantes rodeados por los Andes.',f:'Desde Santiago puedes ver la cordillera nevada ¡a solo 45 minutos en auto!'},
+    {t:'🎨 Valparaíso',p:'Ciudad famosa por sus cerros coloridos, ascensores históricos y arte callejero. Es Patrimonio de la Humanidad.',f:'Valparaíso tiene más de 15 ascensores funiculares, algunos con más de 100 años.'},
+    {t:'🍇 Valles',p:'El centro tiene valles fértiles con clima mediterráneo ideal para la agricultura y los viñedos.',f:'Chile es el cuarto exportador de vino del mundo.'}
+  ]},
+  sur:{icon:'🌲',title:'Sur de Chile',sub:'Lagos, volcanes y pueblos originarios',facts:[
+    {t:'🌋 Volcanes y lagos',p:'El sur tiene decenas de volcanes activos rodeados de lagos cristalinos. El Villarrica es uno de los más activos de Sudamérica.',f:'Chile tiene más de 2.000 volcanes y unos 90 están activos.'},
+    {t:'🪶 El pueblo Mapuche',p:'Los Mapuche son el pueblo originario más grande de Chile. Nunca fueron conquistados por los españoles.',f:'Los Mapuche resistieron por más de 300 años, desde 1536 hasta 1883.'},
+    {t:'🌲 Bosques milenarios',p:'Los bosques del sur tienen araucarias que existen hace más de 200 millones de años y alerces de más de 3.000 años.',f:'La araucaria es un "fósil viviente" porque casi no ha cambiado desde la era de los dinosaurios.'}
+  ]},
+  patagonia:{icon:'🧊',title:'Patagonia',sub:'Glaciares, viento y Torres del Paine',facts:[
+    {t:'🏔️ Torres del Paine',p:'Uno de los lugares más hermosos del planeta. Torres de granito, lagos turquesa y glaciares impresionantes.',f:'El Glaciar Grey tiene más de 6 km de ancho y miles de años de antigüedad.'},
+    {t:'🐆 Pumas',p:'Torres del Paine tiene una de las poblaciones más densas de pumas del mundo.',f:'Si visitas Torres del Paine, ¡tienes buenas chances de ver un puma!'},
+    {t:'🐧 Pingüinos',p:'En el extremo sur viven pingüinos de Magallanes y de Humboldt.',f:'El pingüino de Humboldt lleva ese nombre por la corriente fría desde la Antártida.'}
+  ]},
+  pascua:{icon:'🗿',title:'Rapa Nui',sub:'Moai, misterio y cultura polinésica',facts:[
+    {t:'🗿 Los Moai',p:'Isla de Pascua está a 3.700 km de la costa. El pueblo Rapa Nui talló casi 1.000 estatuas gigantes, ¡algunas de más de 80 toneladas!',f:'Nadie sabe con certeza cómo movieron los Moai — algunos creen que los "caminaron" meciéndolos.'},
+    {t:'🏝️ Cultura Rapa Nui',p:'Desarrollaron una escritura única llamada Rongorongo que aún no ha sido descifrada. Inventaron el Tangata Manu (hombre pájaro).',f:'Rapa Nui es uno de los lugares habitados más aislados del mundo.'},
+    {t:'🌺 Naturaleza',p:'La isla tiene cráteres volcánicos con lagos, playas de arena rosa y caballos salvajes.',f:'El lugar habitado más cercano es isla Pitcairn, ¡a 2.000 km!'}
+  ]}
+};
+function openRegion(id){const r=REGIONS[id];if(!r)return;document.getElementById('rmTitle').innerHTML=r.icon+' '+r.title;document.getElementById('rmSub').textContent=r.sub;document.getElementById('rmFacts').innerHTML=r.facts.map(f=>'<div class="fact-item"><h4>'+f.t+'</h4><p>'+f.p+'</p>'+(f.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+f.f+'</div>':'')+'</div>').join('');document.getElementById('regionModal').classList.add('active');saveVisited(id);updateProgress()}
+function closeRegion(){document.getElementById('regionModal').classList.remove('active')}
 
-    /* ---- State ---- */
-    let currentTopic = null;
-    let quizQs = [];
-    let quizIdx = 0;
-    let quizScore = 0;
+// ── STORIES ──
+const TOPICS=[
+  {id:'geography',icon:'🏔️',name:'Geografía',stories:[
+    {t:'🌎 La forma de Chile',p:'Chile se extiende por más de 4.300 km de norte a sur, pero en promedio solo tiene 177 km de ancho.',f:'Si pusieras a Chile sobre Europa, llegaría desde Noruega hasta el Sahara.'},
+    {t:'🗻 Los Andes',p:'Los poderosos Andes recorren toda la frontera este. Algunos picos superan los 6.000 metros.',f:'Chile tiene más de 2.000 volcanes, ¡y unos 90 están activos!'}
+  ]},
+  {id:'indigenous',icon:'🪶',name:'Pueblos originarios',stories:[
+    {t:'🪶 Los Mapuche',p:'Los Mapuche ("gente de la tierra") son el pueblo originario más grande de Chile. Nunca fueron conquistados por España.',f:'Defendieron sus tierras por más de 300 años, desde 1536 hasta 1883.'},
+    {t:'🗿 Rapa Nui',p:'Isla de Pascua está a 3.700 km de la costa. Los Rapa Nui tallaron casi 1.000 estatuas Moai gigantes.',f:'Nadie sabe con certeza cómo movieron los Moai.'},
+    {t:'🏝️ Aymaras y Diaguitas',p:'Los Aymara han vivido en los Andes pastoreando llamas. Los Diaguitas eran hábiles ceramistas con hermosos diseños.',f:'Los Aymara celebran el Año Nuevo el 21 de junio durante el solsticio de invierno.'}
+  ]},
+  {id:'history',icon:'⚔️',name:'Historia',stories:[
+    {t:'🚢 Llegada española',p:'En 1540, Pedro de Valdivia fundó Santiago el 12 de febrero de 1541. Chile fue parte del Imperio Español por casi 300 años.',f:'Santiago fue fundada junto al cerro Santa Lucía, que puedes visitar hoy.'},
+    {t:'🗡️ La Independencia',p:'El 18 de septiembre de 1810 Chile dio su primer paso hacia la independencia. Se declaró total el 12 de febrero de 1818.',f:'El 18 de septiembre es Fiestas Patrias — con comida, cueca y volantines.'},
+    {t:'🇨🇱 Bernardo O\'Higgins',p:'El Padre de la Patria. Su padre era irlandés y su madre chilena. Fue el primer Director Supremo de Chile.',f:'A pesar de ser mitad irlandés, O\'Higgins es uno de los héroes más celebrados.'}
+  ]},
+  {id:'culture',icon:'🥘',name:'Cultura y comida',stories:[
+    {t:'🥟 Empanadas de pino',p:'Masa horneada rellena de carne, cebolla, huevo duro, aceitunas y pasas. Se comen especialmente en Fiestas Patrias.',f:'Se venden más de 300 millones de empanadas durante las Fiestas Patrias.'},
+    {t:'💃 La Cueca',p:'El baile nacional. Las parejas agitan pañuelos representando el cortejo entre un gallo y una gallina.',f:'Fue declarada baile nacional oficial en 1979.'},
+    {t:'🫖 La Once',p:'Tradición de té/café de la tarde con sándwiches y pastelitos, entre 5 y 7 PM.',f:'Una teoría dice que viene de las 11 letras de "aguardiente".'}
+  ]},
+  {id:'nature',icon:'🦅',name:'Naturaleza',stories:[
+    {t:'🦅 El Cóndor Andino',p:'Una de las aves voladoras más grandes del mundo con envergadura de más de 3 metros. Aparece en el escudo nacional.',f:'Los cóndores pueden vivir más de 70 años.'},
+    {t:'🌲 La Araucaria',p:'Árbol prehistórico que existe hace 200+ millones de años. Es el árbol nacional y produce piñones nutritivos.',f:'Es un "fósil viviente" que casi no ha cambiado desde los dinosaurios.'},
+    {t:'🐆 Pumas y Huemules',p:'Los pumas recorren los bosques del sur. El huemul es un ciervo en peligro que aparece en el escudo junto al cóndor.',f:'Torres del Paine tiene una de las poblaciones más densas de pumas.'}
+  ]},
+  {id:'famous',icon:'🌟',name:'Chilenos famosos',stories:[
+    {t:'📝 Pablo Neruda',p:'El poeta más famoso de Chile, Nobel de Literatura 1971. Escribió sobre el amor, la naturaleza y Chile.',f:'Neruda coleccionaba objetos curiosos — una casa tiene un bar con forma de barco.'},
+    {t:'📖 Gabriela Mistral',p:'Primera latinoamericana en ganar el Nobel de Literatura (1945). Maestra y diplomática que luchó por la educación.',f:'Su rostro aparece en el billete de 5.000 pesos.'},
+    {t:'⚽ Alexis Sánchez',p:'Jugó en Barcelona y Arsenal. Chile ganó la Copa América en 2015 y 2016.',f:'Marcelo Ríos fue el primer tenista latinoamericano #1 del mundo en 1998.'}
+  ]}
+];
+let curTopic=null;
+function renderTopics(){const el=document.getElementById('historyTopics');const prog=getUserProgress();el.innerHTML='';TOPICS.forEach(t=>{const done=prog[t.id]&&prog[t.id].bestStars>0;const btn=document.createElement('button');btn.className='topic-btn'+(curTopic===t.id?' active':'');btn.textContent=t.icon+' '+t.name+(done?' ✓':'');btn.onclick=()=>{curTopic=t.id;renderTopics();renderStories(t.id)};el.appendChild(btn)})}
+function renderStories(id){const topic=TOPICS.find(t=>t.id===id);if(!topic)return;const el=document.getElementById('storyList');el.innerHTML='';topic.stories.forEach(s=>{const c=document.createElement('div');c.className='story-card';c.innerHTML='<h3>'+s.t+'</h3><p>'+s.p+'</p>'+(s.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+s.f+'</div>':'');c.onclick=()=>c.classList.toggle('expanded');el.appendChild(c)})}
 
-    /* ---- Screen nav ---- */
-    function showScreen(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-' + id).classList.add('active');
-      window.scrollTo(0, 0);
-    }
+// ── MEMORY ──
+const MEM_PAIRS=[
+  {icon:'🗡️',name:'Pedro de Valdivia',match:'Fundó Santiago 1541'},
+  {icon:'🇨🇱',name:'Bernardo O\'Higgins',match:'Padre de la Patria'},
+  {icon:'📝',name:'Pablo Neruda',match:'Nobel Literatura 1971'},
+  {icon:'📖',name:'Gabriela Mistral',match:'Primera Nobel latina'},
+  {icon:'🪶',name:'Pueblo Mapuche',match:'Nunca conquistados'},
+  {icon:'⚽',name:'Alexis Sánchez',match:'Copa América 2015'}
+];
+let memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false;
+function initMemory(){memMatched=0;memMoves=0;memLocked=false;memFlipped=[];document.getElementById('memMoves').textContent='0';document.getElementById('memPairs').textContent='0';document.getElementById('memTotal').textContent=MEM_PAIRS.length;document.getElementById('memoryMsg').textContent='';
+  const cards=[];MEM_PAIRS.forEach((p,i)=>{cards.push({id:i,type:'person',icon:p.icon,text:p.name,pid:i});cards.push({id:i,type:'fact',icon:'🏆',text:p.match,pid:i})});
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}memCards=cards;renderMem()}
+function renderMem(){const g=document.getElementById('memoryGrid');g.innerHTML='';memCards.forEach((c,i)=>{const d=document.createElement('div');d.className='memory-card';if(c.matched)d.classList.add('matched');if(memFlipped.includes(i))d.classList.add('flipped');d.innerHTML='<div class="memory-card-inner"><div class="memory-back">🇨🇱</div><div class="memory-front"><span class="mf-icon">'+c.icon+'</span><span class="mf-text">'+c.text+'</span></div></div>';d.onclick=()=>flipCard(i);g.appendChild(d)})}
+function flipCard(i){if(memLocked||memFlipped.includes(i)||memCards[i].matched)return;memFlipped.push(i);renderMem();if(memFlipped.length===2){memMoves++;document.getElementById('memMoves').textContent=memMoves;memLocked=true;const a=memCards[memFlipped[0]],b=memCards[memFlipped[1]];if(a.pid===b.pid&&a.type!==b.type){setTimeout(()=>{a.matched=true;b.matched=true;memMatched++;document.getElementById('memPairs').textContent=memMatched;memFlipped=[];memLocked=false;showFeedback('🎉');renderMem();if(memMatched===MEM_PAIRS.length){document.getElementById('memoryMsg').innerHTML='<span style="color:var(--green)">🏆 ¡Completado en '+memMoves+' movimientos!</span>';saveMemBest(memMoves);updateProgress()}},600)}else{setTimeout(()=>{memFlipped=[];memLocked=false;renderMem()},900)}}}
 
-    /* ---- Init ---- */
-    function init() {
-      const user = getActiveUser();
-      if (user) {
-        const badge = document.getElementById('userBadge');
-        badge.style.display = '';
-        document.getElementById('ubAvatar').textContent = user.avatar;
-        document.getElementById('ubAvatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
-        document.getElementById('ubName').textContent = user.name;
-        // Age-aware greeting
-        if (user.age && user.age <= 6) {
-          document.getElementById('greeting').textContent = `¡Vamos, ${user.name}! Start with the pictures and fun facts!`;
-        } else if (user.age && user.age >= 10) {
-          document.getElementById('greeting').textContent = `¡Vamos, ${user.name}! Challenge yourself with every quiz!`;
-        } else {
-          document.getElementById('greeting').textContent = `¡Vamos, ${user.name}!`;
-        }
-      }
-      renderTopics();
-    }
+// ── QUIZ ──
+const QB={geography:[{q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km']},{q:'¿Qué desierto chileno es uno de los más secos?',a:'Atacama',o:['Atacama','Sahara','Gobi','Kalahari']},{q:'¿Qué montañas están en la frontera este?',a:'Los Andes',o:['Los Andes','Las Rocosas','Los Alpes','El Himalaya']},{q:'¿Dónde está Torres del Paine?',a:'Patagonia',o:['Patagonia','Atacama','Santiago','Isla de Pascua']},{q:'¿Por qué la NASA prueba robots en Atacama?',a:'Suelo parecido a Marte',o:['Suelo parecido a Marte','Muchos cráteres','Mucho frío','No hay gravedad']}],
+indigenous:[{q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque']},{q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares']},{q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años']},{q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca']},{q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km']}],
+history:[{q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar']},{q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero']},{q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano']},{q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541']},{q:'¿De qué país era el padre de O\'Higgins?',a:'Irlanda',o:['Irlanda','España','Inglaterra','Francia']}],
+culture:[{q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón']},{q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua']},{q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre']},{q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol']},{q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo']}],
+nature:[{q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros']},{q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años']},{q:'¿Qué animales están en el escudo?',a:'Cóndor y huemul',o:['Cóndor y huemul','Puma y águila','Llama y cóndor','Pingüino y flamenco']},{q:'¿Dónde hay pumas en Chile?',a:'Torres del Paine',o:['Torres del Paine','Atacama','Santiago','Isla de Pascua']},{q:'¿Qué corriente trae agua fría?',a:'Corriente de Humboldt',o:['Corriente de Humboldt','Corriente del Golfo','Anillo del Pacífico','Flujo chileno']}],
+famous:[{q:'¿Poeta chileno Nobel en 1971?',a:'Pablo Neruda',o:['Pablo Neruda','Gabriela Mistral','Isabel Allende','Huidobro']},{q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa']},{q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo']},{q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970']},{q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos']}]};
+let qTopic='',qQs=[],qIdx=0,qScore=0;
+function renderQuizMenu(){const prog=getUserProgress();let h='<p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:12px">Elige un tema</p><div class="topic-select">';TOPICS.forEach(t=>{const done=prog[t.id]&&prog[t.id].bestStars>0;h+='<button class="topic-btn" onclick="startQuiz(\''+t.id+'\')">'+t.icon+' '+t.name+(done?' ⭐':'')+'</button>'});h+='</div>';document.getElementById('quizArea').innerHTML=h}
+function startQuiz(id){qTopic=id;const u=getActiveUser();const age=u?u.age:null;let qs=[...QB[id]];if(age&&age<=6)qs=qs.sort(()=>Math.random()-0.5).slice(0,3);qQs=qs;qIdx=0;qScore=0;showQ()}
+function showQ(){if(qIdx>=qQs.length){finishQ();return}const q=qQs[qIdx];const sh=[...q.o].sort(()=>Math.random()-0.5);let h='<div class="quiz-top"><div class="quiz-badge">Pregunta '+(qIdx+1)+'/'+qQs.length+'</div><div class="quiz-score">⭐ '+qScore+'</div></div>';h+='<div class="quiz-progress-wrap"><div class="quiz-progress-fill" style="width:'+(qIdx/qQs.length*100)+'%"></div></div>';h+='<div class="quiz-card" id="qC"><div class="quiz-q-text">'+q.q+'</div></div><div class="quiz-opts">';sh.forEach(o=>{h+='<button class="quiz-opt-btn" onclick="ans(this)">'+o+'</button>'});h+='</div>';document.getElementById('quizArea').innerHTML=h}
+function ans(btn){const q=qQs[qIdx];const sel=btn.textContent;const ok=sel===q.a;document.querySelectorAll('.quiz-opt-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===q.a)b.classList.add('reveal')});if(ok){qScore++;btn.classList.add('sel-correct');document.getElementById('qC').classList.add('correct');showFeedback('🎉')}else{btn.classList.add('sel-wrong');document.getElementById('qC').classList.add('wrong');showFeedback('🤔')}setTimeout(()=>{qIdx++;showQ()},1200)}
+function finishQ(){const pct=Math.round(qScore/qQs.length*100);const stars=pct>=90?3:pct>=60?2:1;saveTopicProgress(qTopic,stars,pct);updateProgress();let e,t,s;if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}else if(pct>=60){e='🌟';t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}else{e='💪';t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}let st='';for(let i=0;i<3;i++)st+='<span>'+(i<stars?'⭐':'☆')+'</span>';document.getElementById('quizArea').innerHTML='<div class="results-box"><span class="r-emoji">'+e+'</span><div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="r-stars">'+st+'</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar 🔁</button><button class="btn-ghost" onclick="renderQuizMenu()">Otros temas 🇨🇱</button></div></div>'}
 
-    function renderTopics() {
-      const grid = document.getElementById('topics-grid');
-      const prog = getUserProgress();
-      const user = getActiveUser();
-      const age = user ? user.age : null;
-
-      // Age-based topic recommendations
-      const recMap = {
-        geography: { minAge: 4,  note: 'Great first topic!' },
-        nature:    { minAge: 4,  note: 'Kids love animals!' },
-        culture:   { minAge: 5,  note: 'Yummy food stories!' },
-        indigenous:{ minAge: 7,  note: 'Amazing cultures!' },
-        history:   { minAge: 8,  note: 'Historical adventures!' },
-        famous:    { minAge: 8,  note: 'Inspiring people!' },
-      };
-
-      grid.innerHTML = '';
-      TOPICS.forEach((t, i) => {
-        const data = prog[t.id];
-        const done = data && data.bestStars > 0;
-        const rec = recMap[t.id];
-        const isRec = age && rec && age >= rec.minAge;
-        const card = document.createElement('div');
-        card.className = `topic-card ${t.cssClass}`;
-        card.style.animationDelay = `${0.1 + i * 0.05}s`;
-        card.onclick = () => openTopic(t.id);
-        card.innerHTML = `
-          <span class="topic-icon">${t.icon}</span>
-          <div class="topic-name">${t.name}</div>
-          <div class="topic-sub">${t.sub}</div>
-          <span class="topic-progress ${done ? 'done' : 'pending'}">${done ? '⭐'.repeat(data.bestStars) + ' ' + data.bestPct + '%' : 'Not started'}</span>
-          ${isRec && !done ? `<span class="topic-rec">👈 ${rec.note}</span>` : ''}
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    function openTopic(id) {
-      currentTopic = TOPICS.find(t => t.id === id);
-      if (!currentTopic) return;
-      document.getElementById('storyIcon').textContent = currentTopic.icon;
-      document.getElementById('storyTitle').textContent = currentTopic.name;
-      const cards = document.getElementById('storyCards');
-      cards.innerHTML = '';
-      currentTopic.stories.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'story-card';
-        card.innerHTML = `<h3>${s.title}</h3><p>${s.text}</p>${s.fact ? `<div class="fun-fact">💡 <strong>Fun fact:</strong> ${s.fact}</div>` : ''}`;
-        cards.appendChild(card);
-      });
-      showScreen('story');
-    }
-
-    function goTopics() { renderTopics(); showScreen('topics'); }
-
-    /* ---- Quiz ---- */
-    function startQuiz() {
-      if (!currentTopic) return;
-      const user = getActiveUser();
-      const age = user ? user.age : null;
-
-      // Age-based quiz adjustment: younger kids get fewer questions
-      let qs = [...currentTopic.quiz];
-      if (age && age <= 6) {
-        // Shuffle and take only 3 for young kids
-        qs = qs.sort(() => Math.random() - 0.5).slice(0, 3);
-      }
-      quizQs = qs;
-      quizIdx = 0; quizScore = 0;
-      document.getElementById('quizBadge').textContent = `${currentTopic.icon} ${currentTopic.name}`;
-      updateQuizScore();
-      showScreen('quiz');
-      showQuizQ();
-    }
-
-    function updateQuizScore() { document.getElementById('quizScore').textContent = `⭐ ${quizScore}`; }
-
-    function showQuizQ() {
-      const q = quizQs[quizIdx];
-      const card = document.getElementById('quizCard');
-      card.className = 'quiz-card';
-      document.getElementById('quizLabel').textContent = `Question ${quizIdx + 1} of ${quizQs.length}`;
-      document.getElementById('quizText').textContent = q.q;
-      document.getElementById('quizProgress').style.width = `${(quizIdx / quizQs.length) * 100}%`;
-
-      const wrap = document.getElementById('quizOptions');
-      wrap.innerHTML = '';
-      const shuffled = [...q.opts].sort(() => Math.random() - 0.5);
-      shuffled.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'quiz-opt-btn';
-        btn.textContent = opt;
-        btn.onclick = () => handleQuizAnswer(btn, opt, q);
-        wrap.appendChild(btn);
-      });
-    }
-
-    function handleQuizAnswer(btn, selected, q) {
-      const correct = selected === q.a;
-      const card = document.getElementById('quizCard');
-      const allBtns = document.querySelectorAll('.quiz-opt-btn');
-      allBtns.forEach(b => {
-        b.classList.add('disabled');
-        if (b.textContent === q.a) b.classList.add('reveal');
-      });
-      if (correct) {
-        quizScore++; updateQuizScore();
-        btn.classList.add('sel-correct');
-        card.classList.add('correct');
-        showFeedback(['🎉','🇨🇱','✨','💫','🏔️','👏'][Math.floor(Math.random() * 6)]);
-      } else {
-        btn.classList.add('sel-wrong');
-        card.classList.add('wrong');
-        showFeedback(['😬','🤔','💪','🔄'][Math.floor(Math.random() * 4)]);
-      }
-      setTimeout(() => { quizIdx++; quizIdx >= quizQs.length ? finishQuiz() : showQuizQ(); }, 1300);
-    }
-
-    function showFeedback(emoji) {
-      const el = document.getElementById('feedback');
-      document.getElementById('feedbackEmoji').textContent = emoji;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 900);
-    }
-
-    function finishQuiz() {
-      const pct = Math.round((quizScore / quizQs.length) * 100);
-      const stars = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
-      document.getElementById('quizProgress').style.width = '100%';
-
-      saveTopicProgress(currentTopic.id, stars, pct);
-
-      let emoji, title, sub;
-      if (pct >= 90) { emoji = '🏆'; title = '¡Excelente!'; sub = `${quizScore} out of ${quizQs.length} correct — you're a Chile expert!`; }
-      else if (pct >= 60) { emoji = '🌟'; title = '¡Muy bien!'; sub = `${quizScore} out of ${quizQs.length} — great knowledge!`; }
-      else { emoji = '💪'; title = '¡Sigue intentando!'; sub = `${quizScore} out of ${quizQs.length} — read the stories again and try!`; }
-
-      document.getElementById('rEmoji').textContent = emoji;
-      document.getElementById('rTitle').textContent = title;
-      document.getElementById('rSub').textContent = sub;
-
-      const starsEl = document.getElementById('rStars');
-      starsEl.innerHTML = '';
-      for (let i = 0; i < 3; i++) {
-        const span = document.createElement('span');
-        span.className = 'star';
-        span.textContent = i < stars ? '⭐' : '☆';
-        starsEl.appendChild(span);
-      }
-
-      showScreen('results');
-    }
-
-    function retryQuiz() { startQuiz(); }
-
-    init();
-  </script>
+// ── INIT ──
+const user=getActiveUser();
+if(user){document.getElementById('userBadge').style.display='';document.getElementById('ubAvatar').textContent=user.avatar;document.getElementById('ubAvatar').style.cssText='background:'+user.color+'22;border-color:'+user.color;document.getElementById('ubName').textContent=user.name;if(user.age&&user.age<=6)document.getElementById('greeting').textContent='¡Explora el mapa, '+user.name+'!';else if(user.age&&user.age>=10)document.getElementById('greeting').textContent='¡Desafía todos los quizzes, '+user.name+'!';else document.getElementById('greeting').textContent='¡Vamos, '+user.name+'!'}
+curTopic=TOPICS[0].id;renderTopics();renderStories(curTopic);initMemory();renderQuizMenu();updateProgress();
+</script>
 </body>
 </html>
