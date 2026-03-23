@@ -1,26 +1,32 @@
+/* ================================================================
+   DESCUBRE CHILE — Full Spanish App Engine
+   Fixed: null-safe DOM access, DOMContentLoaded init
+   ================================================================ */
+
 function getUserKey(){const u=getActiveUser();return u?'zs_chile_'+u.name.toLowerCase().replace(/\s+/g,'_'):null}
 function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
 function saveTopicProgress(id,stars,pct){const k=getUserKey();if(!k)return;const p=getUserProgress();const prev=p[id]||{bestStars:0,bestPct:0};p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};localStorage.setItem(k,JSON.stringify(p))}
 function saveVisited(id){const k=getUserKey();if(!k)return;const p=getUserProgress();if(!p.vr)p.vr=[];if(!p.vr.includes(id))p.vr.push(id);localStorage.setItem(k,JSON.stringify(p))}
 function saveMemBest(m){const k=getUserKey();if(!k)return;const p=getUserProgress();if(!p.memBest||m<p.memBest)p.memBest=m;localStorage.setItem(k,JSON.stringify(p))}
-function showFeedback(e){const el=document.getElementById('feedback');document.getElementById('feedbackEmoji').textContent=e;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),900)}
 
-// Tab nav
-document.getElementById('tabBar').addEventListener('click',e=>{
-  if(!e.target.dataset.tab)return;
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+e.target.dataset.tab).classList.add('active');
-  e.target.classList.add('active');
-});
+function showFeedback(e){
+  const el=document.getElementById('feedback');
+  if(!el)return;
+  const inner=el.querySelector('span')||el;
+  inner.textContent=e;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),900);
+}
 
 function updateProgress(){
   const p=getUserProgress();const regs=(p.vr||[]).length;
   const topics=Object.keys(p).filter(k=>k!=='vr'&&k!=='memBest'&&p[k].bestStars>0).length;
   const mem=p.memBest?1:0;const total=regs+topics+mem;const max=5+6+1;
   const pct=Math.min(100,Math.round((total/max)*100));
-  document.getElementById('progressFill').style.width=pct+'%';
-  document.getElementById('progressLabel').textContent='Chile explorado: '+pct+'%';
+  const pf=document.getElementById('progressFill');
+  const pl=document.getElementById('progressLabel');
+  if(pf)pf.style.width=pct+'%';
+  if(pl)pl.textContent='Chile explorado: '+pct+'%';
   (p.vr||[]).forEach(id=>{const el=document.getElementById('reg-'+id);if(el)el.classList.add('visited')});
 }
 
@@ -52,8 +58,20 @@ const REGIONS={
     {t:'🌺 Naturaleza',p:'La isla tiene cráteres volcánicos con lagos, playas de arena rosa y caballos salvajes.',f:'El lugar habitado más cercano es isla Pitcairn, ¡a 2.000 km!'}
   ]}
 };
-function openRegion(id){const r=REGIONS[id];if(!r)return;document.getElementById('rmTitle').innerHTML=r.icon+' '+r.title;document.getElementById('rmSub').textContent=r.sub;document.getElementById('rmFacts').innerHTML=r.facts.map(f=>'<div class="fact-item"><h4>'+f.t+'</h4><p>'+f.p+'</p>'+(f.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+f.f+'</div>':'')+'</div>').join('');document.getElementById('regionModal').classList.add('active');saveVisited(id);updateProgress()}
-function closeRegion(){document.getElementById('regionModal').classList.remove('active')}
+
+function openRegion(id){
+  const r=REGIONS[id];if(!r)return;
+  const titleEl=document.getElementById('rmTitle');
+  const subEl=document.getElementById('rmSub');
+  const factsEl=document.getElementById('rmFacts');
+  const modal=document.getElementById('regionModal');
+  if(titleEl)titleEl.innerHTML=r.icon+' '+r.title;
+  if(subEl)subEl.textContent=r.sub;
+  if(factsEl)factsEl.innerHTML=r.facts.map(f=>'<div class="fact-item"><h4>'+f.t+'</h4><p>'+f.p+'</p>'+(f.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+f.f+'</div>':'')+'</div>').join('');
+  if(modal)modal.classList.add('active');
+  saveVisited(id);updateProgress();
+}
+function closeRegion(){const m=document.getElementById('regionModal');if(m)m.classList.remove('active')}
 
 // ── STORIES ──
 const TOPICS=[
@@ -88,8 +106,35 @@ const TOPICS=[
   ]}
 ];
 let curTopic=null;
-function renderTopics(){const el=document.getElementById('historyTopics');const prog=getUserProgress();el.innerHTML='';TOPICS.forEach(t=>{const done=prog[t.id]&&prog[t.id].bestStars>0;const btn=document.createElement('button');btn.className='topic-btn'+(curTopic===t.id?' active':'');btn.textContent=t.icon+' '+t.name+(done?' ✓':'');btn.onclick=()=>{curTopic=t.id;renderTopics();renderStories(t.id)};el.appendChild(btn)})}
-function renderStories(id){const topic=TOPICS.find(t=>t.id===id);if(!topic)return;const el=document.getElementById('storyList');el.innerHTML='';topic.stories.forEach(s=>{const c=document.createElement('div');c.className='story-card';c.innerHTML='<h3>'+s.t+'</h3><p>'+s.p+'</p>'+(s.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+s.f+'</div>':'');c.onclick=()=>c.classList.toggle('expanded');el.appendChild(c)})}
+
+function renderTopics(){
+  const el=document.getElementById('historyTopics');
+  if(!el)return;
+  const prog=getUserProgress();
+  el.innerHTML='';
+  TOPICS.forEach(t=>{
+    const done=prog[t.id]&&prog[t.id].bestStars>0;
+    const btn=document.createElement('button');
+    btn.className='topic-btn'+(curTopic===t.id?' active':'');
+    btn.textContent=t.icon+' '+t.name+(done?' ✓':'');
+    btn.onclick=()=>{curTopic=t.id;renderTopics();renderStories(t.id)};
+    el.appendChild(btn);
+  });
+}
+
+function renderStories(id){
+  const topic=TOPICS.find(t=>t.id===id);if(!topic)return;
+  const el=document.getElementById('storyList');
+  if(!el)return;
+  el.innerHTML='';
+  topic.stories.forEach(s=>{
+    const c=document.createElement('div');
+    c.className='story-card';
+    c.innerHTML='<h3>'+s.t+'</h3><p>'+s.p+'</p>'+(s.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+s.f+'</div>':'');
+    c.onclick=()=>c.classList.toggle('expanded');
+    el.appendChild(c);
+  });
+}
 
 // ── MEMORY ──
 const MEM_PAIRS=[
@@ -101,27 +146,172 @@ const MEM_PAIRS=[
   {icon:'⚽',name:'Alexis Sánchez',match:'Copa América 2015'}
 ];
 let memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false;
-function initMemory(){memMatched=0;memMoves=0;memLocked=false;memFlipped=[];document.getElementById('memMoves').textContent='0';document.getElementById('memPairs').textContent='0';document.getElementById('memTotal').textContent=MEM_PAIRS.length;document.getElementById('memoryMsg').textContent='';
-  const cards=[];MEM_PAIRS.forEach((p,i)=>{cards.push({id:i,type:'person',icon:p.icon,text:p.name,pid:i});cards.push({id:i,type:'fact',icon:'🏆',text:p.match,pid:i})});
-  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}memCards=cards;renderMem()}
-function renderMem(){const g=document.getElementById('memoryGrid');g.innerHTML='';memCards.forEach((c,i)=>{const d=document.createElement('div');d.className='memory-card';if(c.matched)d.classList.add('matched');if(memFlipped.includes(i))d.classList.add('flipped');d.innerHTML='<div class="memory-card-inner"><div class="memory-back">🇨🇱</div><div class="memory-front"><span class="mf-icon">'+c.icon+'</span><span class="mf-text">'+c.text+'</span></div></div>';d.onclick=()=>flipCard(i);g.appendChild(d)})}
-function flipCard(i){if(memLocked||memFlipped.includes(i)||memCards[i].matched)return;memFlipped.push(i);renderMem();if(memFlipped.length===2){memMoves++;document.getElementById('memMoves').textContent=memMoves;memLocked=true;const a=memCards[memFlipped[0]],b=memCards[memFlipped[1]];if(a.pid===b.pid&&a.type!==b.type){setTimeout(()=>{a.matched=true;b.matched=true;memMatched++;document.getElementById('memPairs').textContent=memMatched;memFlipped=[];memLocked=false;showFeedback('🎉');renderMem();if(memMatched===MEM_PAIRS.length){document.getElementById('memoryMsg').innerHTML='<span style="color:var(--green)">🏆 ¡Completado en '+memMoves+' movimientos!</span>';saveMemBest(memMoves);updateProgress()}},600)}else{setTimeout(()=>{memFlipped=[];memLocked=false;renderMem()},900)}}}
+
+function initMemory(){
+  memMatched=0;memMoves=0;memLocked=false;memFlipped=[];
+  const mmEl=document.getElementById('memMoves');
+  const mpEl=document.getElementById('memPairs');
+  const mtEl=document.getElementById('memTotal');
+  const msgEl=document.getElementById('memoryMsg');
+  if(mmEl)mmEl.textContent='0';
+  if(mpEl)mpEl.textContent='0';
+  if(mtEl)mtEl.textContent=MEM_PAIRS.length;
+  if(msgEl)msgEl.textContent='';
+  const cards=[];
+  MEM_PAIRS.forEach((p,i)=>{
+    cards.push({id:i,type:'person',icon:p.icon,text:p.name,pid:i});
+    cards.push({id:i,type:'fact',icon:'🏆',text:p.match,pid:i});
+  });
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}
+  memCards=cards;renderMem();
+}
+
+function renderMem(){
+  const g=document.getElementById('memoryGrid');
+  if(!g)return;
+  g.innerHTML='';
+  memCards.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='memory-card';
+    if(c.matched)d.classList.add('matched');
+    if(memFlipped.includes(i))d.classList.add('flipped');
+    d.innerHTML='<div class="memory-card-inner"><div class="memory-back">🇨🇱</div><div class="memory-front"><span class="mf-icon">'+c.icon+'</span><span class="mf-text">'+c.text+'</span></div></div>';
+    d.onclick=()=>flipCard(i);
+    g.appendChild(d);
+  });
+}
+
+function flipCard(i){
+  if(memLocked||memFlipped.includes(i)||memCards[i].matched)return;
+  memFlipped.push(i);renderMem();
+  if(memFlipped.length===2){
+    memMoves++;
+    const mmEl=document.getElementById('memMoves');
+    if(mmEl)mmEl.textContent=memMoves;
+    memLocked=true;
+    const a=memCards[memFlipped[0]],b=memCards[memFlipped[1]];
+    if(a.pid===b.pid&&a.type!==b.type){
+      setTimeout(()=>{
+        a.matched=true;b.matched=true;memMatched++;
+        const mpEl=document.getElementById('memPairs');
+        if(mpEl)mpEl.textContent=memMatched;
+        memFlipped=[];memLocked=false;showFeedback('🎉');renderMem();
+        if(memMatched===MEM_PAIRS.length){
+          const msgEl=document.getElementById('memoryMsg');
+          if(msgEl)msgEl.innerHTML='<span style="color:var(--green)">🏆 ¡Completado en '+memMoves+' movimientos!</span>';
+          saveMemBest(memMoves);updateProgress();
+        }
+      },600);
+    }else{
+      setTimeout(()=>{memFlipped=[];memLocked=false;renderMem()},900);
+    }
+  }
+}
 
 // ── QUIZ ──
-const QB={geography:[{q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km']},{q:'¿Qué desierto chileno es uno de los más secos?',a:'Atacama',o:['Atacama','Sahara','Gobi','Kalahari']},{q:'¿Qué montañas están en la frontera este?',a:'Los Andes',o:['Los Andes','Las Rocosas','Los Alpes','El Himalaya']},{q:'¿Dónde está Torres del Paine?',a:'Patagonia',o:['Patagonia','Atacama','Santiago','Isla de Pascua']},{q:'¿Por qué la NASA prueba robots en Atacama?',a:'Suelo parecido a Marte',o:['Suelo parecido a Marte','Muchos cráteres','Mucho frío','No hay gravedad']}],
-indigenous:[{q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque']},{q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares']},{q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años']},{q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca']},{q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km']}],
-history:[{q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar']},{q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero']},{q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano']},{q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541']},{q:'¿De qué país era el padre de O\'Higgins?',a:'Irlanda',o:['Irlanda','España','Inglaterra','Francia']}],
-culture:[{q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón']},{q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua']},{q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre']},{q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol']},{q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo']}],
-nature:[{q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros']},{q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años']},{q:'¿Qué animales están en el escudo?',a:'Cóndor y huemul',o:['Cóndor y huemul','Puma y águila','Llama y cóndor','Pingüino y flamenco']},{q:'¿Dónde hay pumas en Chile?',a:'Torres del Paine',o:['Torres del Paine','Atacama','Santiago','Isla de Pascua']},{q:'¿Qué corriente trae agua fría?',a:'Corriente de Humboldt',o:['Corriente de Humboldt','Corriente del Golfo','Anillo del Pacífico','Flujo chileno']}],
-famous:[{q:'¿Poeta chileno Nobel en 1971?',a:'Pablo Neruda',o:['Pablo Neruda','Gabriela Mistral','Isabel Allende','Huidobro']},{q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa']},{q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo']},{q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970']},{q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos']}]};
-let qTopic='',qQs=[],qIdx=0,qScore=0;
-function renderQuizMenu(){const prog=getUserProgress();let h='<p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:12px">Elige un tema</p><div class="topic-select">';TOPICS.forEach(t=>{const done=prog[t.id]&&prog[t.id].bestStars>0;h+='<button class="topic-btn" onclick="startQuiz(\''+t.id+'\')">'+t.icon+' '+t.name+(done?' ⭐':'')+'</button>'});h+='</div>';document.getElementById('quizArea').innerHTML=h}
-function startQuiz(id){qTopic=id;const u=getActiveUser();const age=u?u.age:null;let qs=[...QB[id]];if(age&&age<=6)qs=qs.sort(()=>Math.random()-0.5).slice(0,3);qQs=qs;qIdx=0;qScore=0;showQ()}
-function showQ(){if(qIdx>=qQs.length){finishQ();return}const q=qQs[qIdx];const sh=[...q.o].sort(()=>Math.random()-0.5);let h='<div class="quiz-top"><div class="quiz-badge">Pregunta '+(qIdx+1)+'/'+qQs.length+'</div><div class="quiz-score">⭐ '+qScore+'</div></div>';h+='<div class="quiz-progress-wrap"><div class="quiz-progress-fill" style="width:'+(qIdx/qQs.length*100)+'%"></div></div>';h+='<div class="quiz-card" id="qC"><div class="quiz-q-text">'+q.q+'</div></div><div class="quiz-opts">';sh.forEach(o=>{h+='<button class="quiz-opt-btn" onclick="ans(this)">'+o+'</button>'});h+='</div>';document.getElementById('quizArea').innerHTML=h}
-function ans(btn){const q=qQs[qIdx];const sel=btn.textContent;const ok=sel===q.a;document.querySelectorAll('.quiz-opt-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===q.a)b.classList.add('reveal')});if(ok){qScore++;btn.classList.add('sel-correct');document.getElementById('qC').classList.add('correct');showFeedback('🎉')}else{btn.classList.add('sel-wrong');document.getElementById('qC').classList.add('wrong');showFeedback('🤔')}setTimeout(()=>{qIdx++;showQ()},1200)}
-function finishQ(){const pct=Math.round(qScore/qQs.length*100);const stars=pct>=90?3:pct>=60?2:1;saveTopicProgress(qTopic,stars,pct);updateProgress();let e,t,s;if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}else if(pct>=60){e='🌟';t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}else{e='💪';t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}let st='';for(let i=0;i<3;i++)st+='<span>'+(i<stars?'⭐':'☆')+'</span>';document.getElementById('quizArea').innerHTML='<div class="results-box"><span class="r-emoji">'+e+'</span><div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="r-stars">'+st+'</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar 🔁</button><button class="btn-ghost" onclick="renderQuizMenu()">Otros temas 🇨🇱</button></div></div>'}
+const QB={
+  geography:[{q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km']},{q:'¿Qué desierto chileno es uno de los más secos?',a:'Atacama',o:['Atacama','Sahara','Gobi','Kalahari']},{q:'¿Qué montañas están en la frontera este?',a:'Los Andes',o:['Los Andes','Las Rocosas','Los Alpes','El Himalaya']},{q:'¿Dónde está Torres del Paine?',a:'Patagonia',o:['Patagonia','Atacama','Santiago','Isla de Pascua']},{q:'¿Por qué la NASA prueba robots en Atacama?',a:'Suelo parecido a Marte',o:['Suelo parecido a Marte','Muchos cráteres','Mucho frío','No hay gravedad']}],
+  indigenous:[{q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque']},{q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares']},{q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años']},{q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca']},{q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km']}],
+  history:[{q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar']},{q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero']},{q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano']},{q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541']},{q:'¿De qué país era el padre de O\'Higgins?',a:'Irlanda',o:['Irlanda','España','Inglaterra','Francia']}],
+  culture:[{q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón']},{q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua']},{q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre']},{q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol']},{q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo']}],
+  nature:[{q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros']},{q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años']},{q:'¿Qué animales están en el escudo?',a:'Cóndor y huemul',o:['Cóndor y huemul','Puma y águila','Llama y cóndor','Pingüino y flamenco']},{q:'¿Dónde hay pumas en Chile?',a:'Torres del Paine',o:['Torres del Paine','Atacama','Santiago','Isla de Pascua']},{q:'¿Qué corriente trae agua fría?',a:'Corriente de Humboldt',o:['Corriente de Humboldt','Corriente del Golfo','Anillo del Pacífico','Flujo chileno']}],
+  famous:[{q:'¿Poeta chileno Nobel en 1971?',a:'Pablo Neruda',o:['Pablo Neruda','Gabriela Mistral','Isabel Allende','Huidobro']},{q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa']},{q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo']},{q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970']},{q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos']}]
+};
 
-// ── INIT ──
-const user=getActiveUser();
-if(user){document.getElementById('userBadge').style.display='';document.getElementById('ubAvatar').textContent=user.avatar;document.getElementById('ubAvatar').style.cssText='background:'+user.color+'22;border-color:'+user.color;document.getElementById('ubName').textContent=user.name;if(user.age&&user.age<=6)document.getElementById('greeting').textContent='¡Explora el mapa, '+user.name+'!';else if(user.age&&user.age>=10)document.getElementById('greeting').textContent='¡Desafía todos los quizzes, '+user.name+'!';else document.getElementById('greeting').textContent='¡Vamos, '+user.name+'!'}
-curTopic=TOPICS[0].id;renderTopics();renderStories(curTopic);initMemory();renderQuizMenu();updateProgress();
+let qTopic='',qQs=[],qIdx=0,qScore=0;
+
+function renderQuizMenu(){
+  const prog=getUserProgress();
+  const qa=document.getElementById('quizArea');
+  if(!qa)return;
+  let h='<p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:12px">Elige un tema</p><div class="topic-select">';
+  TOPICS.forEach(t=>{
+    const done=prog[t.id]&&prog[t.id].bestStars>0;
+    h+='<button class="topic-btn" onclick="startQuiz(\''+t.id+'\')">'+t.icon+' '+t.name+(done?' ⭐':'')+'</button>';
+  });
+  h+='</div>';
+  qa.innerHTML=h;
+}
+
+function startQuiz(id){
+  qTopic=id;const u=getActiveUser();const age=u?u.age:null;
+  let qs=[...QB[id]];
+  if(age&&age<=6)qs=qs.sort(()=>Math.random()-0.5).slice(0,3);
+  qQs=qs;qIdx=0;qScore=0;showQ();
+}
+
+function showQ(){
+  const qa=document.getElementById('quizArea');
+  if(!qa)return;
+  if(qIdx>=qQs.length){finishQ();return}
+  const q=qQs[qIdx];
+  const sh=[...q.o].sort(()=>Math.random()-0.5);
+  let h='<div class="quiz-top"><div class="quiz-badge">Pregunta '+(qIdx+1)+'/'+qQs.length+'</div><div class="quiz-score">⭐ '+qScore+'</div></div>';
+  h+='<div class="quiz-progress-wrap"><div class="quiz-progress-fill" style="width:'+(qIdx/qQs.length*100)+'%"></div></div>';
+  h+='<div class="quiz-card" id="qC"><div class="quiz-q-text">'+q.q+'</div></div><div class="quiz-opts">';
+  sh.forEach(o=>{h+='<button class="quiz-opt-btn" onclick="ans(this)">'+o+'</button>'});
+  h+='</div>';
+  qa.innerHTML=h;
+}
+
+function ans(btn){
+  const q=qQs[qIdx];const sel=btn.textContent;const ok=sel===q.a;
+  document.querySelectorAll('.quiz-opt-btn').forEach(b=>{
+    b.classList.add('disabled');
+    if(b.textContent===q.a)b.classList.add('reveal');
+  });
+  const qc=document.getElementById('qC');
+  if(ok){qScore++;btn.classList.add('sel-correct');if(qc)qc.classList.add('correct');showFeedback('🎉')}
+  else{btn.classList.add('sel-wrong');if(qc)qc.classList.add('wrong');showFeedback('🤔')}
+  setTimeout(()=>{qIdx++;showQ()},1200);
+}
+
+function finishQ(){
+  const qa=document.getElementById('quizArea');
+  if(!qa)return;
+  const pct=Math.round(qScore/qQs.length*100);
+  const stars=pct>=90?3:pct>=60?2:1;
+  saveTopicProgress(qTopic,stars,pct);updateProgress();
+  let e,t,s;
+  if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}
+  else if(pct>=60){e='🌟';t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}
+  else{e='💪';t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}
+  let st='';for(let i=0;i<3;i++)st+='<span>'+(i<stars?'⭐':'☆')+'</span>';
+  qa.innerHTML='<div class="results-box"><span class="r-emoji">'+e+'</span><div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="r-stars">'+st+'</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar 🔁</button><button class="btn-ghost" onclick="renderQuizMenu()">Otros temas 🇨🇱</button></div></div>';
+}
+
+// ── INIT (safe — runs after DOM ready) ──
+function dcInit(){
+  // Tab nav
+  const tabBar=document.getElementById('tabBar');
+  if(tabBar){
+    tabBar.addEventListener('click',e=>{
+      if(!e.target.dataset||!e.target.dataset.tab)return;
+      document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      const target=document.getElementById('tab-'+e.target.dataset.tab);
+      if(target)target.classList.add('active');
+      e.target.classList.add('active');
+    });
+  }
+
+  // User greeting (nav.js handles the badge)
+  const user=getActiveUser();
+  if(user){
+    const greetEl=document.getElementById('greeting');
+    if(greetEl){
+      if(user.age&&user.age<=6) greetEl.textContent='¡Explora el mapa, '+user.name+'!';
+      else if(user.age&&user.age>=10) greetEl.textContent='¡Desafía todos los quizzes, '+user.name+'!';
+      else greetEl.textContent='¡Vamos, '+user.name+'!';
+    }
+  }
+
+  curTopic=TOPICS[0].id;
+  renderTopics();
+  renderStories(curTopic);
+  initMemory();
+  renderQuizMenu();
+  updateProgress();
+}
+
+document.addEventListener('DOMContentLoaded', dcInit);
