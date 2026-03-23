@@ -173,6 +173,10 @@ const TimerManager = (() => {
   }
 
   function _showLockOverlay() {
+    // BUG FIX: Don't show lock overlay if parent is currently in Parents Corner
+    const parentsOverlay = document.getElementById('parents-overlay');
+    if (parentsOverlay && parentsOverlay.classList.contains('active')) return;
+
     if (document.getElementById('timer-lock-overlay')) {
       // Update message if already showing
       const msg = document.querySelector('.lock-msg');
@@ -261,6 +265,14 @@ const TimerManager = (() => {
       </div>
     `;
     document.body.appendChild(overlay);
+    
+    // Add Enter key listener for PIN
+    const pinIn = document.getElementById('lock-pin-input');
+    if (pinIn) {
+      pinIn.addEventListener('keydown', e => {
+        if (e.key === 'Enter') checkLockPin();
+      });
+    }
     
     // Prevent Escape key
     window.addEventListener('keydown', _preventEscape, true);

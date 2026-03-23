@@ -360,6 +360,28 @@
     }
     .btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--purple-glow); }
 
+    .hub-action-btn {
+      padding: 14px 24px;
+      border-radius: var(--radius-xs);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #7C3AED, #A78BFA);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--purple-glow);
+    }
+    .hub-action-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--purple-glow); }
+    .hub-action-btn.secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+      box-shadow: none;
+      border: 1.5px solid rgba(255,255,255,0.1);
+    }
+    .hub-action-btn.secondary:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); border-color: var(--purple); }
+
     /* ================================================================
        HUB SCREEN — App grid with user header
        ================================================================ */
