@@ -195,14 +195,15 @@ function flipCard(i){
         a.matched=true;b.matched=true;memMatched++;
         const mpEl=document.getElementById('memPairs');
         if(mpEl)mpEl.textContent=memMatched;
-        memFlipped=[];memLocked=false;showFeedback('🎉');renderMem();
+        memFlipped=[];memLocked=false;showFeedback('🎉');if(typeof SFX!=='undefined')SFX.correct();renderMem();
         if(memMatched===MEM_PAIRS.length){
           const msgEl=document.getElementById('memoryMsg');
           if(msgEl)msgEl.innerHTML='<span style="color:var(--green)">🏆 ¡Completado en '+memMoves+' movimientos!</span>';
-          saveMemBest(memMoves);updateProgress();
+          saveMemBest(memMoves);updateProgress();if(typeof SFX!=='undefined')SFX.cheer();
         }
       },600);
     }else{
+      if(typeof SFX!=='undefined')SFX.wrong();
       setTimeout(()=>{memFlipped=[];memLocked=false;renderMem()},900);
     }
   }
@@ -261,8 +262,8 @@ function ans(btn){
     if(b.textContent===q.a)b.classList.add('reveal');
   });
   const qc=document.getElementById('qC');
-  if(ok){qScore++;btn.classList.add('sel-correct');if(qc)qc.classList.add('correct');showFeedback('🎉')}
-  else{btn.classList.add('sel-wrong');if(qc)qc.classList.add('wrong');showFeedback('🤔')}
+  if(ok){qScore++;btn.classList.add('sel-correct');if(qc)qc.classList.add('correct');showFeedback('🎉');if(typeof SFX!=='undefined')SFX.correct()}
+  else{btn.classList.add('sel-wrong');if(qc)qc.classList.add('wrong');showFeedback('🤔');if(typeof SFX!=='undefined')SFX.wrong()}
   setTimeout(()=>{qIdx++;showQ()},1200);
 }
 
@@ -271,6 +272,7 @@ function finishQ(){
   if(!qa)return;
   const pct=Math.round(qScore/qQs.length*100);
   const stars=pct>=90?3:pct>=60?2:1;
+  if(typeof SFX!=='undefined'&&pct>=60)SFX.cheer();
   saveTopicProgress(qTopic,stars,pct);updateProgress();
   let e,t,s;
   if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}
