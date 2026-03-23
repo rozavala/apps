@@ -1,32 +1,125 @@
 /* ============================================================
-   SHARED STYLES
+   ZAVALA SERRA APPS — Shared Styles (common.css)
+   Import in every app: <link rel="stylesheet" href="css/common.css">
+   Apps override :root variables for their own theme colors.
    ============================================================ */
 
+/* ---- Font import (remove Google Fonts <link> tags from HTML) ---- */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+/* ---- Base theme variables ---- */
 :root {
   --bg-deep: #0B0B1A;
   --bg-surface: #131328;
   --bg-card: #1A1A3E;
+  --border-subtle: rgba(255,255,255,0.07);
+
+  /* Text — both names for compatibility */
+  --text: #F0EDFF;
   --text-primary: #F0EDFF;
   --text-muted: #8B86B0;
+
+  /* Fonts */
   --font-display: 'Baloo 2', 'Nunito', cursive;
   --font-body: 'Nunito', system-ui, sans-serif;
+
+  /* Radii */
   --radius: 24px;
   --radius-sm: 16px;
   --radius-xs: 12px;
-  --border-subtle: rgba(255,255,255,0.07);
+
+  /* Shared accent colors (apps can override) */
+  --purple: #A78BFA;
+  --purple-glow: rgba(124, 58, 237, 0.35);
+  --green: #34D399;
+  --green-glow: rgba(52, 211, 153, 0.4);
+  --red: #F87171;
+  --red-glow: rgba(248, 113, 113, 0.35);
+  --gold: #FBBF24;
+  --gold-glow: rgba(251, 191, 36, 0.4);
+  --blue: #60A5FA;
+  --blue-glow: rgba(59, 130, 246, 0.4);
+  --cyan: #22D3EE;
+  --cyan-glow: rgba(34, 211, 238, 0.35);
 }
 
+/* ---- Reset ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { height: 100%; font-size: 16px; }
 body {
   min-height: 100%;
   font-family: var(--font-body);
   background: var(--bg-deep);
-  color: var(--text-primary);
+  color: var(--text);
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Home Button */
+/* ---- Default starfield background ---- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 45% 10%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 60% 45%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 75% 20%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 15% 70%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 35% 80%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 55% 65%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 90% 85%, rgba(255,255,255,0.6), transparent);
+  pointer-events: none;
+  z-index: 0;
+  animation: twinkle 7s ease-in-out infinite alternate;
+}
+
+/* ---- Atmosphere blobs (add .atmo elements to page) ---- */
+.atmo {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+
+/* ---- Aurora blobs (hub uses these) ---- */
+.aurora {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 20s ease-in-out infinite alternate;
+}
+
+/* ---- App shell container ---- */
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  padding: 24px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Screen management ---- */
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.screen.active { display: flex; }
+
+/* ---- Home button (rendered by nav.js) ---- */
 .home-btn {
   position: absolute;
   top: 24px;
@@ -46,12 +139,12 @@ body {
   z-index: 10;
 }
 .home-btn:hover {
-  border-color: var(--text-primary);
-  color: var(--text-primary);
+  border-color: var(--gold);
+  color: var(--gold);
   transform: scale(1.08);
 }
 
-/* User Badge */
+/* ---- User badge (rendered by nav.js) ---- */
 .user-badge {
   position: absolute;
   top: 24px;
@@ -67,7 +160,8 @@ body {
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text);
+  animation: fadeUp 0.5s ease-out both;
 }
 .user-badge-avatar {
   width: 28px;
@@ -80,7 +174,26 @@ body {
   border: 2px solid;
 }
 
-/* Common Animations */
+/* ---- Feedback emoji overlay ---- */
+.feedback-float,
+.feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 80px;
+  pointer-events: none;
+  z-index: 2000;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  opacity: 0;
+}
+.feedback-float.show,
+.feedback.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* ---- Common animations ---- */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -92,4 +205,38 @@ body {
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.85) translateY(20px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes gradShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes twinkle {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+@keyframes drift {
+  0% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(20px,-15px) scale(1.06); }
+  100% { transform: translate(-10px,10px) scale(0.97); }
+}
+
+/* ---- Mobile base ---- */
+@media (max-width: 480px) {
+  .app { padding: 16px 14px 32px; }
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
