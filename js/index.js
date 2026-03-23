@@ -184,7 +184,22 @@
         }
 
         // Little Maestro
-        appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">Separate profile</span></div>`;
+        try {
+          const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
+          const prog = lm.progress || {};
+          const songs = Object.entries(prog).filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).length;
+          const lmStars = Object.entries(prog).filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).reduce((s, [, v]) => s + v.stars, 0);
+          const streak = (lm.stats && lm.stats.currentStreak) || 0;
+          if (songs > 0) {
+            const parts = [`⭐ ${lmStars} stars`, `${songs} songs`];
+            if (streak > 0) parts.push(`🔥 ${streak} day streak`);
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">${parts.join(' · ')}</span></div>`;
+          } else {
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">Not started</span></div>`;
+          }
+        } catch {
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">Not started</span></div>`;
+        }
 
         return `<div class="dash-kid">
           <div class="dash-kid-header">
