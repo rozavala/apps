@@ -1,0 +1,317 @@
+    /* ================================================================
+       MATH GALAXY — Space-Themed Math Practice
+       4 levels: Cadet (PreK) · Explorer (1-2) · Pilot (3-4) · Commander (5-6)
+       Now with shared login & per-user progress tracking
+       ================================================================ */
+
+    :root {
+      --bg-deep: #070720;
+      --bg-surface: #0E0E30;
+      --bg-card: #151542;
+      --border-subtle: rgba(255,255,255,0.07);
+
+      --blue: #60A5FA;
+      --blue-glow: rgba(59, 130, 246, 0.4);
+      --cyan: #22D3EE;
+      --cyan-glow: rgba(34, 211, 238, 0.35);
+      --gold: #FBBF24;
+      --gold-glow: rgba(251, 191, 36, 0.4);
+      --green: #34D399;
+      --green-glow: rgba(52, 211, 153, 0.4);
+      --red: #F87171;
+      --red-glow: rgba(248, 113, 113, 0.35);
+      --purple: #A78BFA;
+      --purple-glow: rgba(167, 139, 250, 0.35);
+      --pink: #F472B6;
+
+      --text: #F0EDFF;
+      --text-muted: #8B86B0;
+
+      --font-display: 'Baloo 2', 'Nunito', cursive;
+      --font-body: 'Nunito', system-ui, sans-serif;
+      --radius: 20px;
+      --radius-sm: 14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; font-size: 16px; }
+
+    body {
+      min-height: 100%;
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text);
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ---- Starfield ---- */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      background:
+        radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 28% 42%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(2px 2px at 50% 8%, rgba(96,165,250,0.8), transparent),
+        radial-gradient(1px 1px at 65% 55%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1.5px 1.5px at 78% 22%, rgba(251,191,36,0.7), transparent),
+        radial-gradient(1px 1px at 88% 65%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 18% 75%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 38% 85%, rgba(167,139,250,0.5), transparent),
+        radial-gradient(2px 2px at 58% 70%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 92% 88%, rgba(34,211,238,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 8% 92%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 72% 78%, rgba(255,255,255,0.5), transparent);
+      animation: twinkle 6s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    /* ---- Nebula blobs ---- */
+    .nebula { position: fixed; border-radius: 50%; filter: blur(110px); pointer-events: none; z-index: 0; animation: drift 25s ease-in-out infinite alternate; }
+    .nebula-1 { width: 420px; height: 420px; background: rgba(59,130,246,0.12); top: -80px; left: -60px; }
+    .nebula-2 { width: 350px; height: 350px; background: rgba(167,139,250,0.1); bottom: 10%; right: -70px; animation-delay: -8s; }
+    .nebula-3 { width: 300px; height: 300px; background: rgba(251,191,36,0.08); top: 40%; left: 20%; animation-delay: -15s; }
+    @keyframes drift {
+      0% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(25px,-20px) scale(1.08); }
+      100% { transform: translate(-15px,15px) scale(0.96); }
+    }
+
+    /* ---- App shell ---- */
+    .app {
+      position: relative; z-index: 1; width: 100%; max-width: 600px;
+      padding: 24px 20px 40px; min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ---- Home button ---- */
+    .home-btn {
+      position: absolute; top: 24px; left: 20px;
+      width: 42px; height: 42px; border-radius: 12px;
+      border: 1.5px solid var(--border-subtle); background: var(--bg-card);
+      color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+      font-size: 20px; text-decoration: none; transition: all 0.25s ease; z-index: 10;
+    }
+    .home-btn:hover { border-color: var(--blue); color: var(--blue); transform: scale(1.08); }
+
+    /* ---- User badge ---- */
+    .user-badge {
+      position: absolute; top: 24px; right: 20px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 8px;
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: 99px; z-index: 10;
+      font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+      color: var(--text); animation: fadeUp 0.5s ease-out both;
+    }
+    .user-badge-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; border: 2px solid;
+    }
+
+    /* ---- Screen management ---- */
+    .screen { display: none; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ================================================================
+       LEVEL SELECT SCREEN
+       ================================================================ */
+    .level-header {
+      text-align: center; margin: 40px 0 32px;
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .level-header .icon { font-size: 52px; display: block; margin-bottom: 4px; animation: planetSpin 4s ease-in-out infinite; }
+    @keyframes planetSpin {
+      0%,100% { transform: rotate(-3deg) scale(1); }
+      50% { transform: rotate(3deg) scale(1.08); }
+    }
+    .level-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 6vw, 2.8rem); font-weight: 800;
+      background: linear-gradient(135deg, var(--blue), var(--cyan), var(--gold));
+      background-size: 200% 200%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; animation: gradShift 5s ease-in-out infinite;
+    }
+    @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .level-header p { color: var(--text-muted); font-weight: 600; margin-top: 6px; font-size: 1rem; }
+    .level-header .greeting { color: var(--gold); font-weight: 700; font-size: 0.9rem; margin-top: 2px; }
+
+    .level-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .level-card {
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 24px 20px; text-align: center;
+      cursor: pointer; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      animation: fadeUp 0.5s ease-out both; position: relative; overflow: hidden;
+    }
+    .level-card:nth-child(1) { animation-delay: 0.1s; }
+    .level-card:nth-child(2) { animation-delay: 0.2s; }
+    .level-card:nth-child(3) { animation-delay: 0.3s; }
+    .level-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .level-card:hover {
+      transform: translateY(-5px) scale(1.03);
+      border-color: var(--card-color); box-shadow: 0 12px 40px -10px var(--card-glow);
+    }
+    .level-card:active { transform: translateY(-2px) scale(1.01); }
+    .level-card .rank-icon { font-size: 40px; display: block; margin-bottom: 10px; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    .level-card:hover .rank-icon { transform: scale(1.2) rotate(-5deg); }
+    .level-card .rank-name { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--card-color); }
+    .level-card .rank-ages { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+    .level-card .rank-topics { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; line-height: 1.5; opacity: 0.8; }
+
+    /* Best score badge on level cards */
+    .best-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 10px; padding: 3px 10px; border-radius: 99px;
+      font-family: var(--font-display); font-size: 0.72rem; font-weight: 700;
+      background: rgba(251,191,36,0.12); color: var(--gold);
+    }
+    .best-badge.empty { opacity: 0.4; color: var(--text-muted); background: rgba(255,255,255,0.04); }
+
+    /* Recommended level highlight */
+    .level-card.recommended { border-color: var(--card-color); box-shadow: 0 0 30px -8px var(--card-glow); }
+    .rec-badge {
+      display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 99px;
+      font-family: var(--font-display); font-size: 0.68rem; font-weight: 700;
+      background: rgba(52,211,153,0.12); color: var(--green);
+      animation: fadeUp 0.4s ease-out 0.5s both;
+    }
+
+    .card-cadet    { --card-color: var(--cyan);   --card-glow: var(--cyan-glow); }
+    .card-explorer { --card-color: var(--green);   --card-glow: var(--green-glow); }
+    .card-pilot    { --card-color: var(--gold);    --card-glow: var(--gold-glow); }
+    .card-commander{ --card-color: var(--purple);  --card-glow: var(--purple-glow); }
+
+    /* ================================================================
+       GAME SCREEN
+       ================================================================ */
+    .game-top {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      margin: 24px 0 16px; padding: 0 4px;
+    }
+    .game-level-badge {
+      font-family: var(--font-display); font-size: 0.9rem; font-weight: 700;
+      padding: 6px 14px; border-radius: 99px;
+      background: var(--level-color-subtle); color: var(--level-color);
+    }
+    .game-score { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--gold); }
+
+    .progress-wrap {
+      width: 100%; height: 10px; background: var(--bg-card); border-radius: 99px;
+      overflow: hidden; margin-bottom: 28px; border: 1px solid var(--border-subtle);
+    }
+    .progress-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--level-color), var(--level-color-light));
+      transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 0 12px var(--level-color-glow);
+    }
+
+    .question-card {
+      width: 100%; background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 36px 28px; text-align: center;
+      margin-bottom: 24px; min-height: 180px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .question-card.correct { border-color: var(--green); box-shadow: 0 0 30px var(--green-glow); }
+    .question-card.wrong { border-color: var(--red); box-shadow: 0 0 30px var(--red-glow); animation: shake 0.4s ease; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .question-label {
+      font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+      color: var(--level-color); text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .question-text {
+      font-family: var(--font-display); font-size: clamp(1.6rem, 5vw, 2.5rem);
+      font-weight: 800; color: var(--text); line-height: 1.3; word-break: break-word;
+    }
+    .question-hint { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+    .answers {
+      width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .answer-btn {
+      padding: 18px 12px; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-subtle); background: var(--bg-card);
+      color: var(--text); font-family: var(--font-display); font-size: 1.25rem;
+      font-weight: 700; cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .answer-btn:hover { border-color: var(--level-color); background: var(--level-color-subtle); transform: translateY(-2px); }
+    .answer-btn.disabled { pointer-events: none; }
+    .answer-btn.selected-correct { background: var(--green); border-color: var(--green); color: #fff; box-shadow: 0 4px 20px var(--green-glow); }
+    .answer-btn.selected-wrong { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 4px 20px var(--red-glow); }
+    .answer-btn.reveal-correct { border-color: var(--green); color: var(--green); }
+
+    /* ================================================================
+       RESULTS SCREEN
+       ================================================================ */
+    .results-wrap {
+      text-align: center; display: flex; flex-direction: column; align-items: center;
+      gap: 16px; padding: 60px 0 40px; animation: fadeUp 0.6s ease-out;
+    }
+    .results-emoji { font-size: 72px; animation: planetSpin 3s ease-in-out infinite; }
+    .results-title { font-family: var(--font-display); font-size: 2rem; font-weight: 800; }
+    .results-subtitle { font-size: 1rem; color: var(--text-muted); font-weight: 600; }
+    .stars-row { display: flex; gap: 8px; }
+    .star { font-size: 36px; transition: transform 0.3s ease; }
+    .results-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      width: 100%; max-width: 360px; margin-top: 8px;
+    }
+    .stat-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; }
+    .stat-value { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+    /* New record badge */
+    .new-record { display: inline-block; margin-top: 4px; padding: 4px 12px; border-radius: 99px; background: rgba(251,191,36,0.15); color: var(--gold); font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; animation: fadeUp 0.5s ease-out 0.3s both; }
+
+    .action-btn {
+      padding: 14px 28px; border-radius: var(--radius-sm); border: none;
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.25s ease; margin: 4px;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--blue), var(--cyan)); color: #fff; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--blue-glow); }
+    .btn-secondary { background: var(--bg-card); color: var(--text-muted); border: 1.5px solid var(--border-subtle); }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+    /* ---- Feedback overlay ---- */
+    .feedback {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+      font-size: 80px; pointer-events: none; z-index: 100;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .feedback.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+    /* ---- Mobile ---- */
+    @media (max-width: 480px) {
+      .app { padding: 16px 14px 32px; }
+      .level-grid { gap: 12px; }
+      .level-card { padding: 18px 14px; }
+      .question-card { padding: 28px 20px; min-height: 150px; }
+      .answer-btn { padding: 14px 10px; font-size: 1.15rem; }
+      .results-stats { grid-template-columns: 1fr; }
+    }
