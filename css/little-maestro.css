@@ -6348,4 +6348,192 @@ body.theme--light #import-error-toast    { background: #FFFBF0; }
   }
 }
 
+
+    /* ── Edit button on avatar card (pencil icon, top-left) ── */
+    .ava-edit-btn {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-full);
+      background: rgba(124,58,237,0.08);
+      border: 1px solid rgba(124,58,237,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity var(--t-micro), transform var(--t-micro);
+      cursor: pointer;
+      z-index: 2;
+    }
+    .avatar-card:hover .ava-edit-btn {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .ava-edit-btn:hover {
+      background: rgba(124,58,237,0.25);
+      border-color: rgba(124,58,237,0.5);
+    }
+
+    /* On touch devices, always show edit + delete buttons */
+    @media (hover: none) {
+      .ava-edit-btn,
+      .ava-delete-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* ── Edit Profile Modal ── */
+    #edit-profile-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    #edit-profile-modal.edit-modal--visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .edit-modal-card {
+      position: relative;
+      width: 90%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.25s ease;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+    #edit-profile-modal.edit-modal--visible .edit-modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .edit-modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      z-index: 2;
+    }
+    .edit-modal-close:hover {
+      background: rgba(239,68,68,0.15);
+      color: var(--color-red);
+    }
+
+    /* Preview banner at top */
+    .edit-modal-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 28px 24px 20px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.02));
+      border-bottom: 1px solid var(--color-border);
+    }
+    .edit-preview-circle {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-full);
+      border: 3px solid var(--color-purple);
+      background: rgba(124,58,237,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .edit-preview-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--color-text);
+      transition: color 0.15s;
+    }
+
+    /* Form body */
+    .edit-modal-body {
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Bottom action row */
+    .edit-btn-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 8px;
+      border-top: 1px solid var(--color-border);
+      margin-top: 4px;
+    }
+    .edit-btn-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-delete-btn {
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: var(--color-red, #EF4444);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .edit-delete-btn:hover {
+      background: rgba(239,68,68,0.2);
+      border-color: rgba(239,68,68,0.4);
+    }
+
+    /* ── Avatar/color pickers in edit modal — match create form ── */
+    .edit-avatar-picker {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+    }
+    .edit-color-picker {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
 </style>

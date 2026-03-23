@@ -8197,6 +8197,67 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 
+  <!-- ============================================================
+       EDIT PROFILE MODAL
+       Shown when edit button is tapped on a student card.
+       Protected by Parent PIN.
+       ============================================================ -->
+  <div id="edit-profile-modal" role="dialog" aria-modal="true" aria-label="Edit student profile">
+    <div class="edit-modal-card">
+      <button class="edit-modal-close" aria-label="Close" onclick="_closeEditModal()">✕</button>
+
+      <div class="edit-modal-preview" id="edit-preview">
+        <div class="edit-preview-circle" id="edit-preview-circle">🐱</div>
+        <div class="edit-preview-name" id="edit-preview-name">Student</div>
+      </div>
+
+      <div class="edit-modal-body">
+        <!-- Rename -->
+        <div class="edit-field">
+          <label class="form-label" for="edit-name-input">Name</label>
+          <input
+            id="edit-name-input"
+            class="form-name-input"
+            type="text"
+            maxlength="20"
+            placeholder="Student name…"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Avatar picker -->
+        <div class="edit-field">
+          <label class="form-label">Avatar</label>
+          <div class="avatar-picker edit-avatar-picker" id="edit-avatar-picker">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Color picker -->
+        <div class="edit-field">
+          <label class="form-label">Color</label>
+          <div class="color-swatch-grid edit-color-picker" id="edit-color-picker">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Error message -->
+        <p class="form-error" id="edit-error" role="alert" style="display:none;"></p>
+
+        <!-- Action buttons -->
+        <div class="edit-btn-row">
+          <button type="button" class="edit-delete-btn" id="edit-delete-btn">
+            🗑 Delete Student
+          </button>
+          <div class="edit-btn-right">
+            <button type="button" class="btn-cancel" onclick="_closeEditModal()">Cancel</button>
+            <button type="button" class="btn-create" onclick="_submitEditForm()">Save Changes ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* ============================================================
        LITTLE MAESTRO — PHASE 5
@@ -8354,9 +8415,77 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
       }
 
+      // ── Rename a student (migrates localStorage key + index) ──
+      function renameUser(oldName, newName) {
+        newName = newName.trim();
+        if (!newName) throw new Error('Name cannot be empty');
+        if (newName.length > 20) throw new Error('Name must be 20 characters or less');
+
+        const idx = _getIndex();
+        const oldIdx = idx.findIndex(n => n.toLowerCase() === oldName.toLowerCase());
+        if (oldIdx === -1) throw new Error('Student "' + oldName + '" not found');
+
+        // Check new name doesn't conflict (unless same name with different case)
+        if (oldName.toLowerCase() !== newName.toLowerCase()) {
+          if (idx.some(n => n.toLowerCase() === newName.toLowerCase())) {
+            throw new Error('A student named "' + newName + '" already exists');
+          }
+        }
+
+        const oldKey = _key(oldName);
+        const newKey = _key(newName);
+        const data   = JSON.parse(localStorage.getItem(oldKey));
+        if (!data) throw new Error('Profile data not found');
+
+        // Update the name inside the profile
+        data.profile.name = newName;
+
+        // Write to new key, remove old key (if key changed)
+        localStorage.setItem(newKey, JSON.stringify(data));
+        if (oldKey !== newKey) {
+          localStorage.removeItem(oldKey);
+        }
+
+        // Update index
+        idx[oldIdx] = newName;
+        _saveIndex(idx);
+
+        // Update _current if this is the active user
+        if (_current && _current.profile.name.toLowerCase() === oldName.toLowerCase()) {
+          _current = data;
+          sessionStorage.setItem('lm_active_user', newName);
+        }
+
+        return data;
+      }
+
+      // ── Update avatar and/or color for a student ──────────────
+      function updateProfile(name, updates) {
+        const idx   = _getIndex();
+        const found = idx.find(n => n.toLowerCase() === name.toLowerCase());
+        if (!found) throw new Error('Student "' + name + '" not found');
+
+        const key  = _key(found);
+        const data = JSON.parse(localStorage.getItem(key));
+        if (!data || !data.profile) throw new Error('Profile data not found');
+
+        if (updates.avatar !== undefined) data.profile.avatar = updates.avatar;
+        if (updates.favoriteColor !== undefined) data.profile.favoriteColor = updates.favoriteColor;
+
+        localStorage.setItem(key, JSON.stringify(data));
+
+        // Update _current if active user
+        if (_current && _current.profile.name.toLowerCase() === name.toLowerCase()) {
+          _current = data;
+        }
+
+        return data;
+      }
+
       return {
         getAllUsers, createUser, loadUser, saveUser,
         deleteUser, exportUser, importUser, getCurrentUser,
+        renameUser, updateProfile,
       };
     })();
 
@@ -8424,6 +8553,9 @@ document.addEventListener('DOMContentLoaded', () => {
               .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // ── Track which user is being edited ──────────────────────────
+    let _editingUser = null;
+
     function renderLoginScreen() {
       const grid = document.querySelector('.avatar-grid');
       if (!grid) return;
@@ -8455,11 +8587,12 @@ document.addEventListener('DOMContentLoaded', () => {
           '<span class="ava-progress">World ' + currentWorld + ' · Song ' + currentSong + '</span>' +
           streakHtml +
           '<div class="ava-accent-bar"></div>' +
+          '<button class="ava-edit-btn" aria-label="Edit ' + _escHtml(name) + '" title="Edit student">✏️</button>' +
           '<button class="ava-delete-btn" aria-label="Delete ' + _escHtml(name) + '" title="Delete student">🗑</button>';
 
-        // Click to load
+        // Click card → load user
         card.addEventListener('click', e => {
-          if (e.target.closest('.ava-delete-btn')) return;
+          if (e.target.closest('.ava-delete-btn') || e.target.closest('.ava-edit-btn')) return;
           _loadUserWithAnimation(name, card);
         });
         card.addEventListener('keydown', e => {
@@ -8469,16 +8602,22 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Long press (1 second) → delete
+        // Long press (1 second) → open edit modal (with PIN)
         let pressTimer = null;
         card.addEventListener('pointerdown', () => {
-          pressTimer = setTimeout(() => _confirmDeleteUser(name), 1000);
+          pressTimer = setTimeout(() => _openEditForUser(name), 1000);
         });
         ['pointerup','pointerleave','pointermove'].forEach(ev =>
           card.addEventListener(ev, () => clearTimeout(pressTimer))
         );
 
-        // Delete btn
+        // Edit btn → open edit modal (with PIN)
+        card.querySelector('.ava-edit-btn').addEventListener('click', e => {
+          e.stopPropagation();
+          _openEditForUser(name);
+        });
+
+        // Delete btn → delete (with PIN)
         card.querySelector('.ava-delete-btn').addEventListener('click', e => {
           e.stopPropagation();
           _confirmDeleteUser(name);
@@ -8517,6 +8656,179 @@ document.addEventListener('DOMContentLoaded', () => {
       // First-time experience
       if (users.length === 0) _showWelcomeOverlay();
     }
+
+
+    // ── Open edit modal (PIN-protected) ───────────────────────────
+    function _openEditForUser(name) {
+      _showPinModal(() => {
+        _showEditModal(name);
+      }, 'Enter Parent PIN to edit "' + name + '"');
+    }
+
+
+    // ── Show edit modal ───────────────────────────────────────────
+    function _showEditModal(name) {
+      const users = UserManager.getAllUsers();
+      const user  = users.find(u => u.profile.name.toLowerCase() === name.toLowerCase());
+      if (!user) return;
+
+      _editingUser = name;
+
+      const modal   = document.getElementById('edit-profile-modal');
+      const nameIn  = document.getElementById('edit-name-input');
+      const preview = document.getElementById('edit-preview-circle');
+      const prevNm  = document.getElementById('edit-preview-name');
+      const errEl   = document.getElementById('edit-error');
+
+      if (!modal) return;
+
+      // Set current values
+      nameIn.value = user.profile.name;
+      if (errEl) errEl.style.display = 'none';
+
+      // Preview
+      const color = user.profile.favoriteColor || '#7C3AED';
+      preview.textContent = user.profile.avatar;
+      preview.style.cssText = 'border-color:' + color + ';background:' + color + '22;';
+      prevNm.textContent = user.profile.name;
+
+      // Build avatar picker
+      const avatarPicker = document.getElementById('edit-avatar-picker');
+      avatarPicker.innerHTML = '';
+      AVATAR_OPTIONS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'avatar-opt' + (emoji === user.profile.avatar ? ' selected' : '');
+        btn.textContent = emoji;
+        btn.addEventListener('click', () => {
+          avatarPicker.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          // Update preview
+          preview.textContent = emoji;
+        });
+        avatarPicker.appendChild(btn);
+      });
+
+      // Build color picker
+      const colorPicker = document.getElementById('edit-color-picker');
+      colorPicker.innerHTML = '';
+      COLOR_OPTIONS.forEach(c => {
+        const swatch = document.createElement('button');
+        swatch.type = 'button';
+        swatch.className = 'color-swatch' + (c === color ? ' selected' : '');
+        swatch.style.background = c;
+        swatch.addEventListener('click', () => {
+          colorPicker.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+          swatch.classList.add('selected');
+          // Update preview
+          preview.style.cssText = 'border-color:' + c + ';background:' + c + '22;';
+        });
+        colorPicker.appendChild(swatch);
+      });
+
+      // Live preview of name
+      nameIn.addEventListener('input', () => {
+        prevNm.textContent = nameIn.value.trim() || 'Student';
+      });
+
+      // Delete button
+      const delBtn = document.getElementById('edit-delete-btn');
+      if (delBtn) {
+        delBtn.onclick = () => {
+          if (confirm('Delete "' + name + '"? This cannot be undone.')) {
+            UserManager.deleteUser(name);
+            _closeEditModal();
+            renderLoginScreen();
+          }
+        };
+      }
+
+      // Show modal
+      modal.classList.add('edit-modal--visible');
+      modal.setAttribute('aria-hidden', 'false');
+      setTimeout(() => nameIn.focus(), 100);
+    }
+
+
+    // ── Close edit modal ──────────────────────────────────────────
+    function _closeEditModal() {
+      const modal = document.getElementById('edit-profile-modal');
+      if (modal) {
+        modal.classList.remove('edit-modal--visible');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+      _editingUser = null;
+    }
+
+
+    // ── Submit edit form ──────────────────────────────────────────
+    function _submitEditForm() {
+      const errEl  = document.getElementById('edit-error');
+      const nameIn = document.getElementById('edit-name-input');
+      if (!_editingUser || !nameIn) return;
+
+      const newName = nameIn.value.trim();
+      if (!newName) {
+        errEl.textContent = 'Name cannot be empty.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Get selected avatar
+      const avatarPicker = document.getElementById('edit-avatar-picker');
+      const selectedAvatar = avatarPicker.querySelector('.avatar-opt.selected');
+      const avatar = selectedAvatar ? selectedAvatar.textContent : null;
+
+      // Get selected color
+      const colorPicker = document.getElementById('edit-color-picker');
+      const selectedColor = colorPicker.querySelector('.color-swatch.selected');
+      const color = selectedColor ? selectedColor.style.background : null;
+
+      // Convert rgb() to hex if needed (browsers may return rgb from .style.background)
+      function rgbToHex(rgb) {
+        if (!rgb || rgb.startsWith('#')) return rgb;
+        const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (!match) return rgb;
+        return '#' + [match[1], match[2], match[3]]
+          .map(n => parseInt(n).toString(16).padStart(2, '0'))
+          .join('');
+      }
+      const hexColor = rgbToHex(color);
+
+      try {
+        // 1. Update avatar & color first (on current name)
+        if (avatar || hexColor) {
+          const updates = {};
+          if (avatar)   updates.avatar = avatar;
+          if (hexColor) updates.favoriteColor = hexColor;
+          UserManager.updateProfile(_editingUser, updates);
+        }
+
+        // 2. Rename if name changed
+        if (newName.toLowerCase() !== _editingUser.toLowerCase() || newName !== _editingUser) {
+          UserManager.renameUser(_editingUser, newName);
+        }
+
+        errEl.style.display = 'none';
+        _closeEditModal();
+        renderLoginScreen();
+
+        // Friendly feedback
+        if (typeof Melody !== 'undefined' && Melody.speak) {
+          Melody.speak('Profile updated! ✨', 1500);
+        }
+
+      } catch(err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') _closeEditModal();
+    });
+
 
 
     // ── Load user with card loading animation ─────────────────────
