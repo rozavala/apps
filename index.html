@@ -533,6 +533,142 @@
     .footer { text-align: center; margin-top: 64px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; animation: fadeUp 0.8s ease-out 0.7s both; }
     .footer span { color: #F87171; }
 
+    /* — Card progress mini-stats — */
+    .card-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .card-stats .cs-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 99px;
+    }
+    .card-stats .cs-item.active { background: rgba(251,191,36,0.1); color: #FBBF24; }
+
+    /* — Parent dashboard button — */
+    .parent-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 32px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      border: 1.5px dashed rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.02);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      animation: fadeUp 0.6s ease-out 0.8s both;
+    }
+    .parent-btn:hover {
+      border-color: rgba(167,139,250,0.4);
+      color: var(--text-primary);
+      background: rgba(167,139,250,0.05);
+    }
+
+    /* — Parent dashboard overlay — */
+    .dash-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px;
+      overflow-y: auto;
+    }
+    .dash-overlay.active { display: flex; }
+    .dash-panel {
+      background: var(--bg-surface);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 600px;
+      padding: 28px;
+      animation: popIn 0.3s ease-out;
+    }
+    .dash-panel h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dash-close {
+      margin-left: auto;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dash-close:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+    .dash-kid {
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--bg-deep);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-sm);
+    }
+    .dash-kid-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .dash-kid-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 2.5px solid;
+    }
+    .dash-kid-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .dash-kid-age {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .dash-app-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.85rem;
+    }
+    .dash-app-icon { font-size: 20px; width: 28px; text-align: center; }
+    .dash-app-name { font-weight: 700; flex: 1; }
+    .dash-app-stat { color: var(--text-muted); font-weight: 600; font-size: 0.78rem; text-align: right; }
+
     /* — Mobile — */
     @media (max-width: 640px) {
       .page { padding: 28px 16px 60px; }
@@ -603,6 +739,7 @@
           <div class="card-icon">🎹</div>
           <div class="card-title">Little Maestro</div>
           <div class="card-desc">Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.</div>
+          <div class="card-stats" id="stats-piano"></div>
           <div class="card-tag">▶ Play now</div>
         </a>
 
@@ -611,6 +748,7 @@
           <div class="card-icon">🧮</div>
           <div class="card-title">Math Galaxy</div>
           <div class="card-desc">Blast through math challenges — addition, multiplication, fractions, and more in a space adventure.</div>
+          <div class="card-stats" id="stats-math"></div>
           <div class="card-tag">▶ Play now</div>
         </a>
 
@@ -619,16 +757,18 @@
           <div class="card-icon">🇨🇱</div>
           <div class="card-title">Descubre Chile</div>
           <div class="card-desc">Explore Chile's amazing history — from the Mapuche people to the Andes, through stories and quizzes.</div>
+          <div class="card-stats" id="stats-chile"></div>
           <div class="card-tag">▶ Play now</div>
         </a>
 
-        <!-- 4. Chess Quest (COMING SOON) -->
-        <div class="app-card card-chess coming-soon">
+        <!-- 4. Chess Quest (LIVE) -->
+        <a class="app-card card-chess" href="chess-quest.html">
           <div class="card-icon">♟️</div>
           <div class="card-title">Chess Quest</div>
           <div class="card-desc">Master chess from the basics — learn how each piece moves, tactics, and play against a friendly AI.</div>
-          <div class="card-tag">🔒 Coming soon</div>
-        </div>
+          <div class="card-stats" id="stats-chess"></div>
+          <div class="card-tag">▶ Play now</div>
+        </a>
 
         <!-- 5. Guitar Jam (COMING SOON) -->
         <div class="app-card card-guitar coming-soon">
@@ -648,11 +788,23 @@
 
       </div>
 
+      <button class="parent-btn" onclick="openDashboard()">
+        🔒 Parent Dashboard — See all progress
+      </button>
+
       <div class="footer">
         Made with <span>♥</span> for the Zavala Serra kids
       </div>
     </div>
 
+  </div>
+
+  <!-- Parent Dashboard Overlay -->
+  <div class="dash-overlay" id="dash-overlay" onclick="if(event.target===this)closeDashboard()">
+    <div class="dash-panel">
+      <h2>👨‍👩‍👧‍👦 Parent Dashboard <button class="dash-close" onclick="closeDashboard()">✕</button></h2>
+      <div id="dash-content"></div>
+    </div>
   </div>
 
   <!-- ============================================================
@@ -782,6 +934,133 @@
       document.getElementById('ub-avatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
       document.getElementById('ub-name').textContent = user.name;
       document.getElementById('ub-greeting').textContent = user.age ? `Age ${user.age} · ${getGreeting()}` : getGreeting();
+      loadCardStats(user);
+    }
+
+    // ── Card Progress Stats ──
+    function loadCardStats(user) {
+      const key = user.name.toLowerCase().replace(/\s+/g, '_');
+
+      // Math Galaxy
+      try {
+        const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
+        const levels = Object.values(mg);
+        const totalStars = levels.reduce((s, l) => s + (l.bestStars || 0), 0);
+        const totalPlays = levels.reduce((s, l) => s + (l.plays || 0), 0);
+        const el = document.getElementById('stats-math');
+        if (totalPlays > 0) el.innerHTML = `<span class="cs-item active">⭐ ${totalStars} stars</span><span class="cs-item">${totalPlays} games</span>`;
+        else el.innerHTML = '';
+      } catch { document.getElementById('stats-math').innerHTML = ''; }
+
+      // Descubre Chile
+      try {
+        const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
+        const topics = Object.values(dc);
+        const completed = topics.filter(t => t.bestStars > 0).length;
+        const el = document.getElementById('stats-chile');
+        if (completed > 0) el.innerHTML = `<span class="cs-item active">⭐ ${completed}/6 topics</span>`;
+        else el.innerHTML = '';
+      } catch { document.getElementById('stats-chile').innerHTML = ''; }
+
+      // Chess Quest
+      try {
+        const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
+        const items = [];
+        if ((cq.learnedPieces || []).length > 0) items.push(`📚 ${cq.learnedPieces.length}/6 pieces`);
+        if ((cq.puzzlesSolved || 0) > 0) items.push(`🧩 ${cq.puzzlesSolved} puzzles`);
+        const wins = cq.wins || 0, losses = cq.losses || 0;
+        if (wins + losses > 0) items.push(`⚔️ ${wins}W ${losses}L`);
+        const el = document.getElementById('stats-chess');
+        el.innerHTML = items.map(i => `<span class="cs-item active">${i}</span>`).join('');
+      } catch { document.getElementById('stats-chess').innerHTML = ''; }
+
+      // Little Maestro (still separate system, show basic hint)
+      document.getElementById('stats-piano').innerHTML = '';
+    }
+
+    // ── Parent Dashboard ──
+    function openDashboard() {
+      const profiles = getProfiles();
+      const content = document.getElementById('dash-content');
+
+      if (profiles.length === 0) {
+        content.innerHTML = '<p style="color:var(--text-muted)">No profiles created yet.</p>';
+        document.getElementById('dash-overlay').classList.add('active');
+        return;
+      }
+
+      content.innerHTML = profiles.map(p => {
+        const key = p.name.toLowerCase().replace(/\s+/g, '_');
+        let appRows = '';
+
+        // Math Galaxy
+        try {
+          const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
+          const levels = Object.entries(mg);
+          if (levels.length > 0) {
+            const totalStars = levels.reduce((s, [, l]) => s + (l.bestStars || 0), 0);
+            const totalPlays = levels.reduce((s, [, l]) => s + (l.plays || 0), 0);
+            const bestLevel = levels.sort((a, b) => (b[1].bestPct || 0) - (a[1].bestPct || 0))[0];
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy</span><span class="dash-app-stat">⭐ ${totalStars} stars · ${totalPlays} games · Best: ${bestLevel[0]} ${bestLevel[1].bestPct}%</span></div>`;
+          } else {
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy</span><span class="dash-app-stat">Not started</span></div>`;
+          }
+        } catch {
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy</span><span class="dash-app-stat">Not started</span></div>`;
+        }
+
+        // Descubre Chile
+        try {
+          const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
+          const topics = Object.entries(dc);
+          const completed = topics.filter(([, t]) => t.bestStars > 0).length;
+          if (completed > 0) {
+            const totalStars = topics.reduce((s, [, t]) => s + (t.bestStars || 0), 0);
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile</span><span class="dash-app-stat">⭐ ${totalStars} stars · ${completed}/6 topics</span></div>`;
+          } else {
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile</span><span class="dash-app-stat">Not started</span></div>`;
+          }
+        } catch {
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile</span><span class="dash-app-stat">Not started</span></div>`;
+        }
+
+        // Chess Quest
+        try {
+          const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
+          const parts = [];
+          if ((cq.learnedPieces || []).length > 0) parts.push(`${cq.learnedPieces.length}/6 pieces`);
+          if ((cq.puzzlesSolved || 0) > 0) parts.push(`${cq.puzzlesSolved} puzzles`);
+          const w = cq.wins || 0, l = cq.losses || 0, d = cq.draws || 0;
+          if (w + l + d > 0) parts.push(`${w}W ${l}L ${d}D`);
+          if (parts.length > 0) {
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest</span><span class="dash-app-stat">${parts.join(' · ')}</span></div>`;
+          } else {
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest</span><span class="dash-app-stat">Not started</span></div>`;
+          }
+        } catch {
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest</span><span class="dash-app-stat">Not started</span></div>`;
+        }
+
+        // Little Maestro
+        appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">Separate profile</span></div>`;
+
+        return `<div class="dash-kid">
+          <div class="dash-kid-header">
+            <div class="dash-kid-avatar" style="background:${p.color}22;border-color:${p.color}">${p.avatar}</div>
+            <div>
+              <div class="dash-kid-name">${escHtml(p.name)}</div>
+              <div class="dash-kid-age">${p.age ? 'Age ' + p.age : ''}</div>
+            </div>
+          </div>
+          ${appRows}
+        </div>`;
+      }).join('');
+
+      document.getElementById('dash-overlay').classList.add('active');
+    }
+
+    function closeDashboard() {
+      document.getElementById('dash-overlay').classList.remove('active');
     }
 
     // ── Modal ──
