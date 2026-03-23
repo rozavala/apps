@@ -163,6 +163,67 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       PARENT PIN MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="pin-modal" onclick="if(event.target===this)closePinModal()">
+    <div class="modal" style="max-width:340px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:8px;">🔒</div>
+      <h2 style="margin-bottom:8px;">Parent Access</h2>
+      <p id="pin-msg" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">Enter PIN to continue</p>
+      <input
+        type="password"
+        id="pin-input"
+        maxlength="8"
+        inputmode="numeric"
+        placeholder="····"
+        autocomplete="off"
+        style="text-align:center;font-size:1.5rem;letter-spacing:8px;"
+      />
+      <p id="pin-error" style="color:#EF4444;font-size:0.8rem;font-weight:700;margin-top:8px;display:none;">Incorrect PIN</p>
+      <div class="modal-actions" style="margin-top:20px;">
+        <button class="btn-cancel" onclick="closePinModal()">Cancel</button>
+        <button class="btn-create" onclick="submitPin()">Unlock 🔓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EDIT PROFILE MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="edit-modal" onclick="if(event.target===this)closeEditModal()">
+    <div class="modal" style="max-width:440px;">
+      <div class="edit-preview" id="edit-preview">
+        <div class="edit-preview-avatar" id="edit-preview-avatar">🦊</div>
+        <div class="edit-preview-name" id="edit-preview-name">Student</div>
+      </div>
+      <div class="modal-field">
+        <label>Name</label>
+        <input type="text" id="edit-name" maxlength="20" placeholder="Student name…" autocomplete="off">
+      </div>
+      <div class="modal-field">
+        <label>Age</label>
+        <div class="age-picker" id="edit-age-picker"></div>
+      </div>
+      <div class="modal-field">
+        <label>Avatar</label>
+        <div class="emoji-picker" id="edit-emoji-picker"></div>
+      </div>
+      <div class="modal-field">
+        <label>Color</label>
+        <div class="color-picker" id="edit-color-picker"></div>
+      </div>
+      <p id="edit-error" style="color:#EF4444;font-size:0.8rem;font-weight:700;display:none;"></p>
+      <div class="edit-actions">
+        <button class="btn-delete-profile" onclick="deleteEditingProfile()">🗑 Delete</button>
+        <div class="edit-actions-right">
+          <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+          <button class="btn-create" onclick="saveEditProfile()">Save ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/auth.js"></script>
   <script src="js/index.js"></script>
 </body>

@@ -671,3 +671,99 @@
       .profile-avatar { width: 54px; height: 54px; font-size: 30px; }
       .user-bar { padding: 10px 14px; }
     }
+
+    /* ── Profile card edit button ── */
+    .profile-edit-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(167,139,250,0.08);
+      border: 1.5px solid rgba(167,139,250,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: all 0.2s ease;
+      z-index: 2;
+      padding: 0;
+    }
+    .profile-card:hover .profile-edit-btn {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .profile-edit-btn:hover {
+      background: rgba(167,139,250,0.25);
+      border-color: rgba(167,139,250,0.5);
+      transform: scale(1.1) !important;
+    }
+    /* Always show on touch devices */
+    @media (hover: none) {
+      .profile-edit-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* ── Edit modal preview ── */
+    .edit-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .edit-preview-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid var(--purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .edit-preview-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+    }
+
+    /* ── Edit modal action row ── */
+    .edit-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .edit-actions-right {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-delete-profile {
+      padding: 10px 16px;
+      border-radius: var(--radius-xs);
+      background: rgba(239,68,68,0.08);
+      border: 1.5px solid rgba(239,68,68,0.2);
+      color: #F87171;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-delete-profile:hover {
+      background: rgba(239,68,68,0.2);
+      border-color: rgba(239,68,68,0.4);
+    }
