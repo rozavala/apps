@@ -212,6 +212,11 @@
           if (totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">⭐ ${totalStars}</span></div>`;
         } catch {}
 
+        try {
+          const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
+          if (fe.totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">⛪</span><span class="dash-app-name">Fe Explorador</span><span class="dash-app-stat">⭐ ${fe.totalStars}</span></div>`;
+        } catch {}
+
         return `<div class="dash-profile">
           <div class="dash-profile-header">
             <div class="dash-avatar" style="background:${p.color}22;border-color:${p.color}">${p.avatar}</div>
@@ -332,21 +337,9 @@
 
     // ── Render App Cards (now dynamic for faith toggle) ──
     function renderAppCards() {
-      const grid = document.getElementById('app-grid');
       const user = getActiveUser();
       if (!user) return;
 
-      const faithCard = user.faithVisible !== false ? `
-        <a href="fe-explorador.html" class="app-card card-faith">
-          <div class="card-icon">⛪</div>
-          <div class="card-title">Fe Explorador</div>
-          <div class="card-desc">Oraciones, santos y herencia católica de Chile.</div>
-          <div class="card-tag">🙏 Fe y Valores</div>
-        </a>
-      ` : '';
-
-      // For now, keeping the static HTML cards but inserting the faith card if needed
-      // Actually, it's better to just toggle visibility of the faith card if it exists in HTML
       const feEl = document.querySelector('.card-faith');
       if (feEl) feEl.style.display = (user.faithVisible !== false) ? 'flex' : 'none';
     }

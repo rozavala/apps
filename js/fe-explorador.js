@@ -48,6 +48,19 @@ const FeManager = (() => {
         'ahora y siempre,',
         'por los siglos de los siglos. Amén.'
       ]
+    },
+    {
+      id: 'angelguarda',
+      title: 'Ángel de la Guarda',
+      lines: [
+        'Ángel de la guarda,',
+        'dulce compañía,',
+        'no me desampares',
+        'ni de noche ni de día.',
+        'No me dejes solo,',
+        'que me perdería.',
+        'Amén.'
+      ]
     }
   ];
 
@@ -95,6 +108,72 @@ const FeManager = (() => {
         { q: '¿Qué institución fundó el Padre Hurtado?', a: ['Un banco', 'El Hogar de Cristo', 'Una universidad'], correct: 1 },
         { q: '¿Cuál era su frase más famosa?', a: ['"Hola amigos"', '"Contento, Señor, contento"', '"A estudiar mucho"'], correct: 1 }
       ]
+    },
+    {
+      id: 'tomas_aquino',
+      name: 'Santo Tomás de Aquino',
+      dates: '1225–1274',
+      country: 'Italia 🇮🇹',
+      bio: 'Fue un gran sabio y maestro que amaba estudiar. Escribió muchos libros sobre la fe y la razón, y es conocido como el "Doctor Angélico".',
+      questions: [
+        { q: '¿Qué le gustaba mucho hacer a Santo Tomás?', a: ['Cazar', 'Estudiar y escribir', 'Navegar'], correct: 1 },
+        { q: '¿Cómo es conocido también?', a: ['El Doctor Angélico', 'El Rey Sabio', 'El Gran Viajero'], correct: 0 }
+      ]
+    },
+    {
+      id: 'rosa_lima',
+      name: 'Santa Rosa de Lima',
+      dates: '1586–1617',
+      country: 'Perú 🇵🇪',
+      bio: 'Es la primera santa de América. Vivió en Lima y dedicó su vida a ayudar a los enfermos y a los necesitados en su propia casa.',
+      questions: [
+        { q: 'Fue la primera santa de...', a: ['Europa', 'América', 'Asia'], correct: 1 },
+        { q: '¿En qué ciudad vivió?', a: ['Santiago', 'Lima', 'Bogotá'], correct: 1 }
+      ]
+    },
+    {
+      id: 'martin_porres',
+      name: 'San Martín de Porres',
+      dates: '1579–1639',
+      country: 'Perú 🇵🇪',
+      bio: 'Conocido como el "Santo de la Escoba" por su humildad. Era un gran enfermero y se dice que podía hacer que perros, gatos y ratones comieran del mismo plato.',
+      questions: [
+        { q: '¿Cómo es conocido San Martín?', a: ['El Santo de la Escoba', 'El Gran Guerrero', 'El Rey de los Mares'], correct: 0 },
+        { q: '¿Qué animales se dice que alimentó juntos?', a: ['Leones y tigres', 'Perros, gatos y ratones', 'Elefantes y jirafas'], correct: 1 }
+      ]
+    },
+    {
+      id: 'ignacio_loyola',
+      name: 'San Ignacio de Loyola',
+      dates: '1491–1556',
+      country: 'España 🇪🇸',
+      bio: 'Fue un soldado que, tras ser herido, decidió dedicar su vida a Dios. Fundó la Compañía de Jesús (los Jesuitas) para enseñar y ayudar en todo el mundo.',
+      questions: [
+        { q: '¿Qué orden religiosa fundó?', a: ['Los Franciscanos', 'Los Jesuitas', 'Los Dominicos'], correct: 1 },
+        { q: '¿Qué era antes de dedicar su vida a Dios?', a: ['Marinero', 'Soldado', 'Panadero'], correct: 1 }
+      ]
+    },
+    {
+      id: 'teresa_avila',
+      name: 'Santa Teresa de Ávila',
+      dates: '1515–1582',
+      country: 'España 🇪🇸',
+      bio: 'Una gran escritora y maestra que fundó muchos conventos. Es famosa por sus libros y por su valentía para reformar su orden religiosa.',
+      questions: [
+        { q: '¿Por qué es famosa Santa Teresa de Ávila?', a: ['Por ser una gran escritora', 'Por descubrir un país', 'Por inventar la imprenta'], correct: 0 },
+        { q: '¿Qué fundó en España?', a: ['Muchos hospitales', 'Muchos conventos', 'Muchas escuelas'], correct: 1 }
+      ]
+    },
+    {
+      id: 'juan_bosco',
+      name: 'San Juan Bosco',
+      dates: '1815–1888',
+      country: 'Italia 🇮🇹',
+      bio: 'Dedicó su vida a ayudar a los niños y jóvenes, enseñándoles oficios y divirtiéndolos con juegos y trucos de magia para hablarles de Dios.',
+      questions: [
+        { q: '¿A quiénes dedicó su vida San Juan Bosco?', a: ['A los ancianos', 'A los niños y jóvenes', 'A los soldados'], correct: 1 },
+        { q: '¿Qué usaba para divertir a los niños?', a: ['Magia y juegos', 'Barcos de vela', 'Espadas de madera'], correct: 0 }
+      ]
     }
   ];
 
@@ -124,6 +203,12 @@ const FeManager = (() => {
       title: 'Iglesia de San Francisco',
       info: 'Es la iglesia más antigua de Santiago. Su construcción comenzó en 1586 y ha sobrevivido a muchos terremotos.',
       q: '¿Qué tiene de especial esta iglesia?', a: ['Es la más alta', 'Es la más antigua de Santiago', 'Es de cristal'], correct: 1
+    },
+    {
+      id: 'tirana',
+      title: 'Fiesta de La Tirana',
+      info: 'Se celebra en el norte de Chile cada 16 de julio. Es famosa por sus coloridas "Diabladas" y bailes en honor a la Virgen del Carmen.',
+      q: '¿En qué zona de Chile se celebra La Tirana?', a: ['En el sur', 'En el centro', 'En el norte'], correct: 2
     }
   ];
 
