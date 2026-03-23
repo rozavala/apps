@@ -288,31 +288,67 @@
     function renderParentsCorner() {
       const profiles = getProfiles();
       const container = document.getElementById('parents-content');
+      const isPaused = TimerManager.isPaused();
       
       container.innerHTML = `
+        <div class="parents-top-actions" style="margin-bottom:20px; padding:16px; background:rgba(255,255,255,0.05); border-radius:16px;">
+          <label class="pk-toggle" style="justify-content:center; font-size:1.1rem;">
+            <input type="checkbox" ${isPaused ? 'checked' : ''} onchange="toggleAllTimers(this.checked)">
+            ⏸ Pause All Timers
+          </label>
+        </div>
         <div class="parents-grid">
-          ${profiles.map((p, i) => `
-            <div class="parent-kid-card">
-              <div class="pk-header">
-                <span class="pk-avatar">${p.avatar}</span>
-                <span class="pk-name">${p.name}</span>
+          ${profiles.map((p, i) => {
+            const timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
+            return `
+              <div class="parent-kid-card">
+                <div class="pk-header">
+                  <span class="pk-avatar">${p.avatar}</span>
+                  <span class="pk-name">${p.name}</span>
+                </div>
+                <div class="pk-status" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; font-weight:700;">
+                  ⏰ Used ${timerData.minutesUsed} of ${timerData.maxMinutes} min today
+                </div>
+                <div class="pk-setting">
+                  <label>Daily Time Limit: <span id="val-${i}">${p.maxMinutes || 45}</span> min</label>
+                  <input type="range" min="15" max="120" step="15" value="${p.maxMinutes || 45}" 
+                         oninput="updateKidLimit(${i}, this.value)">
+                </div>
+                <div class="pk-setting" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+                  <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" 
+                          onclick="addKidBonus('${p.name}', 15)">+15 min</button>
+                  <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" 
+                          onclick="addKidBonus('${p.name}', 30)">+30 min</button>
+                  <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1; border-color:rgba(239,68,68,0.3); color:#F87171;" 
+                          onclick="resetKidTimer('${p.name}')">Reset Today</button>
+                </div>
+                <div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05);">
+                  <label class="pk-toggle">
+                    <input type="checkbox" ${p.faithVisible !== false ? 'checked' : ''} 
+                           onchange="updateKidFaith(${i}, this.checked)">
+                    Show Faith Module (Fe Explorador)
+                  </label>
+                </div>
               </div>
-              <div class="pk-setting">
-                <label>Daily Time Limit: <span id="val-${i}">${p.maxMinutes || 45}</span> min</label>
-                <input type="range" min="15" max="120" step="15" value="${p.maxMinutes || 45}" 
-                       oninput="updateKidLimit(${i}, this.value)">
-              </div>
-              <div class="pk-setting">
-                <label class="pk-toggle">
-                  <input type="checkbox" ${p.faithVisible !== false ? 'checked' : ''} 
-                         onchange="updateKidFaith(${i}, this.checked)">
-                  Show Faith Module (Fe Explorador)
-                </label>
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `;
+    }
+    function toggleAllTimers(paused) {
+      if (paused) TimerManager.pauseAll();
+      else TimerManager.resumeAll();
+      renderParentsCorner();
+    }
+    function resetKidTimer(name) {
+      if (confirm(`Reset timer for ${name}?`)) {
+        TimerManager.reset(name);
+        renderParentsCorner();
+      }
+    }
+    function addKidBonus(name, mins) {
+      TimerManager.addBonusForKid(name, mins);
+      renderParentsCorner();
     }
     function updateKidLimit(idx, val) {
       const profiles = getProfiles();
