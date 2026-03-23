@@ -8202,7 +8202,7 @@ document.addEventListener('DOMContentLoaded', () => {
        Shown when edit button is tapped on a student card.
        Protected by Parent PIN.
        ============================================================ -->
-  <div id="edit-profile-modal" role="dialog" aria-modal="true" aria-label="Edit student profile">
+  <div id="edit-profile-modal" role="dialog" aria-modal="true" aria-label="Edit student profile" onclick="if(event.target===this)_closeEditModal()">
     <div class="edit-modal-card">
       <button class="edit-modal-close" aria-label="Close" onclick="_closeEditModal()">✕</button>
 
@@ -8444,6 +8444,15 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(newKey, JSON.stringify(data));
         if (oldKey !== newKey) {
           localStorage.removeItem(oldKey);
+
+          // Migrate Recital data if it exists
+          const oldRecitalKey = oldKey + '_recital';
+          const newRecitalKey = newKey + '_recital';
+          const recitalData   = localStorage.getItem(oldRecitalKey);
+          if (recitalData) {
+            localStorage.setItem(newRecitalKey, recitalData);
+            localStorage.removeItem(oldRecitalKey);
+          }
         }
 
         // Update index
@@ -8724,11 +8733,6 @@ document.addEventListener('DOMContentLoaded', () => {
           preview.style.cssText = 'border-color:' + c + ';background:' + c + '22;';
         });
         colorPicker.appendChild(swatch);
-      });
-
-      // Live preview of name
-      nameIn.addEventListener('input', () => {
-        prevNm.textContent = nameIn.value.trim() || 'Student';
       });
 
       // Delete button
@@ -15475,6 +15479,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Listen for status changes to update banners globally
         MIDIManager.onStatusChange((status, name) => {
           if (typeof SettingsScreen !== 'undefined' && SettingsScreen._updateMidiStatus) SettingsScreen._updateMidiStatus();
+        });
+      }
+
+      // ── 13. Edit Modal: Live preview listener (wired once) ──
+      const editNameIn = document.getElementById('edit-name-input');
+      const editPrevNm = document.getElementById('edit-preview-name');
+      if (editNameIn && editPrevNm) {
+        editNameIn.addEventListener('input', () => {
+          editPrevNm.textContent = editNameIn.value.trim() || 'Student';
         });
       }
 
