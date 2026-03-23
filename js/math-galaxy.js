@@ -257,10 +257,12 @@ function handleAnswer(btn, selected, q) {
     btn.classList.add('selected-correct');
     if (card) card.classList.add('correct');
     showFeedback(['🎉','🌟','✨','💫','🚀','👏'][rand(0, 5)]);
+    if (typeof SFX !== 'undefined') SFX.correct();
   } else {
     btn.classList.add('selected-wrong');
     if (card) card.classList.add('wrong');
     showFeedback(['😬','🤔','💪','🔄'][rand(0, 3)]);
+    if (typeof SFX !== 'undefined') SFX.wrong();
   }
   setTimeout(() => { currentQ++; currentQ >= TOTAL_QUESTIONS ? finishGame() : showQuestion(); }, 1200);
 }
@@ -274,6 +276,7 @@ function finishGame() {
   if (pf) pf.style.width = '100%';
 
   const stars = pct >= 90 ? 3 : pct >= 60 ? 2 : 1;
+  if (typeof SFX !== 'undefined' && pct >= 60) SFX.cheer();
 
   const prevProg = getUserProgress();
   const prevBest = prevProg[currentLevel] ? prevProg[currentLevel].bestPct : 0;
