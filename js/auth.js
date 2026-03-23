@@ -87,5 +87,11 @@ function getTotalStars(userName) {
     }
   } catch {}
 
+  // Fe Explorador: zs_fe_{key} -> { totalStars: 10 }
+  try {
+    const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
+    total += (fe.totalStars || 0);
+  } catch {}
+
   return total;
 }

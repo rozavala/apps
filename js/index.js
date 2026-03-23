@@ -75,10 +75,22 @@
       document.getElementById('ub-avatar').textContent = user.avatar;
       document.getElementById('ub-avatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
       document.getElementById('ub-name').textContent = user.name;
+      
       const totalStars = typeof getTotalStars === 'function' ? getTotalStars() : 0;
       const starText = totalStars > 0 ? ` · ⭐ ${totalStars}` : '';
-      document.getElementById('ub-greeting').textContent = (user.age ? `Age ${user.age}` : getGreeting()) + starText;
+      document.getElementById('ub-greeting').textContent = (user.age ? `Age ${user.age} · ${getGreeting()}` : getGreeting()) + starText;
 
+      // Update timer and token display
+      if (typeof TimerManager !== 'undefined') {
+        const rem = TimerManager.getRemaining();
+        document.getElementById('timer-display').textContent = `⏰ ${rem} min left`;
+      }
+      if (typeof ChoresManager !== 'undefined') {
+        const tokens = ChoresManager.getStatus().totalTokens;
+        document.getElementById('token-balance').textContent = `⭐ ${tokens} tokens`;
+      }
+
+      renderAppCards();
       updateStatsCards();
     }
 
@@ -219,6 +231,126 @@
       document.getElementById('dash-overlay').classList.remove('active');
     }
 
+    // ── Chores List ──
+    function openChores() {
+      renderChoresList();
+      document.getElementById('chores-overlay').classList.add('active');
+    }
+    function closeChores() {
+      document.getElementById('chores-overlay').classList.remove('active');
+    }
+    function renderChoresList() {
+      const content = document.getElementById('chores-content');
+      const chores = ChoresManager.getChores();
+      const status = ChoresManager.getStatus();
+
+      content.innerHTML = `
+        <div class="tokens-summary">
+          <div class="tokens-count">⭐ ${status.totalTokens} <span>Adventure Tokens</span></div>
+          <button class="btn-redeem" onclick="redeemForTime()" ${status.totalTokens < 3 ? 'disabled' : ''}>
+            Redeem 3 Tokens for +15 min ⏰
+          </button>
+        </div>
+        <div class="chores-grid">
+          ${chores.map(c => `
+            <div class="chore-item ${status.completed.includes(c.id) ? 'completed' : ''}" 
+                 onclick="ChoresManager.completeChore('${c.id}')">
+              <div class="chore-check">${status.completed.includes(c.id) ? '✅' : '○'}</div>
+              <div class="chore-label">${c.label}</div>
+              <div class="chore-tokens">+${c.tokens} ⭐</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    function redeemForTime() {
+      if (ChoresManager.redeemTokens(3)) {
+        if (typeof showConfetti === 'function') showConfetti();
+        alert('¡Genial! Has ganado 15 minutos extra de juego. 🚀');
+      }
+    }
+
+    // ── Parents Corner ──
+    function openParentsCorner() {
+      requestPinThen(() => {
+        renderParentsCorner();
+        document.getElementById('parents-overlay').classList.add('active');
+      });
+    }
+    function closeParentsCorner() {
+      document.getElementById('parents-overlay').classList.remove('active');
+    }
+    function renderParentsCorner() {
+      const profiles = getProfiles();
+      const container = document.getElementById('parents-content');
+      
+      container.innerHTML = `
+        <div class="parents-grid">
+          ${profiles.map((p, i) => `
+            <div class="parent-kid-card">
+              <div class="pk-header">
+                <span class="pk-avatar">${p.avatar}</span>
+                <span class="pk-name">${p.name}</span>
+              </div>
+              <div class="pk-setting">
+                <label>Daily Time Limit: <span id="val-${i}">${p.maxMinutes || 45}</span> min</label>
+                <input type="range" min="15" max="120" step="15" value="${p.maxMinutes || 45}" 
+                       oninput="updateKidLimit(${i}, this.value)">
+              </div>
+              <div class="pk-setting">
+                <label class="pk-toggle">
+                  <input type="checkbox" ${p.faithVisible !== false ? 'checked' : ''} 
+                         onchange="updateKidFaith(${i}, this.checked)">
+                  Show Faith Module (Fe Explorador)
+                </label>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    function updateKidLimit(idx, val) {
+      const profiles = getProfiles();
+      profiles[idx].maxMinutes = parseInt(val);
+      saveProfiles(profiles);
+      document.getElementById(`val-${idx}`).textContent = val;
+      // If current user, update timer
+      const active = getActiveUser();
+      if (active && active.name === profiles[idx].name) {
+        TimerManager.setMax(parseInt(val));
+      }
+    }
+    function updateKidFaith(idx, checked) {
+      const profiles = getProfiles();
+      profiles[idx].faithVisible = checked;
+      saveProfiles(profiles);
+      // If hub is showing, refresh app cards to hide/show faith
+      if (document.getElementById('hub-screen').classList.contains('active')) {
+        renderAppCards();
+      }
+    }
+
+    // ── Render App Cards (now dynamic for faith toggle) ──
+    function renderAppCards() {
+      const grid = document.getElementById('app-grid');
+      const user = getActiveUser();
+      if (!user) return;
+
+      const faithCard = user.faithVisible !== false ? `
+        <a href="fe-explorador.html" class="app-card card-faith">
+          <div class="card-icon">⛪</div>
+          <div class="card-title">Fe Explorador</div>
+          <div class="card-desc">Oraciones, santos y herencia católica de Chile.</div>
+          <div class="card-tag">🙏 Fe y Valores</div>
+        </a>
+      ` : '';
+
+      // For now, keeping the static HTML cards but inserting the faith card if needed
+      // Actually, it's better to just toggle visibility of the faith card if it exists in HTML
+      const feEl = document.querySelector('.card-faith');
+      if (feEl) feEl.style.display = (user.faithVisible !== false) ? 'flex' : 'none';
+    }
+
     // ── Add Modal ──
     function openModal() {
       selectedEmoji = AVATARS[0];
@@ -267,22 +399,28 @@
         el.appendChild(btn);
       });
     }
-
-    function createProfile() {
-      const name = document.getElementById('new-name').value.trim();
-      if (!name) { document.getElementById('new-name').focus(); return; }
-      if (!selectedAge) {
-        document.getElementById('age-picker').style.outline = '2px solid #EF4444';
-        setTimeout(() => document.getElementById('age-picker').style.outline = '', 1500);
-        return;
-      }
-      const profiles = getProfiles();
-      const newUser = { name, avatar: selectedEmoji, color: selectedColor, age: selectedAge };
-      profiles.push(newUser);
-      saveProfiles(profiles);
-      closeModal();
-      loginAs(newUser);
-    }
+function createProfile() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { document.getElementById('new-name').focus(); return; }
+  if (!selectedAge) {
+    document.getElementById('age-picker').style.outline = '2px solid #EF4444';
+    setTimeout(() => document.getElementById('age-picker').style.outline = '', 1500);
+    return;
+  }
+  const profiles = getProfiles();
+  const newUser = { 
+    name, 
+    avatar: selectedEmoji, 
+    color: selectedColor, 
+    age: selectedAge,
+    maxMinutes: 45,
+    faithVisible: true 
+  };
+  profiles.push(newUser);
+  saveProfiles(profiles);
+  closeModal();
+  loginAs(newUser);
+}
 
 
     // ══════════════════════════════════════════════════════════════
@@ -497,6 +635,9 @@
       localStorage.removeItem(`zs_mathgalaxy_${key}`);
       localStorage.removeItem(`zs_chile_${key}`);
       localStorage.removeItem(`zs_chess_${key}`);
+      localStorage.removeItem(`zs_timer_${key}`);
+      localStorage.removeItem(`zs_chores_${key}`);
+      localStorage.removeItem(`zs_fe_${key}`);
 
       // Remove from Little Maestro index if present
       try {
@@ -535,6 +676,9 @@
         `zs_mathgalaxy_`,
         `zs_chile_`,
         `zs_chess_`,
+        `zs_timer_`,
+        `zs_chores_`,
+        `zs_fe_`,
       ];
 
       suffixes.forEach(prefix => {

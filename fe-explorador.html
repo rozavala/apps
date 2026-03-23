@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fe Explorador — Zavala Serra Apps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    :root {
+      --faith-gold: #F59E0B;
+      --faith-gold-light: #FBBF24;
+      --faith-bg: #1A1005;
+      --faith-surface: #2D1B0A;
+    }
+    body { background-color: var(--faith-bg); color: #FFFBEB; }
+    
+    .header {
+      background: var(--faith-surface);
+      border-bottom: 2px solid var(--faith-gold);
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .back-btn {
+      background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px; cursor: pointer; text-decoration: none;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.2); }
+    .title { font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 1.4rem; }
+    .stars-badge { background: rgba(245,158,11,0.2); border: 1px solid var(--faith-gold); padding: 4px 12px; border-radius: 99px; font-weight: 800; color: var(--faith-gold-light); }
+
+    .nav-tabs {
+      display: flex; gap: 8px; padding: 12px; overflow-x: auto;
+      background: rgba(0,0,0,0.2);
+    }
+    .tab {
+      padding: 10px 20px; border-radius: 12px; background: rgba(255,255,255,0.05);
+      font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    }
+    .tab.active { background: var(--faith-gold); color: #000; }
+
+    .content-area { padding: 24px; max-width: 600px; margin: 0 auto; min-height: 70vh; }
+    .card { background: var(--faith-surface); border-radius: 20px; border: 1.5px solid rgba(245,158,11,0.2); padding: 24px; animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Prayer Section */
+    .prayer-line { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; line-height: 1.4; opacity: 0.4; transition: opacity 0.3s; }
+    .prayer-line.active { opacity: 1; color: var(--faith-gold-light); transform: scale(1.05); transform-origin: left; }
+    .bead-counter { display: flex; gap: 8px; justify-content: center; margin-top: 24px; }
+    .bead { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+    .bead.active { background: var(--faith-gold); box-shadow: 0 0 10px var(--faith-gold); }
+
+    /* Saint/Heritage Section */
+    .item-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .item-icon { font-size: 3rem; background: rgba(255,255,255,0.05); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+    .item-title { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
+    .item-meta { font-size: 0.85rem; color: var(--faith-gold-light); font-weight: 700; }
+    .item-bio { font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px; }
+
+    .quiz-options { display: grid; gap: 12px; }
+    .quiz-btn {
+      padding: 16px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: white; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;
+    }
+    .quiz-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--faith-gold); }
+    .quiz-btn.correct { background: #10B981; border-color: #10B981; }
+    .quiz-btn.wrong { background: #EF4444; border-color: #EF4444; }
+
+    /* Rosary Section */
+    .rosary-beads { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 32px 0; }
+    .rosary-bead { width: 44px; height: 44px; border-radius: 50%; background: #2D1B0A; border: 3px solid #4D2B1A; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 800; color: rgba(255,255,255,0.2); }
+    .rosary-bead.active { background: var(--faith-gold); border-color: #FFF; color: #000; box-shadow: 0 0 20px var(--faith-gold); transform: scale(1.15); }
+    .rosary-bead.done { background: #4D2B1A; border-color: var(--faith-gold); color: var(--faith-gold); }
+
+    .mystery-card { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 16px; text-align: center; margin-top: 24px; }
+    .mystery-title { font-weight: 800; font-size: 1.2rem; color: var(--faith-gold-light); margin-bottom: 4px; }
+    .mystery-desc { font-size: 0.95rem; opacity: 0.8; }
+
+    .bottom-actions { margin-top: 32px; display: flex; justify-content: center; }
+    .next-btn {
+      padding: 14px 32px; border-radius: 12px; background: var(--faith-gold); color: #000;
+      border: none; font-weight: 800; font-family: 'Baloo 2', cursive; font-size: 1.1rem; cursor: pointer;
+    }
+    .next-btn:hover { transform: scale(1.05); }
+
+    .confetti { position: fixed; pointer-events: none; z-index: 1000; width: 10px; height: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <a href="index.html" class="back-btn">←</a>
+      <div class="title">Fe Explorador ⛪</div>
+    </div>
+    <div class="stars-badge" id="star-count">⭐ 0</div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="tab active" onclick="showTab('prayer')">🙏 Oración</div>
+    <div class="tab" onclick="showTab('saint')">😇 Santos</div>
+    <div class="tab" onclick="showTab('rosary')">📿 Rosario</div>
+    <div class="tab" onclick="showTab('heritage')">🇨🇱 Herencia</div>
+  </div>
+
+  <div class="content-area" id="content-main">
+    <!-- Content injected by JS -->
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/fe-explorador.js"></script>
+  <script>
+    let currentTab = 'prayer';
+    let prayerIndex = 0;
+    let prayerLine = 0;
+    let saintIndex = 0;
+    let rosaryBead = 0;
+    let heritageIndex = 0;
+
+    function updateStars() {
+      document.getElementById('star-count').textContent = `⭐ ${FeManager.getStatus().totalStars}`;
+    }
+
+    function showTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(el => {
+        el.classList.toggle('active', el.textContent.toLowerCase().includes(tab.slice(0, 3)));
+      });
+      render();
+    }
+
+    function render() {
+      const main = document.getElementById('content-main');
+      main.innerHTML = '';
+      
+      if (currentTab === 'prayer') renderPrayer(main);
+      else if (currentTab === 'saint') renderSaint(main);
+      else if (currentTab === 'rosary') renderRosary(main);
+      else if (currentTab === 'heritage') renderHeritage(main);
+      
+      updateStars();
+    }
+
+    function renderPrayer(container) {
+      const p = FeManager.PRAYERS[prayerIndex];
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h2 style="font-family:'Baloo 2';text-align:center;margin-bottom:20px;">${p.title}</h2>
+        <div id="prayer-lines">
+          ${p.lines.map((l, i) => `<div class="prayer-line ${i === prayerLine ? 'active' : ''}">${l}</div>`).join('')}
+        </div>
+        <div class="bead-counter">
+          ${p.lines.map((_, i) => `<div class="bead ${i <= prayerLine ? 'active' : ''}"></div>`).join('')}
+        </div>
+        <div class="bottom-actions">
+          <button class="next-btn" onclick="nextPrayerLine()">Continuar ➔</button>
+        </div>
+      `;
+      container.appendChild(card);
+    }
+
+    function nextPrayerLine() {
+      const p = FeManager.PRAYERS[prayerIndex];
+      if (prayerLine < p.lines.length - 1) {
+        prayerLine++;
+        if (typeof playSound === 'function') playSound('click');
+      } else {
+        FeManager.addStar();
+        if (typeof playSound === 'function') playSound('success');
+        prayerLine = 0;
+        prayerIndex = (prayerIndex + 1) % FeManager.PRAYERS.length;
+      }
+      render();
+    }
+
+    function renderSaint(container) {
+      const s = FeManager.SAINTS[saintIndex];
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="item-header">
+          <div class="item-icon">😇</div>
+          <div>
+            <div class="item-title">${s.name}</div>
+            <div class="item-meta">${s.dates} • ${s.country}</div>
+          </div>
+        </div>
+        <div class="item-bio">${s.bio}</div>
+        <div class="quiz-options">
+          <div style="font-weight:800;margin-bottom:8px;">Pregunta: ${s.questions[0].q}</div>
+          ${s.questions[0].a.map((opt, i) => `
+            <button class="quiz-btn" onclick="checkQuiz(this, ${i === s.questions[0].correct})">${opt}</button>
+          `).join('')}
+        </div>
+      `;
+      container.appendChild(card);
+    }
+
+    function checkQuiz(btn, isCorrect) {
+      if (btn.disabled) return;
+      if (isCorrect) {
+        btn.classList.add('correct');
+        FeManager.addStar();
+        if (typeof playSound === 'function') playSound('success');
+        setTimeout(() => {
+          saintIndex = (saintIndex + 1) % FeManager.SAINTS.length;
+          heritageIndex = (heritageIndex + 1) % FeManager.HERITAGE.length;
+          render();
+        }, 1500);
+      } else {
+        btn.classList.add('wrong');
+        if (typeof playSound === 'function') playSound('error');
+      }
+      btn.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+    }
+
+    function renderRosary(container) {
+      const day = new Date().getDay(); // 0-6, we use Joyful mysteries for weekdays
+      const mIdx = (day === 0 || day === 6) ? 0 : (day - 1) % 5;
+      const m = FeManager.MYSTERIES[mIdx];
+      
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h2 style="font-family:'Baloo 2';text-align:center;">Misterios Gozosos</h2>
+        <div class="mystery-card">
+          <div class="mystery-title">${mIdx + 1}. ${m.name}</div>
+          <div class="mystery-desc">${m.desc}</div>
+        </div>
+        <div class="rosary-beads">
+          ${Array.from({length: 10}).map((_, i) => `
+            <div class="rosary-bead ${i === rosaryBead ? 'active' : (i < rosaryBead ? 'done' : '')}" 
+                 onclick="tapBead(${i})">${i + 1}</div>
+          `).join('')}
+        </div>
+        <p style="text-align:center;font-size:0.9rem;opacity:0.7;">Toca cada cuenta para rezar un Ave María</p>
+      `;
+      container.appendChild(card);
+    }
+
+    function tapBead(i) {
+      if (i === rosaryBead) {
+        if (typeof playSound === 'function') playSound('click');
+        if (rosaryBead < 9) {
+          rosaryBead++;
+        } else {
+          FeManager.addStar();
+          if (typeof playSound === 'function') playSound('success');
+          rosaryBead = 0;
+        }
+        render();
+      }
+    }
+
+    function renderHeritage(container) {
+      const h = FeManager.HERITAGE[heritageIndex];
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="item-header">
+          <div class="item-icon">🇨🇱</div>
+          <div>
+            <div class="item-title">${h.title}</div>
+            <div class="item-meta">Herencia de Chile</div>
+          </div>
+        </div>
+        <div class="item-bio">${h.info}</div>
+        <div class="quiz-options">
+          <div style="font-weight:800;margin-bottom:8px;">Pregunta: ${h.q}</div>
+          ${h.a.map((opt, i) => `
+            <button class="quiz-btn" onclick="checkQuiz(this, ${i === h.correct})">${opt}</button>
+          `).join('')}
+        </div>
+      `;
+      container.appendChild(card);
+    }
+
+    // Confetti effect helper
+    function showConfetti() {
+      for (let i = 0; i < 50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.background = ['#F59E0B', '#FBBF24', '#FFF', '#7C3AED'][Math.floor(Math.random() * 4)];
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(c);
+        
+        const duration = 2000 + Math.random() * 3000;
+        c.animate([
+          { top: '-10px', opacity: 1 },
+          { top: '100vh', opacity: 0, transform: `rotate(${Math.random() * 1000}deg)` }
+        ], { duration, easing: 'cubic-bezier(0, .9, .57, 1)' });
+        
+        setTimeout(() => c.remove(), duration);
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

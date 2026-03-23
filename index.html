@@ -46,9 +46,13 @@
             <div class="user-bar-greeting" id="ub-greeting"></div>
           </div>
         </div>
-        <button class="switch-btn" onclick="switchUser()">
-          🔄 Switch
-        </button>
+        <div class="user-bar-right" style="display:flex;gap:12px;align-items:center;">
+          <span id="timer-display" style="font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:99px;">⏰ -- min</span>
+          <span id="token-balance" style="font-weight:700;font-size:0.85rem;background:rgba(251,191,36,0.1);color:#FBBF24;padding:4px 10px;border-radius:99px;cursor:pointer;" onclick="openChores()">⭐ 0 tokens</span>
+          <button class="switch-btn" onclick="switchUser()">
+            🔄 Switch
+          </button>
+        </div>
       </div>
 
       <!-- Header -->
@@ -59,65 +63,73 @@
       </header>
 
       <!-- App Grid -->
-      <div class="app-grid">
+      <div class="app-grid" id="app-grid">
 
         <!-- 1. Little Maestro (LIVE) -->
         <a class="app-card card-piano" href="little-maestro.html">
           <div class="card-icon">🎹</div>
           <div class="card-title">Little Maestro</div>
-          <div class="card-desc">Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.</div>
+          <div class="card-desc">Learn to play piano with interactive lessons, real songs, and fun challenges.</div>
           <div class="card-stats" id="stats-piano"></div>
-          <div class="card-tag">▶ Play now</div>
+          <div class="card-tag">🎼 Music</div>
         </a>
 
         <!-- 2. Math Galaxy (LIVE) -->
         <a class="app-card card-math" href="math-galaxy.html">
           <div class="card-icon">🧮</div>
           <div class="card-title">Math Galaxy</div>
-          <div class="card-desc">Blast through math challenges — addition, multiplication, fractions, and more in a space adventure.</div>
+          <div class="card-desc">Master addition, multiplication, and more in a space adventure.</div>
           <div class="card-stats" id="stats-math"></div>
-          <div class="card-tag">▶ Play now</div>
+          <div class="card-tag">🚀 Math</div>
         </a>
 
         <!-- 3. Descubre Chile (LIVE) -->
         <a class="app-card card-history" href="descubre-chile.html">
           <div class="card-icon">🇨🇱</div>
           <div class="card-title">Descubre Chile</div>
-          <div class="card-desc">Explore Chile's amazing history — from the Mapuche people to the Andes, through stories and quizzes.</div>
+          <div class="card-desc">Explore Chile's amazing history through stories and quizzes.</div>
           <div class="card-stats" id="stats-chile"></div>
-          <div class="card-tag">▶ Play now</div>
+          <div class="card-tag">🧭 History</div>
         </a>
 
         <!-- 4. Chess Quest (LIVE) -->
         <a class="app-card card-chess" href="chess-quest.html">
           <div class="card-icon">♟️</div>
           <div class="card-title">Chess Quest</div>
-          <div class="card-desc">Master chess from the basics — learn how each piece moves, tactics, and play against a friendly AI.</div>
+          <div class="card-desc">Master chess from the basics and play against a friendly AI.</div>
           <div class="card-stats" id="stats-chess"></div>
-          <div class="card-tag">▶ Play now</div>
+          <div class="card-tag">⚔️ Strategy</div>
         </a>
 
-        <!-- 5. Guitar Jam (COMING SOON) -->
+        <!-- 5. Fe Explorador (Catholic Faith) -->
+        <a class="app-card card-faith" href="fe-explorador.html">
+          <div class="card-icon">⛪</div>
+          <div class="card-title">Fe Explorador</div>
+          <div class="card-desc">Oraciones, santos y herencia católica de Chile.</div>
+          <div class="card-tag">🙏 Fe y Valores</div>
+        </a>
+
+        <!-- 6. Guitar Jam (COMING SOON) -->
         <div class="app-card card-guitar coming-soon">
           <div class="card-icon">🎸</div>
           <div class="card-title">Guitar Jam</div>
-          <div class="card-desc">Strum your first chords and learn popular songs step by step with an interactive fretboard.</div>
-          <div class="card-tag">🔒 Coming soon</div>
-        </div>
-
-        <!-- 6. Art Studio (COMING SOON) -->
-        <div class="app-card card-art coming-soon">
-          <div class="card-icon">🎨</div>
-          <div class="card-title">Art Studio</div>
-          <div class="card-desc">Draw, paint, and create — learn colors, shapes, and famous art styles with guided activities.</div>
+          <div class="card-desc">Strum your first chords and learn popular songs step by step.</div>
           <div class="card-tag">🔒 Coming soon</div>
         </div>
 
       </div>
 
-      <button class="parent-btn" onclick="openDashboard()">
-        🔒 Parent Dashboard — See all progress
-      </button>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:32px;">
+        <button class="parent-btn" style="margin-top:0;" onclick="openChores()">
+          🏠 Tareas del Hogar
+        </button>
+        <button class="parent-btn" style="margin-top:0;" onclick="openParentsCorner()">
+          🔒 Parents Corner
+        </button>
+        <button class="parent-btn" style="margin-top:0;" onclick="openDashboard()">
+          📊 Dashboard
+        </button>
+      </div>
 
       <div class="footer">
         Made with <span>♥</span> for the Zavala Serra kids
@@ -131,6 +143,22 @@
     <div class="dash-panel">
       <h2>👨‍👩‍👧‍👦 Parent Dashboard <button class="dash-close" onclick="closeDashboard()">✕</button></h2>
       <div id="dash-content"></div>
+    </div>
+  </div>
+
+  <!-- Tareas del Hogar Overlay -->
+  <div class="dash-overlay" id="chores-overlay" onclick="if(event.target===this)closeChores()">
+    <div class="dash-panel">
+      <h2>🏠 Tareas del Hogar <button class="dash-close" onclick="closeChores()">✕</button></h2>
+      <div id="chores-content"></div>
+    </div>
+  </div>
+
+  <!-- Parents Corner Overlay -->
+  <div class="dash-overlay" id="parents-overlay" onclick="if(event.target===this)closeParentsCorner()">
+    <div class="dash-panel">
+      <h2>🔒 Parents Corner <button class="dash-close" onclick="closeParentsCorner()">✕</button></h2>
+      <div id="parents-content"></div>
     </div>
   </div>
 
@@ -225,6 +253,8 @@
   </div>
 
   <script src="js/auth.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/chores.js"></script>
   <script src="js/index.js"></script>
 </body>
 </html>

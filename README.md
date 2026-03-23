@@ -13,6 +13,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 - **🧮 Math Galaxy**: Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.
 - **🇨🇱 Descubre Chile**: Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.
 - **♟️ Chess Quest**: Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI.
+- **⛪ Fe Explorador**: Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.
 
 ### Coming Soon
 - **🎸 Guitar Jam**: Strum your first chords and learn popular songs step by step.
@@ -21,6 +22,8 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 ## 🛠️ Key Features
 
 - **Personalized Profiles**: Kids can create their own explorers with custom avatars and colors.
+- **Daily Play Timer**: Configurable daily limits per kid to ensure a healthy balance of screen time.
+- **Adventure Tokens**: Earn extra play time by completing real-world chores (Hacer la cama, Leer, etc.).
 - **Progress Tracking**: All stars, levels, and scores are saved locally using `localStorage`.
 - **Parent Dashboard**: A secure area to monitor progress across all apps in the suite.
 - **Safe by Design**: No external API calls, no dynamic third-party content, and no user-generated features.

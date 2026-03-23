@@ -18,6 +18,7 @@ Build fun, factual, skill-based learning apps for our kids. Every app should fee
 - **Art**: Techniques, colors, shapes, famous styles — hands-on creative skills.
 - **Culture & Traditions**: Food, dance, festivals, customs — presented as cultural facts.
 - **Language**: Vocabulary, reading, spelling — neutral educational content.
+- **Catholic Faith**: Common prayers (Padre Nuestro, Ave María, Gloria), factual saint biographies (dates, locations, historical facts), Chilean Catholic heritage (churches, patron saints, religious festivals as cultural-historical facts), interactive rosary (mystery names and bead counting). All content must be factual and historical.
 - **Values**: Hard work, curiosity, exploration, family, perseverance, sportsmanship.
 
 ## Strictly Excluded Content
