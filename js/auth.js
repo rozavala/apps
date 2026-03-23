@@ -39,3 +39,53 @@ function getGreeting() {
 }
 
 function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ================================================================
+   GLOBAL STAR COUNTER
+   Aggregates stars across all apps for the active user.
+   ================================================================ */
+
+function getTotalStars(userName) {
+  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  if (!name) return 0;
+  const key = name.toLowerCase().replace(/\s+/g, '_');
+  let total = 0;
+
+  // Math Galaxy: { cadet: { bestStars: 3 }, explorer: { bestStars: 2 }, ... }
+  try {
+    const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
+    Object.values(mg).forEach(level => { total += (level.bestStars || 0); });
+  } catch {}
+
+  // Descubre Chile: { geography: { bestStars: 2 }, ... } (skip vr, memBest)
+  try {
+    const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
+    Object.entries(dc).forEach(([k, v]) => {
+      if (k !== 'vr' && k !== 'memBest' && v && v.bestStars) total += v.bestStars;
+    });
+  } catch {}
+
+  // Chess Quest: puzzlesSolved counts as stars, wins count as stars
+  try {
+    const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
+    total += (cq.puzzlesSolved || 0);
+    total += (cq.wins || 0);
+  } catch {}
+
+  // Little Maestro: progress.{songId}.stars
+  try {
+    const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
+    if (lm.progress) {
+      Object.entries(lm.progress).forEach(([sid, val]) => {
+        if (typeof val === 'object' && val !== null && val.stars > 0) {
+          total += val.stars;
+        }
+      });
+      // Legacy fallback: songStars sub-object
+      const songStars = lm.progress.songStars || {};
+      Object.values(songStars).forEach(s => { if (s > 0) total += s; });
+    }
+  } catch {}
+
+  return total;
+}
