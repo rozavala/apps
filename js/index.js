@@ -54,7 +54,9 @@
       document.getElementById('ub-avatar').textContent = user.avatar;
       document.getElementById('ub-avatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
       document.getElementById('ub-name').textContent = user.name;
-      document.getElementById('ub-greeting').textContent = user.age ? `Age ${user.age} · ${getGreeting()}` : getGreeting();
+      const totalStars = typeof getTotalStars === 'function' ? getTotalStars() : 0;
+      const starText = totalStars > 0 ? ` · ⭐ ${totalStars}` : '';
+      document.getElementById('ub-greeting').textContent = (user.age ? `Age ${user.age} · ${getGreeting()}` : getGreeting()) + starText;
       loadCardStats(user);
     }
 
@@ -95,8 +97,27 @@
         el.innerHTML = items.map(i => `<span class="cs-item active">${i}</span>`).join('');
       } catch { document.getElementById('stats-chess').innerHTML = ''; }
 
-      // Little Maestro (still separate system, show basic hint)
-      document.getElementById('stats-piano').innerHTML = '';
+      // Little Maestro
+      try {
+        const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
+        const prog = lm.progress || {};
+        const completedSongs = Object.entries(prog)
+          .filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).length;
+        const totalLMStars = Object.entries(prog)
+          .filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0)
+          .reduce((s, [, v]) => s + v.stars, 0);
+        const streak = (lm.stats && lm.stats.currentStreak) || 0;
+        const pianoEl = document.getElementById('stats-piano');
+        if (pianoEl) {
+          if (completedSongs > 0) {
+            const items = [`⭐ ${totalLMStars} stars`, `🎼 ${completedSongs} songs`];
+            if (streak > 0) items.push(`🔥 ${streak} streak`);
+            pianoEl.innerHTML = items.map(i => `<span class="cs-item active">${i}</span>`).join('');
+          } else {
+            pianoEl.innerHTML = '';
+          }
+        }
+      } catch { if (document.getElementById('stats-piano')) document.getElementById('stats-piano').innerHTML = ''; }
     }
 
     // ── Parent Dashboard ──
