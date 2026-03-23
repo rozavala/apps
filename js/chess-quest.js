@@ -12,7 +12,7 @@ const UNICODE={wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',bK:'♚',bQ
 function pieceChar(piece,color){return UNICODE[(color||'w')+piece]||''}
 const PIECE_VALUES={P:1,N:3,B:3,R:5,Q:9,K:0};
 
-// ── Board representation: 8x8 array, null=empty, {piece,color} ──
+// ── Board representation ──
 function newBoard(){
   const b=Array(8).fill(null).map(()=>Array(8).fill(null));
   const back=['R','N','B','Q','K','B','N','R'];
@@ -34,16 +34,17 @@ function getMoves(board,r,c,checkLegal=true){
   const add=(tr,tc,type='move')=>{if(inBounds(tr,tc)){const t=board[tr][tc];if(!t)moves.push({fr:r,fc:c,tr,tc,type});else if(t.color===opp)moves.push({fr:r,fc:c,tr,tc,type:'capture'})}};
   const slide=(dirs)=>{dirs.forEach(([dr,dc])=>{for(let i=1;i<8;i++){const tr=r+dr*i,tc=c+dc*i;if(!inBounds(tr,tc))break;const t=board[tr][tc];if(!t){moves.push({fr:r,fc:c,tr,tc,type:'move'})}else{if(t.color===opp)moves.push({fr:r,fc:c,tr,tc,type:'capture'});break}}})};
   switch(s.piece){
-    case'P':{
+    case 'P':{
       const dir=col==='w'?-1:1;const start=col==='w'?6:1;
       if(inBounds(r+dir,c)&&!board[r+dir][c]){moves.push({fr:r,fc:c,tr:r+dir,tc:c,type:'move'});if(r===start&&!board[r+2*dir][c])moves.push({fr:r,fc:c,tr:r+2*dir,tc:c,type:'move'})}
       [-1,1].forEach(dc=>{const tr=r+dir,tc=c+dc;if(inBounds(tr,tc)&&board[tr][tc]&&board[tr][tc].color===opp)moves.push({fr:r,fc:c,tr,tc,type:'capture'})});
-      break}
-    case'N':[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>add(r+dr,c+dc));break;
-    case'B':slide([[-1,-1],[-1,1],[1,-1],[1,1]]);break;
-    case'R':slide([[-1,0],[1,0],[0,-1],[0,1]]);break;
-    case'Q':slide([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);break;
-    case'K':[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>add(r+dr,c+dc));break;
+      break;
+    }
+    case 'N':[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>add(r+dr,c+dc));break;
+    case 'B':slide([[-1,-1],[-1,1],[1,-1],[1,1]]);break;
+    case 'R':slide([[-1,0],[1,0],[0,-1],[0,1]]);break;
+    case 'Q':slide([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]);break;
+    case 'K':[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr,dc])=>add(r+dr,c+dc));break;
   }
   if(!checkLegal)return moves;
   return moves.filter(m=>{const nb=cloneBoard(board);nb[m.tr][m.tc]=nb[m.fr][m.fc];nb[m.fr][m.fc]=null;return!isInCheck(nb,col)});
@@ -91,34 +92,52 @@ function renderBoard(boardEl,board,options={}){
 }
 
 // ── Screen nav ──
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo(0,0)}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const target=document.getElementById('screen-'+id);
+  if(target)target.classList.add('active');
+  window.scrollTo(0,0);
+}
 function goMenu(){updateMenuBadges();showScreen('menu')}
-function showFeedback(emoji){const el=document.getElementById('feedback');document.getElementById('feedbackEmoji').textContent=emoji;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),900)}
+function showFeedback(emoji){
+  const el=document.getElementById('feedback');
+  if(!el)return;
+  const inner=el.querySelector('span')||el;
+  inner.textContent=emoji;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),900);
+}
 
-// ── Init ──
+// ── Init (safe — no crash if nav.js hasn't run yet) ──
 function init(){
   const user=getActiveUser();
   if(user){
-    document.getElementById('userBadge').style.display='';
-    document.getElementById('ubAvatar').textContent=user.avatar;
-    document.getElementById('ubAvatar').style.cssText=`background:${user.color}22;border-color:${user.color}`;
-    document.getElementById('ubName').textContent=user.name;
-    if(user.age&&user.age<=6)document.getElementById('greeting').textContent=`Start with "Learn the Pieces", ${user.name}!`;
-    else if(user.age&&user.age>=9)document.getElementById('greeting').textContent=`Ready to play, ${user.name}?`;
-    else document.getElementById('greeting').textContent=`Let's play, ${user.name}!`;
+    // nav.js handles the badge, but set greeting if element exists
+    const greetEl=document.getElementById('greeting');
+    if(greetEl){
+      if(user.age&&user.age<=6) greetEl.textContent=`Start with "Learn the Pieces", ${user.name}!`;
+      else if(user.age&&user.age>=9) greetEl.textContent=`Ready to play, ${user.name}?`;
+      else greetEl.textContent=`Let's play, ${user.name}!`;
+    }
   }
   updateMenuBadges();
 }
+
 function updateMenuBadges(){
   const prog=getUserProgress();
   const learned=(prog.learnedPieces||[]).length;
-  document.getElementById('learnBadge').textContent=learned>0?`${learned}/6 pieces learned`:'Start here!';
-  document.getElementById('learnBadge').className='m-badge '+(learned>0?'prog':'rec');
+  const learnEl=document.getElementById('learnBadge');
+  if(learnEl){
+    learnEl.textContent=learned>0?`${learned}/6 pieces learned`:'Start here!';
+    learnEl.className='m-badge '+(learned>0?'prog':'rec');
+  }
   const solved=prog.puzzlesSolved||0;
-  document.getElementById('puzzleBadge').textContent=solved>0?`${solved} solved`:'';
+  const puzzleEl=document.getElementById('puzzleBadge');
+  if(puzzleEl) puzzleEl.textContent=solved>0?`${solved} solved`:'';
   const wins=prog.wins||0,losses=prog.losses||0,draws=prog.draws||0;
   const total=wins+losses+draws;
-  document.getElementById('playBadge').textContent=total>0?`${wins}W ${losses}L ${draws}D`:'';
+  const playEl=document.getElementById('playBadge');
+  if(playEl) playEl.textContent=total>0?`${wins}W ${losses}L ${draws}D`:'';
 }
 
 /* ================================================================
@@ -138,6 +157,7 @@ function openLearn(){
   const prog=getUserProgress();
   const learned=prog.learnedPieces||[];
   const grid=document.getElementById('pieceGrid');
+  if(!grid)return;
   grid.innerHTML='';
   PIECE_LESSONS.forEach((l,i)=>{
     const card=document.createElement('div');
@@ -153,14 +173,18 @@ function openLearn(){
 function openLesson(idx){
   currentLesson=idx;
   const l=PIECE_LESSONS[idx];
-  document.getElementById('lessonIcon').textContent=l.icon;
-  document.getElementById('lessonTitle').textContent=l.name;
-  document.getElementById('lessonInfo').innerHTML=`<h3>${l.icon} How the ${l.name} moves</h3><p>${l.desc}</p><div class="tip">💡 ${l.tip}</div>`;
-  document.getElementById('lessonNextBtn').textContent=idx<PIECE_LESSONS.length-1?'Next Piece →':'Back to Pieces';
-  // Setup board
+  const iconEl=document.getElementById('lessonIcon');
+  const titleEl=document.getElementById('lessonTitle');
+  const infoEl=document.getElementById('lessonInfo');
+  const nextBtn=document.getElementById('lessonNextBtn');
+  if(iconEl) iconEl.textContent=l.icon;
+  if(titleEl) titleEl.textContent=l.name;
+  if(infoEl) infoEl.innerHTML=`<h3>${l.icon} How the ${l.name} moves</h3><p>${l.desc}</p><div class="tip">💡 ${l.tip}</div>`;
+  if(nextBtn) nextBtn.textContent=idx<PIECE_LESSONS.length-1?'Next Piece →':'Back to Pieces';
   const board=Array(8).fill(null).map(()=>Array(8).fill(null));
   l.setup(board);
   const el=document.getElementById('learnBoard');
+  if(!el)return;
   const renderLearn=()=>{
     renderBoard(el,board,{onClick:(r,c)=>{
       const p=board[r][c];
@@ -173,7 +197,6 @@ function openLesson(idx){
     }});
   };
   renderLearn();
-  // Mark as learned
   const prog=getUserProgress();
   const learned=new Set(prog.learnedPieces||[]);
   learned.add(l.piece);
@@ -203,8 +226,10 @@ function openPuzzleMenu(){puzzleIdx=0;puzzleSolved=0;loadPuzzle();showScreen('pu
 
 function loadPuzzle(){
   if(puzzleIdx>=PUZZLES.length){
-    document.getElementById('puzzleFeedback').innerHTML=`<span style="color:var(--gold)">🎉 All puzzles complete! ${puzzleSolved}/${PUZZLES.length} solved</span>`;
-    document.getElementById('nextPuzzleBtn').style.display='none';
+    const fb=document.getElementById('puzzleFeedback');
+    if(fb) fb.innerHTML=`<span style="color:var(--gold)">🎉 All puzzles complete! ${puzzleSolved}/${PUZZLES.length} solved</span>`;
+    const nb=document.getElementById('nextPuzzleBtn');
+    if(nb) nb.style.display='none';
     const prog=getUserProgress();
     saveProgress({puzzlesSolved:Math.max(prog.puzzlesSolved||0,puzzleSolved)});
     return;
@@ -212,13 +237,19 @@ function loadPuzzle(){
   const pz=PUZZLES[puzzleIdx];
   puzzleBoard=Array(8).fill(null).map(()=>Array(8).fill(null));
   pz.board(puzzleBoard);
-  document.getElementById('puzzleLabel').textContent=`Puzzle ${puzzleIdx+1}/${PUZZLES.length}`;
-  document.getElementById('puzzleScore').textContent=`⭐ ${puzzleSolved}`;
-  document.getElementById('puzzleHint').textContent=pz.hint;
-  document.getElementById('puzzleFeedback').textContent='';
-  document.getElementById('nextPuzzleBtn').style.display='none';
+  const labelEl=document.getElementById('puzzleLabel');
+  const scoreEl=document.getElementById('puzzleScore');
+  const hintEl=document.getElementById('puzzleHint');
+  const fbEl=document.getElementById('puzzleFeedback');
+  const nextBtn=document.getElementById('nextPuzzleBtn');
+  if(labelEl) labelEl.textContent=`Puzzle ${puzzleIdx+1}/${PUZZLES.length}`;
+  if(scoreEl) scoreEl.textContent=`⭐ ${puzzleSolved}`;
+  if(hintEl) hintEl.textContent=pz.hint;
+  if(fbEl) fbEl.textContent='';
+  if(nextBtn) nextBtn.style.display='none';
   let selected=null;
   const el=document.getElementById('puzzleBoard');
+  if(!el)return;
   const render=()=>{
     let moveDots=[],captureDots=[];
     if(selected){
@@ -232,20 +263,19 @@ function loadPuzzle(){
         const moves=getMoves(puzzleBoard,selected[0],selected[1]);
         const move=moves.find(m=>m.tr===r&&m.tc===c);
         if(move){
-          // Check if correct
           const sol=pz.solution;
           if(move.fr===sol.fr&&move.fc===sol.fc&&move.tr===sol.tr&&move.tc===sol.tc){
             puzzleBoard[r][c]=puzzleBoard[move.fr][move.fc];puzzleBoard[move.fr][move.fc]=null;
             puzzleSolved++;
-            document.getElementById('puzzleScore').textContent=`⭐ ${puzzleSolved}`;
-            document.getElementById('puzzleFeedback').innerHTML=`<span style="color:var(--green)">✅ Correct! ${pz.after}</span>`;
-            document.getElementById('nextPuzzleBtn').style.display='';
+            if(scoreEl) scoreEl.textContent=`⭐ ${puzzleSolved}`;
+            if(fbEl) fbEl.innerHTML=`<span style="color:var(--green)">✅ Correct! ${pz.after}</span>`;
+            if(nextBtn) nextBtn.style.display='';
             showFeedback('🎉');
             selected=null;
             renderBoard(el,puzzleBoard,{lastMove:move});
             return;
           }else{
-            document.getElementById('puzzleFeedback').innerHTML=`<span style="color:var(--red)">❌ Not quite — try again!</span>`;
+            if(fbEl) fbEl.innerHTML=`<span style="color:var(--red)">❌ Not quite — try again!</span>`;
             showFeedback('🤔');
             selected=null;render();return;
           }
@@ -271,17 +301,21 @@ let capturedByWhite=[],capturedByBlack=[],lastPlayMove=null;
 function openPlay(){
   playBoard=newBoard();playerTurn=true;gameActive=true;
   capturedByWhite=[];capturedByBlack=[];lastPlayMove=null;
-  document.getElementById('gameOverWrap').innerHTML='';
-  document.getElementById('capturedBlack').innerHTML='';
-  document.getElementById('capturedWhite').innerHTML='';
-  document.getElementById('playStatus').textContent='Your turn (White)';
-  document.getElementById('playStatus').style.color='var(--cream)';
+  const goEl=document.getElementById('gameOverWrap');
+  const cbEl=document.getElementById('capturedBlack');
+  const cwEl=document.getElementById('capturedWhite');
+  const stEl=document.getElementById('playStatus');
+  if(goEl) goEl.innerHTML='';
+  if(cbEl) cbEl.innerHTML='';
+  if(cwEl) cwEl.innerHTML='';
+  if(stEl){stEl.textContent='Your turn (White)';stEl.style.color='var(--cream)'}
   renderPlayBoard();
   showScreen('play');
 }
 
 function renderPlayBoard(){
   const el=document.getElementById('playBoard');
+  if(!el)return;
   let selected=null;
   const render=()=>{
     let moveDots=[],captureDots=[],checkSq=null;
@@ -303,7 +337,8 @@ function renderPlayBoard(){
           lastPlayMove=move;
           selected=null;
           playerTurn=false;
-          document.getElementById('playStatus').textContent='Computer thinking...';
+          const st=document.getElementById('playStatus');
+          if(st) st.textContent='Computer thinking...';
           render();
           if(checkGameEnd('b'))return;
           setTimeout(()=>{aiMove();render()},500);
@@ -328,31 +363,28 @@ function makeMove(board,move,color){
   }
   board[move.tr][move.tc]=board[move.fr][move.fc];
   board[move.fr][move.fc]=null;
-  // Pawn promotion
   const p=board[move.tr][move.tc];
   if(p.piece==='P'&&(move.tr===0||move.tr===7))p.piece='Q';
 }
 
 function updateCaptured(){
-  document.getElementById('capturedBlack').innerHTML=capturedByWhite.map(p=>pieceChar(p.piece,p.color)).join('');
-  document.getElementById('capturedWhite').innerHTML=capturedByBlack.map(p=>pieceChar(p.piece,p.color)).join('');
+  const cbEl=document.getElementById('capturedBlack');
+  const cwEl=document.getElementById('capturedWhite');
+  if(cbEl) cbEl.innerHTML=capturedByWhite.map(p=>pieceChar(p.piece,p.color)).join('');
+  if(cwEl) cwEl.innerHTML=capturedByBlack.map(p=>pieceChar(p.piece,p.color)).join('');
 }
 
 function aiMove(){
   if(!gameActive)return;
   const moves=allMoves(playBoard,'b');
   if(moves.length===0)return;
-  // Simple AI: prefer captures (higher value first), then checks, then random
   const scored=moves.map(m=>{
     let score=Math.random()*0.5;
     const target=playBoard[m.tr][m.tc];
     if(target)score+=PIECE_VALUES[target.piece]*10;
-    // Check bonus
     const nb=cloneBoard(playBoard);nb[m.tr][m.tc]=nb[m.fr][m.fc];nb[m.fr][m.fc]=null;
     if(isInCheck(nb,'w'))score+=5;
-    // Center control bonus
     if(m.tr>=3&&m.tr<=4&&m.tc>=3&&m.tc<=4)score+=1;
-    // Avoid moving king early
     if(playBoard[m.fr][m.fc].piece==='K')score-=2;
     return{move:m,score};
   });
@@ -361,7 +393,8 @@ function aiMove(){
   makeMove(playBoard,best,'b');
   lastPlayMove=best;
   playerTurn=true;
-  document.getElementById('playStatus').textContent='Your turn (White)';
+  const st=document.getElementById('playStatus');
+  if(st) st.textContent='Your turn (White)';
   checkGameEnd('w');
 }
 
@@ -373,8 +406,10 @@ function checkGameEnd(colorToMove){
     const prog=getUserProgress();
     if(colorToMove==='b'){saveProgress({wins:(prog.wins||0)+1});showFeedback('🏆')}
     else{saveProgress({losses:(prog.losses||0)+1});showFeedback('😔')}
-    document.getElementById('playStatus').textContent='Game Over!';
-    document.getElementById('gameOverWrap').innerHTML=`<div class="game-over-box"><h2>${emoji} ${winner} win${winner==='You'?'':'s'}!</h2><p>Checkmate!</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
+    const st=document.getElementById('playStatus');
+    if(st) st.textContent='Game Over!';
+    const goEl=document.getElementById('gameOverWrap');
+    if(goEl) goEl.innerHTML=`<div class="game-over-box"><h2>${emoji} ${winner} win${winner==='You'?'':'s'}!</h2><p>Checkmate!</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
     return true;
   }
   if(isStalemate(playBoard,colorToMove)){
@@ -382,11 +417,14 @@ function checkGameEnd(colorToMove){
     const prog=getUserProgress();
     saveProgress({draws:(prog.draws||0)+1});
     showFeedback('🤝');
-    document.getElementById('playStatus').textContent='Game Over!';
-    document.getElementById('gameOverWrap').innerHTML=`<div class="game-over-box"><h2>🤝 Stalemate!</h2><p>It's a draw — no legal moves.</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
+    const st=document.getElementById('playStatus');
+    if(st) st.textContent='Game Over!';
+    const goEl=document.getElementById('gameOverWrap');
+    if(goEl) goEl.innerHTML=`<div class="game-over-box"><h2>🤝 Stalemate!</h2><p>It's a draw — no legal moves.</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
     return true;
   }
   return false;
 }
 
-init();
+// ── Boot safely after DOM is ready ──
+document.addEventListener('DOMContentLoaded', init);
