@@ -736,6 +736,10 @@
       --card-tag-bg: rgba(245, 158, 11, 0.15); 
     }
 
+    @media (max-width: 800px) {
+      .app-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+    }
+
     @media (max-width: 640px) {
       .page { padding: 28px 16px 60px; }
       .app-grid { grid-template-columns: 1fr !important; gap: 16px; }
