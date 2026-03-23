@@ -9,24 +9,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
-       ROZO'S APPS — Kid-Friendly App Hub
+       ZAVALA SERRA APPS — Kid-Friendly App Hub with Login
        ============================================================ */
 
     :root {
       --bg-deep: #0B0B1A;
       --bg-surface: #131328;
+      --bg-card: #1A1A3E;
       --text-primary: #F0EDFF;
       --text-muted: #8B86B0;
       --font-display: 'Baloo 2', 'Nunito', cursive;
       --font-body: 'Nunito', system-ui, sans-serif;
       --radius: 24px;
       --radius-sm: 16px;
+      --radius-xs: 12px;
+      --purple: #A78BFA;
+      --purple-glow: rgba(124, 58, 237, 0.35);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { height: 100%; font-size: 16px; }
-
     body {
       min-height: 100%;
       font-family: var(--font-body);
@@ -60,43 +62,13 @@
       z-index: 0;
       animation: twinkle 8s ease-in-out infinite alternate;
     }
-
-    @keyframes twinkle {
-      0% { opacity: 0.6; }
-      50% { opacity: 1; }
-      100% { opacity: 0.7; }
-    }
+    @keyframes twinkle { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
 
     /* — Floating aurora blobs — */
-    .aurora {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(100px);
-      pointer-events: none;
-      z-index: 0;
-      animation: float 20s ease-in-out infinite alternate;
-    }
-    .aurora-1 {
-      width: 500px; height: 500px;
-      background: rgba(124, 58, 237, 0.15);
-      top: -100px; left: -100px;
-      animation-duration: 25s;
-    }
-    .aurora-2 {
-      width: 400px; height: 400px;
-      background: rgba(245, 158, 11, 0.1);
-      top: 50%; right: -80px;
-      animation-duration: 18s;
-      animation-delay: -5s;
-    }
-    .aurora-3 {
-      width: 350px; height: 350px;
-      background: rgba(16, 185, 129, 0.1);
-      bottom: -50px; left: 30%;
-      animation-duration: 22s;
-      animation-delay: -10s;
-    }
-
+    .aurora { position: fixed; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0; animation: float 20s ease-in-out infinite alternate; }
+    .aurora-1 { width: 500px; height: 500px; background: rgba(124, 58, 237, 0.15); top: -100px; left: -100px; animation-duration: 25s; }
+    .aurora-2 { width: 400px; height: 400px; background: rgba(245, 158, 11, 0.1); top: 50%; right: -80px; animation-duration: 18s; animation-delay: -5s; }
+    .aurora-3 { width: 350px; height: 350px; background: rgba(16, 185, 129, 0.1); bottom: -50px; left: 30%; animation-duration: 22s; animation-delay: -10s; }
     @keyframes float {
       0% { transform: translate(0, 0) scale(1); }
       33% { transform: translate(30px, -20px) scale(1.1); }
@@ -105,13 +77,358 @@
     }
 
     /* — Main layout — */
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 40px 24px 80px;
+    .page { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes rocketBounce {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-12px) rotate(5deg); }
+    }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* ================================================================
+       LOGIN SCREEN — "Who's playing?"
+       ================================================================ */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      gap: 40px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .login-hero {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .login-hero-emoji { font-size: 64px; animation: rocketBounce 3s ease-in-out infinite; }
+    .login-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #C084FC, #F0ABFC, #FBBF24, #34D399);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+    .login-hero p { color: var(--text-muted); font-weight: 600; font-size: 1.1rem; }
+
+    .profiles-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      max-width: 600px;
+    }
+
+    .profile-card {
+      width: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 24px 16px 20px;
+      background: var(--bg-surface);
+      border: 2px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: popIn 0.5s ease-out both;
+    }
+    .profile-card:nth-child(1) { animation-delay: 0.1s; }
+    .profile-card:nth-child(2) { animation-delay: 0.15s; }
+    .profile-card:nth-child(3) { animation-delay: 0.2s; }
+    .profile-card:nth-child(4) { animation-delay: 0.25s; }
+    .profile-card:nth-child(5) { animation-delay: 0.3s; }
+
+    .profile-card:hover {
+      transform: translateY(-6px) scale(1.05);
+      border-color: var(--purple);
+      box-shadow: 0 16px 48px -12px var(--purple-glow);
+    }
+    .profile-card:active { transform: translateY(-2px) scale(1.02); }
+
+    .profile-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      border: 3px solid;
+      transition: transform 0.3s ease;
+    }
+    .profile-card:hover .profile-avatar { transform: scale(1.1) rotate(-5deg); }
+
+    .profile-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+    .profile-age {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: -4px;
+    }
+
+    /* Add profile card */
+    .profile-card.add-card {
+      border-style: dashed;
+      border-color: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.02);
+    }
+    .profile-card.add-card:hover {
+      border-color: rgba(167,139,250,0.5);
+      background: rgba(167,139,250,0.05);
+      box-shadow: 0 12px 36px -12px rgba(167,139,250,0.2);
+    }
+    .add-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      border: 2px dashed rgba(255,255,255,0.12);
+    }
+    .add-label { font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+
+    /* — Add profile modal — */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 90%;
+      max-width: 420px;
+      animation: popIn 0.3s ease-out;
+    }
+    .modal h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .modal-field { margin-bottom: 20px; }
+    .modal-field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .modal-field input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: var(--radius-xs);
+      border: 2px solid rgba(255,255,255,0.08);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal-field input:focus { border-color: var(--purple); }
+
+    .emoji-picker {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .emoji-option {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: pointer;
+      border: 2.5px solid rgba(255,255,255,0.08);
+      background: var(--bg-deep);
+      transition: all 0.2s ease;
+    }
+    .emoji-option:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.2); }
+    .emoji-option.selected { border-color: var(--purple); box-shadow: 0 0 20px var(--purple-glow); transform: scale(1.15); }
+
+    /* Age picker */
+    .age-picker {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .age-option {
+      padding: 10px 16px;
+      border-radius: var(--radius-xs);
+      border: 2px solid rgba(255,255,255,0.08);
+      background: var(--bg-deep);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .age-option:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); transform: translateY(-1px); }
+    .age-option.selected { border-color: var(--purple); color: var(--purple); background: rgba(167,139,250,0.08); box-shadow: 0 0 16px var(--purple-glow); }
+    .age-option .age-num { font-size: 1.1rem; display: block; }
+    .age-option .age-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; }
+
+    .color-picker {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .color-option {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .color-option:hover { transform: scale(1.2); }
+    .color-option.selected { border-color: #fff; box-shadow: 0 0 16px rgba(255,255,255,0.3); transform: scale(1.2); }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .modal-actions button {
+      flex: 1;
+      padding: 14px;
+      border-radius: var(--radius-xs);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+    .btn-create {
+      background: linear-gradient(135deg, #7C3AED, #A78BFA);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--purple-glow);
+    }
+    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--purple-glow); }
+
+    /* ================================================================
+       HUB SCREEN — App grid with user header
+       ================================================================ */
+    #hub-screen { display: none; }
+    #hub-screen.active { display: block; }
+
+    /* User bar at top */
+    .user-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding: 12px 20px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      animation: fadeUp 0.5s ease-out both;
+    }
+    .user-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-bar-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 2.5px solid;
+    }
+    .user-bar-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .user-bar-greeting {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .switch-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 99px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .switch-btn:hover { border-color: var(--purple); color: var(--text-primary); background: rgba(167,139,250,0.1); }
 
     /* — Header — */
     .header {
@@ -119,19 +436,7 @@
       margin-bottom: 48px;
       animation: fadeUp 0.8s ease-out both;
     }
-
-    .header-emoji {
-      font-size: 56px;
-      display: block;
-      margin-bottom: 8px;
-      animation: rocketBounce 3s ease-in-out infinite;
-    }
-
-    @keyframes rocketBounce {
-      0%, 100% { transform: translateY(0) rotate(-5deg); }
-      50% { transform: translateY(-12px) rotate(5deg); }
-    }
-
+    .header-emoji { font-size: 56px; display: block; margin-bottom: 8px; animation: rocketBounce 3s ease-in-out infinite; }
     .header h1 {
       font-family: var(--font-display);
       font-size: clamp(2.2rem, 6vw, 3.4rem);
@@ -144,18 +449,7 @@
       animation: gradientShift 6s ease-in-out infinite;
       line-height: 1.2;
     }
-
-    @keyframes gradientShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    .header p {
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      margin-top: 8px;
-      font-weight: 600;
-    }
+    .header p { font-size: 1.1rem; color: var(--text-muted); margin-top: 8px; font-weight: 600; }
 
     /* — App Grid — */
     .app-grid {
@@ -182,7 +476,6 @@
       overflow: hidden;
       animation: fadeUp 0.6s ease-out both;
     }
-
     .app-card:nth-child(1) { animation-delay: 0.1s; }
     .app-card:nth-child(2) { animation-delay: 0.2s; }
     .app-card:nth-child(3) { animation-delay: 0.3s; }
@@ -190,12 +483,6 @@
     .app-card:nth-child(5) { animation-delay: 0.5s; }
     .app-card:nth-child(6) { animation-delay: 0.6s; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Glow layer behind card */
     .app-card::before {
       content: '';
       position: absolute;
@@ -207,220 +494,373 @@
       z-index: -1;
       filter: blur(20px);
     }
+    .app-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--card-accent); box-shadow: 0 20px 60px -15px var(--card-glow); }
+    .app-card:hover::before { opacity: 0.4; }
+    .app-card:active { transform: translateY(-2px) scale(1.005); }
 
-    .app-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      border-color: var(--card-accent);
-      box-shadow: 0 20px 60px -15px var(--card-glow);
-    }
-
-    .app-card:hover::before {
-      opacity: 0.4;
-    }
-
-    .app-card:active {
-      transform: translateY(-2px) scale(1.005);
-    }
-
-    /* Card icon bubble */
     .card-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 64px; height: 64px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
       font-size: 32px;
       background: var(--card-icon-bg);
       box-shadow: 0 4px 20px var(--card-glow);
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
-    .app-card:hover .card-icon {
-      transform: scale(1.12) rotate(-3deg);
-    }
-
-    .card-title {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .card-desc {
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.55;
-      font-weight: 600;
-    }
-
+    .app-card:hover .card-icon { transform: scale(1.12) rotate(-3deg); }
+    .card-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
+    .card-desc { font-size: 0.92rem; color: var(--text-muted); line-height: 1.55; font-weight: 600; }
     .card-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--card-accent);
-      background: var(--card-tag-bg);
-      padding: 5px 12px;
-      border-radius: 99px;
-      width: fit-content;
-      margin-top: auto;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--card-accent); background: var(--card-tag-bg);
+      padding: 5px 12px; border-radius: 99px; width: fit-content; margin-top: auto;
     }
 
-    /* — Per-card theming — */
-    .card-piano {
-      --card-accent: #A78BFA;
-      --card-glow: rgba(124, 58, 237, 0.3);
-      --card-icon-bg: linear-gradient(135deg, #7C3AED, #9D6EFF);
-      --card-tag-bg: rgba(124, 58, 237, 0.15);
-    }
-    .card-chess {
-      --card-accent: #FBBF24;
-      --card-glow: rgba(245, 158, 11, 0.3);
-      --card-icon-bg: linear-gradient(135deg, #D97706, #FBBF24);
-      --card-tag-bg: rgba(245, 158, 11, 0.15);
-    }
-    .card-history {
-      --card-accent: #F87171;
-      --card-glow: rgba(239, 68, 68, 0.25);
-      --card-icon-bg: linear-gradient(135deg, #DC2626, #F87171);
-      --card-tag-bg: rgba(239, 68, 68, 0.15);
-    }
-    .card-guitar {
-      --card-accent: #34D399;
-      --card-glow: rgba(16, 185, 129, 0.3);
-      --card-icon-bg: linear-gradient(135deg, #059669, #34D399);
-      --card-tag-bg: rgba(16, 185, 129, 0.15);
-    }
-    .card-math {
-      --card-accent: #60A5FA;
-      --card-glow: rgba(59, 130, 246, 0.3);
-      --card-icon-bg: linear-gradient(135deg, #2563EB, #60A5FA);
-      --card-tag-bg: rgba(59, 130, 246, 0.15);
-    }
-    .card-art {
-      --card-accent: #F472B6;
-      --card-glow: rgba(236, 72, 153, 0.3);
-      --card-icon-bg: linear-gradient(135deg, #DB2777, #F472B6);
-      --card-tag-bg: rgba(236, 72, 153, 0.15);
-    }
+    /* Per-card theming */
+    .card-piano { --card-accent: #A78BFA; --card-glow: rgba(124, 58, 237, 0.3); --card-icon-bg: linear-gradient(135deg, #7C3AED, #9D6EFF); --card-tag-bg: rgba(124, 58, 237, 0.15); }
+    .card-chess { --card-accent: #FBBF24; --card-glow: rgba(245, 158, 11, 0.3); --card-icon-bg: linear-gradient(135deg, #D97706, #FBBF24); --card-tag-bg: rgba(245, 158, 11, 0.15); }
+    .card-history { --card-accent: #F87171; --card-glow: rgba(239, 68, 68, 0.25); --card-icon-bg: linear-gradient(135deg, #DC2626, #F87171); --card-tag-bg: rgba(239, 68, 68, 0.15); }
+    .card-guitar { --card-accent: #34D399; --card-glow: rgba(16, 185, 129, 0.3); --card-icon-bg: linear-gradient(135deg, #059669, #34D399); --card-tag-bg: rgba(16, 185, 129, 0.15); }
+    .card-math { --card-accent: #60A5FA; --card-glow: rgba(59, 130, 246, 0.3); --card-icon-bg: linear-gradient(135deg, #2563EB, #60A5FA); --card-tag-bg: rgba(59, 130, 246, 0.15); }
+    .card-art { --card-accent: #F472B6; --card-glow: rgba(236, 72, 153, 0.3); --card-icon-bg: linear-gradient(135deg, #DB2777, #F472B6); --card-tag-bg: rgba(236, 72, 153, 0.15); }
 
-    /* — Coming Soon overlay — */
-    .coming-soon .card-icon,
-    .coming-soon .card-title,
-    .coming-soon .card-desc {
-      opacity: 0.5;
-    }
-    .coming-soon {
-      cursor: default;
-      pointer-events: none;
-    }
-    .coming-soon .card-tag {
-      color: var(--text-muted);
-      background: rgba(255,255,255,0.06);
-    }
+    /* Coming Soon */
+    .coming-soon .card-icon, .coming-soon .card-title, .coming-soon .card-desc { opacity: 0.5; }
+    .coming-soon { cursor: default; pointer-events: none; }
+    .coming-soon .card-tag { color: var(--text-muted); background: rgba(255,255,255,0.06); }
 
     /* — Footer — */
-    .footer {
-      text-align: center;
-      margin-top: 64px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      animation: fadeUp 0.8s ease-out 0.7s both;
-    }
+    .footer { text-align: center; margin-top: 64px; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; animation: fadeUp 0.8s ease-out 0.7s both; }
+    .footer span { color: #F87171; }
 
-    .footer span {
-      color: #F87171;
-    }
-
-    /* — Mobile tweaks — */
+    /* — Mobile — */
     @media (max-width: 640px) {
       .page { padding: 28px 16px 60px; }
       .app-grid { grid-template-columns: 1fr; gap: 16px; }
       .header { margin-bottom: 32px; }
       .header-emoji { font-size: 44px; }
       .app-card { padding: 24px 22px 22px; }
+      .profiles-grid { gap: 14px; }
+      .profile-card { width: 110px; padding: 20px 12px 16px; }
+      .profile-avatar { width: 54px; height: 54px; font-size: 30px; }
+      .user-bar { padding: 10px 14px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Background aurora blobs -->
   <div class="aurora aurora-1"></div>
   <div class="aurora aurora-2"></div>
   <div class="aurora aurora-3"></div>
 
   <div class="page">
 
-    <!-- Header -->
-    <header class="header">
-      <span class="header-emoji">🚀</span>
-      <h1>Zavala Serra Apps</h1>
-      <p>Fun learning adventures — pick an app!</p>
-    </header>
-
-    <!-- App Grid -->
-    <div class="app-grid">
-
-      <!-- 1. Little Maestro (LIVE) -->
-      <a class="app-card card-piano" href="little-maestro.html">
-        <div class="card-icon">🎹</div>
-        <div class="card-title">Little Maestro</div>
-        <div class="card-desc">Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.</div>
-        <div class="card-tag">▶ Play now</div>
-      </a>
-
-      <!-- 2. Chess Quest (COMING SOON) -->
-      <div class="app-card card-chess coming-soon">
-        <div class="card-icon">♟️</div>
-        <div class="card-title">Chess Quest</div>
-        <div class="card-desc">Master chess from the basics — learn how each piece moves, tactics, and play against a friendly AI.</div>
-        <div class="card-tag">🔒 Coming soon</div>
+    <!-- ============================================================
+         LOGIN SCREEN — Who's playing?
+         ============================================================ -->
+    <div id="login-screen">
+      <div class="login-hero">
+        <span class="login-hero-emoji">🚀</span>
+        <h1>Zavala Serra Apps</h1>
+        <p>Who's playing today?</p>
       </div>
-
-      <!-- 3. Descubre Chile (COMING SOON) -->
-      <div class="app-card card-history coming-soon">
-        <div class="card-icon">🇨🇱</div>
-        <div class="card-title">Descubre Chile</div>
-        <div class="card-desc">Explore Chile's amazing history — from the Mapuche people to the Andes, through stories and quizzes.</div>
-        <div class="card-tag">🔒 Coming soon</div>
+      <div class="profiles-grid" id="profiles-grid">
+        <!-- Populated by JS -->
       </div>
-
-      <!-- 4. Guitar Jam (COMING SOON) -->
-      <div class="app-card card-guitar coming-soon">
-        <div class="card-icon">🎸</div>
-        <div class="card-title">Guitar Jam</div>
-        <div class="card-desc">Strum your first chords and learn popular songs step by step with an interactive fretboard.</div>
-        <div class="card-tag">🔒 Coming soon</div>
-      </div>
-
-      <!-- 5. Math Galaxy (COMING SOON) -->
-      <div class="app-card card-math coming-soon">
-        <div class="card-icon">🧮</div>
-        <div class="card-title">Math Galaxy</div>
-        <div class="card-desc">Blast through math challenges — addition, multiplication, fractions, and more in a space adventure.</div>
-        <div class="card-tag">🔒 Coming soon</div>
-      </div>
-
-      <!-- 6. Art Studio (COMING SOON) -->
-      <div class="app-card card-art coming-soon">
-        <div class="card-icon">🎨</div>
-        <div class="card-title">Art Studio</div>
-        <div class="card-desc">Draw, paint, and create — learn colors, shapes, and famous art styles with guided activities.</div>
-        <div class="card-tag">🔒 Coming soon</div>
-      </div>
-
     </div>
 
-    <div class="footer">
-      Made with <span>♥</span> for the Zavala Serra kids
+    <!-- ============================================================
+         HUB SCREEN — Apps grid (shown after login)
+         ============================================================ -->
+    <div id="hub-screen">
+
+      <!-- User bar -->
+      <div class="user-bar" id="user-bar">
+        <div class="user-bar-left">
+          <div class="user-bar-avatar" id="ub-avatar"></div>
+          <div>
+            <div class="user-bar-name" id="ub-name"></div>
+            <div class="user-bar-greeting" id="ub-greeting"></div>
+          </div>
+        </div>
+        <button class="switch-btn" onclick="switchUser()">
+          🔄 Switch
+        </button>
+      </div>
+
+      <!-- Header -->
+      <header class="header">
+        <span class="header-emoji">🚀</span>
+        <h1>Zavala Serra Apps</h1>
+        <p>Fun learning adventures — pick an app!</p>
+      </header>
+
+      <!-- App Grid -->
+      <div class="app-grid">
+
+        <!-- 1. Little Maestro (LIVE) -->
+        <a class="app-card card-piano" href="little-maestro.html">
+          <div class="card-icon">🎹</div>
+          <div class="card-title">Little Maestro</div>
+          <div class="card-desc">Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.</div>
+          <div class="card-tag">▶ Play now</div>
+        </a>
+
+        <!-- 2. Math Galaxy (LIVE) -->
+        <a class="app-card card-math" href="math-galaxy.html">
+          <div class="card-icon">🧮</div>
+          <div class="card-title">Math Galaxy</div>
+          <div class="card-desc">Blast through math challenges — addition, multiplication, fractions, and more in a space adventure.</div>
+          <div class="card-tag">▶ Play now</div>
+        </a>
+
+        <!-- 3. Descubre Chile (LIVE) -->
+        <a class="app-card card-history" href="descubre-chile.html">
+          <div class="card-icon">🇨🇱</div>
+          <div class="card-title">Descubre Chile</div>
+          <div class="card-desc">Explore Chile's amazing history — from the Mapuche people to the Andes, through stories and quizzes.</div>
+          <div class="card-tag">▶ Play now</div>
+        </a>
+
+        <!-- 4. Chess Quest (COMING SOON) -->
+        <div class="app-card card-chess coming-soon">
+          <div class="card-icon">♟️</div>
+          <div class="card-title">Chess Quest</div>
+          <div class="card-desc">Master chess from the basics — learn how each piece moves, tactics, and play against a friendly AI.</div>
+          <div class="card-tag">🔒 Coming soon</div>
+        </div>
+
+        <!-- 5. Guitar Jam (COMING SOON) -->
+        <div class="app-card card-guitar coming-soon">
+          <div class="card-icon">🎸</div>
+          <div class="card-title">Guitar Jam</div>
+          <div class="card-desc">Strum your first chords and learn popular songs step by step with an interactive fretboard.</div>
+          <div class="card-tag">🔒 Coming soon</div>
+        </div>
+
+        <!-- 6. Art Studio (COMING SOON) -->
+        <div class="app-card card-art coming-soon">
+          <div class="card-icon">🎨</div>
+          <div class="card-title">Art Studio</div>
+          <div class="card-desc">Draw, paint, and create — learn colors, shapes, and famous art styles with guided activities.</div>
+          <div class="card-tag">🔒 Coming soon</div>
+        </div>
+
+      </div>
+
+      <div class="footer">
+        Made with <span>♥</span> for the Zavala Serra kids
+      </div>
     </div>
 
   </div>
 
+  <!-- ============================================================
+       ADD PROFILE MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal">
+      <h2>New Explorer 🌟</h2>
+      <div class="modal-field">
+        <label>What's your name?</label>
+        <input type="text" id="new-name" maxlength="20" placeholder="e.g. Mateo" autocomplete="off">
+      </div>
+      <div class="modal-field">
+        <label>How old are you?</label>
+        <div class="age-picker" id="age-picker"></div>
+      </div>
+      <div class="modal-field">
+        <label>Pick your avatar</label>
+        <div class="emoji-picker" id="emoji-picker"></div>
+      </div>
+      <div class="modal-field">
+        <label>Pick your color</label>
+        <div class="color-picker" id="color-picker"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-create" onclick="createProfile()">Let's Go! 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================================================================
+       SHARED LOGIN SYSTEM
+       All apps read: localStorage.getItem('zs_active_user')
+       Returns: { name, avatar, color } or null
+       ================================================================ */
+
+    const AVATARS = ['🦊','🐱','🐶','🦋','🐰','🐸','🦄','🐨','🦁','🐧','🦖','🐬'];
+    const COLORS  = ['#7C3AED','#EF4444','#F59E0B','#10B981','#0EA5E9','#EC4899','#F97316','#14B8A6'];
+    const AGE_OPTIONS = [
+      { age: 4,  label: '4' },
+      { age: 5,  label: '5' },
+      { age: 6,  label: '6' },
+      { age: 7,  label: '7' },
+      { age: 8,  label: '8' },
+      { age: 9,  label: '9' },
+      { age: 10, label: '10' },
+      { age: 11, label: '11' },
+      { age: 12, label: '12' },
+    ];
+    const STORAGE_KEY = 'zs_profiles';
+    const ACTIVE_KEY  = 'zs_active_user';
+
+    let selectedEmoji = AVATARS[0];
+    let selectedColor = COLORS[0];
+    let selectedAge   = null;
+
+    function getProfiles() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+    function saveProfiles(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+    function getActiveUser() {
+      try { return JSON.parse(localStorage.getItem(ACTIVE_KEY)); }
+      catch { return null; }
+    }
+    function setActiveUser(user) { localStorage.setItem(ACTIVE_KEY, JSON.stringify(user)); }
+
+    function getGreeting() {
+      const h = new Date().getHours();
+      if (h < 12) return 'Good morning!';
+      if (h < 17) return 'Good afternoon!';
+      return 'Good evening!';
+    }
+
+    // ── Render login screen ──
+    function renderLogin() {
+      const grid = document.getElementById('profiles-grid');
+      const profiles = getProfiles();
+      grid.innerHTML = '';
+
+      profiles.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.style.animationDelay = `${0.1 + i * 0.05}s`;
+        card.onclick = () => loginAs(p);
+        card.innerHTML = `
+          <div class="profile-avatar" style="background:${p.color}22;border-color:${p.color}">${p.avatar}</div>
+          <div class="profile-name">${escHtml(p.name)}</div>
+          ${p.age ? `<div class="profile-age">Age ${p.age}</div>` : ''}
+        `;
+        grid.appendChild(card);
+      });
+
+      // Add new card
+      const addCard = document.createElement('div');
+      addCard.className = 'profile-card add-card';
+      addCard.style.animationDelay = `${0.1 + profiles.length * 0.05}s`;
+      addCard.onclick = openModal;
+      addCard.innerHTML = `
+        <div class="add-icon">+</div>
+        <div class="add-label">Add Player</div>
+      `;
+      grid.appendChild(addCard);
+    }
+
+    function loginAs(user) {
+      setActiveUser(user);
+      showHub();
+    }
+
+    function switchUser() {
+      localStorage.removeItem(ACTIVE_KEY);
+      document.getElementById('hub-screen').classList.remove('active');
+      document.getElementById('login-screen').style.display = '';
+      renderLogin();
+    }
+
+    function showHub() {
+      const user = getActiveUser();
+      if (!user) return;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('hub-screen').classList.add('active');
+
+      document.getElementById('ub-avatar').textContent = user.avatar;
+      document.getElementById('ub-avatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
+      document.getElementById('ub-name').textContent = user.name;
+      document.getElementById('ub-greeting').textContent = user.age ? `Age ${user.age} · ${getGreeting()}` : getGreeting();
+    }
+
+    // ── Modal ──
+    function openModal() {
+      selectedEmoji = AVATARS[0];
+      selectedColor = COLORS[0];
+      selectedAge   = null;
+      document.getElementById('new-name').value = '';
+      renderAgePicker();
+      renderEmojiPicker();
+      renderColorPicker();
+      document.getElementById('add-modal').classList.add('active');
+      setTimeout(() => document.getElementById('new-name').focus(), 100);
+    }
+    function closeModal() { document.getElementById('add-modal').classList.remove('active'); }
+
+    function renderAgePicker() {
+      const el = document.getElementById('age-picker');
+      el.innerHTML = '';
+      AGE_OPTIONS.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'age-option' + (selectedAge === opt.age ? ' selected' : '');
+        btn.innerHTML = `<span class="age-num">${opt.label}</span>`;
+        btn.onclick = () => { selectedAge = opt.age; renderAgePicker(); };
+        el.appendChild(btn);
+      });
+    }
+
+    function renderEmojiPicker() {
+      const el = document.getElementById('emoji-picker');
+      el.innerHTML = '';
+      AVATARS.forEach(a => {
+        const btn = document.createElement('div');
+        btn.className = 'emoji-option' + (a === selectedEmoji ? ' selected' : '');
+        btn.textContent = a;
+        btn.onclick = () => { selectedEmoji = a; renderEmojiPicker(); };
+        el.appendChild(btn);
+      });
+    }
+    function renderColorPicker() {
+      const el = document.getElementById('color-picker');
+      el.innerHTML = '';
+      COLORS.forEach(c => {
+        const btn = document.createElement('div');
+        btn.className = 'color-option' + (c === selectedColor ? ' selected' : '');
+        btn.style.background = c;
+        btn.onclick = () => { selectedColor = c; renderColorPicker(); };
+        el.appendChild(btn);
+      });
+    }
+
+    function createProfile() {
+      const name = document.getElementById('new-name').value.trim();
+      if (!name) { document.getElementById('new-name').focus(); return; }
+      if (!selectedAge) {
+        // Flash the age picker briefly
+        document.getElementById('age-picker').style.outline = '2px solid #EF4444';
+        setTimeout(() => document.getElementById('age-picker').style.outline = '', 1500);
+        return;
+      }
+      const profiles = getProfiles();
+      const newUser = { name, avatar: selectedEmoji, color: selectedColor, age: selectedAge };
+      profiles.push(newUser);
+      saveProfiles(profiles);
+      closeModal();
+      loginAs(newUser);
+    }
+
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // ── Init ──
+    (function init() {
+      const active = getActiveUser();
+      if (active) {
+        showHub();
+      } else {
+        renderLogin();
+      }
+    })();
+  </script>
 </body>
 </html>
