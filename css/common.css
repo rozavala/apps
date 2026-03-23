@@ -174,6 +174,18 @@ body::before {
   border: 2px solid;
 }
 
+/* ---- Global star counter (inside user badge) ---- */
+.star-counter {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 /* ---- Feedback emoji overlay ---- */
 .feedback-float,
 .feedback {
