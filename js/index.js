@@ -28,7 +28,7 @@
         card.style.position = 'relative';
 
         card.innerHTML = `
-          <div class="profile-avatar" style="background:${p.color}22;border-color:${p.color}">${p.avatar}</div>
+          <div class="profile-avatar" style="background:${escHtml(p.color)}22;border-color:${escHtml(p.color)}">${escHtml(p.avatar)}</div>
           <div class="profile-name">${escHtml(p.name)}</div>
           ${p.age ? `<div class="profile-age">Age ${p.age}</div>` : ''}
           <button class="profile-edit-btn" data-index="${i}" title="Edit ${escHtml(p.name)}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
@@ -375,7 +375,7 @@
 
         return `<div class="dash-profile">
           <div class="dash-profile-header">
-            <div class="dash-avatar" style="background:${p.color}22;border-color:${p.color}">${p.avatar}</div>
+            <div class="dash-avatar" style="background:${escHtml(p.color)}22;border-color:${escHtml(p.color)}">${escHtml(p.avatar)}</div>
             <div>
               <div class="dash-name">${escHtml(p.name)}</div>
               <div style="display:flex; gap:8px; font-size:0.78rem; font-weight:600;">
@@ -497,8 +497,8 @@
             return `
               <div class="parent-kid-card">
                 <div class="pk-header">
-                  <span class="pk-avatar">${p.avatar}</span>
-                  <span class="pk-name">${p.name}</span>
+                  <span class="pk-avatar">${escHtml(p.avatar)}</span>
+                  <span class="pk-name">${escHtml(p.name)}</span>
                 </div>
                 <div class="pk-status" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; font-weight:700;">
                   ⏰ Used ${timerData.minutesUsed} of ${timerData.maxMinutes} min today
@@ -515,11 +515,11 @@
                 </div>
                 <div class="pk-setting" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
                   <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" 
-                          onclick="addKidBonus('${p.name}', 15)">+15 min</button>
+                          onclick="addKidBonus(getProfiles()[${i}].name, 15)">+15 min</button>
                   <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" 
-                          onclick="addKidBonus('${p.name}', 30)">+30 min</button>
+                          onclick="addKidBonus(getProfiles()[${i}].name, 30)">+30 min</button>
                   <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1; border-color:rgba(239,68,68,0.3); color:#F87171;" 
-                          onclick="resetKidTimer('${p.name}')">Reset Today</button>
+                          onclick="resetKidTimer(getProfiles()[${i}].name)">Reset Today</button>
                 </div>
                 <div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.05);">
                   <label class="pk-toggle">
