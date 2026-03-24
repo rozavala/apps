@@ -45,10 +45,6 @@
 
     if (existing) {
       try {
-        if (typeof CloudSync !== 'undefined' && CloudSync.online) {
-          var lmKey = 'littlemaestro_' + name.toLowerCase().replace(/\s+/g, '_');
-          CloudSync.pull(lmKey);
-        }
         UserManager.loadUser(name);
       }
       catch(e) { console.error('[LM-Bridge] Load failed:', e); return; }
