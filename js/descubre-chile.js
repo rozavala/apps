@@ -130,8 +130,11 @@ const TOPICS=[
   ]},
   {id:'volcanes',icon:'🌋',name:'Volcanes de Chile',stories:[
     {t:'🌋 Cinturón de Fuego',p:'Chile está en el Cinturón de Fuego del Pacífico, una zona con muchos volcanes y terremotos. Hay más de 2.000 volcanes en Chile, y unos 90 están activos.',f:'El Nevado Ojos del Salado es el volcán más alto del mundo (6.891 m).'}
-  ]
-};
+  ]},
+  {id:'animales',icon:'🦙',name:'Fauna Local',stories:[
+    {t:'🦙 Vicuñas y Guanacos',p:'Son camélidos sudamericanos que habitan en los Andes. La vicuña vive a gran altitud y tiene una lana muy fina y valiosa.',f:'El guanaco es más grande y puede correr a casi 60 km/h.'}
+  ]}
+];
 let curTopic=null;
 
 function renderTopics(){
@@ -249,7 +252,10 @@ const QB={
     {q:'¿Qué volcán es uno de los más activos del sur?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'intermediate'},
     {q:'¿Cuál es el ancho promedio de Chile?',a:'177 km',o:['177 km','500 km','10 km','1.000 km'], tier:'expert'},
     {q:'¿Cuál es el archipiélago chileno famoso por sus iglesias de madera?',a:'Chiloé',o:['Chiloé','Juan Fernández','Galápagos','Malvinas'], tier:'advanced'},
-    {q:'¿En qué zona de Chile están los salares y géiseres?',a:'Norte',o:['Norte','Centro','Sur','Patagonia'], tier:'intermediate'}
+    {q:'¿En qué zona de Chile están los salares y géiseres?',a:'Norte',o:['Norte','Centro','Sur','Patagonia'], tier:'intermediate'},
+    {q:'¿Qué país comparte la cordillera de los Andes con Chile en la frontera este?',a:'Argentina',o:['Argentina','Perú','Bolivia','Brasil'], tier:'intermediate'},
+    {q:'¿Dónde se encuentran los glaciares milenarios como el Glaciar Grey?',a:'Patagonia',o:['Patagonia','Atacama','Valles Centrales','Isla de Pascua'], tier:'intermediate'},
+    {q:'¿A qué distancia de la costa está aproximadamente Isla de Pascua?',a:'3.700 km',o:['3.700 km','500 km','1.000 km','10.000 km'], tier:'advanced'}
   ],
   indigenous:[
     {q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque'], tier:'beginner'},
@@ -266,7 +272,10 @@ const QB={
     {q:'¿De qué país era el padre de O\'Higgins?',a:'Irlanda',o:['Irlanda','España','Inglaterra','Francia'], tier:'advanced'},
     {q:'¿Qué pueblo originario resistió la conquista española?',a:'Mapuche',o:['Mapuche','Inca','Azteca','Maya'], tier:'beginner'},
     {q:'¿Junto a qué río se fundó Santiago?',a:'Mapocho',o:['Mapocho','Bío Bío','Loa','Maipo'], tier:'beginner'},
-    {q:'¿Qué cerro está en el centro de Santiago donde se fundó la ciudad?',a:'Santa Lucía',o:['Santa Lucía','San Cristóbal','Aconcagua','Manquehue'], tier:'advanced'}
+    {q:'¿Qué cerro está en el centro de Santiago donde se fundó la ciudad?',a:'Santa Lucía',o:['Santa Lucía','San Cristóbal','Aconcagua','Manquehue'], tier:'advanced'},
+    {q:'¿En qué año se fundó Santiago?',a:'1541',o:['1541','1810','1492','1600'], tier:'intermediate'},
+    {q:'¿En qué fecha ocurrió la Primera Junta de Gobierno?',a:'18 de septiembre de 1810',o:['18 de septiembre de 1810','12 de febrero de 1818','21 de mayo de 1879','1 de enero de 1800'], tier:'advanced'},
+    {q:'¿Qué país gobernó Chile antes de su independencia?',a:'España',o:['España','Inglaterra','Francia','Portugal'], tier:'beginner'}
   ],
   culture:[
     {q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón'], tier:'beginner'},
@@ -303,6 +312,12 @@ const QB={
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Unos 100','Alrededor de 50','Menos de 10'], tier:'intermediate'},
     {q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno'], tier:'expert'},
     {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'}
+  ],
+  animales:[
+    {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
+    {q:'¿Dónde habita principalmente la vicuña?',a:'A gran altitud en los Andes',o:['A gran altitud en los Andes','En la costa del Pacífico','En los bosques del sur','En la selva lluviosa'], tier:'intermediate'},
+    {q:'¿Qué animal tiene una de las lanas más finas y valiosas?',a:'La vicuña',o:['La vicuña','La oveja común','El guanaco','El zorro'], tier:'advanced'},
+    {q:'¿A qué velocidad puede correr un guanaco?',a:'Casi 60 km/h',o:['Casi 60 km/h','Unos 10 km/h','Más de 100 km/h','30 km/h'], tier:'expert'}
   ]
 };
 
@@ -432,4 +447,5 @@ function dcInit(){
 document.addEventListener('DOMContentLoaded', dcInit);
 
 // === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
+// Math Galaxy – 12 new problems added to generators
 // Descubre Chile – 1 new topic + 10 new quiz questions
