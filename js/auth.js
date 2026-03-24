@@ -45,67 +45,82 @@ function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
    Aggregates stars across all apps for the active user.
    ================================================================ */
 
-function getTotalStars(userName) {
-  const name = userName || (getActiveUser() ? getActiveUser().name : null);
-  if (!name) return 0;
-  const key = name.toLowerCase().replace(/\s+/g, '_');
-  let total = 0;
+function getPlayerStats(userName) {
+  let name = userName;
+  if (!name) {
+    const user = getActiveUser();
+    name = user ? user.name : null;
+  }
+  if (!name) return { totalStars: 0, appsWithStars: 0 };
 
-  // Math Galaxy: { cadet: { bestStars: 3 }, explorer: { bestStars: 2 }, ... }
+  const key = name.toLowerCase().replace(/\s+/g, '_');
+  let totalStars = 0;
+  let appsWithStars = 0;
+
+  // Math Galaxy
   try {
     const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
-    Object.values(mg).forEach(level => { total += (level.bestStars || 0); });
+    let mgStars = 0;
+    Object.values(mg).forEach(level => { mgStars += (level.bestStars || 0); });
+    if (mgStars > 0) { totalStars += mgStars; appsWithStars++; }
   } catch {}
 
-  // Descubre Chile: { geography: { bestStars: 2 }, ... } (skip vr, memBest)
+  // Descubre Chile
   try {
     const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
+    let dcStars = 0;
     Object.entries(dc).forEach(([k, v]) => {
-      if (k !== 'vr' && k !== 'memBest' && v && v.bestStars) total += v.bestStars;
+      if (k !== 'vr' && k !== 'memBest' && v && v.bestStars) dcStars += v.bestStars;
     });
+    if (dcStars > 0) { totalStars += dcStars; appsWithStars++; }
   } catch {}
 
-  // Chess Quest: puzzlesSolved counts as stars, wins count as stars
+  // Chess Quest
   try {
     const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
-    total += (cq.puzzlesSolved || 0);
-    total += (cq.wins || 0);
+    const cqStars = (cq.puzzlesSolved || 0) + (cq.wins || 0);
+    if (cqStars > 0) { totalStars += cqStars; appsWithStars++; }
   } catch {}
 
-  // Little Maestro: progress.{songId}.stars
+  // Little Maestro
   try {
     const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
+    let lmStars = 0;
     if (lm.progress) {
       Object.entries(lm.progress).forEach(([sid, val]) => {
         if (typeof val === 'object' && val !== null && val.stars > 0) {
-          total += val.stars;
+          lmStars += val.stars;
         }
       });
-      // Legacy fallback: songStars sub-object
       const songStars = lm.progress.songStars || {};
-      Object.values(songStars).forEach(s => { if (s > 0) total += s; });
+      Object.values(songStars).forEach(s => { if (s > 0) lmStars += s; });
     }
+    if (lmStars > 0) { totalStars += lmStars; appsWithStars++; }
   } catch {}
 
-  // Fe Explorador: zs_fe_{key} -> { totalStars: 10 }
+  // Fe Explorador
   try {
     const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
-    total += (fe.totalStars || 0);
+    if ((fe.totalStars || 0) > 0) { totalStars += fe.totalStars; appsWithStars++; }
   } catch {}
 
   // Guitar Jam
   try {
     const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
-    total += (gj.totalStars || 0);
+    if ((gj.totalStars || 0) > 0) { totalStars += gj.totalStars; appsWithStars++; }
   } catch {}
 
   // Art Studio
   try {
     const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
-    total += (as.totalStars || 0);
+    if ((as.totalStars || 0) > 0) { totalStars += as.totalStars; appsWithStars++; }
   } catch {}
 
-  return total;
+  return { totalStars, appsWithStars };
+}
+
+function getTotalStars(userName) {
+  return getPlayerStats(userName).totalStars;
 }
 
 /**
@@ -117,7 +132,7 @@ function getTotalStars(userName) {
  *          or 'intermediate' as default if no age set.
  */
 function getAgeTier(age) {
-  const a = age || (getActiveUser() ? getActiveUser().age : null);
+  let a = age; if (!a) { const u = getActiveUser(); a = u ? u.age : null; }
   if (!a) return 'intermediate';
   if (a <= 5) return 'beginner';
   if (a <= 7) return 'intermediate';
@@ -126,20 +141,16 @@ function getAgeTier(age) {
 }
 
 function getExplorerRank(userName) {
-  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  let name = userName;
+  if (!name) {
+    const user = getActiveUser();
+    name = user ? user.name : null;
+  }
   if (!name) return { name: 'Cadet', icon: '🛸', level: 0 };
-  const key = name.toLowerCase().replace(/\s+/g, '_');
-  const totalStars = getTotalStars(name);
 
-  // Count how many apps have at least 1 star
-  let appsWithStars = 0;
-  try { const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {}; if (Object.values(mg).some(l => l.bestStars > 0)) appsWithStars++; } catch {}
-  try { const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {}; if (Object.entries(dc).some(([k,v]) => k !== 'vr' && k !== 'memBest' && v && v.bestStars > 0)) appsWithStars++; } catch {}
-  try { const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {}; if ((cq.puzzlesSolved || 0) + (cq.wins || 0) > 0) appsWithStars++; } catch {}
-  try { const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {}; const p = lm.progress || {}; if (Object.values(p).some(v => typeof v === 'object' && v !== null && v.stars > 0)) appsWithStars++; } catch {}
-  try { const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {}; if ((fe.totalStars || 0) > 0) appsWithStars++; } catch {}
-  try { const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {}; if ((gj.totalStars || 0) > 0) appsWithStars++; } catch {}
-  try { const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {}; if ((as.totalStars || 0) > 0) appsWithStars++; } catch {}
+  const stats = getPlayerStats(name);
+  const totalStars = stats.totalStars;
+  const appsWithStars = stats.appsWithStars;
 
   const RANKS = [
     { name: 'Legend',    icon: '🏆', stars: 50, apps: 4 },
@@ -162,7 +173,7 @@ function getExplorerRank(userName) {
    ================================================================ */
 
 function getChessPlaysThisWeek(userName) {
-  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  let name = userName; if (!name) { const u = getActiveUser(); name = u ? u.name : null; }
   if (!name) return 0;
   const key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
   try {
@@ -176,7 +187,7 @@ function getChessPlaysThisWeek(userName) {
 function getChessLimit(userName) {
   // Read from profile; default 2
   const profiles = getProfiles();
-  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  let name = userName; if (!name) { const u = getActiveUser(); name = u ? u.name : null; }
   if (!name) return 2;
   const profile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
   return (profile && typeof profile.chessPlaysPerWeek === 'number') 
@@ -191,7 +202,7 @@ function canPlayChess(userName) {
 }
 
 function recordChessPlay(userName) {
-  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  let name = userName; if (!name) { const u = getActiveUser(); name = u ? u.name : null; }
   if (!name) return;
   const key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
   try {
