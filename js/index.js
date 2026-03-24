@@ -212,6 +212,13 @@
           if (el && (as.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${as.totalStars}</span>`;
         } catch {}
 
+        // Fe Explorador
+        try {
+          const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
+          const el = document.getElementById('stats-faith');
+          if (el && (fe.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${fe.totalStars}</span>`;
+        } catch {}
+
         // Little Maestro
         try {
           const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};

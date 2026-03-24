@@ -74,7 +74,8 @@ const ArtStudio = (() => {
       tier: 'advanced',
       steps: [
         { text: 'Pointillism: Tap to make dots only!', type: 'dots' },
-        { text: 'Mondrian: Use straight lines and primary colors.', type: 'grid' }
+        { text: 'Mondrian: Use straight lines and primary colors.', type: 'grid' },
+        { text: 'Pixel Art: Color squares on the grid!', type: 'pixelgrid' }
       ]
     }
   ];
@@ -270,6 +271,15 @@ const ArtStudio = (() => {
       ctx.fill();
       isDrawing = false;
       saveHistory();
+    } else if (step?.type === 'pixelgrid') {
+      const gridCount = 16;
+      const cellSize = canvas.width / (gridCount * (window.devicePixelRatio || 1));
+      const col = Math.floor(startX / cellSize);
+      const row = Math.floor(startY / cellSize);
+      ctx.fillStyle = currentColor;
+      ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+      isDrawing = false;
+      saveHistory();
     }
   }
 
@@ -342,7 +352,12 @@ const ArtStudio = (() => {
     ctx.lineCap = 'round';
 
     if (currentTool === 'line') {
-      ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(x, y); ctx.stroke();
+      let tx = x, ty = y;
+      if (currentLesson?.steps[currentStepIdx]?.type === 'grid') {
+        if (Math.abs(x - startX) > Math.abs(y - startY)) ty = startY;
+        else tx = startX;
+      }
+      ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(tx, ty); ctx.stroke();
     } else if (currentTool === 'rectangle') {
       ctx.strokeRect(startX, startY, x - startX, y - startY);
     } else if (currentTool === 'circle') {
@@ -358,7 +373,12 @@ const ArtStudio = (() => {
     ctx.lineCap = 'round';
 
     if (currentTool === 'line') {
-      ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(x, y); ctx.stroke();
+      let tx = x, ty = y;
+      if (currentLesson?.steps[currentStepIdx]?.type === 'grid') {
+        if (Math.abs(x - startX) > Math.abs(y - startY)) ty = startY;
+        else tx = startX;
+      }
+      ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(tx, ty); ctx.stroke();
     } else if (currentTool === 'rectangle') {
       ctx.strokeRect(startX, startY, x - startX, y - startY);
     } else if (currentTool === 'circle') {
@@ -481,11 +501,35 @@ const ArtStudio = (() => {
     // Set tool based on step
     if (step.type === 'rect') currentTool = 'rectangle';
     else if (step.type === 'circle') currentTool = 'circle';
-    else if (step.type === 'line') currentTool = 'line';
+    else if (step.type === 'line' || step.type === 'grid') currentTool = 'line';
     else currentTool = 'pencil';
+
+    // Special palette for Mondrian
+    if (step.type === 'grid') {
+      const pal = document.getElementById('color-palette');
+      const mondrianColors = ['#EF4444', '#3B82F6', '#FBBF24', '#000000', '#FFFFFF'];
+      pal.innerHTML = mondrianColors.map(c => `<div class="color-swatch" style="background:${c}" onclick="ArtStudio.setColor('${c}', this)"></div>`).join('');
+      setColor('#000000', pal.firstChild);
+    } else if (currentStepIdx === 0) {
+      setupPalette();
+    }
 
     // Guide layer
     guideCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+    
+    if (step.type === 'pixelgrid') {
+      const gridCount = 16;
+      const cellSize = guideCanvas.width / gridCount;
+      guideCtx.strokeStyle = '#DDD';
+      guideCtx.lineWidth = 1;
+      guideCtx.setLineDash([]);
+      for (let i = 0; i <= gridCount; i++) {
+        guideCtx.beginPath(); guideCtx.moveTo(i * cellSize, 0); guideCtx.lineTo(i * cellSize, guideCanvas.height); guideCtx.stroke();
+        guideCtx.beginPath(); guideCtx.moveTo(0, i * cellSize); guideCtx.lineTo(guideCanvas.width, i * cellSize); guideCtx.stroke();
+      }
+      return;
+    }
+
     guideCtx.setLineDash([10, 10]);
     guideCtx.strokeStyle = '#CCC';
     guideCtx.lineWidth = 4;

@@ -23,9 +23,9 @@ const CHORDS = [
 ];
 
 const SONGS = [
-  { id: 'twinkle', title: 'Twinkle Twinkle', tier: 'beginner', bpm: 90, progression: [['C', 4], ['G', 4], ['Am', 4], ['F', 4], ['C', 4], ['G', 4], ['C', 8]] },
-  { id: 'birthday', title: 'Happy Birthday', tier: 'beginner', bpm: 100, progression: [['G', 4], ['D', 4], ['D', 4], ['G', 4], ['G', 4], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] },
-  { id: 'jingle', title: 'Jingle Bells', tier: 'beginner', bpm: 120, progression: [['G', 8], ['G', 8], ['C', 4], ['G', 4], ['A', 4], ['D', 4], ['G', 8], ['G', 8], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] },
+  { id: 'twinkle', title: 'Twinkle Twinkle', tier: 'beginner', bpm: 90, progression: [['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['C', 4], ['G', 4], ['C', 8]] },
+  { id: 'birthday', title: 'Happy Birthday', tier: 'beginner', bpm: 100, progression: [['G', 4], ['G', 4], ['G', 4], ['C', 4], ['C', 4], ['Am', 4], ['G', 4], ['G', 4], ['C', 8]] },
+  { id: 'jingle', title: 'Jingle Bells', tier: 'beginner', bpm: 120, progression: [['G', 8], ['G', 8], ['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['G', 8], ['G', 8], ['C', 4], ['G', 4], ['Em', 4], ['G', 8]] },
   { id: 'labamba', title: 'La Bamba', tier: 'intermediate', bpm: 130, progression: [['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4]] },
   { id: 'ode', title: 'Ode to Joy', tier: 'intermediate', bpm: 100, progression: [['G', 4], ['G', 4], ['D', 4], ['D', 4], ['Em', 4], ['Em', 4], ['C', 4], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] },
   { id: 'stand', title: 'Stand By Me', tier: 'intermediate', bpm: 110, progression: [['G', 8], ['Em', 8], ['C', 4], ['D', 4], ['G', 8]] },
@@ -328,15 +328,14 @@ const GuitarJam = (() => {
     const beatMs = (60 / currentSong.bpm) * 1000;
     let totalBeats = 0;
     currentSong.progression.forEach((p, i) => {
-      for (let b = 0; b < p[1]; b++) {
-        expectedStrumTimes.push({
-          time: (totalBeats + b) * beatMs,
-          chord: p[0],
-          chordIdx: i,
-          beatIdx: totalBeats + b,
-          hit: false
-        });
-      }
+      // One expected strum per chord segment
+      expectedStrumTimes.push({
+        time: totalBeats * beatMs,
+        endTime: (totalBeats + p[1]) * beatMs,
+        chord: p[0],
+        chordIdx: i,
+        hit: false
+      });
       totalBeats += p[1];
     });
     beatsInSong = totalBeats;
@@ -367,14 +366,12 @@ const GuitarJam = (() => {
     const chord = CHORDS.find(c => c.name === chordName);
     if (chord) Audio.strumChord(chord);
 
-    // Hit detection
-    const closestBeat = expectedStrumTimes.reduce((prev, curr) => 
-      Math.abs(curr.time - now) < Math.abs(prev.time - now) ? curr : prev
-    );
+    // Hit detection: Check if we are within any chord segment's window
+    const activeSegment = expectedStrumTimes.find(s => now >= s.time - 400 && now < s.endTime);
 
     const btn = document.getElementById('big-strum-btn');
-    if (Math.abs(closestBeat.time - now) < 400 && !closestBeat.hit) {
-      closestBeat.hit = true;
+    if (activeSegment && !activeSegment.hit) {
+      activeSegment.hit = true;
       hits++;
       btn.classList.add('hit');
       if (typeof SFX !== 'undefined') SFX.correct();
@@ -438,7 +435,8 @@ const GuitarJam = (() => {
 
   function endSong() {
     cancelAnimationFrame(gameInterval);
-    const accuracy = Math.round((hits / beatsInSong) * 100);
+    const totalPossible = expectedStrumTimes.length;
+    const accuracy = totalPossible > 0 ? Math.round((hits / totalPossible) * 100) : 0;
     let stars = 0;
     if (accuracy >= 90) stars = 3;
     else if (accuracy >= 75) stars = 2;
