@@ -5,7 +5,7 @@
 
 const CloudSync = (() => {
   // ── Set this to your VPS Tailscale IP ──────────────────────
-  const SYNC_SERVER = 'http://100.x.x.x:3333';
+  const SYNC_SERVER = 'http://100.112.161.57:3333';
   // ──────────────────────────────────────────────────────────
 
   const KEY_MAP = {
