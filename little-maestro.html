@@ -7416,10 +7416,19 @@ const AudioEngine = (() => {
 
     osc1.start(now);
     osc2.start(now);
-    osc1.stop(now + (durMs / 1000) + 0.45);
-    osc2.stop(now + (durMs / 1000) + 0.45);
+    const stopAt = now + (durMs / 1000) + 0.45;
+    osc1.stop(stopAt);
+    osc2.stop(stopAt);
 
     activeNodes.push(osc1, osc2, env1, env2);
+
+    // Clean up nodes after they finish playing
+    setTimeout(() => {
+      [osc1, osc2, env1, env2].forEach(n => {
+        const idx = activeNodes.indexOf(n);
+        if (idx !== -1) activeNodes.splice(idx, 1);
+      });
+    }, (durMs + 500));
   }
 
   // ── playSong ──────────────────────────────────────────────────────
@@ -8009,7 +8018,13 @@ const MIDIManager = (() => {
   // ── public: getLog ───────────────────────────────────────────────
   function getLog() { return [..._eventLog]; }
 
-  return { init, onNoteOn, onNoteOff, onStatusChange, getStatus, getDeviceName, disconnect, getLog, forceRetry };
+  // ── public: clearCallbacks ───────────────────────────────────────
+  function clearCallbacks() {
+    _noteOnCallbacks.length  = 0;
+    _noteOffCallbacks.length = 0;
+  }
+
+  return { init, onNoteOn, onNoteOff, onStatusChange, getStatus, getDeviceName, disconnect, getLog, forceRetry, clearCallbacks };
 })();
 
 
@@ -11056,6 +11071,8 @@ document.addEventListener('DOMContentLoaded', () => {
         metronomeTid:      null,        // setInterval handle for metronome
         metronomeBeat:     0,           // beat counter for accent detection
         _phase4AudioTimer: null,        // setTimeout handle for LEAD_MS audio delay
+        _phase4MetroTimer: null,        // setTimeout handle for LEAD_MS metronome delay
+        _readyFallbackTimer: null,      // setTimeout handle for Phase 2 fallback
       };
 
       // Song metadata extras (emoji illustration, fun facts)
@@ -11185,27 +11202,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // ── Clear MIDI listener ───────────────────────────────────
       function _clearMIDI() {
-        // MIDIManager uses push-only callbacks; we flag our handler inactive
-        _s.midiHandler = null;
+       // MIDIManager uses push-only callbacks; we clear the array to prevent memory leaks
+       if (typeof MIDIManager !== 'undefined' && MIDIManager.clearCallbacks) {
+         MIDIManager.clearCallbacks();
+       }
+       _s.midiHandler = null;
       }
 
       // ── Stop playback ────────────────────────────────────────
       function _stopPlayback() {
-        _stopMetronome();
-        // Cancel the LEAD_MS audio delay timer if it's pending
-        if (_s._phase4AudioTimer) {
-          clearTimeout(_s._phase4AudioTimer);
-          _s._phase4AudioTimer = null;
-        }
-        if (_s.playHandle) {
-          _s.playHandle.stop();
-          _s.playHandle = null;
-        }
-        _removeBall();
-        // Stop falling notes animation (but keep highway visible for star screen)
-        if (typeof FallingNotes !== 'undefined') FallingNotes.stop();
+       _stopMetronome();
+       // Cancel the LEAD_MS audio delay timer if it's pending
+       if (_s._phase4AudioTimer) {
+         clearTimeout(_s._phase4AudioTimer);
+         _s._phase4AudioTimer = null;
+       }
+       // Cancel the metronome lead-in timer
+       if (_s._phase4MetroTimer) {
+         clearTimeout(_s._phase4MetroTimer);
+         _s._phase4MetroTimer = null;
+       }
+       // Cancel the ready fallback timer
+       if (_s._readyFallbackTimer) {
+         clearTimeout(_s._readyFallbackTimer);
+         _s._readyFallbackTimer = null;
+       }
+       if (_s.playHandle) {
+         _s.playHandle.stop();
+         _s.playHandle = null;
+       }
+       _removeBall();
+       // Stop falling notes animation (but keep highway visible for star screen)
+       if (typeof FallingNotes !== 'undefined') FallingNotes.stop();
       }
-
       // ── Bouncing ball helpers ─────────────────────────────────
       function _createBall() {
         _removeBall();
@@ -11438,7 +11467,7 @@ document.addEventListener('DOMContentLoaded', () => {
       function _startPhase2() {
         // Hide the falling notes highway if it was visible from a previous phase 4
         if (typeof FallingNotes !== 'undefined') FallingNotes.hide();
-        _s.phase      = 1; // listen is still "pre-play" logically
+        _s.phase      = 2;
         _s.listenCount = 0;
 
         _setPhaseUI('Phase 2 · Listen', true,
@@ -11471,7 +11500,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Safety fallback: enable button after 3 s if playSong never fires onComplete
-        const _readyFallback = setTimeout(() => {
+        _s._readyFallbackTimer = setTimeout(() => {
           const readyBtn = document.getElementById('listen-ready-btn');
           if (readyBtn && readyBtn.disabled) {
             readyBtn.disabled = false;
@@ -11489,7 +11518,10 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           _moveBallToNote(idx);
         }, () => {
-          clearTimeout(_readyFallback);
+          if (_s._readyFallbackTimer) {
+            clearTimeout(_s._readyFallbackTimer);
+            _s._readyFallbackTimer = null;
+          }
           _s.listenCount++;
           _removeBall();
           // Clear highlights
@@ -11722,7 +11754,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Start metronome after lead-in
-        setTimeout(() => {
+        _s._phase4MetroTimer = setTimeout(() => {
           if (_s.phase === 4 && _s.midiHandlerId === handlerId) _startMetronome();
         }, LEAD_MS);
 
@@ -11945,7 +11977,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('input-mode-overlay')?.remove();
         document.getElementById('lesson-mode-select-overlay')?.remove();
         document.getElementById('lesson-exit-modal-overlay')?.remove();
-        document.querySelectorAll('.celebration-overlay,.confetti-wrap,.fn-star-screen,.parent-review-overlay').forEach(el => el.remove());
+        document.querySelectorAll('.celebration-overlay,.confetti-wrap,.fn-star-screen,.parent-review-overlay,.next-song-reveal').forEach(el => el.remove());
         const banner = document.getElementById('note-instruction-banner');
         if (banner) banner.classList.add('banner--hidden');
         if (typeof FallingNotes !== 'undefined') FallingNotes.hide();
