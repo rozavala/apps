@@ -11006,7 +11006,7 @@ document.addEventListener('DOMContentLoaded', () => {
           _origShowScreen(screenId);
           if (screenId === 'questmap')   { setTimeout(QuestMap.render, 220); }
           if (screenId === 'trophyroom') { setTimeout(renderTrophyRoom, 220); }
-          if (screenId === 'lesson')     { Melody.setState('excited'); Melody.speak('Let\'s play! 🎵', 2000); setTimeout(()=>Melody.setState('idle'),2500); }
+          if (screenId === 'lesson')     { Melody.setState('excited'); setTimeout(()=>Melody.setState('idle'),2500); }
         };
       }
 
@@ -11939,6 +11939,16 @@ document.addEventListener('DOMContentLoaded', () => {
         _stopPlayback();
         _clearMIDI();
         _s.midiHandlerId = Date.now();
+
+        // ── Clean up stale overlays from any previous lesson ──
+        document.getElementById('lesson-meet-overlay')?.remove();
+        document.getElementById('input-mode-overlay')?.remove();
+        document.getElementById('lesson-mode-select-overlay')?.remove();
+        document.getElementById('lesson-exit-modal-overlay')?.remove();
+        document.querySelectorAll('.celebration-overlay,.confetti-wrap,.fn-star-screen,.parent-review-overlay').forEach(el => el.remove());
+        const banner = document.getElementById('note-instruction-banner');
+        if (banner) banner.classList.add('banner--hidden');
+        if (typeof FallingNotes !== 'undefined') FallingNotes.hide();
 
         // FIX: Init AudioEngine early so soundfont has ~15s to load before first note
         if (typeof AudioEngine !== 'undefined') AudioEngine.init();
