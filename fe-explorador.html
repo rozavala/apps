@@ -124,6 +124,12 @@
     let rosaryBead = 0;
     let heritageIndex = 0;
 
+    // Auto-pull sync
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      var u = getActiveUser();
+      if (u) CloudSync.pull('zs_fe_' + u.name.toLowerCase().replace(/\s+/g, '_'));
+    }
+
     function updateStars() {
       document.getElementById('star-count').textContent = `⭐ ${FeManager.getStatus().totalStars}`;
     }

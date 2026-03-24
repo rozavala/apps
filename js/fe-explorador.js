@@ -243,13 +243,6 @@ const FeManager = (() => {
 
   return { 
     PRAYERS, SAINTS, MYSTERIES, HERITAGE, addStar, 
-    getStatus: () => {
-      // Auto-pull sync on first status request
-      if (typeof CloudSync !== 'undefined' && CloudSync.online) {
-        const k = _key();
-        if (k) CloudSync.pull(k);
-      }
-      return _getData();
-    }
+    getStatus: _getData
   };
 })();

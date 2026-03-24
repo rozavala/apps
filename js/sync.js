@@ -93,19 +93,19 @@ const CloudSync = (() => {
         let localData = {};
         try { localData = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
         
-        if (info.appName === 'art') {
-          const merged = { ...serverData, gallery: localData.gallery || [] };
-          localStorage.setItem(key, JSON.stringify(merged));
-          return true;
-        } else {
-          const serverTime = serverData._syncedAt || 0;
-          const localTime = localData._syncedAt || 0;
-          if (serverTime > localTime) {
+        const sTime = typeof serverData._syncedAt === 'string' ? new Date(serverData._syncedAt).getTime() : (serverData._syncedAt || 0);
+        const lTime = typeof localData._syncedAt === 'string' ? new Date(localData._syncedAt).getTime() : (localData._syncedAt || 0);
+
+        if (sTime > lTime) {
+          if (info.appName === 'art') {
+            const merged = { ...serverData, gallery: localData.gallery || [] };
+            localStorage.setItem(key, JSON.stringify(merged));
+          } else {
             localStorage.setItem(key, JSON.stringify(serverData));
-            return true;
-          } else if (localTime > serverTime) {
-            state.push(key);
           }
+          return true;
+        } else if (lTime > sTime) {
+          state.push(key);
         }
       } else {
         state.push(key);
@@ -134,17 +134,19 @@ const CloudSync = (() => {
           let localData = {};
           try { localData = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
           
-          if (appName === 'art') {
-            const merged = { ...serverData, gallery: localData.gallery || [] };
-            localStorage.setItem(key, JSON.stringify(merged));
-            changed = true;
-          } else {
-            if ((serverData._syncedAt || 0) > (localData._syncedAt || 0)) {
+          const sTime = typeof serverData._syncedAt === 'string' ? new Date(serverData._syncedAt).getTime() : (serverData._syncedAt || 0);
+          const lTime = typeof localData._syncedAt === 'string' ? new Date(localData._syncedAt).getTime() : (localData._syncedAt || 0);
+
+          if (sTime > lTime) {
+            if (appName === 'art') {
+              const merged = { ...serverData, gallery: localData.gallery || [] };
+              localStorage.setItem(key, JSON.stringify(merged));
+            } else {
               localStorage.setItem(key, JSON.stringify(serverData));
-              changed = true;
-            } else if ((localData._syncedAt || 0) > (serverData._syncedAt || 0)) {
-              state.push(key);
             }
+            changed = true;
+          } else if (lTime > sTime) {
+            state.push(key);
           }
         } else if (localStorage.getItem(key)) {
           state.push(key);
@@ -157,10 +159,14 @@ const CloudSync = (() => {
         const sData = allData['lm_recital'];
         let lData = {};
         try { lData = JSON.parse(localStorage.getItem(rKey)) || {}; } catch(e) {}
-        if ((sData._syncedAt || 0) > (lData._syncedAt || 0)) {
+        
+        const sTime = typeof sData._syncedAt === 'string' ? new Date(sData._syncedAt).getTime() : (sData._syncedAt || 0);
+        const lTime = typeof lData._syncedAt === 'string' ? new Date(lData._syncedAt).getTime() : (lData._syncedAt || 0);
+
+        if (sTime > lTime) {
           localStorage.setItem(rKey, JSON.stringify(sData));
           changed = true;
-        } else if ((lData._syncedAt || 0) > (sData._syncedAt || 0)) {
+        } else if (lTime > sTime) {
           state.push(rKey);
         }
       } else if (localStorage.getItem(rKey)) {
