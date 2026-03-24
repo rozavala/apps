@@ -34,11 +34,17 @@ function saveUserProgress(level, stars, scorePct) {
     lastPlayed: new Date().toISOString()
   };
   localStorage.setItem(key, JSON.stringify(prog));
+  if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(key);
 }
 
 function initUserUI() {
   const user = getActiveUser();
   if (user) {
+    // Auto-pull sync
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      CloudSync.pull(getUserProgressKey());
+    }
+
     // nav.js handles the badge — we only set the greeting and recommend level
     const greetEl = document.getElementById('greeting');
     if (greetEl) greetEl.textContent = `Let's go, ${user.name}!`;

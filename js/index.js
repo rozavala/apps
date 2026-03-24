@@ -36,7 +36,20 @@
 
         card.onclick = (e) => {
           if (e.target.closest('.profile-edit-btn')) return;
-          loginAs(p);
+          setActiveUser(p);
+          if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+            const key = p.name.toLowerCase().replace(/\s+/g, '_');
+            const banner = document.createElement('div');
+            banner.id = 'sync-banner';
+            banner.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:8px;background:rgba(124,58,237,0.9);color:#fff;text-align:center;font-family:var(--font-display);font-weight:700;font-size:0.85rem;z-index:9999;';
+            banner.textContent = '☁️ Syncing...';
+            document.body.appendChild(banner);
+            CloudSync.pullAll(key)
+              .then(() => { banner.textContent = '✅ Synced!'; setTimeout(() => { banner.remove(); showHub(); }, 600); })
+              .catch(() => { banner.textContent = '⚠️ Offline — using local data'; setTimeout(() => { banner.remove(); showHub(); }, 1200); });
+          } else {
+            showHub();
+          }
         };
 
         grid.appendChild(card);
@@ -425,6 +438,41 @@
     function openParentsCorner() {
       requestPinThen(() => {
         renderParentsCorner();
+        
+        const syncEl = document.getElementById('sync-section');
+        if (syncEl && typeof CloudSync !== 'undefined') {
+          const configured = CloudSync.isConfigured();
+          const online = CloudSync.online;
+          syncEl.innerHTML = `
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
+              <h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">
+                ☁️ Cloud Sync
+                <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:99px;
+                  background:${online ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)'};
+                  color:${online ? '#34D399' : '#F87171'};">
+                  ${configured ? (online ? '● Connected' : '● Offline') : '○ Not set up'}
+                </span>
+              </h3>
+              ${configured ? `
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
+                    onclick="_syncPushAll()">⬆️ Push All to Cloud</button>
+                  <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
+                    onclick="_syncPullAll()">⬇️ Pull All from Cloud</button>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">
+                  Sync is automatic — progress pushes on save and pulls on login.
+                  Use these buttons for a manual full sync.
+                </p>
+              ` : `
+                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">
+                  To sync progress across devices, set SYNC_SERVER in js/sync.js
+                  to your VPS Tailscale IP.
+                </p>
+              `}
+            </div>`;
+        }
+
         document.getElementById('parents-overlay').classList.add('active');
       });
     }
@@ -501,6 +549,32 @@
       TimerManager.addBonusForKid(name, mins);
       renderParentsCorner();
     }
+
+    async function _syncPushAll() {
+      const btn = event.target;
+      btn.textContent = '⬆️ Pushing...';
+      btn.disabled = true;
+      try {
+        await CloudSync.pushAllKids();
+        btn.textContent = '✅ Pushed!';
+      } catch (e) { btn.textContent = '❌ Failed'; }
+      setTimeout(() => { btn.textContent = '⬆️ Push All to Cloud'; btn.disabled = false; }, 2000);
+    }
+
+    async function _syncPullAll() {
+      const btn = event.target;
+      btn.textContent = '⬇️ Pulling...';
+      btn.disabled = true;
+      try {
+        await CloudSync.pullAllKids();
+        btn.textContent = '✅ Pulled!';
+        // Refresh hub UI
+        updateStatsCards();
+        renderAppCards();
+      } catch (e) { btn.textContent = '❌ Failed'; }
+      setTimeout(() => { btn.textContent = '⬇️ Pull All from Cloud'; btn.disabled = false; }, 2000);
+    }
+
     function updateKidLimit(idx, val) {
       const profiles = getProfiles();
       profiles[idx].maxMinutes = parseInt(val);
@@ -941,6 +1015,12 @@ function createProfile() {
       if (e.key === 'Escape') {
         if (document.getElementById('edit-modal').classList.contains('active')) closeEditModal();
         else if (document.getElementById('pin-modal').classList.contains('active')) closePinModal();
+      }
+    });
+
+    window.addEventListener('zs:synced', () => {
+      if (document.getElementById('hub-screen')?.classList.contains('active')) {
+        updateStatsCards(); renderAppCards();
       }
     });
 

@@ -228,7 +228,10 @@ const FeManager = (() => {
 
   function _saveData(data) {
     const key = _key();
-    if (key) localStorage.setItem(key, JSON.stringify(data));
+    if (key) {
+      localStorage.setItem(key, JSON.stringify(data));
+      if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(key);
+    }
   }
 
   function addStar() {
@@ -238,5 +241,15 @@ const FeManager = (() => {
     if (typeof showConfetti === 'function') showConfetti();
   }
 
-  return { PRAYERS, SAINTS, MYSTERIES, HERITAGE, addStar, getStatus: _getData };
+  return { 
+    PRAYERS, SAINTS, MYSTERIES, HERITAGE, addStar, 
+    getStatus: () => {
+      // Auto-pull sync on first status request
+      if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+        const k = _key();
+        if (k) CloudSync.pull(k);
+      }
+      return _getData();
+    }
+  };
 })();

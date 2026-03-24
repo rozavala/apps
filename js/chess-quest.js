@@ -4,7 +4,12 @@
 
 function getUserKey(){const u=getActiveUser();return u?`zs_chess_${u.name.toLowerCase().replace(/\s+/g,'_')}`:null}
 function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
-function saveProgress(data){const k=getUserKey();if(!k)return;const p=getUserProgress();Object.assign(p,data);localStorage.setItem(k,JSON.stringify(p))}
+function saveProgress(data){
+  const k=getUserKey();if(!k)return;
+  const p=getUserProgress();Object.assign(p,data);
+  localStorage.setItem(k,JSON.stringify(p));
+  if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(k);
+}
 
 // ── Pieces & Unicode ──
 const P={K:'K',Q:'Q',R:'R',B:'B',N:'N',P:'P'};
@@ -110,6 +115,12 @@ function showFeedback(emoji){
 
 // ── Init (safe — no crash if nav.js hasn't run yet) ──
 function init(){
+  // Auto-pull sync
+  if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+    const k = getUserKey();
+    if (k) CloudSync.pull(k);
+  }
+
   const user=getActiveUser();
   if(user){
     // nav.js handles the badge, but set greeting if element exists

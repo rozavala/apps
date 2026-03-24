@@ -5,9 +5,28 @@
 
 function getUserKey(){const u=getActiveUser();return u?'zs_chile_'+u.name.toLowerCase().replace(/\s+/g,'_'):null}
 function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
-function saveTopicProgress(id,stars,pct){const k=getUserKey();if(!k)return;const p=getUserProgress();const prev=p[id]||{bestStars:0,bestPct:0};p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};localStorage.setItem(k,JSON.stringify(p))}
-function saveVisited(id){const k=getUserKey();if(!k)return;const p=getUserProgress();if(!p.vr)p.vr=[];if(!p.vr.includes(id))p.vr.push(id);localStorage.setItem(k,JSON.stringify(p))}
-function saveMemBest(m){const k=getUserKey();if(!k)return;const p=getUserProgress();if(!p.memBest||m<p.memBest)p.memBest=m;localStorage.setItem(k,JSON.stringify(p))}
+function saveTopicProgress(id,stars,pct){
+  const k=getUserKey();if(!k)return;
+  const p=getUserProgress();
+  const prev=p[id]||{bestStars:0,bestPct:0};
+  p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};
+  localStorage.setItem(k,JSON.stringify(p));
+  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+}
+function saveVisited(id){
+  const k=getUserKey();if(!k)return;
+  const p=getUserProgress();
+  if(!p.vr)p.vr=[];if(!p.vr.includes(id))p.vr.push(id);
+  localStorage.setItem(k,JSON.stringify(p));
+  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+}
+function saveMemBest(m){
+  const k=getUserKey();if(!k)return;
+  const p=getUserProgress();
+  if(!p.memBest||m<p.memBest)p.memBest=m;
+  localStorage.setItem(k,JSON.stringify(p));
+  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+}
 
 function showFeedback(e){
   const el=document.getElementById('feedback');
@@ -111,8 +130,8 @@ const TOPICS=[
   ]},
   {id:'volcanes',icon:'🌋',name:'Volcanes de Chile',stories:[
     {t:'🌋 Cinturón de Fuego',p:'Chile está en el Cinturón de Fuego del Pacífico, una zona con muchos volcanes y terremotos. Hay más de 2.000 volcanes en Chile, y unos 90 están activos.',f:'El Nevado Ojos del Salado es el volcán más alto del mundo (6.891 m).'}
-  ]}
-];
+  ]
+};
 let curTopic=null;
 
 function renderTopics(){
@@ -372,6 +391,12 @@ function finishQ(){
 
 // ── INIT (safe — runs after DOM ready) ──
 function dcInit(){
+  // Auto-pull sync
+  if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+    const k = getUserKey();
+    if (k) CloudSync.pull(k);
+  }
+
   // Tab nav
   const tabBar=document.getElementById('tabBar');
   if(tabBar){

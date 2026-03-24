@@ -177,11 +177,18 @@ const GuitarJam = (() => {
     const p = getProgress();
     Object.assign(p, data);
     localStorage.setItem(k, JSON.stringify(p));
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(k);
   }
 
 
   // ── Chord Library UI ──────────────────────────────────────────
   function initLearn() {
+    // Auto-pull sync
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      const u = getActiveUser();
+      if (u) CloudSync.pull('zs_guitar_' + u.name.toLowerCase().replace(/\s+/g, '_'));
+    }
+
     const tier = getAgeTier();
     const tierOrder = ['beginner', 'intermediate', 'advanced', 'expert'];
     const maxIdx = tierOrder.indexOf(tier);

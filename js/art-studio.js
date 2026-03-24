@@ -119,11 +119,18 @@ const ArtStudio = (() => {
     const p = getProgress();
     Object.assign(p, data);
     localStorage.setItem(k, JSON.stringify(p));
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(k);
   }
 
 
   // ── Initialization ────────────────────────────────────────────
   function init() {
+    // Auto-pull sync
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      const u = getActiveUser();
+      if (u) CloudSync.pull('zs_art_' + u.name.toLowerCase().replace(/\s+/g, '_'));
+    }
+
     mainCanvas = document.getElementById('main-canvas');
     mainCtx = mainCanvas.getContext('2d', { willReadFrequently: true });
     tempCanvas = document.getElementById('temp-canvas');
