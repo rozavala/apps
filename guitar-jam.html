@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Guitar Jam 🎸</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/guitar-jam.css">
+</head>
+<body>
+  <!-- Top navigation managed by nav.js, plus custom tabs for this app -->
+  <div class="screen active" id="screen-learn">
+    <div class="tabs-bar">
+      <button class="tab active" data-tab="learn">Learn</button>
+      <button class="tab" data-tab="play">Play</button>
+      <button class="tab" data-tab="ear">Ear</button>
+      <button class="tab" data-tab="tuner">Tuner</button>
+    </div>
+
+    <div class="content-container">
+      <div id="tab-learn" class="tab-content active">
+        <div class="chord-layout">
+          <div class="chord-sidebar">
+            <h2 style="font-family: var(--font-display); margin-bottom: 12px;">Chords to Learn</h2>
+            <div id="chord-list" class="chord-list"></div>
+          </div>
+          <div class="chord-main">
+            <div class="fretboard-wrap">
+              <svg id="fretboard-container" viewBox="0 0 200 250" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+            <div id="chord-name" class="chord-name">Select a chord</div>
+            <div id="chord-fact" class="chord-fact"></div>
+            <button id="strum-btn" class="strum-btn" style="display:none;">Strum ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-play" class="tab-content">
+        <div id="song-select-screen" class="song-select-screen">
+          <h2 style="font-family: var(--font-display); margin-bottom: 20px; text-align: center;">Pick a Song</h2>
+          <div id="song-list" class="song-grid"></div>
+        </div>
+        
+        <div id="gameplay-screen" class="gameplay-screen" style="display:none;">
+          <div class="game-header">
+            <button class="back-to-songs" onclick="GuitarJam.exitSong()">← Songs</button>
+            <div id="game-song-title" class="game-song-title">Song Title</div>
+            <button id="metro-toggle" class="metro-toggle">⌛ Metro: On</button>
+          </div>
+
+          <div class="chord-strip-container">
+            <div id="chord-strip" class="chord-strip"></div>
+            <div class="hit-indicator"></div>
+          </div>
+
+          <div class="game-main">
+            <div class="fretboard-display">
+              <svg id="game-fretboard" viewBox="0 0 200 250"></svg>
+              <div id="game-chord-name" class="game-chord-name">C</div>
+            </div>
+          </div>
+
+          <div class="game-footer">
+            <button id="big-strum-btn" class="big-strum-btn">STRUM!</button>
+          </div>
+        </div>
+
+        <div id="results-screen" class="results-screen" style="display:none;">
+          <div class="results-card">
+            <div class="results-emoji">🎸</div>
+            <h2 id="results-title">Great Playing!</h2>
+            <div class="results-stars" id="results-stars"></div>
+            <div class="results-stats">
+              <div class="stat-item"><span class="stat-label">Accuracy</span><span id="stat-accuracy" class="stat-val">0%</span></div>
+              <div class="stat-item"><span class="stat-label">Correct</span><span id="stat-hits" class="stat-val">0</span></div>
+            </div>
+            <div class="results-btns">
+              <button class="results-btn primary" onclick="GuitarJam.replaySong()">↺ Play Again</button>
+              <button class="results-btn" onclick="GuitarJam.exitSong()">More Songs</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-ear" class="tab-content">
+        <div id="ear-game-screen" class="ear-game-screen">
+          <div class="ear-header">
+            <div id="ear-round" class="ear-round">Round 1/10</div>
+            <div id="ear-streak" class="ear-streak">🔥 0</div>
+          </div>
+          <div class="ear-main">
+            <div class="ear-question-card">
+              <button id="ear-replay-btn" class="ear-replay-btn">Replay 🔊</button>
+              <p>Which chord did you hear?</p>
+            </div>
+            <div id="ear-options" class="ear-options"></div>
+          </div>
+        </div>
+        
+        <div id="ear-results-screen" class="results-screen" style="display:none;">
+          <div class="results-card">
+            <div class="results-emoji">👂</div>
+            <h2>Ear Training Done!</h2>
+            <div class="results-stars" id="ear-results-stars"></div>
+            <div class="results-stats">
+              <div class="stat-item"><span class="stat-label">Score</span><span id="ear-stat-score" class="stat-val">0/10</span></div>
+              <div class="stat-item"><span class="stat-label">Best Streak</span><span id="ear-stat-streak" class="stat-val">0</span></div>
+            </div>
+            <div class="results-btns">
+              <button class="results-btn primary" onclick="GuitarJam.startEarGame()">↺ Play Again</button>
+              <button class="results-btn" onclick="GuitarJam.initLearn()">Back to Library</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-tuner" class="tab-content">
+        <div class="tuner-container">
+          <h2 style="font-family: var(--font-display); text-align: center; margin-bottom: 24px;">Standard Tuner</h2>
+          <div class="tuner-headstock">
+            <!-- Visual buttons for each string -->
+            <div class="string-buttons">
+              <button class="tuner-btn" data-freq="329.63" data-name="E4">E <span>(High)</span></button>
+              <button class="tuner-btn" data-freq="246.94" data-name="B3">B</button>
+              <button class="tuner-btn" data-freq="196.00" data-name="G3">G</button>
+              <button class="tuner-btn" data-freq="146.83" data-name="D3">D</button>
+              <button class="tuner-btn" data-freq="110.00" data-name="A2">A</button>
+              <button class="tuner-btn" data-freq="82.41" data-name="E2">E <span>(Low)</span></button>
+            </div>
+          </div>
+          <p class="tuner-help">Tap a string to hear the correct pitch. Match your guitar string to this sound.</p>
+          <div class="tuner-tuning">E A D G B E</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Common Feedback Overlay -->
+  <div id="feedback" class="feedback-float"><span></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/guitar-jam.js"></script>
+</body>
+</html>

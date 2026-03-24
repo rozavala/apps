@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Art Studio 🎨</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/art-studio.css">
+</head>
+<body>
+  <!-- Top navigation managed by nav.js -->
+  <div class="screen active" id="screen-studio">
+    <div class="tabs-bar">
+      <button class="tab active" data-tab="draw">Draw</button>
+      <button class="tab" data-tab="learn">Learn</button>
+      <button class="tab" data-tab="gallery">Gallery</button>
+    </div>
+
+    <div class="content-container">
+      <div id="tab-draw" class="tab-content active">
+        <div class="canvas-wrap">
+          <canvas id="main-canvas"></canvas>
+          <canvas id="temp-canvas"></canvas>
+        </div>
+        
+        <div class="toolbar">
+          <div class="tool-section palette-section">
+            <div id="color-palette" class="color-palette"></div>
+          </div>
+          
+          <div class="tool-section brush-section">
+            <button class="brush-size" data-size="3" style="--size: 6px;"></button>
+            <button class="brush-size active" data-size="8" style="--size: 12px;"></button>
+            <button class="brush-size" data-size="16" style="--size: 20px;"></button>
+          </div>
+
+          <div class="tool-section tool-buttons">
+            <button class="tool-btn active" data-tool="pencil" title="Pencil">✏️</button>
+            <button class="tool-btn" data-tool="line" title="Line">📏</button>
+            <button class="tool-btn" data-tool="rectangle" title="Rectangle">⬜</button>
+            <button class="tool-btn" data-tool="circle" title="Circle">⭕</button>
+            <button class="tool-btn" data-tool="fill" title="Fill">🪣</button>
+          </div>
+
+          <div class="tool-section action-buttons">
+            <button id="undo-btn" class="action-btn" title="Undo">↩️</button>
+            <button id="redo-btn" class="action-btn" title="Redo">↪️</button>
+            <button id="clear-btn" class="action-btn" title="Clear">🗑️</button>
+            <button id="save-btn" class="action-btn primary" title="Save to Gallery">💾</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-learn" class="tab-content">
+        <div id="lesson-select-screen" class="lesson-select-screen">
+          <h2 style="font-family: var(--font-display); margin-bottom: 20px; text-align: center;">Guided Lessons</h2>
+          <div id="lesson-list" class="lesson-grid"></div>
+        </div>
+
+        <div id="lesson-game-screen" class="lesson-game-screen" style="display:none;">
+          <div class="lesson-header">
+            <button class="lesson-back" onclick="ArtStudio.exitLesson()">← Lessons</button>
+            <div id="lesson-title" class="lesson-title">Lesson Title</div>
+            <div id="lesson-step-counter" class="lesson-step-counter">Step 1/5</div>
+          </div>
+          
+          <div id="instruction-banner" class="instruction-banner">
+            Draw a big circle!
+          </div>
+
+          <div class="lesson-main">
+            <div class="canvas-wrap lesson-canvas-wrap">
+              <canvas id="lesson-main-canvas"></canvas>
+              <canvas id="lesson-guide-canvas"></canvas>
+              <canvas id="lesson-temp-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="lesson-footer">
+            <button id="lesson-next-btn" class="lesson-next-btn" onclick="ArtStudio.nextLessonStep()">Next Step →</button>
+          </div>
+        </div>
+
+        <!-- Color Mixing Special UI -->
+        <div id="color-mixing-screen" class="color-mixing-screen" style="display:none;">
+          <div class="lesson-header">
+            <button class="lesson-back" onclick="ArtStudio.exitLesson()">← Lessons</button>
+            <div class="lesson-title">Color Mixing</div>
+          </div>
+          <div class="mixing-area">
+            <div class="mixing-pots">
+              <div id="mix-pot-1" class="mix-pot empty" onclick="ArtStudio.pickMixColor(1)">?</div>
+              <div class="mix-plus">+</div>
+              <div id="mix-pot-2" class="mix-pot empty" onclick="ArtStudio.pickMixColor(2)">?</div>
+              <div class="mix-equals">=</div>
+              <div id="mix-result" class="mix-pot result">?</div>
+            </div>
+            <div id="mix-palette" class="mix-palette"></div>
+            <button id="mix-btn" class="mix-btn" disabled onclick="ArtStudio.performMix()">Mix!</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-gallery" class="tab-content">
+        <div id="gallery-grid" class="gallery-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Dialog Overlay -->
+  <div id="save-dialog" class="modal-overlay">
+    <div class="modal-card">
+      <h3>Save Artwork</h3>
+      <input type="text" id="art-title" placeholder="Title your masterpiece..." maxlength="20">
+      <div class="modal-btns">
+        <button class="modal-btn" onclick="ArtStudio.closeSaveDialog()">Cancel</button>
+        <button class="modal-btn primary" onclick="ArtStudio.confirmSave()">Save ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery Viewer Overlay -->
+  <div id="gallery-viewer" class="modal-overlay">
+    <div class="viewer-card">
+      <button class="viewer-close" onclick="ArtStudio.closeViewer()">✕</button>
+      <img id="viewer-img" src="" alt="Artwork">
+      <div id="viewer-title" class="viewer-title">Title</div>
+      <button id="viewer-delete" class="viewer-delete">🗑 Delete Artwork</button>
+    </div>
+  </div>
+
+  <!-- Common Feedback Overlay -->
+  <div id="feedback" class="feedback-float"><span></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/art-studio.js"></script>
+</body>
+</html>

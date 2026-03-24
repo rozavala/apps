@@ -93,6 +93,18 @@ function getTotalStars(userName) {
     total += (fe.totalStars || 0);
   } catch {}
 
+  // Guitar Jam
+  try {
+    const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
+    total += (gj.totalStars || 0);
+  } catch {}
+
+  // Art Studio
+  try {
+    const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
+    total += (as.totalStars || 0);
+  } catch {}
+
   return total;
 }
 
@@ -126,6 +138,8 @@ function getExplorerRank(userName) {
   try { const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {}; if ((cq.puzzlesSolved || 0) + (cq.wins || 0) > 0) appsWithStars++; } catch {}
   try { const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {}; const p = lm.progress || {}; if (Object.values(p).some(v => typeof v === 'object' && v !== null && v.stars > 0)) appsWithStars++; } catch {}
   try { const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {}; if ((fe.totalStars || 0) > 0) appsWithStars++; } catch {}
+  try { const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {}; if ((gj.totalStars || 0) > 0) appsWithStars++; } catch {}
+  try { const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {}; if ((as.totalStars || 0) > 0) appsWithStars++; } catch {}
 
   const RANKS = [
     { name: 'Legend',    icon: '🏆', stars: 50, apps: 4 },

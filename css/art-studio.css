@@ -1,0 +1,253 @@
+/* ============================================================
+   ART STUDIO — SPECIFIC STYLES
+   ============================================================ */
+
+:root {
+  --art-accent: #F472B6;
+  --art-glow: rgba(236, 72, 153, 0.3);
+}
+
+body {
+  padding-top: 60px;
+  overflow: hidden; /* Canvas app usually handles its own scrolling if any */
+}
+
+.content-container {
+  height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content {
+  flex: 1;
+  display: none;
+  height: 100%;
+}
+.tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Canvas Area */
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  background: #FFF;
+  cursor: crosshair;
+  touch-action: none;
+  overflow: hidden;
+}
+#main-canvas, #temp-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#temp-canvas { pointer-events: none; }
+
+/* Toolbar */
+.toolbar {
+  background: var(--bg-surface);
+  border-top: 2px solid rgba(255,255,255,0.08);
+  padding: 12px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 10;
+}
+
+.tool-section {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 0 8px;
+  border-right: 1.5px solid rgba(255,255,255,0.05);
+}
+.tool-section:last-child { border-right: none; }
+
+/* Palette */
+.color-palette {
+  display: flex;
+  gap: 6px;
+  max-width: 200px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.active { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.5); transform: scale(1.15); }
+
+/* Brush Sizes */
+.brush-size {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.brush-size::after {
+  content: '';
+  width: var(--size);
+  height: var(--size);
+  background: #fff;
+  border-radius: 50%;
+}
+.brush-size.active { border-color: var(--art-accent); background: rgba(244, 114, 182, 0.1); }
+
+/* Tool Buttons */
+.tool-btn, .action-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.tool-btn:hover, .action-btn:hover { background: rgba(255,255,255,0.1); }
+.tool-btn.active { border-color: var(--art-accent); background: rgba(244, 114, 182, 0.15); }
+.action-btn.primary { background: var(--art-accent); color: #000; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-card {
+  background: var(--bg-surface); padding: 32px; border-radius: 24px;
+  width: 90%; max-width: 400px; text-align: center;
+  border: 2px solid var(--art-accent);
+}
+.modal-card input {
+  width: 100%; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2);
+  border: 2px solid rgba(255,255,255,0.1); color: #fff; margin: 20px 0;
+  font-family: var(--font-body); font-size: 1rem;
+}
+.modal-btns { display: flex; gap: 12px; }
+.modal-btn { 
+  flex: 1; padding: 12px; border-radius: 10px; border: none; 
+  font-weight: 800; cursor: pointer; 
+}
+.modal-btn.primary { background: var(--art-accent); color: #000; }
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 24px;
+  overflow-y: auto;
+}
+.gallery-card {
+  background: var(--bg-surface); border-radius: 16px; overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.06); cursor: pointer;
+  transition: transform 0.2s;
+}
+.gallery-card:hover { transform: translateY(-4px); border-color: var(--art-accent); }
+.gallery-thumb { width: 100%; aspect-ratio: 1; background: #fff; display: block; object-fit: contain; }
+.gallery-info { padding: 12px; }
+.gallery-title { font-weight: 800; font-family: var(--font-display); }
+.gallery-date { font-size: 0.7rem; color: var(--text-muted); }
+
+/* Viewer */
+.viewer-card {
+  background: #FFF; padding: 12px; border-radius: 16px;
+  max-width: 95%; max-height: 90%; position: relative;
+}
+.viewer-close {
+  position: absolute; top: -40px; right: 0; color: #fff;
+  background: none; border: none; font-size: 2rem; cursor: pointer;
+}
+#viewer-img { max-width: 100%; max-height: 70vh; display: block; }
+.viewer-title { color: #000; font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; text-align: center; margin-top: 12px; }
+.viewer-delete {
+  width: 100%; margin-top: 12px; padding: 10px; border-radius: 8px;
+  background: #FEE2E2; color: #EF4444; border: none; font-weight: 700; cursor: pointer;
+}
+
+/* Lessons */
+.lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+.lesson-card {
+  background: var(--bg-surface); border: 2px solid rgba(255,255,255,0.06);
+  border-radius: 20px; padding: 24px; cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+}
+.lesson-card:hover { transform: translateY(-4px); border-color: var(--art-accent); }
+.lesson-card.done { border-color: #10B981; }
+.lesson-card.done::after { content: '✅'; position: absolute; top: 10px; right: 10px; }
+.lesson-icon { font-size: 3rem; }
+.lesson-card-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; }
+.lesson-card-tier { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+
+.lesson-game-screen { flex: 1; display: flex; flex-direction: column; height: 100%; }
+.lesson-header { padding: 12px 24px; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between; }
+.lesson-back { background: rgba(255,255,255,0.1); border: none; border-radius: 8px; padding: 6px 12px; color: #fff; cursor: pointer; }
+.lesson-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; }
+.lesson-step-counter { font-weight: 700; color: var(--text-muted); }
+
+.instruction-banner {
+  background: rgba(0,0,0,0.7); color: #fff; padding: 12px; text-align: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.3rem;
+  border-bottom: 2px solid var(--art-accent); z-index: 5;
+}
+
+.lesson-main { flex: 1; position: relative; }
+.lesson-canvas-wrap { background: #fff; }
+#lesson-guide-canvas { pointer-events: none; opacity: 0.3; }
+
+.lesson-footer { padding: 16px; display: flex; justify-content: center; background: var(--bg-surface); }
+.lesson-next-btn {
+  background: var(--art-accent); color: #000; border: none; padding: 12px 32px;
+  border-radius: 12px; font-weight: 800; font-family: var(--font-display); font-size: 1.2rem;
+  cursor: pointer; transition: all 0.2s;
+}
+.lesson-next-btn:hover { transform: scale(1.05); }
+
+/* Color Mixing */
+.color-mixing-screen { flex: 1; background: var(--bg-deep); }
+.mixing-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; padding: 20px; }
+.mixing-pots { display: flex; align-items: center; gap: 20px; }
+.mix-pot {
+  width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
+}
+.mix-pot.empty { color: var(--text-muted); border-style: dashed; }
+.mix-pot.result { width: 100px; height: 100px; border-color: var(--art-accent); }
+.mix-plus, .mix-equals { font-size: 2rem; font-weight: 800; color: var(--text-muted); }
+
+.mix-palette { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+.mix-btn {
+  padding: 16px 48px; border-radius: 12px; background: var(--art-accent); color: #000;
+  border: none; font-weight: 800; font-size: 1.5rem; font-family: var(--font-display);
+  cursor: pointer; transition: all 0.2s;
+}
+.mix-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .tool-section { border-right: none; padding: 4px; }
+  .toolbar { gap: 8px; }
+}

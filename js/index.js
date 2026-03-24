@@ -159,7 +159,9 @@
         { name: 'Descubre Chile', icon: '🇨🇱', href: 'descubre-chile.html', key: `zs_chile_${key}` },
         { name: 'Chess Quest', icon: '♟️', href: 'chess-quest.html', key: `zs_chess_${key}` },
         { name: 'Little Maestro', icon: '🎹', href: 'little-maestro.html', key: `littlemaestro_${key}` },
-        { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}` }
+        { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}` },
+        { name: 'Guitar Jam', icon: '🎸', href: 'guitar-jam.html', key: `zs_guitar_${key}` },
+        { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: `zs_art_${key}` }
       ];
 
       const noProgress = [];
@@ -172,6 +174,8 @@
           else if (app.name === 'Chess Quest') hasProg = (data.puzzlesSolved || 0) + (data.wins || 0) > 0;
           else if (app.name === 'Little Maestro') hasProg = (data.progress && Object.keys(data.progress).length > 0);
           else if (app.name === 'Fe Explorador') hasProg = (data.totalStars || 0) > 0;
+          else if (app.name === 'Guitar Jam') hasProg = (data.totalStars || 0) > 0;
+          else if (app.name === 'Art Studio') hasProg = (data.totalStars || 0) > 0;
           
           if (!hasProg) noProgress.push(app);
         } catch { noProgress.push(app); }
@@ -193,6 +197,20 @@
         const user = getActiveUser();
         if (!user) return;
         const key = user.name.toLowerCase().replace(/\s+/g, '_');
+
+        // Guitar Jam
+        try {
+          const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
+          const el = document.getElementById('stats-guitar');
+          if (el && (gj.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${gj.totalStars}</span>`;
+        } catch {}
+
+        // Art Studio
+        try {
+          const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
+          const el = document.getElementById('stats-art');
+          if (el && (as.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${as.totalStars}</span>`;
+        } catch {}
 
         // Little Maestro
         try {
@@ -310,6 +328,27 @@
         try {
           const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
           if (fe.totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">⛪</span><span class="dash-app-name">Fe Explorador</span><span class="dash-app-stat">⭐ ${fe.totalStars}</span></div>`;
+        } catch {}
+
+        try {
+          const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
+          if ((gj.totalStars || 0) > 0) {
+            const chords = (gj.chordsLearned || []).length;
+            const songs = (gj.songsCompleted || []).length;
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎸</span>
+              <span class="dash-app-name">Guitar Jam</span>
+              <span class="dash-app-stat">⭐ ${gj.totalStars} · ${chords} chords · ${songs} songs</span></div>`;
+          }
+        } catch {}
+        try {
+          const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
+          if ((as.totalStars || 0) > 0) {
+            const artworks = (as.gallery || []).length;
+            const lessons = (as.lessonsCompleted || []).length;
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎨</span>
+              <span class="dash-app-name">Art Studio</span>
+              <span class="dash-app-stat">⭐ ${as.totalStars} · ${artworks} artworks · ${lessons} lessons</span></div>`;
+          }
         } catch {}
 
         const rank = typeof getExplorerRank === 'function' ? getExplorerRank(p.name) : { icon: '🛸', name: 'Cadet' };
