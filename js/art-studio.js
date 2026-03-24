@@ -607,12 +607,14 @@ const ArtStudio = (() => {
   function closeViewer() { document.getElementById('gallery-viewer').classList.remove('active'); }
 
   function checkStarMilestones() {
-    const p = getProgress(); let newStars = p.totalStars || 0;
-    if (p.gallery.length >= 1 && newStars < 1) newStars = 1;
-    if (p.gallery.length >= 5 && newStars < 2) newStars = 2;
-    if (p.lessonsCompleted.length >= 3 && newStars < 3) newStars = 3;
-    if (newStars > p.totalStars) {
-      saveProgress({ totalStars: newStars });
+    const p = getProgress(); 
+    const lessonStars = p.lessonsCompleted.length; // 1 star per lesson (max 6)
+    const galleryStars = Math.min(2, Math.floor(p.gallery.length / 5)); // 1 star per 5 artworks (max 2)
+    
+    const totalCalculated = lessonStars + galleryStars;
+
+    if (totalCalculated > p.totalStars) {
+      saveProgress({ totalStars: totalCalculated });
       if (typeof SFX !== 'undefined') setTimeout(() => SFX.cheer(), 500);
       showFeedback('🌟');
     }

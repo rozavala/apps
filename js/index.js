@@ -842,6 +842,9 @@ function createProfile() {
       localStorage.removeItem(`zs_chores_${key}`);
       localStorage.removeItem(`zs_chess_plays_${key}`);
       localStorage.removeItem(`zs_fe_${key}`);
+      localStorage.removeItem(`zs_guitar_${key}`);
+      localStorage.removeItem(`zs_art_${key}`);
+      localStorage.removeItem(`zs_lastrank_${key}`);
 
       // Remove from Little Maestro index if present
       try {
@@ -884,6 +887,9 @@ function createProfile() {
         `zs_timer_`,
         `zs_chores_`,
         `zs_fe_`,
+        `zs_guitar_`,
+        `zs_art_`,
+        `zs_lastrank_`,
       ];
 
       suffixes.forEach(prefix => {

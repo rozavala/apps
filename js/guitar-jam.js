@@ -600,16 +600,20 @@ const GuitarJam = (() => {
   function checkStarMilestones() {
     const p = getProgress();
     const learnedCount = p.chordsLearned.length;
-    const songStars = p.songsCompleted.reduce((sum, s) => sum + s.bestStars, 0);
+    const songStars3Count = p.songsCompleted.filter(s => s.bestStars === 3).length;
     const earStars = p.earStars || 0;
     
-    let newStars = 0;
-    if (learnedCount >= 5 || songStars >= 1 || earStars >= 1) newStars = 1;
-    if (songStars >= 10 || learnedCount >= 10 || earStars >= 2) newStars = 2;
-    if (songStars >= 20 && learnedCount >= CHORDS.length && earStars >= 3) newStars = 3;
+    // 1 star per 5 chords (max 2)
+    let chordStars = Math.min(2, Math.floor(learnedCount / 5));
+    // 1 star per 2 songs aced (max 4)
+    let playStars = Math.min(4, Math.floor(songStars3Count / 2));
+    // 1 star for acing ear training
+    let listenStars = earStars === 3 ? 1 : 0;
 
-    if (newStars > p.totalStars) {
-      saveProgress({ totalStars: newStars });
+    const totalCalculated = chordStars + playStars + listenStars;
+
+    if (totalCalculated > p.totalStars) {
+      saveProgress({ totalStars: totalCalculated });
       if (typeof SFX !== 'undefined') setTimeout(() => SFX.cheer(), 500);
       showFeedback('🌟');
     }
