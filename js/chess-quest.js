@@ -115,9 +115,7 @@ function init(){
     // nav.js handles the badge, but set greeting if element exists
     const greetEl=document.getElementById('greeting');
     if(greetEl){
-      if(user.age&&user.age<=6) greetEl.textContent=`Start with "Learn the Pieces", ${user.name}!`;
-      else if(user.age&&user.age>=9) greetEl.textContent=`Ready to play, ${user.name}?`;
-      else greetEl.textContent=`Let's play, ${user.name}!`;
+      greetEl.textContent = "Let's play, " + user.name + "!";
     }
   }
   updateMenuBadges();
@@ -213,28 +211,40 @@ function nextLesson(){
    PUZZLE MODE
    ================================================================ */
 const PUZZLES=[
-  {name:'Checkmate in 1 #1',hint:'White to move — checkmate!',board:b=>{b[0][4]={piece:'K',color:'b'};b[7][4]={piece:'K',color:'w'};b[1][3]={piece:'Q',color:'w'};b[6][0]={piece:'R',color:'w'}},solution:{fr:1,fc:3,tr:0,tc:3},after:'The Queen delivers checkmate! The King can\'t escape.'},
-  {name:'Checkmate in 1 #2',hint:'White to move — checkmate!',board:b=>{b[0][7]={piece:'K',color:'b'};b[0][6]={piece:'P',color:'b'};b[1][7]={piece:'P',color:'b'};b[2][5]={piece:'Q',color:'w'};b[7][4]={piece:'K',color:'w'}},solution:{fr:2,fc:5,tr:1,tc:6},after:'Queen to g7 is checkmate! The pawns block the King\'s escape.'},
-  {name:'Win the Queen!',hint:'White can capture Black\'s Queen for free!',board:b=>{b[0][4]={piece:'K',color:'b'};b[3][5]={piece:'Q',color:'b'};b[7][4]={piece:'K',color:'w'};b[5][3]={piece:'N',color:'w'}},solution:{fr:5,fc:3,tr:3,tc:4},after:'The Knight forks the King and Queen! (It attacks both at once.)'},
-  {name:'Checkmate in 1 #3',hint:'White to move — checkmate the King!',board:b=>{b[0][4]={piece:'K',color:'b'};b[0][3]={piece:'R',color:'b'};b[0][5]={piece:'B',color:'b'};b[1][4]={piece:'P',color:'b'};b[7][4]={piece:'K',color:'w'};b[6][4]={piece:'R',color:'w'};b[5][4]={piece:'R',color:'w'}},solution:{fr:5,fc:4,tr:0,tc:4},after:'Rook takes pawn with check, and it\'s checkmate! Back-rank mate!'},
-  {name:'Win Material',hint:'White can win a free piece! Find it.',board:b=>{b[0][4]={piece:'K',color:'b'};b[7][4]={piece:'K',color:'w'};b[3][3]={piece:'B',color:'b'};b[3][5]={piece:'N',color:'b'};b[4][4]={piece:'P',color:'w'};b[5][1]={piece:'B',color:'w'}},solution:{fr:5,fc:1,tr:3,tc:3},after:'Bishop takes Bishop — a free piece! It was undefended.'},
-  {name:'Checkmate in 1 #4',hint:'Deliver checkmate in one move!',board:b=>{b[0][6]={piece:'K',color:'b'};b[0][5]={piece:'R',color:'b'};b[1][6]={piece:'P',color:'b'};b[1][7]={piece:'P',color:'b'};b[7][4]={piece:'K',color:'w'};b[4][7]={piece:'Q',color:'w'}},solution:{fr:4,fc:7,tr:0,tc:7},after:'Queen to h8 is checkmate! The Rook on f8 can\'t help.'},
+  {name:'Checkmate in 1 #1',hint:'White to move — checkmate!',tier:'intermediate',board:b=>{b[0][4]={piece:'K',color:'b'};b[7][4]={piece:'K',color:'w'};b[1][3]={piece:'Q',color:'w'};b[6][0]={piece:'R',color:'w'}},solution:{fr:1,fc:3,tr:0,tc:3},after:'The Queen delivers checkmate! The King can\'t escape.'},
+  {name:'Checkmate in 1 #2',hint:'White to move — checkmate!',tier:'intermediate',board:b=>{b[0][7]={piece:'K',color:'b'};b[0][6]={piece:'P',color:'b'};b[1][7]={piece:'P',color:'b'};b[2][5]={piece:'Q',color:'w'};b[7][4]={piece:'K',color:'w'}},solution:{fr:2,fc:5,tr:1,tc:6},after:'Queen to g7 is checkmate! The pawns block the King\'s escape.'},
+  {name:'Win the Queen!',hint:'White can capture Black\'s Queen for free!',tier:'beginner',board:b=>{b[0][4]={piece:'K',color:'b'};b[3][5]={piece:'Q',color:'b'};b[7][4]={piece:'K',color:'w'};b[5][3]={piece:'N',color:'w'}},solution:{fr:5,fc:3,tr:3,tc:4},after:'The Knight forks the King and Queen! (It attacks both at once.)'},
+  {name:'Checkmate in 1 #3',hint:'White to move — checkmate the King!',tier:'advanced',board:b=>{b[0][4]={piece:'K',color:'b'};b[0][3]={piece:'R',color:'b'};b[0][5]={piece:'B',color:'b'};b[1][4]={piece:'P',color:'b'};b[7][4]={piece:'K',color:'w'};b[6][4]={piece:'R',color:'w'};b[5][4]={piece:'R',color:'w'}},solution:{fr:5,fc:4,tr:0,tc:4},after:'Rook takes pawn with check, and it\'s checkmate! Back-rank mate!'},
+  {name:'Win Material',hint:'White can win a free piece! Find it.',tier:'beginner',board:b=>{b[0][4]={piece:'K',color:'b'};b[7][4]={piece:'K',color:'w'};b[3][3]={piece:'B',color:'b'};b[3][5]={piece:'N',color:'b'};b[4][4]={piece:'P',color:'w'};b[5][1]={piece:'B',color:'w'}},solution:{fr:5,fc:1,tr:3,tc:3},after:'Bishop takes Bishop — a free piece! It was undefended.'},
+  {name:'Checkmate in 1 #4',hint:'Deliver checkmate in one move!',tier:'intermediate',board:b=>{b[0][6]={piece:'K',color:'b'};b[0][5]={piece:'R',color:'b'};b[1][6]={piece:'P',color:'b'};b[1][7]={piece:'P',color:'b'};b[7][4]={piece:'K',color:'w'};b[4][7]={piece:'Q',color:'w'}},solution:{fr:4,fc:7,tr:0,tc:7},after:'Queen to h8 is checkmate! The Rook on f8 can\'t help.'},
 ];
+let activePuzzles=[];
 let puzzleIdx=0,puzzleSolved=0,puzzleBoard=null;
 
-function openPuzzleMenu(){puzzleIdx=0;puzzleSolved=0;loadPuzzle();showScreen('puzzle')}
+function openPuzzleMenu(){
+  const tier = typeof getAgeTier === 'function' ? getAgeTier() : 'intermediate';
+  const tierOrder = ['beginner', 'intermediate', 'advanced', 'expert'];
+  const maxTierIdx = tierOrder.indexOf(tier);
+
+  activePuzzles = PUZZLES.filter(p => {
+    const pTierIdx = tierOrder.indexOf(p.tier || 'intermediate');
+    return pTierIdx <= maxTierIdx;
+  });
+
+  puzzleIdx=0;puzzleSolved=0;loadPuzzle();showScreen('puzzle')
+}
 
 function loadPuzzle(){
-  if(puzzleIdx>=PUZZLES.length){
+  if(puzzleIdx>=activePuzzles.length){
     const fb=document.getElementById('puzzleFeedback');
-    if(fb) fb.innerHTML=`<span style="color:var(--gold)">🎉 All puzzles complete! ${puzzleSolved}/${PUZZLES.length} solved</span>`;
+    if(fb) fb.innerHTML=`<span style="color:var(--gold)">🎉 All puzzles complete! ${puzzleSolved}/${activePuzzles.length} solved</span>`;
     const nb=document.getElementById('nextPuzzleBtn');
     if(nb) nb.style.display='none';
     const prog=getUserProgress();
     saveProgress({puzzlesSolved:Math.max(prog.puzzlesSolved||0,puzzleSolved)});
     return;
   }
-  const pz=PUZZLES[puzzleIdx];
+  const pz=activePuzzles[puzzleIdx];
   puzzleBoard=Array(8).fill(null).map(()=>Array(8).fill(null));
   pz.board(puzzleBoard);
   const labelEl=document.getElementById('puzzleLabel');
@@ -242,7 +252,7 @@ function loadPuzzle(){
   const hintEl=document.getElementById('puzzleHint');
   const fbEl=document.getElementById('puzzleFeedback');
   const nextBtn=document.getElementById('nextPuzzleBtn');
-  if(labelEl) labelEl.textContent=`Puzzle ${puzzleIdx+1}/${PUZZLES.length}`;
+  if(labelEl) labelEl.textContent=`Puzzle ${puzzleIdx+1}/${activePuzzles.length}`;
   if(scoreEl) scoreEl.textContent=`⭐ ${puzzleSolved}`;
   if(hintEl) hintEl.textContent=pz.hint;
   if(fbEl) fbEl.textContent='';
@@ -376,8 +386,22 @@ function updateCaptured(){
 
 function aiMove(){
   if(!gameActive)return;
+  const tier = typeof getAgeTier === 'function' ? getAgeTier() : 'intermediate';
   const moves=allMoves(playBoard,'b');
   if(moves.length===0)return;
+
+  // Scale AI difficulty: Beginner sometimes makes random moves
+  if (tier === 'beginner' && Math.random() < 0.5) {
+    const best = moves[Math.floor(Math.random() * moves.length)];
+    makeMove(playBoard,best,'b');
+    lastPlayMove=best;
+    playerTurn=true;
+    const st=document.getElementById('playStatus');
+    if(st) st.textContent='Your turn (White)';
+    checkGameEnd('w');
+    return;
+  }
+
   const scored=moves.map(m=>{
     let score=Math.random()*0.5;
     const target=playBoard[m.tr][m.tc];
@@ -386,10 +410,26 @@ function aiMove(){
     if(isInCheck(nb,'w'))score+=5;
     if(m.tr>=3&&m.tr<=4&&m.tc>=3&&m.tc<=4)score+=1;
     if(playBoard[m.fr][m.fc].piece==='K')score-=2;
+
+    // Advanced/Expert nuances: prioritize check
+    if (tier === 'advanced' || tier === 'expert') {
+      if (isInCheck(nb, 'w')) score += 5;
+    }
+
     return{move:m,score};
   });
+
   scored.sort((a,b)=>b.score-a.score);
-  const best=scored[0].move;
+
+  let best;
+  if (tier === 'expert') {
+    best = scored[0].move; // Always pick best
+  } else {
+    // Intermediate/Advanced: usually pick best, sometimes pick from top 3
+    const pickIdx = Math.random() < 0.8 ? 0 : Math.min(scored.length - 1, Math.floor(Math.random() * 3));
+    best = scored[pickIdx].move;
+  }
+
   makeMove(playBoard,best,'b');
   lastPlayMove=best;
   playerTurn=true;

@@ -69,6 +69,7 @@
     function showHub() {
       const user = getActiveUser();
       if (!user) return;
+      const key = user.name.toLowerCase().replace(/\s+/g, '_');
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('hub-screen').classList.add('active');
 
@@ -77,8 +78,17 @@
       document.getElementById('ub-name').textContent = user.name;
       
       const totalStars = typeof getTotalStars === 'function' ? getTotalStars() : 0;
+      const rank = typeof getExplorerRank === 'function' ? getExplorerRank() : { icon: '🛸', name: 'Cadet' };
+      const rankText = `${rank.icon} ${rank.name}`;
       const starText = totalStars > 0 ? ` · ⭐ ${totalStars}` : '';
-      document.getElementById('ub-greeting').textContent = (user.age ? `Age ${user.age} · ${getGreeting()}` : getGreeting()) + starText;
+      document.getElementById('ub-greeting').textContent = `${rankText}${starText} · ${getGreeting()}`;
+
+      // Rank-up celebration
+      const lastRank = localStorage.getItem(`zs_lastrank_${key}`) || 'Cadet';
+      if (rank.name !== lastRank && lastRank !== 'Cadet') {
+        showRankUpCelebration(rank);
+      }
+      localStorage.setItem(`zs_lastrank_${key}`, rank.name);
 
       // Update timer and token display
       if (typeof TimerManager !== 'undefined') {
@@ -92,7 +102,90 @@
 
       renderAppCards();
       updateStatsCards();
+
+      // Render Next Challenge
+      const challenge = getNextChallenge();
+      const wrap = document.getElementById('next-challenge-wrap');
+      if (wrap && challenge) {
+        wrap.innerHTML = `
+          <div class="next-challenge" onclick="${challenge.href ? `location.href='${challenge.href}'` : ''}" 
+               style="border: 2px solid ${user.color}44; background: var(--bg-surface); padding: 16px; border-radius: 16px; 
+                      display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom: 24px; animation: fadeUp 0.6s ease-out both;">
+            <span style="font-size: 2rem;">${challenge.icon}</span>
+            <div style="flex: 1;">
+              <div style="font-weight: 800; font-family: var(--font-display); font-size: 1.1rem;">${challenge.text}</div>
+              <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">${challenge.sub}</div>
+            </div>
+            <span style="font-size: 1.5rem; color: var(--purple); animation: rocketBounce 2s infinite;">→</span>
+          </div>
+        `;
+      }
     }
+
+    function showRankUpCelebration(rank) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(11, 11, 26, 0.9); backdrop-filter: blur(8px);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; color: #F0EDFF; font-family: var(--font-display);
+        animation: fadeIn 0.5s ease-out;
+      `;
+      overlay.innerHTML = `
+        <div style="font-size: 80px; margin-bottom: 20px; animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+          ${rank.icon}
+        </div>
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">🎉 Rank Up!</h2>
+        <div style="font-size: 1.8rem; font-weight: 800; color: var(--purple);">${rank.name}</div>
+        <p style="margin-top: 20px; opacity: 0.8;">You've reached a new explorer level!</p>
+      `;
+      document.body.appendChild(overlay);
+      if (typeof showConfetti === 'function') showConfetti();
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => overlay.remove(), 500);
+      }, 3000);
+    }
+
+    function getNextChallenge() {
+      const user = getActiveUser();
+      if (!user) return null;
+      const key = user.name.toLowerCase().replace(/\s+/g, '_');
+
+      // Check which apps have zero progress
+      const apps = [
+        { name: 'Math Galaxy', icon: '🧮', href: 'math-galaxy.html', key: `zs_mathgalaxy_${key}` },
+        { name: 'Descubre Chile', icon: '🇨🇱', href: 'descubre-chile.html', key: `zs_chile_${key}` },
+        { name: 'Chess Quest', icon: '♟️', href: 'chess-quest.html', key: `zs_chess_${key}` },
+        { name: 'Little Maestro', icon: '🎹', href: 'little-maestro.html', key: `littlemaestro_${key}` },
+        { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}` }
+      ];
+
+      const noProgress = [];
+      apps.forEach(app => {
+        try {
+          const data = JSON.parse(localStorage.getItem(app.key)) || {};
+          let hasProg = false;
+          if (app.name === 'Math Galaxy') hasProg = Object.keys(data).length > 0;
+          else if (app.name === 'Descubre Chile') hasProg = Object.keys(data).filter(k => k!=='vr' && k!=='memBest').length > 0;
+          else if (app.name === 'Chess Quest') hasProg = (data.puzzlesSolved || 0) + (data.wins || 0) > 0;
+          else if (app.name === 'Little Maestro') hasProg = (data.progress && Object.keys(data.progress).length > 0);
+          else if (app.name === 'Fe Explorador') hasProg = (data.totalStars || 0) > 0;
+          
+          if (!hasProg) noProgress.push(app);
+        } catch { noProgress.push(app); }
+      });
+
+      if (noProgress.length > 0) {
+        const pick = noProgress[Math.floor(Math.random() * noProgress.length)];
+        return { text: `Try something new!`, sub: pick.name, icon: pick.icon, href: pick.href };
+      }
+
+      return { text: 'Keep practicing!', sub: 'Play any app to earn more stars', icon: '⭐', href: null };
+    }
+
+
 
     // ── Stats cards on hub ──
     function updateStatsCards() {
@@ -184,6 +277,8 @@
 
       content.innerHTML = profiles.map(p => {
         const key = p.name.toLowerCase().replace(/\s+/g, '_');
+        const tier = typeof getAgeTier === 'function' ? getAgeTier(p.age) : 'Intermediate';
+        const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
         let appRows = '';
 
         try {
@@ -192,18 +287,18 @@
           if (levels.length > 0) {
             const totalStars = levels.reduce((s, [, l]) => s + (l.bestStars || 0), 0);
             const totalPlays = levels.reduce((s, [, l]) => s + (l.plays || 0), 0);
-            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy</span><span class="dash-app-stat">⭐ ${totalStars} · ${totalPlays} plays</span></div>`;
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalStars} · ${totalPlays} plays</span></div>`;
           }
         } catch {}
         try {
           const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
           const totalStars = Object.entries(dc).filter(([k]) => k !== 'vr' && k !== 'memBest').reduce((s, [, v]) => s + ((v && v.bestStars) || 0), 0);
-          if (totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile</span><span class="dash-app-stat">⭐ ${totalStars}</span></div>`;
+          if (totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalStars}</span></div>`;
         } catch {}
         try {
           const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
           const total = (cq.puzzlesSolved || 0) + (cq.wins || 0);
-          if (total > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest</span><span class="dash-app-stat">⭐ ${total}</span></div>`;
+          if (total > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${total}</span></div>`;
         } catch {}
         try {
           const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
@@ -217,12 +312,17 @@
           if (fe.totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">⛪</span><span class="dash-app-name">Fe Explorador</span><span class="dash-app-stat">⭐ ${fe.totalStars}</span></div>`;
         } catch {}
 
+        const rank = typeof getExplorerRank === 'function' ? getExplorerRank(p.name) : { icon: '🛸', name: 'Cadet' };
+
         return `<div class="dash-profile">
           <div class="dash-profile-header">
             <div class="dash-avatar" style="background:${p.color}22;border-color:${p.color}">${p.avatar}</div>
             <div>
               <div class="dash-name">${escHtml(p.name)}</div>
-              <div class="dash-age">${p.age ? 'Age ' + p.age : ''}</div>
+              <div style="display:flex; gap:8px; font-size:0.78rem; font-weight:600;">
+                <div class="dash-age">${p.age ? 'Age ' + p.age : ''}</div>
+                <div class="dash-rank" style="color:var(--purple);">${rank.icon} ${rank.name}</div>
+              </div>
             </div>
           </div>
           ${appRows}

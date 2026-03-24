@@ -22,6 +22,8 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 ## 🛠️ Key Features
 
 - **Personalized Profiles**: Kids can create their own explorers with custom avatars and colors.
+- **Unified Explorer Rank**: Earn ranks across the entire app suite (Cadet → Legend) by mastering different subjects.
+- **Age-Adaptive Difficulty**: Content automatically adjusts to each child's age for an appropriate challenge level.
 - **Daily Play Timer**: Configurable daily limits per kid to ensure a healthy balance of screen time.
 - **Adventure Tokens**: Earn extra play time by completing real-world chores (Hacer la cama, Leer, etc.).
 - **Progress Tracking**: All stars, levels, and scores are saved locally using `localStorage`.

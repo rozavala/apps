@@ -95,3 +95,52 @@ function getTotalStars(userName) {
 
   return total;
 }
+
+/**
+ * Returns a difficulty tier based on the active user's age.
+ * All apps should use this instead of raw age checks.
+ *
+ * Returns: 'beginner' (ages 4-5), 'intermediate' (ages 6-7),
+ *          'advanced' (ages 8-9), 'expert' (ages 10-12),
+ *          or 'intermediate' as default if no age set.
+ */
+function getAgeTier(age) {
+  const a = age || (getActiveUser() ? getActiveUser().age : null);
+  if (!a) return 'intermediate';
+  if (a <= 5) return 'beginner';
+  if (a <= 7) return 'intermediate';
+  if (a <= 9) return 'advanced';
+  return 'expert';
+}
+
+function getExplorerRank(userName) {
+  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  if (!name) return { name: 'Cadet', icon: '🛸', level: 0 };
+  const key = name.toLowerCase().replace(/\s+/g, '_');
+  const totalStars = getTotalStars(name);
+
+  // Count how many apps have at least 1 star
+  let appsWithStars = 0;
+  try { const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {}; if (Object.values(mg).some(l => l.bestStars > 0)) appsWithStars++; } catch {}
+  try { const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {}; if (Object.entries(dc).some(([k,v]) => k !== 'vr' && k !== 'memBest' && v && v.bestStars > 0)) appsWithStars++; } catch {}
+  try { const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {}; if ((cq.puzzlesSolved || 0) + (cq.wins || 0) > 0) appsWithStars++; } catch {}
+  try { const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {}; const p = lm.progress || {}; if (Object.values(p).some(v => typeof v === 'object' && v !== null && v.stars > 0)) appsWithStars++; } catch {}
+  try { const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {}; if ((fe.totalStars || 0) > 0) appsWithStars++; } catch {}
+
+  const RANKS = [
+    { name: 'Legend',    icon: '🏆', stars: 50, apps: 4 },
+    { name: 'Commander', icon: '👨‍🚀', stars: 30, apps: 3 },
+    { name: 'Pilot',     icon: '🌟', stars: 15, apps: 2 },
+    { name: 'Explorer',  icon: '🚀', stars: 5,  apps: 1 },
+    { name: 'Cadet',     icon: '🛸', stars: 0,  apps: 0 },
+  ];
+
+  for (const rank of RANKS) {
+    if (totalStars >= rank.stars && appsWithStars >= rank.apps) {
+      return { name: rank.name, icon: rank.icon, level: RANKS.length - RANKS.indexOf(rank) - 1 };
+    }
+  }
+  return { name: 'Cadet', icon: '🛸', level: 0 };
+}
+
+

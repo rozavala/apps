@@ -219,14 +219,72 @@ function flipCard(i){
 
 // ── QUIZ ──
 const QB={
-  geography:[{q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km']},{q:'¿Qué desierto chileno es uno de los más secos?',a:'Atacama',o:['Atacama','Sahara','Gobi','Kalahari']},{q:'¿Qué montañas están en la frontera este?',a:'Los Andes',o:['Los Andes','Las Rocosas','Los Alpes','El Himalaya']},{q:'¿Dónde está Torres del Paine?',a:'Patagonia',o:['Patagonia','Atacama','Santiago','Isla de Pascua']},{q:'¿Por qué la NASA prueba robots en Atacama?',a:'Suelo parecido a Marte',o:['Suelo parecido a Marte','Muchos cráteres','Mucho frío','No hay gravedad']},{q:'¿Cuál es el océano que baña las costas de Chile?',a:'Océano Pacífico',o:['Océano Pacífico','Océano Atlántico','Océano Índico','Mar Caribe']},{q:'¿En qué continente está Chile?',a:'América del Sur',o:['América del Sur','Europa','África','Oceanía']},{q:'¿Qué volcán es uno de los más activos del sur?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco']},{q:'¿Cuál es el ancho promedio de Chile?',a:'177 km',o:['177 km','500 km','10 km','1.000 km']},{q:'¿Cuál es el archipiélago chileno famoso por sus iglesias de madera?',a:'Chiloé',o:['Chiloé','Juan Fernández','Galápagos','Malvinas']},{q:'¿En qué zona de Chile están los salares y géiseres?',a:'Norte',o:['Norte','Centro','Sur','Patagonia']}],
-  indigenous:[{q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque']},{q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares']},{q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años']},{q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca']},{q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km']}],
-  history:[{q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar']},{q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero']},{q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano']},{q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541']},{q:'¿De qué país era el padre de O\'Higgins?',a:'Irlanda',o:['Irlanda','España','Inglaterra','Francia']},{q:'¿Qué pueblo originario resistió la conquista española?',a:'Mapuche',o:['Mapuche','Inca','Azteca','Maya']},{q:'¿Junto a qué río se fundó Santiago?',a:'Mapocho',o:['Mapocho','Bío Bío','Loa','Maipo']},{q:'¿Qué cerro está en el centro de Santiago donde se fundó la ciudad?',a:'Santa Lucía',o:['Santa Lucía','San Cristóbal','Aconcagua','Manquehue']}],
-  culture:[{q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón']},{q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua']},{q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre']},{q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol']},{q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo']}],
-  nature:[{q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros']},{q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años']},{q:'¿Qué animales están en el escudo?',a:'Cóndor y huemul',o:['Cóndor y huemul','Puma y águila','Llama y cóndor','Pingüino y flamenco']},{q:'¿Dónde hay pumas en Chile?',a:'Torres del Paine',o:['Torres del Paine','Atacama','Santiago','Isla de Pascua']},{q:'¿Qué corriente trae agua fría?',a:'Corriente de Humboldt',o:['Corriente de Humboldt','Corriente del Golfo','Anillo del Pacífico','Flujo chileno']},{q:'¿Qué animal del sur es un ciervo pequeño?',a:'Pudú',o:['Pudú','Huemul','Guanaco','Zorro']},{q:'¿En qué parte viven los pingüinos en Chile?',a:'En el sur',o:['En el sur','En el desierto','En Santiago','En Isla de Pascua']},{q:'¿Qué pájaro habita en los salares del norte?',a:'Flamenco',o:['Flamenco','Cóndor','Gaviota','Pelícano']}],
-  famous:[{q:'¿Poeta chileno Nobel en 1971?',a:'Pablo Neruda',o:['Pablo Neruda','Gabriela Mistral','Isabel Allende','Huidobro']},{q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa']},{q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo']},{q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970']},{q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos']}],
-  inventors:[{q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko']},{q:'¿Qué es un atrapanieblas?',a:'Una malla para atrapar agua',o:['Una malla para atrapar agua','Un telescopio especial','Un tipo de tienda de campaña','Un barco de pesca']},{q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto']},{q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal']}],
-  volcanes:[{q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial']},{q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Unos 100','Alrededor de 50','Menos de 10']},{q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno']},{q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima']}]
+  geography:[
+    {q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km'], tier:'expert'},
+    {q:'¿Qué desierto chileno es uno de los más secos?',a:'Atacama',o:['Atacama','Sahara','Gobi','Kalahari'], tier:'intermediate'},
+    {q:'¿Qué montañas están en la frontera este?',a:'Los Andes',o:['Los Andes','Las Rocosas','Los Alpes','El Himalaya'], tier:'beginner'},
+    {q:'¿Dónde está Torres del Paine?',a:'Patagonia',o:['Patagonia','Atacama','Santiago','Isla de Pascua'], tier:'intermediate'},
+    {q:'¿Por qué la NASA prueba robots en Atacama?',a:'Suelo parecido a Marte',o:['Suelo parecido a Marte','Muchos cráteres','Mucho frío','No hay gravedad'], tier:'advanced'},
+    {q:'¿Cuál es el océano que baña las costas de Chile?',a:'Océano Pacífico',o:['Océano Pacífico','Océano Atlántico','Océano Índico','Mar Caribe'], tier:'beginner'},
+    {q:'¿En qué continente está Chile?',a:'América del Sur',o:['América del Sur','Europa','África','Oceanía'], tier:'beginner'},
+    {q:'¿Qué volcán es uno de los más activos del sur?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'intermediate'},
+    {q:'¿Cuál es el ancho promedio de Chile?',a:'177 km',o:['177 km','500 km','10 km','1.000 km'], tier:'expert'},
+    {q:'¿Cuál es el archipiélago chileno famoso por sus iglesias de madera?',a:'Chiloé',o:['Chiloé','Juan Fernández','Galápagos','Malvinas'], tier:'advanced'},
+    {q:'¿En qué zona de Chile están los salares y géiseres?',a:'Norte',o:['Norte','Centro','Sur','Patagonia'], tier:'intermediate'}
+  ],
+  indigenous:[
+    {q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque'], tier:'beginner'},
+    {q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares'], tier:'beginner'},
+    {q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años'], tier:'advanced'},
+    {q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca'], tier:'intermediate'},
+    {q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km'], tier:'expert'}
+  ],
+  history:[
+    {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar'], tier:'intermediate'},
+    {q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero'], tier:'beginner'},
+    {q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano'], tier:'intermediate'},
+    {q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541'], tier:'expert'},
+    {q:'¿De qué país era el padre de O\'Higgins?',a:'Irlanda',o:['Irlanda','España','Inglaterra','Francia'], tier:'advanced'},
+    {q:'¿Qué pueblo originario resistió la conquista española?',a:'Mapuche',o:['Mapuche','Inca','Azteca','Maya'], tier:'beginner'},
+    {q:'¿Junto a qué río se fundó Santiago?',a:'Mapocho',o:['Mapocho','Bío Bío','Loa','Maipo'], tier:'beginner'},
+    {q:'¿Qué cerro está en el centro de Santiago donde se fundó la ciudad?',a:'Santa Lucía',o:['Santa Lucía','San Cristóbal','Aconcagua','Manquehue'], tier:'advanced'}
+  ],
+  culture:[
+    {q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón'], tier:'beginner'},
+    {q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua'], tier:'intermediate'},
+    {q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre'], tier:'beginner'},
+    {q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol'], tier:'beginner'},
+    {q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo'], tier:'beginner'}
+  ],
+  nature:[
+    {q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros'], tier:'advanced'},
+    {q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años'], tier:'expert'},
+    {q:'¿Qué animales están en el escudo?',a:'Cóndor y huemul',o:['Cóndor y huemul','Puma y águila','Llama y cóndor','Pingüino y flamenco'], tier:'beginner'},
+    {q:'¿Dónde hay pumas en Chile?',a:'Torres del Paine',o:['Torres del Paine','Atacama','Santiago','Isla de Pascua'], tier:'intermediate'},
+    {q:'¿Qué corriente trae agua fría?',a:'Corriente de Humboldt',o:['Corriente de Humboldt','Corriente del Golfo','Anillo del Pacífico','Flujo chileno'], tier:'advanced'},
+    {q:'¿Qué animal del sur es un ciervo pequeño?',a:'Pudú',o:['Pudú','Huemul','Guanaco','Zorro'], tier:'beginner'},
+    {q:'¿En qué parte viven los pingüinos en Chile?',a:'En el sur',o:['En el sur','En el desierto','En Santiago','En Isla de Pascua'], tier:'intermediate'},
+    {q:'¿Qué pájaro habita en los salares del norte?',a:'Flamenco',o:['Flamenco','Cóndor','Gaviota','Pelícano'], tier:'beginner'}
+  ],
+  famous:[
+    {q:'¿Poeta chileno Nobel en 1971?',a:'Pablo Neruda',o:['Pablo Neruda','Gabriela Mistral','Isabel Allende','Huidobro'], tier:'intermediate'},
+    {q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa'], tier:'intermediate'},
+    {q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo'], tier:'beginner'},
+    {q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970'], tier:'intermediate'},
+    {q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos'], tier:'expert'}
+  ],
+  inventors:[
+    {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
+    {q:'¿Qué es un atrapanieblas?',a:'Una malla para atrapar agua',o:['Una malla para atrapar agua','Un telescopio especial','Un tipo de tienda de campaña','Un barco de pesca'], tier:'advanced'},
+    {q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto'], tier:'advanced'},
+    {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'}
+  ],
+  volcanes:[
+    {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced'},
+    {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Unos 100','Alrededor de 50','Menos de 10'], tier:'intermediate'},
+    {q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno'], tier:'expert'},
+    {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'}
+  ]
 };
 
 let qTopic='',qQs=[],qIdx=0,qScore=0;
@@ -244,12 +302,32 @@ function renderQuizMenu(){
   qa.innerHTML=h;
 }
 
-function startQuiz(id){
-  qTopic=id;const u=getActiveUser();const age=u?u.age:null;
-  let qs=[...QB[id]];
-  if(age&&age<=6)qs=qs.sort(()=>Math.random()-0.5).slice(0,3);
-  qQs=qs;qIdx=0;qScore=0;showQ();
+function startQuiz(id) {
+  qTopic = id;
+  const user = getActiveUser();
+  const tier = getAgeTier(user ? user.age : null);
+
+  let qs = [...QB[id]];
+
+  // Filter: include questions at or below the kid's tier
+  const tierOrder = ['beginner', 'intermediate', 'advanced', 'expert'];
+  const maxTierIdx = tierOrder.indexOf(tier);
+  qs = qs.filter(q => {
+    const qTierIdx = tierOrder.indexOf(q.tier || 'intermediate');
+    return qTierIdx <= maxTierIdx;
+  });
+
+  // Cap question count by age
+  if (tier === 'beginner') qs = qs.sort(() => Math.random() - 0.5).slice(0, 4);
+  else if (tier === 'intermediate') qs = qs.sort(() => Math.random() - 0.5).slice(0, 6);
+  // advanced/expert get all filtered questions
+
+  qQs = qs;
+  qIdx = 0;
+  qScore = 0;
+  showQ();
 }
+
 
 function showQ(){
   const qa=document.getElementById('quizArea');
