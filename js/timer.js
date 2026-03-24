@@ -6,7 +6,7 @@
 const TimerManager = (() => {
   const TIMER_PREFIX = 'zs_timer_';
   const PAUSE_KEY    = 'zs_timer_paused';
-  const DEFAULT_MAX  = 45;
+  const DEFAULT_MAX  = 20;
   let _interval      = null;
 
   function _key(name) {
