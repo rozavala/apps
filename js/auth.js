@@ -143,4 +143,58 @@ function getExplorerRank(userName) {
   return { name: 'Cadet', icon: '🛸', level: 0 };
 }
 
+/* ================================================================
+   CHESS PLAY LIMITS
+   ================================================================ */
+
+function getChessPlaysThisWeek(userName) {
+  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  if (!name) return 0;
+  const key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
+  try {
+    const plays = JSON.parse(localStorage.getItem(key)) || [];
+    // Count plays in the last 7 days
+    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    return plays.filter(d => new Date(d).getTime() > weekAgo).length;
+  } catch { return 0; }
+}
+
+function getChessLimit(userName) {
+  // Read from profile; default 2
+  const profiles = getProfiles();
+  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  if (!name) return 2;
+  const profile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+  return (profile && typeof profile.chessPlaysPerWeek === 'number') 
+    ? profile.chessPlaysPerWeek : 2;
+}
+
+function canPlayChess(userName) {
+  const limit = getChessLimit(userName);
+  if (limit === 0) return false;       // Disabled by parent
+  if (limit >= 7) return true;         // Daily = always
+  return getChessPlaysThisWeek(userName) < limit;
+}
+
+function recordChessPlay(userName) {
+  const name = userName || (getActiveUser() ? getActiveUser().name : null);
+  if (!name) return;
+  const key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
+  try {
+    const plays = JSON.parse(localStorage.getItem(key)) || [];
+    plays.push(new Date().toISOString());
+    // Keep only last 30 days of history
+    const monthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    const trimmed = plays.filter(d => new Date(d).getTime() > monthAgo);
+    localStorage.setItem(key, JSON.stringify(trimmed));
+  } catch {}
+}
+
+function chessPlaysRemaining(userName) {
+  const limit = getChessLimit(userName);
+  if (limit >= 7) return 99;
+  return Math.max(0, limit - getChessPlaysThisWeek(userName));
+}
+
+
 

@@ -414,6 +414,11 @@
                   <input type="range" min="15" max="120" step="15" value="${p.maxMinutes || 45}" 
                          oninput="updateKidLimit(${i}, this.value)">
                 </div>
+                <div class="pk-setting">
+                  <label>Chess per week: <span id="chess-val-${i}">${p.chessPlaysPerWeek !== undefined ? (p.chessPlaysPerWeek === 7 ? 'Daily' : p.chessPlaysPerWeek === 0 ? 'Off' : p.chessPlaysPerWeek + 'x') : '2x'}</span></label>
+                  <input type="range" min="0" max="7" step="1" value="${p.chessPlaysPerWeek ?? 2}" 
+                         oninput="updateKidChess(${i}, this.value)">
+                </div>
                 <div class="pk-setting" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
                   <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" 
                           onclick="addKidBonus('${p.name}', 15)">+15 min</button>
@@ -461,6 +466,14 @@
         TimerManager.setMax(parseInt(val));
       }
     }
+    function updateKidChess(idx, val) {
+      const profiles = getProfiles();
+      const v = parseInt(val);
+      profiles[idx].chessPlaysPerWeek = v;
+      saveProfiles(profiles);
+      const label = v === 7 ? 'Daily' : v === 0 ? 'Off' : v + 'x';
+      document.getElementById(`chess-val-${idx}`).textContent = label;
+    }
     function updateKidFaith(idx, checked) {
       const profiles = getProfiles();
       profiles[idx].faithVisible = checked;
@@ -478,6 +491,28 @@
 
       const feEl = document.querySelector('.card-faith');
       if (feEl) feEl.style.display = (user.faithVisible !== false) ? 'flex' : 'none';
+
+      // Chess limit display
+      const chessCard = document.querySelector('.card-chess');
+      if (chessCard) {
+        const remaining = chessPlaysRemaining();
+        const limit = getChessLimit();
+        const tag = chessCard.querySelector('.card-tag');
+        
+        if (limit === 0) {
+          chessCard.classList.add('coming-soon');
+          if (tag) tag.textContent = '🔒 Off';
+        } else if (remaining === 0 && limit < 7) {
+          chessCard.classList.add('coming-soon');
+          if (tag) tag.textContent = '🔒 Back on Monday';
+        } else {
+          chessCard.classList.remove('coming-soon');
+          if (tag) {
+            if (limit >= 7) tag.textContent = '⚔️ Play Daily';
+            else tag.textContent = `⚔️ ${remaining} of ${limit} left`;
+          }
+        }
+      }
     }
 
     // ── Add Modal ──
@@ -543,9 +578,9 @@ function createProfile() {
     color: selectedColor, 
     age: selectedAge,
     maxMinutes: 45,
+    chessPlaysPerWeek: 2,
     faithVisible: true 
-  };
-  profiles.push(newUser);
+  };  profiles.push(newUser);
   saveProfiles(profiles);
   closeModal();
   loginAs(newUser);
@@ -766,6 +801,7 @@ function createProfile() {
       localStorage.removeItem(`zs_chess_${key}`);
       localStorage.removeItem(`zs_timer_${key}`);
       localStorage.removeItem(`zs_chores_${key}`);
+      localStorage.removeItem(`zs_chess_plays_${key}`);
       localStorage.removeItem(`zs_fe_${key}`);
 
       // Remove from Little Maestro index if present
@@ -805,6 +841,7 @@ function createProfile() {
         `zs_mathgalaxy_`,
         `zs_chile_`,
         `zs_chess_`,
+        `zs_chess_plays_`,
         `zs_timer_`,
         `zs_chores_`,
         `zs_fe_`,

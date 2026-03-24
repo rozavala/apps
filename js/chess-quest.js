@@ -309,8 +309,20 @@ let playBoard=null,playerTurn=true,gameActive=false;
 let capturedByWhite=[],capturedByBlack=[],lastPlayMove=null;
 
 function openPlay(){
+  if (typeof canPlayChess === 'function' && !canPlayChess()) {
+    const limit = getChessLimit();
+    const msg = limit === 0 ? 'Chess is currently disabled.' : 'You have used all your Chess plays for this week! 🔒';
+    alert(msg);
+    return;
+  }
+
   playBoard=newBoard();playerTurn=true;gameActive=true;
   capturedByWhite=[];capturedByBlack=[];lastPlayMove=null;
+  
+  if (typeof recordChessPlay === 'function') {
+    recordChessPlay();
+  }
+
   const goEl=document.getElementById('gameOverWrap');
   const cbEl=document.getElementById('capturedBlack');
   const cwEl=document.getElementById('capturedWhite');
