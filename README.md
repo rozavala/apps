@@ -21,13 +21,19 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 - **🧗 Quest Adventure**: An RPG-style quest where learning math and history unlocks new regions.
 - **🔬 Lab Explorer**: Simple science experiments and facts about the natural world.
 
+## 🛡️ Family Safety & Balance
+
+A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities.
+
+- **Daily Play Timer**: Each child profile has a configurable daily limit (default 20 minutes) to encourage taking breaks and avoiding extended screen time. Once the time is up, a friendly lock screen appears.
+- **Daily Limits (Configurable)**: Parents can set specific limits per app or per child from the Parent Dashboard to control access dynamically based on needs or rules.
+- **Chores System (Adventure Tokens)**: When the daily timer runs out, kids can earn extra time (Adventure Tokens) by completing real-world chores (e.g., "Hacer la cama", "Leer 20 minutos"). A secure Parent PIN is required to unlock and approve the extra time.
+
 ## 🛠️ Key Features
 
 - **Personalized Profiles**: Kids can create their own explorers with custom avatars and colors.
 - **Unified Explorer Rank**: Earn ranks across the entire app suite (Cadet → Legend) by mastering different subjects.
 - **Age-Adaptive Difficulty**: Content automatically adjusts to each child's age for an appropriate challenge level.
-- **Daily Play Timer**: Configurable daily limits per kid to ensure a healthy balance of screen time.
-- **Adventure Tokens**: Earn extra play time by completing real-world chores (Hacer la cama, Leer, etc.).
 - **Progress Tracking**: All stars, levels, and scores are saved locally using `localStorage`.
 - **Parent Dashboard**: A secure area to monitor progress across all apps in the suite.
 - **Safe by Design**: No external API calls, no dynamic third-party content, and no user-generated features.
