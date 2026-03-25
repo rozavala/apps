@@ -87,7 +87,7 @@
       document.getElementById('hub-screen').classList.add('active');
 
       document.getElementById('ub-avatar').textContent = user.avatar;
-      document.getElementById('ub-avatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
+      document.getElementById('ub-avatar').style.cssText = `background:${escHtml(user.color)}22;border-color:${escHtml(user.color)}`;
       document.getElementById('ub-name').textContent = user.name;
       
       const totalStars = typeof getTotalStars === 'function' ? getTotalStars() : 0;
@@ -122,7 +122,7 @@
       if (wrap && challenge) {
         wrap.innerHTML = `
           <div class="next-challenge" onclick="${challenge.href ? `location.href='${challenge.href}'` : ''}" 
-               style="border: 2px solid ${user.color}44; background: var(--bg-surface); padding: 16px; border-radius: 16px; 
+               style="border: 2px solid ${escHtml(user.color)}44; background: var(--bg-surface); padding: 16px; border-radius: 16px;
                       display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom: 24px; animation: fadeUp 0.6s ease-out both;">
             <span style="font-size: 2rem;">${challenge.icon}</span>
             <div style="flex: 1;">
