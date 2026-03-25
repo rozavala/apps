@@ -209,32 +209,35 @@
       try {
         const user = getActiveUser();
         if (!user) return;
-        const key = user.name.toLowerCase().replace(/\s+/g, '_');
+
+        // Fetch stats which caches the parsed JSON objects
+        const stats = typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} };
+        const appStats = stats.appStats || {};
 
         // Guitar Jam
         try {
-          const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
+          const gj = appStats.guitar || {};
           const el = document.getElementById('stats-guitar');
           if (el && (gj.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${gj.totalStars}</span>`;
         } catch {}
 
         // Art Studio
         try {
-          const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
+          const as = appStats.art || {};
           const el = document.getElementById('stats-art');
           if (el && (as.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${as.totalStars}</span>`;
         } catch {}
 
         // Fe Explorador
         try {
-          const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
+          const fe = appStats.faith || {};
           const el = document.getElementById('stats-faith');
           if (el && (fe.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${fe.totalStars}</span>`;
         } catch {}
 
         // Little Maestro
         try {
-          const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
+          const lm = appStats.piano || {};
           const prog = lm.progress || {};
           const completedSongs = Object.entries(prog)
             .filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).length;
@@ -256,7 +259,7 @@
 
         // Math Galaxy
         try {
-          const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
+          const mg = appStats.math || {};
           const levels = Object.entries(mg);
           const mathEl = document.getElementById('stats-math');
           if (mathEl) {
@@ -271,7 +274,7 @@
 
         // Chile
         try {
-          const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
+          const dc = appStats.chile || {};
           const chileEl = document.getElementById('stats-chile');
           if (chileEl) {
             const totalStars = Object.entries(dc)
@@ -287,7 +290,7 @@
 
         // Chess
         try {
-          const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
+          const cq = appStats.chess || {};
           const chessEl = document.getElementById('stats-chess');
           if (chessEl) {
             const total = (cq.puzzlesSolved || 0) + (cq.wins || 0);
