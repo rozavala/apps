@@ -144,8 +144,19 @@ function generateDistractors(correct, count, min, max) {
    ================================================================ */
 
 function genCadet() {
-  const types = ['count', 'add', 'shape', 'bigger', 'planet_count', 'rocket_sub', 'shape_pattern', 'astronaut_count', 'star_add', 'moon_shape'];
+  const types = ['count', 'add', 'shape', 'bigger', 'planet_count', 'rocket_sub', 'shape_pattern', 'astronaut_count', 'star_add', 'moon_shape', 'alien_count', 'satellite_add', 'sun_shape'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'alien_count') {
+    const n = rand(1, 10);
+    return { label: 'Aliens', text: '👽'.repeat(n), hint: 'How many aliens?', answer: n, options: generateDistractors(n, 3, 1, 10), mode: 'choice' };
+  }
+  if (type === 'satellite_add') {
+    const a = rand(1, 5), b = rand(1, 5);
+    return { label: 'Satellite Math', text: `${a} 🛰️ + ${b} 🛰️ = ?`, hint: 'Add the satellites!', answer: a + b, options: generateDistractors(a + b, 3, 1, 10), mode: 'choice' };
+  }
+  if (type === 'sun_shape') {
+    return { label: 'Space Shapes', text: '☀️', hint: 'What shape is the sun?', answer: 'Circle', options: shuffle(['Circle', 'Square', 'Triangle', 'Star']), mode: 'choice' };
+  }
   if (type === 'astronaut_count') {
     const n = rand(1, 10);
     return { label: 'Astronauts', text: '👨‍🚀'.repeat(n), hint: 'How many astronauts?', answer: n, options: generateDistractors(n, 3, 1, 10), mode: 'choice' };
@@ -189,8 +200,21 @@ function genCadet() {
 }
 
 function genExplorer() {
-  const types = ['add', 'sub', 'missing', 'compare', 'double', 'alien_add', 'space_compare', 'star_fraction', 'ufo_sub', 'planet_pattern', 'comet_compare'];
+  const types = ['add', 'sub', 'missing', 'compare', 'double', 'alien_add', 'space_compare', 'star_fraction', 'ufo_sub', 'planet_pattern', 'comet_compare', 'meteor_sub', 'moon_pattern', 'rocket_compare'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'meteor_sub') {
+    const a = rand(6, 15), b = rand(1, a - 1);
+    return { label: 'Meteor Dash', text: `${a} ☄️ - ${b} ☄️ = ?`, hint: 'Subtract the meteors', answer: a - b, options: generateDistractors(a - b, 3, 1, 15), mode: 'choice' };
+  }
+  if (type === 'moon_pattern') {
+    return { label: 'Moon Pattern', text: '🌕 🌑 🌕 🌑 ?', hint: 'Which moon is next?', answer: '🌕', options: shuffle(['🌕', '🌑', '🌗', '🌙']), mode: 'choice' };
+  }
+  if (type === 'rocket_compare') {
+    const a = rand(10, 40), b = rand(10, 40);
+    if (a === b) return genExplorer();
+    const sym = a > b ? '>' : '<';
+    return { label: 'Rocket Fleet', text: `${a} 🚀  ◻  ${b} 🚀`, hint: 'Which is greater?', answer: sym, options: shuffle(['>', '<', '=']), mode: 'choice' };
+  }
   if (type === 'ufo_sub') {
     const a = rand(5, 12), b = rand(1, a - 1);
     return { label: 'UFO Escape', text: `${a} 🛸 - ${b} 🛸 = ?`, hint: 'Subtract the flying UFOs', answer: a - b, options: generateDistractors(a - b, 3, 1, 15), mode: 'choice' };
@@ -225,8 +249,20 @@ function genExplorer() {
 }
 
 function genPilot() {
-  const types = ['mult', 'div', 'frac_visual', 'word', 'missing_mult', 'comet_mult', 'asteroid_div', 'star_word', 'alien_mult', 'satellite_div', 'telescope_frac'];
+  const types = ['mult', 'div', 'frac_visual', 'word', 'missing_mult', 'comet_mult', 'asteroid_div', 'star_word', 'alien_mult', 'satellite_div', 'telescope_frac', 'planet_mult', 'ufo_div', 'rocket_word'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'planet_mult') {
+    const a = rand(3, 9), b = rand(3, 9);
+    return { label: 'Planet Math', text: `${a} 🪐 × ${b} = ?`, hint: 'Total planets?', answer: a * b, options: generateDistractors(a * b, 3, 5, 90), mode: 'choice' };
+  }
+  if (type === 'ufo_div') {
+    const b = rand(2, 8), ans = rand(2, 8);
+    return { label: 'UFO Landing', text: `${b * ans} 🛸 ÷ ${b} = ?`, hint: 'Divide the UFOs', answer: ans, options: generateDistractors(ans, 3, 1, 10), mode: 'choice' };
+  }
+  if (type === 'rocket_word') {
+    const fuel = rand(6, 15), perShip = rand(2, 4);
+    return { label: 'Fleet Supply', text: `A fleet needs ${perShip} fuel units per ship. For ${fuel} ships?`, hint: 'Multiply to find total fuel.', answer: fuel * perShip, options: generateDistractors(fuel * perShip, 3, 10, 60), mode: 'choice' };
+  }
   if (type === 'alien_mult') {
     const a = rand(4, 9), b = rand(2, 6);
     return { label: 'Alien Multiply', text: `${a} 👾 × ${b} = ?`, hint: 'Total aliens?', answer: a * b, options: generateDistractors(a * b, 3, 5, 60), mode: 'choice' };
@@ -259,8 +295,31 @@ function genPilot() {
 }
 
 function genCommander() {
-  const types = ['big_add', 'big_mult', 'fraction_add', 'decimal', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops'];
+  const types = ['big_add', 'big_mult', 'fraction_add', 'decimal', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'comet_ops') {
+    const a = rand(20, 50), b = rand(4, 9), c = rand(2, 6);
+    const ans = a + (b * c);
+    return { label: 'Comet Path', text: `${a} ☄️ + ${b} ☄️ × ${c} = ?`, hint: 'Multiply first!', answer: ans, options: generateDistractors(ans, 3, 20, 100), mode: 'choice' };
+  }
+  if (type === 'star_decimal') {
+    const a = (rand(20, 99) / 10).toFixed(1);
+    const b = (rand(20, 99) / 10).toFixed(1);
+    const ans = (parseFloat(a) + parseFloat(b)).toFixed(1);
+    const opts = [ans];
+    while (opts.length < 4) {
+      const fake = (parseFloat(ans) + (rand(-40, 40) / 10)).toFixed(1);
+      if (!opts.includes(fake) && parseFloat(fake) > 0 && fake !== ans) opts.push(fake);
+    }
+    return { label: 'Star Mass', text: `${a} ⭐ + ${b} ⭐ = ?`, hint: 'Add the decimals.', answer: ans, options: shuffle(opts), mode: 'choice' };
+  }
+  if (type === 'asteroid_pct') {
+    const pcts = [10, 20, 25, 50];
+    const p = pcts[rand(0, pcts.length - 1)];
+    const mass = rand(50, 200) * 2;
+    const ans = mass * (p / 100);
+    return { label: 'Asteroid Ore', text: `${p}% of ${mass} tons`, hint: 'Find the percentage.', answer: ans, options: generateDistractors(ans, 3, 10, mass), mode: 'choice' };
+  }
   if (type === 'nebula_dec') {
     const a = (rand(10, 50) / 10).toFixed(1);
     const b = (rand(10, 50) / 10).toFixed(1);
@@ -452,3 +511,4 @@ document.addEventListener('DOMContentLoaded', initUserUI);
 
 // === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
 // Math Galaxy – 12 new problems added to generators
+// Descubre Chile – 1 new topic + 10 new quiz questions
