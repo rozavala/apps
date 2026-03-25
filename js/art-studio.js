@@ -293,6 +293,7 @@ const ArtStudio = (() => {
   function draw(e) {
     if (!isDrawing) return;
     const { canvas, ctx, temp } = getCanvasForEvent(e);
+    if (!canvas || canvas.width === 0) return;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -495,6 +496,8 @@ const ArtStudio = (() => {
     } else {
       document.getElementById('lesson-game-screen').style.display = 'flex';
       document.getElementById('lesson-title').textContent = currentLesson.title;
+      // FIX: Resize lesson canvases now that the container is visible
+      requestAnimationFrame(() => resize());
       renderLessonStep();
     }
   }
@@ -577,6 +580,8 @@ const ArtStudio = (() => {
     document.getElementById('lesson-game-screen').style.display = 'none';
     document.getElementById('color-mixing-screen').style.display = 'none';
     document.getElementById('lesson-select-screen').style.display = 'block';
+    // FIX: Restore main canvas dimensions
+    requestAnimationFrame(() => resize());
     initLearn();
   }
 
@@ -684,6 +689,7 @@ const ArtStudio = (() => {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         e.target.classList.add('active');
         document.getElementById(`tab-${tabId}`).classList.add('active');
+        if (tabId === 'draw') requestAnimationFrame(() => resize());
         if (tabId === 'gallery') renderGallery();
         if (tabId === 'learn') initLearn();
       });

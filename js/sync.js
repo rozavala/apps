@@ -262,12 +262,23 @@ const CloudSync = (() => {
     pill.style.animation = (status === 'syncing') ? 'syncPulse 1s infinite' : '';
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     if (!state.isConfigured()) { _updatePill('unconfigured'); return; }
-    _fetchWithTimeout(`${SYNC_SERVER}/api/ping`, { timeout: 3000 })
-      .then(r => r.json())
-      .then(() => { state.online = true; _updatePill('idle'); })
-      .catch(() => { state.online = false; _updatePill('offline'); });
+    
+    // Faster connectivity check
+    try {
+      const res = await _fetchWithTimeout(`${SYNC_SERVER}/api/ping`, { timeout: 2000 });
+      if (res.ok) {
+        state.online = true;
+        _updatePill('idle');
+      } else {
+        state.online = false;
+        _updatePill('offline');
+      }
+    } catch (e) {
+      state.online = false;
+      _updatePill('offline');
+    }
   });
 
   return state;
