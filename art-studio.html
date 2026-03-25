@@ -114,7 +114,7 @@
   <div id="save-dialog" class="modal-overlay">
     <div class="modal-card">
       <h3>Save Artwork</h3>
-      <input type="text" id="art-title" placeholder="Title your masterpiece..." maxlength="20">
+      <input type="text" id="art-title" aria-label="Artwork Title" placeholder="Title your masterpiece..." maxlength="20">
       <div class="modal-btns">
         <button class="modal-btn" onclick="ArtStudio.closeSaveDialog()">Cancel</button>
         <button class="modal-btn primary" onclick="ArtStudio.confirmSave()">Save ✓</button>
@@ -125,7 +125,7 @@
   <!-- Gallery Viewer Overlay -->
   <div id="gallery-viewer" class="modal-overlay">
     <div class="viewer-card">
-      <button class="viewer-close" onclick="ArtStudio.closeViewer()">✕</button>
+      <button class="viewer-close" aria-label="Close Gallery Viewer" onclick="ArtStudio.closeViewer()">✕</button>
       <img id="viewer-img" src="" alt="Artwork">
       <div id="viewer-title" class="viewer-title">Title</div>
       <button id="viewer-delete" class="viewer-delete">🗑 Delete Artwork</button>
