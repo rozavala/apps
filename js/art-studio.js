@@ -186,13 +186,16 @@ const ArtStudio = (() => {
   }
 
   function setupPalette() {
-    const palette = document.getElementById('color-palette');
-    if (!palette) return;
-    palette.innerHTML = COLORS.map((c, i) => `
-      <div class="color-swatch ${i === 0 ? 'active' : ''}" 
-           style="background: ${c}" 
-           onclick="ArtStudio.setColor('${c}', this)"></div>
-    `).join('');
+    ['color-palette', 'lesson-color-palette'].forEach(id => {
+      const p = document.getElementById(id);
+      if (!p) return;
+      p.innerHTML = COLORS.map((c, i) => `
+        <div class="color-swatch ${i === 0 ? 'active' : ''}" 
+             style="background: ${c}" 
+             onclick="ArtStudio.setColor('${c}', this)"></div>
+      `).join('');
+    });
+  }
     
     const eraser = document.createElement('div');
     eraser.className = 'color-swatch';
@@ -207,17 +210,19 @@ const ArtStudio = (() => {
   function setupTools() {
     document.querySelectorAll('.tool-btn').forEach(btn => {
       btn.onclick = () => {
-        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentTool = btn.dataset.tool;
+        const tool = btn.dataset.tool;
+        currentTool = tool;
+        document.querySelectorAll(`.tool-btn`).forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(`.tool-btn[data-tool="${tool}"]`).forEach(b => b.classList.add('active'));
       };
     });
 
     document.querySelectorAll('.brush-size').forEach(btn => {
       btn.onclick = () => {
-        document.querySelectorAll('.brush-size').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentSize = parseInt(btn.dataset.size);
+        const size = parseInt(btn.dataset.size);
+        currentSize = size;
+        document.querySelectorAll(`.brush-size`).forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(`.brush-size[data-size="${size}"]`).forEach(b => b.classList.add('active'));
       };
     });
 
@@ -234,7 +239,12 @@ const ArtStudio = (() => {
   function setColor(color, el) {
     currentColor = color;
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-    if (el) el.classList.add('active');
+    // Activate all swatches with this color across all toolbars
+    document.querySelectorAll('.color-swatch').forEach(s => {
+      if (s.style.backgroundColor === color || s.getAttribute('style')?.includes(color)) {
+        s.classList.add('active');
+      }
+    });
   }
 
 

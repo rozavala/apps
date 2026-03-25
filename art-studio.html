@@ -70,6 +70,26 @@
             Draw a big circle!
           </div>
 
+          <div class="toolbar lesson-toolbar">
+            <div class="tool-section palette-section">
+              <div id="lesson-color-palette" class="color-palette"></div>
+            </div>
+            
+            <div class="tool-section brush-section">
+              <button class="brush-size" data-size="3" style="--size: 4px;"></button>
+              <button class="brush-size active" data-size="8" style="--size: 8px;"></button>
+              <button class="brush-size" data-size="16" style="--size: 14px;"></button>
+            </div>
+
+            <div class="tool-section tool-buttons">
+              <button class="tool-btn active" data-tool="pencil" title="Pencil">✏️</button>
+              <button class="tool-btn" data-tool="line" title="Line">📏</button>
+              <button class="tool-btn" data-tool="rectangle" title="Rectangle">⬜</button>
+              <button class="tool-btn" data-tool="circle" title="Circle">⭕</button>
+              <button class="tool-btn" data-tool="fill" title="Fill">🪣</button>
+            </div>
+          </div>
+
           <div class="lesson-main">
             <div class="canvas-wrap lesson-canvas-wrap">
               <canvas id="lesson-main-canvas"></canvas>
