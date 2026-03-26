@@ -150,7 +150,7 @@ function getAgeTier(age) {
   return 'expert';
 }
 
-function getExplorerRank(userName) {
+function getExplorerRank(userName, precalculatedStats = null) {
   let name = userName;
   if (!name) {
     const user = getActiveUser();
@@ -158,7 +158,7 @@ function getExplorerRank(userName) {
   }
   if (!name) return { name: 'Cadet', icon: '🛸', level: 0 };
 
-  const stats = getPlayerStats(name);
+  const stats = precalculatedStats || getPlayerStats(name);
   const totalStars = stats.totalStars;
   const appsWithStars = stats.appsWithStars;
 

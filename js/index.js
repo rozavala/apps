@@ -90,8 +90,17 @@
       document.getElementById('ub-avatar').style.cssText = `background:${escHtml(user.color)}22;border-color:${escHtml(user.color)}`;
       document.getElementById('ub-name').textContent = user.name;
       
-      const totalStars = typeof getTotalStars === 'function' ? getTotalStars() : 0;
-      const rank = typeof getExplorerRank === 'function' ? getExplorerRank() : { icon: '🛸', name: 'Cadet' };
+      let totalStars = 0;
+      let rank = { icon: '🛸', name: 'Cadet' };
+      if (typeof getPlayerStats === 'function') {
+        const stats = getPlayerStats(user.name);
+        totalStars = stats.totalStars;
+        rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name, stats) : { icon: '🛸', name: 'Cadet' };
+      } else {
+        totalStars = typeof getTotalStars === 'function' ? getTotalStars(user.name) : 0;
+        rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name) : { icon: '🛸', name: 'Cadet' };
+      }
+
       const rankText = `${rank.icon} ${rank.name}`;
       const starText = totalStars > 0 ? ` · ⭐ ${totalStars}` : '';
       document.getElementById('ub-greeting').textContent = `${rankText}${starText} · ${getGreeting()}`;
@@ -113,11 +122,11 @@
         document.getElementById('token-balance').textContent = `⭐ ${tokens} tokens`;
       }
 
-      renderAppCards();
-      updateStatsCards();
+      renderAppCards(user);
+      updateStatsCards(user);
 
       // Render Next Challenge
-      const challenge = getNextChallenge();
+      const challenge = getNextChallenge(user);
       const wrap = document.getElementById('next-challenge-wrap');
       if (wrap && challenge) {
         wrap.innerHTML = `
@@ -161,8 +170,8 @@
       }, 3000);
     }
 
-    function getNextChallenge() {
-      const user = getActiveUser();
+    function getNextChallenge(user) {
+      if (!user) user = getActiveUser();
       if (!user) return null;
       const key = user.name.toLowerCase().replace(/\s+/g, '_');
 
@@ -205,9 +214,9 @@
 
 
     // ── Stats cards on hub ──
-    function updateStatsCards() {
+    function updateStatsCards(user) {
       try {
-        const user = getActiveUser();
+        if (!user) user = getActiveUser();
         if (!user) return;
 
         // Fetch stats which caches the parsed JSON objects
@@ -608,8 +617,8 @@
     }
 
     // ── Render App Cards (now dynamic for faith toggle) ──
-    function renderAppCards() {
-      const user = getActiveUser();
+    function renderAppCards(user) {
+      if (!user) user = getActiveUser();
       if (!user) return;
 
       const feEl = document.querySelector('.card-faith');
@@ -618,8 +627,8 @@
       // Chess limit display
       const chessCard = document.querySelector('.card-chess');
       if (chessCard) {
-        const remaining = chessPlaysRemaining();
-        const limit = getChessLimit();
+        const remaining = chessPlaysRemaining(user.name);
+        const limit = getChessLimit(user.name);
         const tag = chessCard.querySelector('.card-tag');
         
         if (limit === 0) {
