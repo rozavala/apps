@@ -464,6 +464,3 @@ document.addEventListener('DOMContentLoaded', dcInit);
 // === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
 // Math Galaxy – 12 new problems added to generators
 // Descubre Chile – 1 new topic + 10 new quiz questions
-// === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
-// Math Galaxy – 12 new problems added to generators
-// Descubre Chile – 1 new topic + 10 new quiz questions

@@ -343,9 +343,15 @@ function genCommander() {
     const b = (rand(25, 95) / 10).toFixed(1);
     const ans = (parseFloat(a) + parseFloat(b)).toFixed(1);
     const opts = [ans];
-    while (opts.length < 4) {
+    let attempts = 0;
+    while (opts.length < 4 && attempts < 15) {
+      attempts++;
       const fake = (parseFloat(ans) + (rand(-30, 30) / 10)).toFixed(1);
       if (!opts.includes(fake) && parseFloat(fake) > 0 && fake !== ans) opts.push(fake);
+    }
+    while (opts.length < 4) {
+      let fallback = (parseFloat(ans) + (opts.length + 1) * 1.1).toFixed(1);
+      if (!opts.includes(fallback)) opts.push(fallback);
     }
     return { label: 'UFO Speed', text: `${a} Mach + ${b} Mach = ?`, hint: 'Add the speeds.', answer: ans, options: shuffle(opts), mode: 'choice' };
   }
@@ -366,9 +372,15 @@ function genCommander() {
     const b = (rand(20, 99) / 10).toFixed(1);
     const ans = (parseFloat(a) + parseFloat(b)).toFixed(1);
     const opts = [ans];
-    while (opts.length < 4) {
+    let attempts = 0;
+    while (opts.length < 4 && attempts < 15) {
+      attempts++;
       const fake = (parseFloat(ans) + (rand(-40, 40) / 10)).toFixed(1);
       if (!opts.includes(fake) && parseFloat(fake) > 0 && fake !== ans) opts.push(fake);
+    }
+    while (opts.length < 4) {
+      let fallback = (parseFloat(ans) + (opts.length + 1) * 1.1).toFixed(1);
+      if (!opts.includes(fallback)) opts.push(fallback);
     }
     return { label: 'Star Mass', text: `${a} ⭐ + ${b} ⭐ = ?`, hint: 'Add the decimals.', answer: ans, options: shuffle(opts), mode: 'choice' };
   }
@@ -384,9 +396,15 @@ function genCommander() {
     const b = (rand(10, 50) / 10).toFixed(1);
     const ans = (parseFloat(a) + parseFloat(b)).toFixed(1);
     const opts = [ans];
-    while (opts.length < 4) {
+    let attempts = 0;
+    while (opts.length < 4 && attempts < 15) {
+      attempts++;
       const fake = (parseFloat(ans) + (rand(-15, 15) / 10)).toFixed(1);
       if (!opts.includes(fake) && parseFloat(fake) > 0 && fake !== ans) opts.push(fake);
+    }
+    while (opts.length < 4) {
+      let fallback = (parseFloat(ans) + (opts.length + 1) * 1.1).toFixed(1);
+      if (!opts.includes(fallback)) opts.push(fallback);
     }
     return { label: 'Nebula Gas', text: `${a} mg + ${b} mg = ?`, hint: 'Add the decimals.', answer: ans, options: shuffle(opts), mode: 'choice' };
   }
@@ -407,9 +425,15 @@ function genCommander() {
     const b = (rand(15, 80) / 10).toFixed(1);
     const ans = (parseFloat(a) + parseFloat(b)).toFixed(1);
     const opts = [ans];
-    while (opts.length < 4) {
+    let attempts = 0;
+    while (opts.length < 4 && attempts < 15) {
+      attempts++;
       const fake = (parseFloat(ans) + (rand(-30, 30) / 10)).toFixed(1);
       if (!opts.includes(fake) && parseFloat(fake) > 0 && fake !== ans) opts.push(fake);
+    }
+    while (opts.length < 4) {
+      let fallback = (parseFloat(ans) + (opts.length + 1) * 1.1).toFixed(1);
+      if (!opts.includes(fallback)) opts.push(fallback);
     }
     return { label: 'Galaxy Decimals', text: `${a} 🌌 + ${b} 🌌 = ?`, hint: 'Add the decimals.', answer: ans, options: shuffle(opts), mode: 'choice' };
   }
@@ -428,7 +452,23 @@ function genCommander() {
   if (type === 'big_add') { const a = rand(100, 500), b = rand(100, 500); return { label: 'Big Addition', text: `${a} + ${b} = ?`, hint: '', answer: a + b, options: generateDistractors(a + b, 3, 200, 1100), mode: 'choice' }; }
   if (type === 'big_mult') { const a = rand(12, 25), b = rand(3, 9); return { label: 'Multiplication', text: `${a} × ${b} = ?`, hint: '', answer: a * b, options: generateDistractors(a * b, 3, 20, 250), mode: 'choice' }; }
   if (type === 'fraction_add') { const d = [4, 6, 8][rand(0, 2)]; const a = rand(1, d / 2), b = rand(1, d / 2); const sum = a + b; return { label: 'Fraction Addition', text: `${a}/${d} + ${b}/${d} = ?`, hint: 'Same denominator!', answer: `${sum}/${d}`, options: shuffle([`${sum}/${d}`, `${sum}/${d * 2}`, `${a + b + 1}/${d}`, `${a}/${d + b}`]), mode: 'choice' }; }
-  if (type === 'decimal') { const a = (rand(11, 95) / 10).toFixed(1); const b = (rand(11, 95) / 10).toFixed(1); const ans = (parseFloat(a) + parseFloat(b)).toFixed(1); const opts = [ans]; while (opts.length < 4) { const fake = (parseFloat(ans) + (rand(-20, 20) / 10)).toFixed(1); if (!opts.includes(fake) && parseFloat(fake) > 0) opts.push(fake); } return { label: 'Decimals', text: `${a} + ${b} = ?`, hint: '', answer: ans, options: shuffle(opts), mode: 'choice' }; }
+  if (type === 'decimal') {
+    const a = (rand(11, 95) / 10).toFixed(1);
+    const b = (rand(11, 95) / 10).toFixed(1);
+    const ans = (parseFloat(a) + parseFloat(b)).toFixed(1);
+    const opts = [ans];
+    let attempts = 0;
+    while (opts.length < 4 && attempts < 15) {
+      attempts++;
+      const fake = (parseFloat(ans) + (rand(-20, 20) / 10)).toFixed(1);
+      if (!opts.includes(fake) && parseFloat(fake) > 0 && fake !== ans) opts.push(fake);
+    }
+    while (opts.length < 4) {
+      let fallback = (parseFloat(ans) + (opts.length + 1) * 1.1).toFixed(1);
+      if (!opts.includes(fallback)) opts.push(fallback);
+    }
+    return { label: 'Decimals', text: `${a} + ${b} = ?`, hint: '', answer: ans, options: shuffle(opts), mode: 'choice' };
+  }
   if (type === 'percent') { const pcts = [10, 20, 25, 50]; const p = pcts[rand(0, pcts.length - 1)]; const base = rand(2, 10) * (100 / p); const ans = base * p / 100; return { label: 'Percentages', text: `${p}% of ${base} = ?`, hint: '', answer: ans, options: generateDistractors(ans, 3, 1, Math.max(ans * 2, 20)), mode: 'choice' }; }
   const a = rand(2, 8), b = rand(2, 5), c = rand(1, 6); const ans = a + b * c;
   return { label: 'Order of Operations', text: `${a} + ${b} × ${c} = ?`, hint: 'Multiply first!', answer: ans, options: generateDistractors(ans, 3, 5, 60), mode: 'choice' };
@@ -568,9 +608,6 @@ function goHome() { renderBestScores(); showScreen('select'); }
 // ── Boot safely after DOM is ready ──
 document.addEventListener('DOMContentLoaded', initUserUI);
 
-// === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
-// Math Galaxy – 12 new problems added to generators
-// Descubre Chile – 1 new topic + 10 new quiz questions
 // === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
 // Math Galaxy – 12 new problems added to generators
 // Descubre Chile – 1 new topic + 10 new quiz questions
