@@ -230,8 +230,8 @@ function genExplorer() {
     return { label: 'Alien Pattern', text: '👽 👾 👽 👾 ?', hint: 'Who is next?', answer: '👽', options: shuffle(['👽', '👾', '🤖', '👨‍🚀']), mode: 'choice' };
   }
   if (type === 'planet_compare') {
-    const a = rand(15, 35), b = rand(15, 35);
-    if (a === b) return genExplorer();
+    const a = rand(15, 35); let b = rand(15, 35);
+    if (a === b) b = a < 35 ? a + 1 : a - 1;
     const sym = a > b ? '>' : '<';
     return { label: 'Planet Orbits', text: `${a} 🪐  ◻  ${b} 🪐`, hint: 'Which is greater?', answer: sym, options: shuffle(['>', '<', '=']), mode: 'choice' };
   }
