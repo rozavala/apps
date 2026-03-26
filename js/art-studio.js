@@ -102,8 +102,7 @@ const ArtStudio = (() => {
   let mixColors = [null, null];
 
   function getUserKey() {
-    const u = getActiveUser();
-    return u ? `zs_art_${u.name.toLowerCase().replace(/\s+/g,'_')}` : null;
+    return typeof getUserAppKey === 'function' ? getUserAppKey('zs_art_') : null;
   }
 
   function getProgress() {
@@ -228,10 +227,18 @@ const ArtStudio = (() => {
 
     const undoBtn = document.getElementById('undo-btn');
     if (undoBtn) undoBtn.onclick = undo;
+    const lessonUndo = document.getElementById('lesson-undo-btn');
+    if (lessonUndo) lessonUndo.onclick = undo;
+
     const redoBtn = document.getElementById('redo-btn');
     if (redoBtn) redoBtn.onclick = redo;
+    const lessonRedo = document.getElementById('lesson-redo-btn');
+    if (lessonRedo) lessonRedo.onclick = redo;
+
     const clearBtn = document.getElementById('clear-btn');
     if (clearBtn) clearBtn.onclick = clearCanvas;
+    const lessonClear = document.getElementById('lesson-clear-btn');
+    if (lessonClear) lessonClear.onclick = clearCanvas;
     const saveBtn = document.getElementById('save-btn');
     if (saveBtn) saveBtn.onclick = openSaveDialog;
   }
@@ -638,6 +645,12 @@ const ArtStudio = (() => {
     const title = document.getElementById('art-title').value.trim() || 'My Masterpiece';
     const dataUrl = mainCanvas.toDataURL('image/png');
     const p = getProgress();
+    if (p.gallery.length >= 10) {
+      const oldest = p.gallery[p.gallery.length - 1];
+      if (!confirm(`Your gallery is full (10 artworks). Saving will remove "${oldest.title}". Continue?`)) {
+        return;
+      }
+    }
     p.gallery.unshift({ id: Date.now(), title, dataUrl, date: new Date().toISOString() });
     if (p.gallery.length > 10) p.gallery.pop();
     saveProgress({ gallery: p.gallery });

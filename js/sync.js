@@ -93,8 +93,8 @@ const CloudSync = (() => {
         let localData = {};
         try { localData = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
         
-        const sTime = typeof serverData._syncedAt === 'string' ? new Date(serverData._syncedAt).getTime() : (serverData._syncedAt || 0);
-        const lTime = typeof localData._syncedAt === 'string' ? new Date(localData._syncedAt).getTime() : (localData._syncedAt || 0);
+        const sTime = Number(serverData._syncedAt) || 0;
+        const lTime = Number(localData._syncedAt) || 0;
 
         if (sTime > lTime) {
           if (info.appName === 'art') {
@@ -134,8 +134,8 @@ const CloudSync = (() => {
           let localData = {};
           try { localData = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
           
-          const sTime = typeof serverData._syncedAt === 'string' ? new Date(serverData._syncedAt).getTime() : (serverData._syncedAt || 0);
-          const lTime = typeof localData._syncedAt === 'string' ? new Date(localData._syncedAt).getTime() : (localData._syncedAt || 0);
+          const sTime = Number(serverData._syncedAt) || 0;
+          const lTime = Number(localData._syncedAt) || 0;
 
           if (sTime > lTime) {
             if (appName === 'art') {
@@ -160,8 +160,8 @@ const CloudSync = (() => {
         let lData = {};
         try { lData = JSON.parse(localStorage.getItem(rKey)) || {}; } catch(e) {}
         
-        const sTime = typeof sData._syncedAt === 'string' ? new Date(sData._syncedAt).getTime() : (sData._syncedAt || 0);
-        const lTime = typeof lData._syncedAt === 'string' ? new Date(lData._syncedAt).getTime() : (lData._syncedAt || 0);
+        const sTime = Number(sData._syncedAt) || 0;
+        const lTime = Number(lData._syncedAt) || 0;
 
         if (sTime > lTime) {
           localStorage.setItem(rKey, JSON.stringify(sData));

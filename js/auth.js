@@ -40,6 +40,33 @@ function getGreeting() {
 
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
+function getParentPin() {
+  // Check if any Little Maestro profile has a custom PIN set
+  try {
+    const idx = JSON.parse(localStorage.getItem('littlemaestro__index')) || [];
+    if (idx.length > 0) {
+      const data = JSON.parse(localStorage.getItem('littlemaestro_' + idx[0].toLowerCase().replace(/\s+/g, '_')));
+      if (data && data.settings && data.settings.parentPin) return data.settings.parentPin;
+    }
+  } catch(e) {}
+  // Also check for a hub-level PIN
+  try {
+    const pin = localStorage.getItem('zs_parent_pin');
+    if (pin) return pin;
+  } catch(e) {}
+  return '1234'; // default
+}
+
+function safeColor(c) {
+  return /^#[0-9a-fA-F]{6}$/.test(c) ? c : '#7C3AED'; // fallback to default purple
+}
+
+function getUserAppKey(prefix) {
+  const u = getActiveUser();
+  if (!u) return null;
+  return prefix + u.name.toLowerCase().replace(/\s+/g, '_');
+}
+
 /* ================================================================
    GLOBAL STAR COUNTER
    Aggregates stars across all apps for the active user.

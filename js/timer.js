@@ -238,6 +238,9 @@ const TimerManager = (() => {
     const paused = isPaused();
     const overlay = document.createElement('div');
     overlay.id = 'timer-lock-overlay';
+    overlay.setAttribute('role', 'alertdialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Daily time limit reached');
     overlay.innerHTML = `
       <div class="lock-card">
         <div class="lock-emoji">${paused ? '⏸️' : '🌟'}</div>
@@ -294,8 +297,7 @@ const TimerManager = (() => {
 
   function checkLockPin() {
     const input = document.getElementById('lock-pin-input');
-    // We'll use the common '1234' pin as used in other parts of the app
-    if (input.value === '1234') {
+    if (input.value === getParentPin()) {
       document.getElementById('lock-pin-area').style.display = 'none';
       document.getElementById('lock-override-btns').style.display = 'flex';
     } else {

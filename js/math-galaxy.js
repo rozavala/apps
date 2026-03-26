@@ -12,9 +12,7 @@ let startTime = 0;
 
 /* ---- Shared User System ---- */
 function getUserProgressKey() {
-  const user = getActiveUser();
-  if (!user) return null;
-  return `zs_mathgalaxy_${user.name.toLowerCase().replace(/\s+/g,'_')}`;
+  return typeof getUserAppKey === 'function' ? getUserAppKey('zs_mathgalaxy_') : null;
 }
 function getUserProgress() {
   const key = getUserProgressKey();

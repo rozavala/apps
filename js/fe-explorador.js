@@ -213,9 +213,7 @@ const FeManager = (() => {
   ];
 
   function _key() {
-    const user = getActiveUser();
-    if (!user) return null;
-    return STORAGE_KEY + user.name.toLowerCase().replace(/\s+/g, '_');
+    return typeof getUserAppKey === 'function' ? getUserAppKey('zs_fe_') : null;
   }
 
   function _getData() {

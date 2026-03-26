@@ -2,7 +2,9 @@
    CHESS QUEST — ENGINE + UI
    ================================================================ */
 
-function getUserKey(){const u=getActiveUser();return u?`zs_chess_${u.name.toLowerCase().replace(/\s+/g,'_')}`:null}
+function getUserKey() {
+  return typeof getUserAppKey === 'function' ? getUserAppKey('zs_chess_') : null;
+}
 function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
 function saveProgress(data){
   const k=getUserKey();if(!k)return;

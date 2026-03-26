@@ -156,8 +156,7 @@ const GuitarJam = (() => {
   let earCorrectChord = null;
 
   function getUserKey() {
-    const u = getActiveUser();
-    return u ? `zs_guitar_${u.name.toLowerCase().replace(/\s+/g,'_')}` : null;
+    return typeof getUserAppKey === 'function' ? getUserAppKey('zs_guitar_') : null;
   }
   
   function getProgress() {

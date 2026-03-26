@@ -12,15 +12,20 @@
 
     // PIN state
     let pinCallback    = null;
-    const PARENT_PIN   = '1234';
 
     // ── Render login screen ──
     function renderLogin() {
       const grid = document.getElementById('profiles-grid');
       const profiles = getProfiles();
+      if (!grid) return;
       grid.innerHTML = '';
 
       profiles.forEach((p, i) => {
+        const safe = {
+          name: escHtml(p.name),
+          avatar: escHtml(p.avatar),
+          color: safeColor(p.color)
+        };
         const card = document.createElement('div');
         card.className = 'profile-card';
         card.style.animationDelay = `${0.1 + i * 0.05}s`;
@@ -28,10 +33,10 @@
         card.style.position = 'relative';
 
         card.innerHTML = `
-          <div class="profile-avatar" style="background:${escHtml(p.color)}22;border-color:${escHtml(p.color)}">${escHtml(p.avatar)}</div>
-          <div class="profile-name">${escHtml(p.name)}</div>
+          <div class="profile-avatar" style="background:${safe.color}22;border-color:${safe.color}">${safe.avatar}</div>
+          <div class="profile-name">${safe.name}</div>
           ${p.age ? `<div class="profile-age">Age ${p.age}</div>` : ''}
-          <button class="profile-edit-btn" data-index="${i}" title="Edit ${escHtml(p.name)}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
+          <button class="profile-edit-btn" data-index="${i}" title="Edit ${safe.name}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
         `;
 
         card.onclick = (e) => {
@@ -83,18 +88,33 @@
       const user = getActiveUser();
       if (!user) return;
       const key = user.name.toLowerCase().replace(/\s+/g, '_');
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('hub-screen').classList.add('active');
+      
+      const els = {
+        login: document.getElementById('login-screen'),
+        hub: document.getElementById('hub-screen'),
+        avatar: document.getElementById('ub-avatar'),
+        name: document.getElementById('ub-name'),
+        greeting: document.getElementById('ub-greeting'),
+        timer: document.getElementById('timer-display'),
+        tokens: document.getElementById('token-balance'),
+        challenge: document.getElementById('next-challenge-wrap')
+      };
 
-      document.getElementById('ub-avatar').textContent = user.avatar;
-      document.getElementById('ub-avatar').style.cssText = `background:${user.color}22;border-color:${user.color}`;
-      document.getElementById('ub-name').textContent = user.name;
+      if (els.login) els.login.style.display = 'none';
+      if (els.hub) els.hub.classList.add('active');
+
+      const color = safeColor(user.color);
+      if (els.avatar) {
+        els.avatar.textContent = user.avatar;
+        els.avatar.style.cssText = `background:${color}22;border-color:${color}`;
+      }
+      if (els.name) els.name.textContent = user.name;
       
       const totalStars = typeof getTotalStars === 'function' ? getTotalStars() : 0;
       const rank = typeof getExplorerRank === 'function' ? getExplorerRank() : { icon: '🛸', name: 'Cadet' };
       const rankText = `${rank.icon} ${rank.name}`;
       const starText = totalStars > 0 ? ` · ⭐ ${totalStars}` : '';
-      document.getElementById('ub-greeting').textContent = `${rankText}${starText} · ${getGreeting()}`;
+      if (els.greeting) els.greeting.textContent = `${rankText}${starText} · ${getGreeting()}`;
 
       // Rank-up celebration
       const lastRank = localStorage.getItem(`zs_lastrank_${key}`) || 'Cadet';
@@ -104,25 +124,24 @@
       localStorage.setItem(`zs_lastrank_${key}`, rank.name);
 
       // Update timer and token display
-      if (typeof TimerManager !== 'undefined') {
+      if (typeof TimerManager !== 'undefined' && els.timer) {
         const rem = TimerManager.getRemaining();
-        document.getElementById('timer-display').textContent = `⏰ ${rem} min left`;
+        els.timer.textContent = `⏰ ${rem} min left`;
       }
-      if (typeof ChoresManager !== 'undefined') {
+      if (typeof ChoresManager !== 'undefined' && els.tokens) {
         const tokens = ChoresManager.getStatus().totalTokens;
-        document.getElementById('token-balance').textContent = `⭐ ${tokens} tokens`;
+        els.tokens.textContent = `⭐ ${tokens} tokens`;
       }
 
       renderAppCards();
-      updateStatsCards();
+      updateStatsCards(user);
 
       // Render Next Challenge
-      const challenge = getNextChallenge();
-      const wrap = document.getElementById('next-challenge-wrap');
-      if (wrap && challenge) {
-        wrap.innerHTML = `
+      const challenge = getNextChallenge(user);
+      if (els.challenge && challenge) {
+        els.challenge.innerHTML = `
           <div class="next-challenge" onclick="${challenge.href ? `location.href='${challenge.href}'` : ''}" 
-               style="border: 2px solid ${user.color}44; background: var(--bg-surface); padding: 16px; border-radius: 16px; 
+               style="border: 2px solid ${color}44; background: var(--bg-surface); padding: 16px; border-radius: 16px; 
                       display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom: 24px; animation: fadeUp 0.6s ease-out both;">
             <span style="font-size: 2rem;">${challenge.icon}</span>
             <div style="flex: 1;">
@@ -161,8 +180,8 @@
       }, 3000);
     }
 
-    function getNextChallenge() {
-      const user = getActiveUser();
+    function getNextChallenge(user) {
+      if (!user) user = getActiveUser();
       if (!user) return null;
       const key = user.name.toLowerCase().replace(/\s+/g, '_');
 
@@ -205,31 +224,38 @@
 
 
     // ── Stats cards on hub ──
-    function updateStatsCards() {
+    function updateStatsCards(user) {
       try {
-        const user = getActiveUser();
+        if (!user) user = getActiveUser();
         if (!user) return;
         const key = user.name.toLowerCase().replace(/\s+/g, '_');
+
+        const els = {
+          guitar: document.getElementById('stats-guitar'),
+          art:    document.getElementById('stats-art'),
+          faith:  document.getElementById('stats-faith'),
+          piano:  document.getElementById('stats-piano'),
+          math:   document.getElementById('stats-math'),
+          chile:  document.getElementById('stats-chile'),
+          chess:  document.getElementById('stats-chess')
+        };
 
         // Guitar Jam
         try {
           const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
-          const el = document.getElementById('stats-guitar');
-          if (el && (gj.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${gj.totalStars}</span>`;
+          if (els.guitar && (gj.totalStars || 0) > 0) els.guitar.innerHTML = `<span class="cs-item active">⭐ ${gj.totalStars}</span>`;
         } catch {}
 
         // Art Studio
         try {
           const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
-          const el = document.getElementById('stats-art');
-          if (el && (as.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${as.totalStars}</span>`;
+          if (els.art && (as.totalStars || 0) > 0) els.art.innerHTML = `<span class="cs-item active">⭐ ${as.totalStars}</span>`;
         } catch {}
 
         // Fe Explorador
         try {
           const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
-          const el = document.getElementById('stats-faith');
-          if (el && (fe.totalStars || 0) > 0) el.innerHTML = `<span class="cs-item active">⭐ ${fe.totalStars}</span>`;
+          if (els.faith && (fe.totalStars || 0) > 0) els.faith.innerHTML = `<span class="cs-item active">⭐ ${fe.totalStars}</span>`;
         } catch {}
 
         // Little Maestro
@@ -242,62 +268,58 @@
             .filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0)
             .reduce((s, [, v]) => s + v.stars, 0);
           const streak = (lm.stats && lm.stats.currentStreak) || 0;
-          const pianoEl = document.getElementById('stats-piano');
-          if (pianoEl) {
+          if (els.piano) {
             if (completedSongs > 0) {
               const items = [`⭐ ${totalLMStars} stars`, `🎼 ${completedSongs} songs`];
               if (streak > 0) items.push(`🔥 ${streak} streak`);
-              pianoEl.innerHTML = items.map(i => `<span class="cs-item active">${i}</span>`).join('');
+              els.piano.innerHTML = items.map(i => `<span class="cs-item active">${i}</span>`).join('');
             } else {
-              pianoEl.innerHTML = '';
+              els.piano.innerHTML = '';
             }
           }
-        } catch { if (document.getElementById('stats-piano')) document.getElementById('stats-piano').innerHTML = ''; }
+        } catch { if (els.piano) els.piano.innerHTML = ''; }
 
         // Math Galaxy
         try {
           const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
           const levels = Object.entries(mg);
-          const mathEl = document.getElementById('stats-math');
-          if (mathEl) {
+          if (els.math) {
             if (levels.length > 0) {
               const totalStars = levels.reduce((s, [, l]) => s + (l.bestStars || 0), 0);
-              mathEl.innerHTML = `<span class="cs-item active">⭐ ${totalStars} stars</span>`;
+              els.math.innerHTML = `<span class="cs-item active">⭐ ${totalStars} stars</span>`;
             } else {
-              mathEl.innerHTML = '';
+              els.math.innerHTML = '';
             }
           }
-        } catch { if (document.getElementById('stats-math')) document.getElementById('stats-math').innerHTML = ''; }
+        } catch { if (els.math) els.math.innerHTML = ''; }
 
         // Chile
         try {
           const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
-          const chileEl = document.getElementById('stats-chile');
-          if (chileEl) {
+          if (els.chile) {
             const totalStars = Object.entries(dc)
               .filter(([k]) => k !== 'vr' && k !== 'memBest')
               .reduce((s, [, v]) => s + ((v && v.bestStars) || 0), 0);
             if (totalStars > 0) {
-              chileEl.innerHTML = `<span class="cs-item active">⭐ ${totalStars} stars</span>`;
+              els.chile.innerHTML = `<span class="cs-item active">⭐ ${totalStars} stars</span>`;
             } else {
-              chileEl.innerHTML = '';
+              els.chile.innerHTML = '';
             }
           }
-        } catch { if (document.getElementById('stats-chile')) document.getElementById('stats-chile').innerHTML = ''; }
+        } catch { if (els.chile) els.chile.innerHTML = ''; }
 
         // Chess
         try {
           const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
-          const chessEl = document.getElementById('stats-chess');
-          if (chessEl) {
+          if (els.chess) {
             const total = (cq.puzzlesSolved || 0) + (cq.wins || 0);
             if (total > 0) {
-              chessEl.innerHTML = `<span class="cs-item active">⭐ ${total} stars</span>`;
+              els.chess.innerHTML = `<span class="cs-item active">⭐ ${total} stars</span>`;
             } else {
-              chessEl.innerHTML = '';
+              els.chess.innerHTML = '';
             }
           }
-        } catch { if (document.getElementById('stats-chess')) document.getElementById('stats-chess').innerHTML = ''; }
+        } catch { if (els.chess) els.chess.innerHTML = ''; }
 
       } catch(e) {}
     }
@@ -375,7 +397,7 @@
 
         return `<div class="dash-profile">
           <div class="dash-profile-header">
-            <div class="dash-avatar" style="background:${escHtml(p.color)}22;border-color:${escHtml(p.color)}">${escHtml(p.avatar)}</div>
+            <div class="dash-avatar" style="background:${safeColor(p.color)}22;border-color:${safeColor(p.color)}">${escHtml(p.avatar)}</div>
             <div>
               <div class="dash-name">${escHtml(p.name)}</div>
               <div style="display:flex; gap:8px; font-size:0.78rem; font-weight:600;">
@@ -456,9 +478,9 @@
               ${configured ? `
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                   <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
-                    onclick="_syncPushAll()">⬆️ Push All to Cloud</button>
+                    onclick="_syncPushAll(this)">⬆️ Push All to Cloud</button>
                   <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
-                    onclick="_syncPullAll()">⬇️ Pull All from Cloud</button>
+                    onclick="_syncPullAll(this)">⬇️ Pull All from Cloud</button>
                 </div>
                 <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">
                   Sync is automatic — progress pushes on save and pulls on login.
@@ -485,11 +507,17 @@
       const isPaused = TimerManager.isPaused();
       
       container.innerHTML = `
-        <div class="parents-top-actions" style="margin-bottom:20px; padding:16px; background:rgba(255,255,255,0.05); border-radius:16px;">
+        <div class="parents-top-actions" style="margin-bottom:20px; padding:16px; background:rgba(255,255,255,0.05); border-radius:16px; display:flex; flex-direction:column; gap:16px;">
           <label class="pk-toggle" style="justify-content:center; font-size:1.1rem;">
             <input type="checkbox" ${isPaused ? 'checked' : ''} onchange="toggleAllTimers(this.checked)">
             ⏸ Pause All Timers
           </label>
+          <div style="display:flex; gap:12px; align-items:center; justify-content:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">
+            <span style="font-size:0.9rem; font-weight:700;">Parent PIN:</span>
+            <input type="password" id="new-parent-pin" maxlength="4" value="${getParentPin()}" 
+                   style="width:60px; padding:4px 8px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:4px; text-align:center;">
+            <button class="hub-action-btn secondary" style="padding:4px 12px; font-size:0.8rem;" onclick="updateParentPin()">Update</button>
+          </div>
         </div>
         <div class="parents-grid">
           ${profiles.map((p, i) => {
@@ -539,6 +567,15 @@
       else TimerManager.resumeAll();
       renderParentsCorner();
     }
+    window.updateParentPin = function() {
+      const pin = document.getElementById('new-parent-pin').value;
+      if (/^\d{4}$/.test(pin)) {
+        localStorage.setItem('zs_parent_pin', pin);
+        alert('PIN updated successfully!');
+      } else {
+        alert('Please enter a 4-digit numeric PIN.');
+      }
+    };
     function resetKidTimer(name) {
       if (confirm(`Reset timer for ${name}?`)) {
         TimerManager.reset(name);
@@ -550,8 +587,7 @@
       renderParentsCorner();
     }
 
-    async function _syncPushAll() {
-      const btn = event.target;
+    async function _syncPushAll(btn) {
       btn.textContent = '⬆️ Pushing...';
       btn.disabled = true;
       try {
@@ -561,8 +597,7 @@
       setTimeout(() => { btn.textContent = '⬆️ Push All to Cloud'; btn.disabled = false; }, 2000);
     }
 
-    async function _syncPullAll() {
-      const btn = event.target;
+    async function _syncPullAll(btn) {
       btn.textContent = '⬇️ Pulling...';
       btn.disabled = true;
       try {
@@ -695,7 +730,7 @@ function createProfile() {
   const newUser = { 
     name, 
     avatar: selectedEmoji, 
-    color: selectedColor, 
+    color: safeColor(selectedColor), 
     age: selectedAge,
     maxMinutes: 45,
     chessPlaysPerWeek: 2,
@@ -719,18 +754,32 @@ function createProfile() {
       if (error) error.style.display = 'none';
       if (input) input.value = '';
       modal.classList.add('active');
+
+      // Trap focus inside modal
+      const focusable = modal.querySelectorAll('input, button, [tabindex]:not([tabindex="-1"])');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      modal._trapFocus = (e) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      };
+      modal.addEventListener('keydown', modal._trapFocus);
       setTimeout(() => { if (input) input.focus(); }, 100);
     }
 
     function closePinModal() {
-      document.getElementById('pin-modal').classList.remove('active');
+      const modal = document.getElementById('pin-modal');
+      if (modal._trapFocus) modal.removeEventListener('keydown', modal._trapFocus);
+      modal.classList.remove('active');
       pinCallback = null;
     }
 
     function submitPin() {
       const input = document.getElementById('pin-input');
       const error = document.getElementById('pin-error');
-      if (input.value === PARENT_PIN) {
+      if (input.value === getParentPin()) {
         document.getElementById('pin-modal').classList.remove('active');
         if (pinCallback) {
           const cb = pinCallback;
@@ -809,7 +858,7 @@ function createProfile() {
       const nameInput = document.getElementById('edit-name');
       if (avatar) {
         avatar.textContent = editEmoji;
-        avatar.style.cssText = `background:${editColor}22;border-color:${editColor};`;
+        avatar.style.cssText = `background:${safeColor(editColor)}22;border-color:${safeColor(editColor)};`;
       }
       if (name && nameInput) {
         name.textContent = nameInput.value.trim() || 'Student';
@@ -880,7 +929,7 @@ function createProfile() {
       // Update profile
       profiles[editingIndex].name   = newName;
       profiles[editingIndex].avatar = editEmoji;
-      profiles[editingIndex].color  = editColor;
+      profiles[editingIndex].color  = safeColor(editColor);
       if (editAge) profiles[editingIndex].age = editAge;
 
       saveProfiles(profiles);

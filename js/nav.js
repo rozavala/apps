@@ -57,8 +57,9 @@
     avatar.className = 'user-badge-avatar';
     avatar.id = 'ubAvatar';
     avatar.textContent = user.avatar;
-    avatar.style.background = user.color + '22';
-    avatar.style.borderColor = user.color;
+    var color = typeof safeColor === 'function' ? safeColor(user.color) : user.color;
+    avatar.style.background = color + '22';
+    avatar.style.borderColor = color;
 
     var nameSpan = document.createElement('span');
     nameSpan.id = 'ubName';

@@ -3,7 +3,9 @@
    Fixed: null-safe DOM access, DOMContentLoaded init
    ================================================================ */
 
-function getUserKey(){const u=getActiveUser();return u?'zs_chile_'+u.name.toLowerCase().replace(/\s+/g,'_'):null}
+function getUserKey() {
+  return typeof getUserAppKey === 'function' ? getUserAppKey('zs_chile_') : null;
+}
 function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
 function saveTopicProgress(id,stars,pct){
   const k=getUserKey();if(!k)return;
