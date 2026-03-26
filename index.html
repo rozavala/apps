@@ -164,7 +164,7 @@
   <!-- Parent Dashboard Overlay -->
   <div class="dash-overlay" id="dash-overlay" onclick="if(event.target===this)closeDashboard()">
     <div class="dash-panel">
-      <h2>👨‍👩‍👧‍👦 Parent Dashboard <button class="dash-close" onclick="closeDashboard()">✕</button></h2>
+      <h2>👨‍👩‍👧‍👦 Parent Dashboard <button class="dash-close" aria-label="Close Parent Dashboard" onclick="closeDashboard()">✕</button></h2>
       <div id="dash-content"></div>
     </div>
   </div>
@@ -172,7 +172,7 @@
   <!-- Tareas del Hogar Overlay -->
   <div class="dash-overlay" id="chores-overlay" onclick="if(event.target===this)closeChores()">
     <div class="dash-panel">
-      <h2>🏠 Tareas del Hogar <button class="dash-close" onclick="closeChores()">✕</button></h2>
+      <h2>🏠 Tareas del Hogar <button class="dash-close" aria-label="Close Tareas del Hogar" onclick="closeChores()">✕</button></h2>
       <div id="chores-content"></div>
     </div>
   </div>
@@ -180,7 +180,7 @@
   <!-- Parents Corner Overlay -->
   <div class="dash-overlay" id="parents-overlay" onclick="if(event.target===this)closeParentsCorner()">
     <div class="dash-panel">
-      <h2>🔒 Parents Corner <button class="dash-close" onclick="closeParentsCorner()">✕</button></h2>
+      <h2>🔒 Parents Corner <button class="dash-close" aria-label="Close Parents Corner" onclick="closeParentsCorner()">✕</button></h2>
       <div id="parents-content"></div>
       <div id="sync-section"></div>
     </div>
@@ -193,7 +193,7 @@
     <div class="modal">
       <h2>Add New Player 🚀</h2>
       <div class="modal-field">
-        <label>Name</label>
+        <label for="new-name">Name</label>
         <input type="text" id="new-name" maxlength="20" placeholder="e.g. Mateo" autocomplete="off">
       </div>
       <div class="modal-field">
@@ -250,7 +250,7 @@
         <div class="edit-preview-name" id="edit-preview-name">Student</div>
       </div>
       <div class="modal-field">
-        <label>Name</label>
+        <label for="edit-name">Name</label>
         <input type="text" id="edit-name" maxlength="20" placeholder="Student name…" autocomplete="off">
       </div>
       <div class="modal-field">

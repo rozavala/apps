@@ -1,3 +1,3 @@
-## 2024-05-18 - Missing ARIA Labels and Unassociated Form Labels in Custom Modals
-**Learning:** This application extensively uses custom modal implementations (`modal-field` wrapping an input and label). These custom components often lack semantic associations between labels and inputs, and use icon-only close buttons (`dash-close`) without ARIA labels. This presents a pattern of accessibility issues across all interactive overlay elements.
-**Action:** When implementing or editing modal or overlay components in this codebase, explicitly check for `<label for="...">` associations and `aria-label`s on icon-only interactive elements like close buttons.
+## 2024-05-24 - Accessibility Patterns in Custom Modals
+**Learning:** The custom modal implementations (e.g., using `modal-field`) in this app often lack semantic `<label for="...">` associations for inputs. In addition, the icon-only close buttons (e.g., `.dash-close`) often miss `aria-label`s. This presents a recurring pattern of accessibility issues across all interactive overlay elements.
+**Action:** Whenever implementing or editing modal or overlay components in this codebase, explicitly check for `<label for="...">` associations and `aria-label`s on icon-only interactive elements like close buttons to ensure full accessibility.
