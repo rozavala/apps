@@ -133,6 +133,9 @@ const TOPICS=[
   ]},
   {id:'animales',icon:'🦙',name:'Fauna Local',stories:[
     {t:'🦙 Vicuñas y Guanacos',p:'Son camélidos sudamericanos que habitan en los Andes. La vicuña vive a gran altitud y tiene una lana muy fina y valiosa.',f:'El guanaco es más grande y puede correr a casi 60 km/h.'}
+  ]},
+  {id:'volcanes_chile',icon:'🌋',name:'Los Volcanes de Chile',stories:[
+    {t:'🌋 Un país de volcanes',p:'Chile está en el Cinturón de Fuego del Pacífico. Hay más de 2.000 volcanes, y muchos están activos.',f:'El volcán Villarrica tiene un lago de lava en su cráter.'}
   ]}
 ];
 let curTopic=null;
@@ -255,7 +258,10 @@ const QB={
     {q:'¿En qué zona de Chile están los salares y géiseres?',a:'Norte',o:['Norte','Centro','Sur','Patagonia'], tier:'intermediate'},
     {q:'¿Qué país comparte la cordillera de los Andes con Chile en la frontera este?',a:'Argentina',o:['Argentina','Perú','Bolivia','Brasil'], tier:'intermediate'},
     {q:'¿Dónde se encuentran los glaciares milenarios como el Glaciar Grey?',a:'Patagonia',o:['Patagonia','Atacama','Valles Centrales','Isla de Pascua'], tier:'intermediate'},
-    {q:'¿A qué distancia de la costa está aproximadamente Isla de Pascua?',a:'3.700 km',o:['3.700 km','500 km','1.000 km','10.000 km'], tier:'advanced'}
+    {q:'¿A qué distancia de la costa está aproximadamente Isla de Pascua?',a:'3.700 km',o:['3.700 km','500 km','1.000 km','10.000 km'], tier:'advanced'},
+    {q:'¿En qué hemisferio se encuentra Chile?',a:'Hemisferio Sur',o:['Hemisferio Sur','Hemisferio Norte','Hemisferio Oriental','En el Ecuador'], tier:'beginner'},
+    {q:'¿Cuál es la capital de Chile?',a:'Santiago',o:['Santiago','Valparaíso','Concepción','Antofagasta'], tier:'beginner'},
+    {q:'¿Qué país está al norte de Chile?',a:'Perú',o:['Perú','Argentina','Bolivia','Brasil'], tier:'intermediate'}
   ],
   indigenous:[
     {q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque'], tier:'beginner'},
@@ -275,7 +281,10 @@ const QB={
     {q:'¿Qué cerro está en el centro de Santiago donde se fundó la ciudad?',a:'Santa Lucía',o:['Santa Lucía','San Cristóbal','Aconcagua','Manquehue'], tier:'advanced'},
     {q:'¿En qué año se fundó Santiago?',a:'1541',o:['1541','1810','1492','1600'], tier:'intermediate'},
     {q:'¿En qué fecha ocurrió la Primera Junta de Gobierno?',a:'18 de septiembre de 1810',o:['18 de septiembre de 1810','12 de febrero de 1818','21 de mayo de 1879','1 de enero de 1800'], tier:'advanced'},
-    {q:'¿Qué país gobernó Chile antes de su independencia?',a:'España',o:['España','Inglaterra','Francia','Portugal'], tier:'beginner'}
+    {q:'¿Qué país gobernó Chile antes de su independencia?',a:'España',o:['España','Inglaterra','Francia','Portugal'], tier:'beginner'},
+    {q:'¿Qué cordillera tuvo que cruzar el Ejército de los Andes?',a:'Cordillera de los Andes',o:['Cordillera de los Andes','Cordillera de la Costa','Los Alpes','Los Pirineos'], tier:'intermediate'},
+    {q:'¿Qué héroe naval comandó la Esmeralda?',a:'Arturo Prat',o:['Arturo Prat','Manuel Baquedano','Bernardo O\'Higgins','José Miguel Carrera'], tier:'intermediate'},
+    {q:'¿En qué ciudad ocurrió el Combate Naval el 21 de mayo?',a:'Iquique',o:['Iquique','Valparaíso','Antofagasta','Arica'], tier:'advanced'}
   ],
   culture:[
     {q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón'], tier:'beginner'},
@@ -318,6 +327,12 @@ const QB={
     {q:'¿Dónde habita principalmente la vicuña?',a:'A gran altitud en los Andes',o:['A gran altitud en los Andes','En la costa del Pacífico','En los bosques del sur','En la selva lluviosa'], tier:'intermediate'},
     {q:'¿Qué animal tiene una de las lanas más finas y valiosas?',a:'La vicuña',o:['La vicuña','La oveja común','El guanaco','El zorro'], tier:'advanced'},
     {q:'¿A qué velocidad puede correr un guanaco?',a:'Casi 60 km/h',o:['Casi 60 km/h','Unos 10 km/h','Más de 100 km/h','30 km/h'], tier:'expert'}
+  ],
+  volcanes_chile:[
+    {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
+    {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Menos de 100','Alrededor de 500','Solo 10'], tier:'expert'},
+    {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
+    {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'}
   ]
 };
 
