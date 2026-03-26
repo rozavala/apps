@@ -84,9 +84,13 @@ function getPlayerStats(userName) {
   let totalStars = 0;
   let appsWithStars = 0;
 
+  // Cache to store the parsed data to avoid double parsing in updateStatsCards and getExplorerRank
+  const appStats = {};
+
   // Math Galaxy
   try {
     const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
+    appStats.math = mg;
     let mgStars = 0;
     Object.values(mg).forEach(level => { mgStars += (level.bestStars || 0); });
     if (mgStars > 0) { totalStars += mgStars; appsWithStars++; }
@@ -95,6 +99,7 @@ function getPlayerStats(userName) {
   // Descubre Chile
   try {
     const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
+    appStats.chile = dc;
     let dcStars = 0;
     Object.entries(dc).forEach(([k, v]) => {
       if (k !== 'vr' && k !== 'memBest' && v && v.bestStars) dcStars += v.bestStars;
@@ -105,6 +110,7 @@ function getPlayerStats(userName) {
   // Chess Quest
   try {
     const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
+    appStats.chess = cq;
     const cqStars = (cq.puzzlesSolved || 0) + (cq.wins || 0);
     if (cqStars > 0) { totalStars += cqStars; appsWithStars++; }
   } catch {}
@@ -112,6 +118,7 @@ function getPlayerStats(userName) {
   // Little Maestro
   try {
     const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
+    appStats.piano = lm;
     let lmStars = 0;
     if (lm.progress) {
       Object.entries(lm.progress).forEach(([sid, val]) => {
@@ -128,22 +135,25 @@ function getPlayerStats(userName) {
   // Fe Explorador
   try {
     const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
+    appStats.faith = fe;
     if ((fe.totalStars || 0) > 0) { totalStars += fe.totalStars; appsWithStars++; }
   } catch {}
 
   // Guitar Jam
   try {
     const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
+    appStats.guitar = gj;
     if ((gj.totalStars || 0) > 0) { totalStars += gj.totalStars; appsWithStars++; }
   } catch {}
 
   // Art Studio
   try {
     const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
+    appStats.art = as;
     if ((as.totalStars || 0) > 0) { totalStars += as.totalStars; appsWithStars++; }
   } catch {}
 
-  return { totalStars, appsWithStars };
+  return { totalStars, appsWithStars, appStats };
 }
 
 function getTotalStars(userName) {
@@ -167,7 +177,7 @@ function getAgeTier(age) {
   return 'expert';
 }
 
-function getExplorerRank(userName) {
+function getExplorerRank(userName, precalculatedStats = null) {
   let name = userName;
   if (!name) {
     const user = getActiveUser();
@@ -175,7 +185,7 @@ function getExplorerRank(userName) {
   }
   if (!name) return { name: 'Cadet', icon: '🛸', level: 0 };
 
-  const stats = getPlayerStats(name);
+  const stats = precalculatedStats || getPlayerStats(name);
   const totalStars = stats.totalStars;
   const appsWithStars = stats.appsWithStars;
 
