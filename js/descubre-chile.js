@@ -138,6 +138,10 @@ const TOPICS=[
   ]},
   {id:'volcanes_chile',icon:'🌋',name:'Los Volcanes de Chile',stories:[
     {t:'🌋 Un país de volcanes',p:'Chile está en el Cinturón de Fuego del Pacífico. Hay más de 2.000 volcanes, y muchos están activos.',f:'El volcán Villarrica tiene un lago de lava en su cráter.'}
+  ]},
+  {id:'astronomia',icon:'🔭',name:'Astronomía en Chile',stories:[
+    {t:'✨ Cielos Claros',p:'El norte de Chile tiene uno de los cielos más despejados y secos del mundo, ideal para la observación espacial.',f:'Alrededor del 70% de la infraestructura astronómica del mundo está o estará en Chile.'},
+    {t:'📡 Observatorio ALMA',p:'En el desierto de Atacama se encuentra ALMA, un conjunto de 66 antenas que trabajan juntas para observar el universo.',f:'ALMA se encuentra a más de 5.000 metros sobre el nivel del mar.'}
   ]}
 ];
 let curTopic=null;
@@ -247,6 +251,9 @@ function flipCard(i){
 // ── QUIZ ──
 const QB={
   geography:[
+    {q:'¿Cuál es el río más largo de Chile?',a:'Río Loa',o:['Río Loa','Río Biobío','Río Mapocho','Río Maipo'], tier:'advanced'},
+    {q:'¿Qué río cruza la ciudad de Santiago?',a:'Río Mapocho',o:['Río Mapocho','Río Loa','Río Baker','Río Maule'], tier:'beginner'},
+    {q:'¿Cómo se llama el estrecho en el extremo sur de Chile?',a:'Estrecho de Magallanes',o:['Estrecho de Magallanes','Estrecho de Bering','Canal de Panamá','Estrecho de Gibraltar'], tier:'intermediate'},
     {q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km'], tier:'expert'},
     {q:'¿Qué desierto chileno es uno de los más secos?',a:'Atacama',o:['Atacama','Sahara','Gobi','Kalahari'], tier:'intermediate'},
     {q:'¿Qué montañas están en la frontera este?',a:'Los Andes',o:['Los Andes','Las Rocosas','Los Alpes','El Himalaya'], tier:'beginner'},
@@ -266,6 +273,9 @@ const QB={
     {q:'¿Qué país está al norte de Chile?',a:'Perú',o:['Perú','Argentina','Bolivia','Brasil'], tier:'intermediate'}
   ],
   indigenous:[
+    {q:'¿Qué pueblo originario desarrolló la cerámica con diseños geométricos?',a:'Los Diaguitas',o:['Los Diaguitas','Los Mapuches','Los Chonos','Los Selknam'], tier:'advanced'},
+    {q:'¿Cuándo celebran el Año Nuevo los Aymaras?',a:'Solsticio de invierno',o:['Solsticio de invierno','En Navidad','El 18 de septiembre','El 1 de enero'], tier:'intermediate'},
+    {q:'¿Dónde habitan principalmente los Aymaras?',a:'En el altiplano',o:['En el altiplano','En los canales del sur','En Isla de Pascua','En Valparaíso'], tier:'intermediate'},
     {q:'¿Qué significa "Mapuche"?',a:'Gente de la tierra',o:['Gente de la tierra','Guerreros de montaña','Hijos del sol','Guardianes del bosque'], tier:'beginner'},
     {q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares'], tier:'beginner'},
     {q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años'], tier:'advanced'},
@@ -335,6 +345,12 @@ const QB={
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Menos de 100','Alrededor de 500','Solo 10'], tier:'expert'},
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
     {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'}
+  ],
+  astronomia:[
+    {q:'¿Qué parte de Chile es ideal para ver las estrellas?',a:'El Norte',o:['El Norte','El Sur','El Centro','Isla de Pascua'], tier:'beginner'},
+    {q:'¿Qué es ALMA?',a:'Un conjunto de antenas',o:['Un conjunto de antenas','Un telescopio de lentes','Un satélite espacial','Un cohete'], tier:'intermediate'},
+    {q:'¿Aproximadamente cuántos metros sobre el nivel del mar está ALMA?',a:'5.000 metros',o:['5.000 metros','1.000 metros','10.000 metros','100 metros'], tier:'expert'},
+    {q:'¿Qué porcentaje de la infraestructura astronómica mundial se concentra en Chile?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'advanced'}
   ]
 };
 
