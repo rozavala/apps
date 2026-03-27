@@ -589,7 +589,11 @@ const ArtStudio = (() => {
     }
     if (typeof SFX !== 'undefined') SFX.cheer();
     showFeedback('🎨 Lesson Done!');
-    exitLesson();
+    if (typeof LearningCheck !== 'undefined') {
+      LearningCheck.maybePrompt('art', () => exitLesson());
+    } else {
+      exitLesson();
+    }
   }
 
   function exitLesson() {
@@ -659,6 +663,9 @@ const ArtStudio = (() => {
     showFeedback('💾 Saved!');
     checkStarMilestones();
     renderGallery();
+    if (typeof LearningCheck !== 'undefined') {
+      LearningCheck.maybePrompt('art');
+    }
   }
   function renderGallery() {
     const grid = document.getElementById('gallery-grid');

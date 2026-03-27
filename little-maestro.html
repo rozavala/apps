@@ -11943,12 +11943,22 @@ document.addEventListener('DOMContentLoaded', () => {
       function _showNextSongReveal() {
         const idx  = SONGS.findIndex(s => s.id === _s.songId);
         const next = SONGS[idx + 1];
+        
+        const returnToMap = () => {
+          if (typeof showScreen === 'function') showScreen('questmap');
+          if (typeof QuestMap !== 'undefined') QuestMap.render();
+        };
+
         if (!next) {
           // World complete!
           GamificationManager.showCelebration('worldComplete');
           setTimeout(() => {
             document.querySelectorAll('.celebration-overlay,.confetti-wrap').forEach(el => el.remove());
-            if (typeof showScreen === 'function') showScreen('questmap');
+            if (typeof LearningCheck !== 'undefined') {
+              LearningCheck.maybePrompt('music', returnToMap);
+            } else {
+              returnToMap();
+            }
           }, 4000);
           return;
         }
@@ -11965,8 +11975,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
           reveal.remove();
-          if (typeof showScreen === 'function') showScreen('questmap');
-          if (typeof QuestMap !== 'undefined') QuestMap.render();
+          if (typeof LearningCheck !== 'undefined') {
+            LearningCheck.maybePrompt('music', returnToMap);
+          } else {
+            returnToMap();
+          }
         }, 4000);
       }
 
@@ -15234,6 +15247,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <script src="js/auth.js"></script>
   <script src="js/sync.js"></script>
   <script src="js/timer.js"></script>
+  <script src="js/learning-checks.js"></script>
   <script src="js/lm-bridge.js"></script>
 
 </body>

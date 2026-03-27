@@ -654,7 +654,11 @@ function finishGame() {
     <div class="stat-box"><div class="stat-value" style="color:var(--cyan)">${mins}:${String(secs).padStart(2,'0')}</div><div class="stat-label">Time</div></div>
   `;
 
-  showScreen('results');
+  if (typeof LearningCheck !== 'undefined') {
+    LearningCheck.maybePrompt('math', () => showScreen('results'));
+  } else {
+    showScreen('results');
+  }
 }
 
 function playAgain() { startGame(currentLevel); }

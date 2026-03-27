@@ -202,7 +202,8 @@
         { name: 'Little Maestro', icon: '🎹', href: 'little-maestro.html', key: `littlemaestro_${key}` },
         { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}` },
         { name: 'Guitar Jam', icon: '🎸', href: 'guitar-jam.html', key: `zs_guitar_${key}` },
-        { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: `zs_art_${key}` }
+        { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: `zs_art_${key}` },
+        { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: `zs_sports_${key}` }
       ];
 
       const noProgress = [];
@@ -217,6 +218,7 @@
           else if (app.name === 'Fe Explorador') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Guitar Jam') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Art Studio') hasProg = (data.totalStars || 0) > 0;
+          else if (app.name === 'Sports Arena') hasProg = (data.totalMatches || 0) + (data.totalActivities || 0) > 0;
           
           if (!hasProg) noProgress.push(app);
         } catch { noProgress.push(app); }
@@ -246,7 +248,8 @@
           piano:  document.getElementById('stats-piano'),
           math:   document.getElementById('stats-math'),
           chile:  document.getElementById('stats-chile'),
-          chess:  document.getElementById('stats-chess')
+          chess:  document.getElementById('stats-chess'),
+          sports: document.getElementById('stats-sports')
         };
 
         // Fetch stats which caches the parsed JSON objects
@@ -333,6 +336,18 @@
             }
           }
         } catch { if (els.chess) els.chess.innerHTML = ''; }
+
+        // Sports Arena stats
+        try {
+          const sports = typeof SportsArena !== 'undefined' ? SportsArena.getStats() : null;
+          if (els.sports && sports && (sports.totalMatches + sports.totalActivities) > 0) {
+            els.sports.innerHTML = `
+              <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">
+                ⭐ ${sports.totalStars} · ${sports.totalMatches} matches · ${sports.totalActivities} activities
+              </span>
+            `;
+          }
+        } catch {}
 
       } catch(e) {}
     }
@@ -532,6 +547,7 @@
             <button class="hub-action-btn secondary" style="padding:4px 12px; font-size:0.8rem;" onclick="updateParentPin()">Update</button>
           </div>
         </div>
+        ${typeof AppSchedule !== 'undefined' ? AppSchedule.renderScheduleConfig() : ''}
         <div class="parents-grid">
           ${profiles.map((p, i) => {
             const timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
@@ -680,6 +696,18 @@
             else tag.textContent = `⚔️ ${remaining} of ${limit} left`;
           }
         }
+      }
+
+      // Apply daily app rotation schedule
+      if (typeof AppSchedule !== 'undefined') {
+        AppSchedule.applyToHub(user);
+
+        // Update schedule banner
+        const msg = AppSchedule.getTodayMessage();
+        const dayEl = document.getElementById('schedule-day');
+        const themeEl = document.getElementById('schedule-theme');
+        if (dayEl) dayEl.textContent = '📅 ' + msg.day + ' — ' + msg.count + ' apps today';
+        if (themeEl) themeEl.textContent = msg.theme;
       }
     }
 

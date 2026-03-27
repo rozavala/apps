@@ -871,3 +871,11 @@
       background: rgba(239,68,68,0.2);
       border-color: rgba(239,68,68,0.4);
     }
+
+/* Sports Arena card */
+.card-sports {
+  --card-accent: #10B981;
+  --card-glow: rgba(16, 185, 129, 0.25);
+  --card-icon-bg: linear-gradient(135deg, #059669, #34D399);
+  --card-tag-bg: rgba(16, 185, 129, 0.15);
+}

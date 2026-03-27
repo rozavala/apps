@@ -115,6 +115,7 @@
   <script src="js/nav.js"></script>
   <script src="js/sounds.js"></script>
   <script src="js/timer.js"></script>
+  <script src="js/learning-checks.js"></script>
   <script src="js/fe-explorador.js"></script>
   <script>
     let currentTab = 'prayer';
@@ -216,10 +217,19 @@
         btn.classList.add('correct');
         FeManager.addStar();
         if (typeof playSound === 'function') playSound('success');
-        setTimeout(() => {
+        
+        const next = () => {
           saintIndex = (saintIndex + 1) % FeManager.SAINTS.length;
           heritageIndex = (heritageIndex + 1) % FeManager.HERITAGE.length;
           render();
+        };
+
+        setTimeout(() => {
+          if (typeof LearningCheck !== 'undefined') {
+            LearningCheck.maybePrompt('faith', next);
+          } else {
+            next();
+          }
         }, 1500);
       } else {
         btn.classList.add('wrong');

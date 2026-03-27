@@ -72,6 +72,15 @@
         <p>Fun learning adventures — pick an app!</p>
       </header>
 
+      <div id="schedule-banner" style="
+        text-align:center; padding:12px 20px; margin-bottom:16px;
+        background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.15);
+        border-radius:16px; animation:fadeUp 0.5s ease-out both;
+      ">
+        <span id="schedule-day" style="font-weight:800; font-family:var(--font-display); font-size:1rem;"></span>
+        <span id="schedule-theme" style="font-size:0.85rem; color:var(--text-muted); font-weight:600; display:block; margin-top:2px;"></span>
+      </div>
+
       <div id="next-challenge-wrap"></div>
 
       <!-- App Grid -->
@@ -131,13 +140,22 @@
           <div class="card-tag">🎵 Music</div>
         </a>
 
-        <!-- 7. Art Studio (LIVE) -->
+        <!-- 7. Art Studio -->
         <a href="art-studio.html" class="app-card card-art">
           <div class="card-icon">🎨</div>
           <div class="card-title">Art Studio</div>
-          <div class="card-desc">Draw, paint, and create — learn colors, shapes, and famous art styles.</div>
+          <div class="card-desc">Draw, paint, and learn about famous artists.</div>
           <div class="card-stats" id="stats-art"></div>
-          <div class="card-tag">🎨 Creative</div>
+          <div class="card-tag">✨ Creative</div>
+        </a>
+
+        <!-- 8. Sports Arena (LIVE — outdoor, not screen time) -->
+        <a href="sports-arena.html" class="app-card card-sports">
+          <div class="card-icon">🏓</div>
+          <div class="card-title">Sports Arena</div>
+          <div class="card-desc">Track matches, run tournaments, and log outdoor activities.</div>
+          <div class="card-stats" id="stats-sports"></div>
+          <div class="card-tag">💪 Outdoor</div>
         </a>
 
       </div>
@@ -281,6 +299,8 @@
   <script src="js/sync.js"></script>
   <script src="js/timer.js"></script>
   <script src="js/chores.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/learning-checks.js"></script>
   <script src="js/index.js"></script>
 </body>
 </html>

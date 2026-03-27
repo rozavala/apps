@@ -429,12 +429,21 @@ function finishQ(){
   const stars=pct>=90?3:pct>=60?2:1;
   if(typeof SFX!=='undefined'&&pct>=60)SFX.cheer();
   saveTopicProgress(qTopic,stars,pct);updateProgress();
-  let e,t,s;
-  if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}
-  else if(pct>=60){e='🌟';t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}
-  else{e='💪';t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}
-  let st='';for(let i=0;i<3;i++)st+='<span>'+(i<stars?'⭐':'☆')+'</span>';
-  qa.innerHTML='<div class="results-box"><span class="r-emoji">'+e+'</span><div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="r-stars">'+st+'</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar 🔁</button><button class="btn-ghost" onclick="renderQuizMenu()">Otros temas 🇨🇱</button></div></div>';
+
+  const showResults = () => {
+    let e,t,s;
+    if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}
+    else if(pct>=60){e='🌟';t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}
+    else{e='💪';t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}
+    let st='';for(let i=0;i<3;i++)st+='<span>'+(i<stars?'⭐':'☆')+'</span>';
+    qa.innerHTML='<div class="results-box"><span class="r-emoji">'+e+'</span><div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="r-stars">'+st+'</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar 🔁</button><button class="btn-ghost" onclick="renderQuizMenu()">Otros temas 🇨🇱</button></div></div>';
+  };
+
+  if (typeof LearningCheck !== 'undefined') {
+    LearningCheck.maybePrompt('history', showResults);
+  } else {
+    showResults();
+  }
 }
 
 // ── INIT (safe — runs after DOM ready) ──

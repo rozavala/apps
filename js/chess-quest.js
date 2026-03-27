@@ -313,7 +313,13 @@ function loadPuzzle(){
   render();
 }
 
-function nextPuzzle(){puzzleIdx++;loadPuzzle()}
+function nextPuzzle(){
+  if (typeof LearningCheck !== 'undefined') {
+    LearningCheck.maybePrompt('chess', () => { puzzleIdx++; loadPuzzle(); });
+  } else {
+    puzzleIdx++; loadPuzzle();
+  }
+}
 
 /* ================================================================
    PLAY MODE — Simple AI
@@ -473,8 +479,15 @@ function checkGameEnd(colorToMove){
     else{saveProgress({losses:(prog.losses||0)+1});showFeedback('😔')}
     const st=document.getElementById('playStatus');
     if(st) st.textContent='Game Over!';
-    const goEl=document.getElementById('gameOverWrap');
-    if(goEl) goEl.innerHTML=`<div class="game-over-box"><h2>${emoji} ${winner} win${winner==='You'?'':'s'}!</h2><p>Checkmate!</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
+    if (typeof LearningCheck !== 'undefined') {
+      LearningCheck.maybePrompt('chess', () => {
+        const goEl=document.getElementById('gameOverWrap');
+        if(goEl) goEl.innerHTML=`<div class="game-over-box"><h2>${emoji} ${winner} win${winner==='You'?'':'s'}!</h2><p>Checkmate!</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
+      });
+    } else {
+      const goEl=document.getElementById('gameOverWrap');
+      if(goEl) goEl.innerHTML=`<div class="game-over-box"><h2>${emoji} ${winner} win${winner==='You'?'':'s'}!</h2><p>Checkmate!</p><div class="go-btns"><button class="btn-gold" onclick="openPlay()">Play Again ♟️</button><button class="btn-outline" onclick="goMenu()">Menu</button></div></div>`;
+    }
     return true;
   }
   if(isStalemate(playBoard,colorToMove)){

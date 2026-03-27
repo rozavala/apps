@@ -448,8 +448,16 @@ const GuitarJam = (() => {
     else if (accuracy >= 75) stars = 2;
     else if (accuracy >= 50) stars = 1;
 
-    document.getElementById('gameplay-screen').style.display = 'none';
-    document.getElementById('results-screen').style.display = 'flex';
+    const showResults = () => {
+      document.getElementById('gameplay-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'flex';
+    };
+
+    if (typeof LearningCheck !== 'undefined') {
+      LearningCheck.maybePrompt('music', showResults);
+    } else {
+      showResults();
+    }
     document.getElementById('results-stars').textContent = '⭐'.repeat(stars) || 'Try again!';
     document.getElementById('stat-accuracy').textContent = accuracy + '%';
     document.getElementById('stat-hits').textContent = hits;
@@ -558,8 +566,16 @@ const GuitarJam = (() => {
   }
 
   function endEarGame() {
-    document.getElementById('ear-game-screen').style.display = 'none';
-    document.getElementById('ear-results-screen').style.display = 'flex';
+    const showResults = () => {
+      document.getElementById('ear-game-screen').style.display = 'none';
+      document.getElementById('ear-results-screen').style.display = 'flex';
+    };
+
+    if (typeof LearningCheck !== 'undefined') {
+      LearningCheck.maybePrompt('music', showResults);
+    } else {
+      showResults();
+    }
     
     let stars = 0;
     if (earScore >= 9) stars = 3;
