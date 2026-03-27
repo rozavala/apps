@@ -1,0 +1,141 @@
+/* ================================================================
+   WORLD EXPLORER — geography app styles
+   ================================================================ */
+
+:root {
+  --world-accent: #3B82F6;
+  --world-glow: rgba(59, 130, 246, 0.3);
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.atmo {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 25s ease-in-out infinite alternate;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  padding: 24px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen { display: none; animation: fadeUp 0.5s ease-out both; }
+.screen.active { display: flex; flex-direction: column; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header & Toggle */
+.world-header { text-align: center; padding: 32px 0; position: relative; }
+.world-header .icon { font-size: 3.5rem; display: block; margin-bottom: 8px; }
+.world-header h1 { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text-primary); }
+.lang-toggle {
+  position: absolute; top: 10px; right: 0;
+  background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+  border-radius: 99px; padding: 6px 14px; cursor: pointer;
+  font-size: 0.8rem; font-weight: 800; transition: all 0.2s;
+}
+.lang-toggle:hover { border-color: var(--world-accent); }
+
+/* Continent Select */
+.continent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.continent-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.continent-card:hover { transform: translateY(-4px); border-color: var(--world-accent); box-shadow: 0 8px 32px var(--world-glow); }
+.continent-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.continent-name { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; margin-bottom: 4px; }
+.continent-stats { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; }
+
+/* Map Explorer */
+.exp-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+.back-btn {
+  width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card); color: var(--text-muted); font-size: 20px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.exp-title { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; }
+.exp-stars { font-weight: 800; color: var(--gold); }
+
+.map-wrap {
+  background: rgba(0,0,0,0.2); border-radius: var(--radius);
+  padding: 20px; border: 1.5px solid var(--border-subtle);
+  margin-top: 12px; min-height: 300px; display: flex; align-items: center; justify-content: center;
+}
+.map-wrap svg { max-width: 100%; height: auto; display: block; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
+.map-hint { text-align: center; margin-top: 16px; font-weight: 700; color: var(--text-muted); font-size: 0.9rem; }
+
+/* SVG Styles */
+path.country { fill: rgba(255,255,255,0.1); stroke: rgba(255,255,255,0.2); stroke-width: 1; cursor: pointer; transition: all 0.2s; }
+path.country:hover { fill: var(--world-accent); fill-opacity: 0.4; }
+path.country.visited { fill: #10B981; fill-opacity: 0.3; stroke: #34D399; }
+
+/* Country Card */
+.country-card {
+  background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius); padding: 32px; text-align: center;
+}
+.country-flag { font-size: 4rem; margin-bottom: 8px; display: block; }
+.country-name { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; margin-bottom: 4px; }
+.country-capital { font-size: 1.1rem; color: var(--text-muted); font-weight: 700; margin-bottom: 24px; }
+
+.country-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.info-box { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 16px; border: 1px solid var(--border-subtle); }
+.info-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; }
+.info-value { font-size: 1.1rem; font-weight: 800; }
+
+.country-facts { text-align: left; background: rgba(0,0,0,0.1); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+.fact-item { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.5; font-weight: 600; display: flex; gap: 10px; }
+.fact-item:last-child { margin-bottom: 0; }
+
+.action-btn {
+  padding: 16px 32px; border-radius: var(--radius-sm); font-family: var(--font-body);
+  font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease;
+  border: none; width: 100%; margin-bottom: 12px;
+}
+.btn-primary { background: linear-gradient(135deg, var(--world-accent), #60A5FA); color: #fff; }
+.btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
+
+/* Results & Feedback same as lab */
+.feedback {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+  z-index: 10000; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.feedback.active { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.feedback-emoji { font-size: 8rem; }

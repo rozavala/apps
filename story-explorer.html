@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Explorer 📚</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/story-explorer.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(139,92,246,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(236,72,153,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: LIBRARY -->
+    <div class="screen active" id="screen-library">
+      <div class="story-header">
+        <span class="icon">📚</span>
+        <h1>Story Explorer</h1>
+        <p>Adventure tales and vocabulary quests!</p>
+        <div class="lang-toggle" onclick="StoryExplorer.toggleLanguage()">
+          <span id="lang-label">EN / ES</span> 🌐
+        </div>
+      </div>
+      <div class="tier-select" id="tier-select">
+        <!-- Tier tabs -->
+      </div>
+      <div class="story-grid" id="story-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN: READ -->
+    <div class="screen" id="screen-read">
+      <div class="exp-header">
+        <button class="back-btn" onclick="StoryExplorer.backToLibrary()">←</button>
+        <div class="exp-title" id="story-title">Story Title</div>
+        <div class="exp-stars" id="story-stars">⭐ 0</div>
+      </div>
+      <div class="story-content">
+        <div class="page-image" id="page-icon">📖</div>
+        <div class="page-text" id="page-text">
+          <!-- Text with highlighted vocab -->
+        </div>
+        <div class="page-controls">
+          <button class="nav-btn" onclick="StoryExplorer.prevPage()">Prev</button>
+          <div class="page-indicator" id="page-indicator">Page 1 / 4</div>
+          <button class="nav-btn" onclick="StoryExplorer.nextPage()">Next</button>
+        </div>
+        <button class="audio-btn" onclick="StoryExplorer.readAloud()">🔊 Read Aloud</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: QUIZ -->
+    <div class="screen" id="screen-quiz">
+      <div class="quiz-wrap" id="quiz-wrap"></div>
+    </div>
+
+    <!-- SCREEN: RESULTS -->
+    <div class="screen" id="screen-results">
+      <div class="results-wrap" id="results-wrap"></div>
+    </div>
+  </div>
+
+  <!-- Vocab Popup -->
+  <div id="vocab-overlay" class="dash-overlay" onclick="if(event.target===this) this.classList.remove('active')">
+    <div class="dash-panel" style="max-width:320px; text-align:center;">
+      <div id="vocab-word" style="font-family:var(--font-display); font-size:1.8rem; font-weight:800; color:var(--purple); margin-bottom:8px;">Word</div>
+      <div id="vocab-def" style="font-size:1rem; font-weight:600; line-height:1.4; color:var(--text-primary); margin-bottom:20px;">Definition</div>
+      <button class="action-btn btn-primary" onclick="document.getElementById('vocab-overlay').classList.remove('active')">Got it! 🧠</button>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"><span class="feedback-emoji" id="feedbackEmoji"></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/learning-checks.js"></script>
+  <script src="js/story-explorer.js"></script>
+</body>
+</html>

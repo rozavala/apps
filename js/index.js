@@ -203,7 +203,10 @@
         { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}` },
         { name: 'Guitar Jam', icon: '🎸', href: 'guitar-jam.html', key: `zs_guitar_${key}` },
         { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: `zs_art_${key}` },
-        { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: `zs_sports_${key}` }
+        { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: `zs_sports_${key}` },
+        { name: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html', key: `zs_lab_${key}` },
+        { name: 'World Explorer', icon: '🌍', href: 'world-explorer.html', key: `zs_world_${key}` },
+        { name: 'Story Explorer', icon: '📚', href: 'story-explorer.html', key: `zs_story_${key}` }
       ];
 
       const noProgress = [];
@@ -219,6 +222,9 @@
           else if (app.name === 'Guitar Jam') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Art Studio') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Sports Arena') hasProg = (data.matches || []).length + (data.activities || []).length > 0;
+          else if (app.name === 'Lab Explorer') hasProg = (data.totalStars || 0) > 0;
+          else if (app.name === 'World Explorer') hasProg = (data.totalStars || 0) > 0;
+          else if (app.name === 'Story Explorer') hasProg = (data.totalStars || 0) > 0;
           
           if (!hasProg) noProgress.push(app);
         } catch { noProgress.push(app); }
@@ -249,7 +255,11 @@
           math:   document.getElementById('stats-math'),
           chile:  document.getElementById('stats-chile'),
           chess:  document.getElementById('stats-chess'),
-          sports: document.getElementById('stats-sports')
+          sports: document.getElementById('stats-sports'),
+          lab:    document.getElementById('stats-lab'),
+          world:  document.getElementById('stats-world'),
+          story:  document.getElementById('stats-story'),
+          quest:  document.getElementById('stats-quest')
         };
 
         // Fetch stats which caches the parsed JSON objects
@@ -351,6 +361,42 @@
           }
         } catch {}
 
+        // Lab Explorer stats
+        try {
+          const le = appStats.lab || JSON.parse(localStorage.getItem(`zs_lab_${key}`)) || {};
+          if (els.lab && (le.totalStars || 0) > 0) {
+            const labs = Object.keys(le).filter(k => k !== 'totalStars' && (le[k].completed || 0) > 0).length;
+            els.lab.innerHTML = `<span class="cs-item active">⭐ ${le.totalStars} · ${labs} labs</span>`;
+          }
+        } catch {}
+
+        // World Explorer stats
+        try {
+          const we = appStats.world || JSON.parse(localStorage.getItem(`zs_world_${key}`)) || {};
+          if (els.world && (we.totalStars || 0) > 0) {
+            const visited = we.visited ? we.visited.length : 0;
+            els.world.innerHTML = `<span class="cs-item active">⭐ ${we.totalStars} · ${visited} countries</span>`;
+          }
+        } catch {}
+
+        // Story Explorer stats
+        try {
+          const se = appStats.story || JSON.parse(localStorage.getItem(`zs_story_${key}`)) || {};
+          if (els.story && (se.totalStars || 0) > 0) {
+            const stories = se.storiesRead ? se.storiesRead.length : 0;
+            const words = se.wordsLearned ? se.wordsLearned.length : 0;
+            els.story.innerHTML = `<span class="cs-item active">⭐ ${se.totalStars} · ${stories} stories · ${words} words</span>`;
+          }
+        } catch {}
+
+        // Quest Adventure stats
+        try {
+          const ep = typeof QuestAdventure !== 'undefined' ? QuestAdventure.calculateEP() : 0;
+          if (els.quest && ep > 0) {
+            els.quest.innerHTML = `<span class="cs-item active">⚡ ${ep} EP</span>`;
+          }
+        } catch {}
+
       } catch(e) {}
     }
 
@@ -381,51 +427,153 @@
         if (levels.length > 0) {
           const totalStars = levels.reduce((s, [, l]) => s + (l.bestStars || 0), 0);
           const totalPlays = levels.reduce((s, [, l]) => s + (l.plays || 0), 0);
-          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalStars} · ${totalPlays} plays</span></div>`;
+          const pct = (totalStars / 40) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">🧮</span>
+            <span class="dash-app-name">Math Galaxy</span>
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-math" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${totalStars}</span>
+          </div>`;
         }
 
         const dc = appStats.chile || {};
         const totalChileStars = Object.entries(dc).filter(([k]) => k !== 'vr' && k !== 'memBest').reduce((s, [, v]) => s + ((v && v.bestStars) || 0), 0);
-        if (totalChileStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalChileStars}</span></div>`;
+        if (totalChileStars > 0) {
+          const pct = (totalChileStars / 30) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">🇨🇱</span>
+            <span class="dash-app-name">Descubre Chile</span>
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-chile" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${totalChileStars}</span>
+          </div>`;
+        }
 
         const cq = appStats.chess || {};
         const totalCQ = (cq.puzzlesSolved || 0) + (cq.wins || 0);
-        if (totalCQ > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalCQ}</span></div>`;
+        if (totalCQ > 0) {
+          const pct = (totalCQ / 50) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">♟️</span>
+            <span class="dash-app-name">Chess Quest</span>
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-chess" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${totalCQ}</span>
+          </div>`;
+        }
 
         const lm = appStats.piano || {};
         const prog = lm.progress || {};
         const totalLMStars = Object.entries(prog).filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).reduce((s, [, v]) => s + v.stars, 0);
-        if (totalLMStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">⭐ ${totalLMStars}</span></div>`;
+        if (totalLMStars > 0) {
+          const pct = (totalLMStars / 50) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">🎹</span>
+            <span class="dash-app-name">Little Maestro</span>
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-piano" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${totalLMStars}</span>
+          </div>`;
+        }
 
         const fe = appStats.faith || {};
-        if (fe.totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">⛪</span><span class="dash-app-name">Fe Explorador</span><span class="dash-app-stat">⭐ ${fe.totalStars}</span></div>`;
+        if (fe.totalStars > 0) {
+          const pct = (fe.totalStars / 20) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">⛪</span>
+            <span class="dash-app-name">Fe Explorador</span>
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-faith" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${fe.totalStars}</span>
+          </div>`;
+        }
 
         const gj = appStats.guitar || {};
         if ((gj.totalStars || 0) > 0) {
-          const chords = (gj.chordsLearned || []).length;
-          const songs = (gj.songsCompleted || []).length;
-          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎸</span>
+          const pct = (gj.totalStars / 20) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">🎸</span>
             <span class="dash-app-name">Guitar Jam</span>
-            <span class="dash-app-stat">⭐ ${gj.totalStars} · ${chords} chords · ${songs} songs</span></div>`;
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-guitar" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${gj.totalStars}</span>
+          </div>`;
         }
 
         const as = appStats.art || {};
         if ((as.totalStars || 0) > 0) {
-          const artworks = (as.gallery || []).length;
-          const lessons = (as.lessonsCompleted || []).length;
-          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎨</span>
+          const pct = (as.totalStars / 20) * 100;
+          appRows += `<div class="dash-app-row">
+            <span class="dash-app-icon">🎨</span>
             <span class="dash-app-name">Art Studio</span>
-            <span class="dash-app-stat">⭐ ${as.totalStars} · ${artworks} artworks · ${lessons} lessons</span></div>`;
+            <div class="dash-bar-wrap"><div class="dash-bar dash-bar-art" style="width:${Math.min(100, pct)}%"></div></div>
+            <span class="dash-app-stat">⭐ ${as.totalStars}</span>
+          </div>`;
         }
 
         try {
           const sa = appStats.sports || JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
-          const matchCount = (sa.matches || []).length;
-          const actCount = (sa.activities || []).length;
-          if (matchCount + actCount > 0) {
-            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🏓</span>
+          const stars = sa.totalStars || 0;
+          if (stars > 0) {
+            const pct = (stars / 50) * 100;
+            appRows += `<div class="dash-app-row">
+              <span class="dash-app-icon">🏓</span>
               <span class="dash-app-name">Sports Arena</span>
-              <span class="dash-app-stat">⭐ ${sa.totalStars || 0} · ${matchCount} matches · ${actCount} activities</span></div>`;
+              <div class="dash-bar-wrap"><div class="dash-bar dash-bar-sports" style="width:${Math.min(100, pct)}%"></div></div>
+              <span class="dash-app-stat">⭐ ${stars}</span>
+            </div>`;
+          }
+        } catch {}
+
+        // Lab Explorer dashboard row
+        try {
+          const le = appStats.lab || JSON.parse(localStorage.getItem(`zs_lab_${key}`)) || {};
+          if ((le.totalStars || 0) > 0) {
+            const pct = (le.totalStars / 18) * 100;
+            appRows += `<div class="dash-app-row">
+              <span class="dash-app-icon">🔬</span>
+              <span class="dash-app-name">Lab Explorer</span>
+              <div class="dash-bar-wrap"><div class="dash-bar dash-bar-lab" style="width:${Math.min(100, pct)}%"></div></div>
+              <span class="dash-app-stat">⭐ ${le.totalStars}</span>
+            </div>`;
+          }
+        } catch {}
+
+        // World Explorer dashboard row
+        try {
+          const we = appStats.world || JSON.parse(localStorage.getItem(`zs_world_${key}`)) || {};
+          if ((we.totalStars || 0) > 0) {
+            const pct = (we.totalStars / 50) * 100;
+            appRows += `<div class="dash-app-row">
+              <span class="dash-app-icon">🌍</span>
+              <span class="dash-app-name">World Explorer</span>
+              <div class="dash-bar-wrap"><div class="dash-bar dash-bar-world" style="width:${Math.min(100, pct)}%"></div></div>
+              <span class="dash-app-stat">⭐ ${we.totalStars}</span>
+            </div>`;
+          }
+        } catch {}
+
+        // Story Explorer dashboard row
+        try {
+          const se = appStats.story || JSON.parse(localStorage.getItem(`zs_story_${key}`)) || {};
+          if ((se.totalStars || 0) > 0) {
+            const pct = (se.totalStars / 30) * 100;
+            appRows += `<div class="dash-app-row">
+              <span class="dash-app-icon">📚</span>
+              <span class="dash-app-name">Story Explorer</span>
+              <div class="dash-bar-wrap"><div class="dash-bar dash-bar-story" style="width:${Math.min(100, pct)}%"></div></div>
+              <span class="dash-app-stat">⭐ ${se.totalStars}</span>
+            </div>`;
+          }
+        } catch {}
+
+        // Quest Adventure dashboard row
+        try {
+          const qa = appStats.quest || JSON.parse(localStorage.getItem(`zs_quest_${key}`)) || {};
+          const ep = typeof QuestAdventure !== 'undefined' ? QuestAdventure.calculateEP() : 0;
+          if (ep > 0) {
+            const pct = (ep / 250) * 100;
+            appRows += `<div class="dash-app-row">
+              <span class="dash-app-icon">🧗</span>
+              <span class="dash-app-name">Quest Adventure</span>
+              <div class="dash-bar-wrap"><div class="dash-bar dash-bar-quest" style="width:${Math.min(100, pct)}%"></div></div>
+              <span class="dash-app-stat">⚡ ${ep}</span>
+            </div>`;
           }
         } catch {}
 
@@ -453,6 +601,44 @@
 
     function closeDashboard() {
       document.getElementById('dash-overlay').classList.remove('active');
+    }
+
+    function exportProgress() {
+      const profiles = getProfiles();
+      const exportData = {
+        exported: new Date().toISOString(),
+        suite: 'Zavala Serra Apps',
+        profiles: profiles.map(p => {
+          const key = p.name.toLowerCase().replace(/\s+/g, '_');
+          return {
+            name: p.name,
+            age: p.age,
+            rank: typeof getExplorerRank === 'function' ? getExplorerRank(p.name) : null,
+            apps: {
+              math: JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`) || '{}'),
+              chile: JSON.parse(localStorage.getItem(`zs_chile_${key}`) || '{}'),
+              chess: JSON.parse(localStorage.getItem(`zs_chess_${key}`) || '{}'),
+              piano: JSON.parse(localStorage.getItem(`littlemaestro_${key}`) || '{}'),
+              faith: JSON.parse(localStorage.getItem(`zs_fe_${key}`) || '{}'),
+              guitar: JSON.parse(localStorage.getItem(`zs_guitar_${key}`) || '{}'),
+              art: JSON.parse(localStorage.getItem(`zs_art_${key}`) || '{}'),
+              sports: JSON.parse(localStorage.getItem(`zs_sports_${key}`) || '{}'),
+              lab: JSON.parse(localStorage.getItem(`zs_lab_${key}`) || '{}'),
+              world: JSON.parse(localStorage.getItem(`zs_world_${key}`) || '{}'),
+              story: JSON.parse(localStorage.getItem(`zs_story_${key}`) || '{}'),
+              quest: JSON.parse(localStorage.getItem(`zs_quest_${key}`) || '{}'),
+            }
+          };
+        })
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `zavala-serra-progress-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     // ── Chores List ──

@@ -74,6 +74,30 @@ const LearningCheck = (() => {
       { q: 'What is H₂O?', options: ['Oxygen', 'Hydrogen', 'Water', 'Salt'], answer: 2 },
       { q: 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 3 },
       { q: 'How many days are in a leap year?', options: ['364', '365', '366', '367'], answer: 2 },
+    ],
+    science: [
+      { q: 'What are the three primary colors?', options: ['Red, Blue, Green', 'Red, Blue, Yellow', 'Red, Green, Yellow', 'Blue, Green, Yellow'], answer: 1 },
+      { q: 'What is evaporation?', options: ['Water freezing', 'Water turning to gas', 'Rain falling', 'Clouds forming'], answer: 1 },
+      { q: 'What does a lever help you do?', options: ['Cut things', 'Lift heavy things', 'Heat water', 'Grow plants'], answer: 1 },
+      { q: 'Which pole of a magnet attracts?', options: ['Same poles', 'Opposite poles', 'Both', 'Neither'], answer: 1 },
+      { q: 'How many planets are in our solar system?', options: ['7', '8', '9', '10'], answer: 1 },
+      { q: 'What do plants need to grow?', options: ['Only water', 'Water and light', 'Only soil', 'Only air'], answer: 1 },
+      { q: 'What causes rain?', options: ['Wind', 'Clouds getting heavy with water', 'The sun', 'Gravity alone'], answer: 1 },
+      { q: 'What shape is a full moon?', options: ['Square', 'Triangle', 'Circle', 'Crescent'], answer: 2 },
+    ],
+    geography: [
+      { q: 'What is the largest continent?', options: ['Africa', 'Asia', 'Europe', 'South America'], answer: 1 },
+      { q: 'Which ocean is the largest?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 3 },
+      { q: 'How many continents are there?', options: ['5', '6', '7', '8'], answer: 2 },
+      { q: 'What is the capital of Chile?', options: ['Lima', 'Santiago', 'Buenos Aires', 'Bogotá'], answer: 1 },
+      { q: 'The Sahara Desert is in which continent?', options: ['Asia', 'South America', 'Africa', 'Australia'], answer: 2 },
+      { q: 'What is the longest river in the world?', options: ['Amazon', 'Nile', 'Mississippi', 'Yangtze'], answer: 1 },
+    ],
+    reading: [
+      { q: 'What is a synonym for "big"?', options: ['Small', 'Huge', 'Fast', 'Old'], answer: 1 },
+      { q: 'A "valley" is a low area between what?', options: ['Buildings', 'Mountains', 'Rivers', 'Trees'], answer: 1 },
+      { q: 'What does "enormous" mean?', options: ['Very small', 'Very fast', 'Very big', 'Very old'], answer: 2 },
+      { q: 'What comes at the end of a sentence?', options: ['Comma', 'Period', 'Colon', 'Dash'], answer: 1 },
     ]
   };
 

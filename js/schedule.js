@@ -28,18 +28,22 @@ const AppSchedule = (() => {
     { id: 'guitar',  card: '.card-guitar',   name: 'Guitar Jam',     icon: '🎸', category: 'music' },
     { id: 'art',     card: '.card-art',      name: 'Art Studio',     icon: '🎨', category: 'creative' },
     { id: 'sports',  card: '.card-sports',   name: 'Sports Arena',   icon: '🏓', category: 'outdoor' },
+    { id: 'lab',     card: '.card-lab',      name: 'Lab Explorer',   icon: '🔬', category: 'stem' },
+    { id: 'world',   card: '.card-world',    name: 'World Explorer', icon: '🌍', category: 'culture' },
+    { id: 'story',   card: '.card-story',    name: 'Story Explorer', icon: '📚', category: 'reading' },
+    { id: 'quest',   card: '.card-quest',    name: 'Quest Adventure',icon: '🧗', category: 'adventure' },
   ];
 
   // ── Smart defaults: 4–5 apps per day, every app appears 3–4x/week ──
   // Days: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   const SMART_SCHEDULE = {
-    0: ['piano', 'chile', 'art'],           // Sunday — relaxed: music, culture, creativity
-    1: ['math', 'chess', 'guitar'],          // Monday — logic + music
-    2: ['piano', 'chile', 'art', 'math'],              // Tuesday — well-rounded
-    3: ['math', 'chess', 'guitar'],          // Wednesday — strategy day
-    4: ['piano', 'art', 'chile'],            // Thursday — creative + culture
-    5: ['math', 'guitar', 'chess', 'art'],             // Friday — challenge day
-    6: ['piano', 'chile', 'guitar', 'art'],  // Saturday — big day, more apps
+    0: ['piano', 'chile', 'art', 'story'],              // Sunday — relaxed + reading
+    1: ['math', 'chess', 'guitar', 'lab'],               // Monday — STEM + music
+    2: ['piano', 'chile', 'art', 'world'],               // Tuesday — culture + geography
+    3: ['math', 'chess', 'guitar', 'story'],             // Wednesday — strategy + reading
+    4: ['piano', 'art', 'chile', 'lab'],                 // Thursday — creative + science
+    5: ['math', 'guitar', 'chess', 'world'],             // Friday — challenge day
+    6: ['piano', 'chile', 'guitar', 'art', 'story'],    // Saturday — big day
   };
 
   // Faith is handled separately (faithVisible toggle) — if visible, always included
@@ -117,8 +121,8 @@ const AppSchedule = (() => {
       // Faith has its own toggle — skip if handled elsewhere
       if (app.id === 'faith') return;
 
-      // Sports Arena is always visible (it's outdoor, not screen time)
-      if (app.id === 'sports') {
+      // Sports Arena and Quest Adventure are always visible
+      if (app.id === 'sports' || app.id === 'quest') {
         el.style.display = '';
         return;
       }

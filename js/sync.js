@@ -16,6 +16,10 @@ const CloudSync = (() => {
     'zs_guitar_': 'guitar',
     'zs_art_': 'art',
     'zs_sports_': 'sports',
+    'zs_lab_': 'lab',
+    'zs_world_': 'world',
+    'zs_story_': 'story',
+    'zs_quest_': 'quest',
     'littlemaestro_': 'littlemaestro',
   };
 

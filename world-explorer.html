@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Explorer 🌍</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/world-explorer.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(59,130,246,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(16,185,129,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: CONTINENT SELECT -->
+    <div class="screen active" id="screen-select">
+      <div class="world-header">
+        <span class="icon">🌍</span>
+        <h1>World Explorer</h1>
+        <p>Pick a continent to start your journey!</p>
+        <div class="lang-toggle" onclick="WorldExplorer.toggleLanguage()">
+          <span id="lang-label">EN / ES</span> 🌐
+        </div>
+      </div>
+      <div class="continent-grid" id="continent-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN: MAP EXPLORER -->
+    <div class="screen" id="screen-continent">
+      <div class="exp-header">
+        <button class="back-btn" onclick="WorldExplorer.backToSelect()">←</button>
+        <div class="exp-title" id="continent-title">Continent</div>
+        <div class="exp-stars" id="world-stars">⭐ 0</div>
+      </div>
+      <div class="map-wrap" id="map-wrap">
+        <!-- SVG Map here -->
+      </div>
+      <div class="map-hint">Tap a country to explore!</div>
+    </div>
+
+    <!-- SCREEN: COUNTRY DETAIL -->
+    <div class="screen" id="screen-country">
+      <div class="country-card" id="country-card">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN: QUIZ -->
+    <div class="screen" id="screen-quiz">
+      <div class="quiz-wrap" id="quiz-wrap">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN: RESULTS -->
+    <div class="screen" id="screen-results">
+      <div class="results-wrap" id="results-wrap"></div>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"><span class="feedback-emoji" id="feedbackEmoji"></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/learning-checks.js"></script>
+  <script src="js/world-explorer.js"></script>
+</body>
+</html>

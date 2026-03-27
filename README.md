@@ -16,10 +16,11 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 - **⛪ Fe Explorador**: Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.
 - **🎸 Guitar Jam**: Learn guitar chords, strum along with songs, and train your ear.
 - **🎨 Art Studio**: Draw, paint, and learn famous art styles with guided activities.
-
-### Coming Soon
-- **🧗 Quest Adventure**: An RPG-style quest where learning math and history unlocks new regions.
-- **🔬 Lab Explorer**: Simple science experiments and facts about the natural world.
+- **🏓 Sports Arena**: Track matches, run tournaments, and log outdoor activities to balance screen time.
+- **🔬 Lab Explorer**: Mix colors, grow plants, and discover how the world works through interactive experiments.
+- **🌍 World Explorer**: Travel the globe—learn flags, capitals, and landmarks across all continents.
+- **📚 Story Explorer**: Read adventure tales and build vocabulary in English and Spanish.
+- **🧗 Quest Adventure**: An RPG-style quest where your progress in every app unlocks new regions on a world map.
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 

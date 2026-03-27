@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quest Adventure 🧗</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/quest-adventure.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(245,158,11,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(16,185,129,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <div class="quest-header">
+      <span class="icon">🧗</span>
+      <h1>Quest Adventure</h1>
+      <p>Your progress across every app unlocks the world!</p>
+    </div>
+
+    <div class="map-container">
+      <div id="quest-map" class="quest-map">
+        <!-- Vertical winding path nodes -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Region Detail Overlay -->
+  <div id="quest-detail" class="dash-overlay" onclick="if(event.target===this) this.classList.remove('active')">
+    <!-- Populated by JS -->
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/learning-checks.js"></script>
+  <script src="js/quest-adventure.js"></script>
+</body>
+</html>

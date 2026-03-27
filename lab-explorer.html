@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab Explorer 🔬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/lab-explorer.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(16,185,129,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(59,130,246,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- TOPIC SELECT -->
+    <div class="screen active" id="screen-select">
+      <div class="lab-header">
+        <span class="icon">🔬</span>
+        <h1>Lab Explorer</h1>
+        <p>Pick a lab and start experimenting!</p>
+        <div class="greeting" id="greeting"></div>
+      </div>
+      <div class="lab-grid" id="lab-grid">
+        <!-- Populated by JS: one card per lab topic -->
+      </div>
+    </div>
+
+    <!-- EXPERIMENT SCREEN -->
+    <div class="screen" id="screen-experiment">
+      <div class="exp-header">
+        <button class="back-btn" onclick="LabExplorer.backToTopics()">←</button>
+        <div class="exp-title" id="exp-title"></div>
+        <div class="exp-stars" id="exp-stars">⭐ 0</div>
+      </div>
+      <div class="exp-canvas-wrap">
+        <canvas id="exp-canvas" width="600" height="400"></canvas>
+      </div>
+      <div class="exp-controls" id="exp-controls">
+        <!-- Dynamic controls per experiment -->
+      </div>
+      <div class="exp-journal" id="exp-journal">
+        <!-- Discovery journal entries -->
+      </div>
+      <div class="exp-actions">
+        <button class="action-btn btn-primary" id="next-btn" onclick="LabExplorer.nextExperiment()" style="display:none;">Next Experiment 🧪</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="screen" id="screen-results">
+      <div class="results-wrap" id="results-wrap"></div>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"><span class="feedback-emoji" id="feedbackEmoji"></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/learning-checks.js"></script>
+  <script src="js/lab-explorer.js"></script>
+</body>
+</html>

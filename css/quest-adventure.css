@@ -1,0 +1,127 @@
+/* ================================================================
+   QUEST ADVENTURE — styles
+   Mirroring Little Maestro's quest map style
+   ================================================================ */
+
+:root {
+  --quest-accent: #F59E0B;
+  --quest-glow: rgba(245, 158, 11, 0.3);
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.atmo {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 25s ease-in-out infinite alternate;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  padding: 24px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-header { text-align: center; padding: 32px 0; }
+.quest-header .icon { font-size: 3.5rem; display: block; margin-bottom: 8px; }
+.quest-header h1 { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text-primary); }
+.quest-header p { color: var(--text-muted); font-size: 1rem; margin-top: 4px; font-weight: 600; }
+
+.map-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 60px;
+}
+
+.quest-map {
+  display: flex;
+  flex-direction: column-reverse; /* Bottom to top progression */
+  align-items: center;
+  width: 100%;
+}
+
+/* EP Bar */
+.quest-ep-bar {
+  width: 100%; max-width: 400px; background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle); border-radius: 20px;
+  padding: 16px; margin-bottom: 40px; text-align: center;
+}
+.quest-ep-label { font-weight: 800; font-size: 1.1rem; margin-bottom: 10px; color: var(--quest-accent); }
+.quest-ep-track { height: 10px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.quest-ep-fill { height: 100%; background: linear-gradient(90deg, #F59E0B, #FBBF24); border-radius: 99px; transition: width 1s ease-out; }
+
+/* Nodes & Connectors */
+.quest-node {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: var(--bg-card); border: 3px solid var(--border-subtle);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; cursor: pointer; transition: all 0.3s ease;
+  z-index: 2; margin: 20px 0;
+}
+.quest-node.unlocked { background: rgba(245, 158, 11, 0.1); border-color: var(--quest-accent); box-shadow: 0 0 20px var(--quest-glow); }
+.quest-node.locked { opacity: 0.6; cursor: not-allowed; }
+.quest-node.current { border-color: #fff; animation: pulse 2s infinite; }
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+.quest-node-icon { font-size: 2rem; }
+.quest-node-name {
+  position: absolute; left: 120px; width: 150px; text-align: left;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.1rem;
+}
+.quest-node:nth-child(even) .quest-node-name { left: auto; right: 120px; text-align: right; }
+
+.quest-node-ep { position: absolute; bottom: -25px; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); white-space: nowrap; }
+
+.quest-connector {
+  width: 6px; height: 60px; background: var(--border-subtle);
+  margin: -20px 0; z-index: 1;
+}
+.quest-connector.active { background: var(--quest-accent); }
+
+/* Detail Card */
+.quest-detail-card {
+  background: var(--bg-card); border: 2px solid var(--quest-accent);
+  border-radius: 32px; padding: 40px 32px; text-align: center;
+  max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes popIn { from { transform: scale(0.8) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+.quest-detail-icon { font-size: 4rem; margin-bottom: 16px; }
+.quest-detail-card h2 { font-family: var(--font-display); font-size: 2rem; font-weight: 800; margin-bottom: 12px; color: var(--quest-accent); }
+.quest-detail-card p { font-size: 1.1rem; font-weight: 600; line-height: 1.5; color: var(--text-primary); margin-bottom: 24px; }
+
+.quest-reward { background: rgba(245, 158, 11, 0.1); border-radius: 20px; padding: 20px; margin-bottom: 32px; text-align: left; border: 1px dashed var(--quest-accent); }
+.reward-label { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--quest-accent); margin-bottom: 6px; }
+.reward-text { font-size: 1rem; font-weight: 700; line-height: 1.4; color: var(--text-primary); }
+
+.action-btn {
+  padding: 16px 32px; border-radius: var(--radius-sm); font-family: var(--font-body);
+  font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease;
+  border: none; width: 100%;
+}
+.btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
