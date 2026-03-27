@@ -158,6 +158,42 @@
           <div class="card-tag">💪 Outdoor</div>
         </a>
 
+        <!-- 9. Lab Explorer (LIVE) -->
+        <a href="lab-explorer.html" class="app-card card-lab" style="display:none;">
+          <div class="card-icon">🔬</div>
+          <div class="card-title">Lab Explorer</div>
+          <div class="card-desc">Mix colors, grow plants, and discover how the world works.</div>
+          <div class="card-stats" id="stats-lab"></div>
+          <div class="card-tag">🧪 Science</div>
+        </a>
+
+        <!-- 10. World Explorer (LIVE) -->
+        <a href="world-explorer.html" class="app-card card-world" style="display:none;">
+          <div class="card-icon">🌍</div>
+          <div class="card-title">World Explorer</div>
+          <div class="card-desc">Travel the globe — learn flags, capitals, and landmarks.</div>
+          <div class="card-stats" id="stats-world"></div>
+          <div class="card-tag">🧭 Geography</div>
+        </a>
+
+        <!-- 11. Story Explorer (LIVE) -->
+        <a href="story-explorer.html" class="app-card card-story" style="display:none;">
+          <div class="card-icon">📚</div>
+          <div class="card-title">Story Explorer</div>
+          <div class="card-desc">Read adventure tales and build your vocabulary.</div>
+          <div class="card-stats" id="stats-story"></div>
+          <div class="card-tag">📖 Reading</div>
+        </a>
+
+        <!-- 12. Quest Adventure (LIVE) -->
+        <a href="quest-adventure.html" class="app-card card-quest" style="display:none;">
+          <div class="card-icon">🧗</div>
+          <div class="card-title">Quest Adventure</div>
+          <div class="card-desc">Explore a world map — your progress in every app unlocks new regions!</div>
+          <div class="card-stats" id="stats-quest"></div>
+          <div class="card-tag">🗺️ Adventure</div>
+        </a>
+
       </div>
 
       <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:32px;">
@@ -182,7 +218,15 @@
   <!-- Parent Dashboard Overlay -->
   <div class="dash-overlay" id="dash-overlay" onclick="if(event.target===this)closeDashboard()">
     <div class="dash-panel">
-      <h2>👨‍👩‍👧‍👦 Parent Dashboard <button class="dash-close" aria-label="Close Dashboard" onclick="closeDashboard()">✕</button></h2>
+      <h2 style="display:flex; justify-content:space-between; align-items:center;">
+        <span>👨‍👩‍👧‍👦 Parent Dashboard</span>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button class="hub-action-btn secondary" style="padding:8px 14px; font-size:0.8rem; margin:0;" onclick="exportProgress()">
+            📥 Export
+          </button>
+          <button class="dash-close" aria-label="Close Dashboard" onclick="closeDashboard()">✕</button>
+        </div>
+      </h2>
       <div id="dash-content"></div>
     </div>
   </div>

@@ -609,6 +609,26 @@
       else TimerManager.resumeAll();
       renderParentsCorner();
     }
+    window.addCustomChore = function() {
+      const label = document.getElementById('new-chore-label').value.trim();
+      const tokens = parseInt(document.getElementById('new-chore-tokens').value);
+      if (label && tokens > 0 && typeof ChoresManager !== 'undefined') {
+         const current = ChoresManager.getChores();
+         current.push({ id: `custom_${Date.now()}`, label, tokens });
+         localStorage.setItem('zs_chores_list', JSON.stringify(current));
+         renderParentsCorner();
+      }
+    };
+
+    window.removeChore = function(idx) {
+      if (typeof ChoresManager !== 'undefined') {
+         const current = ChoresManager.getChores();
+         current.splice(idx, 1);
+         localStorage.setItem('zs_chores_list', JSON.stringify(current));
+         renderParentsCorner();
+      }
+    };
+
     window.updateParentPin = function() {
       const pin = document.getElementById('new-parent-pin').value;
       if (/^\d{4}$/.test(pin)) {
