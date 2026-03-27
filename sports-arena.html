@@ -238,6 +238,7 @@
 <script src="js/auth.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/sounds.js"></script>
 <script src="js/timer.js"></script>
 <script src="js/sports-arena.js"></script>
 <script>
@@ -273,7 +274,8 @@
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', () => {
-    if (typeof TimerManager !== 'undefined') TimerManager.start();
+    // TimerManager intentionally NOT started — Sports Arena is outdoor activity logging,
+    // not screen time. Timer is loaded but idle so lock overlay doesn't block access.
     updateMenuStats();
   });
 
@@ -690,7 +692,7 @@
       historyEl.innerHTML = '<div style="color:var(--text-muted); font-weight:600; font-size:0.9rem;">No matches recorded yet.</div>';
     } else {
       historyEl.innerHTML = recent.map(m => {
-        const sport = SportsArena.getAllSports().find(s => s.id === m.score1 > m.score2 ? m.sportId : m.sportId); // Fixed logic here
+        const sport = SportsArena.getAllSports().find(s => s.id === m.sportId);
         const date = new Date(m.date);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const winner = m.winner === 'draw' ? 'Draw' : m.winner;

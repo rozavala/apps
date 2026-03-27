@@ -218,7 +218,7 @@
           else if (app.name === 'Fe Explorador') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Guitar Jam') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Art Studio') hasProg = (data.totalStars || 0) > 0;
-          else if (app.name === 'Sports Arena') hasProg = (data.totalMatches || 0) + (data.totalActivities || 0) > 0;
+          else if (app.name === 'Sports Arena') hasProg = (data.matches || []).length + (data.activities || []).length > 0;
           
           if (!hasProg) noProgress.push(app);
         } catch { noProgress.push(app); }
@@ -339,11 +339,13 @@
 
         // Sports Arena stats
         try {
-          const sports = typeof SportsArena !== 'undefined' ? SportsArena.getStats() : null;
-          if (els.sports && sports && (sports.totalMatches + sports.totalActivities) > 0) {
+          const sa = appStats.sports || JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
+          const matchCount = (sa.matches || []).length;
+          const actCount = (sa.activities || []).length;
+          if (els.sports && (matchCount + actCount) > 0) {
             els.sports.innerHTML = `
               <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">
-                ⭐ ${sports.totalStars} · ${sports.totalMatches} matches · ${sports.totalActivities} activities
+                ⭐ ${sa.totalStars || 0} · ${matchCount} matches · ${actCount} activities
               </span>
             `;
           }
@@ -418,6 +420,17 @@
             appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎨</span>
               <span class="dash-app-name">Art Studio</span>
               <span class="dash-app-stat">⭐ ${as.totalStars} · ${artworks} artworks · ${lessons} lessons</span></div>`;
+          }
+        } catch {}
+
+        try {
+          const sa = JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
+          const matchCount = (sa.matches || []).length;
+          const actCount = (sa.activities || []).length;
+          if (matchCount + actCount > 0) {
+            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🏓</span>
+              <span class="dash-app-name">Sports Arena</span>
+              <span class="dash-app-stat">⭐ ${sa.totalStars || 0} · ${matchCount} matches · ${actCount} activities</span></div>`;
           }
         } catch {}
 
@@ -1015,6 +1028,8 @@ function createProfile() {
       localStorage.removeItem(`zs_fe_${key}`);
       localStorage.removeItem(`zs_guitar_${key}`);
       localStorage.removeItem(`zs_art_${key}`);
+      localStorage.removeItem(`zs_sports_${key}`);
+      localStorage.removeItem(`zs_lcheck_${key}`);
       localStorage.removeItem(`zs_lastrank_${key}`);
 
       // Remove from Little Maestro index if present
@@ -1060,6 +1075,8 @@ function createProfile() {
         `zs_fe_`,
         `zs_guitar_`,
         `zs_art_`,
+        `zs_sports_`,
+        `zs_lcheck_`,
         `zs_lastrank_`,
       ];
 

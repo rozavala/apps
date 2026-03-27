@@ -11,7 +11,7 @@
      zs_schedule_override  → { [dayIndex]: ['piano','math',...] }  (parent overrides)
      zs_schedule_mode      → 'smart' | 'custom'
    
-   The hub's renderAppCards() calls AppSchedule.getVisibleApps()
+   The hub's renderAppCards() calls AppSchedule.getTodayApps()
    to decide which cards to show/hide.
    ================================================================ */
 
@@ -33,13 +33,13 @@ const AppSchedule = (() => {
   // ── Smart defaults: 4–5 apps per day, every app appears 3–4x/week ──
   // Days: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   const SMART_SCHEDULE = {
-    0: ['piano', 'chile', 'art', 'sports'],           // Sunday — relaxed: music, culture, creativity, outdoor
-    1: ['math', 'chess', 'guitar', 'sports'],          // Monday — logic + music + outdoor
+    0: ['piano', 'chile', 'art'],           // Sunday — relaxed: music, culture, creativity
+    1: ['math', 'chess', 'guitar'],          // Monday — logic + music
     2: ['piano', 'chile', 'art', 'math'],              // Tuesday — well-rounded
-    3: ['math', 'chess', 'guitar', 'sports'],          // Wednesday — strategy day
-    4: ['piano', 'art', 'chile', 'sports'],            // Thursday — creative + culture
+    3: ['math', 'chess', 'guitar'],          // Wednesday — strategy day
+    4: ['piano', 'art', 'chile'],            // Thursday — creative + culture
     5: ['math', 'guitar', 'chess', 'art'],             // Friday — challenge day
-    6: ['piano', 'chile', 'guitar', 'sports', 'art'],  // Saturday — big day, more apps
+    6: ['piano', 'chile', 'guitar', 'art'],  // Saturday — big day, more apps
   };
 
   // Faith is handled separately (faithVisible toggle) — if visible, always included
