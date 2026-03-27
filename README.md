@@ -21,13 +21,13 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 - **🧗 Quest Adventure**: An RPG-style quest where learning math and history unlocks new regions.
 - **🔬 Lab Explorer**: Simple science experiments and facts about the natural world.
 
-## 🛡️ Family Safety & Balance
+## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
-A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities.
+A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities. (Una característica principal de la suite es ayudar a los niños a desarrollar hábitos digitales saludables equilibrando el tiempo de pantalla con actividades del mundo real).
 
-- **Daily Play Timer**: Each child profile has a configurable daily limit (default 20 minutes) to encourage taking breaks and avoiding extended screen time. Once the time is up, a friendly lock screen appears.
-- **Daily Limits (Configurable)**: Parents can set specific limits per app or per child from the Parent Dashboard to control access dynamically based on needs or rules.
-- **Chores System (Adventure Tokens)**: When the daily timer runs out, kids can earn extra time (Adventure Tokens) by completing real-world chores (e.g., "Hacer la cama", "Leer 20 minutos"). A secure Parent PIN is required to unlock and approve the extra time.
+- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable.
+- **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres.
+- **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra.
 
 ## 🛠️ Key Features
 
@@ -44,6 +44,11 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 - **Verifiable Facts**: Geography, history, science, and math.
 - **Classical Skills**: Music theory, chess strategy, and artistic techniques.
 - **Neutral Language**: Factual storytelling without modern social or political agendas.
+
+## 🆕 Novedades de la Semana (What's New This Week)
+
+- **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
+- **"Sports Arena" Ya Disponible**: Registra actividades deportivas al aire libre sin usar el tiempo de pantalla. (Log outdoor sports activities without consuming screen time).
 
 ## 🚀 Getting Started
 
