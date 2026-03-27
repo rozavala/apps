@@ -371,60 +371,55 @@
         const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
         let appRows = '';
 
-        try {
-          const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
-          const levels = Object.entries(mg);
-          if (levels.length > 0) {
-            const totalStars = levels.reduce((s, [, l]) => s + (l.bestStars || 0), 0);
-            const totalPlays = levels.reduce((s, [, l]) => s + (l.plays || 0), 0);
-            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalStars} · ${totalPlays} plays</span></div>`;
-          }
-        } catch {}
-        try {
-          const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
-          const totalStars = Object.entries(dc).filter(([k]) => k !== 'vr' && k !== 'memBest').reduce((s, [, v]) => s + ((v && v.bestStars) || 0), 0);
-          if (totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalStars}</span></div>`;
-        } catch {}
-        try {
-          const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
-          const total = (cq.puzzlesSolved || 0) + (cq.wins || 0);
-          if (total > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${total}</span></div>`;
-        } catch {}
-        try {
-          const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
-          const prog = lm.progress || {};
-          const totalStars = Object.entries(prog).filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).reduce((s, [, v]) => s + v.stars, 0);
-          if (totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">⭐ ${totalStars}</span></div>`;
-        } catch {}
+        // ⚡ Bolt Optimization: Use cached `appStats` object returned by `getPlayerStats`
+        // instead of redundantly parsing 8 different JSON objects per user iteration.
+        const stats = typeof getPlayerStats === 'function' ? getPlayerStats(p.name) : { appStats: {} };
+        const appStats = stats.appStats || {};
+
+        const mg = appStats.math || {};
+        const levels = Object.entries(mg);
+        if (levels.length > 0) {
+          const totalStars = levels.reduce((s, [, l]) => s + (l.bestStars || 0), 0);
+          const totalPlays = levels.reduce((s, [, l]) => s + (l.plays || 0), 0);
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🧮</span><span class="dash-app-name">Math Galaxy <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalStars} · ${totalPlays} plays</span></div>`;
+        }
+
+        const dc = appStats.chile || {};
+        const totalChileStars = Object.entries(dc).filter(([k]) => k !== 'vr' && k !== 'memBest').reduce((s, [, v]) => s + ((v && v.bestStars) || 0), 0);
+        if (totalChileStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🇨🇱</span><span class="dash-app-name">Descubre Chile <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalChileStars}</span></div>`;
+
+        const cq = appStats.chess || {};
+        const totalCQ = (cq.puzzlesSolved || 0) + (cq.wins || 0);
+        if (totalCQ > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">♟️</span><span class="dash-app-name">Chess Quest <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${tierName} tier)</span></span><span class="dash-app-stat">⭐ ${totalCQ}</span></div>`;
+
+        const lm = appStats.piano || {};
+        const prog = lm.progress || {};
+        const totalLMStars = Object.entries(prog).filter(([, v]) => typeof v === 'object' && v !== null && v.stars > 0).reduce((s, [, v]) => s + v.stars, 0);
+        if (totalLMStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎹</span><span class="dash-app-name">Little Maestro</span><span class="dash-app-stat">⭐ ${totalLMStars}</span></div>`;
+
+        const fe = appStats.faith || {};
+        if (fe.totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">⛪</span><span class="dash-app-name">Fe Explorador</span><span class="dash-app-stat">⭐ ${fe.totalStars}</span></div>`;
+
+        const gj = appStats.guitar || {};
+        if ((gj.totalStars || 0) > 0) {
+          const chords = (gj.chordsLearned || []).length;
+          const songs = (gj.songsCompleted || []).length;
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎸</span>
+            <span class="dash-app-name">Guitar Jam</span>
+            <span class="dash-app-stat">⭐ ${gj.totalStars} · ${chords} chords · ${songs} songs</span></div>`;
+        }
+
+        const as = appStats.art || {};
+        if ((as.totalStars || 0) > 0) {
+          const artworks = (as.gallery || []).length;
+          const lessons = (as.lessonsCompleted || []).length;
+          appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎨</span>
+            <span class="dash-app-name">Art Studio</span>
+            <span class="dash-app-stat">⭐ ${as.totalStars} · ${artworks} artworks · ${lessons} lessons</span></div>`;
+        }
 
         try {
-          const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
-          if (fe.totalStars > 0) appRows += `<div class="dash-app-row"><span class="dash-app-icon">⛪</span><span class="dash-app-name">Fe Explorador</span><span class="dash-app-stat">⭐ ${fe.totalStars}</span></div>`;
-        } catch {}
-
-        try {
-          const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
-          if ((gj.totalStars || 0) > 0) {
-            const chords = (gj.chordsLearned || []).length;
-            const songs = (gj.songsCompleted || []).length;
-            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎸</span>
-              <span class="dash-app-name">Guitar Jam</span>
-              <span class="dash-app-stat">⭐ ${gj.totalStars} · ${chords} chords · ${songs} songs</span></div>`;
-          }
-        } catch {}
-        try {
-          const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
-          if ((as.totalStars || 0) > 0) {
-            const artworks = (as.gallery || []).length;
-            const lessons = (as.lessonsCompleted || []).length;
-            appRows += `<div class="dash-app-row"><span class="dash-app-icon">🎨</span>
-              <span class="dash-app-name">Art Studio</span>
-              <span class="dash-app-stat">⭐ ${as.totalStars} · ${artworks} artworks · ${lessons} lessons</span></div>`;
-          }
-        } catch {}
-
-        try {
-          const sa = JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
+          const sa = appStats.sports || JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
           const matchCount = (sa.matches || []).length;
           const actCount = (sa.activities || []).length;
           if (matchCount + actCount > 0) {
@@ -434,7 +429,9 @@
           }
         } catch {}
 
-        const rank = typeof getExplorerRank === 'function' ? getExplorerRank(p.name) : { icon: '🛸', name: 'Cadet' };
+        // ⚡ Bolt Optimization: Reuse precalculated overall stars logic to avoid
+        // `getExplorerRank` repeating all the same `localStorage` parsing operations
+        const rank = typeof getExplorerRank === 'function' ? getExplorerRank(p.name, stats) : { icon: '🛸', name: 'Cadet' };
 
         return `<div class="dash-profile">
           <div class="dash-profile-header">
