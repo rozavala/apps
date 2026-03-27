@@ -259,16 +259,16 @@
         <input type="text" id="new-name" maxlength="20" placeholder="e.g. Mateo" autocomplete="off">
       </div>
       <div class="modal-field">
-        <label>How old are you?</label>
-        <div class="age-picker" id="age-picker"></div>
+        <label id="label-age">How old are you?</label>
+        <div class="age-picker" id="age-picker" role="group" aria-labelledby="label-age"></div>
       </div>
       <div class="modal-field">
-        <label>Avatar</label>
-        <div class="emoji-picker" id="emoji-picker"></div>
+        <label id="label-avatar">Avatar</label>
+        <div class="emoji-picker" id="emoji-picker" role="group" aria-labelledby="label-avatar"></div>
       </div>
       <div class="modal-field">
-        <label>Color</label>
-        <div class="color-picker" id="color-picker"></div>
+        <label id="label-color">Color</label>
+        <div class="color-picker" id="color-picker" role="group" aria-labelledby="label-color"></div>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -317,16 +317,16 @@
         <input type="text" id="edit-name" maxlength="20" placeholder="Student name…" autocomplete="off">
       </div>
       <div class="modal-field">
-        <label>Age</label>
-        <div class="age-picker" id="edit-age-picker"></div>
+        <label id="label-edit-age">Age</label>
+        <div class="age-picker" id="edit-age-picker" role="group" aria-labelledby="label-edit-age"></div>
       </div>
       <div class="modal-field">
-        <label>Avatar</label>
-        <div class="emoji-picker" id="edit-emoji-picker"></div>
+        <label id="label-edit-avatar">Avatar</label>
+        <div class="emoji-picker" id="edit-emoji-picker" role="group" aria-labelledby="label-edit-avatar"></div>
       </div>
       <div class="modal-field">
-        <label>Color</label>
-        <div class="color-picker" id="edit-color-picker"></div>
+        <label id="label-edit-color">Color</label>
+        <div class="color-picker" id="edit-color-picker" role="group" aria-labelledby="label-edit-color"></div>
       </div>
       <p id="edit-error" style="color:#EF4444;font-size:0.8rem;font-weight:700;display:none;"></p>
       <div class="edit-actions">

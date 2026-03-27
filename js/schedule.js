@@ -250,7 +250,7 @@ const AppSchedule = (() => {
     overlay.innerHTML = `
       <div class="dash-panel" style="max-width:400px;">
         <h2>📅 ${DAYS[dayIndex]} 
-          <button class="dash-close" onclick="document.getElementById('schedule-day-overlay').classList.remove('active')">✕</button>
+          <button class="dash-close" aria-label="Close" onclick="document.getElementById('schedule-day-overlay').classList.remove('active')">✕</button>
         </h2>
         <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
           Pick which apps are available on ${DAYS[dayIndex]}s.<br>
