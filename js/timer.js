@@ -236,37 +236,57 @@ const TimerManager = (() => {
     document.head.appendChild(style);
 
     const paused = isPaused();
+    const guest = (typeof isGuestUser === 'function') && isGuestUser();
     const overlay = document.createElement('div');
     overlay.id = 'timer-lock-overlay';
     overlay.setAttribute('role', 'alertdialog');
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-label', 'Daily time limit reached');
-    overlay.innerHTML = `
-      <div class="lock-card">
-        <div class="lock-emoji">${paused ? '⏸️' : '🌟'}</div>
-        <div class="lock-title">${paused ? 'Tiempo de Descanso' : '¡Gran aventura hoy!'}</div>
-        <div class="lock-msg">
-          ${paused 
-            ? 'Timers paused by parent. Time to take a break! ⏸️' 
-            : 'Has jugado mucho por hoy. Descansa un poco o haz una tarea del hogar para ganar más tiempo. ⭐'}
-        </div>
-        
-        <div class="lock-actions">
-          <button class="lock-btn btn-switch" onclick="TimerManager.switchUser()">🔄 Cambiar Jugador</button>
-          <button class="lock-btn btn-parent" id="lock-parent-trigger" onclick="document.getElementById('lock-pin-area').style.display='flex'; this.style.display='none'">🔒 Modo Padres</button>
-          
-          <div class="lock-pin-area" id="lock-pin-area">
-            <input type="password" class="lock-pin-input" id="lock-pin-input" placeholder="····" maxlength="4" inputmode="numeric">
-            <button class="lock-btn btn-parent" onclick="TimerManager.checkLockPin()">Desbloquear 🔓</button>
+    
+    let content = '';
+    if (guest) {
+      content = `
+        <div class="lock-card">
+          <div class="lock-emoji">🌟</div>
+          <div class="lock-title">Guest session over!</div>
+          <div class="lock-msg">
+            Thanks for playing! Your 15-minute guest session is complete.
           </div>
-          
-          <div class="lock-override-btns" id="lock-override-btns">
-            <button class="btn-override" onclick="TimerManager.resetCurrent()">Reset Timer</button>
-            <button class="btn-override" onclick="TimerManager.addBonusCurrent(30)">+30 min</button>
+          <div class="lock-actions">
+            <button class="lock-btn btn-switch" onclick="TimerManager.switchUser()">🏠 Back to Login</button>
           </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      content = `
+        <div class="lock-card">
+          <div class="lock-emoji">${paused ? '⏸️' : '🌟'}</div>
+          <div class="lock-title">${paused ? 'Tiempo de Descanso' : '¡Gran aventura hoy!'}</div>
+          <div class="lock-msg">
+            ${paused 
+              ? 'Timers paused by parent. Time to take a break! ⏸️' 
+              : 'Has jugado mucho por hoy. Descansa un poco o haz una tarea del hogar para ganar más tiempo. ⭐'}
+          </div>
+          
+          <div class="lock-actions">
+            <button class="lock-btn btn-switch" onclick="TimerManager.switchUser()">🔄 Cambiar Jugador</button>
+            <button class="lock-btn btn-parent" id="lock-parent-trigger" onclick="document.getElementById('lock-pin-area').style.display='flex'; this.style.display='none'">🔒 Modo Padres</button>
+            
+            <div class="lock-pin-area" id="lock-pin-area">
+              <input type="password" class="lock-pin-input" id="lock-pin-input" placeholder="····" maxlength="4" inputmode="numeric">
+              <button class="lock-btn btn-parent" onclick="TimerManager.checkLockPin()">Desbloquear 🔓</button>
+            </div>
+            
+            <div class="lock-override-btns" id="lock-override-btns">
+              <button class="btn-override" onclick="TimerManager.resetCurrent()">Reset Timer</button>
+              <button class="btn-override" onclick="TimerManager.addBonusCurrent(30)">+30 min</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    overlay.innerHTML = content;
     document.body.appendChild(overlay);
     
     // Add Enter key listener for PIN

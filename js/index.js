@@ -70,6 +70,18 @@
         <div class="add-label">Add Player</div>
       `;
       grid.appendChild(addCard);
+
+      // Guest card
+      const guestCard = document.createElement('div');
+      guestCard.className = 'profile-card guest-card';
+      guestCard.style.animationDelay = `${0.15 + profiles.length * 0.05}s`;
+      guestCard.onclick = loginAsGuest;
+      guestCard.innerHTML = `
+        <div class="profile-avatar" style="background:rgba(96,165,250,0.15);border-color:#60A5FA">🌟</div>
+        <div class="profile-name">Guest</div>
+        <div class="profile-age" style="font-size:0.7rem;">🔒 PIN required</div>
+      `;
+      grid.appendChild(guestCard);
     }
 
     function loginAs(user) {
@@ -77,7 +89,43 @@
       showHub();
     }
 
+    // ── Guest Player ──
+    function loginAsGuest() {
+      requestPinThen(() => {
+        const guestProfile = {
+          name: 'Guest',
+          avatar: '🌟',
+          color: '#60A5FA',
+          age: 7,
+          isGuest: true,
+          maxMinutes: 15
+        };
+        setActiveUser(guestProfile);
+        showHub();
+      });
+    }
+
+    function isGuestUser() {
+      const user = getActiveUser();
+      return user && user.isGuest === true;
+    }
+
+    function _cleanupGuestData() {
+      const key = 'guest'; // guest profile uses name "Guest" → key "guest"
+      const prefixes = [
+        'zs_mathgalaxy_', 'zs_chile_', 'zs_chess_', 'zs_chess_plays_',
+        'zs_timer_', 'zs_chores_', 'zs_fe_', 'zs_guitar_', 'zs_art_',
+        'zs_sports_', 'zs_lab_', 'zs_world_', 'zs_story_', 'zs_quest_',
+        'zs_lcheck_', 'zs_lastrank_', 'littlemaestro_'
+      ];
+      prefixes.forEach(p => localStorage.removeItem(p + key));
+      localStorage.removeItem('littlemaestro_guest_recital');
+    }
+
     function switchUser() {
+      if (isGuestUser()) {
+        _cleanupGuestData();
+      }
       localStorage.removeItem(ACTIVE_KEY);
       document.getElementById('hub-screen').classList.remove('active');
       document.getElementById('login-screen').style.display = '';
@@ -123,14 +171,21 @@
 
       const rankText = `${rank.icon} ${rank.name}`;
       const starText = totalStars > 0 ? ` · ⭐ ${totalStars}` : '';
-      if (els.greeting) els.greeting.textContent = `${rankText}${starText} · ${getGreeting()}`;
+      
+      if (isGuestUser()) {
+        if (els.greeting) els.greeting.textContent = `🌟 Guest Player · 15 min session`;
+      } else {
+        if (els.greeting) els.greeting.textContent = `${rankText}${starText} · ${getGreeting()}`;
+      }
 
       // Rank-up celebration
-      const lastRank = localStorage.getItem(`zs_lastrank_${key}`) || 'Cadet';
-      if (rank.name !== lastRank && lastRank !== 'Cadet') {
-        showRankUpCelebration(rank);
+      if (!isGuestUser()) {
+        const lastRank = localStorage.getItem(`zs_lastrank_${key}`) || 'Cadet';
+        if (rank.name !== lastRank && lastRank !== 'Cadet') {
+          showRankUpCelebration(rank);
+        }
+        localStorage.setItem(`zs_lastrank_${key}`, rank.name);
       }
-      localStorage.setItem(`zs_lastrank_${key}`, rank.name);
 
       // Update timer and token display
       if (typeof TimerManager !== 'undefined' && els.timer) {
@@ -138,8 +193,13 @@
         els.timer.textContent = `⏰ ${rem} min left`;
       }
       if (typeof ChoresManager !== 'undefined' && els.tokens) {
-        const tokens = ChoresManager.getStatus().totalTokens;
-        els.tokens.textContent = `⭐ ${tokens} tokens`;
+        if (isGuestUser()) {
+          els.tokens.style.display = 'none';
+        } else {
+          const tokens = ChoresManager.getStatus().totalTokens;
+          els.tokens.textContent = `⭐ ${tokens} tokens`;
+          els.tokens.style.display = '';
+        }
       }
 
       renderAppCards(user);

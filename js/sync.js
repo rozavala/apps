@@ -58,6 +58,7 @@ const CloudSync = (() => {
     if (!state.isConfigured() || !state.online) return;
     const info = _getAppInfo(key);
     if (!info) return;
+    if (info.kidKey === 'guest') return; // Don't sync guest data
 
     try {
       const raw = localStorage.getItem(key);
@@ -243,8 +244,6 @@ const CloudSync = (() => {
   };
 
   function _updatePill(status) {
-    if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/')) return;
-    
     let pill = document.getElementById('zs-sync-pill');
     if (!pill) {
       pill = document.createElement('div');
@@ -276,6 +275,22 @@ const CloudSync = (() => {
       if (res.ok) {
         state.online = true;
         _updatePill('idle');
+
+        // Auto-sync profiles on the hub so all devices see the same player list
+        const isHub = window.location.pathname.endsWith('index.html')
+                   || window.location.pathname === '/'
+                   || window.location.pathname.endsWith('/');
+        if (isHub) {
+          try {
+            await state.syncProfiles();
+            // Re-render login screen if it's visible (profiles may have changed)
+            if (typeof renderLogin === 'function' && document.getElementById('login-screen')?.style.display !== 'none') {
+              renderLogin();
+            }
+          } catch (e) {
+            console.warn('[Sync] Auto profile sync failed:', e);
+          }
+        }
       } else {
         state.online = false;
         _updatePill('offline');

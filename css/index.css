@@ -157,6 +157,20 @@
       border-color: var(--purple);
       box-shadow: 0 16px 48px -12px var(--purple-glow);
     }
+
+    /* Guest card */
+    .guest-card {
+      border-style: dashed !important;
+      border-color: rgba(96,165,250,0.25) !important;
+      background: rgba(96,165,250,0.03) !important;
+    }
+    .guest-card:hover {
+      border-color: #60A5FA !important;
+      box-shadow: 0 16px 48px -12px rgba(59,130,246,0.3) !important;
+    }
+    .guest-card .profile-name {
+      color: #60A5FA;
+    }
     .profile-card:active { transform: translateY(-2px) scale(1.02); }
 
     .profile-avatar {
