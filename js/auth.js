@@ -153,6 +153,13 @@ function getPlayerStats(userName) {
     if ((as.totalStars || 0) > 0) { totalStars += as.totalStars; appsWithStars++; }
   } catch {}
 
+  // Sports Arena
+  try {
+    const sa = JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
+    appStats.sports = sa;
+    if ((sa.totalStars || 0) > 0) { totalStars += sa.totalStars; appsWithStars++; }
+  } catch {}
+
   return { totalStars, appsWithStars, appStats };
 }
 
