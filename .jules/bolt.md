@@ -4,3 +4,6 @@
 ## 2024-03-24 - O(N) LocalStorage Parse Optimization
 **Learning:** Found an O(N) double-parsing pattern where `getExplorerRank` would evaluate the entire progression history of all 7 apps (parsing JSON from localStorage) twice per rank check, which happens per-profile on the dashboard. Also, `getActiveUser()` was invoked twice in the same inline condition `userName || (getActiveUser() ? getActiveUser().name : null)`, forcing multiple redundant parses.
 **Action:** Refactored `getTotalStars` and `getExplorerRank` to share a single parsing loop (`getPlayerStats`) and cached `getActiveUser()` in tight scopes to reduce redundant parsing and memory thrashing.
+## 2024-05-15 - Redundant Parsing in Array Map Optimization
+**Learning:** Found an anti-pattern where the dashboard `openDashboard()` function parsed `localStorage` across all 8 apps inside a `profiles.map()` loop. Also, `getExplorerRank()` was blindly called after, resulting in 16 JSON parse operations *per user profile* on every dashboard open.
+**Action:** Centralized the logic using `getPlayerStats(p.name)` and reused the cached `stats.appStats` object. Passed the same `stats` to `getExplorerRank(name, stats)` to avoid recalculating the stars again, drastically cutting down synchronous DOM/storage blocking when the parents' dashboard opens.
