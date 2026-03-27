@@ -1233,6 +1233,10 @@ function createProfile() {
       localStorage.removeItem(`zs_art_${key}`);
       localStorage.removeItem(`zs_sports_${key}`);
       localStorage.removeItem(`zs_lcheck_${key}`);
+      localStorage.removeItem(`zs_lab_${key}`);
+      localStorage.removeItem(`zs_world_${key}`);
+      localStorage.removeItem(`zs_story_${key}`);
+      localStorage.removeItem(`zs_quest_${key}`);
       localStorage.removeItem(`zs_lastrank_${key}`);
 
       // Remove from Little Maestro index if present
@@ -1280,6 +1284,10 @@ function createProfile() {
         `zs_art_`,
         `zs_sports_`,
         `zs_lcheck_`,
+        `zs_lab_`,
+        `zs_world_`,
+        `zs_story_`,
+        `zs_quest_`,
         `zs_lastrank_`,
       ];
 
