@@ -53,13 +53,13 @@
 
   <!-- LEARN: piece list -->
   <div class="screen" id="screen-learn">
-    <div class="learn-header"><button class="back-btn" onclick="goMenu()">←</button><div class="learn-title">Learn the Pieces</div></div>
+    <div class="learn-header"><button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><div class="learn-title">Learn the Pieces</div></div>
     <div class="piece-grid" id="pieceGrid"></div>
   </div>
 
   <!-- LEARN: single piece lesson -->
   <div class="screen" id="screen-lesson">
-    <div class="learn-header"><button class="back-btn" onclick="showScreen('learn')">←</button><span id="lessonIcon" style="font-size:28px"></span><div class="learn-title" id="lessonTitle"></div></div>
+    <div class="learn-header"><button class="back-btn" aria-label="Go back" onclick="showScreen('learn')">←</button><span id="lessonIcon" style="font-size:28px"></span><div class="learn-title" id="lessonTitle"></div></div>
     <div class="lesson-info" id="lessonInfo"></div>
     <div class="board-wrap"><div class="board" id="learnBoard"></div></div>
     <div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
@@ -69,7 +69,7 @@
 
   <!-- PUZZLE -->
   <div class="screen" id="screen-puzzle">
-    <div class="learn-header"><button class="back-btn" onclick="goMenu()">←</button><div class="learn-title">Puzzles</div></div>
+    <div class="learn-header"><button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><div class="learn-title">Puzzles</div></div>
     <div class="puzzle-top"><div class="puzzle-badge" id="puzzleLabel"></div><div style="color:var(--gold);font-family:var(--font-display);font-weight:700" id="puzzleScore"></div></div>
     <div class="board-wrap"><div class="board" id="puzzleBoard"></div></div>
     <div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
@@ -81,7 +81,7 @@
   <!-- PLAY -->
   <div class="screen" id="screen-play">
     <div class="play-top">
-      <button class="back-btn" onclick="goMenu()">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
       <div class="play-status" id="playStatus">Your turn (White)</div>
     </div>
     <div class="play-info"><div>You (White) <span class="captured-row" id="capturedBlack"></span></div><div>Computer (Black) <span class="captured-row" id="capturedWhite"></span></div></div>

@@ -1,3 +1,6 @@
 ## 2024-05-18 - Missing ARIA Labels and Unassociated Form Labels in Custom Modals
 **Learning:** This application extensively uses custom modal implementations (`modal-field` wrapping an input and label). These custom components often lack semantic associations between labels and inputs, and use icon-only close buttons (`dash-close`) without ARIA labels. This presents a pattern of accessibility issues across all interactive overlay elements.
 **Action:** When implementing or editing modal or overlay components in this codebase, explicitly check for `<label for="...">` associations and `aria-label`s on icon-only interactive elements like close buttons.
+## 2024-05-18 - Missing ARIA Labels on Navigation and Action Buttons
+**Learning:** Icon-only navigation and action buttons (e.g., `.back-btn` with a simple "←" text content, `.profile-edit-btn` with "✏️", and generic `.close-modal` buttons with "✕") are widely used throughout the app suite but consistently lack `aria-label` attributes. This leaves screen readers unable to announce their purpose correctly.
+**Action:** Always provide descriptive `aria-label`s for buttons where the text content is purely an icon, emoji, or symbol (such as `aria-label="Go back"` or `aria-label="Edit Profile"`).
