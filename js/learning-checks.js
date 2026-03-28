@@ -147,12 +147,13 @@ const LearningCheck = (() => {
       return;
     }
 
-    // Pick a random question from the subject or general
+    // Pick from subject bank ONLY if it exists, otherwise general
     const bank = QUESTIONS[subject] || QUESTIONS.general;
-    const allQ = [...bank, ...QUESTIONS.general];
-    const question = allQ[Math.floor(Math.random() * allQ.length)];
+    const question = bank[Math.floor(Math.random() * bank.length)];
+    // Use 'general' as the display subject if no dedicated bank exists
+    const displaySubject = QUESTIONS[subject] ? subject : 'general';
 
-    _showCheckOverlay(question, subject, onPass);
+    _showCheckOverlay(question, displaySubject, onPass);
   }
 
   // ── Force a check (for testing or explicit triggers) ──

@@ -805,45 +805,43 @@
 
     // ── Parents Corner ──
     function openParentsCorner() {
-      requestPinThen(() => {
-        renderParentsCorner();
-        
-        const syncEl = document.getElementById('sync-section');
-        if (syncEl && typeof CloudSync !== 'undefined') {
-          const configured = CloudSync.isConfigured();
-          const online = CloudSync.online;
-          syncEl.innerHTML = `
-            <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
-              <h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">
-                ☁️ Cloud Sync
-                <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:99px;
-                  background:${online ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)'};
-                  color:${online ? '#34D399' : '#F87171'};">
-                  ${configured ? (online ? '● Connected' : '● Offline') : '○ Not set up'}
-                </span>
-              </h3>
-              ${configured ? `
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
-                    onclick="_syncPushAll()">⬆️ Push All to Cloud</button>
-                  <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
-                    onclick="_syncPullAll()">⬇️ Pull All from Cloud</button>
-                </div>
-                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">
-                  Sync is automatic — progress pushes on save and pulls on login.
-                  Use these buttons for a manual full sync.
-                </p>
-              ` : `
-                <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">
-                  To sync progress across devices, set SYNC_SERVER in js/sync.js
-                  to your VPS Tailscale IP.
-                </p>
-              `}
-            </div>`;
-        }
+      renderParentsCorner();
+      
+      const syncEl = document.getElementById('sync-section');
+      if (syncEl && typeof CloudSync !== 'undefined') {
+        const configured = CloudSync.isConfigured();
+        const online = CloudSync.online;
+        syncEl.innerHTML = `
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
+            <h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">
+              ☁️ Cloud Sync
+              <span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:99px;
+                background:${online ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)'};
+                color:${online ? '#34D399' : '#F87171'};">
+                ${configured ? (online ? '● Connected' : '● Offline') : '○ Not set up'}
+              </span>
+            </h3>
+            ${configured ? `
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
+                  onclick="_syncPushAll()">⬆️ Push All to Cloud</button>
+                <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
+                  onclick="_syncPullAll()">⬇️ Pull All from Cloud</button>
+              </div>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">
+                Sync is automatic — progress pushes on save and pulls on login.
+                Use these buttons for a manual full sync.
+              </p>
+            ` : `
+              <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">
+                To sync progress across devices, set SYNC_SERVER in js/sync.js
+                to your VPS Tailscale IP.
+              </p>
+            `}
+          </div>`;
+      }
 
-        document.getElementById('parents-overlay').classList.add('active');
-      });
+      document.getElementById('parents-overlay').classList.add('active');
     }
     function closeParentsCorner() {
       document.getElementById('parents-overlay').classList.remove('active');
