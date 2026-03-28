@@ -330,7 +330,8 @@
           lab:    document.getElementById('stats-lab'),
           world:  document.getElementById('stats-world'),
           story:  document.getElementById('stats-story'),
-          quest:  document.getElementById('stats-quest')
+          quest:  document.getElementById('stats-quest'),
+          guess:  document.getElementById('stats-guess')
         };
 
         // Fetch stats which caches the parsed JSON objects
@@ -465,6 +466,16 @@
           const ep = typeof QuestAdventure !== 'undefined' ? QuestAdventure.calculateEP() : 0;
           if (els.quest && ep > 0) {
             els.quest.innerHTML = `<span class="cs-item active">⚡ ${ep} EP</span>`;
+          }
+        } catch {}
+
+        // Guess Quest stats
+        try {
+          if (els.guess && typeof GuessQuest !== 'undefined') {
+            const gs = GuessQuest.getStats();
+            if (gs.roundsPlayed > 0) {
+              els.guess.innerHTML = `<span class="cs-item active">⭐ ${gs.totalStars}</span><span class="cs-item">🎮 ${gs.roundsWon}/${gs.roundsPlayed}</span>`;
+            }
           }
         } catch {}
 
@@ -683,6 +694,20 @@
               <span class="dash-app-name">Quest Adventure</span>
               <div class="dash-bar-wrap"><div class="dash-bar dash-bar-quest" style="width:${Math.min(100, pct)}%"></div></div>
               <span class="dash-app-stat">⚡ ${ep}</span>
+            </div>`;
+          }
+        } catch {}
+
+        // Guess Quest dashboard row
+        try {
+          const gq = appStats.guess || JSON.parse(localStorage.getItem(`zs_guess_${key}`)) || {};
+          if ((gq.totalStars || 0) > 0) {
+            const pct = (gq.totalStars / 30) * 100;
+            appRows += `<div class="dash-app-row">
+              <span class="dash-app-icon">🎯</span>
+              <span class="dash-app-name">Guess Quest</span>
+              <div class="dash-bar-wrap"><div class="dash-bar dash-bar-guess" style="width:${Math.min(100, pct)}%"></div></div>
+              <span class="dash-app-stat">⭐ ${gq.totalStars}</span>
             </div>`;
           }
         } catch {}
@@ -1358,6 +1383,7 @@ function createProfile() {
       localStorage.removeItem(`zs_world_${key}`);
       localStorage.removeItem(`zs_story_${key}`);
       localStorage.removeItem(`zs_quest_${key}`);
+      localStorage.removeItem(`zs_guess_${key}`);
       localStorage.removeItem(`zs_activity_${key}`);
       localStorage.removeItem(`zs_lastrank_${key}`);
 
@@ -1410,6 +1436,7 @@ function createProfile() {
         `zs_world_`,
         `zs_story_`,
         `zs_quest_`,
+        `zs_guess_`,
         `zs_activity_`,
         `zs_lastrank_`,
       ];

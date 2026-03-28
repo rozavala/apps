@@ -160,7 +160,15 @@ function getPlayerStats(userName) {
     if ((sa.totalStars || 0) > 0) { totalStars += sa.totalStars; appsWithStars++; }
   } catch {}
 
+  // Guess Quest
+  try {
+    const gq = JSON.parse(localStorage.getItem(`zs_guess_${key}`)) || {};
+    appStats.guess = gq;
+    if ((gq.totalStars || 0) > 0) { totalStars += gq.totalStars; appsWithStars++; }
+  } catch {}
+
   return { totalStars, appsWithStars, appStats };
+
 }
 
 function getTotalStars(userName) {

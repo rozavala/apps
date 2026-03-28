@@ -32,17 +32,18 @@ const AppSchedule = (() => {
     { id: 'world',   card: '.card-world',    name: 'World Explorer', icon: '🌍', category: 'culture' },
     { id: 'story',   card: '.card-story',    name: 'Story Explorer', icon: '📚', category: 'reading' },
     { id: 'quest',   card: '.card-quest',    name: 'Quest Adventure',icon: '🧗', category: 'adventure' },
+    { id: 'guess',   card: '.card-guess',    name: 'Guess Quest',    icon: '🎯', category: 'logic' },
   ];
 
   // ── Smart defaults: 4–5 apps per day, every app appears 3–4x/week ──
   // Days: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   const SMART_SCHEDULE = {
-    0: ['piano', 'chile', 'art', 'story'],              // Sunday — relaxed + reading
+    0: ['piano', 'chile', 'art', 'story', 'guess'],       // Sunday
     1: ['math', 'chess', 'guitar', 'lab'],               // Monday — STEM + music
     2: ['piano', 'chile', 'art', 'world'],               // Tuesday — culture + geography
-    3: ['math', 'chess', 'guitar', 'story'],             // Wednesday — strategy + reading
+    3: ['math', 'chess', 'guitar', 'story', 'guess'],      // Wednesday — strategy + reading
     4: ['piano', 'art', 'chile', 'lab'],                 // Thursday — creative + science
-    5: ['math', 'guitar', 'chess', 'world'],             // Friday — challenge day
+    5: ['math', 'guitar', 'chess', 'world', 'guess'],             // Friday — challenge day
     6: ['piano', 'chile', 'guitar', 'art', 'story'],    // Saturday — big day
   };
 

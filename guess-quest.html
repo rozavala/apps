@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guess Quest 🎯</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/guess-quest.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(251,191,36,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(239,68,68,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: Category Select -->
+    <div class="screen active" id="screen-select">
+      <div class="gq-header">
+        <span class="icon">🎯</span>
+        <h1>Guess Quest</h1>
+        <p>I'm thinking of something... Can you guess it?</p>
+        <div class="lang-toggle" onclick="GuessQuest.toggleLanguage()">
+          <span id="lang-label">EN / ES</span> 🌐
+        </div>
+      </div>
+      <div class="category-grid" id="category-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN: Game (questions) -->
+    <div class="screen" id="screen-game">
+      <div class="game-header">
+        <button class="back-btn" onclick="GuessQuest.backToSelect()">←</button>
+        <div class="question-counter" id="question-counter">❓ 0 / 20</div>
+        <div class="gq-stars" id="gq-stars">⭐ 0</div>
+      </div>
+
+      <!-- Big answer display (hidden until question asked) -->
+      <div class="answer-display" id="answer-display">
+        <div class="answer-emoji" id="answer-emoji"></div>
+        <div class="answer-text" id="answer-text"></div>
+      </div>
+
+      <!-- Question categories (scrollable) -->
+      <div class="question-categories" id="question-categories">
+        <!-- Populated by JS: category groups with question buttons -->
+      </div>
+
+      <!-- Guess button (always visible) -->
+      <div class="guess-bar">
+        <button class="action-btn btn-guess" onclick="GuessQuest.showGuessScreen()">
+          💡 I want to guess!
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: Guess (pick from candidates) -->
+    <div class="screen" id="screen-guess">
+      <div class="guess-header">
+        <button class="back-btn" onclick="GuessQuest.backToGame()">←</button>
+        <h2>What do you think it is?</h2>
+      </div>
+      <div class="guess-grid" id="guess-grid">
+        <!-- Populated by JS: candidate cards -->
+      </div>
+    </div>
+
+    <!-- SCREEN: Results -->
+    <div class="screen" id="screen-results">
+      <div class="results-wrap" id="results-wrap"></div>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"><span class="feedback-emoji" id="feedbackEmoji"></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/learning-checks.js"></script>
+  <script src="js/guess-quest.js"></script>
+</body>
+</html>
