@@ -150,6 +150,10 @@ const TOPICS=[
   {id:'astronomia',icon:'🔭',name:'Astronomía en Chile',stories:[
     {t:'✨ Cielos Claros',p:'El norte de Chile tiene uno de los cielos más despejados y secos del mundo, ideal para la observación espacial.',f:'Alrededor del 70% de la infraestructura astronómica del mundo está o estará en Chile.'},
     {t:'📡 Observatorio ALMA',p:'En el desierto de Atacama se encuentra ALMA, un conjunto de 66 antenas que trabajan juntas para observar el universo.',f:'ALMA se encuentra a más de 5.000 metros sobre el nivel del mar.'}
+  ]},
+  {id:'cocina',icon:'🍲',name:'La Cocina Tradicional',stories:[
+    {t:'🌽 El Pastel de Choclo',p:'Un plato tradicional hecho con masa de maíz y relleno de pino (carne), pollo, huevo y aceitunas. Se hornea en paila de greda.',f:'Es uno de los platos favoritos del verano chileno.'},
+    {t:'🍅 El Pebre',p:'Una salsa fresca con tomate, cebolla, cilantro y ají, perfecta para acompañar el pan o las carnes.',f:'Nunca falta en la mesa durante las celebraciones o asados.'}
   ]}
 ];
 let curTopic=null;
@@ -288,7 +292,9 @@ const QB={
     {q:'¿Cómo se llaman las estatuas de Isla de Pascua?',a:'Moai',o:['Moai','Tótems','Obeliscos','Pilares'], tier:'beginner'},
     {q:'¿Cuánto resistieron los Mapuche?',a:'Más de 300 años',o:['Más de 300 años','50 años','10 años','1.000 años'], tier:'advanced'},
     {q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca'], tier:'intermediate'},
-    {q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km'], tier:'expert'}
+    {q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km'], tier:'expert'},
+    {q:'¿Qué famoso baile chilote es originario del sur?',a:'La Trastrasera',o:['La Trastrasera','La Cueca','El Sau Sau','El Tango'], tier:'advanced'},
+    {q:'¿Quiénes construyeron los Moai?',a:'Los Rapa Nui',o:['Los Rapa Nui','Los Mapuches','Los Incas','Los Diaguitas'], tier:'beginner'}
   ],
   history:[
     {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar'], tier:'intermediate'},
@@ -311,7 +317,9 @@ const QB={
     {q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua'], tier:'intermediate'},
     {q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre'], tier:'beginner'},
     {q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol'], tier:'beginner'},
-    {q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo'], tier:'beginner'}
+    {q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo'], tier:'beginner'},
+    {q:'¿Qué famoso sándwich lleva carne, porotos verdes, tomate y ají verde?',a:'Chacarero',o:['Chacarero','Barros Luco','Italiano','Chemilico'], tier:'intermediate'},
+    {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Octubre'], tier:'beginner'}
   ],
   nature:[
     {q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros'], tier:'advanced'},
@@ -359,6 +367,12 @@ const QB={
     {q:'¿Qué es ALMA?',a:'Un conjunto de antenas',o:['Un conjunto de antenas','Un telescopio de lentes','Un satélite espacial','Un cohete'], tier:'intermediate'},
     {q:'¿Aproximadamente cuántos metros sobre el nivel del mar está ALMA?',a:'5.000 metros',o:['5.000 metros','1.000 metros','10.000 metros','100 metros'], tier:'expert'},
     {q:'¿Qué porcentaje de la infraestructura astronómica mundial se concentra en Chile?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'advanced'}
+  ],
+  cocina:[
+    {q:'¿En qué tipo de plato se hornea el pastel de choclo?',a:'Paila de greda',o:['Paila de greda','Olla de acero','Plato de vidrio','Sartén de teflón'], tier:'intermediate'},
+    {q:'¿Cuál es el ingrediente principal de la masa del pastel de choclo?',a:'Maíz',o:['Maíz','Trigo','Papas','Zanahorias'], tier:'beginner'},
+    {q:'¿Qué salsa fresca acompaña típicamente el pan o carnes en Chile?',a:'Pebre',o:['Pebre','Kétchup','Mayonesa','Mostaza'], tier:'beginner'},
+    {q:'¿Qué ingredientes lleva típicamente el pebre?',a:'Tomate, cebolla, cilantro y ají',o:['Tomate, cebolla, cilantro y ají','Queso, crema, cebolla','Ajo, aceite y vinagre','Porotos, choclo, zapallo'], tier:'advanced'}
   ]
 };
 

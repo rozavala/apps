@@ -33,7 +33,8 @@ const WorldExplorer = (() => {
           facts: [
             { en: 'Argentina is the 8th largest country in the world.', es: 'Argentina es el 8° país más grande del mundo.' },
             { en: 'Aconcagua is the tallest peak in the Americas.', es: 'El Aconcagua es el pico más alto de América.' },
-            { en: 'Argentina is famous for the Tango dance.', es: 'Argentina es famosa por el baile del Tango.' }
+            { en: 'Argentina is famous for the Tango dance.', es: 'Argentina es famosa por el baile del Tango.' },
+            { en: 'The Perito Moreno Glacier is a massive ice formation in Patagonia.', es: 'El glaciar Perito Moreno es una enorme formación de hielo en la Patagonia.' }
           ],
           landmark: { name: 'Iguazu Falls', nameEs: 'Cataratas del Iguazú', emoji: '💦' },
           animal: { name: 'Jaguar', nameEs: 'Jaguar', emoji: '🐆' },
@@ -150,7 +151,27 @@ const WorldExplorer = (() => {
         },
       ]
     },
-    { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [] },
+    { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [
+      {
+        id: 'mexico', name: 'Mexico', nameEs: 'México', flag: '🇲🇽',
+        capital: 'Mexico City', capitalEs: 'Ciudad de México',
+        facts: [
+          { en: 'Mexico is home to the ancient Mayan city of Chichén Itzá.', es: 'México alberga la antigua ciudad maya de Chichén Itzá.' },
+          { en: 'It is the most populous Spanish-speaking country in the world.', es: 'Es el país de habla hispana más poblado del mundo.' },
+          { en: 'Mexican cuisine, like tacos and mole, is famous worldwide.', es: 'La comida mexicana, como los tacos y el mole, es famosa en todo el mundo.' },
+          { en: 'The axolotl is a unique amphibian native to Mexico.', es: 'El ajolote es un anfibio único nativo de México.' }
+        ],
+        landmark: { name: 'Chichén Itzá', nameEs: 'Chichén Itzá', emoji: '🏛️' },
+        animal: { name: 'Axolotl', nameEs: 'Ajolote', emoji: '🦎' },
+        quiz: [
+          { q: 'What is the capital of Mexico?', qEs: '¿Cuál es la capital de México?', options: ['Guadalajara', 'Monterrey', 'Mexico City', 'Cancun'], optionsEs: ['Guadalajara', 'Monterrey', 'Ciudad de México', 'Cancún'], answer: 2 },
+          { q: 'Which ancient city is located in Mexico?', qEs: '¿Qué antigua ciudad se encuentra en México?', options: ['Machu Picchu', 'Chichén Itzá', 'Petra', 'Colosseum'], optionsEs: ['Machu Picchu', 'Chichén Itzá', 'Petra', 'Coliseo'], answer: 1 },
+          { q: 'What unique amphibian is native to Mexico?', qEs: '¿Qué anfibio único es nativo de México?', options: ['Frog', 'Salamander', 'Toad', 'Axolotl'], optionsEs: ['Rana', 'Salamandra', 'Sapo', 'Ajolote'], answer: 3 },
+          { q: 'What is the most populous Spanish-speaking country?', qEs: '¿Cuál es el país de habla hispana más poblado?', options: ['Spain', 'Colombia', 'Argentina', 'Mexico'], optionsEs: ['España', 'Colombia', 'Argentina', 'México'], answer: 3 },
+          { q: 'Which food is famous worldwide from Mexico?', qEs: '¿Qué comida de México es famosa mundialmente?', options: ['Sushi', 'Tacos', 'Pasta', 'Croissants'], optionsEs: ['Sushi', 'Tacos', 'Pasta', 'Croissants'], answer: 1 }
+        ]
+      }
+    ] },
     { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [] },
     { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [] },
     { id: 'asia', name: 'Asia', nameEs: 'Asia', icon: '🌏', color: '#F59E0B', countries: [] },
