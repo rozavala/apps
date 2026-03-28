@@ -20,16 +20,53 @@ const AGE_OPTIONS = [
 const STORAGE_KEY = 'zs_profiles';
 const ACTIVE_KEY  = 'zs_active_user';
 
+// ⚡ Bolt Optimization: Cache profiles and active user in memory to avoid redundant
+// synchronous localStorage reads and JSON parsing on frequent calls.
+let _cachedProfiles = null;
+let _profilesCached = false;
+
+let _cachedActiveUser = null;
+let _activeUserCached = false;
+
+// Invalidate caches if changed from another tab/window
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY) _profilesCached = false;
+    if (e.key === ACTIVE_KEY) _activeUserCached = false;
+  });
+}
+
 function getProfiles() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  if (_profilesCached) return _cachedProfiles;
+  try {
+    _cachedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    _profilesCached = true;
+    return _cachedProfiles;
+  }
   catch { return []; }
 }
-function saveProfiles(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+function saveProfiles(p) { _cachedProfiles = p; _profilesCached = true; localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+
 function getActiveUser() {
-  try { return JSON.parse(localStorage.getItem(ACTIVE_KEY)); }
+  if (_activeUserCached) return _cachedActiveUser;
+  try {
+    _cachedActiveUser = JSON.parse(localStorage.getItem(ACTIVE_KEY));
+    _activeUserCached = true;
+    return _cachedActiveUser;
+  }
   catch { return null; }
 }
-function setActiveUser(user) { localStorage.setItem(ACTIVE_KEY, JSON.stringify(user)); }
+function setActiveUser(user) {
+  if (user === null) {
+    _cachedActiveUser = null;
+    _activeUserCached = true;
+    localStorage.removeItem(ACTIVE_KEY);
+  } else {
+    _cachedActiveUser = user;
+    _activeUserCached = true;
+    localStorage.setItem(ACTIVE_KEY, JSON.stringify(user));
+  }
+}
 
 function getGreeting() {
   const h = new Date().getHours();
