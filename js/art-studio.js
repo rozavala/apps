@@ -193,17 +193,16 @@ const ArtStudio = (() => {
              style="background: ${c}" 
              onclick="ArtStudio.setColor('${c}', this)"></div>
       `).join('');
+
+      const eraser = document.createElement('div');
+      eraser.className = 'color-swatch';
+      eraser.innerHTML = '🧽';
+      eraser.style.display = 'flex';
+      eraser.style.alignItems = 'center';
+      eraser.style.justifyContent = 'center';
+      eraser.onclick = () => setColor('#FFFFFF', eraser);
+      p.appendChild(eraser);
     });
-  }
-    
-    const eraser = document.createElement('div');
-    eraser.className = 'color-swatch';
-    eraser.innerHTML = '🧽';
-    eraser.style.display = 'flex';
-    eraser.style.alignItems = 'center';
-    eraser.style.justifyContent = 'center';
-    eraser.onclick = () => setColor('#FFFFFF', eraser);
-    palette.appendChild(eraser);
   }
 
   function setupTools() {
