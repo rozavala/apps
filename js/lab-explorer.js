@@ -403,6 +403,10 @@ const LabExplorer = (() => {
     // Recalculate totalStars
     data.totalStars = LABS.reduce((sum, l) => sum + (data[l.id]?.stars || 0), 0);
     _save(data);
+
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.log('Lab Explorer', '🔬', `${currentLab.title} — ${stars} star${stars !== 1 ? 's' : ''}`);
+    }
   }
 
   function getStats() {

@@ -254,23 +254,35 @@
       if (!user) return null;
       const key = user.name.toLowerCase().replace(/\s+/g, '_');
 
+      // Get today's scheduled apps to filter suggestions
+      const todayAppIds = (typeof AppSchedule !== 'undefined') ? AppSchedule.getTodayApps() : [];
+      // Sports and Quest are always visible
+      const alwaysVisible = ['sports', 'quest'];
+
       // Check which apps have zero progress
       const apps = [
-        { name: 'Math Galaxy', icon: '🧮', href: 'math-galaxy.html', key: `zs_mathgalaxy_${key}` },
-        { name: 'Descubre Chile', icon: '🇨🇱', href: 'descubre-chile.html', key: `zs_chile_${key}` },
-        { name: 'Chess Quest', icon: '♟️', href: 'chess-quest.html', key: `zs_chess_${key}` },
-        { name: 'Little Maestro', icon: '🎹', href: 'little-maestro.html', key: `littlemaestro_${key}` },
-        { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}` },
-        { name: 'Guitar Jam', icon: '🎸', href: 'guitar-jam.html', key: `zs_guitar_${key}` },
-        { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: `zs_art_${key}` },
-        { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: `zs_sports_${key}` },
-        { name: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html', key: `zs_lab_${key}` },
-        { name: 'World Explorer', icon: '🌍', href: 'world-explorer.html', key: `zs_world_${key}` },
-        { name: 'Story Explorer', icon: '📚', href: 'story-explorer.html', key: `zs_story_${key}` }
+        { name: 'Math Galaxy', icon: '🧮', href: 'math-galaxy.html', key: `zs_mathgalaxy_${key}`, schedId: 'math' },
+        { name: 'Descubre Chile', icon: '🇨🇱', href: 'descubre-chile.html', key: `zs_chile_${key}`, schedId: 'chile' },
+        { name: 'Chess Quest', icon: '♟️', href: 'chess-quest.html', key: `zs_chess_${key}`, schedId: 'chess' },
+        { name: 'Little Maestro', icon: '🎹', href: 'little-maestro.html', key: `littlemaestro_${key}`, schedId: 'piano' },
+        { name: 'Fe Explorador', icon: '⛪', href: 'fe-explorador.html', key: `zs_fe_${key}`, schedId: 'faith' },
+        { name: 'Guitar Jam', icon: '🎸', href: 'guitar-jam.html', key: `zs_guitar_${key}`, schedId: 'guitar' },
+        { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: `zs_art_${key}`, schedId: 'art' },
+        { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: `zs_sports_${key}`, schedId: 'sports' },
+        { name: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html', key: `zs_lab_${key}`, schedId: 'lab' },
+        { name: 'World Explorer', icon: '🌍', href: 'world-explorer.html', key: `zs_world_${key}`, schedId: 'world' },
+        { name: 'Story Explorer', icon: '📚', href: 'story-explorer.html', key: `zs_story_${key}`, schedId: 'story' }
       ];
 
+      // Filter to only apps visible today
+      const visibleApps = apps.filter(app =>
+        todayAppIds.includes(app.schedId) ||
+        alwaysVisible.includes(app.schedId) ||
+        (app.schedId === 'faith' && user.faithVisible !== false)
+      );
+
       const noProgress = [];
-      apps.forEach(app => {
+      visibleApps.forEach(app => {
         try {
           const data = JSON.parse(localStorage.getItem(app.key)) || {};
           let hasProg = false;
@@ -285,11 +297,10 @@
           else if (app.name === 'Lab Explorer') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'World Explorer') hasProg = (data.totalStars || 0) > 0;
           else if (app.name === 'Story Explorer') hasProg = (data.totalStars || 0) > 0;
-          
+
           if (!hasProg) noProgress.push(app);
         } catch { noProgress.push(app); }
       });
-
       if (noProgress.length > 0) {
         const pick = noProgress[Math.floor(Math.random() * noProgress.length)];
         return { text: `Try something new!`, sub: pick.name, icon: pick.icon, href: pick.href };
@@ -471,7 +482,46 @@
         return;
       }
 
-      content.innerHTML = profiles.map(p => {
+      // Build HTML with recent activity + per-kid stats
+      let html = '';
+
+      // ── Recent Activity (last 7 days, all kids) ──
+      if (typeof ActivityLog !== 'undefined') {
+        html += `<div style="margin-bottom:24px;">
+          <div style="font-weight:800; font-family:var(--font-display); font-size:1.1rem; margin-bottom:12px;">
+            📋 Recent Activity (Last 7 Days)
+          </div>`;
+        
+        let allRecent = [];
+        profiles.forEach(p => {
+          const recent = ActivityLog.getRecent(p.name, 7);
+          recent.forEach(e => allRecent.push({ ...e, kidName: p.name, kidAvatar: p.avatar }));
+        });
+        allRecent.sort((a, b) => b.ts - a.ts); // newest first
+        allRecent = allRecent.slice(0, 20); // max 20
+
+        if (allRecent.length === 0) {
+          html += `<p style="color:var(--text-muted); font-size:0.85rem;">No recent activity recorded yet. Start playing to see activity here!</p>`;
+        } else {
+          html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+          allRecent.forEach(e => {
+            const when = _timeAgo(e.ts);
+            html += `<div style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px;">
+              <span style="font-size:1.2rem;">${e.icon}</span>
+              <div style="flex:1; min-width:0;">
+                <div style="font-weight:700; font-size:0.85rem;">${escHtml(e.kidName)} · ${escHtml(e.app)}</div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">${escHtml(e.desc)}</div>
+              </div>
+              <div style="font-size:0.7rem; color:var(--text-muted); white-space:nowrap;">${when}</div>
+            </div>`;
+          });
+          html += `</div>`;
+        }
+        html += `</div>`;
+      }
+
+      // ── Per-kid stats (existing bar chart rows) ──
+      html += profiles.map(p => {
         const key = p.name.toLowerCase().replace(/\s+/g, '_');
         const tier = typeof getAgeTier === 'function' ? getAgeTier(p.age) : 'Intermediate';
         const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
@@ -661,6 +711,19 @@
 
     function closeDashboard() {
       document.getElementById('dash-overlay').classList.remove('active');
+    }
+
+    // Helper: "2h ago", "yesterday", "3 days ago"
+    function _timeAgo(ts) {
+      const diff = Date.now() - ts;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins}m ago`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days === 1) return 'yesterday';
+      return `${days}d ago`;
     }
 
     function exportProgress() {
@@ -1297,6 +1360,7 @@ function createProfile() {
       localStorage.removeItem(`zs_world_${key}`);
       localStorage.removeItem(`zs_story_${key}`);
       localStorage.removeItem(`zs_quest_${key}`);
+      localStorage.removeItem(`zs_activity_${key}`);
       localStorage.removeItem(`zs_lastrank_${key}`);
 
       // Remove from Little Maestro index if present
@@ -1348,6 +1412,7 @@ function createProfile() {
         `zs_world_`,
         `zs_story_`,
         `zs_quest_`,
+        `zs_activity_`,
         `zs_lastrank_`,
       ];
 

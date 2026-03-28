@@ -145,24 +145,50 @@ const WorldExplorer = (() => {
     const data = _load();
     const visited = data.visited || [];
 
-    // Simple SVG representation of South America countries as boxes for now
-    // In a real implementation, this would be a proper SVG path map
-    let svg = `<svg viewBox="0 0 400 500" width="300">`;
-    
-    // Stub paths for South America
-    const paths = {
-      'brazil': 'M 150 50 L 350 150 L 300 350 L 100 250 Z',
-      'argentina': 'M 100 250 L 200 350 L 150 480 L 50 450 Z',
-      'chile': 'M 50 250 L 100 250 L 80 480 L 40 480 Z',
-      'peru': 'M 50 100 L 150 50 L 150 200 L 50 250 Z'
+    // Simplified but recognizable SVG paths for South America
+    const countryPaths = {
+      'brazil': 'M195 45 L260 55 L310 90 L340 140 L350 200 L340 260 L310 310 L260 340 L220 350 L180 330 L150 290 L130 250 L120 200 L125 150 L140 110 L160 75Z',
+      'argentina': 'M145 290 L170 310 L180 340 L185 380 L175 420 L160 450 L140 470 L125 480 L115 460 L110 420 L105 380 L100 340 L110 300 L125 280Z',
+      'chile': 'M90 250 L105 260 L110 290 L108 330 L105 370 L100 410 L95 445 L88 470 L80 480 L75 460 L78 420 L80 380 L82 340 L84 300 L85 270Z',
+      'peru': 'M75 170 L110 145 L140 140 L155 160 L150 190 L140 220 L125 250 L105 260 L90 250 L78 225 L72 200Z'
     };
+
+    // Country label positions (center of each shape)
+    const labels = {
+      'brazil':    { x: 230, y: 200 },
+      'argentina': { x: 145, y: 380 },
+      'chile':     { x: 70,  y: 370 },
+      'peru':      { x: 115, y: 195 }
+    };
+
+    let svg = `<svg viewBox="0 0 400 520" width="100%" style="max-width:360px; margin:0 auto; display:block;">`;
+    
+    // Ocean background
+    svg += `<rect width="400" height="520" rx="16" fill="rgba(59,130,246,0.08)" />`;
 
     currentContinent.countries.forEach(c => {
       const isVisited = visited.includes(c.id);
-      const path = paths[c.id] || '';
-      svg += `<path d="${path}" class="country ${isVisited ? 'visited' : ''}" onclick="WorldExplorer.openCountry('${c.id}')" data-id="${c.id}">
-                <title>${c.name}</title>
-              </path>`;
+      const path = countryPaths[c.id];
+      if (!path) return;
+
+      const fillColor = isVisited ? 'rgba(16,185,129,0.35)' : 'rgba(255,255,255,0.08)';
+      const strokeColor = isVisited ? '#10B981' : 'rgba(255,255,255,0.25)';
+
+      svg += `<path d="${path}" class="country ${isVisited ? 'visited' : ''}" 
+                fill="${fillColor}" stroke="${strokeColor}" stroke-width="2"
+                style="cursor:pointer; transition: all 0.3s;"
+                onclick="WorldExplorer.openCountry('${c.id}')" />`;
+
+      // Country label
+      const lbl = labels[c.id];
+      if (lbl) {
+        svg += `<text x="${lbl.x}" y="${lbl.y}" text-anchor="middle" 
+                  fill="${isVisited ? '#34D399' : 'rgba(255,255,255,0.5)'}" 
+                  font-family="var(--font-display)" font-size="13" font-weight="800"
+                  style="pointer-events:none;">
+                  ${c.flag} ${lang === 'es' ? c.nameEs : c.name}
+                </text>`;
+      }
     });
 
     svg += `</svg>`;
@@ -221,6 +247,10 @@ const WorldExplorer = (() => {
       if (typeof playSound === 'function') playSound('correct');
       _updateGlobalStars();
       
+      if (typeof ActivityLog !== 'undefined') {
+        ActivityLog.log('World Explorer', '🌍', `Visited ${lang === 'es' ? currentCountry.nameEs : currentCountry.name}`);
+      }
+
       // Trigger learning check
       if (typeof LearningCheck !== 'undefined') {
         LearningCheck.maybePrompt('geography', () => openCountry(id));

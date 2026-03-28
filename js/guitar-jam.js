@@ -230,6 +230,11 @@ const GuitarJam = (() => {
       p.chordsLearned.push(name);
       saveProgress({ chordsLearned: p.chordsLearned });
       if (typeof SFX !== 'undefined') SFX.correct();
+      
+      if (typeof ActivityLog !== 'undefined') {
+        ActivityLog.log('Guitar Jam', '🎸', `Learned the ${name} chord`);
+      }
+
       checkStarMilestones();
       
       const btn = document.querySelector(`.chord-btn[data-chord="${name}"]`);
@@ -469,6 +474,11 @@ const GuitarJam = (() => {
       if (existing) existing.bestStars = stars;
       else p.songsCompleted.push({ songId: currentSong.id, bestStars: stars });
       saveProgress({ songsCompleted: p.songsCompleted });
+
+      if (typeof ActivityLog !== 'undefined' && stars > 0) {
+        ActivityLog.log('Guitar Jam', '🎸', `Completed "${currentSong.title}" — ${stars} star${stars !== 1 ? 's' : ''}`);
+      }
+
       checkStarMilestones();
     }
 

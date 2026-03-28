@@ -237,6 +237,10 @@ const FeManager = (() => {
     data.totalStars++;
     _saveData(data);
     if (typeof showConfetti === 'function') showConfetti();
+
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.log('Fe Explorador', '⛪', 'Ganó una estrella en Fe Explorador');
+    }
   }
 
   return { 

@@ -8,12 +8,29 @@
 }
 
 body {
-  padding-top: 60px;
   overflow: hidden; /* Canvas app usually handles its own scrolling if any */
 }
 
+.app {
+  /* Override common.css padding for art studio — needs max vertical space */
+  padding: 0 !important;
+  height: 100vh;
+  max-width: 100% !important;
+}
+
+#screen-studio {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabs-bar {
+  flex-shrink: 0;
+}
+
 .content-container {
-  height: calc(100vh - 60px);
+  flex: 1;
+  min-height: 0; /* Critical for flex children with overflow */
   display: flex;
   flex-direction: column;
 }

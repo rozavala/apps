@@ -262,6 +262,10 @@ const StoryExplorer = (() => {
       data.totalStars = (data.totalStars || 0) + starsEarned;
       _save(data);
       _updateGlobalStars();
+
+      if (typeof ActivityLog !== 'undefined') {
+        ActivityLog.log('Story Explorer', '📚', `Read "${currentStory.title}" — ${starsEarned} star${starsEarned !== 1 ? 's' : ''}`);
+      }
     }
   }
 

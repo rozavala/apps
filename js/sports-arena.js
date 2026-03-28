@@ -97,6 +97,12 @@ const SportsArena = (() => {
     data.matches.push(match);
     data.totalStars = (data.totalStars || 0) + 1; // 1 star per match played
     _saveData(data);
+
+    if (typeof ActivityLog !== 'undefined') {
+      const sport = getAllSports().find(s => s.id === match.sportId);
+      ActivityLog.log('Sports Arena', '🏓', `Played a ${sport ? sport.name : 'match'} match`);
+    }
+
     return match;
   }
 
@@ -246,6 +252,12 @@ const SportsArena = (() => {
     data.activities.push(activity);
     data.totalStars = (data.totalStars || 0) + 1;
     _saveData(data);
+
+    if (typeof ActivityLog !== 'undefined') {
+      const sport = getAllSports().find(s => s.id === activity.sportId);
+      ActivityLog.log('Sports Arena', '🏓', `Logged activity: ${sport ? sport.name : 'outdoor activity'}`);
+    }
+
     return activity;
   }
 

@@ -14,6 +14,10 @@ function saveTopicProgress(id,stars,pct){
   p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};
   localStorage.setItem(k,JSON.stringify(p));
   if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+
+  if (typeof ActivityLog !== 'undefined' && stars > 0) {
+    ActivityLog.log('Descubre Chile', '🇨🇱', `Completó el tema "${id}" — ${stars} estrella${stars!==1?'s':''}`);
+  }
 }
 function saveVisited(id){
   const k=getUserKey();if(!k)return;
@@ -28,6 +32,10 @@ function saveMemBest(m){
   if(!p.memBest||m<p.memBest)p.memBest=m;
   localStorage.setItem(k,JSON.stringify(p));
   if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+
+  if (typeof ActivityLog !== 'undefined') {
+    ActivityLog.log('Descubre Chile', '🇨🇱', `Completó el juego de memoria en ${m} movimientos`);
+  }
 }
 
 function showFeedback(e){

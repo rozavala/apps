@@ -620,6 +620,10 @@ function finishGame() {
   const isNewRecord = pct > prevBest;
   saveUserProgress(currentLevel, stars, pct);
 
+  if (typeof ActivityLog !== 'undefined') {
+    ActivityLog.log('Math Galaxy', '🧮', `Completed ${currentLevel} — ${stars} star${stars !== 1 ? 's' : ''}`);
+  }
+
   let emoji, title, sub;
   if (pct >= 90) { emoji = '🏆'; title = 'Mission Complete!'; sub = `Amazing! ${score} out of ${TOTAL_QUESTIONS} correct!`; }
   else if (pct >= 70) { emoji = '🌟'; title = 'Great Flying!'; sub = `${score} out of ${TOTAL_QUESTIONS} — almost perfect!`; }

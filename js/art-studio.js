@@ -586,6 +586,10 @@ const ArtStudio = (() => {
       p.lessonsCompleted.push(currentLesson.id);
       saveProgress({ lessonsCompleted: p.lessonsCompleted });
       checkStarMilestones();
+      
+      if (typeof ActivityLog !== 'undefined') {
+        ActivityLog.log('Art Studio', '🎨', `Completed lesson: "${currentLesson.title}"`);
+      }
     }
     if (typeof SFX !== 'undefined') SFX.cheer();
     showFeedback('🎨 Lesson Done!');
@@ -660,6 +664,11 @@ const ArtStudio = (() => {
     saveProgress({ gallery: p.gallery });
     closeSaveDialog();
     if (typeof SFX !== 'undefined') SFX.correct();
+    
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.log('Art Studio', '🎨', `Saved artwork: "${title}"`);
+    }
+
     showFeedback('💾 Saved!');
     checkStarMilestones();
     renderGallery();

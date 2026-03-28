@@ -103,7 +103,12 @@ body {
 
 /* SVG Styles */
 path.country { fill: rgba(255,255,255,0.1); stroke: rgba(255,255,255,0.2); stroke-width: 1; cursor: pointer; transition: all 0.2s; }
-path.country:hover { fill: var(--world-accent); fill-opacity: 0.4; }
+path.country:hover { 
+  fill: var(--world-accent) !important; 
+  fill-opacity: 0.4 !important;
+  stroke: #3B82F6 !important;
+  stroke-width: 3 !important;
+}
 path.country.visited { fill: #10B981; fill-opacity: 0.3; stroke: #34D399; }
 
 /* Country Card */

@@ -294,6 +294,9 @@ function loadPuzzle(){
             if(fbEl) fbEl.innerHTML=`<span style="color:var(--green)">✅ Correct! ${pz.after}</span>`;
             if(nextBtn) nextBtn.style.display='';
             showFeedback('🎉');
+            if (typeof ActivityLog !== 'undefined') {
+              ActivityLog.log('Chess Quest', '♟️', 'Solved a chess puzzle');
+            }
             selected=null;
             renderBoard(el,puzzleBoard,{lastMove:move});
             return;
@@ -475,7 +478,13 @@ function checkGameEnd(colorToMove){
     const winner=colorToMove==='w'?'Computer':'You';
     const emoji=colorToMove==='w'?'😔':'🏆';
     const prog=getUserProgress();
-    if(colorToMove==='b'){saveProgress({wins:(prog.wins||0)+1});showFeedback('🏆')}
+    if(colorToMove==='b'){
+      saveProgress({wins:(prog.wins||0)+1});
+      showFeedback('🏆');
+      if (typeof ActivityLog !== 'undefined') {
+        ActivityLog.log('Chess Quest', '♟️', 'Won a game against computer');
+      }
+    }
     else{saveProgress({losses:(prog.losses||0)+1});showFeedback('😔')}
     const st=document.getElementById('playStatus');
     if(st) st.textContent='Game Over!';
