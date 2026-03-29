@@ -60,14 +60,17 @@ const StoryExplorer = (() => {
           en: 'In the central valley of Chile, a horse named Rayo lived on a beautiful farm.',
           es: 'En el valle central de Chile, un caballo llamado Rayo vivía en una hermosa granja.',
           vocab: [
-            { word: 'huaso', wordEs: 'huaso', def: 'A Chilean countryman and skilled horseman.', defEs: 'Un hombre de campo chileno y hábil jinete.' }
+            { word: 'huaso', wordEs: 'huaso', def: 'A Chilean countryman and skilled horseman.', defEs: 'Un hombre de campo chileno y hábil jinete.' },
+            { word: 'farm', wordEs: 'granja', def: 'An area of land used for growing crops or keeping animals.', defEs: 'Un área de tierra utilizada para cultivar plantas o criar animales.' }
           ]
         },
         {
           en: 'Rayo wore a shiny saddle and carried his huaso across the fields every morning.',
           es: 'Rayo usaba una montura brillante y llevaba a su huaso por los campos cada mañana.',
           vocab: [
-            { word: 'saddle', wordEs: 'montura', def: 'A seat for a rider on a horse.', defEs: 'Un asiento para un jinete en un caballo.' }
+            { word: 'saddle', wordEs: 'montura', def: 'A seat for a rider on a horse.', defEs: 'Un asiento para un jinete en un caballo.' },
+            { word: 'shiny', wordEs: 'brillante', def: 'Reflecting light, bright and clean.', defEs: 'Que refleja la luz, brillante y limpio.' },
+            { word: 'fields', wordEs: 'campos', def: 'Open areas of land without trees or buildings.', defEs: 'Áreas abiertas de tierra sin árboles ni edificios.' }
           ]
         }
       ],
@@ -85,12 +88,57 @@ const StoryExplorer = (() => {
           en: 'Long ago, near the blue lakes of the south, a giant volcano stood perfectly still.',
           es: 'Hace mucho tiempo, cerca de los lagos azules del sur, un volcán gigante permanecía inmóvil.',
           vocab: [
-            { word: 'volcano', wordEs: 'volcán', def: 'A mountain that can erupt with lava and ash.', defEs: 'Una montaña que puede entrar en erupción con lava y ceniza.' }
+            { word: 'volcano', wordEs: 'volcán', def: 'A mountain that can erupt with lava and ash.', defEs: 'Una montaña que puede entrar en erupción con lava y ceniza.' },
+            { word: 'lakes', wordEs: 'lagos', def: 'Large bodies of water surrounded by land.', defEs: 'Grandes cuerpos de agua rodeados de tierra.' },
+            { word: 'giant', wordEs: 'gigante', def: 'Very large and powerful.', defEs: 'Muy grande y poderoso.' }
+          ]
+        },
+        {
+          en: 'People said that if you listened closely, the mountain would whisper secrets of the earth.',
+          es: 'La gente decía que si escuchabas atentamente, la montaña susurraría secretos de la tierra.',
+          vocab: [
+            { word: 'whisper', wordEs: 'susurraría', def: 'To speak very softly or quietly.', defEs: 'Hablar muy suave o en voz baja.' },
+            { word: 'secrets', wordEs: 'secretos', def: 'Things that are kept hidden from others.', defEs: 'Cosas que se mantienen ocultas a los demás.' }
           ]
         }
       ],
       quiz: [
         { q: 'Where was the volcano located?', qEs: '¿Dónde estaba el volcán?', options: ['The desert', 'Near blue lakes', 'In the city', 'On an island'], optionsEs: ['El desierto', 'Cerca de lagos azules', 'En la ciudad', 'En una isla'], answer: 1 }
+      ]
+    },
+    {
+      id: 'lost_compass',
+      title: 'The Lost Compass',
+      titleEs: 'La Brújula Perdida',
+      tier: 'explorer', ageMin: 7, region: 'north', icon: '🧭',
+      pages: [
+        {
+          en: 'An explorer named Leo walked across the dry, sandy desert searching for a hidden oasis.',
+          es: 'Un explorador llamado Leo caminó a través del desierto seco y arenoso buscando un oasis escondido.',
+          vocab: [
+            { word: 'explorer', wordEs: 'explorador', def: 'A person who travels in search of new things.', defEs: 'Una persona que viaja en busca de cosas nuevas.' },
+            { word: 'desert', wordEs: 'desierto', def: 'A very dry area of land with little water.', defEs: 'Un área de tierra muy seca con poca agua.' }
+          ]
+        },
+        {
+          en: 'Suddenly, he noticed his compass was missing. He could not find his way back without it.',
+          es: 'De repente, se dio cuenta de que faltaba su brújula. No podía encontrar el camino de regreso sin ella.',
+          vocab: [
+            { word: 'compass', wordEs: 'brújula', def: 'A tool used to find directions like North or South.', defEs: 'Una herramienta utilizada para encontrar direcciones como el Norte o el Sur.' },
+            { word: 'missing', wordEs: 'faltaba', def: 'Lost or not in its usual place.', defEs: 'Perdido o no en su lugar habitual.' }
+          ]
+        },
+        {
+          en: 'He looked under a rock and found it resting next to a small lizard. "Thank you, friend!" he said.',
+          es: 'Miró debajo de una roca y la encontró descansando junto a un pequeño lagarto. "¡Gracias, amigo!" dijo.',
+          vocab: [
+            { word: 'lizard', wordEs: 'lagarto', def: 'A reptile with rough skin and a long tail.', defEs: 'Un reptil de piel áspera y cola larga.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What did Leo lose?', qEs: '¿Qué perdió Leo?', options: ['His map', 'His compass', 'His water', 'His hat'], optionsEs: ['Su mapa', 'Su brújula', 'Su agua', 'Su sombrero'], answer: 1 },
+        { q: 'Where was the missing item?', qEs: '¿Dónde estaba el objeto perdido?', options: ['In a tree', 'Under a rock', 'In his bag', 'On a mountain'], optionsEs: ['En un árbol', 'Debajo de una roca', 'En su bolso', 'En una montaña'], answer: 1 }
       ]
     }
   ];

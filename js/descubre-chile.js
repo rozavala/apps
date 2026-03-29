@@ -150,6 +150,10 @@ const TOPICS=[
   {id:'astronomia',icon:'🔭',name:'Astronomía en Chile',stories:[
     {t:'✨ Cielos Claros',p:'El norte de Chile tiene uno de los cielos más despejados y secos del mundo, ideal para la observación espacial.',f:'Alrededor del 70% de la infraestructura astronómica del mundo está o estará en Chile.'},
     {t:'📡 Observatorio ALMA',p:'En el desierto de Atacama se encuentra ALMA, un conjunto de 66 antenas que trabajan juntas para observar el universo.',f:'ALMA se encuentra a más de 5.000 metros sobre el nivel del mar.'}
+  ]},
+  {id:'animales_desierto_patagonia',icon:'🦊',name:'Animales del desierto y la Patagonia',stories:[
+    {t:'🦊 El zorro culpeo',p:'Es el zorro más grande de Chile y se puede encontrar desde el desierto de Atacama hasta la Patagonia.',f:'Tiene un pelaje rojizo y grueso que lo protege del frío en el sur.'},
+    {t:'🦩 Flamencos andinos',p:'Estas aves de color rosado viven en las lagunas y salares de gran altura en el norte de Chile.',f:'Obtienen su color rosado de los pequeños crustáceos que comen en el agua.'}
   ]}
 ];
 let curTopic=null;
@@ -311,7 +315,10 @@ const QB={
     {q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua'], tier:'intermediate'},
     {q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre'], tier:'beginner'},
     {q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol'], tier:'beginner'},
-    {q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo'], tier:'beginner'}
+    {q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo'], tier:'beginner'},
+    {q:'¿Cuál es el baile nacional de Chile?',a:'La Cueca',o:['La Cueca','El Tango','La Salsa','El Vals'], tier:'beginner'},
+    {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Abril'], tier:'beginner'},
+    {q:'¿Qué juego tradicional se eleva al cielo durante las Fiestas Patrias?',a:'El volantín',o:['El volantín','El trompo','El emboque','Las bolitas'], tier:'intermediate'}
   ],
   nature:[
     {q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros'], tier:'advanced'},
@@ -328,7 +335,10 @@ const QB={
     {q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa'], tier:'intermediate'},
     {q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo'], tier:'beginner'},
     {q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970'], tier:'intermediate'},
-    {q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos'], tier:'expert'}
+    {q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos'], tier:'expert'},
+    {q:'¿Qué premio ganó Gabriela Mistral en 1945?',a:'Nobel de Literatura',o:['Nobel de Literatura','Nobel de la Paz','Oscar','Medalla de Oro Olímpica'], tier:'intermediate'},
+    {q:'¿Quién fue el primer tenista latinoamericano número 1 del mundo?',a:'Marcelo Ríos',o:['Marcelo Ríos','Fernando González','Nicolás Massú','Guillermo Vilas'], tier:'expert'},
+    {q:'¿Sobre qué temas escribió principalmente Pablo Neruda?',a:'El amor, la naturaleza y Chile',o:['El amor, la naturaleza y Chile','Ciencia ficción','Historia de Europa','Deportes'], tier:'advanced'}
   ],
   inventors:[
     {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
@@ -359,6 +369,12 @@ const QB={
     {q:'¿Qué es ALMA?',a:'Un conjunto de antenas',o:['Un conjunto de antenas','Un telescopio de lentes','Un satélite espacial','Un cohete'], tier:'intermediate'},
     {q:'¿Aproximadamente cuántos metros sobre el nivel del mar está ALMA?',a:'5.000 metros',o:['5.000 metros','1.000 metros','10.000 metros','100 metros'], tier:'expert'},
     {q:'¿Qué porcentaje de la infraestructura astronómica mundial se concentra en Chile?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'advanced'}
+  ],
+  animales_desierto_patagonia:[
+    {q:'¿Cuál es el zorro más grande de Chile?',a:'El zorro culpeo',o:['El zorro culpeo','El zorro chilla','El lobo','El zorro ártico'], tier:'intermediate'},
+    {q:'¿Qué ave de color rosado vive en los salares del norte de Chile?',a:'Flamenco andino',o:['Flamenco andino','Avestruz','Pelícano','Garza'], tier:'beginner'},
+    {q:'¿De qué obtienen su color rosado los flamencos andinos?',a:'De pequeños crustáceos',o:['De pequeños crustáceos','De las rocas rojas','Del sol del desierto','De las algas'], tier:'advanced'},
+    {q:'¿En qué partes de Chile se puede encontrar el zorro culpeo?',a:'Desde el desierto hasta la Patagonia',o:['Desde el desierto hasta la Patagonia','Solo en la Patagonia','Solo en el desierto','Solo en la costa'], tier:'expert'}
   ]
 };
 

@@ -150,7 +150,40 @@ const WorldExplorer = (() => {
         },
       ]
     },
-    { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [] },
+        { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [
+        {
+          id: 'mexico', name: 'Mexico', nameEs: 'México', flag: '🇲🇽',
+          capital: 'Mexico City', capitalEs: 'Ciudad de México',
+          facts: [
+            { en: 'Mexico introduced chocolate, corn, and chilies to the world.', es: 'México introdujo el chocolate, el maíz y los chiles al mundo.' },
+            { en: 'The ancient city of Chichen Itza is a wonder of the world.', es: 'La antigua ciudad de Chichén Itzá es una maravilla del mundo.' },
+            { en: 'Mexico City is built on top of an ancient lake.', es: 'La Ciudad de México está construida sobre un antiguo lago.' }
+          ],
+          landmark: { name: 'Chichen Itza', nameEs: 'Chichén Itzá', emoji: '🏛️' },
+          animal: { name: 'Axolotl', nameEs: 'Ajolote', emoji: '🦎' },
+          quiz: [
+            { q: 'What ancient city is a wonder of the world in Mexico?', qEs: '¿Qué antigua ciudad es una maravilla del mundo en México?', o: ['Chichen Itza', 'Teotihuacan', 'Tulum', 'Palenque'], a: 'Chichen Itza' },
+            { q: 'What is the capital of Mexico?', qEs: '¿Cuál es la capital de México?', o: ['Guadalajara', 'Monterrey', 'Mexico City', 'Cancun'], a: 'Mexico City' },
+            { q: 'What is the national animal of Mexico?', qEs: '¿Cuál es el animal nacional de México?', o: ['Axolotl', 'Jaguar', 'Eagle', 'Chihuahua'], a: 'Axolotl' }
+          ]
+        },
+        {
+          id: 'canada', name: 'Canada', nameEs: 'Canadá', flag: '🇨🇦',
+          capital: 'Ottawa', capitalEs: 'Ottawa',
+          facts: [
+            { en: 'Canada has more lakes than the rest of the world combined.', es: 'Canadá tiene más lagos que el resto del mundo combinado.' },
+            { en: 'It is the second-largest country in the world by total area.', es: 'Es el segundo país más grande del mundo por área total.' },
+            { en: 'The maple leaf has been a symbol of Canada since the 1700s.', es: 'La hoja de arce ha sido un símbolo de Canadá desde el siglo XVIII.' }
+          ],
+          landmark: { name: 'Niagara Falls', nameEs: 'Cataratas del Niágara', emoji: '🌊' },
+          animal: { name: 'Beaver', nameEs: 'Castor', emoji: '🦫' },
+          quiz: [
+            { q: 'What leaf is on the Canadian flag?', qEs: '¿Qué hoja está en la bandera canadiense?', o: ['Oak', 'Maple', 'Pine', 'Birch'], a: 'Maple' },
+            { q: 'What is the capital of Canada?', qEs: '¿Cuál es la capital de Canadá?', o: ['Toronto', 'Vancouver', 'Montreal', 'Ottawa'], a: 'Ottawa' },
+            { q: 'What famous waterfall is located in Canada?', qEs: '¿Qué famosa cascada se encuentra en Canadá?', o: ['Angel Falls', 'Niagara Falls', 'Iguazu Falls', 'Victoria Falls'], a: 'Niagara Falls' }
+          ]
+        }
+    ] },
     { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [] },
     { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [] },
     { id: 'asia', name: 'Asia', nameEs: 'Asia', icon: '🌏', color: '#F59E0B', countries: [] },

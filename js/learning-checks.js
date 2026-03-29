@@ -49,6 +49,7 @@ const LearningCheck = (() => {
       { q: 'What is it called when the king is in danger?', options: ['Stalemate', 'Check', 'Castling', 'Fork'], answer: 1 },
       { q: 'How many squares on a chessboard?', options: ['32', '48', '64', '100'], answer: 2 },
       { q: 'Which piece moves in an L-shape?', options: ['Bishop', 'Knight', 'Rook', 'Pawn'], answer: 1 },
+      { q: 'What is the most powerful piece in chess?', options: ['King', 'Queen', 'Rook', 'Bishop'], answer: 1 },
     ],
     history: [
       { q: 'In what year was Santiago founded?', options: ['1441', '1541', '1641', '1741'], answer: 1 },
@@ -56,17 +57,22 @@ const LearningCheck = (() => {
       { q: 'Who are the indigenous people of southern Chile?', options: ['Inca', 'Maya', 'Mapuche', 'Aztec'], answer: 2 },
       { q: 'What desert is in northern Chile?', options: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], answer: 2 },
       { q: 'What is Chile\'s capital city?', options: ['Valparaíso', 'Concepción', 'Santiago', 'Temuco'], answer: 2 },
+      { q: 'Who is known as the Father of the Nation in Chile?', options: ['Pedro de Valdivia', 'Bernardo O\'Higgins', 'Arturo Prat', 'Manuel Baquedano'], answer: 1 },
     ],
     art: [
       { q: 'What are the three primary colors?', options: ['Red, Green, Blue', 'Red, Yellow, Blue', 'Red, Orange, Purple', 'Blue, Green, Yellow'], answer: 1 },
       { q: 'What technique uses tiny dots to create an image?', options: ['Cubism', 'Pointillism', 'Surrealism', 'Impressionism'], answer: 1 },
       { q: 'What do you call a painting of a landscape?', options: ['Portrait', 'Still life', 'Landscape', 'Abstract'], answer: 2 },
       { q: 'Mixing red and blue makes what color?', options: ['Green', 'Orange', 'Purple', 'Brown'], answer: 2 },
+      { q: 'Mixing yellow and blue makes what color?', options: ['Purple', 'Green', 'Orange', 'Black'], answer: 1 },
+      { q: 'What do you call a painting of a person\'s face?', options: ['Landscape', 'Still life', 'Portrait', 'Mural'], answer: 2 },
     ],
     faith: [
       { q: 'What is the first prayer Jesus taught?', options: ['Ave María', 'Padre Nuestro', 'Gloria', 'Credo'], answer: 1 },
       { q: 'How many decades are in a rosary?', options: ['3', '4', '5', '10'], answer: 2 },
       { q: 'Who is the patron saint of Chile?', options: ['San Pedro', 'Santiago', 'San Francisco', 'San José'], answer: 1 },
+      { q: 'In what town was Jesus born?', options: ['Jerusalem', 'Nazareth', 'Bethlehem', 'Rome'], answer: 2 },
+      { q: 'Who was the earthly father of Jesus?', options: ['Peter', 'Joseph', 'John', 'Paul'], answer: 1 },
     ],
     general: [
       { q: 'What planet is closest to the Sun?', options: ['Venus', 'Earth', 'Mercury', 'Mars'], answer: 2 },
@@ -74,6 +80,7 @@ const LearningCheck = (() => {
       { q: 'What is H₂O?', options: ['Oxygen', 'Hydrogen', 'Water', 'Salt'], answer: 2 },
       { q: 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 3 },
       { q: 'How many days are in a leap year?', options: ['364', '365', '366', '367'], answer: 2 },
+      { q: 'Which is the fastest land animal?', options: ['Lion', 'Cheetah', 'Horse', 'Leopard'], answer: 1 },
     ],
     science: [
       { q: 'What are the three primary colors?', options: ['Red, Blue, Green', 'Red, Blue, Yellow', 'Red, Green, Yellow', 'Blue, Green, Yellow'], answer: 1 },
@@ -98,6 +105,8 @@ const LearningCheck = (() => {
       { q: 'A "valley" is a low area between what?', options: ['Buildings', 'Mountains', 'Rivers', 'Trees'], answer: 1 },
       { q: 'What does "enormous" mean?', options: ['Very small', 'Very fast', 'Very big', 'Very old'], answer: 2 },
       { q: 'What comes at the end of a sentence?', options: ['Comma', 'Period', 'Colon', 'Dash'], answer: 1 },
+      { q: 'What is the opposite of "hot"?', options: ['Warm', 'Spicy', 'Cold', 'Bright'], answer: 2 },
+      { q: 'Which word is a noun?', options: ['Run', 'Happy', 'Dog', 'Quickly'], answer: 2 },
     ]
   };
 
