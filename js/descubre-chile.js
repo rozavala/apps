@@ -108,6 +108,10 @@ const TOPICS=[
     {t:'🌎 La forma de Chile',p:'Chile se extiende por más de 4.300 km de norte a sur, pero en promedio solo tiene 177 km de ancho.',f:'Si pusieras a Chile sobre Europa, llegaría desde Noruega hasta el Sahara.'},
     {t:'🗻 Los Andes',p:'Los poderosos Andes recorren toda la frontera este. Algunos picos superan los 6.000 metros.',f:'Chile tiene más de 2.000 volcanes, ¡y unos 90 están activos!'}
   ]},
+  {id:'antartica',icon:'🧊',name:'La Antártica Chilena',stories:[
+    {t:'❄️ El Continente Blanco',p:'La Antártica es el lugar más frío, seco y ventoso del planeta. Gran parte de ella está cubierta de hielo durante todo el año.',f:'En la Antártica no viven osos polares, ¡pero sí hay muchos pingüinos!'},
+    {t:'🏔️ Territorio Chileno Antártico',p:'Chile tiene bases científicas y militares en la Antártica, donde investigadores estudian el clima, la flora y la fauna del lugar.',f:'Villa Las Estrellas es un poblado en la Antártica donde viven familias e incluso hay una escuela.'}
+  ]},
   {id:'indigenous',icon:'🪶',name:'Pueblos originarios',stories:[
     {t:'🪶 Los Mapuche',p:'Los Mapuche ("gente de la tierra") son el pueblo originario más grande de Chile. Nunca fueron conquistados por España.',f:'Defendieron sus tierras por más de 300 años, desde 1536 hasta 1883.'},
     {t:'🗿 Rapa Nui',p:'Isla de Pascua está a 3.700 km de la costa. Los Rapa Nui tallaron casi 1.000 estatuas Moai gigantes.',f:'Nadie sabe con certeza cómo movieron los Moai.'},
@@ -278,7 +282,16 @@ const QB={
     {q:'¿A qué distancia de la costa está aproximadamente Isla de Pascua?',a:'3.700 km',o:['3.700 km','500 km','1.000 km','10.000 km'], tier:'advanced'},
     {q:'¿En qué hemisferio se encuentra Chile?',a:'Hemisferio Sur',o:['Hemisferio Sur','Hemisferio Norte','Hemisferio Oriental','En el Ecuador'], tier:'beginner'},
     {q:'¿Cuál es la capital de Chile?',a:'Santiago',o:['Santiago','Valparaíso','Concepción','Antofagasta'], tier:'beginner'},
-    {q:'¿Qué país está al norte de Chile?',a:'Perú',o:['Perú','Argentina','Bolivia','Brasil'], tier:'intermediate'}
+    {q:'¿Qué país está al norte de Chile?',a:'Perú',o:['Perú','Argentina','Bolivia','Brasil'], tier:'intermediate'},
+    {q:'¿Cuál es el lago más grande de Chile?',a:'Lago General Carrera',o:['Lago General Carrera','Lago Llanquihue','Lago Villarrica','Lago Ranco'], tier:'advanced'},
+    {q:'¿Qué cordillera recorre la costa chilena?',a:'Cordillera de la Costa',o:['Cordillera de la Costa','Cordillera de los Andes','Cordillera Frontal','Cordillera Domeyko'], tier:'intermediate'},
+    {q:'¿En qué región se encuentra el desierto de Atacama?',a:'Norte Grande',o:['Norte Grande','Zona Central','Patagonia','Sur'], tier:'beginner'}
+  ],
+  antartica:[
+    {q:'¿Qué animal es común encontrar en la Antártica?',a:'Pingüino',o:['Pingüino','Oso Polar','León','Mono'], tier:'beginner'},
+    {q:'¿Cómo se llama el poblado chileno en la Antártica que tiene una escuela?',a:'Villa Las Estrellas',o:['Villa Las Estrellas','Punta Arenas','Puerto Williams','Base Prat'], tier:'advanced'},
+    {q:'¿Cuál es la característica principal del clima antártico?',a:'Frío y seco',o:['Frío y seco','Caluroso y húmedo','Lluvioso','Templado'], tier:'beginner'},
+    {q:'¿Qué estudian principalmente los científicos en la Antártica?',a:'El clima y la fauna',o:['El clima y la fauna','La agricultura','Los bosques','La minería de oro'], tier:'intermediate'}
   ],
   indigenous:[
     {q:'¿Qué pueblo originario desarrolló la cerámica con diseños geométricos?',a:'Los Diaguitas',o:['Los Diaguitas','Los Mapuches','Los Chonos','Los Selknam'], tier:'advanced'},
@@ -304,7 +317,10 @@ const QB={
     {q:'¿Qué país gobernó Chile antes de su independencia?',a:'España',o:['España','Inglaterra','Francia','Portugal'], tier:'beginner'},
     {q:'¿Qué cordillera tuvo que cruzar el Ejército de los Andes?',a:'Cordillera de los Andes',o:['Cordillera de los Andes','Cordillera de la Costa','Los Alpes','Los Pirineos'], tier:'intermediate'},
     {q:'¿Qué héroe naval comandó la Esmeralda?',a:'Arturo Prat',o:['Arturo Prat','Manuel Baquedano','Bernardo O\'Higgins','José Miguel Carrera'], tier:'intermediate'},
-    {q:'¿En qué ciudad ocurrió el Combate Naval el 21 de mayo?',a:'Iquique',o:['Iquique','Valparaíso','Antofagasta','Arica'], tier:'advanced'}
+    {q:'¿En qué ciudad ocurrió el Combate Naval el 21 de mayo?',a:'Iquique',o:['Iquique','Valparaíso','Antofagasta','Arica'], tier:'advanced'},
+    {q:'¿Qué batalla selló la independencia de Chile en 1818?',a:'Batalla de Maipú',o:['Batalla de Maipú','Batalla de Chacabuco','Combate Naval de Iquique','Batalla de Rancagua'], tier:'expert'},
+    {q:'¿Quién fue el primer Director Supremo de Chile?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','José Miguel Carrera','Manuel Bulnes','Pedro de Valdivia'], tier:'intermediate'},
+    {q:'¿En qué siglo se fundó la ciudad de Santiago?',a:'Siglo XVI (16)',o:['Siglo XVI (16)','Siglo XVIII (18)','Siglo XIX (19)','Siglo XV (15)'], tier:'advanced'}
   ],
   culture:[
     {q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón'], tier:'beginner'},
