@@ -20,16 +20,41 @@ const AGE_OPTIONS = [
 const STORAGE_KEY = 'zs_profiles';
 const ACTIVE_KEY  = 'zs_active_user';
 
+let _cachedProfiles = null;
+let _cachedActiveUser = undefined;
+
 function getProfiles() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
+  if (_cachedProfiles !== null) return _cachedProfiles;
+  try { _cachedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { _cachedProfiles = []; }
+  return _cachedProfiles;
 }
-function saveProfiles(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+function saveProfiles(p) {
+  _cachedProfiles = p;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
 function getActiveUser() {
-  try { return JSON.parse(localStorage.getItem(ACTIVE_KEY)); }
-  catch { return null; }
+  if (_cachedActiveUser !== undefined) return _cachedActiveUser;
+  try { _cachedActiveUser = JSON.parse(localStorage.getItem(ACTIVE_KEY)); }
+  catch { _cachedActiveUser = null; }
+  return _cachedActiveUser;
 }
-function setActiveUser(user) { localStorage.setItem(ACTIVE_KEY, JSON.stringify(user)); }
+function setActiveUser(user) {
+  _cachedActiveUser = user;
+  if (user === null) {
+    localStorage.removeItem(ACTIVE_KEY);
+  } else {
+    localStorage.setItem(ACTIVE_KEY, JSON.stringify(user));
+  }
+}
+
+window.addEventListener('storage', (e) => {
+  if (e.key === STORAGE_KEY) {
+    try { _cachedProfiles = JSON.parse(e.newValue) || []; } catch { _cachedProfiles = []; }
+  } else if (e.key === ACTIVE_KEY) {
+    try { _cachedActiveUser = JSON.parse(e.newValue); } catch { _cachedActiveUser = null; }
+  }
+});
 
 function getGreeting() {
   const h = new Date().getHours();

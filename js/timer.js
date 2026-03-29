@@ -311,7 +311,8 @@ const TimerManager = (() => {
   }
 
   function switchUser() {
-    localStorage.removeItem('zs_active_user');
+    if (typeof setActiveUser !== 'undefined') setActiveUser(null);
+    else localStorage.removeItem('zs_active_user');
     window.location.href = 'index.html';
   }
 

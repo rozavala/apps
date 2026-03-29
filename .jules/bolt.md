@@ -7,3 +7,6 @@
 ## 2024-05-15 - Redundant Parsing in Array Map Optimization
 **Learning:** Found an anti-pattern where the dashboard `openDashboard()` function parsed `localStorage` across all 8 apps inside a `profiles.map()` loop. Also, `getExplorerRank()` was blindly called after, resulting in 16 JSON parse operations *per user profile* on every dashboard open.
 **Action:** Centralized the logic using `getPlayerStats(p.name)` and reused the cached `stats.appStats` object. Passed the same `stats` to `getExplorerRank(name, stats)` to avoid recalculating the stars again, drastically cutting down synchronous DOM/storage blocking when the parents' dashboard opens.
+## 2026-03-29 - Cache LocalStorage Profile and Active User parsing
+**Learning:** Found an anti-pattern where `getProfiles()` and `getActiveUser()` parse `localStorage` redundantly on almost every access. Modifying active user or profiles directly with `localStorage.removeItem('zs_active_user')` was desynchronizing potential memory states.
+**Action:** Implemented a module-level memory cache `_cachedProfiles` and `_cachedActiveUser` in `js/auth.js` that `getProfiles()`, `saveProfiles()`, `getActiveUser()`, and `setActiveUser()` read/write from to prevent duplicate synchronous JSON parses, and unified all active-user clearing commands to use `setActiveUser(null)` to stay perfectly synchronized.

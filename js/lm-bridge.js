@@ -111,7 +111,8 @@
       studentBtn.parentNode.replaceChild(newBtn, studentBtn);
       newBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        localStorage.removeItem('zs_active_user');
+        if (typeof setActiveUser !== 'undefined') setActiveUser(null);
+        else localStorage.removeItem('zs_active_user');
         sessionStorage.removeItem('lm_active_user');
         window.location.href = 'index.html';
       });
