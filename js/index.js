@@ -36,7 +36,7 @@
           <div class="profile-avatar" style="background:${safe.color}22;border-color:${safe.color}">${safe.avatar}</div>
           <div class="profile-name">${safe.name}</div>
           ${p.age ? `<div class="profile-age">Age ${p.age}</div>` : ''}
-          <button class="profile-edit-btn" data-index="${i}" title="Edit ${safe.name}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
+          <button class="profile-edit-btn" data-index="${i}" title="Edit ${safe.name}" aria-label="Edit profile ${safe.name}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
         `;
 
         card.onclick = (e) => {
