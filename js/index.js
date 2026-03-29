@@ -718,7 +718,7 @@
 
         return `<div class="dash-profile">
           <div class="dash-profile-header">
-            <div class="dash-avatar" style="background:${escHtml(p.color)}22;border-color:${escHtml(p.color)}">${escHtml(p.avatar)}</div>
+            <div class="dash-avatar" style="background:${safeColor(p.color)}22;border-color:${safeColor(p.color)}">${escHtml(p.avatar)}</div>
             <div>
               <div class="dash-name">${escHtml(p.name)}</div>
               <div style="display:flex; gap:8px; font-size:0.78rem; font-weight:600;">
@@ -1261,7 +1261,8 @@ function createProfile() {
       const nameInput = document.getElementById('edit-name');
       if (avatar) {
         avatar.textContent = editEmoji;
-        avatar.style.cssText = `background:${editColor}22;border-color:${editColor};`;
+        const safeEditColor = safeColor(editColor);
+        avatar.style.cssText = `background:${safeEditColor}22;border-color:${safeEditColor};`;
       }
       if (name && nameInput) {
         name.textContent = nameInput.value.trim() || 'Student';
