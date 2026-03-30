@@ -483,10 +483,18 @@
     }
 
     // ── Parent Dashboard ──
-    function openDashboard() {
-      const profiles = getProfiles();
+    async function openDashboard() {
       const content = document.getElementById('dash-content');
 
+      // Show syncing state while pulling latest data
+      if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+        content.innerHTML = '<p style="color:var(--text-muted);text-align:center;">☁️ Syncing latest data…</p>';
+        document.getElementById('dash-overlay').classList.add('active');
+        try { await CloudSync.pullAllKids(); } catch(e) { console.warn('[Dashboard] Sync pull failed:', e); }
+      }
+
+      const profiles = getProfiles();
+        
       if (profiles.length === 0) {
         content.innerHTML = '<p style="color:var(--text-muted)">No profiles created yet.</p>';
         document.getElementById('dash-overlay').classList.add('active');
