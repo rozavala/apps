@@ -53,9 +53,13 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 - **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
 - **"Sports Arena" Ya Disponible**: Registra actividades deportivas al aire libre sin usar el tiempo de pantalla. (Log outdoor sports activities without consuming screen time).
 
-## 🚀 Getting Started
+## 🚀 Instalación y Uso (Getting Started)
 
-To run the apps locally, simply open the root `index.html` file in any modern web browser. No build steps or server setup required.
+Zavala Serra Apps no requiere servidores ni instalaciones complejas. (No build steps or server setup required).
+
+### Opción 1: Jugar Localmente (Play Locally)
+
+Para ejecutar localmente, simplemente abre el archivo `index.html` en cualquier navegador web. (To run the apps locally, simply open the root `index.html` file in any modern web browser).
 
 ```bash
 # Clone the repository
@@ -64,6 +68,13 @@ git clone <repository-url>
 # Open the hub
 open index.html
 ```
+
+### Opción 2: Teléfonos y Tablets (Phones & Tablets)
+
+Para la mejor experiencia en dispositivos móviles:
+1. Sube los archivos a **GitHub Pages** u otro servidor web estático. (Upload the files to GitHub Pages or another static web server).
+2. Abre la URL en el navegador de tu dispositivo móvil. (Open the URL in your mobile browser).
+3. Selecciona **"Agregar a la pantalla de inicio"** (Add to Home Screen) en el menú de opciones de tu navegador. Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
 
 ## 📂 Project Structure
 
