@@ -103,8 +103,9 @@ const CloudSync = (() => {
         
         const sTime = Number(serverData._syncedAt) || 0;
         const lTime = Number(localData._syncedAt) || 0;
+        const localMissing = Object.keys(localData).length === 0;
 
-        if (sTime > lTime) {
+        if (sTime > lTime || localMissing) {
           if (info.appName === 'art') {
             const merged = { ...serverData, gallery: localData.gallery || [] };
             localStorage.setItem(key, JSON.stringify(merged));
@@ -144,8 +145,9 @@ const CloudSync = (() => {
           
           const sTime = Number(serverData._syncedAt) || 0;
           const lTime = Number(localData._syncedAt) || 0;
+          const localMissing = Object.keys(localData).length === 0;
 
-          if (sTime > lTime) {
+          if (sTime > lTime || localMissing) {
             if (appName === 'art') {
               const merged = { ...serverData, gallery: localData.gallery || [] };
               localStorage.setItem(key, JSON.stringify(merged));
@@ -170,8 +172,9 @@ const CloudSync = (() => {
         
         const sTime = Number(sData._syncedAt) || 0;
         const lTime = Number(lData._syncedAt) || 0;
+        const localMissing = Object.keys(lData).length === 0;
 
-        if (sTime > lTime) {
+        if (sTime > lTime || localMissing) {
           localStorage.setItem(rKey, JSON.stringify(sData));
           changed = true;
         } else if (lTime > sTime) {
@@ -225,6 +228,19 @@ const CloudSync = (() => {
       });
     } catch (e) {
       console.warn('[Sync] Profile sync failed:', e);
+    }
+  };
+
+  state.overwriteProfiles = async (profiles) => {
+    if (!state.isConfigured() || !state.online) return;
+    try {
+      await _fetchWithTimeout(`${SYNC_SERVER}/api/profiles`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profiles)
+      });
+    } catch (e) {
+      console.warn('[Sync] Profile overwrite failed:', e);
     }
   };
 
