@@ -82,6 +82,17 @@ const CloudSync = (() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
+      // Write _syncedAt back to localStorage so local & server timestamps match.
+      // Prevents stale data from "winning" conflicts via clock skew.
+      try {
+        const current = JSON.parse(localStorage.getItem(key));
+        if (current && !Array.isArray(current)) {
+          current._syncedAt = ts;
+          localStorage.setItem(key, JSON.stringify(current));
+        }
+      } catch(ignore) {}
+
       _updatePill('idle');
     } catch (e) {
       console.warn('[Sync] Push failed:', e);
@@ -122,9 +133,9 @@ const CloudSync = (() => {
             localStorage.setItem(key, JSON.stringify(toStore));
           }
           return true;
-        } else if (lTime > sTime) {
-          state.push(key);
         }
+        // lTime > sTime push-back removed — app saves already call push()
+        // directly, so push-back here only causes clock-skew overwrites
       } else {
         state.push(key);
       }
@@ -169,9 +180,8 @@ const CloudSync = (() => {
               localStorage.setItem(key, JSON.stringify(toStore));
             }
             changed = true;
-          } else if (lTime > sTime) {
-            state.push(key);
           }
+          // lTime > sTime push-back removed — prevents clock-skew overwrites
         } else if (localStorage.getItem(key)) {
           state.push(key);
         }
@@ -191,9 +201,8 @@ const CloudSync = (() => {
         if (sTime > lTime || localMissing) {
           localStorage.setItem(rKey, JSON.stringify(sData));
           changed = true;
-        } else if (lTime > sTime) {
-          state.push(rKey);
         }
+        // lTime > sTime push-back removed — prevents clock-skew overwrites
       } else if (localStorage.getItem(rKey)) {
         state.push(rKey);
       }
