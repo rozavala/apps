@@ -29,7 +29,7 @@ const LabExplorer = (() => {
       category: 'earth_science',
       ageMin: 5,
       experiments: [
-        { id: 'cycle', title: 'The Water Cycle',  instruction: 'Interactive water cycle experiment coming soon!' },
+        { id: 'cycle', title: 'The Water Cycle',  instruction: 'Drag the sun to heat the water and create clouds. Then tap the dark clouds to make it rain!' },
       ]
     },
     {
@@ -181,13 +181,12 @@ const LabExplorer = (() => {
     canvas.onpointermove = null;
     canvas.onpointerup = null;
 
-    switch (labId) {
-      case 'colors':
-        _initColorLab();
-        break;
-      default:
-        _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
-        break;
+    if (labId === 'colors' && expId === 'primary') {
+      _initColorLab();
+    } else if (labId === 'water' && expId === 'cycle') {
+      _initWaterLab();
+    } else {
+      _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
   }
 
@@ -205,6 +204,291 @@ const LabExplorer = (() => {
     setTimeout(() => {
       document.getElementById('next-btn').style.display = 'block';
     }, 1000);
+  }
+
+  // ── Water Lab Implementation ──
+  let waterState = {
+    sunX: 0,
+    sunY: 0,
+    sunR: 40,
+    cloudDarkness: 0, // 0 to 1
+    raining: false,
+    waterLevel: 0, // 0 to 1
+    evaporating: false,
+    particles: [],
+    raindrops: [],
+    phase: 0, // 0: Start, 1: Evaporation done, 2: Condensation done, 3: Precipitation done, 4: Collection done
+    animFrame: null
+  };
+
+  function _initWaterLab() {
+    if (waterState.animFrame) cancelAnimationFrame(waterState.animFrame);
+
+    waterState = {
+      sunX: 100,
+      sunY: 100,
+      sunR: 40,
+      cloudDarkness: 0,
+      raining: false,
+      waterLevel: 0.1, // Starts with a little water
+      evaporating: false,
+      particles: [],
+      raindrops: [],
+      phase: 0,
+      animFrame: null
+    };
+
+    let draggingSun = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    canvas.onpointerdown = (e) => {
+      const { mx, my } = _getMousePos(e);
+
+      // Check if tapping sun
+      if (Math.hypot(waterState.sunX - mx, waterState.sunY - my) < waterState.sunR) {
+        draggingSun = true;
+        offsetX = mx - waterState.sunX;
+        offsetY = my - waterState.sunY;
+      }
+
+      // Check if tapping cloud
+      // Cloud roughly bounded by x: 400..600, y: 20..100
+      if (waterState.phase >= 2 && mx > 350 && mx < 550 && my > 10 && my < 110) {
+        if (!waterState.raining) {
+          waterState.raining = true;
+          if (waterState.phase === 2) {
+            waterState.phase = 3;
+            stars++;
+            document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+            _showFeedback('🌧️');
+            if (typeof playSound === 'function') playSound('correct');
+            _addJournalEntry('Precipitation: Heavy clouds drop rain!');
+          }
+        }
+      }
+    };
+
+    canvas.onpointermove = (e) => {
+      if (!draggingSun) return;
+      const { mx, my } = _getMousePos(e);
+      waterState.sunX = Math.max(waterState.sunR, Math.min(canvas.width - waterState.sunR, mx - offsetX));
+      waterState.sunY = Math.max(waterState.sunR, Math.min(canvas.height - waterState.sunR, my - offsetY));
+    };
+
+    canvas.onpointerup = () => {
+      draggingSun = false;
+    };
+
+    canvas.onpointerleave = () => {
+      draggingSun = false;
+    };
+
+    _waterLabLoop();
+  }
+
+  function _waterLabLoop() {
+    // Stop loop if we navigate away from the water lab
+    if (!currentLab || currentLab.id !== 'water') {
+      if (waterState.animFrame) cancelAnimationFrame(waterState.animFrame);
+      return;
+    }
+
+    waterState.animFrame = requestAnimationFrame(_waterLabLoop);
+
+    // Evaporation Check
+    // If sun is close to water surface (water Y is height - height * waterLevel)
+    const waterY = canvas.height - (canvas.height * waterState.waterLevel);
+
+    // If sun Y is near the water and not fully collected yet
+    if (waterState.sunY > waterY - 150 && waterState.waterLevel > 0.05 && waterState.phase < 4) {
+      waterState.evaporating = true;
+      if (Math.random() > 0.6) {
+        waterState.particles.push({
+          x: waterState.sunX - 100 + Math.random() * 200,
+          y: waterY,
+          vy: -1 - Math.random() * 2,
+          r: 2 + Math.random() * 3
+        });
+
+        // Decrease water level as it evaporates
+        if (waterState.phase < 2) {
+          waterState.waterLevel -= 0.0005;
+          if (waterState.waterLevel < 0.05) waterState.waterLevel = 0.05;
+        }
+      }
+      if (waterState.phase === 0) {
+        waterState.phase = 1;
+        stars++;
+        document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+        _showFeedback('🌫️');
+        if (typeof playSound === 'function') playSound('correct');
+        _addJournalEntry('Evaporation: Heat turns water into vapor!');
+      }
+    } else {
+      waterState.evaporating = false;
+    }
+
+    // Update Particles
+    for (let i = waterState.particles.length - 1; i >= 0; i--) {
+      let p = waterState.particles[i];
+      p.y += p.vy;
+      // Drift towards cloud
+      if (p.x < 450) p.x += 1;
+      if (p.x > 500) p.x -= 1;
+
+      // Hit cloud
+      if (p.y < 80 && p.x > 350 && p.x < 550) {
+        waterState.particles.splice(i, 1);
+        waterState.cloudDarkness += 0.005;
+        if (waterState.cloudDarkness >= 1) waterState.cloudDarkness = 1;
+      }
+    }
+
+    // Condensation Milestone
+    if (waterState.cloudDarkness >= 0.8 && waterState.phase === 1) {
+      waterState.phase = 2;
+      stars++;
+      document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+      _showFeedback('☁️');
+      if (typeof playSound === 'function') playSound('correct');
+      _addJournalEntry('Condensation: Vapor cools to form clouds!');
+    }
+
+    // Update Raindrops
+    if (waterState.raining) {
+      if (Math.random() > 0.4) {
+        waterState.raindrops.push({
+          x: 380 + Math.random() * 120,
+          y: 70,
+          vy: 4 + Math.random() * 3
+        });
+      }
+      waterState.cloudDarkness -= 0.003;
+      if (waterState.cloudDarkness < 0) {
+        waterState.cloudDarkness = 0;
+        waterState.raining = false;
+      }
+    }
+
+    for (let i = waterState.raindrops.length - 1; i >= 0; i--) {
+      let r = waterState.raindrops[i];
+      r.y += r.vy;
+      if (r.y >= waterY) {
+        waterState.raindrops.splice(i, 1);
+        waterState.waterLevel += 0.002;
+        if (waterState.waterLevel >= 0.4 && waterState.phase === 3) {
+          waterState.phase = 4;
+          stars++;
+          document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+          _showFeedback('🌊');
+          if (typeof playSound === 'function') playSound('correct');
+          _addJournalEntry('Collection: Water gathers in lakes and oceans!');
+          document.getElementById('next-btn').style.display = 'block';
+          if (typeof ActivityLog !== 'undefined') {
+            ActivityLog.log('Lab Explorer', '💧', 'Completed the Water Cycle experiment!');
+          }
+          _saveProgress();
+        }
+      }
+    }
+
+    _drawWaterLab();
+  }
+
+  function _drawWaterLab() {
+    // Background Sky
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#87CEEB'); // Sky blue
+    grad.addColorStop(1, '#E0F6FF'); // Lighter horizon
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Sun
+    ctx.beginPath();
+    ctx.arc(waterState.sunX, waterState.sunY, waterState.sunR, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFD700'; // Yellow
+    ctx.shadowColor = '#FF8C00';
+    ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.shadowBlur = 0; // reset
+
+    // Sun Rays (animated)
+    const time = Date.now() / 200;
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI / 4) + time * 0.1;
+      ctx.beginPath();
+      ctx.moveTo(waterState.sunX + Math.cos(angle) * (waterState.sunR + 5), waterState.sunY + Math.sin(angle) * (waterState.sunR + 5));
+      ctx.lineTo(waterState.sunX + Math.cos(angle) * (waterState.sunR + 15), waterState.sunY + Math.sin(angle) * (waterState.sunR + 15));
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+
+    // Mountains/Land
+    ctx.fillStyle = '#228B22'; // Forest green
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    ctx.lineTo(0, canvas.height - 100);
+    ctx.quadraticCurveTo(100, canvas.height - 150, 200, canvas.height - 80);
+    ctx.quadraticCurveTo(300, canvas.height - 10, canvas.width, canvas.height - 60);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.fill();
+
+    // Water
+    const waterHeight = canvas.height * waterState.waterLevel;
+    const waterY = canvas.height - waterHeight;
+    ctx.fillStyle = 'rgba(0, 119, 190, 0.8)'; // Ocean blue
+    ctx.fillRect(0, waterY, canvas.width, waterHeight);
+
+    // Water surface reflection
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(0, waterY, canvas.width, 5);
+
+    // Particles (Evaporation)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    for (let p of waterState.particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Raindrops (Precipitation)
+    ctx.strokeStyle = '#4A90E2';
+    ctx.lineWidth = 2;
+    for (let r of waterState.raindrops) {
+      ctx.beginPath();
+      ctx.moveTo(r.x, r.y);
+      ctx.lineTo(r.x + 2, r.y + 6);
+      ctx.stroke();
+    }
+
+    // Cloud
+    // Darkness maps from white (255) to dark grey (100)
+    const cloudColorVal = Math.floor(255 - (155 * waterState.cloudDarkness));
+    ctx.fillStyle = `rgb(${cloudColorVal}, ${cloudColorVal}, ${cloudColorVal})`;
+    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+    ctx.shadowBlur = 10;
+
+    // Cloud shape using overlapping arcs
+    ctx.beginPath();
+    ctx.arc(400, 60, 30, 0, Math.PI * 2);
+    ctx.arc(440, 40, 40, 0, Math.PI * 2);
+    ctx.arc(480, 50, 35, 0, Math.PI * 2);
+    ctx.arc(520, 60, 25, 0, Math.PI * 2);
+    ctx.arc(460, 70, 30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Cloud prompt if ready to rain
+    if (waterState.phase === 2 && !waterState.raining) {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 16px Nunito';
+      ctx.textAlign = 'center';
+      // Bounce effect
+      const offset = Math.sin(Date.now() / 150) * 5;
+      ctx.fillText('Tap Cloud!', 460, 20 + offset);
+    }
   }
 
   // ── Color Lab Implementation ──
