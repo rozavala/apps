@@ -1399,6 +1399,11 @@ function createProfile() {
       profiles.splice(editingIndex, 1);
       saveProfiles(profiles);
 
+      // Overwrite server profiles so deleted profile doesn't reappear on next sync
+      if (typeof CloudSync !== 'undefined' && CloudSync.online && CloudSync.overwriteProfiles) {
+        CloudSync.overwriteProfiles(profiles);
+      }
+
       // Clear active user if it was the deleted one
       const active = getActiveUser();
       if (active && active.name.toLowerCase() === name.toLowerCase()) {
