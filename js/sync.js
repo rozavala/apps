@@ -73,10 +73,14 @@ const CloudSync = (() => {
       }
 
       _updatePill('syncing');
+      const ts = Date.now();
+      const payload = Array.isArray(data)
+        ? { _isList: true, _items: data, _syncedAt: ts }
+        : { ...data, _syncedAt: ts };
       await _fetchWithTimeout(`${SYNC_SERVER}/api/kids/${info.kidKey}/${info.appName}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, _syncedAt: Date.now() })
+        body: JSON.stringify(payload)
       });
       _updatePill('idle');
     } catch (e) {
@@ -106,11 +110,16 @@ const CloudSync = (() => {
         const localMissing = Object.keys(localData).length === 0;
 
         if (sTime > lTime || localMissing) {
-          if (info.appName === 'art') {
-            const merged = { ...serverData, gallery: localData.gallery || [] };
+          let toStore = serverData;
+          // Unwrap array data that was wrapped by push
+          if (serverData._isList && Array.isArray(serverData._items)) {
+            toStore = serverData._items;
+          }
+          if (info.appName === 'art' && !Array.isArray(toStore)) {
+            const merged = { ...toStore, gallery: localData.gallery || [] };
             localStorage.setItem(key, JSON.stringify(merged));
           } else {
-            localStorage.setItem(key, JSON.stringify(serverData));
+            localStorage.setItem(key, JSON.stringify(toStore));
           }
           return true;
         } else if (lTime > sTime) {
@@ -148,11 +157,16 @@ const CloudSync = (() => {
           const localMissing = Object.keys(localData).length === 0;
 
           if (sTime > lTime || localMissing) {
-            if (appName === 'art') {
-              const merged = { ...serverData, gallery: localData.gallery || [] };
+            let toStore = serverData;
+            // Unwrap array data that was wrapped by push
+            if (serverData._isList && Array.isArray(serverData._items)) {
+              toStore = serverData._items;
+            }
+            if (appName === 'art' && !Array.isArray(toStore)) {
+              const merged = { ...toStore, gallery: localData.gallery || [] };
               localStorage.setItem(key, JSON.stringify(merged));
             } else {
-              localStorage.setItem(key, JSON.stringify(serverData));
+              localStorage.setItem(key, JSON.stringify(toStore));
             }
             changed = true;
           } else if (lTime > sTime) {
