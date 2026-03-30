@@ -126,7 +126,7 @@
       if (isGuestUser()) {
         _cleanupGuestData();
       }
-      localStorage.removeItem(ACTIVE_KEY);
+      setActiveUser(null);
       document.getElementById('hub-screen').classList.remove('active');
       document.getElementById('login-screen').style.display = '';
       renderLogin();
@@ -1401,7 +1401,7 @@ function createProfile() {
       // Clear active user if it was the deleted one
       const active = getActiveUser();
       if (active && active.name.toLowerCase() === name.toLowerCase()) {
-        localStorage.removeItem(ACTIVE_KEY);
+        setActiveUser(null);
       }
 
       closeEditModal();
