@@ -41,7 +41,10 @@ const StoryExplorer = (() => {
         {
           en: 'Ciro took a deep breath, opened his wings, and jumped. The wind lifted him up! He was flying!',
           es: 'Ciro respiró profundo, abrió sus alas y saltó. ¡El viento lo levantó! ¡Estaba volando!',
-          vocab: []
+          vocab: [
+            { word: 'breath', wordEs: 'respiro', def: 'Air taken into the lungs.', defEs: 'Aire que se lleva a los pulmones.' },
+            { word: 'jumped', wordEs: 'saltó', def: 'Pushed oneself off the ground.', defEs: 'Se impulsó fuera del suelo.' }
+          ]
         },
       ],
       quiz: [
@@ -67,7 +70,10 @@ const StoryExplorer = (() => {
           en: 'Rayo wore a shiny saddle and carried his huaso across the fields every morning.',
           es: 'Rayo usaba una montura brillante y llevaba a su huaso por los campos cada mañana.',
           vocab: [
-            { word: 'saddle', wordEs: 'montura', def: 'A seat for a rider on a horse.', defEs: 'Un asiento para un jinete en un caballo.' }
+            { word: 'saddle', wordEs: 'montura', def: 'A seat for a rider on a horse.', defEs: 'Un asiento para un jinete en un caballo.' },
+            { word: 'shiny', wordEs: 'brillante', def: 'Reflecting light.', defEs: 'Que refleja la luz.' },
+            { word: 'fields', wordEs: 'campos', def: 'Open areas of land.', defEs: 'Áreas abiertas de tierra.' },
+            { word: 'morning', wordEs: 'mañana', def: 'The early part of the day.', defEs: 'La primera parte del día.' }
           ]
         }
       ],
@@ -85,12 +91,52 @@ const StoryExplorer = (() => {
           en: 'Long ago, near the blue lakes of the south, a giant volcano stood perfectly still.',
           es: 'Hace mucho tiempo, cerca de los lagos azules del sur, un volcán gigante permanecía inmóvil.',
           vocab: [
-            { word: 'volcano', wordEs: 'volcán', def: 'A mountain that can erupt with lava and ash.', defEs: 'Una montaña que puede entrar en erupción con lava y ceniza.' }
+            { word: 'volcano', wordEs: 'volcán', def: 'A mountain that can erupt with lava and ash.', defEs: 'Una montaña que puede entrar en erupción con lava y ceniza.' },
+            { word: 'giant', wordEs: 'gigante', def: 'Extremely large.', defEs: 'Extremadamente grande.' },
+            { word: 'perfectly', wordEs: 'perfectamente', def: 'In a complete or flawless way.', defEs: 'De una manera completa o impecable.' }
+          ]
+        },
+        {
+          en: 'People said it could whisper secrets to the wind.',
+          es: 'La gente decía que podía susurrar secretos al viento.',
+          vocab: [
+            { word: 'whisper', wordEs: 'susurrar', def: 'To speak very softly.', defEs: 'Hablar muy suavemente.' },
+            { word: 'secrets', wordEs: 'secretos', def: 'Things that are kept hidden.', defEs: 'Cosas que se mantienen ocultas.' }
           ]
         }
       ],
       quiz: [
-        { q: 'Where was the volcano located?', qEs: '¿Dónde estaba el volcán?', options: ['The desert', 'Near blue lakes', 'In the city', 'On an island'], optionsEs: ['El desierto', 'Cerca de lagos azules', 'En la ciudad', 'En una isla'], answer: 1 }
+        { q: 'Where was the volcano located?', qEs: '¿Dónde estaba el volcán?', options: ['The desert', 'Near blue lakes', 'In the city', 'On an island'], optionsEs: ['El desierto', 'Cerca de lagos azules', 'En la ciudad', 'En una isla'], answer: 1 },
+        { q: 'What could the volcano do?', qEs: '¿Qué podía hacer el volcán?', options: ['Sing songs', 'Whisper secrets', 'Dance', 'Jump'], optionsEs: ['Cantar canciones', 'Susurrar secretos', 'Bailar', 'Saltar'], answer: 1 }
+      ]
+    },
+    {
+      id: 'pudu_journey',
+      title: 'The Little Pudu\'s Journey',
+      titleEs: 'El Viaje del Pequeño Pudú',
+      tier: 'explorer', ageMin: 6, region: 'south', icon: '🦌',
+      pages: [
+        {
+          en: 'In the deep southern forests of Chile, a tiny deer named Pablito opened his eyes early.',
+          es: 'En los profundos bosques del sur de Chile, un diminuto ciervo llamado Pablito abrió los ojos temprano.',
+          vocab: [
+            { word: 'deer', wordEs: 'ciervo', def: 'A hoofed animal with antlers.', defEs: 'Un animal con pezuñas y cuernos.' },
+            { word: 'forests', wordEs: 'bosques', def: 'Large areas covered with trees.', defEs: 'Grandes áreas cubiertas de árboles.' },
+            { word: 'tiny', wordEs: 'diminuto', def: 'Very small.', defEs: 'Muy pequeño.' }
+          ]
+        },
+        {
+          en: 'He was a pudu, the smallest deer in the world, and he was looking for sweet leaves.',
+          es: 'Era un pudú, el ciervo más pequeño del mundo, y buscaba hojas dulces.',
+          vocab: [
+            { word: 'smallest', wordEs: 'más pequeño', def: 'The least big.', defEs: 'El menos grande.' },
+            { word: 'leaves', wordEs: 'hojas', def: 'The green parts of a tree or plant.', defEs: 'Las partes verdes de un árbol o planta.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What animal is Pablito?', qEs: '¿Qué animal es Pablito?', options: ['A horse', 'A dog', 'A deer', 'A bear'], optionsEs: ['Un caballo', 'Un perro', 'Un ciervo', 'Un oso'], answer: 2 },
+        { q: 'What was Pablito looking for?', qEs: '¿Qué buscaba Pablito?', options: ['Water', 'Sweet leaves', 'His mother', 'A cave'], optionsEs: ['Agua', 'Hojas dulces', 'A su madre', 'Una cueva'], answer: 1 }
       ]
     }
   ];

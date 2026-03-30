@@ -19,7 +19,8 @@ const CHORDS = [
   { name: 'B7', fullName: 'B Dominant 7', tier: 'advanced', frets: [-1, 2, 1, 2, 0, 2], fingers: [0, 2, 1, 3, 0, 4], funFact: '7th chords sound "bluesy" or like they want to move somewhere else.' },
   { name: 'G7', fullName: 'G Dominant 7', tier: 'advanced', frets: [3, 2, 0, 0, 0, 1], fingers: [3, 2, 0, 0, 0, 1], funFact: 'A G chord, but stretched way out to reach the 1st fret!' },
   { name: 'C7', fullName: 'C Dominant 7', tier: 'advanced', frets: [-1, 3, 2, 3, 1, 0], fingers: [0, 3, 2, 4, 1, 0], funFact: 'Add your pinky to a regular C chord to make it a C7.' },
-  { name: 'D7', fullName: 'D Dominant 7', tier: 'advanced', frets: [-1, -1, 0, 2, 1, 2], fingers: [0, 0, 0, 2, 1, 3], funFact: 'It looks like a backwards D Major chord.' }
+  { name: 'D7', fullName: 'D Dominant 7', tier: 'advanced', frets: [-1, -1, 0, 2, 1, 2], fingers: [0, 0, 0, 2, 1, 3], funFact: 'It looks like a backwards D Major chord.' },
+  { name: 'A7', fullName: 'A Dominant 7', tier: 'advanced', frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 0, 2, 0, 3, 0], funFact: 'Like an A Major chord, but with an open G string in the middle.' }
 ];
 
 const SONGS = [
@@ -30,7 +31,8 @@ const SONGS = [
   { id: 'ode', title: 'Ode to Joy', tier: 'intermediate', bpm: 100, progression: [['G', 4], ['G', 4], ['D', 4], ['D', 4], ['Em', 4], ['Em', 4], ['C', 4], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] },
   { id: 'stand', title: 'Stand By Me', tier: 'intermediate', bpm: 110, progression: [['G', 8], ['Em', 8], ['C', 4], ['D', 4], ['G', 8]] },
   { id: 'house', title: 'House of the Rising Sun', tier: 'advanced', bpm: 80, progression: [['Am', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 4], ['C', 4], ['E', 8]] },
-  { id: 'scarborough', title: 'Scarborough Fair', tier: 'advanced', bpm: 90, progression: [['Am', 8], ['Am', 4], ['G', 4], ['Am', 4], ['G', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 8]] }
+  { id: 'scarborough', title: 'Scarborough Fair', tier: 'advanced', bpm: 90, progression: [['Am', 8], ['Am', 4], ['G', 4], ['Am', 4], ['G', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 8]] },
+  { id: 'amazing', title: 'Amazing Grace', tier: 'intermediate', bpm: 100, progression: [['G', 6], ['G', 6], ['C', 6], ['G', 6], ['G', 6], ['G', 6], ['D', 12]] }
 ];
 
 const GuitarJam = (() => {
