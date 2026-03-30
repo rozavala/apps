@@ -204,6 +204,37 @@ function getPlayerStats(userName) {
     if ((gq.totalStars || 0) > 0) { totalStars += gq.totalStars; appsWithStars++; }
   } catch {}
 
+  // ⚡ Bolt Optimization: Cache newly added apps inside `appStats` to avoid
+  // redundant O(N) `localStorage` parsing during dashboard UI rendering loops.
+
+  // Lab Explorer
+  try {
+    const le = JSON.parse(localStorage.getItem(`zs_lab_${key}`)) || {};
+    appStats.lab = le;
+    if ((le.totalStars || 0) > 0) { totalStars += le.totalStars; appsWithStars++; }
+  } catch {}
+
+  // World Explorer
+  try {
+    const we = JSON.parse(localStorage.getItem(`zs_world_${key}`)) || {};
+    appStats.world = we;
+    if ((we.totalStars || 0) > 0) { totalStars += we.totalStars; appsWithStars++; }
+  } catch {}
+
+  // Story Explorer
+  try {
+    const se = JSON.parse(localStorage.getItem(`zs_story_${key}`)) || {};
+    appStats.story = se;
+    if ((se.totalStars || 0) > 0) { totalStars += se.totalStars; appsWithStars++; }
+  } catch {}
+
+  // Quest Adventure
+  try {
+    const qa = JSON.parse(localStorage.getItem(`zs_quest_${key}`)) || {};
+    appStats.quest = qa;
+    if ((qa.totalStars || 0) > 0) { totalStars += qa.totalStars; appsWithStars++; }
+  } catch {}
+
   return { totalStars, appsWithStars, appStats };
 
 }
