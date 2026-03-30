@@ -849,9 +849,9 @@
             ${configured ? `
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
-                  onclick="_syncPushAll()">⬆️ Push All to Cloud</button>
+                  onclick="_syncPushAll(this)">⬆️ Push All to Cloud</button>
                 <button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;"
-                  onclick="_syncPullAll()">⬇️ Pull All from Cloud</button>
+                  onclick="_syncPullAll(this)">⬇️ Pull All from Cloud</button>
               </div>
               <p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">
                 Sync is automatic — progress pushes on save and pulls on login.
