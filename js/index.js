@@ -36,7 +36,7 @@
           <div class="profile-avatar" style="background:${safe.color}22;border-color:${safe.color}">${safe.avatar}</div>
           <div class="profile-name">${safe.name}</div>
           ${p.age ? `<div class="profile-age">Age ${p.age}</div>` : ''}
-          <button class="profile-edit-btn" data-index="${i}" title="Edit ${safe.name}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
+          <button class="profile-edit-btn" data-index="${i}" aria-label="Edit ${safe.name}" title="Edit ${safe.name}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
         `;
 
         card.onclick = (e) => {
@@ -126,7 +126,7 @@
       if (isGuestUser()) {
         _cleanupGuestData();
       }
-      localStorage.removeItem(ACTIVE_KEY);
+      setActiveUser(null);
       document.getElementById('hub-screen').classList.remove('active');
       document.getElementById('login-screen').style.display = '';
       renderLogin();
@@ -1401,7 +1401,7 @@ function createProfile() {
       // Clear active user if it was the deleted one
       const active = getActiveUser();
       if (active && active.name.toLowerCase() === name.toLowerCase()) {
-        localStorage.removeItem(ACTIVE_KEY);
+        setActiveUser(null);
       }
 
       closeEditModal();

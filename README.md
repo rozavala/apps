@@ -21,6 +21,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 - **🌍 World Explorer**: Travel the globe—learn flags, capitals, and landmarks across all continents.
 - **📚 Story Explorer**: Read adventure tales and build vocabulary in English and Spanish.
 - **🧗 Quest Adventure**: An RPG-style quest where your progress in every app unlocks new regions on a world map.
+- **🎯 Guess Quest**: Build deduction skills and vocabulary by guessing hidden words in English and Spanish.
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -48,6 +49,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Guess Quest"!**: Desarrolla habilidades de deducción adivinando palabras ocultas en inglés y español. (Build deduction skills by guessing hidden words in English and Spanish).
 - **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
 - **"Sports Arena" Ya Disponible**: Registra actividades deportivas al aire libre sin usar el tiempo de pantalla. (Log outdoor sports activities without consuming screen time).
 

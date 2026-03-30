@@ -68,7 +68,7 @@
   <!-- ============ LOG A MATCH ============ -->
   <div class="screen" id="screen-log-match">
     <div class="section-header">
-      <button class="back-btn" onclick="goMenu()">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
       <div class="section-title">📝 Log a Match</div>
     </div>
 
@@ -110,7 +110,7 @@
   <!-- ============ LOG AN ACTIVITY ============ -->
   <div class="screen" id="screen-log-activity">
     <div class="section-header">
-      <button class="back-btn" onclick="goMenu()">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
       <div class="section-title">🏃 Log an Activity</div>
     </div>
 
@@ -136,7 +136,7 @@
   <!-- ============ TOURNAMENTS ============ -->
   <div class="screen" id="screen-tournaments">
     <div class="section-header">
-      <button class="back-btn" onclick="goMenu()">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
       <div class="section-title">🏆 Tournaments</div>
     </div>
     <button class="btn-secondary" onclick="showScreen('new-tournament')" style="margin-bottom:16px;">+ New Tournament</button>
@@ -146,7 +146,7 @@
   <!-- ============ NEW TOURNAMENT ============ -->
   <div class="screen" id="screen-new-tournament">
     <div class="section-header">
-      <button class="back-btn" onclick="showScreen('tournaments')">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="showScreen('tournaments')">←</button>
       <div class="section-title">🏆 New Tournament</div>
     </div>
 
@@ -174,7 +174,7 @@
   <!-- ============ TOURNAMENT DETAIL ============ -->
   <div class="screen" id="screen-tournament-detail">
     <div class="section-header">
-      <button class="back-btn" onclick="showScreen('tournaments')">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="showScreen('tournaments')">←</button>
       <div class="section-title" id="tourney-detail-title">Tournament</div>
     </div>
     <div id="tourney-detail-content"></div>
@@ -183,7 +183,7 @@
   <!-- ============ STANDINGS & HISTORY ============ -->
   <div class="screen" id="screen-standings">
     <div class="section-header">
-      <button class="back-btn" onclick="goMenu()">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
       <div class="section-title">📊 Standings & History</div>
     </div>
 
@@ -204,7 +204,7 @@
   <!-- ============ MANAGE SPORTS ============ -->
   <div class="screen" id="screen-manage-sports">
     <div class="section-header">
-      <button class="back-btn" onclick="goMenu()">←</button>
+      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
       <div class="section-title">⚙️ Manage Sports</div>
     </div>
     <div id="sports-list"></div>
@@ -729,7 +729,7 @@
           <span style="font-size:1.4rem;">${sport.icon}</span>
           <span style="flex:1; font-weight:700;">${escHtml(sport.name)}</span>
           <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">${sport.scoreType}</span>
-          ${isCustom ? `<button onclick="removeCustomSportById('${sport.id}')" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:1.1rem;">✕</button>` : ''}
+          ${isCustom ? `<button onclick="removeCustomSportById('${sport.id}')" aria-label="Delete sport" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:1.1rem;">✕</button>` : ''}
         </div>`;
     });
   }
