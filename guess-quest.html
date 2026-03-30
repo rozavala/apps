@@ -33,7 +33,7 @@
     <!-- SCREEN: Game (questions) -->
     <div class="screen" id="screen-game">
       <div class="game-header">
-        <button class="back-btn" onclick="GuessQuest.backToSelect()">←</button>
+        <button class="back-btn" aria-label="Go back" onclick="GuessQuest.backToSelect()">←</button>
         <div class="question-counter" id="question-counter">❓ 0 / 20</div>
         <div class="gq-stars" id="gq-stars">⭐ 0</div>
       </div>
@@ -60,7 +60,7 @@
     <!-- SCREEN: Guess (pick from candidates) -->
     <div class="screen" id="screen-guess">
       <div class="guess-header">
-        <button class="back-btn" onclick="GuessQuest.backToGame()">←</button>
+        <button class="back-btn" aria-label="Go back" onclick="GuessQuest.backToGame()">←</button>
         <h2>What do you think it is?</h2>
       </div>
       <div class="guess-grid" id="guess-grid">
