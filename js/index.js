@@ -731,6 +731,7 @@
         </div>`;
       }).join('');
 
+      content.innerHTML = html;
       document.getElementById('dash-overlay').classList.add('active');
     }
 
