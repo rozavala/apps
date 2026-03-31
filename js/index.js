@@ -281,10 +281,16 @@
         (app.schedId === 'faith' && user.faithVisible !== false)
       );
 
+      // ⚡ Bolt Optimization: Use cached `appStats` object returned by `getPlayerStats`
+      // instead of redundantly calling `JSON.parse(localStorage.getItem(...))` per user iteration.
+      // This eliminates O(N) blocking synchronous I/O operations from the main thread during rendering.
+      const stats = typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} };
+      const appStats = stats.appStats || {};
+
       const noProgress = [];
       visibleApps.forEach(app => {
         try {
-          const data = JSON.parse(localStorage.getItem(app.key)) || {};
+          const data = appStats[app.schedId] || JSON.parse(localStorage.getItem(app.key)) || {};
           let hasProg = false;
           if (app.name === 'Math Galaxy') hasProg = Object.keys(data).length > 0;
           else if (app.name === 'Descubre Chile') hasProg = Object.keys(data).filter(k => k!=='vr' && k!=='memBest').length > 0;

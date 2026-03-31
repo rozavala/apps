@@ -13,3 +13,6 @@
 ## 2024-06-25 - AppStats Caching Gaps Lead to Redundant Parsing
 **Learning:** The previous optimization to cache `localStorage` objects inside the `getPlayerStats` function's returned `appStats` object missed new apps (`Lab Explorer`, `World Explorer`, `Story Explorer`, `Quest Adventure`). Because these apps weren't parsed inside `getPlayerStats()`, the dashboard rendering loop in `js/index.js` repeatedly fell back to `JSON.parse(localStorage.getItem(...))` on every row generation, breaking the O(N) optimization intent.
 **Action:** Always ensure any newly added apps in the suite are integrated into centralized state-aggregating functions (like `getPlayerStats`) to fully leverage the shared `localStorage` caching patterns.
+## 2026-03-31 - O(N) LocalStorage Parse Optimization in getNextChallenge
+**Learning:** Found a redundant synchronous parsing of localStorage inside the getNextChallenge function's rendering loop. This caused blocking JSON parsing for every visible app on the main hub every time the user dashboard loads.
+**Action:** Reused the cached appStats object returned by getPlayerStats() by matching the schedId key, eliminating O(N) redundant localStorage operations.
