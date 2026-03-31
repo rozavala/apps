@@ -138,6 +138,15 @@ const GuitarJam = (() => {
     }
   };
 
+  // Unlock AudioContext on first user gesture (required for iOS Safari)
+  function _warmupAudio() {
+    Audio.init();
+    document.removeEventListener('click', _warmupAudio);
+    document.removeEventListener('touchstart', _warmupAudio);
+  }
+  document.addEventListener('click', _warmupAudio, { once: true });
+  document.addEventListener('touchstart', _warmupAudio, { once: true });
+
 
   // ── State & Progress ──────────────────────────────────────────
   let activeChord = null;
