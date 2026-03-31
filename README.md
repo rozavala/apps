@@ -9,19 +9,22 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 ## 🎮 The App Suite
 
 ### LIVE Apps
-- **🎹 Little Maestro**: Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.
-- **🧮 Math Galaxy**: Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.
-- **🇨🇱 Descubre Chile**: Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.
-- **♟️ Chess Quest**: Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI.
-- **⛪ Fe Explorador**: Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.
-- **🎸 Guitar Jam**: Learn guitar chords, strum along with songs, and train your ear.
-- **🎨 Art Studio**: Draw, paint, and learn famous art styles with guided activities.
-- **🏓 Sports Arena**: Track matches, run tournaments, and log outdoor activities to balance screen time.
-- **🔬 Lab Explorer**: Mix colors, grow plants, and discover how the world works through interactive experiments.
-- **🌍 World Explorer**: Travel the globe—learn flags, capitals, and landmarks across all continents.
-- **📚 Story Explorer**: Read adventure tales and build vocabulary in English and Spanish.
-- **🧗 Quest Adventure**: An RPG-style quest where your progress in every app unlocks new regions on a world map.
-- **🎯 Guess Quest**: Build deduction skills and vocabulary by guessing hidden words in English and Spanish.
+
+| App | Description | Link |
+| --- | --- | --- |
+| **🎹 Little Maestro** | Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians. | [little-maestro.html](little-maestro.html) |
+| **🧮 Math Galaxy** | Blast through math challenges—addition, multiplication, fractions, and more in a space adventure. | [math-galaxy.html](math-galaxy.html) |
+| **🇨🇱 Descubre Chile** | Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes. | [descubre-chile.html](descubre-chile.html) |
+| **♟️ Chess Quest** | Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI. | [chess-quest.html](chess-quest.html) |
+| **⛪ Fe Explorador** | Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes. | [fe-explorador.html](fe-explorador.html) |
+| **🎸 Guitar Jam** | Learn guitar chords, strum along with songs, and train your ear. | [guitar-jam.html](guitar-jam.html) |
+| **🎨 Art Studio** | Draw, paint, and learn famous art styles with guided activities. | [art-studio.html](art-studio.html) |
+| **🏓 Sports Arena** | Track matches, run tournaments, and log outdoor activities to balance screen time. | [sports-arena.html](sports-arena.html) |
+| **🔬 Lab Explorer** | Mix colors, grow plants, and discover how the world works through interactive experiments. | [lab-explorer.html](lab-explorer.html) |
+| **🌍 World Explorer** | Travel the globe—learn flags, capitals, and landmarks across all continents. | [world-explorer.html](world-explorer.html) |
+| **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
+| **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
+| **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
