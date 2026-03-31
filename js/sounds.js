@@ -78,14 +78,27 @@ const SFX = (() => {
     playTone(2000, 0.12, 0.12, 'sine', 0.06);
   }
 
-  // Auto-init AudioContext on first user interaction (autoplay policy)
+  // Auto-init AudioContext on first user interaction (autoplay policy).
+  // Playing a silent buffer upgrades the iOS audio session so it
+  // ignores the silent/ringer switch — just resume() alone is not enough.
   function _warmup() {
-    getCtx();
+    const c = getCtx();
+    try {
+      if (c) {
+        const buf = c.createBuffer(1, 1, c.sampleRate);
+        const src = c.createBufferSource();
+        src.buffer = buf;
+        src.connect(c.destination);
+        src.start(0);
+      }
+    } catch (e) { /* ignore */ }
     document.removeEventListener('click', _warmup);
     document.removeEventListener('touchstart', _warmup);
+    document.removeEventListener('touchend', _warmup);
   }
   document.addEventListener('click', _warmup, { once: true });
   document.addEventListener('touchstart', _warmup, { once: true });
+  document.addEventListener('touchend', _warmup, { once: true });
 
   return { correct, wrong, cheer, click, star };
 })();

@@ -138,14 +138,25 @@ const GuitarJam = (() => {
     }
   };
 
-  // Unlock AudioContext on first user gesture (required for iOS Safari)
+  // Unlock AudioContext on first user gesture (required for iOS Safari).
+  // Playing a silent buffer upgrades the audio session so it ignores
+  // the iPad silent/ringer switch — just resume() alone is not enough.
   function _warmupAudio() {
     Audio.init();
+    try {
+      const buf = Audio.ctx.createBuffer(1, 1, Audio.ctx.sampleRate);
+      const src = Audio.ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(Audio.ctx.destination);
+      src.start(0);
+    } catch (e) { /* ignore */ }
     document.removeEventListener('click', _warmupAudio);
     document.removeEventListener('touchstart', _warmupAudio);
+    document.removeEventListener('touchend', _warmupAudio);
   }
   document.addEventListener('click', _warmupAudio, { once: true });
   document.addEventListener('touchstart', _warmupAudio, { once: true });
+  document.addEventListener('touchend', _warmupAudio, { once: true });
 
 
   // ── State & Progress ──────────────────────────────────────────
