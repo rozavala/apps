@@ -11574,6 +11574,11 @@ document.addEventListener('DOMContentLoaded', () => {
           if (_s.inputMode !== 'piano') return;  // screen mode uses tap, not MIDI
           _handleNoteInput(fullNote);
         });
+
+        MIDIManager.onNoteOff(({ fullNote }) => {
+          if (_s.midiHandlerId !== handlerId) return;
+          if (typeof PianoKeyboard !== 'undefined') PianoKeyboard.clearPlaying(fullNote);
+        });
       }
 
       function _showNoteInstructionBanner() {
@@ -11620,12 +11625,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const expected  = _normalize(rhNotes[_s.noteIndex]?.note || '');
         const played    = _normalize(playedNote);
 
-        // Play audio feedback — screen mode only.
-        // In MIDI (piano) mode the global MIDIManager.onNoteOn handler already
-        // called AudioEngine.playNoteInstant, so we skip it here to avoid a
-        // doubled/echoed note on every keypress.
-        if (_s.inputMode !== 'piano') {
-          AudioEngine.playNoteInstant(played, 90);
+        // Play audio feedback and highlight virtual keyboard
+        // FIX: Always play sound and highlight, because LessonEngine clears global MIDI listeners.
+        AudioEngine.playNoteInstant(played, 90);
+        if (typeof PianoKeyboard !== 'undefined') {
+          PianoKeyboard.highlightPlaying(played);
         }
 
         if (played === expected) {
@@ -11754,10 +11758,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Wire MIDI for play-along (routed through FallingNotes)
-        MIDIManager.onNoteOn(({ fullNote }) => {
+        MIDIManager.onNoteOn(({ fullNote, velocity }) => {
           if (_s.midiHandlerId !== handlerId || _s.phase !== 4) return;
           if (_s.inputMode !== 'piano') return;
+
+          // Play sound and highlight key
+          AudioEngine.playNoteInstant(fullNote, velocity || 90);
+          if (typeof PianoKeyboard !== 'undefined') {
+            PianoKeyboard.highlightPlaying(fullNote);
+          }
+
           if (typeof FallingNotes !== 'undefined') FallingNotes.onNoteInput(fullNote);
+        });
+
+        MIDIManager.onNoteOff(({ fullNote }) => {
+          if (_s.midiHandlerId !== handlerId) return;
+          if (typeof PianoKeyboard !== 'undefined') PianoKeyboard.clearPlaying(fullNote);
         });
 
         // Start metronome after lead-in
@@ -13068,10 +13084,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(_animateClef, 600);
         setTimeout(() => _startRhythm(0), 800);
 
-        // Wire MIDI for Middle C
+        // Wire MIDI for Middle C detection
         const handlerId = Date.now();
         MIDIManager.onNoteOn(({ fullNote }) => {
-          if (fullNote === 'C4') _hitMC('C4');
+          _hitMC(fullNote);
         });
       }
 
