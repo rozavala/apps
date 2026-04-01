@@ -302,6 +302,7 @@
     }
     .emoji-option:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.2); }
     .emoji-option.selected { border-color: var(--purple); box-shadow: 0 0 20px var(--purple-glow); transform: scale(1.15); }
+    .emoji-option:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
 
     /* Age picker */
     .age-picker {
@@ -326,6 +327,7 @@
     }
     .age-option:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); transform: translateY(-1px); }
     .age-option.selected { border-color: var(--purple); color: var(--purple); background: rgba(167,139,250,0.08); box-shadow: 0 0 16px var(--purple-glow); }
+    .age-option:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
     .age-option .age-num { font-size: 1.1rem; display: block; }
     .age-option .age-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; }
 
@@ -345,6 +347,7 @@
     }
     .color-option:hover { transform: scale(1.2); }
     .color-option.selected { border-color: #fff; box-shadow: 0 0 16px rgba(255,255,255,0.3); transform: scale(1.2); }
+    .color-option:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
 
     .modal-actions {
       display: flex;
