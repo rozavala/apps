@@ -45,6 +45,15 @@ Antes de cada push, ejecuta el siguiente comando obligatorio para asegurarte de 
 grep -r -i -E "genero|género|identidad|diversidad|inclusi[oó]n|pronombre|trans |gay|lesbiana|queer|pride|diverso|equidad|justicia social|colonialismo|opres|patriarcado|feminis|woke|diversity|equity|inclusion|gender |lgbt|transgender" --include="*.html" --include="*.js" --include="*.md" .
 ```
 
+## 🤖 Agentes IA y Personas (AI Agents & Personas)
+
+Varios agentes y perfiles de IA asisten en el mantenimiento de este repositorio (Multiple AI agents and personas assist in maintaining this repository):
+- **Documentation Guardian**: Se enfoca en actualizaciones de documentación pequeñas y factuales (Focuses on small, factual documentation updates).
+- **Module Builder**: Construye nuevos módulos asegurando un enfoque offline-first con Vanilla JS (Builds new modules ensuring offline-first Vanilla JS approach).
+- **Bolt (Performance)**: Realiza micro-optimizaciones medibles sin añadir dependencias (Performs measurable micro-optimizations without adding dependencies).
+- **Sentinel (Security)**: Parchea vulnerabilidades críticas rápidamente (Patches critical vulnerabilities quickly).
+- **Palette (UX/A11y)**: Mejora la accesibilidad y UX respetando las clases CSS existentes (Improves accessibility and UX respecting existing CSS classes).
+
 ## 📝 Reglas de Documentación (Documentation Rules)
 
 - **Markdown Vanilla:** Usa únicamente Markdown estándar y sencillo. Debe ser limpio y legible en dispositivos móviles.
