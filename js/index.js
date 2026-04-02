@@ -1125,7 +1125,9 @@
       const el = document.getElementById('age-picker');
       el.innerHTML = '';
       AGE_OPTIONS.forEach(opt => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Select age ${opt.label}`);
         btn.className = 'age-option' + (selectedAge === opt.age ? ' selected' : '');
         btn.innerHTML = `<span class="age-num">${opt.label}</span>`;
         btn.onclick = () => { selectedAge = opt.age; renderAgePicker(); };
@@ -1137,7 +1139,9 @@
       const el = document.getElementById('emoji-picker');
       el.innerHTML = '';
       AVATARS.forEach(a => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Select avatar ${a}`);
         btn.className = 'emoji-option' + (a === selectedEmoji ? ' selected' : '');
         btn.textContent = a;
         btn.onclick = () => { selectedEmoji = a; renderEmojiPicker(); };
@@ -1148,7 +1152,9 @@
       const el = document.getElementById('color-picker');
       el.innerHTML = '';
       COLORS.forEach(c => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Select color ${c}`);
         btn.className = 'color-option' + (c === selectedColor ? ' selected' : '');
         btn.style.background = c;
         btn.onclick = () => { selectedColor = c; renderColorPicker(); };
@@ -1307,7 +1313,9 @@ function createProfile() {
       const el = document.getElementById('edit-age-picker');
       el.innerHTML = '';
       AGE_OPTIONS.forEach(opt => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Select age ${opt.label}`);
         btn.className = 'age-option' + (editAge === opt.age ? ' selected' : '');
         btn.innerHTML = `<span class="age-num">${opt.label}</span>`;
         btn.onclick = () => { editAge = opt.age; _renderEditAgePicker(); };
@@ -1319,7 +1327,9 @@ function createProfile() {
       const el = document.getElementById('edit-emoji-picker');
       el.innerHTML = '';
       AVATARS.forEach(a => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Select avatar ${a}`);
         btn.className = 'emoji-option' + (a === editEmoji ? ' selected' : '');
         btn.textContent = a;
         btn.onclick = () => { editEmoji = a; _renderEditEmojiPicker(); _updateEditPreview(); };
@@ -1331,7 +1341,9 @@ function createProfile() {
       const el = document.getElementById('edit-color-picker');
       el.innerHTML = '';
       COLORS.forEach(c => {
-        const btn = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `Select color ${c}`);
         btn.className = 'color-option' + (c === editColor ? ' selected' : '');
         btn.style.background = c;
         btn.onclick = () => { editColor = c; _renderEditColorPicker(); _updateEditPreview(); };

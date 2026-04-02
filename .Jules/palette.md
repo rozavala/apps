@@ -4,3 +4,6 @@
 ## 2024-05-18 - Missing ARIA Labels on Navigation and Action Buttons
 **Learning:** Icon-only navigation and action buttons (e.g., `.back-btn` with a simple "←" text content, `.profile-edit-btn` with "✏️", and generic `.close-modal` buttons with "✕") are widely used throughout the app suite but consistently lack `aria-label` attributes. This leaves screen readers unable to announce their purpose correctly.
 **Action:** Always provide descriptive `aria-label`s for buttons where the text content is purely an icon, emoji, or symbol (such as `aria-label="Go back"` or `aria-label="Edit Profile"`).
+## 2024-05-18 - Accessible Form Picker Options
+**Learning:** Custom form elements like age, emoji, and color pickers in `.modal-field` containers were built using `<div>`s, which lack inherent semantic meaning, focus states, and screen reader announcements. This meant keyboard users couldn't navigate them and screen readers didn't know what they were.
+**Action:** Always implement individual picker options as semantic `<button type="button">` elements. Add descriptive `aria-label`s to each and ensure `:focus-visible` styles are provided so that they are fully accessible to all users.
