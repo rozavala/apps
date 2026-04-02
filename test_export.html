@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <script>
+        // Mock localStorage
+        window.localStorage = {
+            getItem: (k) => null,
+            setItem: () => {}
+        };
+
+        let __logs = [];
+        const originalParse = JSON.parse;
+        JSON.parse = function(v) {
+            if (typeof v === 'string' && v.includes('{')) {
+                // mock parse
+            }
+            __logs.push("parsed");
+            return originalParse(v);
+        }
+    </script>
+    <script src="js/auth.js"></script>
+    <script src="js/index.js"></script>
+    <script>
+        // Run test logic
+    </script>
+</body>
+</html>
