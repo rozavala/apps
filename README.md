@@ -75,7 +75,7 @@ open index.html
 ### Opción 2: Teléfonos y Tablets (Phones & Tablets)
 
 Para la mejor experiencia en dispositivos móviles:
-1. Sube los archivos a **GitHub Pages** u otro servidor web estático. (Upload the files to GitHub Pages or another static web server).
+1. Sube los archivos a **GitHub Pages** u otro servidor web estático. (Upload the files to GitHub Pages or another static web server). **Tip: In GitHub, go to Settings > Pages > Source: Deploy from a branch > select `main`.**
 2. Abre la URL en el navegador de tu dispositivo móvil. (Open the URL in your mobile browser).
 3. Selecciona **"Agregar a la pantalla de inicio"** (Add to Home Screen) en el menú de opciones de tu navegador. Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
 
