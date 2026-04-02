@@ -86,10 +86,17 @@ const CloudSync = (() => {
       // Write _syncedAt back to localStorage so local & server timestamps match.
       // Prevents stale data from "winning" conflicts via clock skew.
       try {
-        const current = JSON.parse(localStorage.getItem(key));
-        if (current && !Array.isArray(current)) {
-          current._syncedAt = ts;
-          localStorage.setItem(key, JSON.stringify(current));
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const current = JSON.parse(raw);
+          if (Array.isArray(current)) {
+            // For arrays, we can't easily add a property without changing the type
+            // but we can store the sync time in a companion key or handle it during pull.
+            // For now, the pull logic handles lTime=0 for arrays which forces a pull.
+          } else {
+            current._syncedAt = ts;
+            localStorage.setItem(key, JSON.stringify(current));
+          }
         }
       } catch(ignore) {}
 

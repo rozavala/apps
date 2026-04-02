@@ -494,9 +494,18 @@
 
       // Show syncing state while pulling latest data
       if (typeof CloudSync !== 'undefined' && CloudSync.online) {
-        content.innerHTML = '<p style="color:var(--text-muted);text-align:center;">☁️ Syncing latest data…</p>';
+        content.innerHTML = '<div style="text-align:center; padding:40px 20px;"><div class="sync-emoji" style="font-size:3rem; margin-bottom:12px; animation: syncPulse 1s infinite;">🔄</div><p style="color:var(--text-muted); font-weight:700;">Syncing latest activity from cloud…</p></div>';
         document.getElementById('dash-overlay').classList.add('active');
-        try { await CloudSync.pullAllKids(); } catch(e) { console.warn('[Dashboard] Sync pull failed:', e); }
+        try { 
+          await CloudSync.pullAllKids(); 
+        } catch(e) { 
+          console.warn('[Dashboard] Sync pull failed:', e);
+          content.innerHTML += '<p style="color:var(--red); font-size:0.8rem; font-weight:700; margin-top:12px;">⚠️ Sync failed. Showing local data only. Check your connection.</p>';
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      } else if (typeof CloudSync !== 'undefined' && !CloudSync.online) {
+        document.getElementById('dash-overlay').classList.add('active');
+        content.innerHTML = '<p style="color:var(--orange); font-size:0.85rem; font-weight:700; text-align:center; margin-bottom:20px;">☁️ Offline — showing local data only</p>';
       }
 
       const profiles = getProfiles();
@@ -519,10 +528,20 @@
         
         let allRecent = [];
         profiles.forEach(p => {
-          const recent = ActivityLog.getRecent(p.name, 7);
-          recent.forEach(e => allRecent.push({ ...e, kidName: p.name, kidAvatar: p.avatar }));
+          try {
+            const recent = ActivityLog.getRecent(p.name, 7);
+            if (Array.isArray(recent)) {
+              recent.forEach(e => {
+                if (e && e.ts) {
+                  allRecent.push({ ...e, kidName: p.name, kidAvatar: p.avatar });
+                }
+              });
+            }
+          } catch(e) { console.warn(`[Dashboard] Failed to load activity for ${p.name}:`, e); }
         });
-        allRecent.sort((a, b) => b.ts - a.ts); // newest first
+        
+        // Sort newest first, with safety for missing timestamps
+        allRecent.sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
         allRecent = allRecent.slice(0, 20); // max 20
 
         if (allRecent.length === 0) {
