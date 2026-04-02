@@ -11,3 +11,8 @@
 **Vulnerability:** User-provided profile fields, specifically `p.color`, were being injected directly into `style.cssText` or inline `style="..."` attributes without proper CSS context sanitization, allowing for potential CSS injection attacks, especially since data can be synced across devices.
 **Learning:** Even if data is visually styled or assumed to be just a hex code, directly injecting values from `localStorage` into `style` attributes or `cssText` without validation creates a vulnerability. `escHtml` is not sufficient for CSS contexts.
 **Prevention:** Always validate or sanitize color inputs before DOM injection using a strict format checker like `safeColor(c)` which enforces a valid hex code pattern and falls back to a default safe color.
+
+## 2026-10-27 - [Stored XSS in Art Studio Gallery]
+**Vulnerability:** User-provided artwork titles (`art.title`) were injected directly into `innerHTML` strings in `js/art-studio.js` when rendering the gallery (`renderGallery()`). Because artwork metadata is stored in user profiles which can be synced via CloudSync, this represented a stored XSS vulnerability.
+**Learning:** Any user-generated string input, even if localized to a specific app module like Art Studio, can be a stored XSS vector if rendered directly into the DOM, especially given the CloudSync synchronization capability.
+**Prevention:** Consistently apply `escHtml()` to sanitize all user-controlled inputs (such as artwork titles) before interpolating them into HTML strings used for DOM manipulation.

@@ -681,8 +681,8 @@ const ArtStudio = (() => {
     if (p.gallery.length === 0) { grid.innerHTML = '<div class="placeholder-msg" style="grid-column: 1/-1"><h2>Your gallery is empty</h2><p>Draw something and save it!</p></div>'; return; }
     grid.innerHTML = p.gallery.map(art => `
       <div class="gallery-card" onclick="ArtStudio.viewArt(${art.id})">
-        <img src="${art.dataUrl}" class="gallery-thumb" alt="${art.title}">
-        <div class="gallery-info"><div class="gallery-title">${art.title}</div><div class="gallery-date">${new Date(art.date).toLocaleDateString()}</div></div>
+        <img src="${art.dataUrl}" class="gallery-thumb" alt="${escHtml(art.title)}">
+        <div class="gallery-info"><div class="gallery-title">${escHtml(art.title)}</div><div class="gallery-date">${new Date(art.date).toLocaleDateString()}</div></div>
       </div>
     `).join('');
   }
