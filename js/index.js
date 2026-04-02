@@ -35,7 +35,7 @@
         card.innerHTML = `
           <div class="profile-avatar" style="background:${safe.color}22;border-color:${safe.color}">${safe.avatar}</div>
           <div class="profile-name">${safe.name}</div>
-          ${p.age ? `<div class="profile-age">Age ${p.age}</div>` : ''}
+          ${p.age ? `<div class="profile-age">Age ${escHtml(p.age)}</div>` : ''}
           <button class="profile-edit-btn" data-index="${i}" aria-label="Edit ${safe.name}" title="Edit ${safe.name}" onclick="event.stopPropagation(); requestPinThen(() => openEditModal(${i}))">✏️</button>
         `;
 
@@ -551,7 +551,7 @@
           allRecent.forEach(e => {
             const when = _timeAgo(e.ts);
             html += `<div style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px;">
-              <span style="font-size:1.2rem;">${e.icon}</span>
+              <span style="font-size:1.2rem;">${escHtml(e.icon)}</span>
               <div style="flex:1; min-width:0;">
                 <div style="font-weight:700; font-size:0.85rem;">${escHtml(e.kidName)} · ${escHtml(e.app)}</div>
                 <div style="font-size:0.78rem; color:var(--text-muted);">${escHtml(e.desc)}</div>
@@ -755,7 +755,7 @@
             <div>
               <div class="dash-name">${escHtml(p.name)}</div>
               <div style="display:flex; gap:8px; font-size:0.78rem; font-weight:600;">
-                <div class="dash-age">${p.age ? 'Age ' + p.age : ''}</div>
+                <div class="dash-age">${p.age ? 'Age ' + escHtml(p.age) : ''}</div>
                 <div class="dash-rank" style="color:var(--purple);">${rank.icon} ${rank.name}</div>
               </div>
             </div>
@@ -940,13 +940,13 @@
                   ⏰ Used ${timerData.minutesUsed} of ${timerData.maxMinutes} min today
                 </div>
                 <div class="pk-setting">
-                  <label>Daily Time Limit: <span id="val-${i}">${p.maxMinutes || 45}</span> min</label>
-                  <input type="range" min="15" max="120" step="15" value="${p.maxMinutes || 45}" 
+                  <label>Daily Time Limit: <span id="val-${i}">${escHtml(p.maxMinutes || 45)}</span> min</label>
+                  <input type="range" min="15" max="120" step="15" value="${escHtml(p.maxMinutes || 45)}"
                          oninput="updateKidLimit(${i}, this.value)">
                 </div>
                 <div class="pk-setting">
-                  <label>Chess per week: <span id="chess-val-${i}">${p.chessPlaysPerWeek !== undefined ? (p.chessPlaysPerWeek === 7 ? 'Daily' : p.chessPlaysPerWeek === 0 ? 'Off' : p.chessPlaysPerWeek + 'x') : '2x'}</span></label>
-                  <input type="range" min="0" max="7" step="1" value="${p.chessPlaysPerWeek ?? 2}" 
+                  <label>Chess per week: <span id="chess-val-${i}">${p.chessPlaysPerWeek !== undefined ? (p.chessPlaysPerWeek === 7 ? 'Daily' : p.chessPlaysPerWeek === 0 ? 'Off' : escHtml(p.chessPlaysPerWeek) + 'x') : '2x'}</span></label>
+                  <input type="range" min="0" max="7" step="1" value="${escHtml(p.chessPlaysPerWeek ?? 2)}"
                          oninput="updateKidChess(${i}, this.value)">
                 </div>
                 <div class="pk-setting" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
