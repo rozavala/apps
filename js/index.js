@@ -792,23 +792,26 @@
         suite: 'Zavala Serra Apps',
         profiles: profiles.map(p => {
           const key = p.name.toLowerCase().replace(/\s+/g, '_');
+          const stats = typeof getPlayerStats === 'function' ? getPlayerStats(p.name) : { appStats: {} };
+          const appStats = stats.appStats || {};
+
           return {
             name: p.name,
             age: p.age,
-            rank: typeof getExplorerRank === 'function' ? getExplorerRank(p.name) : null,
+            rank: typeof getExplorerRank === 'function' ? getExplorerRank(p.name, stats) : null,
             apps: {
-              math: JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`) || '{}'),
-              chile: JSON.parse(localStorage.getItem(`zs_chile_${key}`) || '{}'),
-              chess: JSON.parse(localStorage.getItem(`zs_chess_${key}`) || '{}'),
-              piano: JSON.parse(localStorage.getItem(`littlemaestro_${key}`) || '{}'),
-              faith: JSON.parse(localStorage.getItem(`zs_fe_${key}`) || '{}'),
-              guitar: JSON.parse(localStorage.getItem(`zs_guitar_${key}`) || '{}'),
-              art: JSON.parse(localStorage.getItem(`zs_art_${key}`) || '{}'),
-              sports: JSON.parse(localStorage.getItem(`zs_sports_${key}`) || '{}'),
-              lab: JSON.parse(localStorage.getItem(`zs_lab_${key}`) || '{}'),
-              world: JSON.parse(localStorage.getItem(`zs_world_${key}`) || '{}'),
-              story: JSON.parse(localStorage.getItem(`zs_story_${key}`) || '{}'),
-              quest: JSON.parse(localStorage.getItem(`zs_quest_${key}`) || '{}'),
+              math: appStats.math || JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`) || '{}'),
+              chile: appStats.chile || JSON.parse(localStorage.getItem(`zs_chile_${key}`) || '{}'),
+              chess: appStats.chess || JSON.parse(localStorage.getItem(`zs_chess_${key}`) || '{}'),
+              piano: appStats.piano || JSON.parse(localStorage.getItem(`littlemaestro_${key}`) || '{}'),
+              faith: appStats.faith || JSON.parse(localStorage.getItem(`zs_fe_${key}`) || '{}'),
+              guitar: appStats.guitar || JSON.parse(localStorage.getItem(`zs_guitar_${key}`) || '{}'),
+              art: appStats.art || JSON.parse(localStorage.getItem(`zs_art_${key}`) || '{}'),
+              sports: appStats.sports || JSON.parse(localStorage.getItem(`zs_sports_${key}`) || '{}'),
+              lab: appStats.lab || JSON.parse(localStorage.getItem(`zs_lab_${key}`) || '{}'),
+              world: appStats.world || JSON.parse(localStorage.getItem(`zs_world_${key}`) || '{}'),
+              story: appStats.story || JSON.parse(localStorage.getItem(`zs_story_${key}`) || '{}'),
+              quest: appStats.quest || JSON.parse(localStorage.getItem(`zs_quest_${key}`) || '{}'),
             }
           };
         })
