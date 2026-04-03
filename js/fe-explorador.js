@@ -73,7 +73,8 @@ const FeManager = (() => {
       bio: 'Nació en Italia. Es conocido por su amor a la naturaleza y a los animales. Fundó la orden de los franciscanos y escribió el Cántico de las Criaturas.',
       questions: [
         { q: '¿Por qué es más conocido San Francisco?', a: ['Amor a la naturaleza', 'Ser un gran rey', 'Inventar el piano'], correct: 0 },
-        { q: '¿En qué país nació?', a: ['Chile', 'Italia', 'España'], correct: 1 }
+        { q: '¿En qué país nació?', a: ['Chile', 'Italia', 'España'], correct: 1 },
+        { q: '¿Qué orden religiosa fundó?', a: ['Los Jesuitas', 'Los Dominicos', 'Los Franciscanos'], correct: 2 }
       ]
     },
     {
@@ -172,7 +173,8 @@ const FeManager = (() => {
       bio: 'Dedicó su vida a ayudar a los niños y jóvenes, enseñándoles oficios y divirtiéndolos con juegos y trucos de magia para hablarles de Dios.',
       questions: [
         { q: '¿A quiénes dedicó su vida San Juan Bosco?', a: ['A los ancianos', 'A los niños y jóvenes', 'A los soldados'], correct: 1 },
-        { q: '¿Qué usaba para divertir a los niños?', a: ['Magia y juegos', 'Barcos de vela', 'Espadas de madera'], correct: 0 }
+        { q: '¿Qué usaba para divertir a los niños?', a: ['Magia y juegos', 'Barcos de vela', 'Espadas de madera'], correct: 0 },
+        { q: '¿A quiénes ayudó principalmente?', a: ['A los soldados', 'A los niños y jóvenes', 'A los ancianos'], correct: 1 }
       ]
     },
     {
@@ -185,6 +187,17 @@ const FeManager = (() => {
         { q: '¿Cuál era el oficio de San José?', a: ['Herrero', 'Carpintero', 'Pastor'], correct: 1 },
         { q: 'San José es el padre adoptivo de...', a: ['Juan', 'Pedro', 'Jesús'], correct: 2 },
         { q: '¿Por qué virtud es conocido San José?', a: ['Ser guerrero', 'Su paciencia y silencio', 'Sus viajes'], correct: 1 }
+      ]
+    },
+    {
+      id: 'juan_dios',
+      name: 'San Juan de Dios',
+      dates: '1495–1550',
+      country: 'España 🇪🇸',
+      bio: 'Dedicó su vida a cuidar enfermos fundando hospitales. Es un ejemplo de caridad y entrega.',
+      questions: [
+        { q: '¿A qué se dedicó principalmente?', a: ['A cuidar enfermos', 'A la guerra', 'Al comercio'], correct: 0 },
+        { q: '¿Qué tipo de institución fundó?', a: ['Escuelas', 'Hospitales', 'Bancos'], correct: 1 }
       ]
     }
   ];
@@ -227,6 +240,12 @@ const FeManager = (() => {
       title: 'Fiesta de Cuasimodo',
       info: 'Se celebra en la zona central el domingo siguiente a Pascua. Los huasos acompañan al sacerdote a caballo para llevar la comunión a los enfermos.',
       q: '¿Cómo acompañan los huasos al sacerdote en Cuasimodo?', a: ['A pie', 'En auto', 'A caballo'], correct: 2
+    },
+    {
+      id: 'andacollo',
+      title: 'Fiesta de Andacollo',
+      info: 'Gran festividad mariana en el norte chico de Chile. Miles de peregrinos y bailes rinden homenaje a la Virgen.',
+      q: '¿Dónde se celebra la Fiesta de Andacollo?', a: ['En el norte chico', 'En Punta Arenas', 'En Santiago'], correct: 0
     }
   ];
 

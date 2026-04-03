@@ -58,6 +58,7 @@ const LearningCheck = (() => {
       { q: 'What desert is in northern Chile?', options: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], answer: 2 },
       { q: 'What is Chile\'s capital city?', options: ['Valparaíso', 'Concepción', 'Santiago', 'Temuco'], answer: 2 },
       { q: 'Who is known as the Father of the Nation in Chile?', options: ['Arturo Prat', 'Bernardo O\'Higgins', 'Pedro de Valdivia', 'José Miguel Carrera'], answer: 1 },
+      { q: 'Who discovered the Strait of Magellan?', options: ['Ferdinand Magellan', 'Christopher Columbus', 'James Cook', 'Vasco da Gama'], answer: 0 },
     ],
     art: [
       { q: 'What are the three primary colors?', options: ['Red, Green, Blue', 'Red, Yellow, Blue', 'Red, Orange, Purple', 'Blue, Green, Yellow'], answer: 1 },
@@ -66,6 +67,7 @@ const LearningCheck = (() => {
       { q: 'Mixing red and blue makes what color?', options: ['Green', 'Orange', 'Purple', 'Brown'], answer: 2 },
       { q: 'What are the secondary colors?', options: ['Red, Blue, Yellow', 'Green, Orange, Purple', 'Black, White, Gray', 'Pink, Brown, Cyan'], answer: 1 },
       { q: 'Mixing red and yellow makes what color?', options: ['Green', 'Orange', 'Purple', 'Brown'], answer: 1 },
+      { q: 'Who painted the Mona Lisa?', options: ['Vincent van Gogh', 'Leonardo da Vinci', 'Pablo Picasso', 'Claude Monet'], answer: 1 },
     ],
     faith: [
       { q: 'What is the first prayer Jesus taught?', options: ['Ave María', 'Padre Nuestro', 'Gloria', 'Credo'], answer: 1 },

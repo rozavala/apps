@@ -22,10 +22,16 @@ const WorldExplorer = (() => {
           facts: [
             { en: 'Chile is the longest north-south country in the world.', es: 'Chile es el país más largo del mundo de norte a sur.' },
             { en: 'The Atacama Desert is the driest place on Earth.', es: 'El desierto de Atacama es el lugar más seco del planeta.' },
-            { en: 'The Moai statues are found on Chile\'s Easter Island.', es: 'Las estatuas Moai se encuentran en la Isla de Pascua de Chile.' }
+            { en: 'The Moai statues are found on Chile\'s Easter Island.', es: 'Las estatuas Moai se encuentran en la Isla de Pascua de Chile.' },
+            { en: 'The national dance of Chile is the Cueca.', es: 'El baile nacional de Chile es la Cueca.' }
           ],
           landmark: { name: 'Easter Island', nameEs: 'Isla de Pascua', emoji: '🗿' },
           animal: { name: 'Andean Condor', nameEs: 'Cóndor Andino', emoji: '🦅' },
+          quiz: [
+            { q: 'What is the capital of Chile?', qEs: '¿Cuál es la capital de Chile?', options: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], optionsEs: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], answer: 2 },
+            { q: 'What desert is in Chile?', qEs: '¿Qué desierto está en Chile?', options: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], optionsEs: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], answer: 2 },
+            { q: 'What bird is on Chile\'s coat of arms?', qEs: '¿Qué ave está en el escudo de Chile?', options: ['Eagle', 'Condor', 'Hawk', 'Falcon'], optionsEs: ['Águila', 'Cóndor', 'Halcón', 'Falcón'], answer: 1 }
+          ]
         },
         {
           id: 'argentina', name: 'Argentina', nameEs: 'Argentina', flag: '🇦🇷',
@@ -38,6 +44,11 @@ const WorldExplorer = (() => {
           ],
           landmark: { name: 'Iguazu Falls', nameEs: 'Cataratas del Iguazú', emoji: '💦' },
           animal: { name: 'Jaguar', nameEs: 'Jaguar', emoji: '🐆' },
+          quiz: [
+            { q: 'What is the capital of Argentina?', qEs: '¿Cuál es la capital de Argentina?', options: ['Buenos Aires', 'Lima', 'Bogotá', 'Santiago'], optionsEs: ['Buenos Aires', 'Lima', 'Bogotá', 'Santiago'], answer: 0 },
+            { q: 'What famous dance originated in Argentina?', qEs: '¿Qué famoso baile se originó en Argentina?', options: ['Salsa', 'Tango', 'Flamenco', 'Samba'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Samba'], answer: 1 },
+            { q: 'What is the tallest peak in the Americas?', qEs: '¿Cuál es el pico más alto de América?', options: ['Everest', 'Aconcagua', 'Kilimanjaro', 'Denali'], optionsEs: ['Everest', 'Aconcagua', 'Kilimanjaro', 'Denali'], answer: 1 }
+          ]
         },
         {
           id: 'brazil', name: 'Brazil', nameEs: 'Brasil', flag: '🇧🇷',
@@ -45,10 +56,16 @@ const WorldExplorer = (() => {
           facts: [
             { en: 'Brazil is the largest country in South America.', es: 'Brasil es el país más grande de América del Sur.' },
             { en: 'The Amazon Rainforest is mostly in Brazil.', es: 'La selva amazónica está mayoritariamente en Brasil.' },
-            { en: 'Brazil has won the most World Cups in soccer history.', es: 'Brasil ha ganado la mayor cantidad de Copas del Mundo en la historia del fútbol.' }
+            { en: 'Brazil has won the most World Cups in soccer history.', es: 'Brasil ha ganado la mayor cantidad de Copas del Mundo en la historia del fútbol.' },
+            { en: 'Portuguese is the official language of Brazil.', es: 'El portugués es el idioma oficial de Brasil.' }
           ],
           landmark: { name: 'Christ the Redeemer', nameEs: 'Cristo Redentor', emoji: '⛪' },
           animal: { name: 'Macaw', nameEs: 'Guacamayo', emoji: '🦜' },
+          quiz: [
+            { q: 'What is the largest country in South America?', qEs: '¿Cuál es el país más grande de América del Sur?', options: ['Argentina', 'Peru', 'Brazil', 'Colombia'], optionsEs: ['Argentina', 'Perú', 'Brasil', 'Colombia'], answer: 2 },
+            { q: 'What language is spoken in Brazil?', qEs: '¿Qué idioma se habla en Brasil?', options: ['Spanish', 'Portuguese', 'English', 'French'], optionsEs: ['Español', 'Portugués', 'Inglés', 'Francés'], answer: 1 },
+            { q: 'Which rainforest is mostly in Brazil?', qEs: '¿Qué selva está mayoritariamente en Brasil?', options: ['Congo', 'Amazon', 'Daintree', 'Valdivian'], optionsEs: ['Congo', 'Amazonas', 'Daintree', 'Valdiviana'], answer: 1 }
+          ]
         },
         {
           id: 'peru', name: 'Peru', nameEs: 'Perú', flag: '🇵🇪',
@@ -57,9 +74,16 @@ const WorldExplorer = (() => {
             { en: 'Peru was the home of the ancient Inca Empire.', es: 'Perú fue el hogar del antiguo Imperio Inca.' },
             { en: 'Machu Picchu is a famous ancient city in the Andes.', es: 'Machu Picchu es una famosa ciudad antigua en los Andes.' },
             { en: 'Peru has over 3,000 varieties of potatoes.', es: 'Perú tiene más de 3.000 variedades de papas.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Machu Picchu', nameEs: 'Machu Picchu', emoji: '⛰️' },
           animal: { name: 'Llama', nameEs: 'Llama', emoji: '🦙' },
+          quiz: [
+            { q: 'What was the ancient empire in Peru?', qEs: '¿Cuál fue el antiguo imperio en Perú?', options: ['Aztec', 'Inca', 'Maya', 'Olmec'], optionsEs: ['Azteca', 'Inca', 'Maya', 'Olmeca'], answer: 1 },
+            { q: 'What is the capital of Peru?', qEs: '¿Cuál es la capital de Perú?', options: ['Lima', 'Cusco', 'Arequipa', 'Trujillo'], optionsEs: ['Lima', 'Cusco', 'Arequipa', 'Trujillo'], answer: 0 },
+            { q: 'What famous animal lives in the Andes of Peru?', qEs: '¿Qué famoso animal vive en los Andes de Perú?', options: ['Llama', 'Tiger', 'Elephant', 'Kangaroo'], optionsEs: ['Llama', 'Tigre', 'Elefante', 'Canguro'], answer: 0 }
+          ]
         },
         {
           id: 'colombia', name: 'Colombia', nameEs: 'Colombia', flag: '🇨🇴',
@@ -68,9 +92,16 @@ const WorldExplorer = (() => {
             { en: 'Colombia is the only South American country with coastlines on both the Pacific and Atlantic oceans.', es: 'Colombia es el único país sudamericano con costas en el Pacífico y el Atlántico.' },
             { en: 'Colombia produces more emeralds than any other country.', es: 'Colombia produce más esmeraldas que cualquier otro país.' },
             { en: 'The Amazon River begins in Colombia.', es: 'El río Amazonas comienza en Colombia.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Cartagena Old City', nameEs: 'Ciudad Vieja de Cartagena', emoji: '🏰' },
           animal: { name: 'Spectacled Bear', nameEs: 'Oso de Anteojos', emoji: '🐻' },
+          quiz: [
+            { q: 'What is the capital of Colombia?', qEs: '¿Cuál es la capital de Colombia?', options: ['Bogotá', 'Medellín', 'Cali', 'Cartagena'], optionsEs: ['Bogotá', 'Medellín', 'Cali', 'Cartagena'], answer: 0 },
+            { q: 'Colombia is famous for producing what gem?', qEs: '¿Colombia es famosa por producir qué gema?', options: ['Diamond', 'Ruby', 'Emerald', 'Sapphire'], optionsEs: ['Diamante', 'Rubí', 'Esmeralda', 'Zafiro'], answer: 2 },
+            { q: 'Which oceans does Colombia touch?', qEs: '¿Qué océanos toca Colombia?', options: ['Atlantic only', 'Pacific only', 'Atlantic and Pacific', 'Indian'], optionsEs: ['Solo Atlántico', 'Solo Pacífico', 'Atlántico y Pacífico', 'Índico'], answer: 2 }
+          ]
         },
         {
           id: 'venezuela', name: 'Venezuela', nameEs: 'Venezuela', flag: '🇻🇪',
@@ -79,9 +110,16 @@ const WorldExplorer = (() => {
             { en: 'Angel Falls in Venezuela is the tallest waterfall in the world at 979 meters.', es: 'El Salto Ángel en Venezuela es la cascada más alta del mundo con 979 metros.' },
             { en: 'Venezuela has one of the largest oil reserves in the world.', es: 'Venezuela tiene una de las reservas de petróleo más grandes del mundo.' },
             { en: 'Lake Maracaibo is one of the oldest lakes on Earth.', es: 'El Lago de Maracaibo es uno de los lagos más antiguos de la Tierra.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Angel Falls', nameEs: 'Salto Ángel', emoji: '💧' },
           animal: { name: 'Capybara', nameEs: 'Capibara', emoji: '🐹' },
+          quiz: [
+            { q: 'What is the capital of Venezuela?', qEs: '¿Cuál es la capital de Venezuela?', options: ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto'], optionsEs: ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto'], answer: 0 },
+            { q: 'What is the world\'s highest waterfall located in Venezuela?', qEs: '¿Cuál es la cascada más alta del mundo ubicada en Venezuela?', options: ['Niagara', 'Angel Falls', 'Iguazu', 'Victoria'], optionsEs: ['Niágara', 'Salto Ángel', 'Iguazú', 'Victoria'], answer: 1 },
+            { q: 'What is the official language of Venezuela?', qEs: '¿Cuál es el idioma oficial de Venezuela?', options: ['English', 'Spanish', 'Portuguese', 'French'], optionsEs: ['Inglés', 'Español', 'Portugués', 'Francés'], answer: 1 }
+          ]
         },
         {
           id: 'ecuador', name: 'Ecuador', nameEs: 'Ecuador', flag: '🇪🇨',
@@ -90,9 +128,16 @@ const WorldExplorer = (() => {
             { en: 'Ecuador is named after the Equator, which runs through it.', es: 'Ecuador lleva el nombre del Ecuador, que lo atraviesa.' },
             { en: 'The Galápagos Islands belong to Ecuador.', es: 'Las Islas Galápagos pertenecen a Ecuador.' },
             { en: 'Quito is one of the highest capital cities in the world.', es: 'Quito es una de las capitales más altas del mundo.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Galápagos Islands', nameEs: 'Islas Galápagos', emoji: '🐢' },
           animal: { name: 'Giant Tortoise', nameEs: 'Tortuga Gigante', emoji: '🐢' },
+          quiz: [
+            { q: 'What islands belong to Ecuador?', qEs: '¿Qué islas pertenecen a Ecuador?', options: ['Canary', 'Galapagos', 'Falkland', 'Azores'], optionsEs: ['Canarias', 'Galápagos', 'Malvinas', 'Azores'], answer: 1 },
+            { q: 'What is the capital of Ecuador?', qEs: '¿Cuál es la capital de Ecuador?', options: ['Quito', 'Guayaquil', 'Cuenca', 'Loja'], optionsEs: ['Quito', 'Guayaquil', 'Cuenca', 'Loja'], answer: 0 },
+            { q: 'Where is Ecuador located?', qEs: '¿Dónde está ubicado Ecuador?', options: ['On the Prime Meridian', 'On the Equator', 'At the North Pole', 'At the South Pole'], optionsEs: ['En el Meridiano de Greenwich', 'En el Ecuador', 'En el Polo Norte', 'En el Polo Sur'], answer: 1 }
+          ]
         },
         {
           id: 'bolivia', name: 'Bolivia', nameEs: 'Bolivia', flag: '🇧🇴',
@@ -101,9 +146,16 @@ const WorldExplorer = (() => {
             { en: 'Bolivia has two capital cities: Sucre and La Paz.', es: 'Bolivia tiene dos capitales: Sucre y La Paz.' },
             { en: 'The Salar de Uyuni is the largest salt flat in the world.', es: 'El Salar de Uyuni es el salar más grande del mundo.' },
             { en: 'Lake Titicaca, shared with Peru, is the highest navigable lake.', es: 'El Lago Titicaca, compartido con Perú, es el lago navegable más alto.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Salar de Uyuni', nameEs: 'Salar de Uyuni', emoji: '🏔️' },
           animal: { name: 'Llama', nameEs: 'Llama', emoji: '🦙' },
+          quiz: [
+            { q: 'Bolivia has two capitals: Sucre and...?', qEs: 'Bolivia tiene dos capitales: Sucre y...?', options: ['La Paz', 'Santa Cruz', 'Cochabamba', 'Potosí'], optionsEs: ['La Paz', 'Santa Cruz', 'Cochabamba', 'Potosí'], answer: 0 },
+            { q: 'What famous salt flat is in Bolivia?', qEs: '¿Qué famoso salar está en Bolivia?', options: ['Uyuni', 'Atacama', 'Bonneville', 'Makgadikgadi'], optionsEs: ['Uyuni', 'Atacama', 'Bonneville', 'Makgadikgadi'], answer: 0 },
+            { q: 'Is Bolivia landlocked?', qEs: '¿Es Bolivia un país sin salida al mar?', options: ['Yes', 'No', 'Partially', 'Only in winter'], optionsEs: ['Sí', 'No', 'Parcialmente', 'Solo en invierno'], answer: 0 }
+          ]
         },
         {
           id: 'paraguay', name: 'Paraguay', nameEs: 'Paraguay', flag: '🇵🇾',
@@ -112,9 +164,16 @@ const WorldExplorer = (() => {
             { en: 'Paraguay is one of only two landlocked countries in South America.', es: 'Paraguay es uno de los dos países sin costa en Sudamérica.' },
             { en: 'The Itaipú Dam on the Paraguay-Brazil border is one of the largest hydroelectric dams.', es: 'La represa de Itaipú en la frontera Paraguay-Brasil es una de las más grandes del mundo.' },
             { en: 'Most Paraguayans speak both Spanish and Guaraní.', es: 'La mayoría de los paraguayos hablan español y guaraní.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Itaipú Dam', nameEs: 'Represa de Itaipú', emoji: '🌊' },
           animal: { name: 'Toucan', nameEs: 'Tucán', emoji: '🦜' },
+          quiz: [
+            { q: 'What is the capital of Paraguay?', qEs: '¿Cuál es la capital de Paraguay?', options: ['Asunción', 'Ciudad del Este', 'Encarnación', 'Luque'], optionsEs: ['Asunción', 'Ciudad del Este', 'Encarnación', 'Luque'], answer: 0 },
+            { q: 'Paraguay is a bilingual nation. What are the languages?', qEs: 'Paraguay es una nación bilingüe. ¿Cuáles son los idiomas?', options: ['Spanish & English', 'Spanish & Guarani', 'Portuguese & Guarani', 'Spanish & French'], optionsEs: ['Español e Inglés', 'Español y Guaraní', 'Portugués y Guaraní', 'Español y Francés'], answer: 1 },
+            { q: 'Is Paraguay landlocked?', qEs: '¿Paraguay es un país sin salida al mar?', options: ['Yes', 'No', 'It has one coast', 'It is an island'], optionsEs: ['Sí', 'No', 'Tiene una costa', 'Es una isla'], answer: 0 }
+          ]
         },
         {
           id: 'uruguay', name: 'Uruguay', nameEs: 'Uruguay', flag: '🇺🇾',
@@ -123,9 +182,16 @@ const WorldExplorer = (() => {
             { en: 'Uruguay hosted and won the first FIFA World Cup in 1930.', es: 'Uruguay fue sede y ganador de la primera Copa del Mundo FIFA en 1930.' },
             { en: 'Uruguay is one of the smallest countries in South America.', es: 'Uruguay es uno de los países más pequeños de Sudamérica.' },
             { en: 'Nearly half of all Uruguayans live in Montevideo.', es: 'Casi la mitad de todos los uruguayos viven en Montevideo.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Colonia del Sacramento', nameEs: 'Colonia del Sacramento', emoji: '🏛️' },
           animal: { name: 'Southern Lapwing', nameEs: 'Tero', emoji: '🐦' },
+          quiz: [
+            { q: 'What is the capital of Uruguay?', qEs: '¿Cuál es la capital de Uruguay?', options: ['Montevideo', 'Salto', 'Paysandú', 'Maldonado'], optionsEs: ['Montevideo', 'Salto', 'Paysandú', 'Maldonado'], answer: 0 },
+            { q: 'Which ocean borders Uruguay?', qEs: '¿Qué océano bordea Uruguay?', options: ['Pacific', 'Atlantic', 'Indian', 'Arctic'], optionsEs: ['Pacífico', 'Atlántico', 'Índico', 'Ártico'], answer: 1 },
+            { q: 'What is a popular drink in Uruguay?', qEs: '¿Qué bebida es popular en Uruguay?', options: ['Coffee', 'Tea', 'Mate', 'Juice'], optionsEs: ['Café', 'Té', 'Mate', 'Jugo'], answer: 2 }
+          ]
         },
         {
           id: 'guyana', name: 'Guyana', nameEs: 'Guyana', flag: '🇬🇾',
@@ -134,9 +200,16 @@ const WorldExplorer = (() => {
             { en: 'Guyana is the only English-speaking country in South America.', es: 'Guyana es el único país de habla inglesa en Sudamérica.' },
             { en: 'About 80% of Guyana is covered by tropical rainforest.', es: 'Cerca del 80% de Guyana está cubierto por selva tropical.' },
             { en: 'Kaieteur Falls is one of the most powerful waterfalls in the world.', es: 'Las Cataratas Kaieteur son una de las cascadas más poderosas del mundo.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Kaieteur Falls', nameEs: 'Cataratas Kaieteur', emoji: '💦' },
           animal: { name: 'Giant Otter', nameEs: 'Nutria Gigante', emoji: '🦦' },
+          quiz: [
+            { q: 'What is the official language of Guyana?', qEs: '¿Cuál es el idioma oficial de Guyana?', options: ['Spanish', 'English', 'French', 'Dutch'], optionsEs: ['Español', 'Inglés', 'Francés', 'Holandés'], answer: 1 },
+            { q: 'What is the capital of Guyana?', qEs: '¿Cuál es la capital de Guyana?', options: ['Georgetown', 'Linden', 'New Amsterdam', 'Bartica'], optionsEs: ['Georgetown', 'Linden', 'New Amsterdam', 'Bartica'], answer: 0 },
+            { q: 'What famous waterfall is in Guyana?', qEs: '¿Qué famosa cascada está en Guyana?', options: ['Angel', 'Niagara', 'Kaieteur', 'Iguazu'], optionsEs: ['Ángel', 'Niágara', 'Kaieteur', 'Iguazú'], answer: 2 }
+          ]
         },
         {
           id: 'suriname', name: 'Suriname', nameEs: 'Surinam', flag: '🇸🇷',
@@ -145,9 +218,16 @@ const WorldExplorer = (() => {
             { en: 'Suriname is the smallest country in South America.', es: 'Surinam es el país más pequeño de Sudamérica.' },
             { en: 'Dutch is the official language of Suriname.', es: 'El holandés es el idioma oficial de Surinam.' },
             { en: 'Over 90% of Suriname is covered by rainforest.', es: 'Más del 90% de Surinam está cubierto por selva tropical.' }
+,
+            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
           ],
           landmark: { name: 'Central Suriname Reserve', nameEs: 'Reserva Central de Surinam', emoji: '🌳' },
           animal: { name: 'Harpy Eagle', nameEs: 'Águila Harpía', emoji: '🦅' },
+          quiz: [
+            { q: 'What is the official language of Suriname?', qEs: '¿Cuál es el idioma oficial de Surinam?', options: ['Spanish', 'English', 'French', 'Dutch'], optionsEs: ['Español', 'Inglés', 'Francés', 'Holandés'], answer: 3 },
+            { q: 'What is the capital of Suriname?', qEs: '¿Cuál es la capital de Surinam?', options: ['Paramaribo', 'Lelydorp', 'Nieuw Nickerie', 'Moengo'], optionsEs: ['Paramaribo', 'Lelydorp', 'Nieuw Nickerie', 'Moengo'], answer: 0 },
+            { q: 'Suriname is located on which continent?', qEs: '¿Surinam está ubicado en qué continente?', options: ['Africa', 'Europe', 'South America', 'Asia'], optionsEs: ['África', 'Europa', 'América del Sur', 'Asia'], answer: 2 }
+          ]
         },
       ]
     },
@@ -173,7 +253,24 @@ const WorldExplorer = (() => {
       }
     ] },
     { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [] },
-    { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [] },
+    { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [
+      {
+        id: 'egypt', name: 'Egypt', nameEs: 'Egipto', flag: '🇪🇬',
+        capital: 'Cairo', capitalEs: 'El Cairo',
+        facts: [
+          { en: 'The Pyramids of Giza are in Egypt.', es: 'Las pirámides de Guiza están en Egipto.' },
+          { en: 'The Nile is the longest river in Africa.', es: 'El Nilo es el río más largo de África.' },
+          { en: 'Egypt has a rich ancient history.', es: 'Egipto tiene una rica historia antigua.' }
+        , { en: 'Arabic is the official language.', es: 'El árabe es el idioma oficial.' } ],
+        landmark: { name: 'Pyramids', nameEs: 'Pirámides', emoji: '🔺' },
+        animal: { name: 'Camel', nameEs: 'Camello', emoji: '🐫' },
+        quiz: [
+          { q: 'What river flows through Egypt?', qEs: '¿Qué río fluye por Egipto?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], optionsEs: ['Amazonas', 'Nilo', 'Yangtsé', 'Misisipi'], answer: 1 },
+          { q: 'What famous monument is in Egypt?', qEs: '¿Qué monumento famoso está en Egipto?', options: ['Colosseum', 'Eiffel Tower', 'Pyramids', 'Taj Mahal'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Pirámides', 'Taj Mahal'], answer: 2 },
+          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0 }
+        ]
+      }
+    ] },
     { id: 'asia', name: 'Asia', nameEs: 'Asia', icon: '🌏', color: '#F59E0B', countries: [] },
     { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [] }
   ];

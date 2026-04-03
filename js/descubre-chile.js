@@ -151,13 +151,10 @@ const TOPICS=[
   {id:'volcanes_chile',icon:'🌋',name:'Los Volcanes de Chile',stories:[
     {t:'🌋 Un país de volcanes',p:'Chile está en el Cinturón de Fuego del Pacífico. Hay más de 2.000 volcanes, y muchos están activos.',f:'El volcán Villarrica tiene un lago de lava en su cráter.'}
   ]},
-  {id:'astronomia',icon:'🔭',name:'Astronomía en Chile',stories:[
-    {t:'✨ Cielos Claros',p:'El norte de Chile tiene uno de los cielos más despejados y secos del mundo, ideal para la observación espacial.',f:'Alrededor del 70% de la infraestructura astronómica del mundo está o estará en Chile.'},
-    {t:'📡 Observatorio ALMA',p:'En el desierto de Atacama se encuentra ALMA, un conjunto de 66 antenas que trabajan juntas para observar el universo.',f:'ALMA se encuentra a más de 5.000 metros sobre el nivel del mar.'}
-  ]},
-  {id:'cocina',icon:'🍲',name:'La Cocina Tradicional',stories:[
-    {t:'🌽 El Pastel de Choclo',p:'Un plato tradicional hecho con masa de maíz y relleno de pino (carne), pollo, huevo y aceitunas. Se hornea en paila de greda.',f:'Es uno de los platos favoritos del verano chileno.'},
-    {t:'🍅 El Pebre',p:'Una salsa fresca con tomate, cebolla, cilantro y ají, perfecta para acompañar el pan o las carnes.',f:'Nunca falta en la mesa durante las celebraciones o asados.'}
+  // PRUNED [2026-04-03]: Removed 'astronomia' and 'cocina' to make room for 'fiestas_patrias' and stay within MAX 12 limit.
+  {id:'fiestas_patrias',icon:'🪁',name:'Fiestas Patrias',stories:[
+    {t:'🇨🇱 El 18 de Septiembre',p:'Celebramos el inicio de nuestra independencia. Las familias se reúnen en las fondas para comer, bailar y celebrar.',f:'En esta fecha se declaran feriados irrenunciables para celebrar.'},
+    {t:'💃 La Cueca',p:'Es el baile nacional. Representa el cortejo del gallo y la gallina, y se baila agitando pañuelos al aire.',f:'Fue declarada baile nacional de Chile en el año 1979.'}
   ]}
 ];
 let curTopic=null;
@@ -295,7 +292,10 @@ const QB={
     {q:'¿Qué animal es común encontrar en la Antártica?',a:'Pingüino',o:['Pingüino','Oso Polar','León','Mono'], tier:'beginner'},
     {q:'¿Cómo se llama el poblado chileno en la Antártica que tiene una escuela?',a:'Villa Las Estrellas',o:['Villa Las Estrellas','Punta Arenas','Puerto Williams','Base Prat'], tier:'advanced'},
     {q:'¿Cuál es la característica principal del clima antártico?',a:'Frío y seco',o:['Frío y seco','Caluroso y húmedo','Lluvioso','Templado'], tier:'beginner'},
-    {q:'¿Qué estudian principalmente los científicos en la Antártica?',a:'El clima y la fauna',o:['El clima y la fauna','La agricultura','Los bosques','La minería de oro'], tier:'intermediate'}
+    {q:'¿Qué estudian principalmente los científicos en la Antártica?',a:'El clima y la fauna',o:['El clima y la fauna','La agricultura','Los bosques','La minería de oro'], tier:'intermediate'},
+    {q:'¿Qué tratado regula la Antártica?',a:'Tratado Antártico',o:['Tratado Antártico','Tratado de Paz','Pacto del Sur','Acuerdo Polar'], tier:'advanced'},
+    {q:'¿Hay osos polares en la Antártica?',a:'No',o:['No','Sí','Solo en invierno','Solo en verano'], tier:'beginner'},
+    {q:'¿Qué porcentaje de agua dulce del mundo está en la Antártica?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'expert'}
   ],
   indigenous:[
     {q:'¿Qué pueblo originario desarrolló la cerámica con diseños geométricos?',a:'Los Diaguitas',o:['Los Diaguitas','Los Mapuches','Los Chonos','Los Selknam'], tier:'advanced'},
@@ -370,7 +370,10 @@ const QB={
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
     {q:'¿Dónde habita principalmente la vicuña?',a:'A gran altitud en los Andes',o:['A gran altitud en los Andes','En la costa del Pacífico','En los bosques del sur','En la selva lluviosa'], tier:'intermediate'},
     {q:'¿Qué animal tiene una de las lanas más finas y valiosas?',a:'La vicuña',o:['La vicuña','La oveja común','El guanaco','El zorro'], tier:'advanced'},
-    {q:'¿A qué velocidad puede correr un guanaco?',a:'Casi 60 km/h',o:['Casi 60 km/h','Unos 10 km/h','Más de 100 km/h','30 km/h'], tier:'expert'}
+    {q:'¿A qué velocidad puede correr un guanaco?',a:'Casi 60 km/h',o:['Casi 60 km/h','Unos 10 km/h','Más de 100 km/h','30 km/h'], tier:'expert'},
+    {q:'¿Qué animal es el pudú?',a:'Un pequeño ciervo',o:['Un pequeño ciervo','Un roedor','Un ave','Un tipo de zorro'], tier:'beginner'},
+    {q:'¿Dónde vive principalmente el pudú?',a:'En el sur de Chile',o:['En el sur de Chile','En el desierto','En la Isla de Pascua','En Santiago'], tier:'intermediate'},
+    {q:'¿Qué animal marino se puede ver en las costas chilenas?',a:'El lobo marino',o:['El lobo marino','El oso polar','La morsa','El manatí'], tier:'beginner'}
   ],
   volcanes_chile:[
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
@@ -378,17 +381,11 @@ const QB={
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
     {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'}
   ],
-  astronomia:[
-    {q:'¿Qué parte de Chile es ideal para ver las estrellas?',a:'El Norte',o:['El Norte','El Sur','El Centro','Isla de Pascua'], tier:'beginner'},
-    {q:'¿Qué es ALMA?',a:'Un conjunto de antenas',o:['Un conjunto de antenas','Un telescopio de lentes','Un satélite espacial','Un cohete'], tier:'intermediate'},
-    {q:'¿Aproximadamente cuántos metros sobre el nivel del mar está ALMA?',a:'5.000 metros',o:['5.000 metros','1.000 metros','10.000 metros','100 metros'], tier:'expert'},
-    {q:'¿Qué porcentaje de la infraestructura astronómica mundial se concentra en Chile?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'advanced'}
-  ],
-  cocina:[
-    {q:'¿En qué tipo de plato se hornea el pastel de choclo?',a:'Paila de greda',o:['Paila de greda','Olla de acero','Plato de vidrio','Sartén de teflón'], tier:'intermediate'},
-    {q:'¿Cuál es el ingrediente principal de la masa del pastel de choclo?',a:'Maíz',o:['Maíz','Trigo','Papas','Zanahorias'], tier:'beginner'},
-    {q:'¿Qué salsa fresca acompaña típicamente el pan o carnes en Chile?',a:'Pebre',o:['Pebre','Kétchup','Mayonesa','Mostaza'], tier:'beginner'},
-    {q:'¿Qué ingredientes lleva típicamente el pebre?',a:'Tomate, cebolla, cilantro y ají',o:['Tomate, cebolla, cilantro y ají','Queso, crema, cebolla','Ajo, aceite y vinagre','Porotos, choclo, zapallo'], tier:'advanced'}
+  fiestas_patrias:[
+    {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},
+    {q:'¿Qué baile tradicional se baila en las fondas?',a:'La Cueca',o:['La Cueca','La Cumbia','El Tango','El Reggaetón'], tier:'beginner'},
+    {q:'¿En qué año se declaró a la Cueca como baile nacional?',a:'1979',o:['1979','1810','1990','2000'], tier:'expert'},
+    {q:'¿Qué animal representa el cortejo de la Cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Cóndor y águila','Puma y huemul','Caballo y yegua'], tier:'intermediate'}
   ]
 };
 
