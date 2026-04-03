@@ -160,10 +160,11 @@
       
       let totalStars = 0;
       let rank = { icon: '🛸', name: 'Cadet' };
+      let precalcStats = null;
       if (typeof getPlayerStats === 'function') {
-        const stats = getPlayerStats(user.name);
-        totalStars = stats.totalStars;
-        rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name, stats) : { icon: '🛸', name: 'Cadet' };
+        precalcStats = getPlayerStats(user.name);
+        totalStars = precalcStats.totalStars;
+        rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name, precalcStats) : { icon: '🛸', name: 'Cadet' };
       } else {
         totalStars = typeof getTotalStars === 'function' ? getTotalStars(user.name) : 0;
         rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name) : { icon: '🛸', name: 'Cadet' };
@@ -203,10 +204,10 @@
       }
 
       renderAppCards(user);
-      updateStatsCards(user);
+      updateStatsCards(user, precalcStats);
 
       // Render Next Challenge
-      const challenge = getNextChallenge(user);
+      const challenge = getNextChallenge(user, precalcStats);
       if (els.challenge && challenge) {
         els.challenge.innerHTML = `
           <div class="next-challenge" onclick="${challenge.href ? `location.href='${challenge.href}'` : ''}" 
@@ -249,7 +250,7 @@
       }, 3000);
     }
 
-    function getNextChallenge(user) {
+    function getNextChallenge(user, precalculatedStats = null) {
       if (!user) user = getActiveUser();
       if (!user) return null;
       const key = user.name.toLowerCase().replace(/\s+/g, '_');
@@ -284,7 +285,7 @@
       // ⚡ Bolt Optimization: Use cached `appStats` object returned by `getPlayerStats`
       // instead of redundantly calling `JSON.parse(localStorage.getItem(...))` per user iteration.
       // This eliminates O(N) blocking synchronous I/O operations from the main thread during rendering.
-      const stats = typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} };
+      const stats = precalculatedStats || (typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} });
       const appStats = stats.appStats || {};
 
       const noProgress = [];
@@ -318,7 +319,7 @@
 
 
     // ── Stats cards on hub ──
-    function updateStatsCards(user) {
+    function updateStatsCards(user, precalculatedStats = null) {
       try {
         if (!user) user = getActiveUser();
         if (!user) return;
@@ -341,7 +342,7 @@
         };
 
         // Fetch stats which caches the parsed JSON objects
-        const stats = typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} };
+        const stats = precalculatedStats || (typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} });
         const appStats = stats.appStats || {};
 
         // Guitar Jam
