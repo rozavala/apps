@@ -16,3 +16,8 @@
 **Vulnerability:** User-provided artwork titles (`art.title`) were injected directly into `innerHTML` strings in `js/art-studio.js` when rendering the gallery (`renderGallery()`). Because artwork metadata is stored in user profiles which can be synced via CloudSync, this represented a stored XSS vulnerability.
 **Learning:** Any user-generated string input, even if localized to a specific app module like Art Studio, can be a stored XSS vector if rendered directly into the DOM, especially given the CloudSync synchronization capability.
 **Prevention:** Consistently apply `escHtml()` to sanitize all user-controlled inputs (such as artwork titles) before interpolating them into HTML strings used for DOM manipulation.
+
+## 2026-04-03 - [XSS Anti-Pattern in Lab Explorer Journal]
+**Vulnerability:** In `js/lab-explorer.js`, the `_addJournalEntry` function assigned string arguments directly into `innerHTML` (e.g. `div.innerHTML = \`📓 \${text} ...\``) without sanitization. While current arguments originated from hardcoded experiment data, this created an active anti-pattern and latent vulnerability.
+**Learning:** Functions that generate UI elements from string parameters and manipulate `innerHTML` are prime vectors for stored/reflected XSS if the underlying data flow ever changes to include user input (e.g. custom user-generated experiments synced across devices).
+**Prevention:** Consistently apply `escHtml()` (or an equivalent sanitization routine) on string parameters before injecting them into `innerHTML`, even if the string is currently assumed to be hardcoded, implementing defense-in-depth security.
