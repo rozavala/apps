@@ -280,7 +280,7 @@
         <div class="color-picker" id="color-picker" role="group" aria-labelledby="label-color"></div>
       </div>
       <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-cancel" aria-label="Cancel profile creation" onclick="closeModal()">Cancel</button>
         <button class="btn-create" onclick="createProfile()">Let's Go! 🚀</button>
       </div>
     </div>
@@ -306,7 +306,7 @@
       />
       <p id="pin-error" style="color:#EF4444;font-size:0.8rem;font-weight:700;margin-top:8px;display:none;">Incorrect PIN</p>
       <div class="modal-actions" style="margin-top:20px;">
-        <button class="btn-cancel" onclick="closePinModal()">Cancel</button>
+        <button class="btn-cancel" aria-label="Cancel pin entry" onclick="closePinModal()">Cancel</button>
         <button class="btn-create" onclick="submitPin()">Unlock 🔓</button>
       </div>
     </div>
@@ -341,7 +341,7 @@
       <div class="edit-actions">
         <button class="btn-delete-profile" onclick="deleteEditingProfile()">🗑 Delete</button>
         <div class="edit-actions-right">
-          <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+          <button class="btn-cancel" aria-label="Cancel editing profile" onclick="closeEditModal()">Cancel</button>
           <button class="btn-create" onclick="saveEditProfile()">Save ✓</button>
         </div>
       </div>
