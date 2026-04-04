@@ -80,12 +80,29 @@ Para la mejor experiencia en dispositivos móviles:
 2. Abre la URL en el navegador de tu dispositivo móvil. (Open the URL in your mobile browser).
 3. Selecciona **"Agregar a la pantalla de inicio"** (Add to Home Screen) en el menú de opciones de tu navegador. Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
 
+### Opción 3: Sincronización Familiar (Family Sync - Opcional)
+
+Las familias pueden sincronizar su progreso localmente usando Tailscale y el sistema integrado CloudSync. (Families can sync progress locally using Tailscale and built-in CloudSync).
+- Los perfiles y estrellas se sincronizan entre dispositivos. (Profiles and stars sync across devices).
+- Los límites de tiempo de pantalla y las tareas (chores) no se sincronizan, ya que son específicos de cada dispositivo. (Screen time limits and chores do not sync, as they are device-specific).
+- Todos los datos permanecen privados y locales. (All data remains private and local).
+
 ## 📂 Project Structure
 
 - `index.html`: The main app hub and profile selector.
 - `css/`: Stylesheets for the hub and individual apps.
 - `js/`: Core logic, authentication, and app-specific scripts.
 - `little-maestro.html`, `math-galaxy.html`, etc.: Individual application entry points.
+
+## 🚀 ¡A Explorar! (Let's Explore!)
+
+```text
+   /\
+  (  )
+  (  )
+ /|/\|\
+/_||||_\
+```
 
 ---
 *Made with ♥ for the Zavala Serra kids.*
