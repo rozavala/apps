@@ -620,7 +620,7 @@ const LabExplorer = (() => {
     const journal = document.getElementById('exp-journal');
     const div = document.createElement('div');
     div.className = 'journal-entry';
-    div.innerHTML = `📓 ${text} <span class="journal-time">${entry.time}</span>`;
+    div.innerHTML = `📓 ${escHtml(text)} <span class="journal-time">${entry.time}</span>`;
     journal.prepend(div);
   }
 
