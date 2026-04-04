@@ -852,7 +852,7 @@
             <div class="chore-item ${status.completed.includes(c.id) ? 'completed' : ''}" 
                  onclick="ChoresManager.completeChore('${c.id}')">
               <div class="chore-check">${status.completed.includes(c.id) ? '✅' : '○'}</div>
-              <div class="chore-label">${c.label}</div>
+              <div class="chore-label">${escHtml(c.label)}</div>
               <div class="chore-tokens">+${c.tokens} ⭐</div>
             </div>
           `).join('')}

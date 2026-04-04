@@ -21,3 +21,8 @@
 **Vulnerability:** In `js/lab-explorer.js`, the `_addJournalEntry` function assigned string arguments directly into `innerHTML` (e.g. `div.innerHTML = \`📓 \${text} ...\``) without sanitization. While current arguments originated from hardcoded experiment data, this created an active anti-pattern and latent vulnerability.
 **Learning:** Functions that generate UI elements from string parameters and manipulate `innerHTML` are prime vectors for stored/reflected XSS if the underlying data flow ever changes to include user input (e.g. custom user-generated experiments synced across devices).
 **Prevention:** Consistently apply `escHtml()` (or an equivalent sanitization routine) on string parameters before injecting them into `innerHTML`, even if the string is currently assumed to be hardcoded, implementing defense-in-depth security.
+
+## 2024-04-04 - [Stored XSS in Custom Chores]
+**Vulnerability:** User-provided custom chore labels (`c.label`) were injected directly into `innerHTML` strings in `js/index.js` when rendering the chores list (`renderChoresList()`). Because custom chores are saved in `localStorage` (`zs_chores_list`) and can be modified directly or potentially synced, this represented a stored XSS vulnerability.
+**Learning:** Any user-generated string input that gets persisted and later displayed must be sanitized before being added to the DOM. This applies to seemingly harmless features like custom chores.
+**Prevention:** Consistently apply `escHtml()` to sanitize all user-controlled inputs before interpolating them into HTML strings used for `innerHTML` manipulation.
