@@ -45,7 +45,15 @@ function getProfiles() {
   }
   catch { return []; }
 }
-function saveProfiles(p) { _cachedProfiles = p; _profilesCached = true; localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+function saveProfiles(p) { 
+  _cachedProfiles = p; 
+  _profilesCached = true; 
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); 
+  } catch (e) {
+    console.warn('[Auth] Failed to save profiles to localStorage:', e);
+  }
+}
 
 function getActiveUser() {
   if (_activeUserCached) return _cachedActiveUser;
@@ -60,11 +68,17 @@ function setActiveUser(user) {
   if (user === null) {
     _cachedActiveUser = null;
     _activeUserCached = true;
-    localStorage.removeItem(ACTIVE_KEY);
+    try {
+      localStorage.removeItem(ACTIVE_KEY);
+    } catch (e) {}
   } else {
     _cachedActiveUser = user;
     _activeUserCached = true;
-    localStorage.setItem(ACTIVE_KEY, JSON.stringify(user));
+    try {
+      localStorage.setItem(ACTIVE_KEY, JSON.stringify(user));
+    } catch (e) {
+      console.warn('[Auth] Failed to set active user in localStorage:', e);
+    }
   }
 }
 

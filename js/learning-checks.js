@@ -250,7 +250,7 @@ const LearningCheck = (() => {
       const btn = document.createElement('button');
       btn.className = 'lcheck-opt';
       btn.textContent = opt;
-      btn.onclick = () => _handleAnswer(i, question.answer, btn, optionsEl, feedbackEl, overlay, onPass);
+      btn.addEventListener('click', () => _handleAnswer(i, question.answer, btn, optionsEl, feedbackEl, overlay, onPass));
       optionsEl.appendChild(btn);
     });
   }

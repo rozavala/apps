@@ -3,6 +3,11 @@
    Fixed: null-safe DOM access, DOMContentLoaded init
    ================================================================ */
 
+let qTopic = null;
+let qQs = [];
+let qIdx = 0;
+let qScore = 0;
+
 function getUserKey() {
   return typeof getUserAppKey === 'function' ? getUserAppKey('zs_chile_') : null;
 }
@@ -12,7 +17,11 @@ function saveTopicProgress(id,stars,pct){
   const p=getUserProgress();
   const prev=p[id]||{bestStars:0,bestPct:0};
   p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};
-  localStorage.setItem(k,JSON.stringify(p));
+  try {
+    localStorage.setItem(k,JSON.stringify(p));
+  } catch (e) {
+    console.warn('[Chile] Failed to save topic progress:', e);
+  }
   if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
 
   if (typeof ActivityLog !== 'undefined' && stars > 0) {
@@ -23,14 +32,18 @@ function saveVisited(id){
   const k=getUserKey();if(!k)return;
   const p=getUserProgress();
   if(!p.vr)p.vr=[];if(!p.vr.includes(id))p.vr.push(id);
-  localStorage.setItem(k,JSON.stringify(p));
+  try {
+    localStorage.setItem(k,JSON.stringify(p));
+  } catch (e) {}
   if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
 }
 function saveMemBest(m){
   const k=getUserKey();if(!k)return;
   const p=getUserProgress();
   if(!p.memBest||m<p.memBest)p.memBest=m;
-  localStorage.setItem(k,JSON.stringify(p));
+  try {
+    localStorage.setItem(k,JSON.stringify(p));
+  } catch (e) {}
   if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
 
   if (typeof ActivityLog !== 'undefined') {
