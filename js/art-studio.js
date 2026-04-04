@@ -189,13 +189,16 @@ const ArtStudio = (() => {
       const p = document.getElementById(id);
       if (!p) return;
       p.innerHTML = COLORS.map((c, i) => `
-        <div class="color-swatch ${i === 0 ? 'active' : ''}" 
+        <button type="button" class="color-swatch ${i === 0 ? 'active' : ''}"
              style="background: ${c}" 
-             onclick="ArtStudio.setColor('${c}', this)"></div>
+             aria-label="Select color ${c}"
+             onclick="ArtStudio.setColor('${c}', this)"></button>
       `).join('');
 
-      const eraser = document.createElement('div');
+      const eraser = document.createElement('button');
+      eraser.type = 'button';
       eraser.className = 'color-swatch';
+      eraser.setAttribute('aria-label', 'Eraser tool');
       eraser.innerHTML = '🧽';
       eraser.style.display = 'flex';
       eraser.style.alignItems = 'center';
@@ -534,7 +537,7 @@ const ArtStudio = (() => {
     if (step.type === 'grid') {
       const pal = document.getElementById('color-palette');
       const mondrianColors = ['#EF4444', '#3B82F6', '#FBBF24', '#000000', '#FFFFFF'];
-      pal.innerHTML = mondrianColors.map(c => `<div class="color-swatch" style="background:${c}" onclick="ArtStudio.setColor('${c}', this)"></div>`).join('');
+      pal.innerHTML = mondrianColors.map(c => `<button type="button" class="color-swatch" style="background:${c}" aria-label="Select color ${c}" onclick="ArtStudio.setColor('${c}', this)"></button>`).join('');
       setColor('#000000', pal.firstChild);
     } else if (currentStepIdx === 0) {
       setupPalette();
@@ -616,7 +619,7 @@ const ArtStudio = (() => {
     const pal = document.getElementById('mix-palette');
     const mixable = ['#EF4444', '#FBBF24', '#3B82F6', '#FFFFFF', '#000000'];
     pal.innerHTML = mixable.map(c => `
-      <div class="color-swatch" style="background:${c}" onclick="ArtStudio.pickMixColorFromPal('${c}')"></div>
+      <button type="button" class="color-swatch" style="background:${c}" aria-label="Select mix color ${c}" onclick="ArtStudio.pickMixColorFromPal('${c}')"></button>
     `).join('');
     updateMixingUI();
   }

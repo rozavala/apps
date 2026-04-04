@@ -7,3 +7,6 @@
 ## 2024-05-18 - Dynamically Created Interactive Elements using Divs
 **Learning:** Some custom pickers (e.g., age, color, and emoji pickers in profile forms) use dynamically generated `<div>` elements as interactive options without semantic roles or keyboard focusability, violating basic accessibility principles.
 **Action:** Always use native `<button type="button">` elements for interactive options when building or refactoring custom selection groups to ensure keyboard accessibility, focus visibility, and screen reader compatibility. Include clear `aria-label`s, particularly for color or icon selections.
+## 2024-04-04 - Accessible Color Swatch Pickers
+**Learning:** Color pickers and brush size pickers rendered as `<div>` elements are completely inaccessible to screen reader and keyboard users. Using `role="button"` and `tabindex="0"` on `<div>` elements is less robust than using native semantic buttons.
+**Action:** When creating custom pickers (e.g. colors, brushes), always use `<button type="button">` with descriptive `aria-label`s instead of styling `<div>`s to behave like buttons. This leverages native browser focus management and semantic accessibility.
