@@ -1,6 +1,6 @@
 /* ================================================================
    DEBUG SYSTEM — Persistent Error & Event Logging
-   Captures global errors and unhandled rejections for mobile debugging.
+   Captures global errors and pushes to server for remote viewing.
    ================================================================ */
 
 var Debug = (function() {
@@ -8,39 +8,72 @@ var Debug = (function() {
 
   var logs = [];
   var MAX_LOGS = 100;
+  var SYNC_SERVER = 'https://real-options-dev.tail57521e.ts.net';
+
+  // ── Device Identification ──
+  function _getDeviceId() {
+    var id = localStorage.getItem('zs_debug_device_id');
+    if (!id) {
+      var platform = (navigator.userAgent.indexOf('iPad') !== -1) ? 'iPad' :
+                     (navigator.userAgent.indexOf('iPhone') !== -1) ? 'iPhone' :
+                     (navigator.userAgent.indexOf('Firefox') !== -1) ? 'Firefox' : 'Mobile';
+      id = platform + '_' + Math.random().toString(36).substring(2, 7);
+      localStorage.setItem('zs_debug_device_id', id);
+    }
+    return id;
+  }
 
   function _add(type, msg, meta) {
     var entry = {
-      ts: new Date().toLocaleTimeString(),
+      ts: new Date().toISOString(),
       type: type,
       msg: msg,
-      meta: meta || ''
+      meta: meta || '',
+      device: _getDeviceId(),
+      ua: navigator.userAgent
     };
     logs.unshift(entry);
     if (logs.length > MAX_LOGS) logs.pop();
     
-    // Also print to real console
     if (console && console.log) {
       var color = type === 'error' ? 'color:#ef4444' : 'color:#3b82f6';
       console.log('%c[Debug ' + type + '] ' + msg, color, meta || '');
     }
+
+    // Auto-push errors
+    if (type === 'error') {
+      setTimeout(function() { pushToServer(); }, 1000);
+    }
+  }
+
+  function pushToServer() {
+    if (!SYNC_SERVER || SYNC_SERVER.indexOf('x.x.x') !== -1) return Promise.resolve();
+    
+    var deviceId = _getDeviceId();
+    var payload = {
+      _isList: true,
+      _items: logs,
+      _syncedAt: Date.now()
+    };
+
+    return fetch(SYNC_SERVER + '/api/kids/debug/logs_' + deviceId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function(e) { console.warn('[Debug] Cloud push failed'); });
   }
 
   // Catch global JS errors
   window.onerror = function(msg, url, line, col, error) {
     var filename = url ? url.split('/').pop() : 'unknown';
     _add('error', msg, filename + ':' + line + ':' + col);
-    return false; // Let browser still handle it
+    return false;
   };
 
   // Catch Promise rejections
   window.addEventListener('unhandledrejection', function(event) {
     _add('error', 'Unhandled Promise: ' + event.reason);
   });
-
-  function getLogs() { return logs; }
-
-  function clear() { logs = []; }
 
   function show() {
     var overlay = document.getElementById('debug-log-overlay');
@@ -51,11 +84,13 @@ var Debug = (function() {
       
       var header = document.createElement('div');
       header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid #333;padding-bottom:10px;';
-      header.innerHTML = '<h2 style="margin:0">🛠 Debug Log</h2><button onclick="Debug.hide()" style="background:#333;color:#fff;border:none;padding:8px 16px;border-radius:8px;">Close</button>';
+      header.innerHTML = '<h2 style="margin:0">🛠 Debug Log (' + _getDeviceId() + ')</h2><button onclick="Debug.hide()" style="background:#333;color:#fff;border:none;padding:8px 16px;border-radius:8px;">Close</button>';
       
       var controls = document.createElement('div');
       controls.style.cssText = 'margin-bottom:15px;display:flex;gap:10px;';
-      controls.innerHTML = '<button onclick="Debug.clear();Debug.render();" style="background:#ef444433;color:#ef4444;border:1px solid #ef444455;padding:4px 12px;border-radius:4px;font-size:12px;">Clear All</button>';
+      controls.innerHTML = 
+        '<button onclick="Debug.clear();Debug.render();" style="background:#ef444433;color:#ef4444;border:1px solid #ef444455;padding:4px 12px;border-radius:4px;font-size:12px;">Clear Local</button>' +
+        '<button onclick="Debug.pushToServer().then(function(){alert(\'Logs pushed! Check /api/kids/debug/logs_' + _getDeviceId() + '\')})" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f655;padding:4px 12px;border-radius:4px;font-size:12px;">⬆️ Push to Cloud</button>';
       
       var list = document.createElement('div');
       list.id = 'debug-log-list';
@@ -85,8 +120,9 @@ var Debug = (function() {
 
     list.innerHTML = logs.map(function(l) {
       var color = l.type === 'error' ? '#ef4444' : '#3b82f6';
+      var time = l.ts.split('T')[1].split('.')[0]; // HH:MM:SS
       return '<div style="margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.03);border-radius:4px;border-left:3px solid ' + color + '">' +
-        '<div style="font-size:10px;color:#666;margin-bottom:4px;">[' + l.ts + '] ' + l.type.toUpperCase() + '</div>' +
+        '<div style="font-size:10px;color:#666;margin-bottom:4px;">[' + time + '] ' + l.type.toUpperCase() + '</div>' +
         '<div style="font-size:13px;word-break:break-all;">' + l.msg + '</div>' +
         (l.meta ? '<div style="font-size:11px;color:#888;margin-top:4px;">' + l.meta + '</div>' : '') +
       '</div>';
@@ -98,8 +134,10 @@ var Debug = (function() {
     error: function(msg, meta) { _add('error', msg, meta); },
     show: show,
     hide: hide,
-    clear: clear,
+    clear: function() { logs = []; },
     render: render,
-    getLogs: getLogs
+    getLogs: function() { return logs; },
+    pushToServer: pushToServer,
+    getDeviceId: _getDeviceId
   };
 })();
