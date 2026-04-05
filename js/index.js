@@ -568,9 +568,11 @@
   }
 
   function _openDashboard() {
+    if (typeof Debug !== 'undefined') Debug.log('Opening Dashboard...');
     var content = document.getElementById('dash-content');
 
     var finishOpening = function() {
+      if (typeof Debug !== 'undefined') Debug.log('Dashboard: finishOpening started');
       var profiles = getProfiles();
         
       if (profiles.length === 0) {
@@ -704,16 +706,22 @@
     };
 
     if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      if (typeof Debug !== 'undefined') Debug.log('Dashboard: starting cloud sync');
       content.innerHTML = '<div style="text-align:center; padding:40px 20px;"><div class="sync-emoji" style="font-size:3rem; margin-bottom:12px; animation: syncPulse 1s infinite;">🔄</div><p style="color:var(--text-muted); font-weight:700;">Syncing latest activity from cloud…</p></div>';
       document.getElementById('dash-overlay').classList.add('active');
       CloudSync.pullAllKids()
-        .then(finishOpening)
+        .then(function() {
+          if (typeof Debug !== 'undefined') Debug.log('Dashboard: sync complete');
+          finishOpening();
+        })
         .catch(function(e) { 
+          if (typeof Debug !== 'undefined') Debug.error('Dashboard: sync failed', e.message);
           console.warn('[Dashboard] Sync pull failed:', e);
           content.innerHTML += '<p style="color:var(--red); font-size:0.8rem; font-weight:700; margin-top:12px;">⚠️ Sync failed. Showing local data only.</p>';
           setTimeout(finishOpening, 1500);
         });
     } else {
+      if (typeof Debug !== 'undefined') Debug.log('Dashboard: offline mode');
       if (typeof CloudSync !== 'undefined' && !CloudSync.online) {
         content.innerHTML = '<p style="color:var(--orange); font-size:0.85rem; font-weight:700; text-align:center; margin-bottom:20px;">☁️ Offline — showing local data only</p>';
       }
@@ -792,6 +800,7 @@
   }
 
   function renderParentsCorner() {
+    if (typeof Debug !== 'undefined') Debug.log('Opening Parents Corner...');
     var profiles = getProfiles();
     var container = document.getElementById('parents-content');
     if (!container) return;
@@ -1011,6 +1020,7 @@
   }
 
   function requestPinThen(callback) {
+    if (typeof Debug !== 'undefined') Debug.log('Requesting Parent PIN...');
     pinCallback = callback;
     var modal = document.getElementById('pin-modal');
     var input = document.getElementById('pin-input');
@@ -1019,26 +1029,34 @@
   }
 
   function closePinModal() {
+    if (typeof Debug !== 'undefined') Debug.log('Closing PIN modal');
     var modal = document.getElementById('pin-modal');
     if (modal) modal.classList.remove('active');
     pinCallback = null;
   }
 
   function submitPin() {
-    var input = document.getElementById('pin-input');
-    var err = document.getElementById('pin-error');
-    if (input && input.value === getParentPin()) {
-      if (err) err.style.display = 'none';
-      closePinModal();
-      if (pinCallback) {
+    if (typeof Debug !== 'undefined') Debug.log('Submitting PIN...');
+    try {
+      var input = document.getElementById('pin-input');
+      var err = document.getElementById('pin-error');
+      if (input && input.value === getParentPin()) {
+        if (typeof Debug !== 'undefined') Debug.log('PIN Correct');
+        if (err) err.style.display = 'none';
         var cb = pinCallback;
-        pinCallback = null;
-        cb();
+        closePinModal();
+        if (cb) {
+          if (typeof Debug !== 'undefined') Debug.log('Executing callback');
+          cb();
+        }
+      } else if (input) {
+        if (typeof Debug !== 'undefined') Debug.log('PIN Incorrect');
+        if (err) err.style.display = 'block';
+        input.value = '';
+        input.focus();
       }
-    } else if (input) {
-      if (err) err.style.display = 'block';
-      input.value = '';
-      input.focus();
+    } catch(e) {
+      if (typeof Debug !== 'undefined') Debug.error('submitPin crash', e.message);
     }
   }
 

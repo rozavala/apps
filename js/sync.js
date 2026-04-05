@@ -65,7 +65,7 @@ var CloudSync = (function() {
     if (!Array.isArray(listB)) listB = [];
     listA.concat(listB).forEach(function(item) {
       if (!item || !item.ts) return;
-      var key = item.ts + '_' + (item.desc || '');
+      var key = item.ts + '_' + (item.app || '') + '_' + (item.desc || '');
       map[key] = item;
     });
     var merged = [];
@@ -291,23 +291,35 @@ var CloudSync = (function() {
       })
       .then(function(serverProfiles) {
         var localProfiles = (typeof getProfiles === 'function') ? getProfiles() : [];
-        var map = new Map();
-        [].concat(serverProfiles || [], localProfiles).forEach(function(p) {
-          if (!p || !p.name) return;
+        var profileMap = {};
+        var merged = [].concat(serverProfiles || [], localProfiles);
+        var finalProfiles = [];
+        var nameToIdx = {};
+
+        for (var i = 0; i < merged.length; i++) {
+          var p = merged[i];
+          if (!p || !p.name) continue;
           var key = p.name.toLowerCase();
-          if (!map.has(key) || (p.age > map.get(key).age)) {
-            map.set(key, p);
+          if (nameToIdx.hasOwnProperty(key)) {
+            var existing = finalProfiles[nameToIdx[key]];
+            if (p.age > existing.age) {
+              finalProfiles[nameToIdx[key]] = p;
+            }
+          } else {
+            nameToIdx[key] = finalProfiles.length;
+            finalProfiles.push(p);
           }
-        });
-        var merged = Array.from(map.values());
-        if (typeof saveProfiles === 'function') saveProfiles(merged);
-        
+        }
+
+        if (typeof saveProfiles === 'function') saveProfiles(finalProfiles);
+
         return _fetchWithTimeout(SYNC_SERVER + '/api/profiles', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(merged)
+          body: JSON.stringify(finalProfiles)
         });
       })
+
       .catch(function(e) {
         console.warn('[Sync] Profile sync failed:', e);
       });

@@ -4,40 +4,32 @@
    Storage key: zs_activity_[username]
    ================================================================ */
 
-const ActivityLog = (() => {
+var ActivityLog = (function() {
   'use strict';
 
-  const MAX_ENTRIES = 100; // Keep last 100 activities per kid
+  var MAX_ENTRIES = 100; // Keep last 100 activities per kid
 
   function _key() {
-    const u = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    var u = typeof getActiveUser === 'function' ? getActiveUser() : null;
     if (!u) return null;
     return 'zs_activity_' + u.name.toLowerCase().replace(/\s+/g, '_');
   }
 
   function _load() {
-    const k = _key();
+    var k = _key();
     if (!k) return [];
     try {
-      const raw = JSON.parse(localStorage.getItem(k));
+      var raw = JSON.parse(localStorage.getItem(k));
       if (!raw) return [];
       if (Array.isArray(raw)) return raw;
-      if (raw._isList && Array.isArray(raw._items)) return raw._items;
-      const keys = Object.keys(raw).filter(k => /^\d+$/.test(k));
-      if (keys.length > 0) {
-        return keys.sort((a, b) => Number(a) - Number(b)).map(k => raw[k]).filter(Boolean);
-      }
-      return [];
-    } catch { return []; }
-  }
-
-  function _save(entries) {
-    const k = _key();
-    if (!k) return;
-    // Trim to max
-    if (entries.length > MAX_ENTRIES) entries = entries.slice(-MAX_ENTRIES);
-    localStorage.setItem(k, JSON.stringify(entries));
-    if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(k);
+      
+      // Legacy fix for corrupted objects
+      var keys = [];
+      for (var prop in raw) { if (/^\d+$/.test(prop)) keys.push(prop); }
+      return keys.sort(function(a, b){ return Number(a) - Number(b); })
+                 .map(function(k){ return raw[k]; })
+                 .filter(function(x){ return !!x; });
+    } catch (e) { return []; }
   }
 
   // Log an activity: ActivityLog.log('Math Galaxy', '🧮', 'Completed Cadet level — 3 stars')
@@ -47,40 +39,52 @@ const ActivityLog = (() => {
     
     if (typeof Debug !== 'undefined') Debug.log('Activity: ' + appName, description);
 
-    const entries = _load();
+    var entries = _load();
     entries.push({
       app: appName,
       icon: icon,
       desc: description,
       ts: Date.now()
     });
-    _save(entries);
+
+    // Trim to MAX_ENTRIES
+    if (entries.length > MAX_ENTRIES) {
+      entries = entries.slice(entries.length - MAX_ENTRIES);
+    }
+
+    var k = _key();
+    if (k) {
+      try {
+        localStorage.setItem(k, JSON.stringify(entries));
+        // Auto-push to cloud
+        if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+          CloudSync.push(k);
+        }
+      } catch (e) {}
+    }
   }
 
-  // Get activities for a specific kid (by name, for dashboard)
   function getForUser(userName) {
-    const k = 'zs_activity_' + userName.toLowerCase().replace(/\s+/g, '_');
+    var k = 'zs_activity_' + userName.toLowerCase().replace(/\s+/g, '_');
     try {
-      const raw = JSON.parse(localStorage.getItem(k));
+      var raw = JSON.parse(localStorage.getItem(k));
       if (!raw) return [];
       if (Array.isArray(raw)) return raw;
-      // Handle corrupted sync data (array spread into object)
-      if (raw._isList && Array.isArray(raw._items)) return raw._items;
-      // Legacy corruption: object with numeric keys from old array spread
-      const keys = Object.keys(raw).filter(k => /^\d+$/.test(k));
-      if (keys.length > 0) {
-        return keys.sort((a, b) => Number(a) - Number(b)).map(k => raw[k]).filter(Boolean);
-      }
-      return [];
-    } catch { return []; }
+      
+      var keys = [];
+      for (var prop in raw) { if (/^\d+$/.test(prop)) keys.push(prop); }
+      return keys.sort(function(a, b){ return Number(a) - Number(b); })
+                 .map(function(k){ return raw[k]; })
+                 .filter(function(x){ return !!x; });
+    } catch (e) { return []; }
   }
 
-  // Get activities from the last N days
+  // Return activities from last X days
   function getRecent(userName, days) {
-    const all = getForUser(userName);
-    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
-    return all.filter(e => e.ts >= cutoff);
+    var all = getForUser(userName);
+    var cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    return all.filter(function(e){ return e.ts >= cutoff; });
   }
 
-  return { log, getForUser, getRecent };
+  return { log: log, getForUser: getForUser, getRecent: getRecent };
 })();

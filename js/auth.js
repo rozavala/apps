@@ -1,12 +1,16 @@
 /* ================================================================
-   SHARED LOGIN SYSTEM
-   All apps read: localStorage.getItem('zs_active_user')
-   Returns: { name, avatar, color, age } or null
+   ZAVALA SERRA APPS — Shared Auth & Stats (auth.js)
+   
+   Handles:
+   - Profile management (localStorage 'zs_profiles')
+   - Active user session ('zs_active_user')
+   - Cross-app star aggregation (getTotalStars)
+   - Explorer Ranks (getExplorerRank)
    ================================================================ */
 
-const AVATARS = ['🦊','🐱','🐶','🦋','🐰','🐸','🦄','🐨','🦁','🐧','🦖','🐬'];
-const COLORS  = ['#7C3AED','#EF4444','#F59E0B','#10B981','#0EA5E9','#EC4899','#F97316','#14B8A6'];
-const AGE_OPTIONS = [
+var AVATARS = ['🦊','🐱','🐶','🦋','🐰','🐸','🦄','🐨','🦁','🐧','🦖','🐬'];
+var COLORS  = ['#7C3AED','#EF4444','#F59E0B','#10B981','#0EA5E9','#EC4899','#F97316','#14B8A6'];
+var AGE_OPTIONS = [
   { age: 4,  label: '4' },
   { age: 5,  label: '5' },
   { age: 6,  label: '6' },
@@ -14,68 +18,66 @@ const AGE_OPTIONS = [
   { age: 8,  label: '8' },
   { age: 9,  label: '9' },
   { age: 10, label: '10' },
-  { age: 11, label: '11' },
-  { age: 12, label: '12' },
+  { age: 11, label: '11+' }
 ];
-const STORAGE_KEY = 'zs_profiles';
-const ACTIVE_KEY  = 'zs_active_user';
 
-// ⚡ Bolt Optimization: Cache profiles and active user in memory to avoid redundant
-// synchronous localStorage reads and JSON parsing on frequent calls.
-let _cachedProfiles = null;
-let _profilesCached = false;
+var STORAGE_KEY = 'zs_profiles';
+var ACTIVE_KEY  = 'zs_active_user';
 
-let _cachedActiveUser = null;
-let _activeUserCached = false;
+var _cachedProfiles = null;
+var _profilesCached = false;
+var _cachedActiveUser = null;
+var _activeUserCached = false;
 
-// Invalidate caches if changed from another tab/window
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (e) => {
-    if (e.key === STORAGE_KEY) _profilesCached = false;
-    if (e.key === ACTIVE_KEY) _activeUserCached = false;
-  });
-}
+// ── Profiles ──────────────────────────────────────────────────────
 
 function getProfiles() {
-  if (_profilesCached) return _cachedProfiles;
+  if (_profilesCached) return _cachedProfiles || [];
   try {
-    _cachedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    var raw = localStorage.getItem(STORAGE_KEY);
+    _cachedProfiles = raw ? JSON.parse(raw) : [];
     _profilesCached = true;
     return _cachedProfiles;
-  }
-  catch { return []; }
-}
-function saveProfiles(p) { 
-  _cachedProfiles = p; 
-  _profilesCached = true; 
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); 
   } catch (e) {
-    console.warn('[Auth] Failed to save profiles to localStorage:', e);
+    console.warn('[Auth] Failed to parse profiles:', e);
+    return [];
   }
 }
+
+function saveProfiles(profiles) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+    _cachedProfiles = profiles;
+    _profilesCached = true;
+  } catch (e) {
+    console.warn('[Auth] Failed to save profiles:', e);
+  }
+}
+
+// ── Active User ───────────────────────────────────────────────────
 
 function getActiveUser() {
   if (_activeUserCached) return _cachedActiveUser;
   try {
-    _cachedActiveUser = JSON.parse(localStorage.getItem(ACTIVE_KEY));
+    var raw = localStorage.getItem(ACTIVE_KEY);
+    _cachedActiveUser = raw ? JSON.parse(raw) : null;
     _activeUserCached = true;
     return _cachedActiveUser;
+  } catch (e) {
+    return null;
   }
-  catch { return null; }
 }
+
 function setActiveUser(user) {
-  if (user === null) {
+  if (!user) {
+    localStorage.removeItem(ACTIVE_KEY);
     _cachedActiveUser = null;
     _activeUserCached = true;
-    try {
-      localStorage.removeItem(ACTIVE_KEY);
-    } catch (e) {}
   } else {
-    _cachedActiveUser = user;
-    _activeUserCached = true;
     try {
       localStorage.setItem(ACTIVE_KEY, JSON.stringify(user));
+      _cachedActiveUser = user;
+      _activeUserCached = true;
     } catch (e) {
       console.warn('[Auth] Failed to set active user in localStorage:', e);
     }
@@ -83,7 +85,7 @@ function setActiveUser(user) {
 }
 
 function getGreeting() {
-  const h = new Date().getHours();
+  var h = new Date().getHours();
   if (h < 12) return 'Good morning!';
   if (h < 17) return 'Good afternoon!';
   return 'Good evening!';
@@ -92,17 +94,18 @@ function getGreeting() {
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 function getParentPin() {
-  // Check if any Little Maestro profile has a custom PIN set
   try {
-    const idx = JSON.parse(localStorage.getItem('littlemaestro__index')) || [];
-    if (idx.length > 0) {
-      const data = JSON.parse(localStorage.getItem('littlemaestro_' + idx[0].toLowerCase().replace(/\s+/g, '_')));
+    var idxRaw = localStorage.getItem('littlemaestro__index');
+    var idx = idxRaw ? JSON.parse(idxRaw) : [];
+    if (idx && idx.length > 0 && idx[0]) {
+      var nameKey = idx[0].toLowerCase().replace(/\s+/g, '_');
+      var dataRaw = localStorage.getItem('littlemaestro_' + nameKey);
+      var data = dataRaw ? JSON.parse(dataRaw) : null;
       if (data && data.settings && data.settings.parentPin) return data.settings.parentPin;
     }
   } catch(e) {}
-  // Also check for a hub-level PIN
   try {
-    const pin = localStorage.getItem('zs_parent_pin');
+    var pin = localStorage.getItem('zs_parent_pin');
     if (pin) return pin;
   } catch(e) {}
   return '1234'; // default
@@ -117,251 +120,199 @@ function saveParentPin(pin) {
 }
 
 function safeColor(c) {
-  return /^#[0-9a-fA-F]{6}$/.test(c) ? c : '#7C3AED'; // fallback to default purple
+  return /^#[0-9a-fA-F]{6}$/.test(c) ? c : '#7C3AED';
 }
 
 function getUserAppKey(prefix) {
-  const u = getActiveUser();
+  var u = getActiveUser();
   if (!u) return null;
   return prefix + u.name.toLowerCase().replace(/\s+/g, '_');
 }
 
-/* ================================================================
-   GLOBAL STAR COUNTER
-   Aggregates stars across all apps for the active user.
-   ================================================================ */
+// ── Player Stats ──────────────────────────────────────────────────
 
 function getPlayerStats(userName) {
-  let name = userName;
+  var name = userName;
   if (!name) {
-    const user = getActiveUser();
+    var user = getActiveUser();
     name = user ? user.name : null;
   }
-  if (!name) return { totalStars: 0, appsWithStars: 0 };
+  if (!name) return { totalStars: 0, appsWithStars: 0, appStats: {} };
 
-  const key = name.toLowerCase().replace(/\s+/g, '_');
-  let totalStars = 0;
-  let appsWithStars = 0;
+  var key = name.toLowerCase().replace(/\s+/g, '_');
+  var totalStars = 0;
+  var appsWithStars = 0;
+  var appStats = {};
 
-  // Cache to store the parsed data to avoid double parsing in updateStatsCards and getExplorerRank
-  const appStats = {};
+  var appConfigs = [
+    { id: 'math',   prefix: 'zs_mathgalaxy_' },
+    { id: 'chile',  prefix: 'zs_chile_' },
+    { id: 'chess',  prefix: 'zs_chess_' },
+    { id: 'piano',  prefix: 'littlemaestro_' },
+    { id: 'faith',  prefix: 'zs_fe_' },
+    { id: 'guitar', prefix: 'zs_guitar_' },
+    { id: 'art',    prefix: 'zs_art_' },
+    { id: 'sports', prefix: 'zs_sports_' },
+    { id: 'guess',  prefix: 'zs_guess_' },
+    { id: 'lab',    prefix: 'zs_lab_' },
+    { id: 'world',  prefix: 'zs_world_' },
+    { id: 'story',  prefix: 'zs_story_' },
+    { id: 'quest',  prefix: 'zs_quest_' }
+  ];
 
-  // Math Galaxy
-  try {
-    const mg = JSON.parse(localStorage.getItem(`zs_mathgalaxy_${key}`)) || {};
-    appStats.math = mg;
-    let mgStars = 0;
-    Object.values(mg).forEach(level => { mgStars += (level.bestStars || 0); });
-    if (mgStars > 0) { totalStars += mgStars; appsWithStars++; }
-  } catch {}
+  for (var i = 0; i < appConfigs.length; i++) {
+    var cfg = appConfigs[i];
+    try {
+      var raw = localStorage.getItem(cfg.prefix + key);
+      var data = raw ? JSON.parse(raw) : {};
+      appStats[cfg.id] = data;
 
-  // Descubre Chile
-  try {
-    const dc = JSON.parse(localStorage.getItem(`zs_chile_${key}`)) || {};
-    appStats.chile = dc;
-    let dcStars = 0;
-    Object.entries(dc).forEach(([k, v]) => {
-      if (k !== 'vr' && k !== 'memBest' && v && v.bestStars) dcStars += v.bestStars;
-    });
-    if (dcStars > 0) { totalStars += dcStars; appsWithStars++; }
-  } catch {}
-
-  // Chess Quest
-  try {
-    const cq = JSON.parse(localStorage.getItem(`zs_chess_${key}`)) || {};
-    appStats.chess = cq;
-    const cqStars = (cq.puzzlesSolved || 0) + (cq.wins || 0);
-    if (cqStars > 0) { totalStars += cqStars; appsWithStars++; }
-  } catch {}
-
-  // Little Maestro
-  try {
-    const lm = JSON.parse(localStorage.getItem(`littlemaestro_${key}`)) || {};
-    appStats.piano = lm;
-    let lmStars = 0;
-    if (lm.progress) {
-      Object.entries(lm.progress).forEach(([sid, val]) => {
-        if (typeof val === 'object' && val !== null && val.stars > 0) {
-          lmStars += val.stars;
+      var appStars = 0;
+      if (cfg.id === 'math') {
+        for (var k in data) { appStars += (data[k].bestStars || 0); }
+      } else if (cfg.id === 'chile') {
+        for (var k2 in data) { if (k2 !== 'vr' && k2 !== 'memBest') appStars += (data[k2].bestStars || 0); }
+      } else if (cfg.id === 'chess') {
+        appStars = (data.puzzlesSolved || 0) + (data.wins || 0);
+      } else if (cfg.id === 'piano') {
+        if (data.progress) {
+          for (var k3 in data.progress) {
+            var val = data.progress[k3];
+            if (val && typeof val === 'object' && val.stars) appStars += val.stars;
+          }
         }
-      });
-      const songStars = lm.progress.songStars || {};
-      Object.values(songStars).forEach(s => { if (s > 0) lmStars += s; });
-    }
-    if (lmStars > 0) { totalStars += lmStars; appsWithStars++; }
-  } catch {}
+      } else if (cfg.id === 'guess') {
+        appStars = data.totalStars || 0;
+      } else {
+        appStars = data.totalStars || 0;
+      }
 
-  // Fe Explorador
-  try {
-    const fe = JSON.parse(localStorage.getItem(`zs_fe_${key}`)) || {};
-    appStats.faith = fe;
-    if ((fe.totalStars || 0) > 0) { totalStars += fe.totalStars; appsWithStars++; }
-  } catch {}
+      if (appStars > 0) {
+        totalStars += appStars;
+        appsWithStars++;
+      }
+    } catch (e) {}
+  }
 
-  // Guitar Jam
-  try {
-    const gj = JSON.parse(localStorage.getItem(`zs_guitar_${key}`)) || {};
-    appStats.guitar = gj;
-    if ((gj.totalStars || 0) > 0) { totalStars += gj.totalStars; appsWithStars++; }
-  } catch {}
-
-  // Art Studio
-  try {
-    const as = JSON.parse(localStorage.getItem(`zs_art_${key}`)) || {};
-    appStats.art = as;
-    if ((as.totalStars || 0) > 0) { totalStars += as.totalStars; appsWithStars++; }
-  } catch {}
-
-  // Sports Arena
-  try {
-    const sa = JSON.parse(localStorage.getItem(`zs_sports_${key}`)) || {};
-    appStats.sports = sa;
-    if ((sa.totalStars || 0) > 0) { totalStars += sa.totalStars; appsWithStars++; }
-  } catch {}
-
-  // Guess Quest
-  try {
-    const gq = JSON.parse(localStorage.getItem(`zs_guess_${key}`)) || {};
-    appStats.guess = gq;
-    if ((gq.totalStars || 0) > 0) { totalStars += gq.totalStars; appsWithStars++; }
-  } catch {}
-
-  // ⚡ Bolt Optimization: Cache newly added apps inside `appStats` to avoid
-  // redundant O(N) `localStorage` parsing during dashboard UI rendering loops.
-
-  // Lab Explorer
-  try {
-    const le = JSON.parse(localStorage.getItem(`zs_lab_${key}`)) || {};
-    appStats.lab = le;
-    if ((le.totalStars || 0) > 0) { totalStars += le.totalStars; appsWithStars++; }
-  } catch {}
-
-  // World Explorer
-  try {
-    const we = JSON.parse(localStorage.getItem(`zs_world_${key}`)) || {};
-    appStats.world = we;
-    if ((we.totalStars || 0) > 0) { totalStars += we.totalStars; appsWithStars++; }
-  } catch {}
-
-  // Story Explorer
-  try {
-    const se = JSON.parse(localStorage.getItem(`zs_story_${key}`)) || {};
-    appStats.story = se;
-    if ((se.totalStars || 0) > 0) { totalStars += se.totalStars; appsWithStars++; }
-  } catch {}
-
-  // Quest Adventure
-  try {
-    const qa = JSON.parse(localStorage.getItem(`zs_quest_${key}`)) || {};
-    appStats.quest = qa;
-    if ((qa.totalStars || 0) > 0) { totalStars += qa.totalStars; appsWithStars++; }
-  } catch {}
-
-  return { totalStars, appsWithStars, appStats };
-
+  return { totalStars: totalStars, appsWithStars: appsWithStars, appStats: appStats };
 }
 
-function getTotalStars(userName) {
-  return getPlayerStats(userName).totalStars;
-}
-
-/**
- * Returns a difficulty tier based on the active user's age.
- * All apps should use this instead of raw age checks.
- *
- * Returns: 'beginner' (ages 4-5), 'intermediate' (ages 6-7),
- *          'advanced' (ages 8-9), 'expert' (ages 10-12),
- *          or 'intermediate' as default if no age set.
- */
 function getAgeTier(age) {
-  let a = age; if (!a) { const u = getActiveUser(); a = u ? u.age : null; }
+  var a = age;
+  if (!a) {
+    var u = getActiveUser();
+    a = u ? u.age : null;
+  }
   if (!a) return 'intermediate';
   if (a <= 5) return 'beginner';
-  if (a <= 7) return 'intermediate';
-  if (a <= 9) return 'advanced';
+  if (a <= 8) return 'intermediate';
+  if (a <= 11) return 'advanced';
   return 'expert';
 }
 
-function getExplorerRank(userName, precalculatedStats = null) {
-  let name = userName;
+function getExplorerRank(userName, precalculatedStats) {
+  var name = userName;
   if (!name) {
-    const user = getActiveUser();
+    var user = getActiveUser();
     name = user ? user.name : null;
   }
-  if (!name) return { name: 'Cadet', icon: '🛸', level: 0 };
+  if (!name) return { icon: '🛸', name: 'Cadet' };
 
-  const stats = precalculatedStats || getPlayerStats(name);
-  const totalStars = stats.totalStars;
-  const appsWithStars = stats.appsWithStars;
+  var stats = precalculatedStats || getPlayerStats(name);
+  var totalStars = stats.totalStars;
+  var appsWithStars = stats.appsWithStars;
 
-  const RANKS = [
-    { name: 'Legend',    icon: '🏆', stars: 50, apps: 4 },
-    { name: 'Commander', icon: '👨‍🚀', stars: 30, apps: 3 },
-    { name: 'Pilot',     icon: '🌟', stars: 15, apps: 2 },
-    { name: 'Explorer',  icon: '🚀', stars: 5,  apps: 1 },
-    { name: 'Cadet',     icon: '🛸', stars: 0,  apps: 0 },
+  var RANKS = [
+    { minStars: 500, icon: '👑', name: 'Grand Master' },
+    { minStars: 250, icon: '💎', name: 'Elite' },
+    { minStars: 150, icon: '🌌', name: 'Astronaut' },
+    { minStars: 100, icon: '🚀', name: 'Pilot' },
+    { minStars: 60,  icon: '🌍', name: 'Explorer' },
+    { minStars: 30,  icon: '🛡️', name: 'Veteran' },
+    { minStars: 15,  icon: '🌟', name: 'Apprentice' },
+    { minStars: 0,   icon: '🛸', name: 'Cadet' }
   ];
 
-  for (const rank of RANKS) {
-    if (totalStars >= rank.stars && appsWithStars >= rank.apps) {
-      return { name: rank.name, icon: rank.icon, level: RANKS.length - RANKS.indexOf(rank) - 1 };
-    }
+  for (var i = 0; i < RANKS.length; i++) {
+    var rank = RANKS[i];
+    if (totalStars >= rank.minStars) return rank;
   }
-  return { name: 'Cadet', icon: '🛸', level: 0 };
+  return RANKS[RANKS.length - 1];
 }
 
-/* ================================================================
-   CHESS PLAY LIMITS
-   ================================================================ */
+// ── Chess Limits ──
 
 function getChessPlaysThisWeek(userName) {
-  let name = userName; if (!name) { const u = getActiveUser(); name = u ? u.name : null; }
+  var name = userName;
+  if (!name) {
+    var u = getActiveUser();
+    name = u ? u.name : null;
+  }
   if (!name) return 0;
-  const key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
+  var key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
   try {
-    const plays = JSON.parse(localStorage.getItem(key)) || [];
-    // Count plays in the last 7 days
-    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    return plays.filter(d => new Date(d).getTime() > weekAgo).length;
-  } catch { return 0; }
+    var playsRaw = localStorage.getItem(key);
+    var plays = playsRaw ? JSON.parse(playsRaw) : [];
+    var weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    var count = 0;
+    for (var i = 0; i < plays.length; i++) {
+      if (new Date(plays[i]).getTime() > weekAgo) count++;
+    }
+    return count;
+  } catch (e) { return 0; }
 }
 
 function getChessLimit(userName) {
-  // Read from profile; default 2
-  const profiles = getProfiles();
-  let name = userName; if (!name) { const u = getActiveUser(); name = u ? u.name : null; }
+  var profiles = getProfiles();
+  var name = userName;
+  if (!name) {
+    var u = getActiveUser();
+    name = u ? u.name : null;
+  }
   if (!name) return 2;
-  const profile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
-  return (profile && typeof profile.chessPlaysPerWeek === 'number') 
-    ? profile.chessPlaysPerWeek : 2;
-}
-
-function canPlayChess(userName) {
-  const limit = getChessLimit(userName);
-  if (limit === 0) return false;       // Disabled by parent
-  if (limit >= 7) return true;         // Daily = always
-  return getChessPlaysThisWeek(userName) < limit;
+  var profile = null;
+  for (var i = 0; i < profiles.length; i++) {
+    if (profiles[i].name.toLowerCase() === name.toLowerCase()) {
+      profile = profiles[i];
+      break;
+    }
+  }
+  if (!profile || profile.chessPlaysPerWeek === undefined) return 2;
+  return profile.chessPlaysPerWeek;
 }
 
 function recordChessPlay(userName) {
-  let name = userName; if (!name) { const u = getActiveUser(); name = u ? u.name : null; }
+  var name = userName;
+  if (!name) {
+    var u = getActiveUser();
+    name = u ? u.name : null;
+  }
   if (!name) return;
-  const key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
+  var key = 'zs_chess_plays_' + name.toLowerCase().replace(/\s+/g, '_');
   try {
-    const plays = JSON.parse(localStorage.getItem(key)) || [];
-    plays.push(new Date().toISOString());
-    // Keep only last 30 days of history
-    const monthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-    const trimmed = plays.filter(d => new Date(d).getTime() > monthAgo);
-    localStorage.setItem(key, JSON.stringify(trimmed));
-  } catch {}
+    var playsRaw = localStorage.getItem(key);
+    var plays = playsRaw ? JSON.parse(playsRaw) : [];
+    var monthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    var filtered = [];
+    for (var i = 0; i < plays.length; i++) {
+      if (new Date(plays[i]).getTime() > monthAgo) filtered.push(plays[i]);
+    }
+    filtered.push(new Date().toISOString());
+    localStorage.setItem(key, JSON.stringify(filtered));
+  } catch (e) {}
 }
 
-function chessPlaysRemaining(userName) {
-  const limit = getChessLimit(userName);
-  if (limit >= 7) return 99;
-  return Math.max(0, limit - getChessPlaysThisWeek(userName));
+function canPlayChess(userName) {
+  var limit = getChessLimit(userName);
+  if (limit >= 7) return true; // Daily/Unlimited
+  if (limit === 0) return false;
+  var current = getChessPlaysThisWeek(userName);
+  return current < limit;
 }
 
+// ── Initialization ──
 
-
+window.addEventListener('storage', function(e) {
+  if (e.key === STORAGE_KEY) { _profilesCached = false; }
+  if (e.key === ACTIVE_KEY) { _activeUserCached = false; }
+});
