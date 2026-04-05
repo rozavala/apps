@@ -26,38 +26,42 @@
   };
 
   window.openParentsCorner = function() {
-    renderParentsCorner();
-    var syncEl = document.getElementById('sync-section');
-    if (syncEl && typeof CloudSync !== 'undefined') {
-      var configured = CloudSync.isConfigured();
-      var online = CloudSync.online;
-      syncEl.innerHTML = 
-        '<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
-          '<h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">' +
-            '☁️ Cloud Sync ' +
-            '<span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:99px;' +
-              'background:' + (online ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)') + ';' +
-              'color:' + (online ? '#34D399' : '#F87171') + ';">' +
-              (configured ? (online ? '● Connected' : '● Offline') : '○ Not set up') +
-            '</span>' +
-          '</h3>' +
-          (configured ? 
-            '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-              '<button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;" ' +
-                'onclick="_syncPushAll(this)">⬆️ Push All to Cloud</button>' +
-              '<button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;" ' +
-                'onclick="_syncPullAll(this)">⬇️ Pull All from Cloud</button>' +
-            '</div>' +
-            '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">' +
-              'Sync is automatic — progress pushes on save and pulls on login.' +
-            '</p>' : 
-            '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">' +
-              'Set SYNC_SERVER in js/sync.js to sync across devices.' +
-            '</p>') +
-        '</div>';
+    try {
+      renderParentsCorner();
+      var syncEl = document.getElementById('sync-section');
+      if (syncEl && typeof CloudSync !== 'undefined') {
+        var configured = CloudSync.isConfigured();
+        var online = CloudSync.online;
+        syncEl.innerHTML = 
+          '<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
+            '<h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">' +
+              '☁️ Cloud Sync ' +
+              '<span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:99px;' +
+                'background:' + (online ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)') + ';' +
+                'color:' + (online ? '#34D399' : '#F87171') + ';">' +
+                (configured ? (online ? '● Connected' : '● Offline') : '○ Not set up') +
+              '</span>' +
+            '</h3>' +
+            (configured ? 
+              '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                '<button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;" ' +
+                  'onclick="_syncPushAll(this)">⬆️ Push All to Cloud</button>' +
+                '<button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;" ' +
+                  'onclick="_syncPullAll(this)">⬇️ Pull All from Cloud</button>' +
+              '</div>' +
+              '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">' +
+                'Sync is automatic — progress pushes on save and pulls on login.' +
+              '</p>' : 
+              '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">' +
+                'Set SYNC_SERVER in js/sync.js to sync across devices.' +
+              '</p>') +
+          '</div>';
+      }
+      var p = document.getElementById('parents-overlay');
+      if (p) p.classList.add('active');
+    } catch(e) {
+      if (typeof Debug !== 'undefined') Debug.error('openParentsCorner failed', e.message);
     }
-    var p = document.getElementById('parents-overlay');
-    if (p) p.classList.add('active');
   };
 
   window.closeParentsCorner = function() {
@@ -65,7 +69,13 @@
     if (p) p.classList.remove('active');
   };
 
-  window.openDashboard = function() { openDashboard(); };
+  window.openDashboard = function() { 
+    try {
+      _openDashboard(); 
+    } catch(e) {
+      if (typeof Debug !== 'undefined') Debug.error('openDashboard failed', e.message);
+    }
+  };
   window.closeDashboard = function() {
     var d = document.getElementById('dash-overlay');
     if (d) d.classList.remove('active');
@@ -554,7 +564,7 @@
     } catch(err) {}
   }
 
-  function openDashboard() {
+  function _openDashboard() {
     var content = document.getElementById('dash-content');
 
     var finishOpening = function() {
@@ -1013,7 +1023,9 @@
 
   function submitPin() {
     var input = document.getElementById('pin-input');
+    var err = document.getElementById('pin-error');
     if (input && input.value === getParentPin()) {
+      if (err) err.style.display = 'none';
       closePinModal();
       if (pinCallback) {
         var cb = pinCallback;
@@ -1021,6 +1033,7 @@
         cb();
       }
     } else if (input) {
+      if (err) err.style.display = 'block';
       input.value = '';
       input.focus();
     }
