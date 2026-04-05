@@ -1,31 +1,7 @@
 (function() {
   'use strict';
 
-  // ── Public Exports (Direct Assignment at Top) ──
-  window.switchUser = function() {
-    if (isGuestUser()) {
-      _cleanupGuestData();
-    }
-    setActiveUser(null);
-    var hub = document.getElementById('hub-screen');
-    if (hub) hub.classList.remove('active');
-    var login = document.getElementById('login-screen');
-    if (login) login.style.display = '';
-    renderLogin();
-  };
-
-  window.openChores = function() {
-    renderChoresList();
-    var c = document.getElementById('chores-overlay');
-    if (c) c.classList.add('active');
-  };
-
-  window.closeChores = function() {
-    var c = document.getElementById('chores-overlay');
-    if (c) c.classList.remove('active');
-  };
-
-  window.openParentsCorner = function() {
+  function openParentsCornerWrapper() {
     try {
       renderParentsCorner();
       var syncEl = document.getElementById('sync-section');
@@ -62,20 +38,47 @@
     } catch(e) {
       if (typeof Debug !== 'undefined') Debug.error('openParentsCorner failed', e.message);
     }
-  };
+  }
 
-  window.closeParentsCorner = function() {
-    var p = document.getElementById('parents-overlay');
-    if (p) p.classList.remove('active');
-  };
-
-  window.openDashboard = function() { 
+  function openDashboardWrapper() { 
     try {
       _openDashboard(); 
     } catch(e) {
       if (typeof Debug !== 'undefined') Debug.error('openDashboard failed', e.message);
     }
+  }
+
+  // ── Public Exports (Direct Assignment at Top) ──
+  window.switchUser = function() {
+    if (isGuestUser()) {
+      _cleanupGuestData();
+    }
+    setActiveUser(null);
+    var hub = document.getElementById('hub-screen');
+    if (hub) hub.classList.remove('active');
+    var login = document.getElementById('login-screen');
+    if (login) login.style.display = '';
+    renderLogin();
   };
+
+  window.openChores = function() {
+    renderChoresList();
+    var c = document.getElementById('chores-overlay');
+    if (c) c.classList.add('active');
+  };
+
+  window.closeChores = function() {
+    var c = document.getElementById('chores-overlay');
+    if (c) c.classList.remove('active');
+  };
+
+  window.openParentsCorner = openParentsCornerWrapper;
+  window.closeParentsCorner = function() {
+    var p = document.getElementById('parents-overlay');
+    if (p) p.classList.remove('active');
+  };
+
+  window.openDashboard = openDashboardWrapper;
   window.closeDashboard = function() {
     var d = document.getElementById('dash-overlay');
     if (d) d.classList.remove('active');

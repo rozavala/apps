@@ -108,6 +108,14 @@ function getParentPin() {
   return '1234'; // default
 }
 
+function saveParentPin(pin) {
+  try {
+    localStorage.setItem('zs_parent_pin', pin);
+  } catch(e) {
+    console.warn('[Auth] Failed to save PIN:', e);
+  }
+}
+
 function safeColor(c) {
   return /^#[0-9a-fA-F]{6}$/.test(c) ? c : '#7C3AED'; // fallback to default purple
 }

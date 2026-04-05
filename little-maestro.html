@@ -7346,7 +7346,7 @@ const AudioEngine = (() => {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(0.7, ctx.currentTime);
+    masterGain.gain.setValueAtTime(0.5, ctx.currentTime);
     masterGain.connect(ctx.destination);
     _loadSoundfont();  // start loading piano samples in the background
   }
@@ -7362,7 +7362,7 @@ const AudioEngine = (() => {
     if (_sfInstrument) {
       try {
         const masterVol = masterGain ? masterGain.gain.value : 0.7;
-        const gainVal   = (velocity / 127) * masterVol * 1.4;
+        const gainVal   = (velocity / 127) * masterVol * 1.0;
         _sfInstrument.play(noteName, ctx.currentTime, {
           duration: (durMs / 1000) * 0.9,
           gain    : gainVal,
@@ -7531,7 +7531,7 @@ const AudioEngine = (() => {
         const masterVol = masterGain ? masterGain.gain.value : 0.7;
         _sfInstrument.play(noteName, ctx.currentTime, {
           duration: 0.6,
-          gain    : (velocity / 127) * masterVol * 1.4,
+          gain    : (velocity / 127) * masterVol * 1.0,
         });
       } catch(e) {}
       return;
