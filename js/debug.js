@@ -75,6 +75,13 @@ var Debug = (function() {
     _add('error', 'Unhandled Promise: ' + event.reason);
   });
 
+  // ── iPad WebMIDIBrowser Shield ──
+  // This browser injects code that calls this global. If not defined, 
+  // it throws ReferenceErrors that can break the UI.
+  if (typeof window._callback_receiveMIDIMessage === 'undefined') {
+    window._callback_receiveMIDIMessage = function() {};
+  }
+
   function show() {
     var overlay = document.getElementById('debug-log-overlay');
     if (!overlay) {
