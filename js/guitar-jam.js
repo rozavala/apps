@@ -327,7 +327,7 @@ const GuitarJam = (() => {
       const completed = p.songsCompleted.find(sc => sc.songId === s.id);
       const stars = completed ? completed.bestStars : 0;
       const starHtml = stars > 0 ? '⭐'.repeat(stars) : '';
-      const uniqueChords = [...new Set(s.progression.map(p => p[0]))];
+      const uniqueChords = Array.from(new Set(s.progression.map(p => p[0])));
       
       return `
         <div class="song-card" onclick="GuitarJam.startSong('${s.id}')">

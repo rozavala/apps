@@ -67,7 +67,7 @@ const SportsArena = (() => {
 
   function getAllSports() {
     const data = _getData();
-    return [...DEFAULT_SPORTS, ...(data.customSports || [])];
+    return DEFAULT_SPORTS.concat(data.customSports || []);
   }
 
   function addCustomSport(sport) {
@@ -334,7 +334,7 @@ const SportsArena = (() => {
     });
 
     // Merge, profiles first
-    const all = [...profileNames];
+    const all = profileNames.slice();
     matchNames.forEach(n => {
       if (!all.includes(n)) all.push(n);
     });
@@ -350,7 +350,7 @@ const SportsArena = (() => {
     weekStart.setDate(now.getDate() - now.getDay());
     weekStart.setHours(0, 0, 0, 0);
 
-    const thisWeek = [...(data.matches || []), ...(data.activities || [])].filter(item => {
+    const thisWeek = (data.matches || []).concat(data.activities || []).filter(item => {
       return new Date(item.date) >= weekStart;
     });
 

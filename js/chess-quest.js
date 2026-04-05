@@ -31,7 +31,7 @@ function newBoard(){
   }
   return b;
 }
-function cloneBoard(b){return b.map(r=>r.map(s=>s?{...s}:null))}
+function cloneBoard(b){return b.map(function(r){return r.map(function(s){return s?Object.assign({},s):null;});})}
 function inBounds(r,c){return r>=0&&r<8&&c>=0&&c<8}
 
 // ── Move generation ──
@@ -58,7 +58,7 @@ function getMoves(board,r,c,checkLegal=true){
 }
 function allMoves(board,color){
   const moves=[];
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]&&board[r][c].color===color)moves.push(...getMoves(board,r,c));
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]&&board[r][c].color===color)moves = moves.concat(getMoves(board,r,c));
   return moves;
 }
 function isInCheck(board,color){
@@ -211,7 +211,7 @@ function openLesson(idx){
   const prog=getUserProgress();
   const learned=new Set(prog.learnedPieces||[]);
   learned.add(l.piece);
-  saveProgress({learnedPieces:[...learned]});
+  saveProgress({learnedPieces:Array.from(learned)});
   showScreen('lesson');
 }
 

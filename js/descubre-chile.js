@@ -429,7 +429,7 @@ function startQuiz(id) {
   const user = getActiveUser();
   const tier = getAgeTier(user ? user.age : null);
 
-  let qs = [...QB[id]];
+  let qs = QB[id].slice();
 
   // Filter: include questions at or below the kid's tier
   const tierOrder = ['beginner', 'intermediate', 'advanced', 'expert'];
@@ -456,7 +456,7 @@ function showQ(){
   if(!qa)return;
   if(qIdx>=qQs.length){finishQ();return}
   const q=qQs[qIdx];
-  const sh=[...q.o].sort(()=>Math.random()-0.5);
+  const sh=q.o.slice().sort(()=>Math.random()-0.5);
   let h='<div class="quiz-top"><div class="quiz-badge">Pregunta '+(qIdx+1)+'/'+qQs.length+'</div><div class="quiz-score">⭐ '+qScore+'</div></div>';
   h+='<div class="quiz-progress-wrap"><div class="quiz-progress-fill" style="width:'+(qIdx/qQs.length*100)+'%"></div></div>';
   h+='<div class="quiz-card" id="qC"><div class="quiz-q-text">'+q.q+'</div></div><div class="quiz-opts">';

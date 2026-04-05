@@ -134,7 +134,7 @@ function generateDistractors(correct, count, min, max) {
     attempts++;
   }
   while (set.size < count + 1) set.add(rand(min, max));
-  return shuffle([...set]);
+  return shuffle(Array.from(set));
 }
 
 /* ================================================================
@@ -228,7 +228,7 @@ function genCadet() {
   if (type === 'shape') {
     const shapes = [ { name: 'Circle', emoji: '⚪' }, { name: 'Triangle', emoji: '🔺' }, { name: 'Square', emoji: '🟧' } ];
     const s = shapes[rand(0, shapes.length - 1)];
-    return { label: 'Shapes', text: s.emoji, hint: 'What shape is this?', answer: s.name, options: shuffle([...shapes.map(x => x.name), 'Star'].slice(0, 4)), mode: 'choice' };
+    return { label: 'Shapes', text: s.emoji, hint: 'What shape is this?', answer: s.name, options: shuffle(shapes.map(function(x){return x.name;}).concat(['Star']).slice(0, 4)), mode: 'choice' };
   }
   const a = rand(1, 10), b = rand(1, 10);
   if (a === b) return genCadet();
