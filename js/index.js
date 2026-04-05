@@ -92,6 +92,8 @@
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
   window.updateParentPin = function() { updateParentPin(); };
+  window.renderChoresList = function() { renderChoresList(); };
+  window.completeChore = function(id) { if (typeof ChoresManager !== 'undefined') ChoresManager.completeChore(id); };
 
   // ── State ──
   var selectedEmoji, selectedColor, selectedAge;
@@ -552,25 +554,10 @@
     } catch(err) {}
   }
 
-  async function openDashboard() {
+  function openDashboard() {
     var content = document.getElementById('dash-content');
 
-    try {
-      if (typeof CloudSync !== 'undefined' && CloudSync.online) {
-        content.innerHTML = '<div style="text-align:center; padding:40px 20px;"><div class="sync-emoji" style="font-size:3rem; margin-bottom:12px; animation: syncPulse 1s infinite;">🔄</div><p style="color:var(--text-muted); font-weight:700;">Syncing latest activity from cloud…</p></div>';
-        document.getElementById('dash-overlay').classList.add('active');
-        try { 
-          await CloudSync.pullAllKids(); 
-        } catch(e) { 
-          console.warn('[Dashboard] Sync pull failed:', e);
-          content.innerHTML += '<p style="color:var(--red); font-size:0.8rem; font-weight:700; margin-top:12px;">⚠️ Sync failed. Showing local data only. Check your connection.</p>';
-          await new Promise(function(r) { setTimeout(r, 1500); });
-        }
-      } else if (typeof CloudSync !== 'undefined' && !CloudSync.online) {
-        document.getElementById('dash-overlay').classList.add('active');
-        content.innerHTML = '<p style="color:var(--orange); font-size:0.85rem; font-weight:700; text-align:center; margin-bottom:20px;">☁️ Offline — showing local data only</p>';
-      }
-
+    var finishOpening = function() {
       var profiles = getProfiles();
         
       if (profiles.length === 0) {
@@ -605,7 +592,7 @@
         allRecent = allRecent.slice(0, 20);
 
         if (allRecent.length === 0) {
-          html += '<p style="color:var(--text-muted); font-size:0.85rem;">No recent activity recorded yet. Start playing to see activity here!</p>';
+          html += '<p style="color:var(--text-muted); font-size:0.85rem;">No recent activity recorded yet.</p>';
         } else {
           html += '<div style="display:flex; flex-direction:column; gap:8px;">';
           allRecent.forEach(function(e) {
@@ -701,10 +688,23 @@
 
       content.innerHTML = html;
       document.getElementById('dash-overlay').classList.add('active');
-    } catch(e) {
-      console.warn('[Dashboard] Render failed:', e);
-      content.innerHTML = '<p style="color:var(--red)">⚠️ Failed to load dashboard data.</p>';
+    };
+
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      content.innerHTML = '<div style="text-align:center; padding:40px 20px;"><div class="sync-emoji" style="font-size:3rem; margin-bottom:12px; animation: syncPulse 1s infinite;">🔄</div><p style="color:var(--text-muted); font-weight:700;">Syncing latest activity from cloud…</p></div>';
       document.getElementById('dash-overlay').classList.add('active');
+      CloudSync.pullAllKids()
+        .then(finishOpening)
+        .catch(function(e) { 
+          console.warn('[Dashboard] Sync pull failed:', e);
+          content.innerHTML += '<p style="color:var(--red); font-size:0.8rem; font-weight:700; margin-top:12px;">⚠️ Sync failed. Showing local data only.</p>';
+          setTimeout(finishOpening, 1500);
+        });
+    } else {
+      if (typeof CloudSync !== 'undefined' && !CloudSync.online) {
+        content.innerHTML = '<p style="color:var(--orange); font-size:0.85rem; font-weight:700; text-align:center; margin-bottom:20px;">☁️ Offline — showing local data only</p>';
+      }
+      finishOpening();
     }
   }
 
@@ -762,7 +762,7 @@
       '<div class="chores-grid">' +
         chores.map(function(c) {
           var isDone = status.completed.indexOf(c.id) !== -1;
-          return '<div class="chore-item ' + (isDone ? 'completed' : '') + '" onclick="ChoresManager.completeChore(\'' + c.id + '\')">' +
+          return '<div class="chore-item ' + (isDone ? 'completed' : '') + '" onclick="completeChore(\'' + c.id + '\')">' +
             '<div class="chore-check">' + (isDone ? '✅' : '○') + '</div>' +
             '<div class="chore-label">' + c.label + '</div>' +
             '<div class="chore-tokens">+' + c.tokens + ' ⭐</div>' +
@@ -820,6 +820,11 @@
               '</div>' +
             '</div>';
         }).join('') +
+      '</div>' +
+      '<div style="margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); text-align:center;">' +
+        '<button class="parent-btn" style="background:#333; font-size:0.8rem;" onclick="if(typeof Debug!==\'undefined\')Debug.show()">' +
+          '🛠 View Debug Log' +
+        '</button>' +
       '</div>';
   }
 
@@ -840,26 +845,26 @@
     renderParentsCorner();
   }
 
-  async function _syncPushAll(btn) {
+  function _syncPushAll(btn) {
     btn.textContent = '⬆️ Pushing...';
     btn.disabled = true;
-    try {
-      await CloudSync.pushAllKids();
-      btn.textContent = '✅ Pushed!';
-    } catch (e) { btn.textContent = '❌ Failed'; }
-    setTimeout(function() { btn.textContent = '⬆️ Push All to Cloud'; btn.disabled = false; }, 2000);
+    CloudSync.pushAllKids()
+      .then(function() { btn.textContent = '✅ Pushed!'; })
+      .catch(function() { btn.textContent = '❌ Failed'; })
+      .then(function() { setTimeout(function() { btn.textContent = '⬆️ Push All to Cloud'; btn.disabled = false; }, 2000); });
   }
 
-  async function _syncPullAll(btn) {
+  function _syncPullAll(btn) {
     btn.textContent = '⬇️ Pulling...';
     btn.disabled = true;
-    try {
-      await CloudSync.pullAllKids();
-      btn.textContent = '✅ Pulled!';
-      updateStatsCards();
-      renderAppCards();
-    } catch (e) { btn.textContent = '❌ Failed'; }
-    setTimeout(function() { btn.textContent = '⬇️ Pull All from Cloud'; btn.disabled = false; }, 2000);
+    CloudSync.pullAllKids()
+      .then(function() {
+        btn.textContent = '✅ Pulled!';
+        updateStatsCards();
+        renderAppCards();
+      })
+      .catch(function() { btn.textContent = '❌ Failed'; })
+      .then(function() { setTimeout(function() { btn.textContent = '⬇️ Pull All from Cloud'; btn.disabled = false; }, 2000); });
   }
 
   function updateKidLimit(idx, val) {

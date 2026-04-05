@@ -45,6 +45,8 @@ const ActivityLog = (() => {
     // Don't log for guest users
     if (typeof isGuestUser === 'function' && isGuestUser()) return;
     
+    if (typeof Debug !== 'undefined') Debug.log('Activity: ' + appName, description);
+
     const entries = _load();
     entries.push({
       app: appName,

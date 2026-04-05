@@ -4,11 +4,13 @@
    Redeem tokens for extra play time or stars.
    ================================================================ */
 
-const ChoresManager = (() => {
-  const CHORES_PREFIX = 'zs_chores_';
-  const TOKEN_VAL_MIN = 5; // 1 token = 5 extra minutes
+var ChoresManager = (function() {
+  'use strict';
 
-  const DEFAULT_CHORES = [
+  var CHORES_PREFIX = 'zs_chores_';
+  var TOKEN_VAL_MIN = 5; // 1 token = 5 extra minutes
+
+  var DEFAULT_CHORES = [
     { id: 'bed',    label: 'Hacer la cama 🛏️', tokens: 1 },
     { id: 'table',  label: 'Poner la mesa 🍽️', tokens: 1 },
     { id: 'toys',   label: 'Recoger juguetes 🧸', tokens: 1 },
@@ -18,34 +20,39 @@ const ChoresManager = (() => {
   ];
 
   function _key() {
-    const user = getActiveUser();
+    var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
     if (!user) return null;
     return CHORES_PREFIX + user.name.toLowerCase().replace(/\s+/g, '_');
   }
 
   function _getData() {
-    const key = _key();
+    var key = _key();
     if (!key) return null;
     try {
-      const data = JSON.parse(localStorage.getItem(key)) || {
+      var item = localStorage.getItem(key);
+      var data = item ? JSON.parse(item) : {
         date: new Date().toISOString().split('T')[0],
         completed: [],
         totalTokens: 0
       };
       // Midnight reset check for completed list (keep totalTokens)
-      const today = new Date().toISOString().split('T')[0];
+      var today = new Date().toISOString().split('T')[0];
       if (data.date !== today) {
         data.date = today;
         data.completed = [];
         _saveData(data);
       }
       return data;
-    } catch { return null; }
+    } catch (e) { return null; }
   }
 
   function _saveData(data) {
-    const key = _key();
-    if (key) localStorage.setItem(key, JSON.stringify(data));
+    var key = _key();
+    if (key) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (e) {}
+    }
   }
 
   function getChores() {
@@ -53,16 +60,31 @@ const ChoresManager = (() => {
   }
 
   function getStatus() {
-    const data = _getData();
+    var data = _getData();
     return data ? data : { completed: [], totalTokens: 0 };
   }
 
   function completeChore(id) {
-    const data = _getData();
+    var data = _getData();
     if (!data) return;
-    if (data.completed.includes(id)) return;
+    
+    // Check if already completed today
+    var alreadyDone = false;
+    for (var i = 0; i < data.completed.length; i++) {
+      if (data.completed[i] === id) {
+        alreadyDone = true;
+        break;
+      }
+    }
+    if (alreadyDone) return;
 
-    const chore = DEFAULT_CHORES.find(c => c.id === id);
+    var chore = null;
+    for (var j = 0; j < DEFAULT_CHORES.length; j++) {
+      if (DEFAULT_CHORES[j].id === id) {
+        chore = DEFAULT_CHORES[j];
+        break;
+      }
+    }
     if (!chore) return;
 
     data.completed.push(id);
@@ -70,18 +92,16 @@ const ChoresManager = (() => {
     _saveData(data);
     _updateUI();
 
-    // Visual feedback (if in hub)
     if (typeof showConfetti === 'function') showConfetti();
   }
 
   function redeemTokens(count) {
-    const data = _getData();
+    var data = _getData();
     if (!data || data.totalTokens < count) return false;
 
     data.totalTokens -= count;
     _saveData(data);
 
-    // Call timer to add time
     if (typeof TimerManager !== 'undefined') {
       TimerManager.addBonus(count * TOKEN_VAL_MIN);
     }
@@ -91,14 +111,19 @@ const ChoresManager = (() => {
   }
 
   function _updateUI() {
-    // Update token balance in user bar
-    const tokenEl = document.getElementById('token-balance');
+    var tokenEl = document.getElementById('token-balance');
     if (tokenEl) {
-      tokenEl.textContent = `⭐ ${getStatus().totalTokens} tokens`;
+      tokenEl.textContent = '⭐ ' + getStatus().totalTokens + ' tokens';
     }
-    // Re-render chores list if open
-    if (typeof renderChoresList === 'function') renderChoresList();
+    if (typeof window.renderChoresList === 'function') {
+      window.renderChoresList();
+    }
   }
 
-  return { getChores, getStatus, completeChore, redeemTokens };
+  return { 
+    getChores: getChores, 
+    getStatus: getStatus, 
+    completeChore: completeChore, 
+    redeemTokens: redeemTokens 
+  };
 })();
