@@ -56,6 +56,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 - **¡Nueva App "Guess Quest"!**: Desarrolla habilidades de deducción adivinando palabras ocultas en inglés y español. (Build deduction skills by guessing hidden words in English and Spanish).
 - **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
 - **"Sports Arena" Ya Disponible**: Registra actividades deportivas al aire libre sin usar el tiempo de pantalla. (Log outdoor sports activities without consuming screen time).
+- **Rotación Inteligente y Panel de Padres (Smart Rotation & Parents Corner)**: Descubre diferentes aplicaciones cada día y administra el uso y límites diarios. (Discover different apps every day and manage usage and daily limits).
 
 ## 🚀 Instalación y Uso (Getting Started)
 
