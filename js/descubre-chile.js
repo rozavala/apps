@@ -380,13 +380,19 @@ const QB={
     {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
     {q:'¿Qué es un atrapanieblas?',a:'Una malla para atrapar agua',o:['Una malla para atrapar agua','Un telescopio especial','Un tipo de tienda de campaña','Un barco de pesca'], tier:'advanced'},
     {q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto'], tier:'advanced'},
-    {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'}
+    {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'},
+    {q:'¿Qué inventó el chileno que creó los atrapanieblas?',a:'Un sistema para sacar agua de la niebla',o:['Un sistema para sacar agua de la niebla','Una estufa a leña','Un panel solar','Un telescopio'], tier:'advanced'},
+    {q:'¿Cuál es el observatorio más importante del norte?',a:'ALMA',o:['ALMA','Hubble','Paranal','Cerro Tololo'], tier:'intermediate'},
+    {q:'¿Qué hizo Pablo Valenzuela?',a:'Ayudó a crear la vacuna contra la hepatitis B',o:['Ayudó a crear la vacuna contra la hepatitis B','Inventó el teléfono','Creó el atrapanieblas','Descubrió un planeta'], tier:'expert'}
   ],
   volcanes:[
     {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced'},
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Unos 100','Alrededor de 50','Menos de 10'], tier:'intermediate'},
     {q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno'], tier:'expert'},
-    {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'}
+    {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'},
+    {q:'¿Qué material arroja un volcán?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Piedras de oro'], tier:'beginner'},
+    {q:'¿Dónde está el Cinturón de Fuego?',a:'En el Océano Pacífico',o:['En el Océano Pacífico','En el Atlántico','En Europa','En África'], tier:'intermediate'},
+    {q:'¿Cómo se llama la abertura por donde sale la lava?',a:'Cráter',o:['Cráter','Cueva','Túnel','Agujero'], tier:'advanced'}
   ],
   animales:[
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
@@ -401,7 +407,10 @@ const QB={
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Menos de 100','Alrededor de 500','Solo 10'], tier:'expert'},
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
-    {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'}
+    {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'},
+    {q:'¿Qué volcán del sur es famoso por su forma de cono perfecto?',a:'Osorno',o:['Osorno','Villarrica','Llaima','Calbuco'], tier:'advanced'},
+    {q:'¿Qué hay dentro del cráter del volcán Villarrica?',a:'Un lago de lava',o:['Un lago de lava','Agua congelada','Piedras preciosas','Una cueva'], tier:'expert'},
+    {q:'¿En qué región se encuentra el volcán Llaima?',a:'Araucanía',o:['Araucanía','Los Lagos','Metropolitana','Coquimbo'], tier:'advanced'}
   ],
   fiestas_patrias:[
     {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},

@@ -21,6 +21,7 @@ const StoryExplorer = (() => {
           vocab: [
             { word: 'condor', wordEs: 'cóndor', def: 'A very large bird that lives in the mountains.', defEs: 'Un ave muy grande que vive en las montañas.' },
             { word: 'ledge', wordEs: 'cornisa', def: 'A flat piece of rock sticking out from a cliff.', defEs: 'Una roca plana que sobresale de un acantilado.' },
+            { word: 'mountain', wordEs: 'montaña', def: 'A very tall hill.', defEs: 'Una colina muy alta.' }
           ]
         },
         {
@@ -63,7 +64,9 @@ const StoryExplorer = (() => {
           en: 'In the central valley of Chile, a horse named Rayo lived on a beautiful farm.',
           es: 'En el valle central de Chile, un caballo llamado Rayo vivía en una hermosa granja.',
           vocab: [
-            { word: 'huaso', wordEs: 'huaso', def: 'A Chilean countryman and skilled horseman.', defEs: 'Un hombre de campo chileno y hábil jinete.' }
+            { word: 'huaso', wordEs: 'huaso', def: 'A Chilean countryman and skilled horseman.', defEs: 'Un hombre de campo chileno y hábil jinete.' },
+            { word: 'horse', wordEs: 'caballo', def: 'A large animal used for riding.', defEs: 'Un animal grande usado para montar.' },
+            { word: 'farm', wordEs: 'granja', def: 'Land used for growing crops or keeping animals.', defEs: 'Tierra usada para cultivar o mantener animales.' }
           ]
         },
         {
@@ -73,7 +76,8 @@ const StoryExplorer = (() => {
             { word: 'saddle', wordEs: 'montura', def: 'A seat for a rider on a horse.', defEs: 'Un asiento para un jinete en un caballo.' },
             { word: 'shiny', wordEs: 'brillante', def: 'Reflecting light.', defEs: 'Que refleja la luz.' },
             { word: 'fields', wordEs: 'campos', def: 'Open areas of land.', defEs: 'Áreas abiertas de tierra.' },
-            { word: 'morning', wordEs: 'mañana', def: 'The early part of the day.', defEs: 'La primera parte del día.' }
+            { word: 'morning', wordEs: 'mañana', def: 'The early part of the day.', defEs: 'La primera parte del día.' },
+            { word: 'beautiful', wordEs: 'hermosa', def: 'Very pleasing to look at.', defEs: 'Muy agradable a la vista.' }
           ]
         }
       ],
@@ -93,7 +97,9 @@ const StoryExplorer = (() => {
           vocab: [
             { word: 'volcano', wordEs: 'volcán', def: 'A mountain that can erupt with lava and ash.', defEs: 'Una montaña que puede entrar en erupción con lava y ceniza.' },
             { word: 'giant', wordEs: 'gigante', def: 'Extremely large.', defEs: 'Extremadamente grande.' },
-            { word: 'perfectly', wordEs: 'perfectamente', def: 'In a complete or flawless way.', defEs: 'De una manera completa o impecable.' }
+            { word: 'perfectly', wordEs: 'perfectamente', def: 'In a complete or flawless way.', defEs: 'De una manera completa o impecable.' },
+            { word: 'lakes', wordEs: 'lagos', def: 'Large bodies of water surrounded by land.', defEs: 'Grandes cuerpos de agua rodeados de tierra.' },
+            { word: 'blue', wordEs: 'azules', def: 'The color of the sky.', defEs: 'El color del cielo.' }
           ]
         },
         {
@@ -101,7 +107,8 @@ const StoryExplorer = (() => {
           es: 'La gente decía que podía susurrar secretos al viento.',
           vocab: [
             { word: 'whisper', wordEs: 'susurrar', def: 'To speak very softly.', defEs: 'Hablar muy suavemente.' },
-            { word: 'secrets', wordEs: 'secretos', def: 'Things that are kept hidden.', defEs: 'Cosas que se mantienen ocultas.' }
+            { word: 'secrets', wordEs: 'secretos', def: 'Things that are kept hidden.', defEs: 'Cosas que se mantienen ocultas.' },
+            { word: 'wind', wordEs: 'viento', def: 'Moving air.', defEs: 'Aire en movimiento.' }
           ]
         }
       ],
@@ -122,7 +129,9 @@ const StoryExplorer = (() => {
           vocab: [
             { word: 'deer', wordEs: 'ciervo', def: 'A hoofed animal with antlers.', defEs: 'Un animal con pezuñas y cuernos.' },
             { word: 'forests', wordEs: 'bosques', def: 'Large areas covered with trees.', defEs: 'Grandes áreas cubiertas de árboles.' },
-            { word: 'tiny', wordEs: 'diminuto', def: 'Very small.', defEs: 'Muy pequeño.' }
+            { word: 'tiny', wordEs: 'diminuto', def: 'Very small.', defEs: 'Muy pequeño.' },
+            { word: 'deep', wordEs: 'profundos', def: 'Going far down or in.', defEs: 'Que llega muy abajo o adentro.' },
+            { word: 'eyes', wordEs: 'ojos', def: 'The parts of the body you see with.', defEs: 'Las partes del cuerpo con las que ves.' }
           ]
         },
         {
@@ -130,13 +139,46 @@ const StoryExplorer = (() => {
           es: 'Era un pudú, el ciervo más pequeño del mundo, y buscaba hojas dulces.',
           vocab: [
             { word: 'smallest', wordEs: 'más pequeño', def: 'The least big.', defEs: 'El menos grande.' },
-            { word: 'leaves', wordEs: 'hojas', def: 'The green parts of a tree or plant.', defEs: 'Las partes verdes de un árbol o planta.' }
+            { word: 'leaves', wordEs: 'hojas', def: 'The green parts of a tree or plant.', defEs: 'Las partes verdes de un árbol o planta.' },
+            { word: 'sweet', wordEs: 'dulces', def: 'Tasting like sugar.', defEs: 'Que sabe a azúcar.' }
           ]
         }
       ],
       quiz: [
         { q: 'What animal is Pablito?', qEs: '¿Qué animal es Pablito?', options: ['A horse', 'A dog', 'A deer', 'A bear'], optionsEs: ['Un caballo', 'Un perro', 'Un ciervo', 'Un oso'], answer: 2 },
         { q: 'What was Pablito looking for?', qEs: '¿Qué buscaba Pablito?', options: ['Water', 'Sweet leaves', 'His mother', 'A cave'], optionsEs: ['Agua', 'Hojas dulces', 'A su madre', 'Una cueva'], answer: 1 }
+      ]
+    },
+    {
+      id: 'lost_compass',
+      title: 'The Lost Compass',
+      titleEs: 'La Brújula Perdida',
+      tier: 'explorer', ageMin: 6, region: 'world', icon: '🧭',
+      pages: [
+        {
+          en: 'Captain Leo looked at his map. He needed his compass to find the north.',
+          es: 'El Capitán Leo miró su mapa. Necesitaba su brújula para encontrar el norte.',
+          vocab: [
+            { word: 'compass', wordEs: 'brújula', def: 'A tool that shows direction.', defEs: 'Una herramienta que muestra la dirección.' },
+            { word: 'north', wordEs: 'norte', def: 'A direction pointing to the top of the earth.', defEs: 'Una dirección que apunta hacia la parte superior de la tierra.' },
+            { word: 'map', wordEs: 'mapa', def: 'A drawing of an area.', defEs: 'Un dibujo de un área.' },
+            { word: 'captain', wordEs: 'capitán', def: 'The leader of a ship.', defEs: 'El líder de un barco.' }
+          ]
+        },
+        {
+          en: 'He found it under a heavy barrel. Now the ship could sail across the ocean safely.',
+          es: 'La encontró debajo de un barril pesado. Ahora el barco podía navegar por el océano de forma segura.',
+          vocab: [
+            { word: 'heavy', wordEs: 'pesado', def: 'Weighing a lot.', defEs: 'Que pesa mucho.' },
+            { word: 'barrel', wordEs: 'barril', def: 'A round wooden container.', defEs: 'Un recipiente redondo de madera.' },
+            { word: 'sail', wordEs: 'navegar', def: 'To travel on water in a ship.', defEs: 'Viajar por el agua en un barco.' },
+            { word: 'ocean', wordEs: 'océano', def: 'A very large body of salt water.', defEs: 'Una masa muy grande de agua salada.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What did the captain lose?', qEs: '¿Qué perdió el capitán?', options: ['His hat', 'His map', 'His compass', 'His boots'], optionsEs: ['Su sombrero', 'Su mapa', 'Su brújula', 'Sus botas'], answer: 2 },
+        { q: 'Where did he find it?', qEs: '¿Dónde la encontró?', options: ['Under a barrel', 'In a box', 'On the deck', 'In the ocean'], optionsEs: ['Debajo de un barril', 'En una caja', 'En la cubierta', 'En el océano'], answer: 0 }
       ]
     }
   ];

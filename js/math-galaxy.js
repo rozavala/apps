@@ -142,8 +142,15 @@ function generateDistractors(correct, count, min, max) {
    ================================================================ */
 
 function genCadet() {
-  const types = ['count', 'add', 'shape', 'bigger', 'planet_count', 'rocket_sub', 'shape_pattern', 'astronaut_count', 'star_add', 'moon_shape', 'alien_count', 'satellite_add', 'sun_shape', 'robot_add', 'meteor_count', 'earth_shape', 'ufo_count', 'telescope_add', 'star_shape', 'sun_count', 'alien_sub', 'sun_add', 'rocket_count'];
+  const types = ['count', 'add', 'shape', 'bigger', 'planet_count', 'rocket_sub', 'shape_pattern', 'astronaut_count', 'star_add', 'moon_shape', 'alien_count', 'satellite_add', 'sun_shape', 'robot_add', 'meteor_count', 'earth_shape', 'ufo_count', 'telescope_add', 'star_shape', 'sun_count', 'alien_sub', 'sun_add', 'rocket_count', 'robot_shape', 'star_count'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'robot_shape') {
+    return { label: 'Robot Shape', text: '🤖', hint: 'What shape is a robot head usually?', answer: 'Square', options: shuffle(['Square', 'Circle', 'Triangle', 'Star']), mode: 'choice' };
+  }
+  if (type === 'star_count') {
+    const n = rand(1, 10);
+    return { label: 'Star Count', text: '⭐'.repeat(n), hint: 'How many stars?', answer: n, options: generateDistractors(n, 3, 1, 10), mode: 'choice' };
+  }
   if (type === 'sun_count') {
     const n = rand(1, 10);
     return { label: 'Suns', text: '☀️'.repeat(n), hint: 'How many suns?', answer: n, options: generateDistractors(n, 3, 1, 10), mode: 'choice' };
@@ -236,8 +243,17 @@ function genCadet() {
 }
 
 function genExplorer() {
-  const types = ['add', 'sub', 'missing', 'compare', 'double', 'alien_add', 'space_compare', 'star_fraction', 'ufo_sub', 'planet_pattern', 'comet_compare', 'meteor_sub', 'moon_pattern', 'rocket_compare', 'astronaut_sub', 'robot_pattern', 'satellite_compare', 'comet_sub', 'alien_pattern', 'planet_compare', 'star_sub', 'rocket_add', 'planet_sub', 'comet_add'];
+  // PRUNED [2026-04-03]: removed planet_compare to make room for moon_add and asteroid_sub
+  const types = ['add', 'sub', 'missing', 'compare', 'double', 'alien_add', 'space_compare', 'star_fraction', 'ufo_sub', 'planet_pattern', 'comet_compare', 'meteor_sub', 'moon_pattern', 'rocket_compare', 'astronaut_sub', 'robot_pattern', 'satellite_compare', 'comet_sub', 'alien_pattern', 'star_sub', 'rocket_add', 'planet_sub', 'comet_add', 'moon_add', 'asteroid_sub'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'moon_add') {
+    const a = rand(4, 9), b = rand(4, 9);
+    return { label: 'Moon Addition', text: `${a} 🌕 + ${b} 🌕 = ?`, hint: 'Add the moons', answer: a + b, options: generateDistractors(a + b, 3, 5, 20), mode: 'choice' };
+  }
+  if (type === 'asteroid_sub') {
+    const a = rand(6, 15), b = rand(1, a - 1);
+    return { label: 'Asteroid Subtraction', text: `${a} 🪨 - ${b} 🪨 = ?`, hint: 'Subtract the asteroids', answer: a - b, options: generateDistractors(a - b, 3, 1, 15), mode: 'choice' };
+  }
   if (type === 'star_sub') {
     const a = rand(6, 15), b = rand(1, a - 1);
     return { label: 'Star Subtraction', text: `${a} ⭐ - ${b} ⭐ = ?`, hint: 'Subtract the stars', answer: a - b, options: generateDistractors(a - b, 3, 1, 15), mode: 'choice' };
@@ -260,12 +276,6 @@ function genExplorer() {
   }
   if (type === 'alien_pattern') {
     return { label: 'Alien Pattern', text: '👽 👾 👽 👾 ?', hint: 'Who is next?', answer: '👽', options: shuffle(['👽', '👾', '🤖', '👨‍🚀']), mode: 'choice' };
-  }
-  if (type === 'planet_compare') {
-    const a = rand(15, 35); let b = rand(15, 35);
-    if (a === b) b = a < 35 ? a + 1 : a - 1;
-    const sym = a > b ? '>' : '<';
-    return { label: 'Planet Orbits', text: `${a} 🪐  ◻  ${b} 🪐`, hint: 'Which is greater?', answer: sym, options: shuffle(['>', '<', '=']), mode: 'choice' };
   }
   if (type === 'astronaut_sub') {
     const a = rand(6, 15), b = rand(1, a - 1);
@@ -327,8 +337,17 @@ function genExplorer() {
 }
 
 function genPilot() {
-  const types = ['mult', 'div', 'frac_visual', 'word', 'missing_mult', 'comet_mult', 'asteroid_div', 'star_word', 'alien_mult', 'satellite_div', 'telescope_frac', 'planet_mult', 'ufo_div', 'rocket_word', 'robot_mult', 'meteor_div', 'alien_word', 'astronaut_mult', 'rocket_div', 'moon_frac', 'comet_div', 'meteor_mult', 'asteroid_mult', 'alien_div'];
+  // PRUNED [2026-04-03]: removed ufo_div to make room for blackhole_div and supernova_mult
+  const types = ['mult', 'div', 'frac_visual', 'word', 'missing_mult', 'comet_mult', 'asteroid_div', 'star_word', 'alien_mult', 'satellite_div', 'telescope_frac', 'planet_mult', 'rocket_word', 'robot_mult', 'meteor_div', 'alien_word', 'astronaut_mult', 'rocket_div', 'moon_frac', 'comet_div', 'meteor_mult', 'asteroid_mult', 'alien_div', 'blackhole_div', 'supernova_mult'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'blackhole_div') {
+    const b = rand(2, 9), ans = rand(2, 9);
+    return { label: 'Black Hole Div', text: `${b * ans} 🕳️ ÷ ${b} = ?`, hint: 'Divide the black holes', answer: ans, options: generateDistractors(ans, 3, 1, 10), mode: 'choice' };
+  }
+  if (type === 'supernova_mult') {
+    const a = rand(4, 9), b = rand(4, 9);
+    return { label: 'Supernova Mult', text: `${a} 💥 × ${b} = ?`, hint: 'Total supernovas?', answer: a * b, options: generateDistractors(a * b, 3, 10, 90), mode: 'choice' };
+  }
   if (type === 'comet_div') {
     const b = rand(2, 8), ans = rand(2, 8);
     return { label: 'Comet Division', text: `${b * ans} ☄️ ÷ ${b} = ?`, hint: 'Divide the comets', answer: ans, options: generateDistractors(ans, 3, 1, 10), mode: 'choice' };
@@ -372,10 +391,6 @@ function genPilot() {
     const a = rand(3, 9), b = rand(3, 9);
     return { label: 'Planet Math', text: `${a} 🪐 × ${b} = ?`, hint: 'Total planets?', answer: a * b, options: generateDistractors(a * b, 3, 5, 90), mode: 'choice' };
   }
-  if (type === 'ufo_div') {
-    const b = rand(2, 8), ans = rand(2, 8);
-    return { label: 'UFO Landing', text: `${b * ans} 🛸 ÷ ${b} = ?`, hint: 'Divide the UFOs', answer: ans, options: generateDistractors(ans, 3, 1, 10), mode: 'choice' };
-  }
   if (type === 'rocket_word') {
     const fuel = rand(6, 15), perShip = rand(2, 4);
     return { label: 'Fleet Supply', text: `A fleet needs ${perShip} fuel units per ship. For ${fuel} ships?`, hint: 'Multiply to find total fuel.', answer: fuel * perShip, options: generateDistractors(fuel * perShip, 3, 10, 60), mode: 'choice' };
@@ -413,8 +428,21 @@ function genPilot() {
 
 function genCommander() {
   // PRUNED [2026-04-03]: Removed 'nebula_pct' and 'pulsar_ops' to make room for 'sci_not' and 'dec_add' and stay within MAX 25 limit.
-  const types = ['big_add', 'big_mult', 'fraction_add', 'decimal', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'robot_ops', 'ufo_decimal', 'rocket_pct', 'blackhole_add', 'asteroid_decimal', 'supernova_pct', 'sci_not', 'dec_add', 'sci_not', 'dec_add'];
+  // PRUNED [2026-04-03]: removed duplicate sci_not and dec_add, added pulsar_pct and quasar_ops
+  const types = ['big_add', 'big_mult', 'fraction_add', 'decimal', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'robot_ops', 'ufo_decimal', 'rocket_pct', 'blackhole_add', 'asteroid_decimal', 'supernova_pct', 'sci_not', 'dec_add', 'pulsar_pct', 'quasar_ops'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'pulsar_pct') {
+    const pcts = [10, 20, 25, 50, 75];
+    const p = pcts[rand(0, pcts.length - 1)];
+    const energy = rand(10, 100) * 10;
+    const ans = energy * (p / 100);
+    return { label: 'Pulsar Energy', text: `${p}% of ${energy} units`, hint: 'Find the percentage.', answer: ans, options: generateDistractors(ans, 3, 5, energy), mode: 'choice' };
+  }
+  if (type === 'quasar_ops') {
+    const a = rand(20, 60), b = rand(4, 12), c = rand(2, 5);
+    const ans = a + (b * c);
+    return { label: 'Quasar Spin', text: `${a} 🎇 + ${b} 🎇 × ${c} = ?`, hint: 'Multiply first!', answer: ans, options: generateDistractors(ans, 3, 20, 150), mode: 'choice' };
+  }
   if (type === 'nebula_pct') {
     const pcts = [10, 20, 25, 50, 75];
     const p = pcts[rand(0, pcts.length - 1)];

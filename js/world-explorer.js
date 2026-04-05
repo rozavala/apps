@@ -252,7 +252,42 @@ const WorldExplorer = (() => {
         ]
       }
     ] },
-    { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [] },
+    { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [
+      {
+        id: 'spain', name: 'Spain', nameEs: 'España', flag: '🇪🇸',
+        capital: 'Madrid', capitalEs: 'Madrid',
+        facts: [
+          { en: 'Spain shares the Iberian Peninsula with Portugal.', es: 'España comparte la península ibérica con Portugal.' },
+          { en: 'Spanish is the second most spoken native language in the world.', es: 'El español es el segundo idioma nativo más hablado del mundo.' },
+          { en: 'The Sagrada Familia is a famous basilica in Barcelona.', es: 'La Sagrada Familia es una famosa basílica en Barcelona.' },
+          { en: 'Spain produces more than half of the world\'s olive oil.', es: 'España produce más de la mitad del aceite de oliva del mundo.' }
+        ],
+        landmark: { name: 'Sagrada Familia', nameEs: 'Sagrada Familia', emoji: '⛪' },
+        animal: { name: 'Iberian Lynx', nameEs: 'Lince Ibérico', emoji: '🐱' },
+        quiz: [
+          { q: 'What is the capital of Spain?', qEs: '¿Cuál es la capital de España?', options: ['Madrid', 'Barcelona', 'Seville', 'Valencia'], optionsEs: ['Madrid', 'Barcelona', 'Sevilla', 'Valencia'], answer: 0 },
+          { q: 'What peninsula is Spain part of?', qEs: '¿De qué península es parte España?', options: ['Italian', 'Balkan', 'Iberian', 'Scandinavian'], optionsEs: ['Italiana', 'Balcánica', 'Ibérica', 'Escandinava'], answer: 2 },
+          { q: 'What famous building is in Barcelona?', qEs: '¿Qué edificio famoso está en Barcelona?', options: ['Colosseum', 'Eiffel Tower', 'Sagrada Familia', 'Pantheon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Sagrada Familia', 'Panteón'], answer: 2 }
+        ]
+      },
+      {
+        id: 'italy', name: 'Italy', nameEs: 'Italia', flag: '🇮🇹',
+        capital: 'Rome', capitalEs: 'Roma',
+        facts: [
+          { en: 'Italy is shaped like a boot.', es: 'Italia tiene forma de bota.' },
+          { en: 'Rome was the center of the Roman Empire.', es: 'Roma fue el centro del Imperio Romano.' },
+          { en: 'Pizza was invented in Naples, Italy.', es: 'La pizza se inventó en Nápoles, Italia.' },
+          { en: 'Vatican City is an independent state inside Rome.', es: 'La Ciudad del Vaticano es un estado independiente dentro de Roma.' }
+        ],
+        landmark: { name: 'Colosseum', nameEs: 'Coliseo', emoji: '🏟️' },
+        animal: { name: 'Italian Wolf', nameEs: 'Lobo Italiano', emoji: '🐺' },
+        quiz: [
+          { q: 'What shape does Italy resemble?', qEs: '¿A qué forma se parece Italia?', options: ['A hat', 'A boot', 'A square', 'A star'], optionsEs: ['Un sombrero', 'Una bota', 'Un cuadrado', 'Una estrella'], answer: 1 },
+          { q: 'What is the capital of Italy?', qEs: '¿Cuál es la capital de Italia?', options: ['Milan', 'Venice', 'Rome', 'Florence'], optionsEs: ['Milán', 'Venecia', 'Roma', 'Florencia'], answer: 2 },
+          { q: 'Where was pizza invented?', qEs: '¿Dónde se inventó la pizza?', options: ['Rome', 'Naples', 'Turin', 'Genoa'], optionsEs: ['Roma', 'Nápoles', 'Turín', 'Génova'], answer: 1 }
+        ]
+      }
+    ] },
     { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [
       {
         id: 'egypt', name: 'Egypt', nameEs: 'Egipto', flag: '🇪🇬',

@@ -66,6 +66,18 @@ const FeManager = (() => {
 
   const SAINTS = [
     {
+      id: 'pablo',
+      name: 'San Pablo',
+      dates: '5–67',
+      country: 'Turquía 🇹🇷',
+      bio: 'Fue un gran misionero que viajó por muchos lugares enseñando sobre Jesús. Escribió muchas de las cartas del Nuevo Testamento.',
+      questions: [
+        { q: '¿A qué se dedicó San Pablo?', a: ['A viajar como misionero', 'A construir barcos', 'A ser soldado'], correct: 0 },
+        { q: '¿Qué escribió San Pablo?', a: ['Poemas', 'Cartas del Nuevo Testamento', 'Libros de historia'], correct: 1 },
+        { q: '¿En qué país actual nació?', a: ['Italia', 'Turquía', 'España'], correct: 1 }
+      ]
+    },
+    {
       id: 'francisco',
       name: 'San Francisco de Asís',
       dates: '1181–1226',
@@ -85,7 +97,8 @@ const FeManager = (() => {
       bio: 'Es la primera santa de Chile. Nació en Santiago y vivió en el monasterio de Los Andes. Es conocida por su alegría y su entrega a Dios desde joven.',
       questions: [
         { q: '¿Dónde nació Santa Teresa de los Andes?', a: ['Roma', 'Santiago', 'Concepción'], correct: 1 },
-        { q: 'Fue la primera santa de...', a: ['Argentina', 'España', 'Chile'], correct: 2 }
+        { q: 'Fue la primera santa de...', a: ['Argentina', 'España', 'Chile'], correct: 2 },
+        { q: '¿Cómo era conocida Santa Teresa?', a: ['Por su tristeza', 'Por su alegría', 'Por su enojo'], correct: 1 }
       ]
     },
     {
@@ -96,7 +109,8 @@ const FeManager = (() => {
       bio: 'Fue un soldado romano que defendió su fe con gran valentía. Es el patrono de los exploradores y se le representa como un caballero valiente.',
       questions: [
         { q: '¿Qué profesión tenía San Jorge?', a: ['Pintor', 'Soldado', 'Cocinero'], correct: 1 },
-        { q: 'Es el patrono de los...', a: ['Exploradores', 'Navegantes', 'Músicos'], correct: 0 }
+        { q: 'Es el patrono de los...', a: ['Exploradores', 'Navegantes', 'Músicos'], correct: 0 },
+        { q: '¿De qué época era San Jorge?', a: ['Siglo III', 'Siglo XX', 'Siglo XV'], correct: 0 }
       ]
     },
     {
@@ -107,7 +121,8 @@ const FeManager = (() => {
       bio: 'Sacerdote jesuita chileno que fundó el Hogar de Cristo para ayudar a las personas más pobres. Siempre decía: "Contento, Señor, contento".',
       questions: [
         { q: '¿Qué institución fundó el Padre Hurtado?', a: ['Un banco', 'El Hogar de Cristo', 'Una universidad'], correct: 1 },
-        { q: '¿Cuál era su frase más famosa?', a: ['"Hola amigos"', '"Contento, Señor, contento"', '"A estudiar mucho"'], correct: 1 }
+        { q: '¿Cuál era su frase más famosa?', a: ['"Hola amigos"', '"Contento, Señor, contento"', '"A estudiar mucho"'], correct: 1 },
+        { q: '¿A qué orden pertenecía el Padre Hurtado?', a: ['Franciscana', 'Dominica', 'Jesuita'], correct: 2 }
       ]
     },
     {
@@ -118,7 +133,8 @@ const FeManager = (() => {
       bio: 'Fue un gran sabio y maestro que amaba estudiar. Escribió muchos libros sobre la fe y la razón, y es conocido como el "Doctor Angélico".',
       questions: [
         { q: '¿Qué le gustaba mucho hacer a Santo Tomás?', a: ['Cazar', 'Estudiar y escribir', 'Navegar'], correct: 1 },
-        { q: '¿Cómo es conocido también?', a: ['El Doctor Angélico', 'El Rey Sabio', 'El Gran Viajero'], correct: 0 }
+        { q: '¿Cómo es conocido también?', a: ['El Doctor Angélico', 'El Rey Sabio', 'El Gran Viajero'], correct: 0 },
+        { q: '¿Sobre qué temas escribió Santo Tomás?', a: ['La fe y la razón', 'La agricultura', 'La navegación'], correct: 0 }
       ]
     },
     {
@@ -129,7 +145,8 @@ const FeManager = (() => {
       bio: 'Es la primera santa de América. Vivió en Lima y dedicó su vida a ayudar a los enfermos y a los necesitados en su propia casa.',
       questions: [
         { q: 'Fue la primera santa de...', a: ['Europa', 'América', 'Asia'], correct: 1 },
-        { q: '¿En qué ciudad vivió?', a: ['Santiago', 'Lima', 'Bogotá'], correct: 1 }
+        { q: '¿En qué ciudad vivió?', a: ['Santiago', 'Lima', 'Bogotá'], correct: 1 },
+        { q: '¿A quiénes ayudaba Santa Rosa en su casa?', a: ['A los soldados', 'A los enfermos y necesitados', 'A los comerciantes'], correct: 1 }
       ]
     },
     {
@@ -140,7 +157,8 @@ const FeManager = (() => {
       bio: 'Conocido como el "Santo de la Escoba" por su humildad. Era un gran enfermero y se dice que podía hacer que perros, gatos y ratones comieran del mismo plato.',
       questions: [
         { q: '¿Cómo es conocido San Martín?', a: ['El Santo de la Escoba', 'El Gran Guerrero', 'El Rey de los Mares'], correct: 0 },
-        { q: '¿Qué animales se dice que alimentó juntos?', a: ['Leones y tigres', 'Perros, gatos y ratones', 'Elefantes y jirafas'], correct: 1 }
+        { q: '¿Qué animales se dice que alimentó juntos?', a: ['Leones y tigres', 'Perros, gatos y ratones', 'Elefantes y jirafas'], correct: 1 },
+        { q: '¿De qué país era San Martín de Porres?', a: ['Chile', 'España', 'Perú'], correct: 2 }
       ]
     },
     {
@@ -151,7 +169,8 @@ const FeManager = (() => {
       bio: 'Fue un soldado que, tras ser herido, decidió dedicar su vida a Dios. Fundó la Compañía de Jesús (los Jesuitas) para enseñar y ayudar en todo el mundo.',
       questions: [
         { q: '¿Qué orden religiosa fundó?', a: ['Los Franciscanos', 'Los Jesuitas', 'Los Dominicos'], correct: 1 },
-        { q: '¿Qué era antes de dedicar su vida a Dios?', a: ['Marinero', 'Soldado', 'Panadero'], correct: 1 }
+        { q: '¿Qué era antes de dedicar su vida a Dios?', a: ['Marinero', 'Soldado', 'Panadero'], correct: 1 },
+        { q: '¿Qué orden fundó San Ignacio?', a: ['Los Jesuitas', 'Los Dominicos', 'Los Franciscanos'], correct: 0 }
       ]
     },
     {
@@ -162,7 +181,8 @@ const FeManager = (() => {
       bio: 'Una gran escritora y maestra que fundó muchos conventos. Es famosa por sus libros y por su valentía para reformar su orden religiosa.',
       questions: [
         { q: '¿Por qué es famosa Santa Teresa de Ávila?', a: ['Por ser una gran escritora', 'Por descubrir un país', 'Por inventar la imprenta'], correct: 0 },
-        { q: '¿Qué fundó en España?', a: ['Muchos hospitales', 'Muchos conventos', 'Muchas escuelas'], correct: 1 }
+        { q: '¿Qué fundó en España?', a: ['Muchos hospitales', 'Muchos conventos', 'Muchas escuelas'], correct: 1 },
+        { q: '¿En qué país nació Santa Teresa?', a: ['España', 'Francia', 'Italia'], correct: 0 }
       ]
     },
     {
@@ -197,7 +217,8 @@ const FeManager = (() => {
       bio: 'Dedicó su vida a cuidar enfermos fundando hospitales. Es un ejemplo de caridad y entrega.',
       questions: [
         { q: '¿A qué se dedicó principalmente?', a: ['A cuidar enfermos', 'A la guerra', 'Al comercio'], correct: 0 },
-        { q: '¿Qué tipo de institución fundó?', a: ['Escuelas', 'Hospitales', 'Bancos'], correct: 1 }
+        { q: '¿Qué tipo de institución fundó?', a: ['Escuelas', 'Hospitales', 'Bancos'], correct: 1 },
+        { q: '¿En qué país nació San Juan de Dios?', a: ['Chile', 'España', 'Portugal'], correct: 1 }
       ]
     }
   ];
@@ -246,6 +267,12 @@ const FeManager = (() => {
       title: 'Fiesta de Andacollo',
       info: 'Gran festividad mariana en el norte chico de Chile. Miles de peregrinos y bailes rinden homenaje a la Virgen.',
       q: '¿Dónde se celebra la Fiesta de Andacollo?', a: ['En el norte chico', 'En Punta Arenas', 'En Santiago'], correct: 0
+    },
+    {
+      id: 'santuario_teresa',
+      title: 'Santuario de Auco',
+      info: 'El santuario de Santa Teresa de Los Andes está en Auco, cerca de Rinconada. Es un gran lugar de peregrinación para los jóvenes chilenos.',
+      q: '¿Dónde está el santuario de Santa Teresa?', a: ['En Auco', 'En Santiago', 'En Valparaíso'], correct: 0
     }
   ];
 
