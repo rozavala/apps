@@ -269,7 +269,7 @@ const TimerManager = (() => {
           </div>
           
           <div class="lock-actions">
-            <button class="lock-btn btn-switch" onclick="TimerManager.switchUser()">🔄 Cambiar Jugador</button>
+            <button class="lock-btn btn-switch" onclick="TimerManager.timerSwitchUser()">🔄 Cambiar Jugador</button>
             <button class="lock-btn btn-parent" id="lock-parent-trigger" onclick="document.getElementById('lock-pin-area').style.display='flex'; this.style.display='none'">🔒 Modo Padres</button>
             
             <div class="lock-pin-area" id="lock-pin-area">
@@ -310,7 +310,7 @@ const TimerManager = (() => {
     }
   }
 
-  function switchUser() {
+  function timerSwitchUser() {
     localStorage.removeItem('zs_active_user');
     window.location.href = 'index.html';
   }
@@ -362,6 +362,6 @@ const TimerManager = (() => {
 
   return { 
     getRemaining, isTimeUp, start, pause, addBonus, addBonusForKid, setMax, reset, getUsed, getDataForKid, pauseAll, resumeAll, isPaused,
-    switchUser, checkLockPin, resetCurrent, addBonusCurrent
+    timerSwitchUser, checkLockPin, resetCurrent, addBonusCurrent
   };
 })();
