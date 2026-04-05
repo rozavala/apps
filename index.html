@@ -33,10 +33,10 @@
 
       <!-- Parent access from login screen (no kid login needed) -->
       <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px;">
-        <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(() => openParentsCorner())">
+        <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(function() { openParentsCorner(); })">
           🔒 Parents Corner
         </button>
-        <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(() => openDashboard())">
+        <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(function() { openDashboard(); })">
           📊 Dashboard
         </button>
       </div>
@@ -209,7 +209,7 @@
         <button class="parent-btn" style="margin-top:0;" onclick="openChores()">
           🏠 Tareas del Hogar
         </button>
-        <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(() => openParentsCorner())">
+        <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(function() { openParentsCorner(); })">
           🔒 Parents Corner
         </button>
         <button class="parent-btn" style="margin-top:0;" onclick="openDashboard()">

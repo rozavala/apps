@@ -1,6 +1,98 @@
 (function() {
   'use strict';
 
+  // ── Public Exports (Direct Assignment at Top) ──
+  window.switchUser = function() {
+    if (isGuestUser()) {
+      _cleanupGuestData();
+    }
+    setActiveUser(null);
+    var hub = document.getElementById('hub-screen');
+    if (hub) hub.classList.remove('active');
+    var login = document.getElementById('login-screen');
+    if (login) login.style.display = '';
+    renderLogin();
+  };
+
+  window.openChores = function() {
+    renderChoresList();
+    var c = document.getElementById('chores-overlay');
+    if (c) c.classList.add('active');
+  };
+
+  window.closeChores = function() {
+    var c = document.getElementById('chores-overlay');
+    if (c) c.classList.remove('active');
+  };
+
+  window.openParentsCorner = function() {
+    renderParentsCorner();
+    var syncEl = document.getElementById('sync-section');
+    if (syncEl && typeof CloudSync !== 'undefined') {
+      var configured = CloudSync.isConfigured();
+      var online = CloudSync.online;
+      syncEl.innerHTML = 
+        '<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">' +
+          '<h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:12px;">' +
+            '☁️ Cloud Sync ' +
+            '<span style="font-size:0.75rem;margin-left:8px;padding:2px 8px;border-radius:99px;' +
+              'background:' + (online ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)') + ';' +
+              'color:' + (online ? '#34D399' : '#F87171') + ';">' +
+              (configured ? (online ? '● Connected' : '● Offline') : '○ Not set up') +
+            '</span>' +
+          '</h3>' +
+          (configured ? 
+            '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+              '<button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;" ' +
+                'onclick="_syncPushAll(this)">⬆️ Push All to Cloud</button>' +
+              '<button class="parent-btn" style="margin:0;font-size:0.8rem;padding:8px 16px;" ' +
+                'onclick="_syncPullAll(this)">⬇️ Pull All from Cloud</button>' +
+            '</div>' +
+            '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">' +
+              'Sync is automatic — progress pushes on save and pulls on login.' +
+            '</p>' : 
+            '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">' +
+              'Set SYNC_SERVER in js/sync.js to sync across devices.' +
+            '</p>') +
+        '</div>';
+    }
+    var p = document.getElementById('parents-overlay');
+    if (p) p.classList.add('active');
+  };
+
+  window.closeParentsCorner = function() {
+    var p = document.getElementById('parents-overlay');
+    if (p) p.classList.remove('active');
+  };
+
+  window.openDashboard = function() { openDashboard(); };
+  window.closeDashboard = function() {
+    var d = document.getElementById('dash-overlay');
+    if (d) d.classList.remove('active');
+  };
+
+  window.exportProgress = function() { exportProgress(); };
+  window.requestPinThen = function(cb) { requestPinThen(cb); };
+  window.submitPin = function() { submitPin(); };
+  window.closePinModal = function() { closePinModal(); };
+  window.createProfile = function() { createProfile(); };
+  window.saveEditProfile = function() { saveEditProfile(); };
+  window.deleteEditingProfile = function() { deleteEditingProfile(); };
+  window.loginAsGuest = function() { loginAsGuest(); };
+  window.openModal = function() { openModal(); };
+  window.closeModal = function() { closeModal(); };
+  window.updateKidLimit = function(idx, val) { updateKidLimit(idx, val); };
+  window.addKidBonus = function(name, mins) { addKidBonus(name, mins); };
+  window.resetKidTimer = function(name) { resetKidTimer(name); };
+  window.toggleAllTimers = function(p) { toggleAllTimers(p); };
+  window._syncPushAll = function(b) { _syncPushAll(b); };
+  window._syncPullAll = function(b) { _syncPullAll(b); };
+  window.openEditModal = function(i) { openEditModal(i); };
+  window.redeemForTime = function() { redeemForTime(); };
+  window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
+  window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
+  window.updateParentPin = function() { updateParentPin(); };
+
   // ── State ──
   var selectedEmoji, selectedColor, selectedAge;
   try {
@@ -12,16 +104,14 @@
     selectedColor = '#7C3AED';
   }
 
-  // Edit state
-  var editingIndex   = -1;
-  var editEmoji      = null;
-  var editColor      = null;
-  var editAge        = null;
+  var editingIndex = -1;
+  var editEmoji = null;
+  var editColor = null;
+  var editAge = null;
+  var pinCallback = null;
 
-  // PIN state
-  var pinCallback    = null;
+  // ── Implementation ──
 
-  // ── Render login screen ──
   function renderLogin() {
     var grid = document.getElementById('profiles-grid');
     var profiles = getProfiles();
@@ -66,7 +156,6 @@
       grid.appendChild(card);
     });
 
-    // Add new card
     var addCard = document.createElement('div');
     addCard.className = 'profile-card add-card';
     addCard.style.animationDelay = (0.1 + profiles.length * 0.05) + 's';
@@ -74,7 +163,6 @@
     addCard.innerHTML = '<div class="add-icon">+</div><div class="add-label">Add Player</div>';
     grid.appendChild(addCard);
 
-    // Guest card
     var guestCard = document.createElement('div');
     guestCard.className = 'profile-card guest-card';
     guestCard.style.animationDelay = (0.15 + profiles.length * 0.05) + 's';
@@ -84,11 +172,6 @@
       '<div class="profile-name">Guest</div>' +
       '<div class="profile-age" style="font-size:0.7rem;">🔒 PIN required</div>';
     grid.appendChild(guestCard);
-  }
-
-  function loginAs(user) {
-    setActiveUser(user);
-    showHub();
   }
 
   function loginAsGuest() {
@@ -123,18 +206,6 @@
       try { localStorage.removeItem(p + key); } catch (e) {}
     });
     try { localStorage.removeItem('littlemaestro_guest_recital'); } catch (e) {}
-  }
-
-  function switchUser() {
-    if (isGuestUser()) {
-      _cleanupGuestData();
-    }
-    setActiveUser(null);
-    var hub = document.getElementById('hub-screen');
-    if (hub) hub.classList.remove('active');
-    var login = document.getElementById('login-screen');
-    if (login) login.style.display = '';
-    renderLogin();
   }
 
   function showHub() {
@@ -554,7 +625,6 @@
       }
 
       html += profiles.map(function(p) {
-        var key = p.name.toLowerCase().replace(/\s+/g, '_');
         var stats = typeof getPlayerStats === 'function' ? getPlayerStats(p.name) : { appStats: {} };
         var appStats = stats.appStats || {};
         var appRows = '';
@@ -804,6 +874,32 @@
     }
   }
 
+  function updateKidChess(idx, val) {
+    var profiles = getProfiles();
+    profiles[idx].chessPlaysPerWeek = parseInt(val);
+    saveProfiles(profiles);
+    var label = document.getElementById('chess-val-' + idx);
+    if (label) {
+      var v = parseInt(val);
+      label.textContent = (v === 7 ? 'Daily' : v === 0 ? 'Off' : v + 'x');
+    }
+  }
+
+  function updateKidFaith(idx, checked) {
+    var profiles = getProfiles();
+    profiles[idx].faithVisible = checked;
+    saveProfiles(profiles);
+    renderAppCards();
+  }
+
+  function updateParentPin() {
+    var input = document.getElementById('new-parent-pin');
+    if (input && input.value.length === 4 && typeof saveParentPin === 'function') {
+      saveParentPin(input.value);
+      alert('PIN updated! ✅');
+    }
+  }
+
   function renderAppCards(user) {
     if (!user) user = getActiveUser();
     if (!user) return;
@@ -1031,32 +1127,6 @@
     closeEditModal();
     switchUser();
   }
-
-  // ── Public Exports (Global) ──
-  window.switchUser = switchUser;
-  window.openChores = function() { renderChoresList(); var c = document.getElementById('chores-overlay'); if (c) c.classList.add('active'); };
-  window.closeChores = function() { var c = document.getElementById('chores-overlay'); if (c) c.classList.remove('active'); };
-  window.openParentsCorner = function() { renderParentsCorner(); var p = document.getElementById('parents-overlay'); if (p) p.classList.add('active'); };
-  window.closeParentsCorner = function() { var p = document.getElementById('parents-overlay'); if (p) p.classList.remove('active'); };
-  window.openDashboard = openDashboard;
-  window.closeDashboard = function() { var d = document.getElementById('dash-overlay'); if (d) d.classList.remove('active'); };
-  window.exportProgress = exportProgress;
-  window.requestPinThen = requestPinThen;
-  window.submitPin = submitPin;
-  window.closePinModal = closePinModal;
-  window.createProfile = createProfile;
-  window.saveEditProfile = saveEditProfile;
-  window.deleteEditingProfile = deleteEditingProfile;
-  window.loginAsGuest = loginAsGuest;
-  window.openModal = openModal;
-  window.closeModal = closeModal;
-  window.updateKidLimit = updateKidLimit;
-  window.addKidBonus = addKidBonus;
-  window.resetKidTimer = resetKidTimer;
-  window.toggleAllTimers = toggleAllTimers;
-  window._syncPushAll = _syncPushAll;
-  window._syncPullAll = _syncPullAll;
-  window.openEditModal = openEditModal;
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', function() {
