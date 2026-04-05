@@ -1,10 +1,47 @@
 (function() {
   'use strict';
 
+  // ── Public Exports (Hoisted) ──
+  window.openChores = openChores;
+  window.openParentsCorner = openParentsCorner;
+  window.openDashboard = openDashboard;
+  window.exportProgress = exportProgress;
+  window.closeDashboard = closeDashboard;
+  window.closeChores = closeChores;
+  window.requestPinThen = requestPinThen;
+  window.closePinModal = closePinModal;
+  window.submitPin = submitPin;
+  window.loginAsGuest = loginAsGuest;
+  window.switchUser = switchUser;
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+  window.createProfile = createProfile;
+  window.saveEditProfile = saveEditProfile;
+  window.deleteEditingProfile = deleteEditingProfile;
+  window.closeEditModal = closeEditModal;
+  window.updateKidLimit = updateKidLimit;
+  window.updateKidChess = updateKidChess;
+  window.updateKidFaith = updateKidFaith;
+  window.toggleAllTimers = toggleAllTimers;
+  window._syncPushAll = _syncPushAll;
+  window._syncPullAll = _syncPullAll;
+  window.openEditModal = openEditModal;
+  window.renderLogin = renderLogin;
+  window.showHub = showHub;
+  window.redeemForTime = redeemForTime;
+  window.addKidBonus = addKidBonus;
+  window.resetKidTimer = resetKidTimer;
+
   // ── State ──
-  let selectedEmoji = AVATARS[0];
-  let selectedColor = COLORS[0];
-  let selectedAge   = null;
+  let selectedEmoji, selectedColor, selectedAge;
+  try {
+    selectedEmoji = (typeof AVATARS !== 'undefined') ? AVATARS[0] : '🦊';
+    selectedColor = (typeof COLORS !== 'undefined') ? COLORS[0] : '#7C3AED';
+    selectedAge   = null;
+  } catch(e) {
+    selectedEmoji = '🦊';
+    selectedColor = '#7C3AED';
+  }
 
   // Edit state
   let editingIndex   = -1;
@@ -483,7 +520,8 @@
   async function openDashboard() {
     const content = document.getElementById('dash-content');
 
-    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+    try {
+      if (typeof CloudSync !== 'undefined' && CloudSync.online) {
       content.innerHTML = '<div style="text-align:center; padding:40px 20px;"><div class="sync-emoji" style="font-size:3rem; margin-bottom:12px; animation: syncPulse 1s infinite;">🔄</div><p style="color:var(--text-muted); font-weight:700;">Syncing latest activity from cloud…</p></div>';
       document.getElementById('dash-overlay').classList.add('active');
       try { 
@@ -491,7 +529,7 @@
       } catch(e) { 
         console.warn('[Dashboard] Sync pull failed:', e);
         content.innerHTML += '<p style="color:var(--red); font-size:0.8rem; font-weight:700; margin-top:12px;">⚠️ Sync failed. Showing local data only. Check your connection.</p>';
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(function(r) { setTimeout(r, 1500); });
       }
     } else if (typeof CloudSync !== 'undefined' && !CloudSync.online) {
       document.getElementById('dash-overlay').classList.add('active');
@@ -740,8 +778,13 @@
       </div>`;
     }).join('');
 
-    content.innerHTML = html;
-    document.getElementById('dash-overlay').classList.add('active');
+      content.innerHTML = html;
+      document.getElementById('dash-overlay').classList.add('active');
+    } catch(e) {
+      console.warn('[Dashboard] Render failed:', e);
+      content.innerHTML = '<p style="color:var(--red)">⚠️ Failed to load dashboard data.</p>';
+      document.getElementById('dash-overlay').classList.add('active');
+    }
   }
 
   function closeDashboard() {
@@ -919,9 +962,10 @@
               </div>
               <div class="pk-setting">
                 <label>Chess per week: <span id="chess-val-${i}">${p.chessPlaysPerWeek !== undefined ? (p.chessPlaysPerWeek === 7 ? 'Daily' : p.chessPlaysPerWeek === 0 ? 'Off' : escHtml(p.chessPlaysPerWeek) + 'x') : '2x'}</span></label>
-                <input type="range" min="0" max="7" step="1" value="${escHtml(p.chessPlaysPerWeek ?? 2)}"
+                <input type="range" min="0" max="7" step="1" value="${escHtml(p.chessPlaysPerWeek !== undefined ? p.chessPlaysPerWeek : 2)}"
                        oninput="updateKidChess(${i}, this.value)">
               </div>
+
               <div class="pk-setting" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
                 <button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" 
                         onclick="addKidBonus(getProfiles()[${i}].name, 15)">+15 min</button>
@@ -1512,12 +1556,13 @@
   });
 
   window.addEventListener('zs:synced', () => {
-    if (document.getElementById('hub-screen')?.classList.contains('active')) {
+    const hub = document.getElementById('hub-screen');
+    if (hub && hub.classList.contains('active')) {
       updateStatsCards(); renderAppCards();
     }
   });
 
-  // ── Init ──
+  // ── Init (last) ──
   (function init() {
     const active = getActiveUser();
     if (active) {
@@ -1526,35 +1571,5 @@
       renderLogin();
     }
   })();
-
-  // ── Public Exports ──
-  window.openChores = openChores;
-  window.openParentsCorner = openParentsCorner;
-  window.openDashboard = openDashboard;
-  window.exportProgress = exportProgress;
-  window.closeDashboard = closeDashboard;
-  window.closeChores = closeChores;
-  window.requestPinThen = requestPinThen;
-  window.closePinModal = closePinModal;
-  window.submitPin = submitPin;
-  window.loginAsGuest = loginAsGuest;
-  window.openModal = openModal;
-  window.closeModal = closeModal;
-  window.createProfile = createProfile;
-  window.saveEditProfile = saveEditProfile;
-  window.deleteEditingProfile = deleteEditingProfile;
-  window.closeEditModal = closeEditModal;
-  window.updateKidLimit = updateKidLimit;
-  window.updateKidChess = updateKidChess;
-  window.updateKidFaith = updateKidFaith;
-  window.toggleAllTimers = toggleAllTimers;
-  window._syncPushAll = _syncPushAll;
-  window._syncPullAll = _syncPullAll;
-  window.openEditModal = openEditModal;
-  window.renderLogin = renderLogin;
-  window.showHub = showHub;
-  window.redeemForTime = redeemForTime;
-  window.addKidBonus = addKidBonus;
-  window.resetKidTimer = resetKidTimer;
 
 })();

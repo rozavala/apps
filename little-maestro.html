@@ -8951,8 +8951,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function _tick() {
-      const cw  = _canvas.width;
-      const ch  = _canvas.height || HIGHWAY_HEIGHT;
+      const cw   = (_canvas && _canvas.width) || 400;
+      const ch2  = (_canvas && _canvas.height) || HIGHWAY_HEIGHT;
+
       // songTime: negative while lead-in, 0 = song starts, positive = into song
       const songTime = (performance.now() - _startedAt) - FALL_DURATION;
 
@@ -9205,7 +9206,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function hideStarScreen() {
-      document.getElementById('fn-star-screen')?.remove();
+      const el = document.getElementById('fn-star-screen');
+      if (el) el.remove();
     }
 
     function show() {
@@ -10515,11 +10517,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <!-- Continue button -->
-        <button class="home-continue" onclick="if(typeof LessonEngine!=='undefined'){LessonEngine.startLesson(${continueSong?.id || 1});if(typeof showScreen!=='undefined')showScreen('lesson');}">
+        <button class="home-continue" onclick="if(typeof LessonEngine!=='undefined'){LessonEngine.startLesson(${(continueSong && continueSong.id) || 1});if(typeof showScreen!=='undefined')showScreen('lesson');}">
           <div class="home-continue-icon">🎵</div>
           <div class="home-continue-text">
             <div class="home-continue-label">Continue Learning</div>
-            <div class="home-continue-title">${continueSong?.title || 'Hot Cross Buns'}</div>
+            <div class="home-continue-title">${(continueSong && continueSong.title) || 'Hot Cross Buns'}</div>
           </div>
           <div class="home-continue-arrow">▶</div>
         </button>
@@ -11322,7 +11324,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // ══════════════════════════════════════════════════════════
       function _showInputModeSelector() {
         // Remove any existing modal
-        document.getElementById('input-mode-overlay')?.remove();
+        const elInput = document.getElementById('input-mode-overlay');
+        if (elInput) elInput.remove();
 
         const midiConnected = (typeof MIDIManager !== 'undefined') &&
                               MIDIManager.getStatus() === 'connected';
@@ -11335,7 +11338,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="input-mode-modal">
             <div class="input-mode-emoji">🎹</div>
             <div class="input-mode-title">Ready to play?</div>
-            <div class="input-mode-subtitle">${_s.song?.title ? '"' + _s.song.title + '"' : 'Let\'s go!'}</div>
+            <div class="input-mode-subtitle">${(_s.song && _s.song.title) ? '"' + _s.song.title + '"' : "Let's go!"}</div>
 
             <div class="input-mode-section-label">How will you play?</div>
             <div class="input-mode-choices">
@@ -11426,7 +11429,7 @@ document.addEventListener('DOMContentLoaded', () => {
       function _startMetronome() {
         _stopMetronome();
         if (!_s.metronomeEnabled) return;
-        const bpm        = (_s.song?.bpm && _s.song.bpm[_s.tempo]) || 100;
+        const bpm        = (_s.song && _s.song.bpm && _s.song.bpm[_s.tempo]) || 100;
         const intervalMs = Math.round(60000 / bpm);
         _s.metronomeBeat = 0;
 
@@ -11622,7 +11625,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function _handleNoteInput(playedNote) {
         const rhNotes   = _rhNotes();
-        const expected  = _normalize(rhNotes[_s.noteIndex]?.note || '');
+        const expected  = _normalize((rhNotes[_s.noteIndex] && rhNotes[_s.noteIndex].note) || '');
         const played    = _normalize(playedNote);
 
         // Play audio feedback and highlight virtual keyboard
@@ -11692,7 +11695,8 @@ document.addEventListener('DOMContentLoaded', () => {
         _s.noteIndex     = 0;
         _s.midiHandlerId = Date.now();
 
-        document.getElementById('stuck-panel')?.remove();
+        const elStuck = document.getElementById('stuck-panel');
+        if (elStuck) elStuck.remove();
         const banner = document.getElementById('note-instruction-banner');
         if (banner) banner.classList.add('banner--hidden');
 
@@ -11903,7 +11907,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function _awardStars(stars) {
         // Remove parent review overlay
-        document.getElementById('parent-review-overlay')?.remove();
+        const elReview = document.getElementById('parent-review-overlay');
+        if (elReview) elReview.remove();
 
         // Save stars
         GamificationManager.awardStars(_s.songId, stars);
@@ -12010,7 +12015,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ── Clean up stale overlays from any previous lesson ──
         document.getElementById('lesson-meet-overlay')?.remove();
-        document.getElementById('input-mode-overlay')?.remove();
+        const elInput = document.getElementById('input-mode-overlay');
+        if (elInput) elInput.remove();
         document.getElementById('lesson-mode-select-overlay')?.remove();
         document.getElementById('lesson-exit-modal-overlay')?.remove();
         document.querySelectorAll('.celebration-overlay,.confetti-wrap,.fn-star-screen,.parent-review-overlay,.next-song-reveal').forEach(el => el.remove());
@@ -12108,7 +12114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         _clearMIDI();
         document.getElementById('lesson-exit-modal-overlay')?.remove();
         document.getElementById('lesson-meet-overlay')?.remove();
-        document.getElementById('input-mode-overlay')?.remove();
+        const elInput = document.getElementById('input-mode-overlay');
+        if (elInput) elInput.remove();
         document.getElementById('lesson-mode-select-overlay')?.remove();
         document.querySelectorAll('.celebration-overlay,.confetti-wrap,.fn-star-screen,.parent-review-overlay').forEach(el => el.remove());
         if (typeof FallingNotes !== 'undefined') FallingNotes.stop();
@@ -14392,7 +14399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
         const s = _getSettings();
 
-        const vol       = s.masterVolume     ?? 0.7;
+        const vol       = s.masterVolume !== undefined ? s.masterVolume : 0.7;
         const tempo     = s.tempoPreference  || 'normal';
         const noteNames = s.showNoteNames    !== false;
         const melodyOn  = s.melodyEnabled    !== false;

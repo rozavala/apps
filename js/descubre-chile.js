@@ -115,6 +115,15 @@ function openRegion(id){
 }
 function closeRegion(){const m=document.getElementById('regionModal');if(m)m.classList.remove('active')}
 
+window.openRegion = openRegion;
+window.closeRegion = closeRegion;
+window.startQuiz = startQuiz;
+window.ans = ans;
+window.initMemory = initMemory;
+window.renderQuizMenu = renderQuizMenu;
+window.renderTopics = renderTopics;
+window.renderStories = renderStories;
+
 // ── STORIES ──
 const TOPICS=[
   {id:'geography',icon:'🏔️',name:'Geografía',stories:[
@@ -401,8 +410,6 @@ const QB={
     {q:'¿Qué animal representa el cortejo de la Cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Cóndor y águila','Puma y huemul','Caballo y yegua'], tier:'intermediate'}
   ]
 };
-
-let qTopic='',qQs=[],qIdx=0,qScore=0;
 
 function renderQuizMenu(){
   const prog=getUserProgress();

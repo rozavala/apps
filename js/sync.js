@@ -39,22 +39,20 @@ const CloudSync = (() => {
         return { kidKey, appName };
       }
     }
-    return null;
-  }
+    async function _fetchWithTimeout(url, options = {}) {
+      const timeout = options.timeout || 8000;
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
 
-  async function _fetchWithTimeout(url, options = {}) {
-    const { timeout = 5000 } = options;
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(id);
-      return response;
-    } catch (e) {
-      clearTimeout(id);
-      throw e;
+      try {
+        const response = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
+        clearTimeout(id);
+        return response;
+      } catch (error) {
+        clearTimeout(id);
+        throw error;
+      }
     }
-  }
 
   state.push = async (key) => {
     if (!state.isConfigured() || !state.online) return;
@@ -69,14 +67,19 @@ const CloudSync = (() => {
 
       // Strip large art data
       if (info.appName === 'art' && data.gallery) {
-        data.gallery = data.gallery.map(item => ({ ...item, dataUrl: undefined }));
+        data.gallery = data.gallery.map(function(item) {
+          const newItem = Object.assign({}, item);
+          delete newItem.dataUrl;
+          return newItem;
+        });
       }
 
       _updatePill('syncing');
       const ts = Date.now();
       const payload = Array.isArray(data)
         ? { _isList: true, _items: data, _syncedAt: ts }
-        : { ...data, _syncedAt: ts };
+        : Object.assign({}, data, { _syncedAt: ts });
+
       await _fetchWithTimeout(`${SYNC_SERVER}/api/kids/${info.kidKey}/${info.appName}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -86,14 +89,10 @@ const CloudSync = (() => {
       // Write _syncedAt back to localStorage so local & server timestamps match.
       // Prevents stale data from "winning" conflicts via clock skew.
       try {
-        const raw = localStorage.getItem(key);
-        if (raw) {
-          const current = JSON.parse(raw);
-          if (Array.isArray(current)) {
-            // For arrays, we can't easily add a property without changing the type
-            // but we can store the sync time in a companion key or handle it during pull.
-            // For now, the pull logic handles lTime=0 for arrays which forces a pull.
-          } else {
+        const rawReload = localStorage.getItem(key);
+        if (rawReload) {
+          const current = JSON.parse(rawReload);
+          if (!Array.isArray(current)) {
             current._syncedAt = ts;
             localStorage.setItem(key, JSON.stringify(current));
           }
@@ -121,7 +120,10 @@ const CloudSync = (() => {
 
       if (serverData) {
         let localData = {};
-        try { localData = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
+        try {
+          const rawLocal = localStorage.getItem(key);
+          localData = rawLocal ? JSON.parse(rawLocal) : {};
+        } catch(e) {}
         
         const sTime = Number(serverData._syncedAt) || 0;
         const lTime = Number(localData._syncedAt) || 0;
@@ -134,7 +136,7 @@ const CloudSync = (() => {
             toStore = serverData._items;
           }
           if (info.appName === 'art' && !Array.isArray(toStore)) {
-            const merged = { ...toStore, gallery: localData.gallery || [] };
+            const merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
             localStorage.setItem(key, JSON.stringify(merged));
           } else {
             localStorage.setItem(key, JSON.stringify(toStore));
@@ -168,7 +170,10 @@ const CloudSync = (() => {
         if (allData[appName]) {
           const serverData = allData[appName];
           let localData = {};
-          try { localData = JSON.parse(localStorage.getItem(key)) || {}; } catch(e) {}
+          try {
+            const rawLocal = localStorage.getItem(key);
+            localData = rawLocal ? JSON.parse(rawLocal) : {};
+          } catch(e) {}
           
           const sTime = Number(serverData._syncedAt) || 0;
           const lTime = Number(localData._syncedAt) || 0;
@@ -181,7 +186,7 @@ const CloudSync = (() => {
               toStore = serverData._items;
             }
             if (appName === 'art' && !Array.isArray(toStore)) {
-              const merged = { ...toStore, gallery: localData.gallery || [] };
+              const merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
               localStorage.setItem(key, JSON.stringify(merged));
             } else {
               localStorage.setItem(key, JSON.stringify(toStore));
@@ -199,7 +204,10 @@ const CloudSync = (() => {
       if (allData['lm_recital']) {
         const sData = allData['lm_recital'];
         let lData = {};
-        try { lData = JSON.parse(localStorage.getItem(rKey)) || {}; } catch(e) {}
+        try {
+          const rawRecital = localStorage.getItem(rKey);
+          lData = rawRecital ? JSON.parse(rawRecital) : {};
+        } catch(e) {}
         
         const sTime = Number(sData._syncedAt) || 0;
         const lTime = Number(lData._syncedAt) || 0;
@@ -231,7 +239,7 @@ const CloudSync = (() => {
     }
     const rKey = 'littlemaestro_' + kidKey + '_recital';
     if (localStorage.getItem(rKey)) promises.push(state.push(rKey));
-    await Promise.allSettled(promises);
+    await Promise.all(promises);
   };
 
   state.syncProfiles = async () => {
@@ -242,7 +250,8 @@ const CloudSync = (() => {
       const localProfiles = (typeof getProfiles === 'function') ? getProfiles() : [];
       
       const map = new Map();
-      [...serverProfiles, ...localProfiles].forEach(p => {
+      [].concat(serverProfiles, localProfiles).forEach(function(p) {
+        if (!p || !p.name) return;
         const key = p.name.toLowerCase();
         if (!map.has(key) || (p.age > map.get(key).age)) {
           map.set(key, p);
@@ -275,18 +284,22 @@ const CloudSync = (() => {
   };
 
   state.pushAllKids = async () => {
+    if (!state.isConfigured() || !state.online) return;
     const profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
     for (const p of profiles) {
-      await state.pushAll(p.name.toLowerCase().replace(/\s+/g, '_'));
+      const kidKey = p.name.toLowerCase().replace(/\s+/g, '_');
+      await state.pushAll(kidKey);
     }
     await state.syncProfiles();
   };
 
   state.pullAllKids = async () => {
+    if (!state.isConfigured() || !state.online) return;
     await state.syncProfiles();
     const profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
     for (const p of profiles) {
-      await state.pullAll(p.name.toLowerCase().replace(/\s+/g, '_'));
+      const kidKey = p.name.toLowerCase().replace(/\s+/g, '_');
+      await state.pullAll(kidKey);
     }
     window.dispatchEvent(new CustomEvent('zs:synced'));
   };
@@ -297,7 +310,7 @@ const CloudSync = (() => {
       pill = document.createElement('div');
       pill.id = 'zs-sync-pill';
       pill.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9000;background:var(--bg-surface,#1E1B2E);border:1.5px solid rgba(255,255,255,0.08);border-radius:99px;padding:6px 12px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(0,0,0,0.3);color:#fff;';
-      pill.onclick = () => {
+      pill.onclick = function() {
         if (!state.isConfigured()) alert('Cloud Sync not configured. Edit js/sync.js and set SYNC_SERVER to your VPS Tailscale IP.');
       };
       document.body.appendChild(pill);
@@ -317,22 +330,20 @@ const CloudSync = (() => {
   document.addEventListener('DOMContentLoaded', async () => {
     if (!state.isConfigured()) { _updatePill('unconfigured'); return; }
     
-    // Faster connectivity check
     try {
       const res = await _fetchWithTimeout(`${SYNC_SERVER}/api/ping`, { timeout: 2000 });
       if (res.ok) {
         state.online = true;
         _updatePill('idle');
 
-        // Auto-sync profiles on the hub so all devices see the same player list
-        const isHub = window.location.pathname.endsWith('index.html')
+        const isHub = window.location.pathname.indexOf('index.html') !== -1
                    || window.location.pathname === '/'
-                   || window.location.pathname.endsWith('/');
+                   || (window.location.pathname.length > 0 && window.location.pathname[window.location.pathname.length - 1] === '/');
         if (isHub) {
           try {
             await state.syncProfiles();
-            // Re-render login screen if it's visible (profiles may have changed)
-            if (typeof renderLogin === 'function' && document.getElementById('login-screen')?.style.display !== 'none') {
+            const loginScr = document.getElementById('login-screen');
+            if (typeof renderLogin === 'function' && loginScr && loginScr.style.display !== 'none') {
               renderLogin();
             }
           } catch (e) {
