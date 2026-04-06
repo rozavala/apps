@@ -34,6 +34,8 @@ A core feature of the Zavala Serra Apps suite is helping kids develop healthy di
 - **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres.
 - **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra.
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
+- **Sincronización Familiar (Family Sync)**: Respalda el progreso opcionalmente a un servidor familiar local vía Tailscale (CloudSync).
+- **Rotación de Apps (Daily App Rotation)**: Las apps disponibles en el hub cambian diariamente para evitar la monotonía y fomentar diferentes habilidades.
 
 ## 🛠️ Key Features
 
@@ -86,6 +88,20 @@ Para la mejor experiencia en dispositivos móviles:
 - `css/`: Stylesheets for the hub and individual apps.
 - `js/`: Core logic, authentication, and app-specific scripts.
 - `little-maestro.html`, `math-galaxy.html`, etc.: Individual application entry points.
+
+## 🚀 ¡Para los Exploradores! (For the Explorers)
+
+```text
+   / \
+  |   |
+  |   |
+ /|   |\
+/ |   | \
+| |   | |
+|  ===  |
+ \_/ \_/
+```
+¡Prepara tu nave y empieza a explorar el mundo del aprendizaje!
 
 ---
 *Made with ♥ for the Zavala Serra kids.*
