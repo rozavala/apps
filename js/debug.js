@@ -124,16 +124,41 @@ var Debug = (function() {
   }
 
   function showStorageReport() {
-    var report = 'LocalStorage Usage:\n\n';
+    var list = document.getElementById('debug-log-list');
+    if (!list) return;
+    
+    var items = [];
     var total = 0;
     for (var i = 0; i < localStorage.length; i++) {
       var key = localStorage.key(i);
-      var size = localStorage.getItem(key).length * 2; // ~2 bytes per char (UTF-16)
+      var val = localStorage.getItem(key);
+      var size = val.length * 2;
       total += size;
-      report += (size / 1024).toFixed(1) + ' KB - ' + key + '\n';
+      items.push({ key: key, size: size });
     }
-    report += '\nTotal: ' + (total / (1024 * 1024)).toFixed(2) + ' MB / 5.00 MB';
-    alert(report);
+    
+    items.sort(function(a, b) { return b.size - a.size; });
+    
+    var html = '<div style="background:#1a1a2e; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #3b82f655;">' +
+      '<h3 style="margin-top:0">📊 Storage Manager</h3>' +
+      '<p style="font-size:12px; color:#aaa;">Total Usage: ' + (total / (1024 * 1024)).toFixed(2) + ' MB / 5.00 MB</p>' +
+      '<button onclick="Debug.render()" style="background:#333; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px;">Back to Logs</button>' +
+      '<div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">';
+    
+    items.forEach(function(item) {
+      var mb = (item.size / (1024 * 1024)).toFixed(2);
+      var color = item.size > 1000000 ? '#ef4444' : (item.size > 100000 ? '#f59e0b' : '#34d399');
+      html += '<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:rgba(255,255,255,0.03); border-radius:4px; font-size:12px;">' +
+        '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:10px;">' +
+          '<b style="color:' + color + '">' + mb + ' MB</b> - ' + item.key +
+        '</div>' +
+        '<button onclick="if(confirm(\'Delete ' + item.key + '?\')){localStorage.removeItem(\'' + item.key + '\'); Debug.showStorageReport();}" ' +
+        'style="background:#ef444433; color:#ef4444; border:1px solid #ef444455; padding:2px 8px; border-radius:4px; cursor:pointer;">Delete</button>' +
+      '</div>';
+    });
+    
+    html += '</div></div>';
+    list.innerHTML = html;
   }
 
   function render() {
