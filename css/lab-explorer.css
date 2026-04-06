@@ -90,6 +90,15 @@ body {
 .lab-progress-bar { height: 100%; background: linear-gradient(90deg, #10B981, #34D399); border-radius: 99px; transition: width 0.5s; }
 .lab-progress-text { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
 
+/* Plant Lab Controls */
+.plant-controls { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; align-items: center; }
+.plant-controls .action-btn { margin-bottom: 0; padding: 12px 24px; font-size: 1rem; }
+.resource-bars { display: flex; width: 100%; max-width: 280px; gap: 12px; margin-top: 8px; }
+.resource-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+.resource-fill { height: 100%; transition: width 0.2s linear; }
+.bg-blue { background: #3B82F6; }
+.bg-yellow { background: #FBBF24; }
+
 /* Experiment Screen */
 .exp-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
 .back-btn {

@@ -40,7 +40,7 @@ const LabExplorer = (() => {
       category: 'biology',
       ageMin: 4,
       experiments: [
-        { id: 'growth',  title: 'Growing Plants',   instruction: 'Plant growth simulation coming soon!' },
+        { id: 'growth',  title: 'Growing Plants',   instruction: 'Tap the Water and Sunlight buttons to help your seed grow into a flower!' },
       ]
     },
     {
@@ -185,6 +185,8 @@ const LabExplorer = (() => {
       _initColorLab();
     } else if (labId === 'water' && expId === 'cycle') {
       _initWaterLab();
+    } else if (labId === 'plants' && expId === 'growth') {
+      _initPlantLab();
     } else {
       _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
@@ -489,6 +491,212 @@ const LabExplorer = (() => {
       const offset = Math.sin(Date.now() / 150) * 5;
       ctx.fillText('Tap Cloud!', 460, 20 + offset);
     }
+  }
+
+  // ── Plant Growth Lab Implementation ──
+  let plantState = {
+    growth: 0,
+    waterLevel: 0,
+    sunlightLevel: 0,
+    stage: 0, // 0: Seed, 1: Sprout, 2: Stem, 3: Flower
+    particles: [],
+    animFrame: null
+  };
+
+  function _initPlantLab() {
+    if (plantState.animFrame) cancelAnimationFrame(plantState.animFrame);
+
+    plantState = {
+      growth: 0,
+      waterLevel: 0,
+      sunlightLevel: 0,
+      stage: 0,
+      particles: [],
+      animFrame: null
+    };
+
+    const controls = document.getElementById('exp-controls');
+    controls.innerHTML += `
+      <div class="plant-controls">
+        <button class="action-btn btn-primary" id="btn-water">💧 Give Water</button>
+        <button class="action-btn btn-primary" id="btn-sun" style="background: linear-gradient(135deg, #F59E0B, #FBBF24);">☀️ Give Sunlight</button>
+        <div class="resource-bars">
+          <div class="resource-bar"><div class="resource-fill bg-blue" id="water-bar" style="width: 0%"></div></div>
+          <div class="resource-bar"><div class="resource-fill bg-yellow" id="sun-bar" style="width: 0%"></div></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-water').onclick = () => {
+      plantState.waterLevel = Math.min(1, plantState.waterLevel + 0.3);
+      for(let i=0; i<10; i++) {
+        plantState.particles.push({
+          x: canvas.width/2 - 50 + Math.random()*100,
+          y: 50,
+          vy: 2 + Math.random()*3,
+          color: '#3B82F6',
+          type: 'water'
+        });
+      }
+      if (typeof playSound === 'function') playSound('click');
+    };
+
+    document.getElementById('btn-sun').onclick = () => {
+      plantState.sunlightLevel = Math.min(1, plantState.sunlightLevel + 0.3);
+      for(let i=0; i<10; i++) {
+        plantState.particles.push({
+          x: canvas.width/2 - 100 + Math.random()*200,
+          y: 0,
+          vy: 1 + Math.random()*2,
+          color: '#FBBF24',
+          type: 'sun'
+        });
+      }
+      if (typeof playSound === 'function') playSound('click');
+    };
+
+    _plantLabLoop();
+  }
+
+  function _plantLabLoop() {
+    if (!currentLab || currentLab.id !== 'plants') {
+      if (plantState.animFrame) cancelAnimationFrame(plantState.animFrame);
+      return;
+    }
+
+    plantState.animFrame = requestAnimationFrame(_plantLabLoop);
+
+    // Decrease resources slowly
+    plantState.waterLevel = Math.max(0, plantState.waterLevel - 0.001);
+    plantState.sunlightLevel = Math.max(0, plantState.sunlightLevel - 0.001);
+
+    // Update UI bars
+    const wBar = document.getElementById('water-bar');
+    const sBar = document.getElementById('sun-bar');
+    if (wBar) wBar.style.width = `${plantState.waterLevel * 100}%`;
+    if (sBar) sBar.style.width = `${plantState.sunlightLevel * 100}%`;
+
+    // Growth logic
+    if (plantState.waterLevel > 0.1 && plantState.sunlightLevel > 0.1 && plantState.growth < 100) {
+      plantState.growth += 0.05 + (plantState.waterLevel * 0.05) + (plantState.sunlightLevel * 0.05);
+
+      // Stage milestones
+      if (plantState.growth >= 25 && plantState.stage === 0) {
+        plantState.stage = 1;
+        stars++;
+        document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+        _showFeedback('🌱');
+        if (typeof playSound === 'function') playSound('correct');
+        _addJournalEntry('Sprout: The seed has germinated and broken through the soil!');
+      } else if (plantState.growth >= 50 && plantState.stage === 1) {
+        plantState.stage = 2;
+        stars++;
+        document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+        _showFeedback('🌿');
+        if (typeof playSound === 'function') playSound('correct');
+        _addJournalEntry('Stem: The plant grows taller to reach more sunlight.');
+      } else if (plantState.growth >= 100 && plantState.stage === 2) {
+        plantState.stage = 3;
+        plantState.growth = 100;
+        stars++;
+        document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+        _showFeedback('🌻');
+        if (typeof playSound === 'function') playSound('correct');
+        _addJournalEntry('Flower: The mature plant produces a flower!');
+        document.getElementById('next-btn').style.display = 'block';
+        if (typeof ActivityLog !== 'undefined') {
+          ActivityLog.log('Lab Explorer', '🌱', 'Completed the Plant Growth experiment!');
+        }
+        _saveProgress();
+      }
+    }
+
+    // Update particles
+    for (let i = plantState.particles.length - 1; i >= 0; i--) {
+      let p = plantState.particles[i];
+      p.y += p.vy;
+      if (p.y > canvas.height - 50) {
+        plantState.particles.splice(i, 1);
+      }
+    }
+
+    _drawPlantLab();
+  }
+
+  function _drawPlantLab() {
+    // Sky
+    ctx.fillStyle = '#E0F6FF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dirt
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+    ctx.fillStyle = '#654321';
+    ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+
+    const cx = canvas.width / 2;
+    const groundY = canvas.height - 100;
+
+    // Plant based on stage
+    if (plantState.stage === 0) {
+      // Seed
+      ctx.fillStyle = '#D2B48C';
+      ctx.beginPath();
+      ctx.ellipse(cx, groundY + 20, 10, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (plantState.stage === 1) {
+      // Sprout
+      ctx.strokeStyle = '#22C55E';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(cx, groundY + 10);
+      ctx.lineTo(cx, groundY - 20);
+      ctx.stroke();
+      // Leaves
+      ctx.fillStyle = '#22C55E';
+      ctx.beginPath(); ctx.ellipse(cx - 10, groundY - 15, 8, 4, Math.PI/4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 10, groundY - 15, 8, 4, -Math.PI/4, 0, Math.PI * 2); ctx.fill();
+    } else if (plantState.stage >= 2) {
+      // Stem
+      const height = plantState.stage === 2 ? 80 : 150;
+      ctx.strokeStyle = '#16A34A';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx, groundY + 10);
+      ctx.lineTo(cx, groundY - height);
+      ctx.stroke();
+
+      // Leaves
+      ctx.fillStyle = '#16A34A';
+      ctx.beginPath(); ctx.ellipse(cx - 20, groundY - 40, 15, 8, Math.PI/6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 20, groundY - 60, 15, 8, -Math.PI/6, 0, Math.PI * 2); ctx.fill();
+
+      if (plantState.stage === 3) {
+        ctx.beginPath(); ctx.ellipse(cx - 15, groundY - 100, 12, 6, Math.PI/4, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx + 15, groundY - 120, 12, 6, -Math.PI/4, 0, Math.PI * 2); ctx.fill();
+
+        // Flower
+        const fy = groundY - 150;
+        ctx.fillStyle = '#EF4444'; // Red petals
+        for(let i=0; i<8; i++) {
+          ctx.beginPath();
+          ctx.ellipse(cx + Math.cos(i*Math.PI/4)*15, fy + Math.sin(i*Math.PI/4)*15, 12, 12, 0, 0, Math.PI*2);
+          ctx.fill();
+        }
+        ctx.fillStyle = '#FBBF24'; // Yellow center
+        ctx.beginPath();
+        ctx.arc(cx, fy, 15, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    // Particles
+    plantState.particles.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.type === 'water' ? 3 : 2, 0, Math.PI*2);
+      ctx.fill();
+    });
   }
 
   // ── Color Lab Implementation ──
