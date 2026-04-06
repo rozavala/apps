@@ -48,15 +48,21 @@ var CloudSync = (function() {
   function _fetchWithTimeout(url, options) {
     if (!options) options = {};
     var timeout = options.timeout || 8000;
-    var controller = new AbortController();
-    var id = setTimeout(function() { controller.abort(); }, timeout);
+    
+    if (typeof AbortController !== 'undefined') {
+      var controller = new AbortController();
+      var id = setTimeout(function() { controller.abort(); }, timeout);
 
-    var fetchOpts = Object.assign({}, options, { signal: controller.signal });
-    delete fetchOpts.timeout;
+      var fetchOpts = Object.assign({}, options, { signal: controller.signal });
+      delete fetchOpts.timeout;
 
-    return fetch(url, fetchOpts)
-      .then(function(res) { clearTimeout(id); return res; })
-      .catch(function(err) { clearTimeout(id); throw err; });
+      return fetch(url, fetchOpts)
+        .then(function(res) { clearTimeout(id); return res; })
+        .catch(function(err) { clearTimeout(id); throw err; });
+    } else {
+      // Fallback for browsers without AbortController
+      return fetch(url, options);
+    }
   }
 
   function _mergeLists(listA, listB) {
@@ -206,13 +212,15 @@ var CloudSync = (function() {
   state.pullAll = function(kidKey) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     _updatePill('syncing');
+    if (typeof Debug !== 'undefined') Debug.log('[Sync] Pulling all for ' + kidKey);
     return _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + kidKey)
       .then(function(res) {
-        if (!res.ok) throw new Error('Server error');
+        if (!res.ok) throw new Error('Server error (' + res.status + ')');
         return res.json();
       })
       .then(function(allData) {
         var changed = false;
+        var promises = [];
         for (var prefix in KEY_MAP) {
           var appName = KEY_MAP[prefix];
           var key = prefix + kidKey;
@@ -245,16 +253,16 @@ var CloudSync = (function() {
                 } else {
                   localStorage.setItem(key, JSON.stringify(toStore));
                 }
+                changed = true;
               } catch (storageError) {
                 if (typeof Debug !== 'undefined') {
                   Debug.error('[Sync] Quota Exceeded in pullAll', key + ' size: ' + JSON.stringify(toStore).length);
                 }
                 throw storageError;
               }
-              changed = true;
             }
           } else if (localStorage.getItem(key)) {
-            state.push(key);
+            promises.push(state.push(key));
           }
         }
         
@@ -279,15 +287,19 @@ var CloudSync = (function() {
             }
           }
         } else if (localStorage.getItem(rKey)) {
-          state.push(rKey);
+          promises.push(state.push(rKey));
         }
 
-        if (changed) window.dispatchEvent(new CustomEvent('zs:synced'));
-        _updatePill('idle');
+        return Promise.all(promises).then(function() {
+          if (changed) window.dispatchEvent(new CustomEvent('zs:synced'));
+          _updatePill('idle');
+          return true;
+        });
       })
       .catch(function(e) {
         if (typeof Debug !== 'undefined') Debug.error('[Sync] PullAll failed', e.message);
         _updatePill('error');
+        throw e;
       });
   };
 
@@ -307,7 +319,7 @@ var CloudSync = (function() {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     return _fetchWithTimeout(SYNC_SERVER + '/api/profiles')
       .then(function(res) {
-        if (!res.ok) throw new Error('Fetch failed');
+        if (!res.ok) throw new Error('Fetch failed (' + res.status + ')');
         return res.json();
       })
       .then(function(serverProfiles) {
@@ -340,9 +352,9 @@ var CloudSync = (function() {
           body: JSON.stringify(finalProfiles)
         });
       })
-
       .catch(function(e) {
         if (typeof Debug !== 'undefined') Debug.error('[Sync] Profile sync failed', e.message);
+        throw e;
       });
   };
 
@@ -354,6 +366,7 @@ var CloudSync = (function() {
       body: JSON.stringify(profiles)
     }).catch(function(e) {
       if (typeof Debug !== 'undefined') Debug.error('[Sync] Profile overwrite failed', e.message);
+      throw e;
     });
   };
 
@@ -390,7 +403,8 @@ var CloudSync = (function() {
       pill.id = 'zs-sync-pill';
       pill.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9000;background:var(--bg-surface,#1E1B2E);border:1.5px solid rgba(255,255,255,0.08);border-radius:99px;padding:6px 12px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(0,0,0,0.3);color:#fff;';
       pill.onclick = function() {
-        if (!state.isConfigured()) alert('Cloud Sync not configured.');
+        if (!state.isConfigured()) { alert('Cloud Sync not configured.'); return; }
+        if (typeof Debug !== 'undefined') Debug.show();
       };
       document.body.appendChild(pill);
       
@@ -409,7 +423,7 @@ var CloudSync = (function() {
   document.addEventListener('DOMContentLoaded', function() {
     if (!state.isConfigured()) { _updatePill('unconfigured'); return; }
     
-    _fetchWithTimeout(SYNC_SERVER + '/api/ping', { timeout: 2000 })
+    _fetchWithTimeout(SYNC_SERVER + '/api/ping', { timeout: 5000 })
       .then(function(res) {
         if (res.ok) {
           state.online = true;

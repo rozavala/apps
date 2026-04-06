@@ -152,6 +152,7 @@
 
       card.onclick = function(e) {
         if (e.target.closest('.profile-edit-btn')) return;
+        if (typeof Debug !== 'undefined') Debug.log('Profile clicked: ' + p.name);
         setActiveUser(p);
         if (typeof CloudSync !== 'undefined' && CloudSync.online) {
           var key = p.name.toLowerCase().replace(/\s+/g, '_');
@@ -160,10 +161,21 @@
           banner.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:8px;background:rgba(124,58,237,0.9);color:#fff;text-align:center;font-family:var(--font-display);font-weight:700;font-size:0.85rem;z-index:9999;';
           banner.textContent = '☁️ Syncing...';
           document.body.appendChild(banner);
+          
+          if (typeof Debug !== 'undefined') Debug.log('Starting CloudSync.pullAll for ' + key);
           CloudSync.pullAll(key)
-            .then(function() { banner.textContent = '✅ Synced!'; setTimeout(function() { banner.remove(); showHub(); }, 600); })
-            .catch(function() { banner.textContent = '⚠️ Offline — using local data'; setTimeout(function() { banner.remove(); showHub(); }, 1200); });
+            .then(function() { 
+              if (typeof Debug !== 'undefined') Debug.log('CloudSync.pullAll success');
+              banner.textContent = '✅ Synced!'; 
+              setTimeout(function() { if (banner.parentNode) banner.remove(); showHub(); }, 600); 
+            })
+            .catch(function(err) { 
+              if (typeof Debug !== 'undefined') Debug.error('CloudSync.pullAll failed', err.message);
+              banner.textContent = '⚠️ Offline — using local data'; 
+              setTimeout(function() { if (banner.parentNode) banner.remove(); showHub(); }, 1200); 
+            });
         } else {
+          if (typeof Debug !== 'undefined') Debug.log('CloudSync offline or undefined, skipping pullAll');
           showHub();
         }
       };
@@ -224,8 +236,13 @@
   }
 
   function showHub() {
+    if (typeof Debug !== 'undefined') Debug.log('showHub started');
     var user = getActiveUser();
-    if (!user) return;
+    if (!user) {
+      if (typeof Debug !== 'undefined') Debug.error('showHub failed: no active user');
+      return;
+    }
+    if (typeof Debug !== 'undefined') Debug.log('showHub user: ' + user.name);
     var key = user.name.toLowerCase().replace(/\s+/g, '_');
     
     var els = {
@@ -239,8 +256,19 @@
       challenge: document.getElementById('next-challenge-wrap')
     };
 
-    if (els.login) els.login.style.display = 'none';
-    if (els.hub) els.hub.classList.add('active');
+    if (els.login) {
+      els.login.style.display = 'none';
+      if (typeof Debug !== 'undefined') Debug.log('login-screen hidden');
+    } else {
+      if (typeof Debug !== 'undefined') Debug.warn('login-screen NOT FOUND');
+    }
+    
+    if (els.hub) {
+      els.hub.classList.add('active');
+      if (typeof Debug !== 'undefined') Debug.log('hub-screen active');
+    } else {
+      if (typeof Debug !== 'undefined') Debug.error('hub-screen NOT FOUND');
+    }
 
     var color = safeColor(user.color);
     if (els.avatar) {
@@ -249,16 +277,21 @@
     }
     if (els.name) els.name.textContent = user.name;
     
+    if (typeof Debug !== 'undefined') Debug.log('Calculating stats and rank...');
     var totalStars = 0;
     var rank = { icon: '🛸', name: 'Cadet' };
     var precalcStats = null;
     if (typeof getPlayerStats === 'function') {
-      precalcStats = getPlayerStats(user.name);
-      totalStars = precalcStats.totalStars;
-      rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name, precalcStats) : { icon: '🛸', name: 'Cadet' };
+      try {
+        precalcStats = getPlayerStats(user.name);
+        totalStars = precalcStats.totalStars;
+        rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name, precalcStats) : { icon: '🛸', name: 'Cadet' };
+      } catch(e) { if (typeof Debug !== 'undefined') Debug.error('getPlayerStats/Rank failed', e.message); }
     } else {
-      totalStars = typeof getTotalStars === 'function' ? getTotalStars(user.name) : 0;
-      rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name) : { icon: '🛸', name: 'Cadet' };
+      try {
+        totalStars = typeof getTotalStars === 'function' ? getTotalStars(user.name) : 0;
+        rank = typeof getExplorerRank === 'function' ? getExplorerRank(user.name) : { icon: '🛸', name: 'Cadet' };
+      } catch(e) { if (typeof Debug !== 'undefined') Debug.error('getTotalStars/Rank failed', e.message); }
     }
 
     var rankText = rank.icon + ' ' + rank.name;
@@ -277,6 +310,7 @@
       } catch (e) {}
       
       if (rank.name !== lastRank && lastRank !== 'Cadet') {
+        if (typeof Debug !== 'undefined') Debug.log('Rank Up! Show celebration');
         showRankUpCelebration(rank);
       }
       try {
@@ -288,6 +322,7 @@
       var rem = TimerManager.getRemaining();
       els.timer.textContent = '⏰ ' + rem + ' min left';
     }
+    
     if (typeof ChoresManager !== 'undefined' && els.tokens) {
       if (isGuestUser()) {
         els.tokens.style.display = 'none';
@@ -298,23 +333,34 @@
       }
     }
 
-    renderAppCards(user);
-    updateStatsCards(user, precalcStats);
+    if (typeof Debug !== 'undefined') Debug.log('Rendering app cards...');
+    try {
+      renderAppCards(user);
+    } catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderAppCards failed', e.message); }
+    
+    try {
+      updateStatsCards(user, precalcStats);
+    } catch(e) { if (typeof Debug !== 'undefined') Debug.error('updateStatsCards failed', e.message); }
 
-    var challenge = getNextChallenge(user, precalcStats);
-    if (els.challenge && challenge) {
-      els.challenge.innerHTML = 
-        '<div class="next-challenge" onclick="' + (challenge.href ? "location.href='" + challenge.href + "'" : "") + '" ' +
-             'style="border: 2px solid ' + color + '44; background: var(--bg-surface); padding: 16px; border-radius: 16px;' +
-                    'display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom: 24px; animation: fadeUp 0.6s ease-out both;">' +
-          '<span style="font-size: 2rem;">' + challenge.icon + '</span>' +
-          '<div style="flex: 1;">' +
-            '<div style="font-weight: 800; font-family: var(--font-display); font-size: 1.1rem;">' + challenge.text + '</div>' +
-            '<div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">' + challenge.sub + '</div>' +
-          '</div>' +
-          '<span style="font-size: 1.5rem; color: var(--purple); animation: rocketBounce 2s infinite;">→</span>' +
-        '</div>';
-    }
+    if (typeof Debug !== 'undefined') Debug.log('Calculating next challenge...');
+    try {
+      var challenge = getNextChallenge(user, precalcStats);
+      if (els.challenge && challenge) {
+        els.challenge.innerHTML = 
+          '<div class="next-challenge" onclick="' + (challenge.href ? "location.href='" + challenge.href + "'" : "") + '" ' +
+               'style="border: 2px solid ' + color + '44; background: var(--bg-surface); padding: 16px; border-radius: 16px;' +
+                      'display: flex; align-items: center; gap: 16px; cursor: pointer; margin-bottom: 24px; animation: fadeUp 0.6s ease-out both;">' +
+            '<span style="font-size: 2rem;">' + challenge.icon + '</span>' +
+            '<div style="flex: 1;">' +
+              '<div style="font-weight: 800; font-family: var(--font-display); font-size: 1.1rem;">' + challenge.text + '</div>' +
+              '<div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">' + challenge.sub + '</div>' +
+            '</div>' +
+            '<span style="font-size: 1.5rem; color: var(--purple); animation: rocketBounce 2s infinite;">→</span>' +
+          '</div>';
+      }
+    } catch(e) { if (typeof Debug !== 'undefined') Debug.error('getNextChallenge failed', e.message); }
+    
+    if (typeof Debug !== 'undefined') Debug.log('showHub finished');
   }
 
   function showRankUpCelebration(rank) {
@@ -1024,8 +1070,13 @@
     pinCallback = callback;
     var modal = document.getElementById('pin-modal');
     var input = document.getElementById('pin-input');
+    var err = document.getElementById('pin-error');
+    if (err) err.style.display = 'none';
     if (modal) modal.classList.add('active');
-    if (input) { input.value = ''; setTimeout(function() { input.focus(); }, 100); }
+    if (input) { 
+      input.value = ''; 
+      setTimeout(function() { input.focus(); }, 100); 
+    }
   }
 
   function closePinModal() {
@@ -1036,27 +1087,36 @@
   }
 
   function submitPin() {
-    if (typeof Debug !== 'undefined') Debug.log('Submitting PIN...');
+    if (typeof Debug !== 'undefined') Debug.log('submitPin called');
     try {
       var input = document.getElementById('pin-input');
       var err = document.getElementById('pin-error');
-      if (input && input.value === getParentPin()) {
-        if (typeof Debug !== 'undefined') Debug.log('PIN Correct');
+      var entered = input ? input.value : '';
+      var expected = getParentPin();
+      
+      if (typeof Debug !== 'undefined') Debug.log('PIN attempt: ' + (entered === expected ? 'CORRECT' : 'INCORRECT'));
+      
+      if (entered === expected) {
         if (err) err.style.display = 'none';
         var cb = pinCallback;
+        if (typeof Debug !== 'undefined') Debug.log('PIN success, closing modal. Callback exists: ' + (!!cb));
         closePinModal();
         if (cb) {
-          if (typeof Debug !== 'undefined') Debug.log('Executing callback');
+          if (typeof Debug !== 'undefined') Debug.log('Executing callback...');
           cb();
         }
-      } else if (input) {
-        if (typeof Debug !== 'undefined') Debug.log('PIN Incorrect');
-        if (err) err.style.display = 'block';
-        input.value = '';
-        input.focus();
+      } else {
+        if (err) {
+          err.style.display = 'block';
+          err.textContent = 'Incorrect PIN';
+        }
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
       }
     } catch(e) {
-      if (typeof Debug !== 'undefined') Debug.error('submitPin crash', e.message);
+      if (typeof Debug !== 'undefined') Debug.error('submitPin CRASHED', e.message);
     }
   }
 
