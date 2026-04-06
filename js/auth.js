@@ -50,7 +50,7 @@ function getProfiles() {
     _profilesCached = true;
     return _cachedProfiles;
   } catch (e) {
-    console.warn('[Auth] Failed to parse profiles:', e);
+    if (typeof Debug !== 'undefined') Debug.error('[Auth] Failed to parse profiles', e.message);
     return [];
   }
 }
@@ -61,7 +61,7 @@ function saveProfiles(profiles) {
     _cachedProfiles = profiles;
     _profilesCached = true;
   } catch (e) {
-    console.warn('[Auth] Failed to save profiles:', e);
+    if (typeof Debug !== 'undefined') Debug.error('[Auth] Failed to save profiles', e.message);
   }
 }
 

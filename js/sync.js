@@ -136,7 +136,7 @@ var CloudSync = (function() {
         _updatePill('idle');
       });
     }).catch(function(e) {
-      console.warn('[Sync] Push failed:', e);
+      if (typeof Debug !== 'undefined') Debug.error('[Sync] Push failed', e.message);
       _updatePill('error');
     });
   };
@@ -188,9 +188,8 @@ var CloudSync = (function() {
           return true;
         }
         return false;
-      })
-      .catch(function(e) {
-        console.warn('[Sync] Pull failed:', e);
+      }).catch(function(e) {
+        if (typeof Debug !== 'undefined') Debug.error('[Sync] Pull failed', e.message);
         _updatePill('error');
         return false;
       });
@@ -265,7 +264,7 @@ var CloudSync = (function() {
         _updatePill('idle');
       })
       .catch(function(e) {
-        console.warn('[Sync] PullAll failed:', e);
+        if (typeof Debug !== 'undefined') Debug.error('[Sync] PullAll failed', e.message);
         _updatePill('error');
       });
   };
@@ -321,7 +320,7 @@ var CloudSync = (function() {
       })
 
       .catch(function(e) {
-        console.warn('[Sync] Profile sync failed:', e);
+        if (typeof Debug !== 'undefined') Debug.error('[Sync] Profile sync failed', e.message);
       });
   };
 
@@ -332,7 +331,7 @@ var CloudSync = (function() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(profiles)
     }).catch(function(e) {
-      console.warn('[Sync] Profile overwrite failed:', e);
+      if (typeof Debug !== 'undefined') Debug.error('[Sync] Profile overwrite failed', e.message);
     });
   };
 

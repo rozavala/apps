@@ -2185,7 +2185,7 @@
     /* ── Lesson screen: HORIZONTAL split layout for full screen usage ── */
     #screen-lesson .screen-content {
       display: grid !important;
-      grid-template-columns: 1fr 350px !important;
+      grid-template-columns: 350px 1fr !important;
       grid-template-rows: auto 1fr !important;
       padding: 0 !important;
       overflow: hidden !important;

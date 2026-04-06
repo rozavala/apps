@@ -9220,10 +9220,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const secRect = section.getBoundingClientRect();
       const kbRect  = kbPanel.getBoundingClientRect();
 
-      // Highway spans full width, from section top down to just above keyboard panel
+      // Highway aligns to keyboard width, from section top down to just above keyboard panel
       const highwayH = Math.max(180, kbRect.top - secRect.top - 8);
-      hw.style.left   = '0';
-      hw.style.right  = '0';
+      hw.style.left   = (kbRect.left - secRect.left) + 'px';
+      hw.style.width  = kbRect.width + 'px';
       hw.style.top    = '0';
       hw.style.height = highwayH + 'px';
 
