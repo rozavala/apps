@@ -76,10 +76,16 @@ var Debug = (function() {
   });
 
   // ── iPad WebMIDIBrowser Shield ──
-  // This browser injects code that calls this global. If not defined, 
+  // This browser injects code that calls these globals. If not defined, 
   // it throws ReferenceErrors that can break the UI.
   if (typeof window._callback_receiveMIDIMessage === 'undefined') {
     window._callback_receiveMIDIMessage = function() {};
+  }
+  if (typeof window._callback_addSource === 'undefined') {
+    window._callback_addSource = function() {};
+  }
+  if (typeof window._callback_addDestination === 'undefined') {
+    window._callback_addDestination = function() {};
   }
 
   function show() {

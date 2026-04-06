@@ -35,7 +35,18 @@ function getProfiles() {
   if (_profilesCached) return _cachedProfiles || [];
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
-    _cachedProfiles = raw ? JSON.parse(raw) : [];
+    var parsed = raw ? JSON.parse(raw) : [];
+    
+    // Fix for corrupted array-to-object serialization
+    if (parsed && !Array.isArray(parsed)) {
+      var keys = [];
+      for (var prop in parsed) { if (/^\d+$/.test(prop)) keys.push(prop); }
+      parsed = keys.sort(function(a, b){ return Number(a) - Number(b); })
+                   .map(function(k){ return parsed[k]; })
+                   .filter(function(x){ return !!x; });
+    }
+    
+    _cachedProfiles = parsed || [];
     _profilesCached = true;
     return _cachedProfiles;
   } catch (e) {

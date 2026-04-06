@@ -8952,7 +8952,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function _tick() {
       const cw   = (_canvas && _canvas.width) || 400;
-      const ch2  = (_canvas && _canvas.height) || HIGHWAY_HEIGHT;
+      const ch   = (_canvas && _canvas.height) || HIGHWAY_HEIGHT;
 
       // songTime: negative while lead-in, 0 = song starts, positive = into song
       const songTime = (performance.now() - _startedAt) - FALL_DURATION;
@@ -9123,8 +9123,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const xf   = _xFrac(note.note);
       const letter = _norm(note.note).replace(/\d/, '');
       const color  = NOTE_COLORS[letter] || '#8B5CF6';
-      const ch2 = _canvas?.height || HIGHWAY_HEIGHT;
-      _spawnParticles(xf * cw, ch2 - HIT_ZONE_H, color, perfect ? 18 : 9);
+      const ch   = _canvas?.height || HIGHWAY_HEIGHT;
+      _spawnParticles(xf * cw, ch - HIT_ZONE_H, color, perfect ? 18 : 9);
 
       if (typeof PianoKeyboard !== 'undefined') PianoKeyboard.flashCorrect(_norm(note.note));
 
