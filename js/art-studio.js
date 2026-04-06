@@ -650,7 +650,28 @@ const ArtStudio = (() => {
   function closeSaveDialog() { document.getElementById('save-dialog').classList.remove('active'); }
   function confirmSave() {
     const title = document.getElementById('art-title').value.trim() || 'My Masterpiece';
-    const dataUrl = mainCanvas.toDataURL('image/png');
+    
+    // ── Downscale for storage ──
+    // Create a temporary canvas to resize the drawing to max 1024px.
+    // This prevents QuotaExceededError in localStorage (especially on high-DPI iPads).
+    const maxDim = 1024;
+    const saveCanvas = document.createElement('canvas');
+    let sw = mainCanvas.width;
+    let sh = mainCanvas.height;
+    
+    if (sw > maxDim || sh > maxDim) {
+      if (sw > sh) { sh = (maxDim / sw) * sh; sw = maxDim; }
+      else { sw = (maxDim / sh) * sw; sh = maxDim; }
+    }
+    
+    saveCanvas.width = sw;
+    saveCanvas.height = sh;
+    const saveCtx = saveCanvas.getContext('2d');
+    saveCtx.drawImage(mainCanvas, 0, 0, sw, sh);
+    
+    // Use JPEG 0.7 for much better compression than PNG
+    const dataUrl = saveCanvas.toDataURL('image/jpeg', 0.7);
+    
     const p = getProgress();
     if (p.gallery.length >= 10) {
       const oldest = p.gallery[p.gallery.length - 1];
@@ -658,9 +679,29 @@ const ArtStudio = (() => {
         return;
       }
     }
+    
     p.gallery.unshift({ id: Date.now(), title, dataUrl, date: new Date().toISOString() });
     if (p.gallery.length > 10) p.gallery.pop();
-    saveProgress({ gallery: p.gallery });
+    
+    try {
+      saveProgress({ gallery: p.gallery });
+    } catch (e) {
+      // If still fails, try removing one more
+      if (p.gallery.length > 1) {
+        p.gallery.pop();
+        try {
+          saveProgress({ gallery: p.gallery });
+          alert('Storage full: Oldest artwork was removed to make room.');
+        } catch (e2) {
+          alert('Storage full: Please delete some older artworks manually.');
+          return;
+        }
+      } else {
+        alert('Storage full: Could not save artwork.');
+        return;
+      }
+    }
+
     closeSaveDialog();
     if (typeof SFX !== 'undefined') SFX.correct();
     

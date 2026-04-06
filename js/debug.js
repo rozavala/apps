@@ -100,10 +100,11 @@ var Debug = (function() {
       header.innerHTML = '<h2 style="margin:0">🛠 Debug Log (' + _getDeviceId() + ')</h2><button onclick="Debug.hide()" style="background:#333;color:#fff;border:none;padding:8px 16px;border-radius:8px;">Close</button>';
       
       var controls = document.createElement('div');
-      controls.style.cssText = 'margin-bottom:15px;display:flex;gap:10px;';
+      controls.style.cssText = 'margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap;';
       controls.innerHTML = 
-        '<button onclick="Debug.clear();Debug.render();" style="background:#ef444433;color:#ef4444;border:1px solid #ef444455;padding:4px 12px;border-radius:4px;font-size:12px;">Clear Local</button>' +
-        '<button onclick="Debug.pushToServer().then(function(){alert(\'Logs pushed! Check /api/kids/debug/logs_' + _getDeviceId() + '\')})" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f655;padding:4px 12px;border-radius:4px;font-size:12px;">⬆️ Push to Cloud</button>';
+        '<button onclick="Debug.clear();Debug.render();" style="background:#ef444433;color:#ef4444;border:1px solid #ef444455;padding:4px 12px;border-radius:4px;font-size:12px;">Clear Local Logs</button>' +
+        '<button onclick="Debug.pushToServer().then(function(){alert(\'Logs pushed! Check /api/kids/debug/logs_\' + Debug.getDeviceId())})" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f655;padding:4px 12px;border-radius:4px;font-size:12px;">⬆️ Push to Cloud</button>' +
+        '<button onclick="Debug.showStorageReport()" style="background:#10b98133;color:#10b981;border:1px solid #10b98155;padding:4px 12px;border-radius:4px;font-size:12px;">📊 Storage Report</button>';
       
       var list = document.createElement('div');
       list.id = 'debug-log-list';
@@ -120,6 +121,19 @@ var Debug = (function() {
   function hide() {
     var overlay = document.getElementById('debug-log-overlay');
     if (overlay) overlay.style.display = 'none';
+  }
+
+  function showStorageReport() {
+    var report = 'LocalStorage Usage:\n\n';
+    var total = 0;
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      var size = localStorage.getItem(key).length * 2; // ~2 bytes per char (UTF-16)
+      total += size;
+      report += (size / 1024).toFixed(1) + ' KB - ' + key + '\n';
+    }
+    report += '\nTotal: ' + (total / (1024 * 1024)).toFixed(2) + ' MB / 5.00 MB';
+    alert(report);
   }
 
   function render() {
@@ -147,6 +161,7 @@ var Debug = (function() {
     error: function(msg, meta) { _add('error', msg, meta); },
     show: show,
     hide: hide,
+    showStorageReport: showStorageReport,
     clear: function() { logs = []; },
     render: render,
     getLogs: function() { return logs; },

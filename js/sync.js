@@ -179,11 +179,19 @@ var CloudSync = (function() {
               toStore = _mergeLists(toStore, localItems);
             }
           }
-          if (info.appName === 'art' && !Array.isArray(toStore)) {
-            var merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
-            localStorage.setItem(key, JSON.stringify(merged));
-          } else {
-            localStorage.setItem(key, JSON.stringify(toStore));
+          
+          try {
+            if (info.appName === 'art' && !Array.isArray(toStore)) {
+              var merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
+              localStorage.setItem(key, JSON.stringify(merged));
+            } else {
+              localStorage.setItem(key, JSON.stringify(toStore));
+            }
+          } catch (storageError) {
+            if (typeof Debug !== 'undefined') {
+              Debug.error('[Sync] Quota Exceeded', key + ' size: ' + JSON.stringify(toStore).length);
+            }
+            throw storageError;
           }
           return true;
         }
@@ -229,11 +237,19 @@ var CloudSync = (function() {
                   toStore = _mergeLists(toStore, localItems);
                 }
               }
-              if (appName === 'art' && !Array.isArray(toStore)) {
-                var merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
-                localStorage.setItem(key, JSON.stringify(merged));
-              } else {
-                localStorage.setItem(key, JSON.stringify(toStore));
+              
+              try {
+                if (appName === 'art' && !Array.isArray(toStore)) {
+                  var merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
+                  localStorage.setItem(key, JSON.stringify(merged));
+                } else {
+                  localStorage.setItem(key, JSON.stringify(toStore));
+                }
+              } catch (storageError) {
+                if (typeof Debug !== 'undefined') {
+                  Debug.error('[Sync] Quota Exceeded in pullAll', key + ' size: ' + JSON.stringify(toStore).length);
+                }
+                throw storageError;
               }
               changed = true;
             }
@@ -253,8 +269,14 @@ var CloudSync = (function() {
           var sTimeR = Number(sData._syncedAt) || 0;
           var lTimeR = Number(lData._syncedAt) || 0;
           if (sTimeR > lTimeR || !localStorage.getItem(rKey)) {
-            localStorage.setItem(rKey, JSON.stringify(sData));
-            changed = true;
+            try {
+              localStorage.setItem(rKey, JSON.stringify(sData));
+              changed = true;
+            } catch (storageError) {
+              if (typeof Debug !== 'undefined') {
+                Debug.error('[Sync] Quota Exceeded in recital pull', rKey + ' size: ' + JSON.stringify(sData).length);
+              }
+            }
           }
         } else if (localStorage.getItem(rKey)) {
           state.push(rKey);
