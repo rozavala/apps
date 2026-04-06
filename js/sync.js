@@ -211,6 +211,7 @@ var CloudSync = (function() {
 
   state.pullAll = function(kidKey) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
+    if (kidKey === 'guest') return Promise.resolve();
     _updatePill('syncing');
     if (typeof Debug !== 'undefined') Debug.log('[Sync] Pulling all for ' + kidKey);
     return _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + kidKey)
@@ -256,9 +257,8 @@ var CloudSync = (function() {
                 changed = true;
               } catch (storageError) {
                 if (typeof Debug !== 'undefined') {
-                  Debug.error('[Sync] Quota Exceeded in pullAll', key + ' size: ' + JSON.stringify(toStore).length);
+                  Debug.warn('[Sync] Quota Exceeded for ' + key + ' skipping pull.');
                 }
-                throw storageError;
               }
             }
           } else if (localStorage.getItem(key)) {

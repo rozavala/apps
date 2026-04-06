@@ -67,44 +67,41 @@ function saveProfiles(profiles) {
 
 // ── Active User ───────────────────────────────────────────────────
 
-function getActiveUser() {
-  if (typeof Debug !== 'undefined') Debug.log('[Auth] getActiveUser called (cached: ' + _activeUserCached + ')');
-  if (_activeUserCached) return _cachedActiveUser;
-  try {
-    var raw = localStorage.getItem(ACTIVE_KEY);
-    if (typeof Debug !== 'undefined') Debug.log('[Auth] getActiveUser raw: ' + (raw ? 'found' : 'empty'));
-    _cachedActiveUser = raw ? JSON.parse(raw) : null;
-    _activeUserCached = true;
-    return _cachedActiveUser;
-  } catch (e) {
-    if (typeof Debug !== 'undefined') Debug.error('[Auth] getActiveUser crash', e.message);
-    return null;
-  }
-}
-
 function setActiveUser(user) {
   if (typeof Debug !== 'undefined') Debug.log('[Auth] setActiveUser: ' + (user ? user.name : 'null'));
   if (!user) {
     localStorage.removeItem(ACTIVE_KEY);
+    try { sessionStorage.removeItem(ACTIVE_KEY); } catch(e) {}
     _cachedActiveUser = null;
     _activeUserCached = true;
   } else {
+    var json = JSON.stringify(user);
+    _cachedActiveUser = user;
+    _activeUserCached = true;
+    
     try {
-      var json = JSON.stringify(user);
       localStorage.setItem(ACTIVE_KEY, json);
-      _cachedActiveUser = user;
-      _activeUserCached = true;
-      
-      // Verify immediately
-      var verify = localStorage.getItem(ACTIVE_KEY);
-      if (typeof Debug !== 'undefined') {
-        if (verify === json) Debug.log('[Auth] setActiveUser VERIFIED in localStorage');
-        else Debug.error('[Auth] setActiveUser VERIFICATION FAILED! Memory might be full or blocked.');
-      }
+      if (typeof Debug !== 'undefined') Debug.log('[Auth] setActiveUser saved to localStorage');
     } catch (e) {
-      if (typeof Debug !== 'undefined') Debug.error('[Auth] setActiveUser crash', e.message);
-      console.warn('[Auth] Failed to set active user in localStorage:', e);
+      if (typeof Debug !== 'undefined') Debug.warn('[Auth] localStorage FULL, falling back to sessionStorage');
+      try {
+        sessionStorage.setItem(ACTIVE_KEY, json);
+      } catch (e2) {
+        if (typeof Debug !== 'undefined') Debug.error('[Auth] ALL STORAGE FAILED', e2.message);
+      }
     }
+  }
+}
+
+function getActiveUser() {
+  if (_activeUserCached && _cachedActiveUser) return _cachedActiveUser;
+  try {
+    var raw = localStorage.getItem(ACTIVE_KEY) || sessionStorage.getItem(ACTIVE_KEY);
+    _cachedActiveUser = raw ? JSON.parse(raw) : null;
+    _activeUserCached = true;
+    return _cachedActiveUser;
+  } catch (e) {
+    return null;
   }
 }
 
