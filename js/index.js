@@ -154,6 +154,10 @@
         if (e.target.closest('.profile-edit-btn')) return;
         if (typeof Debug !== 'undefined') Debug.log('Profile clicked: ' + p.name);
         setActiveUser(p);
+        
+        // Ensure auth.js cache is cleared so showHub reads fresh from localStorage
+        if (typeof _activeUserCached !== 'undefined') window._activeUserCached = false;
+
         if (typeof CloudSync !== 'undefined' && CloudSync.online) {
           var key = p.name.toLowerCase().replace(/\s+/g, '_');
           var banner = document.createElement('div');
@@ -211,7 +215,13 @@
         isGuest: true,
         maxMinutes: 15
       };
+      
+      if (typeof Debug !== 'undefined') Debug.log('loginAsGuest: Setting active user and forcing cache clear');
       setActiveUser(guestProfile);
+      
+      // Global reset for the auth cache to force a fresh read from localStorage in showHub
+      if (typeof _activeUserCached !== 'undefined') window._activeUserCached = false;
+      
       showHub();
     });
   }

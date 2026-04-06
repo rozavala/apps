@@ -68,28 +68,41 @@ function saveProfiles(profiles) {
 // ── Active User ───────────────────────────────────────────────────
 
 function getActiveUser() {
+  if (typeof Debug !== 'undefined') Debug.log('[Auth] getActiveUser called (cached: ' + _activeUserCached + ')');
   if (_activeUserCached) return _cachedActiveUser;
   try {
     var raw = localStorage.getItem(ACTIVE_KEY);
+    if (typeof Debug !== 'undefined') Debug.log('[Auth] getActiveUser raw: ' + (raw ? 'found' : 'empty'));
     _cachedActiveUser = raw ? JSON.parse(raw) : null;
     _activeUserCached = true;
     return _cachedActiveUser;
   } catch (e) {
+    if (typeof Debug !== 'undefined') Debug.error('[Auth] getActiveUser crash', e.message);
     return null;
   }
 }
 
 function setActiveUser(user) {
+  if (typeof Debug !== 'undefined') Debug.log('[Auth] setActiveUser: ' + (user ? user.name : 'null'));
   if (!user) {
     localStorage.removeItem(ACTIVE_KEY);
     _cachedActiveUser = null;
     _activeUserCached = true;
   } else {
     try {
-      localStorage.setItem(ACTIVE_KEY, JSON.stringify(user));
+      var json = JSON.stringify(user);
+      localStorage.setItem(ACTIVE_KEY, json);
       _cachedActiveUser = user;
       _activeUserCached = true;
+      
+      // Verify immediately
+      var verify = localStorage.getItem(ACTIVE_KEY);
+      if (typeof Debug !== 'undefined') {
+        if (verify === json) Debug.log('[Auth] setActiveUser VERIFIED in localStorage');
+        else Debug.error('[Auth] setActiveUser VERIFICATION FAILED! Memory might be full or blocked.');
+      }
     } catch (e) {
+      if (typeof Debug !== 'undefined') Debug.error('[Auth] setActiveUser crash', e.message);
       console.warn('[Auth] Failed to set active user in localStorage:', e);
     }
   }
