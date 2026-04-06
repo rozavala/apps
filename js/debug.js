@@ -123,6 +123,17 @@ var Debug = (function() {
     if (overlay) overlay.style.display = 'none';
   }
 
+  function _deleteKey(key) {
+    if (!key) return;
+    if (typeof Debug !== 'undefined') Debug.log('[Debug] Deleting key: ' + key);
+    try {
+      localStorage.removeItem(key);
+      showStorageReport();
+    } catch (e) {
+      if (typeof Debug !== 'undefined') Debug.error('[Debug] Delete failed', e.message);
+    }
+  }
+
   function showStorageReport() {
     var list = document.getElementById('debug-log-list');
     if (!list) return;
@@ -152,7 +163,7 @@ var Debug = (function() {
         '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:10px;">' +
           '<b style="color:' + color + '">' + mb + ' MB</b> - ' + item.key +
         '</div>' +
-        '<button onclick="if(confirm(\'Delete ' + item.key + '?\')){localStorage.removeItem(\'' + item.key + '\'); Debug.showStorageReport();}" ' +
+        '<button onclick="Debug.deleteKey(\'' + item.key + '\')" ' +
         'style="background:#ef444433; color:#ef4444; border:1px solid #ef444455; padding:2px 8px; border-radius:4px; cursor:pointer;">Delete</button>' +
       '</div>';
     });
@@ -187,6 +198,7 @@ var Debug = (function() {
     show: show,
     hide: hide,
     showStorageReport: showStorageReport,
+    deleteKey: _deleteKey,
     clear: function() { logs = []; },
     render: render,
     getLogs: function() { return logs; },
