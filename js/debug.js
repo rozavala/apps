@@ -23,6 +23,58 @@ var Debug = (function() {
     return id;
   }
 
+  function showLayoutReport() {
+    var list = document.getElementById('debug-log-list');
+    if (!list) return;
+
+    var elInfo = function(sel) {
+      var el = document.querySelector(sel);
+      if (!el) return sel + ': NOT FOUND';
+      var rect = el.getBoundingClientRect();
+      return sel + ': ' + Math.round(rect.width) + 'x' + Math.round(rect.height) + 
+             ' (top:' + Math.round(rect.top) + ', left:' + Math.round(rect.left) + ')';
+    };
+
+    var report = '<div style="background:#1a1a2e; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #a78bfa55;">' +
+      '<h3 style="margin-top:0">📐 Layout Inspector</h3>' +
+      '<button onclick="Debug.render()" style="background:#333; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px;">Back to Logs</button>' +
+      '<div style="margin-top:15px; font-family:monospace; font-size:11px; color:#ddd; line-height:1.6; display:flex; flex-direction:column; gap:4px;">' +
+        '<b>--- Window ---</b>' +
+        'Screen: ' + screen.width + 'x' + screen.height + ' (dpr:' + window.devicePixelRatio + ')' +
+        'Inner: ' + window.innerWidth + 'x' + window.innerHeight +
+        'Viewport Height (1vh): ' + (window.innerHeight / 100).toFixed(2) + 'px' +
+        '<br><b>--- Key Elements ---</b>' +
+        elInfo('#app') +
+        elInfo('#global-header') +
+        elInfo('main.screen.active') +
+        elInfo('#bottom-nav') +
+        elInfo('.piano-scroll-wrap') +
+        elInfo('.piano-keys-container') +
+        elInfo('#canvas-container') +
+        '<br><b>--- Styles ---</b>' +
+        'Orientation: ' + (window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait') +
+        '</div>' +
+      '</div>';
+    
+    list.innerHTML = report;
+  }
+
+  // --- Usability & Interaction Tracking ---
+  document.addEventListener('click', function(e) {
+    var target = e.target;
+    var interactive = target.closest('button, a, input, [onclick], .nav-item, .app-card, .key');
+    
+    if (interactive) {
+      var id = interactive.id ? '#' + interactive.id : '';
+      var cls = interactive.className ? '.' + interactive.className.split(' ').join('.') : '';
+      var text = (interactive.textContent || '').substring(0, 20).trim();
+      _add('info', '[Tap] ' + interactive.tagName + id + cls + ' ("' + text + '")');
+    } else {
+      // Log clicks on non-interactive elements to find layout misalignments
+      _add('info', '[Dead Tap] x:' + e.clientX + ' y:' + e.clientY + ' on <' + target.tagName.toLowerCase() + '>');
+    }
+  }, true);
+
   function _add(type, msg, meta) {
     var entry = {
       ts: new Date().toISOString(),
@@ -104,7 +156,8 @@ var Debug = (function() {
       controls.innerHTML = 
         '<button onclick="Debug.clear();Debug.render();" style="background:#ef444433;color:#ef4444;border:1px solid #ef444455;padding:4px 12px;border-radius:4px;font-size:12px;">Clear Local Logs</button>' +
         '<button onclick="Debug.pushToServer().then(function(){alert(\'Logs pushed! Check /api/kids/debug/logs_\' + Debug.getDeviceId())})" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f655;padding:4px 12px;border-radius:4px;font-size:12px;">⬆️ Push to Cloud</button>' +
-        '<button onclick="Debug.showStorageReport()" style="background:#10b98133;color:#10b981;border:1px solid #10b98155;padding:4px 12px;border-radius:4px;font-size:12px;">📊 Storage Report</button>';
+        '<button onclick="Debug.showStorageReport()" style="background:#10b98133;color:#10b981;border:1px solid #10b98155;padding:4px 12px;border-radius:4px;font-size:12px;">📊 Storage Report</button>' +
+        '<button onclick="Debug.showLayoutReport()" style="background:#a78bfa33;color:#a78bfa;border:1px solid #a78bfa55;padding:4px 12px;border-radius:4px;font-size:12px;">📐 Layout Report</button>';
       
       var list = document.createElement('div');
       list.id = 'debug-log-list';
@@ -117,6 +170,14 @@ var Debug = (function() {
     overlay.style.display = 'block';
     render();
   }
+
+  // --- Auto-logging for layout changes ---
+  window.addEventListener('resize', function() {
+    _add('info', '[Layout] Resize: ' + window.innerWidth + 'x' + window.innerHeight);
+  });
+  window.addEventListener('orientationchange', function() {
+    _add('info', '[Layout] Orientation Change');
+  });
 
   function hide() {
     var overlay = document.getElementById('debug-log-overlay');
@@ -198,6 +259,7 @@ var Debug = (function() {
     show: show,
     hide: hide,
     showStorageReport: showStorageReport,
+    showLayoutReport: showLayoutReport,
     deleteKey: _deleteKey,
     clear: function() { logs = []; },
     render: render,
