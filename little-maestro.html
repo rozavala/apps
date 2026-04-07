@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Little Maestro 🎹</title>
 
   <!-- PWA -->
@@ -7343,12 +7343,22 @@ const AudioEngine = (() => {
   }
 
   // ── init ──────────────────────────────────────────────────────────
+  let compressor;
   function init() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0.5, ctx.currentTime);
-    masterGain.connect(ctx.destination);
+
+    compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-12, ctx.currentTime);
+    compressor.knee.setValueAtTime(10, ctx.currentTime);
+    compressor.ratio.setValueAtTime(4, ctx.currentTime);
+    compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+    compressor.release.setValueAtTime(0.25, ctx.currentTime);
+
+    masterGain.connect(compressor);
+    compressor.connect(ctx.destination);
     _loadSoundfont();  // start loading piano samples in the background
   }
 
@@ -7525,15 +7535,32 @@ const AudioEngine = (() => {
 
   // ── playNoteInstant ───────────────────────────────────────────────
   // Single note, immediate playback — for key taps and flashcards
+  let _activeNotes = [];
   function playNoteInstant(noteName, velocity = 90) {
     init();
     if (_sfInstrument) {
       try {
         const masterVol = masterGain ? masterGain.gain.value : 0.7;
-        _sfInstrument.play(noteName, ctx.currentTime, {
+        // Cap single note gain at 0.7 to avoid clipping when combined
+        const maxGain = 0.7;
+        const gainVal = Math.min((velocity / 127) * masterVol * 1.0, maxGain);
+
+        const noteNode = _sfInstrument.play(noteName, ctx.currentTime, {
           duration: 0.6,
-          gain    : (velocity / 127) * masterVol * 1.0,
+          gain    : gainVal,
         });
+
+        // Track active notes for polyphony limiting (max 8)
+        _activeNotes.push({ node: noteNode, time: ctx.currentTime });
+
+        // Cleanup old notes from array and stop them if we exceed polyphony
+        _activeNotes = _activeNotes.filter(n => ctx.currentTime - n.time < 2.0);
+        if (_activeNotes.length > 8) {
+           const oldest = _activeNotes.shift();
+           if (oldest && oldest.node && typeof oldest.node.stop === 'function') {
+             try { oldest.node.stop(ctx.currentTime + 0.05); } catch(e) {}
+           }
+        }
       } catch(e) {}
       return;
     }
@@ -7971,9 +7998,13 @@ const MIDIManager = (() => {
           ? 'permission-denied'
           : 'disconnected';
         _logEvent(`MIDI error: ${errMsg}`);
-        _updateStatusUI();
-        _notifyStatusChange();
-        _updateMidiBanner();
+        try {
+          _updateStatusUI();
+          _notifyStatusChange();
+          _updateMidiBanner();
+        } catch(uiErr) {
+          if (typeof Debug !== 'undefined') Debug.error('[MIDI] Error updating UI: ', uiErr);
+        }
         // Retry even on error — user might grant permission later
         _scheduleRetry();
         return false;
@@ -9985,14 +10016,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Scroll highlighted note into view
         const target = _s.noteRefs.find(r => r.globalIdx === index);
-        if (target && target.vfNote.attrs && target.vfNote.attrs.el) {
-          const el = target.vfNote.attrs.el;
+        let el = target && target.vfNote && target.vfNote.attrs ? target.vfNote.attrs.el : null;
+
+        // Fallback to data-note-index attribute if VexFlow doesn't populate attrs.el
+        if (!el) {
+          const noteEls = document.querySelectorAll('#lesson-sheet-music [data-note-index]');
+          el = noteEls[index];
+        }
+
+        if (el) {
           const container = document.getElementById(_s.containerId);
           if (container && el.getBoundingClientRect) {
             const noteRect = el.getBoundingClientRect();
             const contRect = container.getBoundingClientRect();
-            if (noteRect.top < contRect.top || noteRect.bottom > contRect.bottom) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Check current note and lookahead notes (e.g., index + 2)
+            let needsScroll = (noteRect.top < contRect.top || noteRect.bottom > contRect.bottom);
+            if (!needsScroll) {
+               const lookaheadEls = document.querySelectorAll('#lesson-sheet-music [data-note-index]');
+               const lookaheadEl = lookaheadEls[index + 2];
+               if (lookaheadEl) {
+                  const laRect = lookaheadEl.getBoundingClientRect();
+                  if (laRect.bottom > contRect.bottom) {
+                     needsScroll = true;
+                  }
+               }
+            }
+
+            if (needsScroll) {
+               // Calculate relative Y and manual smooth scrollTo instead of scrollIntoView
+               const relativeY = (noteRect.top - contRect.top) + container.scrollTop;
+               // Scroll to place the note in the top third of the container
+               const targetScroll = Math.max(0, relativeY - (contRect.height / 3));
+               container.scrollTo({ top: targetScroll, behavior: 'smooth' });
             }
           }
         }
