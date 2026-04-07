@@ -75,7 +75,7 @@ const WorldExplorer = (() => {
             { en: 'Machu Picchu is a famous ancient city in the Andes.', es: 'Machu Picchu es una famosa ciudad antigua en los Andes.' },
             { en: 'Peru has over 3,000 varieties of potatoes.', es: 'Perú tiene más de 3.000 variedades de papas.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'The Amazon River starts in the Peruvian Andes.', es: 'El río Amazonas nace en los Andes peruanos.' }
           ],
           landmark: { name: 'Machu Picchu', nameEs: 'Machu Picchu', emoji: '⛰️' },
           animal: { name: 'Llama', nameEs: 'Llama', emoji: '🦙' },
@@ -93,7 +93,7 @@ const WorldExplorer = (() => {
             { en: 'Colombia produces more emeralds than any other country.', es: 'Colombia produce más esmeraldas que cualquier otro país.' },
             { en: 'The Amazon River begins in Colombia.', es: 'El río Amazonas comienza en Colombia.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Colombia is known for its beautiful coffee regions.', es: 'Colombia es conocida por sus hermosas regiones cafetaleras.' }
           ],
           landmark: { name: 'Cartagena Old City', nameEs: 'Ciudad Vieja de Cartagena', emoji: '🏰' },
           animal: { name: 'Spectacled Bear', nameEs: 'Oso de Anteojos', emoji: '🐻' },
@@ -111,7 +111,7 @@ const WorldExplorer = (() => {
             { en: 'Venezuela has one of the largest oil reserves in the world.', es: 'Venezuela tiene una de las reservas de petróleo más grandes del mundo.' },
             { en: 'Lake Maracaibo is one of the oldest lakes on Earth.', es: 'El Lago de Maracaibo es uno de los lagos más antiguos de la Tierra.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'The Andes mountains end in Venezuela.', es: 'La cordillera de los Andes termina en Venezuela.' }
           ],
           landmark: { name: 'Angel Falls', nameEs: 'Salto Ángel', emoji: '💧' },
           animal: { name: 'Capybara', nameEs: 'Capibara', emoji: '🐹' },
@@ -129,7 +129,7 @@ const WorldExplorer = (() => {
             { en: 'The Galápagos Islands belong to Ecuador.', es: 'Las Islas Galápagos pertenecen a Ecuador.' },
             { en: 'Quito is one of the highest capital cities in the world.', es: 'Quito es una de las capitales más altas del mundo.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Ecuador has beautiful volcanic mountains.', es: 'Ecuador tiene hermosas montañas volcánicas.' }
           ],
           landmark: { name: 'Galápagos Islands', nameEs: 'Islas Galápagos', emoji: '🐢' },
           animal: { name: 'Giant Tortoise', nameEs: 'Tortuga Gigante', emoji: '🐢' },
@@ -147,7 +147,7 @@ const WorldExplorer = (() => {
             { en: 'The Salar de Uyuni is the largest salt flat in the world.', es: 'El Salar de Uyuni es el salar más grande del mundo.' },
             { en: 'Lake Titicaca, shared with Peru, is the highest navigable lake.', es: 'El Lago Titicaca, compartido con Perú, es el lago navegable más alto.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Bolivia has a high-altitude climate.', es: 'Bolivia tiene un clima de gran altitud.' }
           ],
           landmark: { name: 'Salar de Uyuni', nameEs: 'Salar de Uyuni', emoji: '🏔️' },
           animal: { name: 'Llama', nameEs: 'Llama', emoji: '🦙' },
@@ -165,7 +165,7 @@ const WorldExplorer = (() => {
             { en: 'The Itaipú Dam on the Paraguay-Brazil border is one of the largest hydroelectric dams.', es: 'La represa de Itaipú en la frontera Paraguay-Brasil es una de las más grandes del mundo.' },
             { en: 'Most Paraguayans speak both Spanish and Guaraní.', es: 'La mayoría de los paraguayos hablan español y guaraní.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Paraguay is sometimes called the Heart of South America.', es: 'A Paraguay a veces se le llama el Corazón de Sudamérica.' }
           ],
           landmark: { name: 'Itaipú Dam', nameEs: 'Represa de Itaipú', emoji: '🌊' },
           animal: { name: 'Toucan', nameEs: 'Tucán', emoji: '🦜' },
@@ -183,7 +183,7 @@ const WorldExplorer = (() => {
             { en: 'Uruguay is one of the smallest countries in South America.', es: 'Uruguay es uno de los países más pequeños de Sudamérica.' },
             { en: 'Nearly half of all Uruguayans live in Montevideo.', es: 'Casi la mitad de todos los uruguayos viven en Montevideo.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Uruguay has a very long Atlantic coastline.', es: 'Uruguay tiene una costa atlántica muy larga.' }
           ],
           landmark: { name: 'Colonia del Sacramento', nameEs: 'Colonia del Sacramento', emoji: '🏛️' },
           animal: { name: 'Southern Lapwing', nameEs: 'Tero', emoji: '🐦' },
@@ -201,7 +201,7 @@ const WorldExplorer = (() => {
             { en: 'About 80% of Guyana is covered by tropical rainforest.', es: 'Cerca del 80% de Guyana está cubierto por selva tropical.' },
             { en: 'Kaieteur Falls is one of the most powerful waterfalls in the world.', es: 'Las Cataratas Kaieteur son una de las cascadas más poderosas del mundo.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Guyana is known as the land of many waters.', es: 'Guyana es conocida como la tierra de muchas aguas.' }
           ],
           landmark: { name: 'Kaieteur Falls', nameEs: 'Cataratas Kaieteur', emoji: '💦' },
           animal: { name: 'Giant Otter', nameEs: 'Nutria Gigante', emoji: '🦦' },
@@ -219,7 +219,7 @@ const WorldExplorer = (() => {
             { en: 'Dutch is the official language of Suriname.', es: 'El holandés es el idioma oficial de Surinam.' },
             { en: 'Over 90% of Suriname is covered by rainforest.', es: 'Más del 90% de Surinam está cubierto por selva tropical.' }
 ,
-            { en: 'This country has a rich history.', es: 'Este país tiene una rica historia.' }
+            { en: 'Suriname has a very diverse culture.', es: 'Surinam tiene una cultura muy diversa.' }
           ],
           landmark: { name: 'Central Suriname Reserve', nameEs: 'Reserva Central de Surinam', emoji: '🌳' },
           animal: { name: 'Harpy Eagle', nameEs: 'Águila Harpía', emoji: '🦅' },
@@ -252,7 +252,25 @@ const WorldExplorer = (() => {
         ]
       }
     ] },
-    { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [] },
+    { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [
+      {
+        id: 'france', name: 'France', nameEs: 'Francia', flag: '🇫🇷',
+        capital: 'Paris', capitalEs: 'París',
+        facts: [
+          { en: 'The Eiffel Tower is located in Paris.', es: 'La Torre Eiffel está en París.' },
+          { en: 'France is famous for its bread and cheese.', es: 'Francia es famosa por su pan y queso.' },
+          { en: 'It is the most visited country in the world.', es: 'Es el país más visitado del mundo.' },
+          { en: 'The Tour de France is a famous bicycle race.', es: 'El Tour de Francia es una famosa carrera de bicicletas.' }
+        ],
+        landmark: { name: 'Eiffel Tower', nameEs: 'Torre Eiffel', emoji: '🗼' },
+        animal: { name: 'Rooster', nameEs: 'Gallo', emoji: '🐓' },
+        quiz: [
+          { q: 'What is the capital of France?', qEs: '¿Cuál es la capital de Francia?', options: ['London', 'Berlin', 'Madrid', 'Paris'], optionsEs: ['Londres', 'Berlín', 'Madrid', 'París'], answer: 3 },
+          { q: 'Which famous monument is in France?', qEs: '¿Qué famoso monumento está en Francia?', options: ['Colosseum', 'Eiffel Tower', 'Big Ben', 'Parthenon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Big Ben', 'Partenón'], answer: 1 },
+          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 }
+        ]
+      }
+    ] },
     { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [
       {
         id: 'egypt', name: 'Egypt', nameEs: 'Egipto', flag: '🇪🇬',
