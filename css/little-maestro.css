@@ -6354,3 +6354,50 @@ body.theme--light #import-error-toast    { background: #FFFBF0; }
 }
 
 </style>
+
+/* --- EMERGENCY IPAD LAYOUT OVERRIDES --- */
+@media (max-height: 850px) {
+  :root {
+    --header-h: 48px !important;
+    --nav-h: 52px !important;
+  }
+  
+  #screen-lesson .screen-content {
+    height: calc(100dvh - var(--header-h) - var(--nav-h)) !important;
+    padding: 8px !important;
+    gap: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .lesson-panel--sheet {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .lesson-right-panel {
+    height: 220px !important;
+    flex-direction: row !important;
+    flex-shrink: 0 !important;
+  }
+
+  #lesson-panel-melody {
+    width: 140px !important;
+    height: 100% !important;
+  }
+
+  #screen-lesson .lesson-panel--keyboard {
+    flex: 1 !important;
+    height: 100% !important;
+    min-height: unset !important;
+  }
+
+  /* Fix Falling Notes Highway */
+  .fn-highway {
+    height: calc(100dvh - var(--header-h) - var(--nav-h) - 230px) !important;
+    top: var(--header-h) !important;
+    z-index: 100 !important;
+    display: block !important;
+    background: rgba(0,0,0,0.2) !important;
+  }
+}
