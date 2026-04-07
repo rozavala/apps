@@ -7965,11 +7965,12 @@ const MIDIManager = (() => {
         return _status === 'connected';
       })
       .catch(err => {
-        if (typeof Debug !== 'undefined') Debug.error('[MIDI] Access denied or error: ' + (err.message || err.name));
-        _status = (err.name === 'SecurityError' || err.name === 'NotAllowedError')
+        const errMsg = err ? (err.message || err.name || 'Unknown error') : 'Unknown error';
+        if (typeof Debug !== 'undefined') Debug.error('[MIDI] Access denied or error: ' + errMsg);
+        _status = (err && (err.name === 'SecurityError' || err.name === 'NotAllowedError'))
           ? 'permission-denied'
           : 'disconnected';
-        _logEvent(`MIDI error: ${err.message || err.name}`);
+        _logEvent(`MIDI error: ${errMsg}`);
         _updateStatusUI();
         _notifyStatusChange();
         _updateMidiBanner();
@@ -13849,7 +13850,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </body>
-</html>\`;
+</html>`;
 
         const blob = new Blob([html], { type: 'text/html' });
         const url  = URL.createObjectURL(blob);
@@ -13890,7 +13891,6 @@ document.addEventListener('DOMContentLoaded', () => {
               };
 
               if (exists) {
-                // Ask: replace or keep both
                 const choice = confirm(`A student named "${name}" already exists.\n\nOK = Replace existing data\nCancel = Import as a new copy`);
                 if (choice) {
                   _doImport(name);
@@ -13908,12 +13908,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // ── Wire drag-and-drop on login screen ────────────────────
       function wireLoginImport() {
         const zone = document.getElementById('login-import-zone');
         if (!zone) return;
-
-        // Click to open file picker
         zone.addEventListener('click', () => {
           const input = document.createElement('input');
           input.type   = 'file';
@@ -13921,8 +13918,6 @@ document.addEventListener('DOMContentLoaded', () => {
           input.onchange = (e) => _handleImportFile(e.target.files[0]);
           input.click();
         });
-
-        // Drag events
         zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('zone--hover'); });
         zone.addEventListener('dragleave', () => zone.classList.remove('zone--hover'));
         zone.addEventListener('drop', (e) => {
@@ -13936,18 +13931,19 @@ document.addEventListener('DOMContentLoaded', () => {
       function _handleImportFile(file) {
         if (!file) return;
         importUser(file).then((importedName) => {
-          Melody.setState('excited');
-          Melody.speak(`Welcome back, ${importedName}! 🎵`, 3000);
-          // Refresh login screen
+          if (typeof Melody !== 'undefined') {
+            Melody.setState('excited');
+            Melody.speak(`Welcome back, ${importedName}! 🎵`, 3000);
+          }
           if (typeof UserManager !== 'undefined' && UserManager.renderLoginScreen) {
             UserManager.renderLoginScreen();
-          } else if (typeof renderLoginScreen !== 'undefined') {
-            renderLoginScreen();
           }
         }).catch((err) => {
-          Melody.setState('wrong');
-          Melody.speak(`Oops! ${err.message}`, 3000);
-          setTimeout(() => Melody.setState('idle'), 3500);
+          if (typeof Melody !== 'undefined') {
+            Melody.setState('wrong');
+            Melody.speak(`Oops! ${err.message}`, 3000);
+            setTimeout(() => Melody.setState('idle'), 3500);
+          }
         });
       }
 
@@ -13956,466 +13952,182 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 
   <script>
-/* === PHASE 12 JS === */
-/* ============================================================
-   PHASE 12 — EDGE CASES, SOUND POLISH, FINAL WIRING
-   ============================================================ */
-
-/* ── SOUND FX MODULE ──────────────────────────────────────── */
-const SoundFX = (() => {
-  let _muted = false;
-
-  function _ctx() {
-    return AudioEngine && AudioEngine.context ? AudioEngine.context :
-           (window._sfxCtx = window._sfxCtx || new (window.AudioContext || window.webkitAudioContext)());
-  }
-
-  function _gain(ctx, vol) {
-    const g = ctx.createGain();
-    const master = _muted ? 0 : (
-      (() => {
-        try {
-          const u = UserManager.getCurrentUser();
-          return u && u.settings && u.settings.volume != null ? u.settings.volume / 100 : 0.55;
-        } catch(e) { return 0.55; }
-      })()
-    );
-    g.gain.value = vol * master;
-    g.connect(ctx.destination);
-    return g;
-  }
-
-  function _tone(freq, type, startTime, dur, ctx, gainNode, peakVol) {
-    const osc = ctx.createOscillator();
-    const env = ctx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    env.gain.setValueAtTime(0, startTime);
-    env.gain.linearRampToValueAtTime(peakVol, startTime + 0.015);
-    env.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
-    osc.connect(env);
-    env.connect(gainNode);
-    osc.start(startTime);
-    osc.stop(startTime + dur + 0.05);
-  }
-
-  /* Ascending 4-note arpeggio — level up */
-  function levelUp() {
-    if (_muted) return;
-    try {
-      const ctx = _ctx();
-      const g = _gain(ctx, 0.38);
-      const t = ctx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
-      notes.forEach((f, i) => _tone(f, 'triangle', t + i * 0.13, 0.35, ctx, g, 0.5));
-    } catch(e) {}
-  }
-
-  /* Single high bell chime — correct answer */
-  function chime() {
-    if (_muted) return;
-    try {
-      const ctx = _ctx();
-      const g = _gain(ctx, 0.32);
-      const t = ctx.currentTime;
-      _tone(1318.5, 'sine', t, 0.45, ctx, g, 0.6);       // E6 bell
-      _tone(2637.0, 'sine', t + 0.01, 0.25, ctx, g, 0.2); // overtone
-    } catch(e) {}
-  }
-
-  /* 3-note progression — session complete fanfare */
-  function fanfare() {
-    if (_muted) return;
-    try {
-      const ctx = _ctx();
-      const g = _gain(ctx, 0.42);
-      const t = ctx.currentTime;
-      _tone(523.25,  'triangle', t,        0.28, ctx, g, 0.55); // C5
-      _tone(659.25,  'triangle', t + 0.20, 0.28, ctx, g, 0.55); // E5
-      _tone(1046.50, 'triangle', t + 0.40, 0.60, ctx, g, 0.65); // C6
-      // harmony chord on final note
-      _tone(783.99,  'sine',     t + 0.40, 0.55, ctx, g, 0.25); // G5
-    } catch(e) {}
-  }
-
-  /* Soft tick for rhythm game */
-  function tick() {
-    if (_muted) return;
-    try {
-      const ctx = _ctx();
-      const g = _gain(ctx, 0.2);
-      const t = ctx.currentTime;
-      _tone(880, 'square', t, 0.05, ctx, g, 0.3);
-    } catch(e) {}
-  }
-
-  function mute(val) {
-    _muted = (val === undefined) ? !_muted : !!val;
-    return _muted;
-  }
-  function isMuted() { return _muted; }
-
-  return { levelUp, chime, fanfare, tick, mute, isMuted };
-})();
-
-/* ── EDGE CASE HANDLERS ───────────────────────────────────── */
-const EdgeCases = (() => {
-
-  /* Audio init banner — shows if AudioContext is suspended */
-  function _checkAudioInit() {
-    const banner = document.getElementById('audio-init-banner');
-    if (!banner) return;
-    function dismiss() {
-      banner.classList.remove('visible');
-      document.removeEventListener('pointerdown', dismiss, true);
+  /* === PHASE 12 JS === */
+  const SoundFX = (() => {
+    let _muted = false;
+    function _ctx() {
+      return (window.AudioEngine && AudioEngine.context) ? AudioEngine.context :
+             (window._sfxCtx = window._sfxCtx || new (window.AudioContext || window.webkitAudioContext)());
     }
-    function show() {
-      const ctx = window.AudioContext || window.webkitAudioContext;
-      if (!ctx) return;
-      // Watch for suspended context
-      const check = () => {
+    function _gain(ctx, vol) {
+      const g = ctx.createGain();
+      const master = _muted ? 0 : (() => {
         try {
-          if (AudioEngine && AudioEngine.context && AudioEngine.context.state === 'suspended') {
+          const u = window.UserManager && UserManager.getCurrentUser();
+          return (u && u.settings && u.settings.masterVolume !== undefined) ? u.settings.masterVolume : 0.7;
+        } catch(e) { return 0.7; }
+      })();
+      g.gain.value = vol * master;
+      g.connect(ctx.destination);
+      return g;
+    }
+    function playSuccess() {
+      const ctx = _ctx(); const g = _gain(ctx, 0.3); const osc = ctx.createOscillator(); const now = ctx.currentTime;
+      osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3);
+      osc.connect(g); osc.start(); osc.stop(now + 0.3);
+    }
+    function playWrong() {
+      const ctx = _ctx(); const g = _gain(ctx, 0.3); const osc = ctx.createOscillator(); const now = ctx.currentTime;
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(220, now); osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+      osc.connect(g); osc.start(); osc.stop(now + 0.2);
+    }
+    function playDing() {
+      const ctx = _ctx(); const g = _gain(ctx, 0.2); const osc = ctx.createOscillator(); const now = ctx.currentTime;
+      osc.type = 'sine'; osc.frequency.setValueAtTime(880, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(g); osc.start(); osc.stop(now + 0.5);
+    }
+    return { playSuccess, playWrong, playDing };
+  })();
+
+  const EdgeCases = (() => {
+    function init() {
+      _checkAudioInit();
+      setTimeout(_checkResumeLesson, 800);
+      _wireSFXMute();
+      const _origShow = window.showScreen;
+      if (_origShow) {
+        window.showScreen = function(screenId) {
+          if (screenId === 'lesson') {
+            try {
+              const state = window.LessonEngine && LessonEngine._state && LessonEngine._state();
+              if (state && state.songId) sessionStorage.setItem('lm_resume_song', state.songId);
+            } catch(e) {}
+          } else {
+            sessionStorage.removeItem('lm_resume_song');
+          }
+          return _origShow(screenId);
+        };
+      }
+    }
+    function _checkAudioInit() {
+      const banner = document.getElementById('audio-init-banner');
+      if (!banner) return;
+      setTimeout(() => {
+        try {
+          if (window.AudioEngine && AudioEngine.context && AudioEngine.context.state === 'suspended') {
             banner.classList.add('visible');
             document.addEventListener('pointerdown', () => {
               AudioEngine.context.resume().then(() => banner.classList.remove('visible'));
             }, { once: true, capture: true });
           }
         } catch(e) {}
-      };
-      setTimeout(check, 1200);
+      }, 1200);
     }
-    show();
-  }
-
-  /* Resume lesson prompt — if mid-lesson session was interrupted */
-  function _checkResumeLessson() {
-    const banner = document.getElementById('resume-lesson-banner');
-    if (!banner) return;
-    try {
-      const savedScreen = sessionStorage.getItem('lm_current_screen');
-      const savedSong   = sessionStorage.getItem('lm_resume_song');
-      if (savedScreen === 'screen-lesson' && savedSong) {
-        const songId = parseInt(savedSong, 10);
-        const SONGS = window.SONGS || [];
-        const song = SONGS.find(s => s.id === songId);
-        if (song) {
-          banner.querySelector('.resume-title').textContent =
-            `Resume "${song.title}"?`;
-          banner.classList.add('visible');
-          banner.querySelector('.resume-yes').onclick = () => {
-            banner.classList.remove('visible');
-            if (window.LessonEngine) LessonEngine.startLesson(songId);
-          };
-          banner.querySelector('.resume-no').onclick = () => {
-            banner.classList.remove('visible');
-            sessionStorage.removeItem('lm_resume_song');
-          };
+    function _checkResumeLesson() {
+      const banner = document.getElementById('resume-lesson-banner');
+      if (!banner) return;
+      try {
+        const savedScreen = sessionStorage.getItem('lm_current_screen');
+        const savedSong   = sessionStorage.getItem('lm_resume_song');
+        if (savedScreen === 'screen-lesson' && savedSong) {
+          const songId = parseInt(savedSong, 10);
+          const song = (window.SONGS || []).find(s => s.id === songId);
+          if (song) {
+            banner.querySelector('.resume-title').textContent = `Resume "${song.title}"?`;
+            banner.classList.add('visible');
+            banner.querySelector('.resume-yes').onclick = () => {
+              banner.classList.remove('visible');
+              if (window.LessonEngine) LessonEngine.startLesson(songId);
+            };
+            banner.querySelector('.resume-no').onclick = () => {
+              banner.classList.remove('visible');
+              sessionStorage.removeItem('lm_resume_song');
+            };
+          }
         }
-      }
-    } catch(e) {}
-  }
-
-  /* localStorage quota check — fires before save operations */
-  function checkStorageQuota(onFull) {
-    try {
-      const test = '_lm_quota_test';
-      const data = 'x'.repeat(1024); // 1KB probe
-      localStorage.setItem(test, data);
-      localStorage.removeItem(test);
-      return false; // not full
-    } catch(e) {
-      _showStorageWarning(onFull);
-      return true; // full
+      } catch(e) {}
     }
-  }
-
-  function _showStorageWarning(onExport) {
-    let toast = document.getElementById('storage-warning-toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'storage-warning-toast';
-      toast.innerHTML = `
-        <div class="toast-title">⚠️ Storage Almost Full</div>
-        <div>Your browser's storage is nearly full. Export your student data to keep it safe before it's lost.</div>
-        <button class="toast-btn" onclick="this.closest('#storage-warning-toast').classList.remove('visible')">Export & Clear</button>`;
-      document.body.appendChild(toast);
-      toast.querySelector('.toast-btn').onclick = () => {
-        toast.classList.remove('visible');
-        if (onExport) onExport();
-        else if (window.ExportManager) {
-          const u = UserManager.getCurrentUser();
-          if (u) ExportManager.exportUser(u.profile.name);
-        }
-      };
-    }
-    requestAnimationFrame(() => toast.classList.add('visible'));
-    setTimeout(() => toast.classList.remove('visible'), 9000);
-  }
-
-  /* Import file corrupted — friendly error */
-  function showImportError(message) {
-    let toast = document.getElementById('import-error-toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'import-error-toast';
-      toast.innerHTML = '<div class="toast-title">📂 Import Problem</div><div class="toast-body"></div>';
-      document.body.appendChild(toast);
-    }
-    toast.querySelector('.toast-body').textContent = message || 'That file doesn\'t look like a Little Maestro profile. Please try a different file.';
-    requestAnimationFrame(() => toast.classList.add('visible'));
-    setTimeout(() => toast.classList.remove('visible'), 6000);
-  }
-
-  /* 6 profiles full — overlay */
-  function showProfilesFull() {
-    alert('🎹 All 6 student spots are taken!\n\nAsk a parent to remove an old profile first, then you can add a new one.');
-  }
-
-  /* Song with no notes — skip gracefully */
-  function validateSong(song) {
-    if (!song) return false;
-    if (!song.notes || song.notes.length === 0) {
-      console.warn(`[LittleMaestro] Song id=${song.id} "${song.title}" has no note data — skipping.`);
-      return false;
-    }
-    return true;
-  }
-
-  /* Empty state helper — inject friendly Melody message */
-  function showEmptyState(containerId, title, body) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-mascot">🎵</div>
-        <div class="empty-title">${title}</div>
-        <div class="empty-body">${body}</div>
-      </div>`;
-  }
-
-  /* SFX mute toggle wiring */
-  function _wireSFXMute() {
-    document.querySelectorAll('.sfx-mute-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const muted = SoundFX.mute();
-        btn.classList.toggle('muted', muted);
-        btn.title = muted ? 'Unmute sounds' : 'Mute sounds';
-        btn.textContent = muted ? '🔇' : '🔊';
-        // persist
-        try {
-          const u = UserManager.getCurrentUser();
-          if (u) { u.settings.sfxMuted = muted; UserManager.saveUser(); }
-        } catch(e) {}
+    function _wireSFXMute() {
+      document.querySelectorAll('.sfx-mute-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const muted = btn.classList.toggle('muted');
+          btn.textContent = muted ? '🔇' : '🔊';
+          try {
+            const u = UserManager.getCurrentUser();
+            if (u) { u.settings.sfxMuted = muted; UserManager.saveUser(); }
+          } catch(e) {}
+        });
       });
+    }
+    function showEmptyState(containerId, title, sub) {
+      const c = document.getElementById(containerId);
+      if (!c) return;
+      c.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div></div>`;
+    }
+    function showImportError(msg) {
+      let t = document.getElementById('import-error-toast');
+      if (!t) {
+        t = document.createElement('div'); t.id = 'import-error-toast';
+        t.className = 'toast toast--error'; document.body.appendChild(t);
+      }
+      t.textContent = msg || 'Error importing data.';
+      t.classList.add('visible'); setTimeout(() => t.classList.remove('visible'), 5000);
+    }
+    return { init, showEmptyState, showImportError, _wireSFXMute };
+  })();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.ExportManager) {
+      const _origExp = ExportManager.exportUser;
+      ExportManager.exportUser = function(name) {
+        const choice = confirm("Export printable Journey Keepsake (OK) or raw JSON data (Cancel)?");
+        if (choice) ExportManager.exportKeepsake(name); else _origExp(name);
+      };
+    }
+    document.addEventListener('lm:settings-rendered', () => {
+      if (window.EdgeCases) EdgeCases._wireSFXMute && EdgeCases._wireSFXMute();
     });
-  }
-
-  function init() {
-    _checkAudioInit();
-    setTimeout(_checkResumeLessson, 800);
-    _wireSFXMute();
-
-    // Track mid-lesson song for resume
-    const _origShowScreen = window.showScreen;
-    window.showScreen = function(screenId) {
-      if (screenId === 'lesson') {
-        try {
-          const state = LessonEngine && LessonEngine._state && LessonEngine._state();
-          if (state && state.songId) sessionStorage.setItem('lm_resume_song', state.songId);
-        } catch(e) {}
-      } else {
-        sessionStorage.removeItem('lm_resume_song');
-      }
-      return _origShowScreen(screenId);
-    };
-  }
-
-  return { init, checkStorageQuota, showImportError, showProfilesFull, validateSong, showEmptyState };
-})();
-
-/* ── HOOK SOUND FX INTO EXISTING MODULES ──────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-
-  // Patch GamificationManager to play sounds
-  if (window.GamificationManager) {
-    const _origShowCelebration = GamificationManager.showCelebration.bind(GamificationManager);
-    GamificationManager.showCelebration = function(type, data) {
-      if (type === 'songPass' && data && data.stars === 3) SoundFX.fanfare();
-      else if (type === 'worldComplete')   SoundFX.fanfare();
-      else if (type === 'streakMilestone') SoundFX.levelUp();
-      else if (type === 'threeStars')      SoundFX.fanfare();
-      return _origShowCelebration(type, data);
-    };
-
-    const _origAwardNotes = GamificationManager.awardNotes.bind(GamificationManager);
-    GamificationManager.awardNotes = function(amount, reason) {
-      if (amount >= 25) SoundFX.levelUp();
-      return _origAwardNotes(amount, reason);
-    };
-  }
-
-  // Patch LessonEngine for correct-note chime
-  if (window.LessonEngine && LessonEngine._onCorrect === undefined) {
-    // Hook via global event
-    document.addEventListener('lm:note-correct', () => SoundFX.chime());
-  }
-
-  // Patch SessionManager for session complete fanfare
-  if (window.SessionManager) {
-    const _origEndSession = SessionManager.endSession.bind(SessionManager);
-    SessionManager.endSession = function() {
-      SoundFX.fanfare();
-      return _origEndSession();
-    };
-  }
-
-  // Patch MiniLessons completion
-  if (window.MiniLessons) {
-    const _origRender = MiniLessons.render.bind(MiniLessons);
-    // listen for precurriculum complete event
-    document.addEventListener('lm:precurr-complete', () => SoundFX.fanfare());
-  }
-
-  // Wire SFX mute buttons (from settings screen)
-  document.addEventListener('lm:settings-rendered', () => {
-    if (window.EdgeCases) EdgeCases._wireSFXMute && EdgeCases._wireSFXMute();
+    window.SoundFX = SoundFX; window.EdgeCases = EdgeCases;
+    EdgeCases.init();
+    if (typeof AudioEngine !== 'undefined' && !document.getElementById('audio-init-banner')) {
+      const b = document.createElement('div'); b.id = 'audio-init-banner';
+      b.innerHTML = `<span class="audio-banner-icon">🔊</span> Tap anywhere to start audio`;
+      document.body.appendChild(b);
+      document.addEventListener('pointerdown', () => b.classList.remove('visible'), { once: true, capture: true });
+    }
+    if (window.UserManager && UserManager.createUser) {
+      const _origC = UserManager.createUser.bind(UserManager);
+      UserManager.createUser = (n,a,c) => { try { return _origC(n,a,c); } catch(err) { EdgeCases.showImportError(err.message); throw err; } };
+    }
+    const _origTR = window.renderTrophyRoom;
+    if (_origTR) {
+      window.renderTrophyRoom = () => {
+        _origTR(); const g = document.getElementById('trophy-grid-container');
+        if (g && g.children.length === 0) EdgeCases.showEmptyState('trophy-grid-container', 'No trophies yet!', 'Finish your first song to earn a trophy!');
+      };
+    }
+    document.addEventListener('lm:questmap-empty', () => {
+      EdgeCases.showEmptyState('questmap-path-container', 'No songs available', 'Complete Mini-Lessons first!');
+    });
+    console.log('[LittleMaestro] Phase 12 — Final polish loaded.');
   });
-
-  // Expose helpers globally for other modules
-  window.SoundFX = SoundFX;
-  window.EdgeCases = EdgeCases;
-
-  // Init edge cases
-  EdgeCases.init();
-
-  // Add skip-to-main accessibility link
-  if (!document.querySelector('.skip-to-main')) {
-    const skip = document.createElement('a');
-    skip.className = 'skip-to-main';
-    skip.href = '#app-root';
-    skip.textContent = 'Skip to main content';
-    document.body.insertBefore(skip, document.body.firstChild);
-  }
-
-  // Add audio init banner to DOM if not present
-  if (!document.getElementById('audio-init-banner')) {
-    const banner = document.createElement('div');
-    banner.id = 'audio-init-banner';
-    banner.innerHTML = `<span class="audio-banner-icon">🔊</span> Tap anywhere to start audio`;
-    document.body.appendChild(banner);
-    document.addEventListener('pointerdown', () => {
-      banner.classList.remove('visible');
-    }, { once: true, capture: true });
-    // Check if we need to show it after a moment
-    setTimeout(() => {
-      try {
-        if (AudioEngine && AudioEngine.context && AudioEngine.context.state === 'suspended') {
-          banner.classList.add('visible');
-        } else if (!AudioEngine || !AudioEngine.context) {
-          // No audio context created yet — show banner proactively on first load
-          banner.classList.add('visible');
-          setTimeout(() => banner.classList.remove('visible'), 4000);
-        }
-      } catch(e) {
-        banner.classList.add('visible');
-        setTimeout(() => banner.classList.remove('visible'), 4000);
-      }
-    }, 1500);
-  }
-
-  // Add resume lesson banner to DOM
-  if (!document.getElementById('resume-lesson-banner')) {
-    const rb = document.createElement('div');
-    rb.id = 'resume-lesson-banner';
-    rb.innerHTML = `
-      <div class="resume-title">Resume song?</div>
-      <div class="resume-sub" style="font-size:13px;color:var(--color-text-muted)">You were in the middle of a lesson.</div>
-      <div class="resume-actions">
-        <button class="resume-yes">▶ Resume</button>
-        <button class="resume-no">Start Fresh</button>
-      </div>`;
-    document.body.appendChild(rb);
-  }
-
-  // Intercept UserManager.createUser to catch 6-profile limit
-  if (window.UserManager && UserManager.createUser) {
-    const _origCreate = UserManager.createUser.bind(UserManager);
-    UserManager.createUser = function(name, avatar, color) {
-      try {
-        return _origCreate(name, avatar, color);
-      } catch(e) {
-        if (e.message && e.message.includes('limit')) {
-          EdgeCases.showProfilesFull();
-        }
-        throw e;
-      }
-    };
-  }
-
-  // Intercept ExportManager.importUser to show friendly errors
-  if (window.ExportManager && ExportManager.importUser) {
-    const _origImport = ExportManager.importUser.bind(ExportManager);
-    ExportManager.importUser = function(file) {
-      return _origImport(file).catch(err => {
-        EdgeCases.showImportError(err && err.message ? err.message : null);
-        throw err;
-      });
-    };
-  }
-
-  // Trophy room empty state
-  const _origRenderTrophyRoom = window.renderTrophyRoom;
-  if (_origRenderTrophyRoom) {
-    window.renderTrophyRoom = function() {
-      _origRenderTrophyRoom();
-      const grid = document.getElementById('trophy-grid-container');
-      if (grid && grid.children.length === 0) {
-        EdgeCases.showEmptyState('trophy-grid-container',
-          'No trophies yet!',
-          'Finish your first song to earn a trophy. Melody believes in you! 🎵');
-      }
-    };
-  }
-
-  // Quest map empty state guard
-  document.addEventListener('lm:questmap-empty', () => {
-    EdgeCases.showEmptyState('questmap-path-container',
-      'No songs available',
-      'Complete the Mini-Lessons first to unlock your first song!');
-  });
-
-  console.log('[LittleMaestro] Phase 12 — Final polish loaded. SoundFX & EdgeCases active.');
-});
-
-  // Quest map empty state guard
-  document.addEventListener('lm:questmap-empty', () => {
-    EdgeCases.showEmptyState('questmap-path-container',
-      'No songs available',
-      'Complete the Mini-Lessons first to unlock your first song!');
-  });
-
-  console.log('[LittleMaestro] Phase 12 — Final polish loaded. SoundFX & EdgeCases active.');
-});
-
 </script>
 
-  <!-- ── PWA Service Worker registration ── -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./_assets/sw.js', { scope: './' })
-          .then(reg => console.log('[SW] Registered:', reg.scope))
-          .catch(err => console.warn('[SW] Registration failed:', err));
-      });
-    }
-  </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./_assets/sw.js', { scope: './' })
+        .then(reg => console.log('[SW] Registered:', reg.scope))
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    });
+  }
+</script>
 
-  <script src="js/auth.js?v=2"></script>
-  <script src="js/sync.js?v=2"></script>
-  <script src="js/timer.js?v=2"></script>
-  <script src="js/learning-checks.js?v=2"></script>
-  <script src="js/lm-bridge.js?v=2"></script>
+<script src="js/auth.js?v=2"></script>
+<script src="js/sync.js?v=2"></script>
+<script src="js/timer.js?v=2"></script>
+<script src="js/learning-checks.js?v=2"></script>
+<script src="js/lm-bridge.js?v=2"></script>
 
 </body>
 </html>
