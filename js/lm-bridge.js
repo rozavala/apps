@@ -15,8 +15,10 @@
   'use strict';
 
   function bridgeInit() {
+    if (typeof Debug !== 'undefined') Debug.log('[LM-Bridge] Initializing bridge...');
     // Ensure Little Maestro's UserManager exists
     if (typeof UserManager === 'undefined') {
+      if (typeof Debug !== 'undefined') Debug.warn('[LM-Bridge] UserManager not found');
       console.warn('[LM-Bridge] UserManager not found — is this little-maestro.html?');
       return;
     }
@@ -25,10 +27,13 @@
     var sharedUser = null;
     try {
       sharedUser = JSON.parse(localStorage.getItem('zs_active_user'));
-    } catch(e) {}
+    } catch(e) {
+      if (typeof Debug !== 'undefined') Debug.error('[LM-Bridge] Failed to parse zs_active_user', e.message);
+    }
 
     // No shared user → redirect to hub
     if (!sharedUser) {
+      if (typeof Debug !== 'undefined') Debug.warn('[LM-Bridge] No shared user, redirecting to index');
       window.location.href = 'index.html';
       return;
     }
@@ -36,6 +41,7 @@
     var name   = sharedUser.name;
     var avatar = sharedUser.avatar || '🐱';
     var color  = sharedUser.color || '#7C3AED';
+    if (typeof Debug !== 'undefined') Debug.log('[LM-Bridge] Bridging user: ' + name);
 
     // Find or create a matching Little Maestro profile
     var allUsers = UserManager.getAllUsers();
@@ -45,18 +51,29 @@
 
     if (existing) {
       try {
+        if (typeof Debug !== 'undefined') Debug.log('[LM-Bridge] Loading existing LM user: ' + name);
         UserManager.loadUser(name);
       }
-      catch(e) { console.error('[LM-Bridge] Load failed:', e); return; }
+      catch(e) { 
+        if (typeof Debug !== 'undefined') Debug.error('[LM-Bridge] Load failed', e.message);
+        console.error('[LM-Bridge] Load failed:', e); 
+        return; 
+      }
     } else {
       try {
+        if (typeof Debug !== 'undefined') Debug.log('[LM-Bridge] Creating new LM user: ' + name);
         UserManager.createUser(name, avatar, color);
         try { UserManager.loadUser(name); } catch(e) {}
       } catch(e) {
         // Name might exist with different case — try loading
+        if (typeof Debug !== 'undefined') Debug.warn('[LM-Bridge] Create failed, trying load: ' + e.message);
         console.warn('[LM-Bridge] Create failed, trying load:', e.message);
         try { UserManager.loadUser(name); }
-        catch(e2) { console.error('[LM-Bridge] Cannot create or load:', e2); return; }
+        catch(e2) { 
+          if (typeof Debug !== 'undefined') Debug.error('[LM-Bridge] Cannot create or load', e2.message);
+          console.error('[LM-Bridge] Cannot create or load:', e2); 
+          return; 
+        }
       }
     }
 
