@@ -7944,11 +7944,15 @@ const MIDIManager = (() => {
 
         // Hot-plug: fires when any MIDI device connects or disconnects
         _access.onstatechange = (event) => {
-          if (event.port.type === 'input') {
-            if (typeof Debug !== 'undefined') Debug.log('[MIDI] State change: ' + event.port.name + ' is ' + event.port.state);
-            _logEvent(`Device ${event.port.state}: ${event.port.name}`);
-            // Delay to let device fully initialize
-            setTimeout(_scanInputs, 400);
+          try {
+            if (event && event.port && event.port.type === 'input') {
+              if (typeof Debug !== 'undefined') Debug.log('[MIDI] State change: ' + event.port.name + ' is ' + event.port.state);
+              _logEvent(`Device ${event.port.state}: ${event.port.name}`);
+              // Delay to let device fully initialize
+              setTimeout(_scanInputs, 400);
+            }
+          } catch(e) {
+            if (typeof Debug !== 'undefined') Debug.error('[MIDI] onstatechange failed', e.message);
           }
         };
 
@@ -13844,8 +13848,23 @@ document.addEventListener('DOMContentLoaded', () => {
       Exported ${new Date().toLocaleDateString()}
     </div>
   </div>
+</body>
+</html>\`;
 
-<script>
+        const blob = new Blob([html], { type: 'text/html' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `LittleMaestro_${name.replace(/\s+/g,'_')}_Keepsake.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      return { exportUser, exportKeepsake };
+    })();
+  </script>
+
+  <script>
 /* === PHASE 12 JS === */
 /* ============================================================
    PHASE 12 — EDGE CASES, SOUND POLISH, FINAL WIRING
