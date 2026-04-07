@@ -286,7 +286,8 @@ function flipCard(i){
 // ── QUIZ ──
 const QB={
   geography:[
-    {q:'¿Cuál es el río más largo de Chile?',a:'Río Loa',o:['Río Loa','Río Biobío','Río Mapocho','Río Maipo'], tier:'advanced'},
+    // PRUNED [2026-04-12]: Removed to stay within MAX 20 limit
+
     {q:'¿Qué río cruza la ciudad de Santiago?',a:'Río Mapocho',o:['Río Mapocho','Río Loa','Río Baker','Río Maule'], tier:'beginner'},
     {q:'¿Cómo se llama el estrecho en el extremo sur de Chile?',a:'Estrecho de Magallanes',o:['Estrecho de Magallanes','Estrecho de Bering','Canal de Panamá','Estrecho de Gibraltar'], tier:'intermediate'},
     {q:'¿Cuánto mide Chile de norte a sur?',a:'Más de 4.300 km',o:['Más de 4.300 km','Unos 1.000 km','Alrededor de 2.500 km','Menos de 500 km'], tier:'expert'},
@@ -300,10 +301,12 @@ const QB={
     {q:'¿Cuál es el ancho promedio de Chile?',a:'177 km',o:['177 km','500 km','10 km','1.000 km'], tier:'expert'},
     {q:'¿Cuál es el archipiélago chileno famoso por sus iglesias de madera?',a:'Chiloé',o:['Chiloé','Juan Fernández','Galápagos','Malvinas'], tier:'advanced'},
     {q:'¿En qué zona de Chile están los salares y géiseres?',a:'Norte',o:['Norte','Centro','Sur','Patagonia'], tier:'intermediate'},
-    {q:'¿Qué país comparte la cordillera de los Andes con Chile en la frontera este?',a:'Argentina',o:['Argentina','Perú','Bolivia','Brasil'], tier:'intermediate'},
+    // PRUNED [2026-04-12]: Removed to stay within MAX 20 limit
+
     {q:'¿Dónde se encuentran los glaciares milenarios como el Glaciar Grey?',a:'Patagonia',o:['Patagonia','Atacama','Valles Centrales','Isla de Pascua'], tier:'intermediate'},
     {q:'¿A qué distancia de la costa está aproximadamente Isla de Pascua?',a:'3.700 km',o:['3.700 km','500 km','1.000 km','10.000 km'], tier:'advanced'},
-    {q:'¿En qué hemisferio se encuentra Chile?',a:'Hemisferio Sur',o:['Hemisferio Sur','Hemisferio Norte','Hemisferio Oriental','En el Ecuador'], tier:'beginner'},
+    // PRUNED [2026-04-12]: Removed to stay within MAX 20 limit
+
     {q:'¿Cuál es la capital de Chile?',a:'Santiago',o:['Santiago','Valparaíso','Concepción','Antofagasta'], tier:'beginner'},
     {q:'¿Qué país está al norte de Chile?',a:'Perú',o:['Perú','Argentina','Bolivia','Brasil'], tier:'intermediate'},
     {q:'¿Cuál es el lago más grande de Chile?',a:'Lago General Carrera',o:['Lago General Carrera','Lago Llanquihue','Lago Villarrica','Lago Ranco'], tier:'advanced'},
@@ -374,19 +377,25 @@ const QB={
     {q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa'], tier:'intermediate'},
     {q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo'], tier:'beginner'},
     {q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970'], tier:'intermediate'},
-    {q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos'], tier:'expert'}
+    {q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos'], tier:'expert'},
+    {q:'¿Qué deporte practicaba Marcelo Ríos?',a:'Tenis',o:['Tenis','Fútbol','Gimnasia','Natación'], tier:'beginner'},
+    {q:'¿En qué año fue Marcelo Ríos número 1 del mundo?',a:'1998',o:['1998','2000','1995','2005'], tier:'advanced'}
   ],
   inventors:[
     {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
     {q:'¿Qué es un atrapanieblas?',a:'Una malla para atrapar agua',o:['Una malla para atrapar agua','Un telescopio especial','Un tipo de tienda de campaña','Un barco de pesca'], tier:'advanced'},
     {q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto'], tier:'advanced'},
-    {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'}
+    {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'},
+    {q:'¿Qué virus ayudó a descubrir Pablo Valenzuela?',a:'Hepatitis C',o:['Hepatitis C','Gripe','Sarampión','Varicela'], tier:'advanced'},
+    {q:'¿Cuál será el telescopio más grande del mundo en construcción en Chile?',a:'ELT',o:['ELT','VLT','ALMA','Hubble'], tier:'expert'}
   ],
   volcanes:[
     {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced'},
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Unos 100','Alrededor de 50','Menos de 10'], tier:'intermediate'},
     {q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno'], tier:'expert'},
-    {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'}
+    {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'},
+    {q:'¿Qué volcán es famoso por su forma de cono perfecto en el sur?',a:'Osorno',o:['Osorno','Llaima','Calbuco','Villarrica'], tier:'advanced'},
+    {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'}
   ],
   animales:[
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
