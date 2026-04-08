@@ -16,7 +16,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🧮 Math Galaxy** | Blast through math challenges—addition, multiplication, fractions, and more in a space adventure. | [math-galaxy.html](math-galaxy.html) |
 | **🇨🇱 Descubre Chile** | Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes. | [descubre-chile.html](descubre-chile.html) |
 | **♟️ Chess Quest** | Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI. | [chess-quest.html](chess-quest.html) |
-| **⛪ Fe Explorador** | Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes. | [fe-explorador.html](fe-explorador.html) |
+| **⛪ Fe Explorador** | Descubre oraciones, vidas de santos y patrimonio religioso chileno. (Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.) | [fe-explorador.html](fe-explorador.html) |
 | **🎸 Guitar Jam** | Learn guitar chords, strum along with songs, and train your ear. | [guitar-jam.html](guitar-jam.html) |
 | **🎨 Art Studio** | Draw, paint, and learn famous art styles with guided activities. | [art-studio.html](art-studio.html) |
 | **🏓 Sports Arena** | Track matches, run tournaments, and log outdoor activities to balance screen time. | [sports-arena.html](sports-arena.html) |
@@ -78,7 +78,9 @@ open index.html
 Para la mejor experiencia en dispositivos móviles:
 1. Sube los archivos a **GitHub Pages** u otro servidor web estático. (Upload the files to GitHub Pages or another static web server). **Tip: In GitHub, go to Settings > Pages > Source: Deploy from a branch > select `main`.**
 2. Abre la URL en el navegador de tu dispositivo móvil. (Open the URL in your mobile browser).
-3. Selecciona **"Agregar a la pantalla de inicio"** (Add to Home Screen) en el menú de opciones de tu navegador. Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
+3. Selecciona **"Agregar a la pantalla de inicio"** (Add to Home Screen). Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
+   - **iOS (Safari):** Toca el ícono de compartir (Share) y elige "Agregar a inicio" (Add to Home Screen).
+   - **Android (Chrome):** Toca el menú de tres puntos y elige "Agregar a la pantalla principal" (Add to Home Screen).
 
 ## 📂 Project Structure
 
