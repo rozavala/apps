@@ -410,13 +410,17 @@ const QB={
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Menos de 100','Alrededor de 500','Solo 10'], tier:'expert'},
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
-    {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'}
+    {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'},
+    {q:'¿Qué instrumento se usa para medir los sismos cerca de un volcán?',a:'Sismógrafo',o:['Sismógrafo','Termómetro','Telescopio','Barómetro'], tier:'advanced'},
+    {q:'¿Qué volcán hizo erupción en 2015 en la Región de Los Lagos?',a:'Calbuco',o:['Calbuco','Villarrica','Osorno','Llaima'], tier:'expert'}
   ],
   fiestas_patrias:[
     {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},
     {q:'¿Qué baile tradicional se baila en las fondas?',a:'La Cueca',o:['La Cueca','La Cumbia','El Tango','El Reggaetón'], tier:'beginner'},
     {q:'¿En qué año se declaró a la Cueca como baile nacional?',a:'1979',o:['1979','1810','1990','2000'], tier:'expert'},
-    {q:'¿Qué animal representa el cortejo de la Cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Cóndor y águila','Puma y huemul','Caballo y yegua'], tier:'intermediate'}
+    {q:'¿Qué animal representa el cortejo de la Cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Cóndor y águila','Puma y huemul','Caballo y yegua'], tier:'intermediate'},
+    {q:'¿Qué juego típico se juega elevándolo con hilo al viento?',a:'El volantín',o:['El volantín','El trompo','El emboque','Las bolitas'], tier:'beginner'},
+    {q:'¿Qué comida es tradicional en Fiestas Patrias?',a:'La empanada de pino',o:['La empanada de pino','El sushi','La pizza','Los tacos'], tier:'beginner'}
   ]
 };
 

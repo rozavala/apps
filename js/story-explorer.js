@@ -168,6 +168,36 @@ const StoryExplorer = (() => {
         { q: 'What was Tomas studying?', qEs: '¿Qué estaba estudiando Tomás?', options: ['Forests', 'Glaciers', 'Deserts', 'Oceans'], optionsEs: ['Bosques', 'Glaciares', 'Desiertos', 'Océanos'], answer: 1 },
         { q: 'How did the ice look in the sun?', qEs: '¿Cómo se veía el hielo al sol?', options: ['Like rocks', 'Like diamonds', 'Like glass', 'Like water'], optionsEs: ['Como rocas', 'Como diamantes', 'Como cristal', 'Como agua'], answer: 1 }
       ]
+    },
+    {
+      id: 'lost_map',
+      title: 'The Lost Map',
+      titleEs: 'El Mapa Perdido',
+      tier: 'explorer', ageMin: 6, region: 'andes', icon: '🗺️',
+      pages: [
+        {
+          en: 'One day, an explorer found a strange old map in a cave.',
+          es: 'Un día, un explorador encontró un extraño mapa antiguo en una cueva.',
+          vocab: [
+            { word: 'explorer', wordEs: 'explorador', def: 'A person who travels to unknown places.', defEs: 'Una persona que viaja a lugares desconocidos.' },
+            { word: 'strange', wordEs: 'extraño', def: 'Unusual or surprising.', defEs: 'Inusual o sorprendente.' },
+            { word: 'map', wordEs: 'mapa', def: 'A drawing of a place showing where things are.', defEs: 'Un dibujo de un lugar que muestra dónde están las cosas.' }
+          ]
+        },
+        {
+          en: 'It showed a path leading to a hidden waterfall in the forest.',
+          es: 'Mostraba un camino que llevaba a una cascada oculta en el bosque.',
+          vocab: [
+            { word: 'path', wordEs: 'camino', def: 'A track made for walking.', defEs: 'Una pista hecha para caminar.' },
+            { word: 'waterfall', wordEs: 'cascada', def: 'Water falling from a height.', defEs: 'Agua cayendo desde una altura.' },
+            { word: 'forest', wordEs: 'bosque', def: 'A large area covered with trees.', defEs: 'Una gran área cubierta de árboles.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Where did the explorer find the map?', qEs: '¿Dónde encontró el explorador el mapa?', options: ['In a house', 'In a cave', 'In a tree', 'In the river'], optionsEs: ['En una casa', 'En una cueva', 'En un árbol', 'En el río'], answer: 1 },
+        { q: 'What did the map show the way to?', qEs: '¿Hacia dónde mostraba el camino el mapa?', options: ['A castle', 'A hidden waterfall', 'A city', 'A treasure chest'], optionsEs: ['A un castillo', 'A una cascada oculta', 'A una ciudad', 'A un cofre del tesoro'], answer: 1 }
+      ]
     }
   ];
 

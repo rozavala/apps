@@ -22,7 +22,8 @@ const CHORDS = [
   { name: 'D7', fullName: 'D Dominant 7', tier: 'advanced', frets: [-1, -1, 0, 2, 1, 2], fingers: [0, 0, 0, 2, 1, 3], funFact: 'It looks like a backwards D Major chord.' },
   { name: 'A7', fullName: 'A Dominant 7', tier: 'advanced', frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 0, 2, 0, 3, 0], funFact: 'Like an A Major chord, but with an open G string in the middle.' },
   { name: 'E7', fullName: 'E Dominant 7', tier: 'advanced', frets: [0, 2, 0, 1, 0, 0], fingers: [0, 2, 0, 1, 0, 0], funFact: 'A very bluesy sounding chord.' },
-  { name: 'Am7', fullName: 'A Minor 7', tier: 'advanced', frets: [-1, 0, 2, 0, 1, 0], fingers: [0, 0, 2, 0, 1, 0], funFact: 'A jazzy variation of the standard A Minor chord.' }
+  { name: 'Am7', fullName: 'A Minor 7', tier: 'advanced', frets: [-1, 0, 2, 0, 1, 0], fingers: [0, 0, 2, 0, 1, 0], funFact: 'A jazzy variation of the standard A Minor chord.' },
+  { name: 'Fm', fullName: 'F Minor (Barre)', tier: 'expert', frets: [1, 3, 3, 1, 1, 1], fingers: [1, 3, 4, 1, 1, 1], funFact: 'A sad, moody barre chord.' }
 ];
 
 const SONGS = [
@@ -36,7 +37,8 @@ const SONGS = [
   { id: 'scarborough', title: 'Scarborough Fair', tier: 'advanced', bpm: 90, progression: [['Am', 8], ['Am', 4], ['G', 4], ['Am', 4], ['G', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 8]] },
   { id: 'amazing', title: 'Amazing Grace', tier: 'intermediate', bpm: 100, progression: [['G', 6], ['G', 6], ['C', 6], ['G', 6], ['G', 6], ['G', 6], ['D', 12]] },
   { id: 'valerie', title: 'Valerie', tier: 'intermediate', bpm: 105, progression: [['C', 4], ['Dm', 4], ['C', 4], ['Dm', 4]] },
-  { id: 'letitbe', title: 'Let It Be', tier: 'intermediate', bpm: 70, progression: [['C', 4], ['G', 4], ['Am', 4], ['F', 4], ['C', 4], ['G', 4], ['F', 2], ['C', 6]] }
+  { id: 'letitbe', title: 'Let It Be', tier: 'intermediate', bpm: 70, progression: [['C', 4], ['G', 4], ['Am', 4], ['F', 4], ['C', 4], ['G', 4], ['F', 2], ['C', 6]] },
+  { id: 'hallelujah', title: 'Hallelujah', tier: 'intermediate', bpm: 60, progression: [['C', 6], ['Am', 6], ['C', 6], ['Am', 6], ['F', 6], ['G', 6], ['C', 6], ['G', 6]] }
 ];
 
 const GuitarJam = (() => {
