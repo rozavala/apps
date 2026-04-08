@@ -89,18 +89,7 @@ const FeManager = (() => {
         { q: '¿En qué ciudad vivió en un monasterio?', a: ['Roma', 'Los Andes', 'Valparaíso'], correct: 1 }
       ]
     },
-    {
-      id: 'jorge',
-      name: 'San Jorge',
-      dates: 'siglo III',
-      country: 'Capadocia ⚔️',
-      bio: 'Fue un soldado romano que defendió su fe con gran valentía. Es el patrono de los exploradores y se le representa como un caballero valiente.',
-      questions: [
-        { q: '¿Qué profesión tenía San Jorge?', a: ['Pintor', 'Soldado', 'Cocinero'], correct: 1 },
-        { q: 'Es el patrono de los...', a: ['Exploradores', 'Navegantes', 'Músicos'], correct: 0 },
-        { q: '¿Cómo se le representa generalmente?', a: ['Como un rey', 'Como un caballero valiente', 'Como un pastor'], correct: 1 }
-      ]
-    },
+    // PRUNED [2026-04-14]: Removed 'jorge' to stay within MAX 15 limit
     {
       id: 'alberto_hurtado',
       name: 'San Alberto Hurtado',
@@ -113,18 +102,7 @@ const FeManager = (() => {
         { q: '¿A qué orden pertenecía el Padre Hurtado?', a: ['Franciscanos', 'Jesuitas', 'Dominicos'], correct: 1 }
       ]
     },
-    {
-      id: 'tomas_aquino',
-      name: 'Santo Tomás de Aquino',
-      dates: '1225–1274',
-      country: 'Italia 🇮🇹',
-      bio: 'Fue un gran sabio y maestro que amaba estudiar. Escribió muchos libros sobre la fe y la razón, y es conocido como el "Doctor Angélico".',
-      questions: [
-        { q: '¿Qué le gustaba mucho hacer a Santo Tomás?', a: ['Cazar', 'Estudiar y escribir', 'Navegar'], correct: 1 },
-        { q: '¿Cómo es conocido también?', a: ['El Doctor Angélico', 'El Rey Sabio', 'El Gran Viajero'], correct: 0 },
-        { q: '¿Qué le gustaba estudiar?', a: ['La fe y la razón', 'La navegación', 'La agricultura'], correct: 0 }
-      ]
-    },
+    // PRUNED [2026-04-14]: Removed 'tomas_aquino' to stay within MAX 15 limit
     {
       id: 'rosa_lima',
       name: 'Santa Rosa de Lima',
@@ -221,6 +199,18 @@ const FeManager = (() => {
         { q: '¿En qué siglo vivió?', a: ['Siglo X', 'Siglo I', 'Siglo V'], correct: 1 }
       ]
     },
+    {
+      id: 'pedro',
+      name: 'San Pedro',
+      dates: 'Siglo I',
+      country: 'Judea 🗝️',
+      bio: 'Fue un pescador y uno de los apóstoles más cercanos a Jesús. Es considerado el primer Papa de la Iglesia Católica.',
+      questions: [
+        { q: '¿Cuál era la profesión original de San Pedro?', a: ['Carpintero', 'Pescador', 'Soldado'], correct: 1 },
+        { q: '¿A quién se le considera el primer Papa?', a: ['San Pablo', 'San Pedro', 'San Juan'], correct: 1 },
+        { q: '¿En qué siglo vivió?', a: ['Siglo V', 'Siglo III', 'Siglo I'], correct: 2 }
+      ]
+    }
   ];
 
   const MYSTERIES = [
@@ -273,6 +263,12 @@ const FeManager = (() => {
       title: 'Templo Votivo de Maipú',
       info: 'Construido en Santiago para cumplir la promesa hecha a la Virgen del Carmen tras ganar la independencia de Chile.',
       q: '¿A quién se le hizo la promesa de construir este templo?', a: ['A San José', 'A la Virgen del Carmen', 'A San Miguel'], correct: 1
+    },
+    {
+      id: 'teresa',
+      title: 'Santuario de Santa Teresa de Los Andes',
+      info: 'Ubicado en Auco, es un importante lugar de peregrinación donde descansan los restos de la primera santa chilena.',
+      q: '¿Qué santa chilena descansa en este santuario?', a: ['Santa Rosa', 'Santa Teresa de Los Andes', 'Santa Cecilia'], correct: 1
     }
   ];
 

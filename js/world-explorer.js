@@ -289,7 +289,42 @@ const WorldExplorer = (() => {
         ]
       }
     ] },
-    { id: 'asia', name: 'Asia', nameEs: 'Asia', icon: '🌏', color: '#F59E0B', countries: [] },
+    { id: 'asia', name: 'Asia', nameEs: 'Asia', icon: '🌏', color: '#F59E0B', countries: [
+      {
+        id: 'japan', name: 'Japan', nameEs: 'Japón', flag: '🇯🇵',
+        capital: 'Tokyo', capitalEs: 'Tokio',
+        facts: [
+          { en: 'Japan is an island nation in East Asia.', es: 'Japón es un país insular en el este de Asia.' },
+          { en: 'Mount Fuji is the highest mountain in Japan.', es: 'El monte Fuji es la montaña más alta de Japón.' },
+          { en: 'Bullet trains in Japan can travel up to 320 km/h.', es: 'Los trenes bala en Japón pueden viajar hasta 320 km/h.' },
+          { en: 'Cherry blossoms are a famous symbol of spring in Japan.', es: 'Las flores de cerezo son un famoso símbolo de la primavera en Japón.' }
+        ],
+        landmark: { name: 'Mount Fuji', nameEs: 'Monte Fuji', emoji: '🗻' },
+        animal: { name: 'Macaque', nameEs: 'Macaco', emoji: '🐒' },
+        quiz: [
+          { q: 'What is the capital of Japan?', qEs: '¿Cuál es la capital de Japón?', options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'], optionsEs: ['Kioto', 'Osaka', 'Tokio', 'Hiroshima'], answer: 2 },
+          { q: 'What is the highest mountain in Japan?', qEs: '¿Cuál es la montaña más alta de Japón?', options: ['Mount Everest', 'Mount Fuji', 'Mount Kilimanjaro', 'Mount Blanc'], optionsEs: ['Monte Everest', 'Monte Fuji', 'Monte Kilimanjaro', 'Mont Blanc'], answer: 1 },
+          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2 }
+        ]
+      },
+      {
+        id: 'china', name: 'China', nameEs: 'China', flag: '🇨🇳',
+        capital: 'Beijing', capitalEs: 'Pekín',
+        facts: [
+          { en: 'The Great Wall of China is over 21,000 km long.', es: 'La Gran Muralla China tiene más de 21.000 km de largo.' },
+          { en: 'Giant pandas are native to South Central China.', es: 'Los osos panda gigantes son nativos del centro-sur de China.' },
+          { en: 'China has the largest population in the world.', es: 'China tiene la población más grande del mundo.' },
+          { en: 'The Yangtze is the longest river in Asia.', es: 'El Yangtsé es el río más largo de Asia.' }
+        ],
+        landmark: { name: 'Great Wall', nameEs: 'Gran Muralla', emoji: '🧱' },
+        animal: { name: 'Giant Panda', nameEs: 'Oso Panda', emoji: '🐼' },
+        quiz: [
+          { q: 'What is the capital of China?', qEs: '¿Cuál es la capital de China?', options: ['Shanghai', 'Beijing', 'Hong Kong', 'Shenzhen'], optionsEs: ['Shanghái', 'Pekín', 'Hong Kong', 'Shenzhen'], answer: 1 },
+          { q: 'Which famous wall is located in China?', qEs: '¿Qué famosa muralla se encuentra en China?', options: ['Berlin Wall', 'Hadrian\'s Wall', 'Great Wall', 'Western Wall'], optionsEs: ['Muro de Berlín', 'Muro de Adriano', 'Gran Muralla', 'Muro de los Lamentos'], answer: 2 },
+          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2 }
+        ]
+      }
+    ] },
     { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [] }
   ];
 
