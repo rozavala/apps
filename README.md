@@ -30,10 +30,11 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 
 A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities. (Una característica principal de la suite es ayudar a los niños a desarrollar hábitos digitales saludables equilibrando el tiempo de pantalla con actividades del mundo real).
 
-- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable.
-- **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres.
-- **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra.
+- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable. (Each profile has a daily limit, 20 mins by default, to encourage breaks. The screen locks in a friendly way when time is up).
+- **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres. (Parents can configure specific limits per app or child from the Parent Dashboard).
+- **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra. (When time is up, kids can earn extra time by completing real-world chores. A parent PIN is required to approve extra time).
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
+- **Sincronización Familiar (Family Sync)**: El progreso se sincroniza opcionalmente con un servidor familiar a través de Tailscale, manteniendo un enfoque offline-first. (Progress is optionally synced to a family server via Tailscale, maintaining an offline-first approach).
 
 ## 🛠️ Key Features
 
