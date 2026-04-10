@@ -1,10 +1,20 @@
 # Zavala Serra Apps 🚀
 
-Fun, factual, and skill-based learning adventures for kids. A suite of interactive educational apps designed to inspire curiosity and mastery in music, math, history, and strategy.
+Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños. Una suite de aplicaciones educativas interactivas diseñadas para inspirar curiosidad y maestría en música, matemáticas, historia y estrategia. (Fun, factual, and skill-based learning adventures for kids. A suite of interactive educational apps designed to inspire curiosity and mastery in music, math, history, and strategy.)
 
-## 🌟 Overview
+## 🧭 ¡Para los Exploradores! (For Explorers!)
 
-**Zavala Serra Apps** is a collection of educational tools built for the Zavala Serra kids. Every app focuses on real-world skills and knowledge, following a "learning through play" philosophy with a commitment to neutral, factual content.
+```text
+  /\
+ /  \
+/____\
+  ||
+```
+¡Prepara tu mochila y comienza la aventura de aprender! (Pack your bag and start the learning adventure!)
+
+## 🌟 Resumen (Overview)
+
+**Zavala Serra Apps** es una colección de herramientas educativas creadas para la familia Zavala Serra. Cada aplicación se centra en habilidades y conocimientos del mundo real, siguiendo la filosofía de "aprender jugando" con un compromiso de contenido neutral y factual. (**Zavala Serra Apps** is a collection of educational tools built for the Zavala Serra kids. Every app focuses on real-world skills and knowledge, following a "learning through play" philosophy with a commitment to neutral, factual content.)
 
 ## 🎮 The App Suite
 
