@@ -325,7 +325,25 @@ const WorldExplorer = (() => {
         ]
       }
     ] },
-    { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [] }
+    { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
+      {
+        id: 'australia', name: 'Australia', nameEs: 'Australia', flag: '🇦🇺',
+        capital: 'Canberra', capitalEs: 'Canberra',
+        facts: [
+          { en: 'Australia is both a country and a continent.', es: 'Australia es un país y un continente.' },
+          { en: 'It is famous for the Great Barrier Reef.', es: 'Es famosa por la Gran Barrera de Coral.' },
+          { en: 'Kangaroos and koalas are native to Australia.', es: 'Los canguros y koalas son nativos de Australia.' },
+          { en: 'The Sydney Opera House is a famous building.', es: 'La Ópera de Sídney es un edificio famoso.' }
+        ],
+        landmark: { name: 'Sydney Opera House', nameEs: 'Ópera de Sídney', emoji: '🏛️' },
+        animal: { name: 'Kangaroo', nameEs: 'Canguro', emoji: '🦘' },
+        quiz: [
+          { q: 'What is the capital of Australia?', qEs: '¿Cuál es la capital de Australia?', options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'], optionsEs: ['Sídney', 'Melbourne', 'Canberra', 'Perth'], answer: 2 },
+          { q: 'Which animal is native to Australia?', qEs: '¿Qué animal es nativo de Australia?', options: ['Lion', 'Penguin', 'Kangaroo', 'Bear'], optionsEs: ['León', 'Pingüino', 'Canguro', 'Oso'], answer: 2 },
+          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0 }
+        ]
+      }
+    ] }
   ];
 
   // ── State ──

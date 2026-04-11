@@ -314,6 +314,8 @@ const QB={
     {q:'¿En qué región se encuentra el desierto de Atacama?',a:'Norte Grande',o:['Norte Grande','Zona Central','Patagonia','Sur'], tier:'beginner'}
   ],
   antartica:[
+    {q:'¿Cuál es la base civil más conocida de Chile en la Antártica?',a:'Villa Las Estrellas',o:['Villa Las Estrellas','Punta Arenas','Puerto Williams','Base Prat'], tier:'advanced'},
+    {q:'¿Qué tratado regula la presencia de países en la Antártica?',a:'Tratado Antártico',o:['Tratado Antártico','Acuerdo de París','Pacto de Santiago','Convención de Ginebra'], tier:'expert'},
     {q:'¿Qué animal es común encontrar en la Antártica?',a:'Pingüino',o:['Pingüino','Oso Polar','León','Mono'], tier:'beginner'},
     {q:'¿Cómo se llama el poblado chileno en la Antártica que tiene una escuela?',a:'Villa Las Estrellas',o:['Villa Las Estrellas','Punta Arenas','Puerto Williams','Base Prat'], tier:'advanced'},
     {q:'¿Cuál es la característica principal del clima antártico?',a:'Frío y seco',o:['Frío y seco','Caluroso y húmedo','Lluvioso','Templado'], tier:'beginner'},
@@ -354,6 +356,8 @@ const QB={
     {q:'¿En qué siglo se fundó la ciudad de Santiago?',a:'Siglo XVI (16)',o:['Siglo XVI (16)','Siglo XVIII (18)','Siglo XIX (19)','Siglo XV (15)'], tier:'advanced'}
   ],
   culture:[
+    {q:'¿Cuál es el baile nacional de Chile?',a:'La Cueca',o:['La Cueca','El Tango','La Salsa','El Candombe'], tier:'beginner'},
+    {q:'¿Qué instrumento de cuerdas se usa frecuentemente en la música folclórica chilena?',a:'La guitarra',o:['La guitarra','El violín','El piano','La trompeta'], tier:'intermediate'},
     {q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón'], tier:'beginner'},
     {q:'¿Qué animales representa la cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Águila y cóndor','Gato y ratón','Caballo y yegua'], tier:'intermediate'},
     {q:'¿Qué es la "once"?',a:'Té de la tarde con comida',o:['Té de la tarde con comida','Un baile','Una jugada de fútbol','Un postre'], tier:'beginner'},
@@ -363,6 +367,8 @@ const QB={
     {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Octubre'], tier:'beginner'}
   ],
   nature:[
+    {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble'], tier:'advanced'},
+    {q:'¿Qué animal marino se puede avistar frecuentemente en la Reserva Nacional Pingüino de Humboldt?',a:'Delfín',o:['Delfín','Tiburón blanco','Estrella de mar','Caballito de mar'], tier:'expert'},
     {q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros'], tier:'advanced'},
     {q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años'], tier:'expert'},
     {q:'¿Qué animales están en el escudo?',a:'Cóndor y huemul',o:['Cóndor y huemul','Puma y águila','Llama y cóndor','Pingüino y flamenco'], tier:'beginner'},
