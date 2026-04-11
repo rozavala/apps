@@ -35,14 +35,14 @@ A core feature of the Zavala Serra Apps suite is helping kids develop healthy di
 - **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra.
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
 
-## 🛠️ Key Features
+## 🛠️ Características Principales (Key Features)
 
-- **Personalized Profiles**: Kids can create their own explorers with custom avatars and colors.
-- **Unified Explorer Rank**: Earn ranks across the entire app suite (Cadet → Legend) by mastering different subjects.
-- **Age-Adaptive Difficulty**: Content automatically adjusts to each child's age for an appropriate challenge level.
-- **Progress Tracking**: All stars, levels, and scores are saved locally using `localStorage`.
-- **Parent Dashboard**: A secure area to monitor progress across all apps in the suite.
-- **Safe by Design**: No external API calls, no dynamic third-party content, and no user-generated features.
+- **Perfiles Personalizados (Personalized Profiles)**: Los niños pueden crear sus propios exploradores con avatares y colores personalizados. (Kids can create their own explorers with custom avatars and colors).
+- **Rango de Explorador Unificado (Unified Explorer Rank)**: Gana rangos en toda la suite de aplicaciones (Cadete, Explorador, Piloto, Comandante, Leyenda) dominando diferentes materias. (Earn ranks across the entire app suite by mastering different subjects).
+- **Dificultad Adaptativa (Age-Adaptive Difficulty)**: El contenido se ajusta automáticamente a la edad de cada niño para un nivel de desafío apropiado. (Content automatically adjusts to each child's age for an appropriate challenge level).
+- **Seguimiento del Progreso (Progress Tracking)**: Todas las estrellas, niveles y puntuaciones se guardan localmente usando `localStorage`. (All stars, levels, and scores are saved locally).
+- **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso en todas las aplicaciones de la suite. (A secure area to monitor progress across all apps in the suite).
+- **Diseño Seguro (Safe by Design)**: Sin llamadas a API externas, sin contenido dinámico de terceros y sin funciones generadas por los usuarios. (No external API calls, no dynamic third-party content, and no user-generated features).
 
 ## 📜 Content Philosophy
 
