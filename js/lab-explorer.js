@@ -62,7 +62,7 @@ const LabExplorer = (() => {
       category: 'physics',
       ageMin: 5,
       experiments: [
-        { id: 'magnetism', title: 'Magnetic Magic', instruction: 'Magnetism lab coming soon!' },
+        { id: 'magnetism', title: 'Magnetic Magic', instruction: 'Drag objects toward the magnet. See what sticks!' },
       ]
     },
     {
@@ -89,6 +89,13 @@ const LabExplorer = (() => {
   let colors = [];
   let dragging = null;
   let offsetX, offsetY;
+
+  // ── Magnet Lab State ──
+  let magnetState = {
+    items: [],
+    magnet: { x: 300, y: 150, w: 100, h: 100 },
+    tested: []
+  };
 
   // ── Storage ──
   function _key() {
@@ -187,6 +194,8 @@ const LabExplorer = (() => {
       _initWaterLab();
     } else if (labId === 'plants' && expId === 'growth') {
       _initPlantLab();
+    } else if (labId === 'magnets' && expId === 'magnetism') {
+      _initMagnetsLab();
     } else {
       _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
@@ -808,6 +817,179 @@ const LabExplorer = (() => {
         document.getElementById('next-btn').style.display = 'block';
         _saveProgress();
       }
+    }
+  }
+
+  // ── Magnets Lab Implementation ──
+  function _initMagnetsLab() {
+    magnetState.magnet = { x: canvas.width / 2, y: 150, w: 120, h: 120 };
+    magnetState.tested = [];
+
+    // Initial items setup at the bottom
+    magnetState.items = [
+      { id: 'nail', name: 'Iron Nail', emoji: '🔨', isMagnetic: true, x: 100, y: 350, startX: 100, startY: 350, r: 25 },
+      { id: 'wood', name: 'Wood Block', emoji: '🪵', isMagnetic: false, x: 200, y: 350, startX: 200, startY: 350, r: 25 },
+      { id: 'coin', name: 'Copper Coin', emoji: '🪙', isMagnetic: false, x: 300, y: 350, startX: 300, startY: 350, r: 25 },
+      { id: 'paperclip', name: 'Paper Clip', emoji: '📎', isMagnetic: true, x: 400, y: 350, startX: 400, startY: 350, r: 25 },
+      { id: 'glass', name: 'Glass Marble', emoji: '🔮', isMagnetic: false, x: 500, y: 350, startX: 500, startY: 350, r: 25 }
+    ];
+
+    canvas.onpointerdown = (e) => {
+      const { mx, my } = _getMousePos(e);
+      dragging = magnetState.items.find(item => Math.hypot(item.x - mx, item.y - my) < item.r);
+      if (dragging) {
+        offsetX = mx - dragging.x;
+        offsetY = my - dragging.y;
+      }
+    };
+
+    canvas.onpointermove = (e) => {
+      if (!dragging) return;
+      const { mx, my } = _getMousePos(e);
+      dragging.x = mx - offsetX;
+      dragging.y = my - offsetY;
+      _drawMagnetsLab();
+    };
+
+    canvas.onpointerup = () => {
+      if (!dragging) return;
+
+      const magnetCenterX = magnetState.magnet.x;
+      const magnetCenterY = magnetState.magnet.y;
+
+      // Check distance to magnet ends
+      const dist = Math.hypot(dragging.x - magnetCenterX, dragging.y - (magnetCenterY + magnetState.magnet.h/2));
+
+      if (dist < 80) {
+        if (dragging.isMagnetic) {
+          // Snap to magnet
+          dragging.x = magnetCenterX + (Math.random() * 40 - 20);
+          dragging.y = magnetCenterY + magnetState.magnet.h/2 + 20;
+
+          if (!magnetState.tested.includes(dragging.id)) {
+            magnetState.tested.push(dragging.id);
+            _addJournalEntry(`Discovered: ${dragging.name} is magnetic!`);
+            _showFeedback('✨');
+            if (typeof SFX !== 'undefined' && SFX.correct) SFX.correct();
+            else if (typeof playSound === 'function') playSound('correct');
+            stars++;
+            document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+
+            if (stars >= 2) { // There are 2 magnetic items
+              document.getElementById('next-btn').style.display = 'block';
+              _saveProgress();
+            }
+          }
+        } else {
+          // Bounce back
+          dragging.x = dragging.startX;
+          dragging.y = dragging.startY;
+          if (!magnetState.tested.includes(dragging.id)) {
+            magnetState.tested.push(dragging.id);
+            _addJournalEntry(`Discovered: ${dragging.name} is NOT magnetic.`);
+            _showFeedback('❌');
+            if (typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
+            else if (typeof playSound === 'function') playSound('error');
+          }
+        }
+      } else {
+        // Return to start if dropped too far
+        dragging.x = dragging.startX;
+        dragging.y = dragging.startY;
+      }
+
+      dragging = null;
+      _drawMagnetsLab();
+    };
+
+    _drawMagnetsLab();
+  }
+
+  function _drawMagnetsLab() {
+    ctx.fillStyle = '#E8F5E9'; // Light green background
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw Magnet (U-Shape)
+    const m = magnetState.magnet;
+    ctx.lineWidth = 20;
+    ctx.strokeStyle = '#EF4444'; // Red half
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.w/2, Math.PI, 0);
+    ctx.stroke();
+
+    // Magnet prongs
+    ctx.beginPath();
+    ctx.moveTo(m.x - m.w/2, m.y);
+    ctx.lineTo(m.x - m.w/2, m.y + m.h/2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#3B82F6'; // Blue half
+    ctx.beginPath();
+    ctx.moveTo(m.x + m.w/2, m.y);
+    ctx.lineTo(m.x + m.w/2, m.y + m.h/2);
+    ctx.stroke();
+
+    // Magnet ends (silver)
+    ctx.fillStyle = '#9CA3AF';
+    ctx.fillRect(m.x - m.w/2 - 10, m.y + m.h/2, 20, 10);
+    ctx.fillRect(m.x + m.w/2 - 10, m.y + m.h/2, 20, 10);
+
+    // N and S labels
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 16px Nunito';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('N', m.x - m.w/2, m.y + m.h/2 - 10);
+    ctx.fillText('S', m.x + m.w/2, m.y + m.h/2 - 10);
+
+    // Draw magnetic field lines (optional flair)
+    ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+    ctx.lineWidth = 2;
+    for(let i=0; i<3; i++) {
+      ctx.beginPath();
+      ctx.arc(m.x, m.y + m.h/2 + 20, 30 + i*15, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    // Draw items
+    magnetState.items.forEach(item => {
+      // Circle background
+      ctx.beginPath();
+      ctx.arc(item.x, item.y, item.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
+      ctx.strokeStyle = '#D1D5DB';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Emoji
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(item.emoji, item.x, item.y);
+
+      // Name (if not dragging)
+      if (item !== dragging) {
+        ctx.fillStyle = '#4B5563';
+        ctx.font = '12px Nunito';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(item.name, item.x, item.y + item.r + 15);
+      }
+    });
+
+    // Draw dragging item on top
+    if (dragging) {
+      ctx.beginPath();
+      ctx.arc(dragging.x, dragging.y, dragging.r * 1.1, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
+      ctx.strokeStyle = '#3B82F6';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.font = '28px Arial';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(dragging.emoji, dragging.x, dragging.y);
     }
   }
 
