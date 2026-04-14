@@ -10,6 +10,46 @@ const StoryExplorer = (() => {
   // ── Story Library ──
   const STORIES = [
     {
+      id: 'inca_trail',
+      title: 'The Secret Inca Trail',
+      titleEs: 'El Sendero Secreto Inca',
+      tier: 'explorer', ageMin: 6, region: 'north', icon: '⛰️',
+      pages: [
+        {
+          en: 'Deep in the Atacama desert, Leo found an old map showing a secret Inca trail.',
+          es: 'En lo profundo del desierto de Atacama, Leo encontró un viejo mapa mostrando un sendero secreto Inca.',
+          vocab: [
+            { word: 'trail', wordEs: 'sendero', def: 'A path through a wild place.', defEs: 'Un camino a través de un lugar salvaje.' },
+            { word: 'map', wordEs: 'mapa', def: 'A drawing of a place.', defEs: 'Un dibujo de un lugar.' }
+          ]
+        },
+        {
+          en: 'He packed his compass, a water bottle, and some snacks for the adventure.',
+          es: 'Él empacó su brújula, una botella de agua y algunos bocadillos para la aventura.',
+          vocab: [
+            { word: 'compass', wordEs: 'brújula', def: 'A tool that shows direction.', defEs: 'Una herramienta que muestra la dirección.' },
+            { word: 'adventure', wordEs: 'aventura', def: 'An exciting experience.', defEs: 'Una experiencia emocionante.' }
+          ]
+        },
+        {
+          en: 'The trail went high up into the Andes. The air was thin, and the sun was bright.',
+          es: 'El sendero subía alto en los Andes. El aire era fino, y el sol brillaba fuerte.',
+          vocab: [
+            { word: 'thin', wordEs: 'fino', def: 'Not thick. Hard to breathe up high.', defEs: 'No espeso. Difícil de respirar en la altura.' },
+            { word: 'bright', wordEs: 'fuerte (brillante)', def: 'Giving out a lot of light.', defEs: 'Que emite mucha luz.' }
+          ]
+        },
+        {
+          en: 'At the top, Leo discovered an ancient stone fortress built by the Incas.',
+          es: 'En la cima, Leo descubrió una antigua fortaleza de piedra construida por los Incas.',
+          vocab: [
+            { word: 'ancient', wordEs: 'antigua', def: 'Very old.', defEs: 'Muy viejo.' },
+            { word: 'fortress', wordEs: 'fortaleza', def: 'A strong building used for defense.', defEs: 'Un edificio fuerte usado para defensa.' }
+          ]
+        }
+      ]
+    },
+    {
       id: 'condor_flight',
       title: 'The Condor\'s First Flight',
       titleEs: 'El Primer Vuelo del Cóndor',

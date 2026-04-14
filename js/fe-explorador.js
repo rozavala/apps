@@ -66,6 +66,18 @@ const FeManager = (() => {
 
   const SAINTS = [
     {
+      id: 'benito',
+      name: 'San Benito de Nursia',
+      dates: '480–547',
+      country: 'Italia 🇮🇹',
+      bio: 'Es el patrón de Europa y fundador del monacato occidental. Su famosa regla se resume en "Ora et labora" (Reza y trabaja).',
+      questions: [
+        { q: '¿Cuál es el lema de San Benito?', a: ['Reza y trabaja', 'Solo trabaja', 'Estudia y duerme'], correct: 0 },
+        { q: '¿De qué continente es patrón?', a: ['América', 'Europa', 'Asia'], correct: 1 },
+        { q: '¿Dónde nació?', a: ['España', 'Italia', 'Francia'], correct: 1 }
+      ]
+    },
+    {
       id: 'francisco',
       name: 'San Francisco de Asís',
       dates: '1181–1226',

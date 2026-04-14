@@ -40,19 +40,24 @@ var LearningCheck = (function() {
       { q: 'Who founded Santiago in 1541?', options: ['Pedro de Valdivia', 'Bernardo O\'Higgins', 'Arturo Prat', 'Manuel Blanco'], answer: 0 },
       { q: 'In what year did Chile declare independence?', options: ['1818', '1810', '1850', '1900'], answer: 0 },
       { q: 'What ancient civilization built Machu Picchu?', options: ['Aztecs', 'Maya', 'Inca', 'Olmec'], answer: 2 },
-      { q: 'Who invented the light bulb?', options: ['Thomas Edison', 'Nikola Tesla', 'Albert Einstein', 'Isaac Newton'], answer: 0 }
+      { q: 'Who invented the light bulb?', options: ['Thomas Edison', 'Nikola Tesla', 'Albert Einstein', 'Isaac Newton'], answer: 0 },
+      { q: 'Who was the first person to walk on the moon?', options: ['Neil Armstrong', 'Yuri Gagarin', 'Buzz Aldrin', 'John Glenn'], answer: 0 }
     ],
     art: [
       { q: 'What are the primary colors?', options: ['Red, Blue, Yellow', 'Green, Orange, Purple', 'Black, White, Gray', 'Red, Green, Blue'], answer: 0 },
       { q: 'What tool is used to paint on a canvas?', options: ['Hammer', 'Brush', 'Wrench', 'Spoon'], answer: 1 },
       { q: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Picasso', 'Leonardo da Vinci', 'Monet'], answer: 2 },
-      { q: 'Mixing red and yellow makes what color?', options: ['Green', 'Orange', 'Purple', 'Brown'], answer: 1 }
+      { q: 'Mixing red and yellow makes what color?', options: ['Green', 'Orange', 'Purple', 'Brown'], answer: 1 },
+      { q: 'Mixing blue and yellow makes what color?', options: ['Green', 'Orange', 'Purple', 'Pink'], answer: 0 },
+      { q: 'What material is used to make pottery?', options: ['Wood', 'Clay', 'Metal', 'Glass'], answer: 1 }
     ],
     faith: [
       { q: 'Who is the foster father of Jesus?', options: ['Peter', 'Paul', 'Joseph', 'John'], answer: 2 },
       { q: 'What prayer begins with "Our Father"?', options: ['Hail Mary', 'Gloria', 'Lord\'s Prayer', 'Creed'], answer: 2 },
       { q: 'How many apostles did Jesus have?', options: ['10', '12', '14', '7'], answer: 1 },
-      { q: 'Who was the mother of Jesus?', options: ['Elizabeth', 'Mary', 'Martha', 'Ruth'], answer: 1 }
+      { q: 'Who was the mother of Jesus?', options: ['Elizabeth', 'Mary', 'Martha', 'Ruth'], answer: 1 },
+      { q: 'In what city was Jesus born?', options: ['Jerusalem', 'Nazareth', 'Bethlehem', 'Rome'], answer: 2 },
+      { q: 'Who baptized Jesus?', options: ['Peter', 'John the Baptist', 'Matthew', 'James'], answer: 1 }
     ],
     general: [
       { q: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], answer: 1 },
