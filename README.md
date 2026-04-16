@@ -20,7 +20,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🎸 Guitar Jam** | Learn guitar chords, strum along with songs, and train your ear. | [guitar-jam.html](guitar-jam.html) |
 | **🎨 Art Studio** | Draw, paint, and learn famous art styles with guided activities. | [art-studio.html](art-studio.html) |
 | **🏓 Sports Arena** | Track matches, run tournaments, and log outdoor activities to balance screen time. | [sports-arena.html](sports-arena.html) |
-| **🔬 Lab Explorer** | Mix colors, grow plants, and discover how the world works through interactive experiments. | [lab-explorer.html](lab-explorer.html) |
+| **🔬 Lab Explorer** | Mix colors, grow plants, explore magnets, and discover how the world works through interactive experiments. | [lab-explorer.html](lab-explorer.html) |
 | **🌍 World Explorer** | Travel the globe—learn flags, capitals, and landmarks across all continents. | [world-explorer.html](world-explorer.html) |
 | **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
 | **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
@@ -54,6 +54,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Nuevo Laboratorio "Magnets" en Lab Explorer**: Aprende sobre el magnetismo con experimentos interactivos. (Learn about magnetism with interactive experiments in the new Magnets lab).
 - **¡Nueva App "Guess Quest"!**: Desarrolla habilidades de deducción adivinando palabras ocultas en inglés y español. (Build deduction skills by guessing hidden words in English and Spanish).
 - **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
 - **"Sports Arena" Ya Disponible**: Registra actividades deportivas al aire libre sin usar el tiempo de pantalla. (Log outdoor sports activities without consuming screen time).
