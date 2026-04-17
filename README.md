@@ -6,11 +6,11 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 
 **Zavala Serra Apps** is a collection of educational tools built for the Zavala Serra kids. Every app focuses on real-world skills and knowledge, following a "learning through play" philosophy with a commitment to neutral, factual content.
 
-## 🎮 The App Suite
+## 🎮 La Suite de Aplicaciones (The App Suite)
 
 ### LIVE Apps
 
-| App | Description | Link |
+| Aplicación (App) | Descripción (Description) | Enlace (Link) |
 | --- | --- | --- |
 | **🎹 Little Maestro** | Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians. | [little-maestro.html](little-maestro.html) |
 | **🧮 Math Galaxy** | Blast through math challenges—addition, multiplication, fractions, and more in a space adventure. | [math-galaxy.html](math-galaxy.html) |
@@ -45,7 +45,7 @@ A core feature of the Zavala Serra Apps suite is helping kids develop healthy di
 - **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso en todas las aplicaciones de la suite. (A secure area to monitor progress across all apps in the suite).
 - **Diseño Seguro (Safe by Design)**: Sin llamadas API externas, sin contenido dinámico de terceros y sin funciones generadas por el usuario. (No external API calls, no dynamic third-party content, and no user-generated features).
 
-## 📜 Content Philosophy
+## 📜 Filosofía de Contenido (Content Philosophy)
 
 All content in this repository adheres to the [Content Guidelines](content-guidelines.md). We prioritize:
 - **Verifiable Facts**: Geography, history, science, and math.
@@ -84,7 +84,7 @@ Para la mejor experiencia en dispositivos móviles:
    - **iOS (Safari):** Toca el ícono de compartir (Share) y elige "Agregar a inicio" (Add to Home Screen).
    - **Android (Chrome):** Toca el menú de tres puntos y elige "Agregar a la pantalla principal" (Add to Home Screen).
 
-## 📂 Project Structure
+## 📂 Estructura del Proyecto (Project Structure)
 
 - `index.html`: The main app hub and profile selector.
 - `css/`: Stylesheets for the hub and individual apps.
