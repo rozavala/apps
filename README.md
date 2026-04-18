@@ -15,16 +15,16 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🎹 Little Maestro** | Aprende a tocar el piano con lecciones interactivas, canciones reales y desafíos divertidos para pequeños músicos. (Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.) | [little-maestro.html](little-maestro.html) |
 | **🧮 Math Galaxy** | Supera desafíos matemáticos—suma, multiplicación, fracciones y más en una aventura espacial. (Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.) | [math-galaxy.html](math-galaxy.html) |
 | **🇨🇱 Descubre Chile** | Explora la increíble historia de Chile—desde el pueblo Mapuche hasta los Andes, a través de historias y cuestionarios. (Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.) | [descubre-chile.html](descubre-chile.html) |
-| **♟️ Chess Quest** | Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI. | [chess-quest.html](chess-quest.html) |
+| **♟️ Chess Quest** | Domina el ajedrez desde lo básico—aprende cómo se mueve cada pieza, tácticas y juega contra una IA amigable. (Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI.) | [chess-quest.html](chess-quest.html) |
 | **⛪ Fe Explorador** | Descubre oraciones, vidas de santos y patrimonio religioso chileno. (Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.) | [fe-explorador.html](fe-explorador.html) |
-| **🎸 Guitar Jam** | Learn guitar chords, strum along with songs, and train your ear. | [guitar-jam.html](guitar-jam.html) |
-| **🎨 Art Studio** | Draw, paint, and learn famous art styles with guided activities. | [art-studio.html](art-studio.html) |
-| **🏓 Sports Arena** | Track matches, run tournaments, and log outdoor activities to balance screen time. | [sports-arena.html](sports-arena.html) |
-| **🔬 Lab Explorer** | Mix colors, grow plants, explore magnets, and discover how the world works through interactive experiments. | [lab-explorer.html](lab-explorer.html) |
-| **🌍 World Explorer** | Travel the globe—learn flags, capitals, and landmarks across all continents. | [world-explorer.html](world-explorer.html) |
-| **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
-| **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
-| **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
+| **🎸 Guitar Jam** | Aprende acordes de guitarra, toca canciones y entrena tu oído. (Learn guitar chords, strum along with songs, and train your ear.) | [guitar-jam.html](guitar-jam.html) |
+| **🎨 Art Studio** | Dibuja, pinta y aprende estilos artísticos famosos con actividades guiadas. (Draw, paint, and learn famous art styles with guided activities.) | [art-studio.html](art-studio.html) |
+| **🏓 Sports Arena** | Registra partidos, organiza torneos y anota actividades al aire libre para equilibrar el tiempo de pantalla. (Track matches, run tournaments, and log outdoor activities to balance screen time.) | [sports-arena.html](sports-arena.html) |
+| **🔬 Lab Explorer** | Mezcla colores, cultiva plantas, explora imanes y descubre cómo funciona el mundo mediante experimentos interactivos. (Mix colors, grow plants, explore magnets, and discover how the world works through interactive experiments.) | [lab-explorer.html](lab-explorer.html) |
+| **🌍 World Explorer** | Viaja por el mundo—aprende banderas, capitales y monumentos de todos los continentes. (Travel the globe—learn flags, capitals, and landmarks across all continents.) | [world-explorer.html](world-explorer.html) |
+| **📚 Story Explorer** | Lee cuentos de aventuras y amplía tu vocabulario en inglés y español. (Read adventure tales and build vocabulary in English and Spanish.) | [story-explorer.html](story-explorer.html) |
+| **🧗 Quest Adventure** | Una misión estilo RPG donde tu progreso en cada aplicación desbloquea nuevas regiones en un mapa mundial. (An RPG-style quest where your progress in every app unlocks new regions on a world map.) | [quest-adventure.html](quest-adventure.html) |
+| **🎯 Guess Quest** | Desarrolla habilidades de deducción y vocabulario adivinando palabras ocultas en inglés y español. (Build deduction skills and vocabulary by guessing hidden words in English and Spanish.) | [guess-quest.html](guess-quest.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
