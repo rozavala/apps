@@ -12,9 +12,9 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 
 | Aplicación (App) | Descripción (Description) | Enlace (Link) |
 | --- | --- | --- |
-| **🎹 Little Maestro** | Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians. | [little-maestro.html](little-maestro.html) |
-| **🧮 Math Galaxy** | Blast through math challenges—addition, multiplication, fractions, and more in a space adventure. | [math-galaxy.html](math-galaxy.html) |
-| **🇨🇱 Descubre Chile** | Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes. | [descubre-chile.html](descubre-chile.html) |
+| **🎹 Little Maestro** | Aprende a tocar el piano con lecciones interactivas, canciones reales y desafíos divertidos para pequeños músicos. (Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.) | [little-maestro.html](little-maestro.html) |
+| **🧮 Math Galaxy** | Supera desafíos matemáticos—suma, multiplicación, fracciones y más en una aventura espacial. (Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.) | [math-galaxy.html](math-galaxy.html) |
+| **🇨🇱 Descubre Chile** | Explora la increíble historia de Chile—desde el pueblo Mapuche hasta los Andes, a través de historias y cuestionarios. (Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.) | [descubre-chile.html](descubre-chile.html) |
 | **♟️ Chess Quest** | Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI. | [chess-quest.html](chess-quest.html) |
 | **⛪ Fe Explorador** | Descubre oraciones, vidas de santos y patrimonio religioso chileno. (Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.) | [fe-explorador.html](fe-explorador.html) |
 | **🎸 Guitar Jam** | Learn guitar chords, strum along with songs, and train your ear. | [guitar-jam.html](guitar-jam.html) |
