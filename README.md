@@ -45,6 +45,14 @@ A core feature of the Zavala Serra Apps suite is helping kids develop healthy di
 - **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso en todas las aplicaciones de la suite. (A secure area to monitor progress across all apps in the suite).
 - **Diseño Seguro (Safe by Design)**: Sin llamadas API externas, sin contenido dinámico de terceros y sin funciones generadas por el usuario. (No external API calls, no dynamic third-party content, and no user-generated features).
 
+## ⛪ Fe Explorador: Herencia y Tradición (Heritage & Tradition)
+
+Fe Explorador es una aplicación dedicada a la historia y tradiciones de la fe Católica en Chile. (Fe Explorador is an app dedicated to the history and traditions of the Catholic faith in Chile).
+
+- **Oraciones (Prayers):** Aprende oraciones tradicionales como el Padre Nuestro, Ave María y el Rosario. (Learn traditional prayers).
+- **Vidas de Santos (Saints' Lives):** Biografías históricas y factuales de santos importantes. (Historical and factual biographies of important saints).
+- **Patrimonio Chileno (Chilean Heritage):** Descubre iglesias históricas, santuarios y tradiciones religiosas del país. (Discover historic churches, shrines, and religious traditions of the country).
+
 ## 📜 Filosofía de Contenido (Content Philosophy)
 
 All content in this repository adheres to the [Content Guidelines](content-guidelines.md). We prioritize:
