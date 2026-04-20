@@ -108,23 +108,24 @@ var BMC = (function() {
     var tabButtons = document.querySelectorAll('.bmc-tab-btn');
     tabButtons.forEach(function(b) { b.classList.remove('active'); });
 
+    function _activateTabButtons(selector) {
+      document.querySelectorAll(selector).forEach(function(b) { b.classList.add('active'); });
+    }
+
     if (name === 'library') {
       document.getElementById('screen-library').classList.add('active');
       _renderLibrary();
-      var btn = document.querySelector('.bmc-tab-btn[onclick*="library"]');
-      if (btn) btn.classList.add('active');
+      _activateTabButtons('.bmc-tab-btn[onclick*="library"]');
     } else if (name === 'history') {
       document.getElementById('screen-history').classList.add('active');
       _renderHistory();
-      var btn2 = document.querySelector('.bmc-tab-btn[onclick*="history"]');
-      if (btn2) btn2.classList.add('active');
+      _activateTabButtons('.bmc-tab-btn[onclick*="history"]');
     } else if (name === 'result') {
       document.getElementById('screen-result').classList.add('active');
     } else {
       document.getElementById('screen-home').classList.add('active');
       _renderHome();
-      var btn3 = document.querySelector('.bmc-tab-btn[onclick*="home"]');
-      if (btn3) btn3.classList.add('active');
+      _activateTabButtons('.bmc-tab-btn[onclick*="home"]');
     }
   }
 
