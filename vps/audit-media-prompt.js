@@ -28,6 +28,26 @@ const SEV = { none: 0, mild: 1, moderate: 2, significant: 3 };
 const sevLte = (a, b) => SEV[a] <= SEV[b];
 const sevGte = (a, b) => SEV[a] >= SEV[b];
 
+// Mirror of js/book-movie-check.js _blockReason — returns what banner
+// a kid would actually see for this evaluation.
+// Returns one of: 'approved' | 'caution' | 'grown-up' | 'values'
+function predictedBanner(result) {
+  if (result.verdict === 'approved') return 'approved';
+  if (result.verdict === 'caution') return 'caution';
+  // verdict === 'not_recommended' — decide grown-up vs values
+  const f = result.content_flags || {};
+  const valuesFlags = ['lgbtq_content', 'crt_ideology', 'anti_religious', 'occult_aspirational'];
+  const hasSignificantValues = valuesFlags.some(k => f[k] === 'significant');
+  const hasModerateValues = valuesFlags.some(k => f[k] === 'moderate');
+  const hasSignificantRelativism = f.moral_relativism === 'significant';
+  const isPureMaturityGate =
+    !hasSignificantValues &&
+    !hasModerateValues &&
+    !hasSignificantRelativism &&
+    result.minimum_age && result.minimum_age >= 13;
+  return isPureMaturityGate ? 'grown-up' : 'values';
+}
+
 // ── Test corpus ────────────────────────────────────────────────
 // Each entry has a synopsis chosen to give Gemini enough signal to
 // judge the book without needing external metadata. Expectations use
@@ -199,7 +219,98 @@ const CORPUS = [
     year: 2005, type: 'book',
     synopsis: 'Twelve-year-old Percy Jackson learns he is the son of the Greek god Poseidon and a mortal woman. He is sent to Camp Half-Blood for demigods and accused of stealing Zeus\'s master lightning bolt. With his friends Annabeth (daughter of Athena) and Grover (a satyr), Percy journeys across America to the underworld to find the bolt. A middle-grade pastiche of Greek mythology, with Olympian gods and monsters drawn from classical sources.',
     expect: { verdict: null }
-  }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // Category D — Maturity-gate classics.
+  // These MUST return verdict: not_recommended with banner: 'grown-up'
+  // (amber "Grown-up book" framing, NOT red "Not for our family").
+  // Test for the round-2 banner split: adult content alone must not
+  // trigger values-rejection messaging.
+  // ═══════════════════════════════════════════════════════════════
+  {
+    category: 'maturity-gate',
+    title: 'Brideshead Revisited',
+    author_or_director: 'Evelyn Waugh',
+    year: 1945, type: 'book',
+    synopsis: 'Charles Ryder, an agnostic Oxford student, is drawn into the orbit of the Flyte family — aristocratic English Catholics who own the estate of Brideshead. Over two decades he falls in love first with Sebastian Flyte (a deep friendship marked by Sebastian\'s descent into alcoholism) and later with his sister Julia, with whom he begins an adulterous affair. The novel\'s culminating theme is the mysterious working of divine grace upon the Flyte family, drawing each member back to the Catholic faith in unexpected ways. A major 20th-century Catholic literary novel; contains adult romance, alcoholism, and an adulterous relationship.',
+    expect: {
+      verdict: 'not_recommended',
+      banner: 'grown-up',
+      flagMax: { lgbtq_content: 'mild', crt_ideology: 'none', anti_religious: 'none', occult_aspirational: 'none' },
+      minAge: 16
+    }
+  },
+  {
+    category: 'maturity-gate',
+    title: 'Crime and Punishment',
+    author_or_director: 'Fyodor Dostoevsky',
+    year: 1866, type: 'book',
+    synopsis: 'Raskolnikov, an impoverished former student in St. Petersburg, murders an elderly pawnbroker and her sister with an axe, convinced by a theory that extraordinary men are above conventional morality. The novel follows his psychological torment, pursuit by the detective Porfiry Petrovich, and eventual confession and redemption through the love of the devout Christian prostitute Sonya. A major work of Christian literature on sin, guilt, and the mercy of God. Contains graphic violence and adult themes.',
+    expect: {
+      verdict: 'not_recommended',
+      banner: 'grown-up',
+      flagMax: { lgbtq_content: 'none', crt_ideology: 'none', anti_religious: 'none' },
+      minAge: 14
+    }
+  },
+  {
+    category: 'maturity-gate',
+    title: 'The Brothers Karamazov',
+    author_or_director: 'Fyodor Dostoevsky',
+    year: 1880, type: 'book',
+    synopsis: 'The sensual patriarch Fyodor Pavlovich Karamazov and his three sons — the passionate Dmitri, the intellectual atheist Ivan, and the devout novice monk Alyosha — are drawn into a tangle of passion, philosophical debate, and eventual patricide. The novel contains the famous "Grand Inquisitor" chapter and the teachings of the Elder Zosima, making it one of the most important Christian philosophical novels ever written. Contains adult themes: illegitimate children, a love triangle, and graphic discussion of violence against children in theological debate.',
+    expect: {
+      verdict: 'not_recommended',
+      banner: 'grown-up',
+      flagMax: { lgbtq_content: 'none', crt_ideology: 'none', anti_religious: 'mild' },
+      minAge: 15
+    }
+  },
+  {
+    category: 'maturity-gate',
+    title: 'Anna Karenina',
+    author_or_director: 'Leo Tolstoy',
+    year: 1878, type: 'book',
+    synopsis: 'Anna Karenina, wife of a St. Petersburg government official and mother of a young son, begins an affair with the cavalry officer Count Vronsky. Her abandonment of husband and son, and her subsequent social isolation, culminate in her suicide by throwing herself under a train. In parallel, the devout landowner Konstantin Levin courts Kitty Shcherbatskaya and wrestles with questions of faith and meaning, eventually finding Christian peace. Tolstoy presents Anna\'s adultery as ruinous and Levin\'s faith as redemptive. Contains adultery as a central theme.',
+    expect: {
+      verdict: 'not_recommended',
+      banner: 'grown-up',
+      flagMax: { lgbtq_content: 'none', crt_ideology: 'none', anti_religious: 'none' },
+      minAge: 15
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // Category E — Ideological rejection re-confirm.
+  // These MUST return verdict: not_recommended with banner: 'values'
+  // (red "Not for our family" framing). Guards against the maturity-gate
+  // branch accidentally softening ideological rejections.
+  // ═══════════════════════════════════════════════════════════════
+  {
+    category: 'values-rejection',
+    title: 'Melissa (banner re-confirm)',
+    author_or_director: 'Alex Gino',
+    year: 2015, type: 'book',
+    synopsis: 'Melissa, originally published as George, is a middle-grade novel about a fourth-grader everyone perceives as a boy named George. Internally she knows she is a girl. The novel follows her as she convinces her friend Kelly and her mother that she is transgender, culminating in Melissa playing the role of Charlotte in a school production of Charlotte\'s Web. The book explicitly advocates affirmation of transgender identity in children.',
+    expect: {
+      verdict: 'not_recommended',
+      banner: 'values',
+      flagMin: { lgbtq_content: 'significant' }
+    }
+  },
+  {
+    category: 'values-rejection',
+    title: 'Antiracist Baby (banner re-confirm)',
+    author_or_director: 'Ibram X. Kendi',
+    year: 2020, type: 'book',
+    synopsis: 'A board book adapted from Kendi\'s How to Be an Antiracist, aimed at infants and toddlers. Presents nine steps for being an antiracist baby, including recognizing every color and confessing when being racist. The book teaches explicit Critical Race Theory framings to pre-readers: that racial inequality results from racist policies, that colorblindness is harmful, and that children must actively oppose a system of racism.',
+    expect: {
+      verdict: 'not_recommended',
+      banner: 'values',
+      flagMin: { crt_ideology: 'significant' }
+    }
+  },
 ];
 
 // ── Runner ─────────────────────────────────────────────────────
@@ -242,10 +353,25 @@ function grade(test, result) {
   }
   const notes = [];
   let pass = true;
+
+  // Verdict check
   if (test.expect.verdict && result.verdict !== test.expect.verdict) {
     notes.push('verdict: expected "' + test.expect.verdict + '", got "' + result.verdict + '"');
     pass = false;
   }
+
+  // Banner check — verifies client-side would render the correct framing
+  if (test.expect.banner) {
+    const actualBanner = predictedBanner(result);
+    if (actualBanner !== test.expect.banner) {
+      notes.push('banner: expected "' + test.expect.banner + '", got "' + actualBanner + '"' +
+        ' (min_age=' + (result.minimum_age || '?') +
+        ', flags=' + JSON.stringify(result.content_flags || {}) + ')');
+      pass = false;
+    }
+  }
+
+  // Flag max check
   const flags = result.content_flags || {};
   for (const f of Object.keys(test.expect.flagMax || {})) {
     const max = test.expect.flagMax[f];
@@ -255,6 +381,8 @@ function grade(test, result) {
       pass = false;
     }
   }
+
+  // Flag min check
   for (const f of Object.keys(test.expect.flagMin || {})) {
     const min = test.expect.flagMin[f];
     const actual = flags[f] || 'none';
@@ -263,6 +391,16 @@ function grade(test, result) {
       pass = false;
     }
   }
+
+  // Minimum age check
+  if (typeof test.expect.minAge === 'number') {
+    const gotAge = result.minimum_age || 0;
+    if (gotAge < test.expect.minAge) {
+      notes.push('minimum_age: expected ≥ ' + test.expect.minAge + ', got ' + gotAge);
+      pass = false;
+    }
+  }
+
   return { status: pass ? 'pass' : 'fail', notes };
 }
 
@@ -301,7 +439,9 @@ async function main() {
       results.push({ test, result, grade: g });
 
       if (g.status === 'pass') {
-        console.log('✅ PASS (' + result.verdict + ')');
+        const banner = predictedBanner(result);
+        const bannerLabel = banner === result.verdict ? '' : ' → ' + banner;
+        console.log('✅ PASS (' + result.verdict + bannerLabel + ')');
       } else if (g.status === 'fail') {
         console.log('❌ FAIL');
         g.notes.forEach(n => console.log('     • ' + n));
