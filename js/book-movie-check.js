@@ -17,6 +17,26 @@ var BMC = (function() {
   var _currentResult = null; // last shown evaluation
   var _scanActive = false;
   var _scanStream = null;
+  var _parentMode = false;  // session-only, resets on page reload
+
+  function _requestParentMode() {
+    if (_parentMode) return true;
+    var entered = prompt('Parent PIN:');
+    if (!entered) return false;
+    var correct = typeof getParentPin === 'function' ? getParentPin() : '1234';
+    if (entered === correct) {
+      _parentMode = true;
+      return true;
+    }
+    alert('Incorrect PIN.');
+    return false;
+  }
+
+  function unlockParent() {
+    if (_requestParentMode()) {
+      if (_currentResult) showResult(_currentResult);
+    }
+  }
 
   // ── Storage helpers ────────────────────────────────────────────
   function _key() {
@@ -88,23 +108,24 @@ var BMC = (function() {
     var tabButtons = document.querySelectorAll('.bmc-tab-btn');
     tabButtons.forEach(function(b) { b.classList.remove('active'); });
 
+    function _activateTabButtons(selector) {
+      document.querySelectorAll(selector).forEach(function(b) { b.classList.add('active'); });
+    }
+
     if (name === 'library') {
       document.getElementById('screen-library').classList.add('active');
       _renderLibrary();
-      var btn = document.querySelector('.bmc-tab-btn[onclick*="library"]');
-      if (btn) btn.classList.add('active');
+      _activateTabButtons('.bmc-tab-btn[onclick*="library"]');
     } else if (name === 'history') {
       document.getElementById('screen-history').classList.add('active');
       _renderHistory();
-      var btn2 = document.querySelector('.bmc-tab-btn[onclick*="history"]');
-      if (btn2) btn2.classList.add('active');
+      _activateTabButtons('.bmc-tab-btn[onclick*="history"]');
     } else if (name === 'result') {
       document.getElementById('screen-result').classList.add('active');
     } else {
       document.getElementById('screen-home').classList.add('active');
       _renderHome();
-      var btn3 = document.querySelector('.bmc-tab-btn[onclick*="home"]');
-      if (btn3) btn3.classList.add('active');
+      _activateTabButtons('.bmc-tab-btn[onclick*="home"]');
     }
   }
 
@@ -158,7 +179,11 @@ var BMC = (function() {
     if (!container) return;
     var items = Object.keys(_familyLibrary)
       .map(function(id) { return _familyLibrary[id]; })
-      .filter(Boolean)
+      .filter(function(item) {
+        if (!item) return false;
+        if (!_parentMode && item.verdict === 'not_recommended') return false;
+        return true;
+      })
       .sort(function(a, b) { return (b.evaluated_at || 0) - (a.evaluated_at || 0); });
     if (!items.length) {
       container.innerHTML = '<div class="bmc-empty">No titles checked yet. Search for a book or movie to get started!</div>';
@@ -186,7 +211,9 @@ var BMC = (function() {
       html += '<div class="bmc-list-group-title">Wishlist</div>';
       html += data.wishlist.map(function(id) {
         var lib = _familyLibrary[id];
-        return lib ? _listItemHtml(lib) : '';
+        if (!lib) return '';
+        if (!_parentMode && lib.verdict === 'not_recommended') return '';
+        return _listItemHtml(lib);
       }).join('');
     }
     if (!html) {
@@ -402,16 +429,16 @@ var BMC = (function() {
     _setStatus('');
     var wrap = document.getElementById('bmc-result');
     if (!wrap) return;
-    var html = '<h3 style="font-family:var(--font-display);font-weight:800;margin-bottom:12px;">Which one?</h3>';
+    var html = '<h3 style="font-family:var(--font-display);font-weight:800;margin-bottom:12px;color:var(--text-primary);">Which one?</h3>';
     html += candidates.map(function(c) {
       var cover = c.cover_url
-        ? 'style="background-image:url(\'' + escAttr(c.cover_url) + '\');width:44px;height:60px;background-size:cover;background-position:center;border-radius:6px;"'
-        : 'style="width:44px;height:60px;border-radius:6px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.6rem;"';
+        ? 'style="background-image:url(\'' + escAttr(c.cover_url) + '\');width:44px;height:60px;background-size:cover;background-position:center;border-radius:6px;flex-shrink:0;"'
+        : 'style="width:44px;height:60px;border-radius:6px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;"';
       var emoji = (c.type === 'movie' || c.type === 'series') ? '🎬' : '📕';
       return '<button type="button" class="bmc-candidate" onclick="BMC.pickCandidate(\'' + escAttr(c.canonical_id) + '\')">' +
         '<div ' + cover + '>' + (c.cover_url ? '' : emoji) + '</div>' +
-        '<div><div style="font-weight:800;">' + _escHtmlLocal(c.title) + '</div>' +
-        '<div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">' + _escHtmlLocal(c.author_or_director || '') + (c.year ? ' · ' + c.year : '') + '</div></div>' +
+        '<div style="flex:1;min-width:0;"><div>' + _escHtmlLocal(c.title) + '</div>' +
+        '<div class="candidate-meta">' + _escHtmlLocal(c.author_or_director || '') + (c.year ? ' · ' + c.year : '') + '</div></div>' +
       '</button>';
     }).join('');
     wrap.innerHTML = html;
@@ -477,54 +504,24 @@ var BMC = (function() {
     var userAge = user && user.age;
     var tooYoung = userAge && e.minimum_age && userAge < e.minimum_age;
 
-    // Flag chips
-    var flagOrder = ['lgbtq_content','crt_ideology','sexual_content','violence','scary_content','profanity','occult_aspirational','anti_religious','moral_relativism','disrespect_authority'];
-    var flagLabels = {
-      lgbtq_content: 'LGBTQ content',
-      crt_ideology: 'Racial ideology',
-      sexual_content: 'Sexual content',
-      violence: 'Violence',
-      scary_content: 'Scary',
-      profanity: 'Language',
-      occult_aspirational: 'Occult themes',
-      anti_religious: 'Anti-religious',
-      moral_relativism: 'Moral relativism',
-      disrespect_authority: 'Disrespect of authority'
-    };
-    var chipHtml = flagOrder.map(function(k) {
-      var sev = (e.content_flags || {})[k];
-      if (!sev || sev === 'none') return '';
-      return '<span class="bmc-chip bmc-chip-' + sev + '">' + flagLabels[k] + ' · ' + sev + '</span>';
-    }).join('');
+    var isParent = _parentMode;
+    var isSafe = e.verdict === 'approved';
+    var isCaution = e.verdict === 'caution';
+    var isBlocked = e.verdict === 'not_recommended';
 
-    // Positive chips
-    var posLabels = {
-      catholic_themes: '✝️ Catholic',
-      christian_themes: '🙏 Christian',
-      virtue_modeled: '⚔️ Virtue',
-      intact_family: '👨‍👩‍👧 Family',
-      clear_moral_framework: '⚖️ Clear morals',
-      educational_value: '📚 Educational',
-      classic_literary_merit: '🏛 Classic',
-      inspires_wonder: '✨ Wonder'
-    };
-    var posHtml = Object.keys(posLabels).filter(function(k) {
-      return (e.positive_flags || {})[k];
-    }).map(function(k) {
-      return '<span class="bmc-chip bmc-chip-positive">' + posLabels[k] + '</span>';
-    }).join('');
-
-    var concernsHtml = '';
-    if (e.specific_concerns && e.specific_concerns.length) {
-      concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
-        e.specific_concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
-        '</ul></div>';
-    }
+    var showSummary = isParent || isSafe || isCaution;
+    var showFlags = isParent || isSafe;
+    var showConcerns = isParent || isSafe;
+    var showParentNotes = isParent;
+    var showActions = isParent || !isBlocked;
 
     var verdictEmoji = e.verdict === 'approved' ? '✅' : (e.verdict === 'not_recommended' ? '❌' : '⚠️');
     var verdictTitle = e.verdict === 'approved' ? 'Approved' : (e.verdict === 'not_recommended' ? 'Not for our family' : 'Needs care');
+    var verdictMessage = isBlocked && !isParent
+      ? 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
+      : (e.verdict_reasoning || '');
 
-    var confBanner = e.confidence === 'low'
+    var confBanner = (e.confidence === 'low' && (isParent || !isBlocked))
       ? '<div class="bmc-lowconf">ℹ️ This check is low-confidence — please verify with a parent.</div>'
       : '';
 
@@ -532,7 +529,67 @@ var BMC = (function() {
     var onWishlist = (data.wishlist || []).indexOf(e.canonical_id) !== -1;
     var alreadyConsumed = (data.consumed || []).some(function(c) { return c.canonical_id === e.canonical_id; });
 
-    wrap.innerHTML =
+    var chipHtml = '';
+    var posHtml = '';
+    if (showFlags) {
+      var flagOrder = ['lgbtq_content','crt_ideology','sexual_content','violence','scary_content','profanity','occult_aspirational','anti_religious','moral_relativism','disrespect_authority'];
+      var flagLabels = {
+        lgbtq_content: 'LGBTQ content',
+        crt_ideology: 'Racial ideology',
+        sexual_content: 'Sexual content',
+        violence: 'Violence',
+        scary_content: 'Scary',
+        profanity: 'Language',
+        occult_aspirational: 'Occult themes',
+        anti_religious: 'Anti-religious',
+        moral_relativism: 'Moral relativism',
+        disrespect_authority: 'Disrespect of authority'
+      };
+      chipHtml = flagOrder.map(function(k) {
+        var sev = (e.content_flags || {})[k];
+        if (!sev || sev === 'none') return '';
+        return '<span class="bmc-chip bmc-chip-' + sev + '">' + flagLabels[k] + ' · ' + sev + '</span>';
+      }).join('');
+      var posLabels = {
+        catholic_themes: '✝️ Catholic',
+        christian_themes: '🙏 Christian',
+        virtue_modeled: '⚔️ Virtue',
+        intact_family: '👨‍👩‍👧 Family',
+        clear_moral_framework: '⚖️ Clear morals',
+        educational_value: '📚 Educational',
+        classic_literary_merit: '🏛 Classic',
+        inspires_wonder: '✨ Wonder'
+      };
+      posHtml = Object.keys(posLabels).filter(function(k) {
+        return (e.positive_flags || {})[k];
+      }).map(function(k) {
+        return '<span class="bmc-chip bmc-chip-positive">' + posLabels[k] + '</span>';
+      }).join('');
+    }
+
+    var concernsHtml = '';
+    if (showConcerns && e.specific_concerns && e.specific_concerns.length) {
+      concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
+        e.specific_concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
+        '</ul></div>';
+    } else if (isCaution && !isParent && e.confidence !== 'low') {
+      var nFlags = 0;
+      if (e.content_flags) {
+        for (var k in e.content_flags) {
+          if (e.content_flags[k] && e.content_flags[k] !== 'none') nFlags++;
+        }
+      }
+      if (nFlags > 0) {
+        concernsHtml = '<div class="bmc-card"><h4>Good to know</h4><p style="font-size:0.9rem;">This one has some content worth checking with a parent first.</p></div>';
+      }
+    }
+
+    var unlockStrip = '';
+    if (!isParent && (isBlocked || !showParentNotes || !showFlags)) {
+      unlockStrip = '<button class="bmc-btn bmc-btn-ghost" onclick="BMC.unlockParent()" style="width:100%;margin-top:4px;">🔒 Show Mom or Dad (parent PIN)</button>';
+    }
+
+    var html =
       '<div class="bmc-result-head">' +
         '<div class="bmc-result-cover" ' + coverStyle + '>' + (e.cover_url ? '' : coverEmoji) + '</div>' +
         '<div class="bmc-result-meta">' +
@@ -544,20 +601,20 @@ var BMC = (function() {
 
       '<div class="bmc-verdict-banner verdict-' + escAttr(e.verdict) + '">' +
         '<div class="verdict-emoji">' + verdictEmoji + '</div>' +
-        '<div><h3>' + verdictTitle + '</h3><p>' + _escHtmlLocal(e.verdict_reasoning || '') + '</p></div>' +
+        '<div><h3>' + verdictTitle + '</h3><p>' + _escHtmlLocal(verdictMessage) + '</p></div>' +
       '</div>' +
 
       '<div class="bmc-age-row">' +
         '<span class="bmc-age-pill">Ages ' + (e.minimum_age || '?') + '+' + (e.ideal_age_range ? ' · ideal ' + _escHtmlLocal(e.ideal_age_range) : '') + '</span>' +
-        (e.parent_reviewed ? '<span class="bmc-reviewed-pill">✓ Parent reviewed</span>' : '') +
+        (isParent && e.parent_reviewed ? '<span class="bmc-reviewed-pill">✓ Parent reviewed</span>' : '') +
       '</div>' +
 
-      (tooYoung
+      (tooYoung && !isParent
         ? '<div class="bmc-age-gate">This is recommended for age ' + e.minimum_age + '+. Ask Mom or Dad first.</div>'
         : ''
       ) +
 
-      (e.summary
+      (showSummary && e.summary
         ? '<div class="bmc-summary"><h4>What it\'s about</h4>' + _escHtmlLocal(e.summary) + '</div>'
         : ''
       ) +
@@ -569,23 +626,29 @@ var BMC = (function() {
 
       concernsHtml +
 
-      (e.parent_notes
+      (showParentNotes && e.parent_notes
         ? '<div class="bmc-parent-notes"><strong>Parent notes</strong>' + _escHtmlLocal(e.parent_notes) + '</div>'
         : ''
       ) +
 
-      '<div class="bmc-action-row">' +
-        (alreadyConsumed
-          ? '<button class="bmc-btn bmc-btn-ghost" disabled>✅ On your shelf</button>'
-          : '<button class="bmc-btn bmc-btn-primary" onclick="BMC.recordConsumed(\'' + escAttr(e.canonical_id) + '\')">📖 I\'m reading/watching this</button>'
-        ) +
-        (onWishlist
-          ? '<button class="bmc-btn bmc-btn-ghost" disabled>💫 On wishlist</button>'
-          : '<button class="bmc-btn bmc-btn-secondary" onclick="BMC.addToWishlist(\'' + escAttr(e.canonical_id) + '\')">+ Add to wishlist</button>'
-        ) +
-      '</div>' +
+      (showActions
+        ? ('<div class="bmc-action-row">' +
+            (alreadyConsumed
+              ? '<button class="bmc-btn bmc-btn-ghost" disabled>✅ On your shelf</button>'
+              : '<button class="bmc-btn bmc-btn-primary" onclick="BMC.recordConsumed(\'' + escAttr(e.canonical_id) + '\')">📖 I\'m reading/watching this</button>'
+            ) +
+            (onWishlist
+              ? '<button class="bmc-btn bmc-btn-ghost" disabled>💫 On wishlist</button>'
+              : '<button class="bmc-btn bmc-btn-secondary" onclick="BMC.addToWishlist(\'' + escAttr(e.canonical_id) + '\')">+ Add to wishlist</button>'
+            ) +
+          '</div>')
+        : ''
+      ) +
 
+      unlockStrip +
       confBanner;
+
+    wrap.innerHTML = html;
   }
 
   // ── Library/history click → show result for a known item ───────
@@ -597,11 +660,14 @@ var BMC = (function() {
         .then(function(evaluation) {
           _familyLibrary[canonicalId] = evaluation;
           _setStatus('');
+          showTab('result');
           showResult(evaluation);
         })
         .catch(function() { _setStatus('Could not load that entry.', 'error'); });
       return;
     }
+    _setStatus('');
+    showTab('result');
     showResult(item);
   }
 
@@ -674,7 +740,8 @@ var BMC = (function() {
     selectCandidate: selectCandidate,
     pickCandidate: pickCandidate,
     recordConsumed: recordConsumed,
-    addToWishlist: addToWishlist
+    addToWishlist: addToWishlist,
+    unlockParent: unlockParent
   };
 })();
 

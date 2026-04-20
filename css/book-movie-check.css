@@ -505,14 +505,30 @@ body {
 /* Candidate disambiguation list */
 .bmc-candidate {
   display: flex; gap: 12px; align-items: center;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--bg-card);
   border: 1.5px solid var(--border-subtle);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  color: var(--text-primary);
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
 }
-.bmc-candidate:hover { border-color: var(--bmc-accent); }
+.bmc-candidate:hover {
+  border-color: var(--bmc-accent);
+  background: rgba(96,165,250,0.06);
+}
+.bmc-candidate strong, .bmc-candidate > div > div:first-child {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+.bmc-candidate .candidate-meta {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
 
 /* Low-confidence banner */
 .bmc-lowconf {

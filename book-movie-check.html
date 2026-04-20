@@ -38,7 +38,7 @@
       </div>
 
       <div class="bmc-tabs">
-        <button class="bmc-tab-btn active" onclick="BMC.showTab('home')">⭐ Suggested</button>
+        <button class="bmc-tab-btn active" onclick="BMC.showTab('home')">🔍 Search</button>
         <button class="bmc-tab-btn" onclick="BMC.showTab('library')">📚 Library</button>
         <button class="bmc-tab-btn" onclick="BMC.showTab('history')">📖 My shelf</button>
       </div>
@@ -54,6 +54,11 @@
     <!-- SCREEN: Result -->
     <section class="screen" id="screen-result">
       <button class="back-btn" aria-label="Go back" onclick="BMC.showTab('home')">←</button>
+      <div class="bmc-tabs">
+        <button class="bmc-tab-btn" onclick="BMC.showTab('home')">🔍 Search</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('library')">📚 Library</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('history')">📖 My shelf</button>
+      </div>
       <div id="bmc-result" class="bmc-result-wrap">
         <!-- Populated by JS: title metadata + verdict + flags + notes -->
       </div>
@@ -62,6 +67,11 @@
     <!-- SCREEN: Library (everything the family has evaluated) -->
     <section class="screen" id="screen-library">
       <button class="back-btn" aria-label="Go back" onclick="BMC.showTab('home')">←</button>
+      <div class="bmc-tabs">
+        <button class="bmc-tab-btn" onclick="BMC.showTab('home')">🔍 Search</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('library')">📚 Library</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('history')">📖 My shelf</button>
+      </div>
       <div class="bmc-section-header">
         <h2>📚 Family library</h2>
         <p>Every book and movie we've looked up together.</p>
@@ -75,6 +85,11 @@
     <!-- SCREEN: History (this kid's shelf) -->
     <section class="screen" id="screen-history">
       <button class="back-btn" aria-label="Go back" onclick="BMC.showTab('home')">←</button>
+      <div class="bmc-tabs">
+        <button class="bmc-tab-btn" onclick="BMC.showTab('home')">🔍 Search</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('library')">📚 Library</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('history')">📖 My shelf</button>
+      </div>
       <div class="bmc-section-header">
         <h2>📖 My shelf</h2>
         <p>What you've read, watched, or want to.</p>
