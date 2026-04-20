@@ -14,6 +14,7 @@ const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GROK_KEY = process.env.GROK_API_KEY;
 const CACHE_TTL_DAYS = 90;
+const PROMPT_VERSION = 2;  // bump whenever media-prompt.txt is edited
 const RATE_LIMIT_PER_HOUR = 60;  // per source IP, total evaluate calls
 
 let DATA_DIR = null;
@@ -329,6 +330,7 @@ function init(app, dataDir) {
       const cache = _loadCache();
       const now = Date.now();
       if (cache[canonical_id] && cache[canonical_id].evaluated_at
+          && cache[canonical_id].prompt_version === PROMPT_VERSION
           && (now - cache[canonical_id].evaluated_at) < CACHE_TTL_DAYS * 86400000) {
         return res.json(cache[canonical_id]);
       }
@@ -338,6 +340,7 @@ function init(app, dataDir) {
       evaluation.canonical_id = canonical_id;
       evaluation.cover_url = _httpsCover(metadata.cover_url || null);
       evaluation.evaluated_at = now;
+      evaluation.prompt_version = PROMPT_VERSION;
       if (typeof evaluation.parent_reviewed !== 'boolean') evaluation.parent_reviewed = false;
       if (!evaluation.type) evaluation.type = metadata.type || 'book';
       if (!evaluation.title) evaluation.title = metadata.title;
@@ -374,6 +377,82 @@ function init(app, dataDir) {
     entry.parent_reviewed = true;
     _saveCache(cache);
     res.json(entry);
+  });
+
+  // ── POST /api/media/reevaluate/:id ── (force re-eval one entry)
+  app.post('/api/media/reevaluate/:id', async (req, res) => {
+    const ip = req.ip || 'unknown';
+    if (!_rateOk(ip)) return res.status(429).json({ error: 'Rate limit exceeded' });
+    const cache = _loadCache();
+    const entry = cache[req.params.id];
+    if (!entry) return res.status(404).json({ error: 'Not cached' });
+    try {
+      const metadata = {
+        title: entry.title,
+        author_or_director: entry.author_or_director,
+        year: entry.year,
+        type: entry.type,
+        synopsis: entry.summary || ''
+      };
+      const fresh = await _evaluate(metadata);
+      fresh.canonical_id = entry.canonical_id;
+      fresh.cover_url = entry.cover_url;
+      fresh.evaluated_at = Date.now();
+      fresh.prompt_version = PROMPT_VERSION;
+      fresh.parent_reviewed = entry.parent_reviewed || false;
+      cache[entry.canonical_id] = fresh;
+      _saveCache(cache);
+      res.json(fresh);
+    } catch (err) {
+      console.error('[media/reevaluate]', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── POST /api/media/reevaluate-stale ── (walks cache, re-evals stale entries)
+  app.post('/api/media/reevaluate-stale', async (req, res) => {
+    const cache = _loadCache();
+    const stale = Object.keys(cache).filter(id =>
+      cache[id].prompt_version !== PROMPT_VERSION);
+    res.json({ started: true, count: stale.length });
+    // Fire-and-forget; process serially with delay to respect rate limit
+    (async () => {
+      for (const id of stale) {
+        try {
+          const entry = cache[id];
+          const metadata = {
+            title: entry.title,
+            author_or_director: entry.author_or_director,
+            year: entry.year,
+            type: entry.type,
+            synopsis: entry.summary || ''
+          };
+          const fresh = await _evaluate(metadata);
+          fresh.canonical_id = id;
+          fresh.cover_url = entry.cover_url;
+          fresh.evaluated_at = Date.now();
+          fresh.prompt_version = PROMPT_VERSION;
+          fresh.parent_reviewed = entry.parent_reviewed || false;
+          const current = _loadCache();
+          current[id] = fresh;
+          _saveCache(current);
+          console.log('[media/reevaluate-stale] Updated ' + entry.title);
+          await new Promise(r => setTimeout(r, 1500));
+        } catch (err) {
+          console.warn('[media/reevaluate-stale] Failed ' + id + ':', err.message);
+        }
+      }
+      console.log('[media/reevaluate-stale] Done');
+    })();
+  });
+
+  // ── GET /api/media/stale-count ── (how many entries need re-eval)
+  app.get('/api/media/stale-count', (req, res) => {
+    const cache = _loadCache();
+    const total = Object.keys(cache).length;
+    const stale = Object.keys(cache).filter(id =>
+      cache[id].prompt_version !== PROMPT_VERSION).length;
+    res.json({ total: total, stale: stale, prompt_version: PROMPT_VERSION });
   });
 }
 
