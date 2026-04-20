@@ -25,6 +25,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
 | **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
 | **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
+| **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -54,6 +55,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Book & Movie Check"!**: Averigua si un libro o película es adecuado para nuestra familia. (Find out if a book or movie is right for our family).
 - **Nuevo Laboratorio "Magnets" en Lab Explorer**: Aprende sobre el magnetismo con experimentos interactivos. (Learn about magnetism with interactive experiments in the new Magnets lab).
 - **¡Nueva App "Guess Quest"!**: Desarrolla habilidades de deducción adivinando palabras ocultas en inglés y español. (Build deduction skills by guessing hidden words in English and Spanish).
 - **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
