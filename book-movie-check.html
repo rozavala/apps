@@ -75,11 +75,33 @@
       <div class="bmc-section-header">
         <h2>📚 Family library</h2>
         <p>Every book and movie we've looked up together.</p>
-        <div id="bmc-parent-tools" style="display:none; margin-top:12px;">
-          <button class="bmc-btn bmc-btn-secondary" onclick="BMC.reviewWithNewCriteria()">
-            🔄 Re-review library with new criteria (<span id="bmc-stale-count">?</span>)
+        <div id="bmc-parent-bar" style="margin-top:12px;">
+          <button class="bmc-btn bmc-btn-secondary" id="bmc-parent-unlock"
+                  onclick="BMC.unlockParent()">
+            🔒 Parents
           </button>
-          <div id="bmc-reeval-status" style="margin-top:8px; font-size:0.85rem; color:var(--text-muted);"></div>
+        </div>
+        <div id="bmc-parent-tools" style="display:none; margin-top:12px;
+             padding:14px; background:var(--bg-card);
+             border:1.5px solid var(--border-subtle); border-radius:12px;">
+          <h4 style="font-size:0.75rem; letter-spacing:0.6px; text-transform:uppercase;
+                     color:var(--text-muted); font-weight:800; margin-bottom:10px;">
+            Parent tools
+          </h4>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="bmc-btn bmc-btn-secondary" onclick="BMC.reviewWithNewCriteria()">
+              🔄 Re-review with new criteria (<span id="bmc-stale-count">?</span>)
+            </button>
+            <button class="bmc-btn bmc-btn-secondary" onclick="BMC.clearMySearches()">
+              🧹 Clear my recent checks
+            </button>
+            <button class="bmc-btn bmc-btn-secondary" onclick="BMC.resetFamilyLibrary()"
+                    style="color:var(--bmc-notrec); border-color:var(--bmc-notrec);">
+              ⚠️ Reset family library
+            </button>
+          </div>
+          <div id="bmc-reeval-status" style="margin-top:10px; font-size:0.85rem;
+               color:var(--text-muted);"></div>
         </div>
       </div>
       <div id="bmc-library-filter" class="bmc-filter-row"></div>
@@ -115,6 +137,15 @@
     <div class="bmc-modal-panel">
       <button class="bmc-modal-close" onclick="BMC.closeScan()" aria-label="Close scanner">✕</button>
       <h3>Point camera at the ISBN barcode</h3>
+      <div id="bmc-scan-ipad-hint" style="display:none; padding:10px 12px; margin-bottom:10px;
+           background:rgba(96,165,250,0.1); border:1.5px solid rgba(96,165,250,0.4);
+           border-radius:10px; font-size:0.85rem; line-height:1.4;">
+        ℹ️ This app can't use the camera here. You have two options:
+        <ol style="margin:6px 0 0 20px; padding:0;">
+          <li>Open Book &amp; Movie Check in <b>Safari</b> to scan,</li>
+          <li>Or tap <b>"Type ISBN instead"</b> below to enter it manually.</li>
+        </ol>
+      </div>
       <video id="bmc-scan-video" playsinline muted></video>
       <div id="bmc-scan-hint" class="bmc-modal-hint">Looking for barcode…</div>
       <div class="bmc-modal-actions">

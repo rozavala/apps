@@ -19,6 +19,20 @@ var BMC = (function() {
   var _scanStream = null;
   var _parentMode = false;  // session-only, resets on page reload
 
+  // Environment detection for iPad-in-WKWebView-wrapper cases
+  var _cameraAvailable = null;  // null = unknown; true/false after probe
+  function _isIpadWrapper() {
+    try {
+      var ua = navigator.userAgent || '';
+      var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (!isIOS) return false;
+      // Safari on iOS reports "Safari" in UA. WKWebView wrappers do not.
+      var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+      return !isSafari;
+    } catch (e) { return false; }
+  }
+
   function _requestParentMode() {
     if (_parentMode) return true;
     var entered = prompt('Parent PIN:');
@@ -305,16 +319,29 @@ var BMC = (function() {
   }
 
   // ── ISBN scan + manual entry ───────────────────────────────────
+  function _showScanModalWithHint() {
+    var modal = document.getElementById('bmc-scan-modal');
+    var hint = document.getElementById('bmc-scan-ipad-hint');
+    if (!modal) return false;
+    if (hint) hint.style.display = 'block';
+    modal.classList.add('active');
+    return true;
+  }
+
   function scanIsbn() {
+    // BarcodeDetector is Chromium-only; on all WebKit iPads it is undefined.
     if (typeof BarcodeDetector === 'undefined') {
+      if (_showScanModalWithHint()) return;
       return promptManualIsbn();
     }
     BarcodeDetector.getSupportedFormats().then(function(formats) {
       if (formats.indexOf('ean_13') === -1 && formats.indexOf('isbn_13') === -1) {
+        if (_showScanModalWithHint()) return;
         return promptManualIsbn();
       }
       _startScan(formats);
     }).catch(function() {
+      if (_showScanModalWithHint()) return;
       promptManualIsbn();
     });
   }
@@ -323,8 +350,18 @@ var BMC = (function() {
     var modal = document.getElementById('bmc-scan-modal');
     var video = document.getElementById('bmc-scan-video');
     var hint = document.getElementById('bmc-scan-hint');
+    var ipadHint = document.getElementById('bmc-scan-ipad-hint');
     if (!modal || !video) return promptManualIsbn();
     modal.classList.add('active');
+
+    // iPad WKWebView wrapper (e.g. Web MIDI Browser) — camera rarely works here
+    if (_isIpadWrapper() && ipadHint) {
+      ipadHint.style.display = 'block';
+    }
+    // BarcodeDetector is Chromium-only; on all WebKit iPads it is undefined
+    if (typeof BarcodeDetector === 'undefined' && ipadHint) {
+      ipadHint.style.display = 'block';
+    }
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then(function(stream) {
@@ -349,8 +386,11 @@ var BMC = (function() {
         loop();
       })
       .catch(function() {
-        closeScan();
-        promptManualIsbn();
+        if (ipadHint) {
+          ipadHint.style.display = 'block';
+          ipadHint.innerHTML = '⚠️ Camera not available in this app. ' +
+            'Tap <b>"Type ISBN instead"</b> below, or open Book &amp; Movie Check in Safari.';
+        }
       });
   }
 
@@ -530,6 +570,33 @@ var BMC = (function() {
       ? 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
       : (e.verdict_reasoning || '');
 
+    // Maturity gate vs. values rejection — soften messaging for pure adult content
+    if (isBlocked && !isParent) {
+      var f = e.content_flags || {};
+      var valuesFlags = ['lgbtq_content', 'crt_ideology', 'anti_religious', 'occult_aspirational'];
+      var hasSignificantValues = valuesFlags.some(function(k) {
+        return f[k] === 'significant';
+      });
+      var hasModerateValues = valuesFlags.some(function(k) {
+        return f[k] === 'moderate';
+      });
+      var hasSignificantRelativism = f.moral_relativism === 'significant';
+      var isPureMaturityGate =
+        !hasSignificantValues &&
+        !hasModerateValues &&
+        !hasSignificantRelativism &&
+        e.minimum_age && e.minimum_age >= 13;
+      if (isPureMaturityGate) {
+        verdictEmoji = '🧓';
+        verdictTitle = 'Grown-up book';
+        verdictMessage = 'This one is a grown-up book. Ask Mom or Dad if it is right for you yet.';
+      }
+    }
+
+    var bannerVerdictClass = (isBlocked && !isParent && verdictTitle === 'Grown-up book')
+      ? 'verdict-caution'  // reuse the amber caution styling for maturity
+      : e.verdict;
+
     var confBanner = (e.confidence === 'low' && (isParent || !isBlocked))
       ? '<div class="bmc-lowconf">ℹ️ This check is low-confidence — please verify with a parent.</div>'
       : '';
@@ -608,7 +675,7 @@ var BMC = (function() {
         '</div>' +
       '</div>' +
 
-      '<div class="bmc-verdict-banner verdict-' + escAttr(e.verdict) + '">' +
+      '<div class="bmc-verdict-banner verdict-' + escAttr(bannerVerdictClass) + '">' +
         '<div class="verdict-emoji">' + verdictEmoji + '</div>' +
         '<div><h3>' + verdictTitle + '</h3><p>' + _escHtmlLocal(verdictMessage) + '</p></div>' +
       '</div>' +
@@ -720,18 +787,67 @@ var BMC = (function() {
   function _refreshStaleCount() {
     var tools = document.getElementById('bmc-parent-tools');
     var countEl = document.getElementById('bmc-stale-count');
+    var unlockBtn = document.getElementById('bmc-parent-unlock');
     if (!tools) return;
     if (!_parentMode) {
       tools.style.display = 'none';
+      if (unlockBtn) unlockBtn.textContent = '🔒 Parents';
       return;
     }
     tools.style.display = 'block';
+    if (unlockBtn) unlockBtn.textContent = '🔓 Parent mode on';
     _fetchJson(VPS + '/api/media/stale-count')
       .then(function(r) {
         if (countEl) countEl.textContent = r.stale + ' of ' + r.total;
       })
       .catch(function() {
         if (countEl) countEl.textContent = '?';
+      });
+  }
+
+  // Clear this kid's lookups (recent checks list on home)
+  function clearMySearches() {
+    if (!_requestParentMode()) return;
+    if (!confirm('Clear this child\'s recent checks? Their shelf and wishlist stay.')) return;
+    var data = loadData();
+    data.lookups = {};
+    saveData(data);
+    var statusEl = document.getElementById('bmc-reeval-status');
+    if (statusEl) statusEl.textContent = 'Recent checks cleared.';
+    // If currently on home, re-render so the list disappears
+    if (document.getElementById('screen-home').classList.contains('active')) {
+      _renderHome();
+    }
+  }
+
+  // Wipe the family-wide media-cache.json on the VPS
+  function resetFamilyLibrary() {
+    if (!_requestParentMode()) return;
+    var statusEl = document.getElementById('bmc-reeval-status');
+    if (!confirm('⚠️ This will DELETE every evaluation in the family library for ALL kids.\n\n' +
+                 'Every previously-checked book will be re-evaluated from scratch the next time ' +
+                 'anyone searches for it.\n\nAre you sure?')) return;
+    var typed = prompt('Type WIPE to confirm:');
+    if (typed !== 'WIPE') {
+      if (statusEl) statusEl.textContent = 'Reset cancelled.';
+      return;
+    }
+    if (statusEl) statusEl.textContent = 'Wiping family library…';
+    _fetchJson(VPS + '/api/media/library', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirm: 'WIPE_FAMILY_LIBRARY' })
+    })
+      .then(function(r) {
+        _familyLibrary = {};
+        if (statusEl) statusEl.textContent = 'Wiped ' + r.cleared + ' entries. Library reset.';
+        _refreshStaleCount();
+        // Clear the displayed library list too
+        var listEl = document.getElementById('bmc-library-list');
+        if (listEl) listEl.innerHTML = '<div class="bmc-empty">Library is empty. Check a book to get started.</div>';
+      })
+      .catch(function(err) {
+        if (statusEl) statusEl.textContent = 'Reset failed: ' + err.message;
       });
   }
 
@@ -787,7 +903,9 @@ var BMC = (function() {
     recordConsumed: recordConsumed,
     addToWishlist: addToWishlist,
     unlockParent: unlockParent,
-    reviewWithNewCriteria: reviewWithNewCriteria
+    reviewWithNewCriteria: reviewWithNewCriteria,
+    clearMySearches: clearMySearches,
+    resetFamilyLibrary: resetFamilyLibrary
   };
 })();
 

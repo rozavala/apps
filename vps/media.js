@@ -469,6 +469,25 @@ function init(app, dataDir) {
     res.json({ total: total, stale: stale, prompt_version: PROMPT_VERSION });
   });
 
+  // ── DELETE /api/media/library ──
+  // Wipes the entire family media cache. Requires a magic confirmation token
+  // to prevent accidental wipes via casual POSTs.
+  app.delete('/api/media/library', (req, res) => {
+    const { confirm } = req.body || {};
+    if (confirm !== 'WIPE_FAMILY_LIBRARY') {
+      return res.status(400).json({ error: 'Missing or invalid confirmation token' });
+    }
+    try {
+      const before = Object.keys(_loadCache()).length;
+      _saveCache({});
+      console.log('[media/library DELETE] Wiped ' + before + ' entries');
+      res.json({ ok: true, cleared: before });
+    } catch (err) {
+      console.error('[media/library DELETE]', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ── POST /api/media/test-evaluate ──
   // Hermetic evaluation for regression testing. Bypasses cache entirely.
   // Shares the same rate limit bucket as /evaluate.
