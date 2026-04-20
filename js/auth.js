@@ -178,7 +178,8 @@ function getPlayerStats(userName) {
     { id: 'lab',    prefix: 'zs_lab_' },
     { id: 'world',  prefix: 'zs_world_' },
     { id: 'story',  prefix: 'zs_story_' },
-    { id: 'quest',  prefix: 'zs_quest_' }
+    { id: 'quest',  prefix: 'zs_quest_' },
+    { id: 'bmcheck', prefix: 'zs_bmcheck_' }
   ];
 
   for (var i = 0; i < appConfigs.length; i++) {

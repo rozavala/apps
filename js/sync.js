@@ -23,6 +23,7 @@ var CloudSync = (function() {
     'zs_story_': 'story',
     'zs_quest_': 'quest',
     'zs_guess_': 'guess',
+    'zs_bmcheck_': 'bmcheck',
     'zs_activity_': 'activity',
     'littlemaestro_': 'littlemaestro',
   };
