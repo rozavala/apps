@@ -10,46 +10,6 @@ const StoryExplorer = (() => {
   // ── Story Library ──
   const STORIES = [
     {
-      id: 'lost_compass',
-      title: 'The Lost Compass',
-      titleEs: 'La Brújula Perdida',
-      tier: 'explorer', ageMin: 6, region: 'south', icon: '🧭',
-      pages: [
-        {
-          en: 'Leo was hiking in the mountains. He looked for his compass, but it was gone.',
-          es: 'Leo estaba haciendo senderismo en las montañas. Buscó su brújula, pero había desaparecido.',
-          vocab: [
-            { word: 'hiking', wordEs: 'senderismo', def: 'Walking in nature.', defEs: 'Caminar en la naturaleza.' },
-            { word: 'compass', wordEs: 'brújula', def: 'A tool for direction.', defEs: 'Una herramienta para dirección.' }
-          ]
-        },
-        {
-          en: 'He retraced his steps carefully. The wind was blowing strong.',
-          es: 'Él rehízo sus pasos con cuidado. El viento soplaba fuerte.',
-          vocab: [
-            { word: 'steps', wordEs: 'pasos', def: 'Foot movements.', defEs: 'Movimientos de los pies.' },
-            { word: 'wind', wordEs: 'viento', def: 'Moving air.', defEs: 'Aire en movimiento.' }
-          ]
-        },
-        {
-          en: 'Under a big rock, he saw something shiny. It was his compass!',
-          es: 'Bajo una gran roca, vio algo brillante. ¡Era su brújula!',
-          vocab: [
-            { word: 'rock', wordEs: 'roca', def: 'A large stone.', defEs: 'Una piedra grande.' },
-            { word: 'shiny', wordEs: 'brillante', def: 'Reflecting light.', defEs: 'Que refleja luz.' }
-          ]
-        },
-        {
-          en: 'Happy, Leo used the compass to find the path home before dark.',
-          es: 'Feliz, Leo usó la brújula para encontrar el camino a casa antes de oscurecer.',
-          vocab: [
-            { word: 'path', wordEs: 'camino', def: 'A track to walk on.', defEs: 'Una vía para caminar.' },
-            { word: 'dark', wordEs: 'oscuro', def: 'Without light.', defEs: 'Sin luz.' }
-          ]
-        }
-      ]
-    },
-    {
       id: 'inca_trail',
       title: 'The Secret Inca Trail',
       titleEs: 'El Sendero Secreto Inca',
