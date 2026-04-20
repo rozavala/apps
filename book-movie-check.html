@@ -75,6 +75,12 @@
       <div class="bmc-section-header">
         <h2>📚 Family library</h2>
         <p>Every book and movie we've looked up together.</p>
+        <div id="bmc-parent-tools" style="display:none; margin-top:12px;">
+          <button class="bmc-btn bmc-btn-secondary" onclick="BMC.reviewWithNewCriteria()">
+            🔄 Re-review library with new criteria (<span id="bmc-stale-count">?</span>)
+          </button>
+          <div id="bmc-reeval-status" style="margin-top:8px; font-size:0.85rem; color:var(--text-muted);"></div>
+        </div>
       </div>
       <div id="bmc-library-filter" class="bmc-filter-row"></div>
       <div id="bmc-library-list" class="bmc-list">

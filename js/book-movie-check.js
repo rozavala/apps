@@ -35,6 +35,7 @@ var BMC = (function() {
   function unlockParent() {
     if (_requestParentMode()) {
       if (_currentResult) showResult(_currentResult);
+      _refreshStaleCount();
     }
   }
 
@@ -115,6 +116,7 @@ var BMC = (function() {
     if (name === 'library') {
       document.getElementById('screen-library').classList.add('active');
       _renderLibrary();
+      _refreshStaleCount();
       _activateTabButtons('.bmc-tab-btn[onclick*="library"]');
     } else if (name === 'history') {
       document.getElementById('screen-history').classList.add('active');
@@ -714,6 +716,42 @@ var BMC = (function() {
       });
   }
 
+  // ── Re-review / stale-count (parent tools) ─────────────────────
+  function _refreshStaleCount() {
+    var tools = document.getElementById('bmc-parent-tools');
+    var countEl = document.getElementById('bmc-stale-count');
+    if (!tools) return;
+    if (!_parentMode) {
+      tools.style.display = 'none';
+      return;
+    }
+    tools.style.display = 'block';
+    _fetchJson(VPS + '/api/media/stale-count')
+      .then(function(r) {
+        if (countEl) countEl.textContent = r.stale + ' of ' + r.total;
+      })
+      .catch(function() {
+        if (countEl) countEl.textContent = '?';
+      });
+  }
+
+  function reviewWithNewCriteria() {
+    if (!_requestParentMode()) return;
+    if (!confirm('Re-review all stale entries? This can take several minutes.')) return;
+    var statusEl = document.getElementById('bmc-reeval-status');
+    if (statusEl) statusEl.textContent = 'Starting…';
+    _fetchJson(VPS + '/api/media/reevaluate-stale', { method: 'POST' })
+      .then(function(r) {
+        if (statusEl) {
+          statusEl.textContent = 'Re-reviewing ' + r.count + ' books in the background. '
+            + 'Refresh in a few minutes.';
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
+      });
+  }
+
   // ── Init ───────────────────────────────────────────────────────
   function init() {
     _hydrateFamilyLibrary().then(function() {
@@ -748,7 +786,8 @@ var BMC = (function() {
     pickCandidate: pickCandidate,
     recordConsumed: recordConsumed,
     addToWishlist: addToWishlist,
-    unlockParent: unlockParent
+    unlockParent: unlockParent,
+    reviewWithNewCriteria: reviewWithNewCriteria
   };
 })();
 
