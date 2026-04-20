@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book &amp; Movie Check 🔍</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/book-movie-check.css">
+</head>
+<body>
+  <div class="atmo" style="width:420px;height:420px;background:rgba(96,165,250,0.08);top:-120px;left:-120px;"></div>
+  <div class="atmo" style="width:360px;height:360px;background:rgba(16,185,129,0.05);bottom:-100px;right:-80px;animation-delay:-9s;"></div>
+
+  <div class="app">
+
+    <!-- SCREEN: Home (search) -->
+    <section class="screen active" id="screen-home">
+      <div class="bmc-header">
+        <span class="icon">🔍</span>
+        <h1>Book &amp; Movie Check</h1>
+        <p>Find out if a book or movie is right for our family.</p>
+      </div>
+
+      <div class="bmc-search-card">
+        <label for="bmc-query" class="bmc-label">Search by title</label>
+        <div class="bmc-search-row">
+          <input type="text" id="bmc-query" placeholder="e.g. The Hobbit" autocomplete="off" />
+          <button class="bmc-btn bmc-btn-primary" onclick="BMC.search()">Search</button>
+        </div>
+        <div class="bmc-search-actions">
+          <button class="bmc-btn bmc-btn-secondary" onclick="BMC.scanIsbn()">📷 Scan ISBN</button>
+          <button class="bmc-btn bmc-btn-secondary" onclick="BMC.capturePhoto()">🖼 Photo of cover</button>
+        </div>
+        <div id="bmc-status" class="bmc-status" aria-live="polite"></div>
+      </div>
+
+      <div class="bmc-tabs">
+        <button class="bmc-tab-btn active" onclick="BMC.showTab('home')">⭐ Suggested</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('library')">📚 Library</button>
+        <button class="bmc-tab-btn" onclick="BMC.showTab('history')">📖 My shelf</button>
+      </div>
+
+      <div id="bmc-recent" class="bmc-list">
+        <!-- Populated by JS -->
+      </div>
+      <div id="bmc-suggested" class="bmc-list">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- SCREEN: Result -->
+    <section class="screen" id="screen-result">
+      <button class="back-btn" aria-label="Go back" onclick="BMC.showTab('home')">←</button>
+      <div id="bmc-result" class="bmc-result-wrap">
+        <!-- Populated by JS: title metadata + verdict + flags + notes -->
+      </div>
+    </section>
+
+    <!-- SCREEN: Library (everything the family has evaluated) -->
+    <section class="screen" id="screen-library">
+      <button class="back-btn" aria-label="Go back" onclick="BMC.showTab('home')">←</button>
+      <div class="bmc-section-header">
+        <h2>📚 Family library</h2>
+        <p>Every book and movie we've looked up together.</p>
+      </div>
+      <div id="bmc-library-filter" class="bmc-filter-row"></div>
+      <div id="bmc-library-list" class="bmc-list">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- SCREEN: History (this kid's shelf) -->
+    <section class="screen" id="screen-history">
+      <button class="back-btn" aria-label="Go back" onclick="BMC.showTab('home')">←</button>
+      <div class="bmc-section-header">
+        <h2>📖 My shelf</h2>
+        <p>What you've read, watched, or want to.</p>
+      </div>
+      <div id="bmc-history-list" class="bmc-list">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Hidden file input for cover-photo capture -->
+  <input type="file" id="bmc-photo-input" accept="image/*" capture="environment" style="display:none" />
+
+  <!-- Scan ISBN modal (shown when BarcodeDetector is supported) -->
+  <div id="bmc-scan-modal" class="bmc-modal" onclick="if(event.target===this)BMC.closeScan()">
+    <div class="bmc-modal-panel">
+      <button class="bmc-modal-close" onclick="BMC.closeScan()" aria-label="Close scanner">✕</button>
+      <h3>Point camera at the ISBN barcode</h3>
+      <video id="bmc-scan-video" playsinline muted></video>
+      <div id="bmc-scan-hint" class="bmc-modal-hint">Looking for barcode…</div>
+      <div class="bmc-modal-actions">
+        <button class="bmc-btn bmc-btn-secondary" onclick="BMC.promptManualIsbn()">Type ISBN instead</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/book-movie-check.js"></script>
+</body>
+</html>
