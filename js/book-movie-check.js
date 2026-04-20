@@ -659,11 +659,14 @@ var BMC = (function() {
         .then(function(evaluation) {
           _familyLibrary[canonicalId] = evaluation;
           _setStatus('');
+          showTab('result');
           showResult(evaluation);
         })
         .catch(function() { _setStatus('Could not load that entry.', 'error'); });
       return;
     }
+    _setStatus('');
+    showTab('result');
     showResult(item);
   }
 
