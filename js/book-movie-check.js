@@ -245,11 +245,6 @@ var BMC = (function() {
     }
 
     _setStatus('Searching for "' + q + '"…', 'working');
-    if (typeof CloudSync !== 'undefined' && !CloudSync.online) {
-      _setStatus('Offline — can only check titles already in the family library.', 'error');
-      return;
-    }
-
     _fetchJson(VPS + '/api/media/lookup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -268,7 +263,10 @@ var BMC = (function() {
       })
       .catch(function(err) {
         console.warn('[BMC] Lookup failed:', err);
-        _setStatus('Could not search right now. Please try again.', 'error');
+        var msg = (err && err.name === 'AbortError')
+          ? 'The search timed out. Check your connection and try again.'
+          : 'Could not reach the book server. Please try again.';
+        _setStatus(msg, 'error');
       });
   }
 
@@ -638,7 +636,9 @@ var BMC = (function() {
       .then(function(library) {
         _familyLibrary = library || {};
       })
-      .catch(function() { /* offline or endpoint down — that's OK */ });
+      .catch(function(err) {
+        console.warn('[BMC] Library hydrate failed:', err);
+      });
   }
 
   // ── Init ───────────────────────────────────────────────────────
