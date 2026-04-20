@@ -204,17 +204,31 @@ const CORPUS = [
 
 // ── Runner ─────────────────────────────────────────────────────
 
-async function testEvaluate(metadata) {
+const MAX_RETRIES_503 = 4;   // Gemini overload — usually clears fast
+const MAX_RETRIES_429 = 2;   // quota — retry a couple times, then give up
+const PACING_MS = 2000;      // delay between tests
+
+async function testEvaluate(metadata, attempt) {
+  attempt = attempt || 1;
   const r = await fetch(VPS + '/api/media/test-evaluate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ metadata })
   });
-  if (r.status === 429) {
-    console.log('\n   ⏸️  Rate limited; sleeping 60s…');
-    await new Promise(res => setTimeout(res, 60000));
-    return testEvaluate(metadata);
+
+  if (r.status === 503 && attempt <= MAX_RETRIES_503) {
+    const wait = 5000 * attempt;  // 5s, 10s, 15s, 20s
+    console.log('\n   ⏸️  upstream 503 (overloaded); retry ' + attempt + '/' + MAX_RETRIES_503 + ' in ' + (wait / 1000) + 's…');
+    await new Promise(res => setTimeout(res, wait));
+    return testEvaluate(metadata, attempt + 1);
   }
+  if (r.status === 429 && attempt <= MAX_RETRIES_429) {
+    const wait = 60000 * attempt;  // 60s, 120s
+    console.log('\n   ⏸️  upstream 429 (quota); retry ' + attempt + '/' + MAX_RETRIES_429 + ' in ' + (wait / 1000) + 's…');
+    await new Promise(res => setTimeout(res, wait));
+    return testEvaluate(metadata, attempt + 1);
+  }
+
   if (!r.ok) {
     const body = await r.text();
     throw new Error('HTTP ' + r.status + ': ' + body.slice(0, 200));
@@ -303,9 +317,15 @@ async function main() {
       }
     } catch (err) {
       console.log('❌ ERROR: ' + err.message);
-      results.push({ test, result: null, grade: { status: 'error', notes: [err.message] } });
+      // Informational titles that error are not scored failures.
+      const isInfo = !test.expect || test.expect.verdict === null;
+      results.push({
+        test,
+        result: null,
+        grade: { status: isInfo ? 'info-error' : 'error', notes: [err.message] }
+      });
     }
-    await new Promise(r => setTimeout(r, 500));  // polite pacing
+    await new Promise(r => setTimeout(r, PACING_MS));  // polite pacing
   }
 
   // ── Summary ──
@@ -316,7 +336,7 @@ async function main() {
   const cats = {};
   for (const r of results) {
     const c = r.test.category || 'other';
-    if (!cats[c]) cats[c] = { pass: 0, fail: 0, error: 0, info: 0 };
+    if (!cats[c]) cats[c] = { pass: 0, fail: 0, error: 0, info: 0, 'info-error': 0 };
     cats[c][r.grade.status]++;
   }
   const W = 28;
@@ -326,9 +346,11 @@ async function main() {
   for (const c of Object.keys(cats)) {
     const x = cats[c];
     const scored = x.pass + x.fail + x.error;
-    if (scored === 0 && x.info === 0) continue;
+    const infoTotal = x.info + x['info-error'];
+    if (scored === 0 && infoTotal === 0) continue;
     if (scored === 0) {
-      console.log('   ' + pad(c, W) + ' |    - |    - |  ' + pad(String(x.info), 3) + ' (info)');
+      const suffix = x['info-error'] ? ' (info, ' + x['info-error'] + ' errored)' : ' (info)';
+      console.log('   ' + pad(c, W) + ' |    - |    - |  ' + pad(String(infoTotal), 3) + suffix);
       continue;
     }
     totalPass += x.pass;
