@@ -223,15 +223,20 @@ var BMC = (function() {
   }
 
   // ── List item HTML ─────────────────────────────────────────────
+  function _httpsCover(url) {
+    return url ? String(url).replace(/^http:\/\//i, 'https://') : '';
+  }
+
   function _listItemHtml(item) {
     if (!item) return '';
-    var cover = item.cover_url
-      ? 'style="background-image:url(\'' + escAttr(item.cover_url) + '\')"'
+    var coverUrl = _httpsCover(item.cover_url);
+    var cover = coverUrl
+      ? 'style="background-image:url(\'' + escAttr(coverUrl) + '\')"'
       : '';
     var emoji = (item.type === 'movie' || item.type === 'series') ? '🎬' : '📕';
     var verdict = item.verdict || 'caution';
     return '<button type="button" class="bmc-list-item verdict-' + escAttr(verdict) + '" onclick="BMC.selectCandidate(\'' + escAttr(item.canonical_id) + '\')">' +
-      '<div class="bmc-list-cover" ' + cover + '>' + (item.cover_url ? '' : emoji) + '</div>' +
+      '<div class="bmc-list-cover" ' + cover + '>' + (coverUrl ? '' : emoji) + '</div>' +
       '<div class="bmc-list-body">' +
       '  <div class="bmc-list-title">' + escHtml(item.title) + '</div>' +
       '  <div class="bmc-list-meta">' + escHtml(item.author_or_director || '') + (item.year ? ' · ' + item.year : '') + ' · ages ' + (item.minimum_age || '?') + '+</div>' +
@@ -431,12 +436,13 @@ var BMC = (function() {
     if (!wrap) return;
     var html = '<h3 style="font-family:var(--font-display);font-weight:800;margin-bottom:12px;color:var(--text-primary);">Which one?</h3>';
     html += candidates.map(function(c) {
-      var cover = c.cover_url
-        ? 'style="background-image:url(\'' + escAttr(c.cover_url) + '\');width:44px;height:60px;background-size:cover;background-position:center;border-radius:6px;flex-shrink:0;"'
+      var coverUrl = _httpsCover(c.cover_url);
+      var cover = coverUrl
+        ? 'style="background-image:url(\'' + escAttr(coverUrl) + '\');width:44px;height:60px;background-size:cover;background-position:center;border-radius:6px;flex-shrink:0;"'
         : 'style="width:44px;height:60px;border-radius:6px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;"';
       var emoji = (c.type === 'movie' || c.type === 'series') ? '🎬' : '📕';
       return '<button type="button" class="bmc-candidate" onclick="BMC.pickCandidate(\'' + escAttr(c.canonical_id) + '\')">' +
-        '<div ' + cover + '>' + (c.cover_url ? '' : emoji) + '</div>' +
+        '<div ' + cover + '>' + (coverUrl ? '' : emoji) + '</div>' +
         '<div style="flex:1;min-width:0;"><div>' + _escHtmlLocal(c.title) + '</div>' +
         '<div class="candidate-meta">' + _escHtmlLocal(c.author_or_director || '') + (c.year ? ' · ' + c.year : '') + '</div></div>' +
       '</button>';
@@ -497,7 +503,8 @@ var BMC = (function() {
     var wrap = document.getElementById('bmc-result');
     if (!wrap) return;
 
-    var coverStyle = e.cover_url ? 'style="background-image:url(\'' + escAttr(e.cover_url) + '\')"' : '';
+    var coverUrl = _httpsCover(e.cover_url);
+    var coverStyle = coverUrl ? 'style="background-image:url(\'' + escAttr(coverUrl) + '\')"' : '';
     var coverEmoji = (e.type === 'movie' || e.type === 'series') ? '🎬' : '📕';
 
     var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
@@ -591,7 +598,7 @@ var BMC = (function() {
 
     var html =
       '<div class="bmc-result-head">' +
-        '<div class="bmc-result-cover" ' + coverStyle + '>' + (e.cover_url ? '' : coverEmoji) + '</div>' +
+        '<div class="bmc-result-cover" ' + coverStyle + '>' + (coverUrl ? '' : coverEmoji) + '</div>' +
         '<div class="bmc-result-meta">' +
           '<h2>' + _escHtmlLocal(e.title) + '</h2>' +
           '<div class="bmc-result-author">' + _escHtmlLocal(e.author_or_director || '') + (e.year ? ' · ' + e.year : '') + '</div>' +

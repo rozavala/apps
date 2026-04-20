@@ -44,6 +44,11 @@ function _rateOk(ip) {
   return true;
 }
 
+function _httpsCover(url) {
+  if (!url) return null;
+  return String(url).replace(/^http:\/\//i, 'https://');
+}
+
 function _canonicalIsbn(isbn) { return 'isbn13:' + String(isbn).replace(/[^0-9Xx]/g, ''); }
 function _canonicalTmdb(id)   { return 'tmdb:' + id; }
 function _canonicalTitle(title, year, author) {
@@ -66,7 +71,7 @@ async function _lookupIsbn(isbn) {
         title: v.title || 'Unknown',
         author_or_director: (v.authors || []).join(', ') || '',
         year: v.publishedDate ? parseInt(String(v.publishedDate).slice(0, 4)) : null,
-        cover_url: (v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null,
+        cover_url: _httpsCover((v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null),
         synopsis: v.description || ''
       }];
     }
@@ -112,7 +117,7 @@ async function _searchBooks(query) {
         title: v.title || 'Unknown',
         author_or_director: (v.authors || []).join(', ') || '',
         year: v.publishedDate ? parseInt(String(v.publishedDate).slice(0, 4)) : null,
-        cover_url: (v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null,
+        cover_url: _httpsCover((v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null),
         synopsis: v.description || ''
       };
     });
@@ -331,7 +336,7 @@ function init(app, dataDir) {
       const evaluation = await _evaluate(metadata);
       // Ensure required fields
       evaluation.canonical_id = canonical_id;
-      evaluation.cover_url = metadata.cover_url || null;
+      evaluation.cover_url = _httpsCover(metadata.cover_url || null);
       evaluation.evaluated_at = now;
       if (typeof evaluation.parent_reviewed !== 'boolean') evaluation.parent_reviewed = false;
       if (!evaluation.type) evaluation.type = metadata.type || 'book';
