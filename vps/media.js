@@ -454,6 +454,28 @@ function init(app, dataDir) {
       cache[id].prompt_version !== PROMPT_VERSION).length;
     res.json({ total: total, stale: stale, prompt_version: PROMPT_VERSION });
   });
+
+  // ── POST /api/media/test-evaluate ──
+  // Hermetic evaluation for regression testing. Bypasses cache entirely.
+  // Shares the same rate limit bucket as /evaluate.
+  app.post('/api/media/test-evaluate', async (req, res) => {
+    const ip = req.ip || 'unknown';
+    if (!_rateOk(ip)) return res.status(429).json({ error: 'Rate limit exceeded' });
+    try {
+      const { metadata } = req.body || {};
+      if (!metadata || !metadata.title) {
+        return res.status(400).json({ error: 'Missing metadata.title' });
+      }
+      const evaluation = await _evaluate(metadata);
+      evaluation.prompt_version = PROMPT_VERSION;
+      evaluation.evaluated_at = Date.now();
+      evaluation._test = true;
+      res.json(evaluation);
+    } catch (err) {
+      console.error('[media/test-evaluate]', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
 }
 
 module.exports = { init };
