@@ -50,6 +50,12 @@ function _httpsCover(url) {
   return String(url).replace(/^http:\/\//i, 'https://');
 }
 
+function _upstreamStatus(errMsg) {
+  // Parses "Gemini 429: ..." or "Grok 503: ..." from _evaluate*() error messages.
+  const m = String(errMsg || '').match(/^(?:Gemini|Grok)\s+(\d+):/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
 function _canonicalIsbn(isbn) { return 'isbn13:' + String(isbn).replace(/[^0-9Xx]/g, ''); }
 function _canonicalTmdb(id)   { return 'tmdb:' + id; }
 function _canonicalTitle(title, year, author) {
@@ -352,6 +358,10 @@ function init(app, dataDir) {
       res.json(evaluation);
     } catch (err) {
       console.error('[media/evaluate]', err.message);
+      const upstream = _upstreamStatus(err.message);
+      if (upstream === 429 || upstream === 503) {
+        return res.status(upstream).json({ error: err.message, upstream: upstream });
+      }
       res.status(500).json({ error: err.message });
     }
   });
@@ -405,6 +415,10 @@ function init(app, dataDir) {
       res.json(fresh);
     } catch (err) {
       console.error('[media/reevaluate]', err.message);
+      const upstream = _upstreamStatus(err.message);
+      if (upstream === 429 || upstream === 503) {
+        return res.status(upstream).json({ error: err.message, upstream: upstream });
+      }
       res.status(500).json({ error: err.message });
     }
   });
@@ -473,6 +487,10 @@ function init(app, dataDir) {
       res.json(evaluation);
     } catch (err) {
       console.error('[media/test-evaluate]', err.message);
+      const upstream = _upstreamStatus(err.message);
+      if (upstream === 429 || upstream === 503) {
+        return res.status(upstream).json({ error: err.message, upstream: upstream });
+      }
       res.status(500).json({ error: err.message });
     }
   });
