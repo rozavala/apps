@@ -63,74 +63,334 @@ function _canonicalTitle(title, year, author) {
   return 'title:' + slug + (year ? '-' + year : '') + (author ? '-' + String(author).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30) : '');
 }
 
-// ── Metadata providers ───────────────────────────────────────────
+// ── ISBN format conversion ───────────────────────────────────────
 
-async function _lookupIsbn(isbn) {
-  const clean = String(isbn).replace(/[^0-9Xx]/g, '');
+function _isbn13to10(isbn13) {
+  const clean = String(isbn13).replace(/[^0-9]/g, '');
+  if (clean.length !== 13 || !clean.startsWith('978')) return null;
+  const core = clean.slice(3, 12);  // 9 digits
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += (i + 1) * parseInt(core[i], 10);
+  const check = sum % 11;
+  return core + (check === 10 ? 'X' : String(check));
+}
+
+function _isbn10to13(isbn10) {
+  const clean = String(isbn10).replace(/[^0-9Xx]/g, '');
+  if (clean.length !== 10) return null;
+  const core = '978' + clean.slice(0, 9);  // 12 digits
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(core[i], 10) * (i % 2 === 0 ? 1 : 3);
+  }
+  const check = (10 - (sum % 10)) % 10;
+  return core + String(check);
+}
+
+// ── AI-fallback metadata lookup ──────────────────────────────────
+// Used when Google Books and OpenLibrary return no results. The AI
+// provider is already available (GEMINI_API_KEY / GROK_API_KEY) and
+// has much better coverage for Chilean, Spanish-language, and other
+// regional titles. Returns null on failure; returns a candidate
+// object marked with source: 'ai_fallback' on success.
+async function _lookupFromAI({ isbn, query }) {
+  const ident = isbn ? ('ISBN ' + isbn) : ('titled "' + query + '"');
+  const prompt =
+    'You are a book metadata lookup service. Identify the book ' + ident + '. ' +
+    'Respond with ONLY a JSON object, no markdown, no preamble:\n' +
+    '{"title": string, "author": string, "year": number or null, ' +
+    '"language": string or null, "synopsis": string (2-3 sentence plot summary), ' +
+    '"confidence": "high" | "medium" | "low" | "none"}.\n' +
+    'Use "none" if you do not recognize the book. Do NOT guess or fabricate. ' +
+    '"high" = you know this specific edition; ' +
+    '"medium" = you know the work but not this exact edition; ' +
+    '"low" = educated guess, may be wrong.';
+
   try {
-    const r = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + clean);
+    if (PROVIDER === 'grok') {
+      if (!GROK_KEY) return null;
+      const r = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROK_KEY },
+        body: JSON.stringify({
+          model: 'grok-4-fast-non-reasoning',
+          temperature: 0.1,
+          response_format: { type: 'json_object' },
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      if (!r.ok) return null;
+      const j = await r.json();
+      const parsed = _extractJson(j.choices[0].message.content);
+      return _aiCandidateFrom(parsed, { isbn, query });
+    }
+    // Gemini path
+    if (!GEMINI_KEY) return null;
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY;
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
+      })
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const text = j.candidates && j.candidates[0] && j.candidates[0].content &&
+                 j.candidates[0].content.parts && j.candidates[0].content.parts[0] &&
+                 j.candidates[0].content.parts[0].text;
+    if (!text) return null;
+    const parsed = _extractJson(text);
+    return _aiCandidateFrom(parsed, { isbn, query });
+  } catch (e) {
+    console.warn('[media] AI lookup failed:', e.message);
+    return null;
+  }
+}
+
+function _aiCandidateFrom(parsed, { isbn, query }) {
+  if (!parsed || !parsed.title || parsed.confidence === 'none') return null;
+  const clean = isbn ? String(isbn).replace(/[^0-9Xx]/g, '') : null;
+  return {
+    canonical_id: clean
+      ? _canonicalIsbn(clean)
+      : _canonicalTitle(parsed.title, parsed.year, parsed.author),
+    type: 'book',
+    title: parsed.title,
+    author_or_director: parsed.author || '',
+    year: parsed.year || null,
+    cover_url: null,
+    synopsis: parsed.synopsis || '',
+    source: 'ai_fallback',
+    ai_confidence: parsed.confidence || 'low'
+  };
+}
+
+// ── Individual provider helpers (used by _lookupIsbn) ────────────
+
+async function _googleBooksByIsbn(isbn) {
+  try {
+    const r = await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:' + isbn);
     const j = await r.json();
     if (j.items && j.items[0]) {
       const v = j.items[0].volumeInfo;
-      return [{
-        canonical_id: _canonicalIsbn(clean),
-        type: 'book',
-        title: v.title || 'Unknown',
-        author_or_director: (v.authors || []).join(', ') || '',
-        year: v.publishedDate ? parseInt(String(v.publishedDate).slice(0, 4)) : null,
-        cover_url: _httpsCover((v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null),
-        synopsis: v.description || ''
-      }];
+      if (v && v.title) {
+        return {
+          canonical_id: _canonicalIsbn(isbn),
+          type: 'book',
+          title: v.title,
+          author_or_director: (v.authors || []).join(', ') || '',
+          year: v.publishedDate ? parseInt(String(v.publishedDate).slice(0, 4)) : null,
+          cover_url: _httpsCover((v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null),
+          synopsis: v.description || '',
+          source: 'google_books'
+        };
+      }
     }
   } catch (e) { /* fall through */ }
-  // OpenLibrary fallback
-  try {
-    const r = await fetch('https://openlibrary.org/isbn/' + clean + '.json');
-    if (r.ok) {
-      const j = await r.json();
-      let authors = '';
-      if (j.authors && j.authors[0]) {
-        try {
-          const ar = await fetch('https://openlibrary.org' + j.authors[0].key + '.json');
-          const aj = await ar.json();
-          authors = aj.name || '';
-        } catch (e) {}
-      }
-      return [{
-        canonical_id: _canonicalIsbn(clean),
-        type: 'book',
-        title: j.title || 'Unknown',
-        author_or_director: authors,
-        year: j.publish_date ? parseInt(String(j.publish_date).slice(-4)) : null,
-        cover_url: j.covers && j.covers[0] ? 'https://covers.openlibrary.org/b/id/' + j.covers[0] + '-M.jpg' : null,
-        synopsis: ''
-      }];
-    }
-  } catch (e) {}
-  return [];
+  return null;
 }
 
-async function _searchBooks(query) {
+async function _googleBooksPlainQuery(isbn) {
   try {
-    const r = await fetch('https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=3');
+    const r = await fetch('https://www.googleapis.com/books/v1/volumes?q=' + isbn);
+    const j = await r.json();
+    const items = j.items || [];
+    for (const it of items) {
+      const v = it.volumeInfo || {};
+      const ids = v.industryIdentifiers || [];
+      // Only accept items whose registered ISBNs actually include our target —
+      // the plain-text query otherwise returns loosely-related books.
+      const match = ids.some(x => String(x.identifier).replace(/[^0-9Xx]/g, '') === isbn);
+      if (match && v.title) {
+        return {
+          canonical_id: _canonicalIsbn(isbn),
+          type: 'book',
+          title: v.title,
+          author_or_director: (v.authors || []).join(', ') || '',
+          year: v.publishedDate ? parseInt(String(v.publishedDate).slice(0, 4)) : null,
+          cover_url: _httpsCover((v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null),
+          synopsis: v.description || '',
+          source: 'google_books'
+        };
+      }
+    }
+  } catch (e) { /* fall through */ }
+  return null;
+}
+
+async function _openLibraryByIsbn(isbn) {
+  try {
+    const r = await fetch('https://openlibrary.org/isbn/' + isbn + '.json');
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j.title) return null;
+    let authors = '';
+    if (j.authors && j.authors[0]) {
+      try {
+        const ar = await fetch('https://openlibrary.org' + j.authors[0].key + '.json');
+        const aj = await ar.json();
+        authors = aj.name || '';
+      } catch (e) {}
+    }
+    return {
+      canonical_id: _canonicalIsbn(isbn),
+      type: 'book',
+      title: j.title,
+      author_or_director: authors,
+      year: j.publish_date ? parseInt(String(j.publish_date).slice(-4)) : null,
+      cover_url: j.covers && j.covers[0] ? 'https://covers.openlibrary.org/b/id/' + j.covers[0] + '-M.jpg' : null,
+      synopsis: '',
+      source: 'openlibrary'
+    };
+  } catch (e) { /* fall through */ }
+  return null;
+}
+
+async function _openLibrarySearchByIsbn(isbn) {
+  try {
+    const r = await fetch('https://openlibrary.org/search.json?isbn=' + isbn);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const doc = j.docs && j.docs[0];
+    if (!doc || !doc.title) return null;
+    return {
+      canonical_id: _canonicalIsbn(isbn),
+      type: 'book',
+      title: doc.title,
+      author_or_director: (doc.author_name || []).join(', ') || '',
+      year: doc.first_publish_year || null,
+      cover_url: doc.cover_i ? 'https://covers.openlibrary.org/b/id/' + doc.cover_i + '-M.jpg' : null,
+      synopsis: '',
+      source: 'openlibrary'
+    };
+  } catch (e) { /* fall through */ }
+  return null;
+}
+
+// ── Individual provider helpers (used by _searchBooks) ───────────
+
+function _looksSpanish(query) {
+  return /[áéíóúñ¿¡]/i.test(query) ||
+         /\b(el|la|los|las|un|una|de|del|y|en|con|por|para)\b/i.test(query);
+}
+
+async function _googleBooksSearch(query, langRestrict) {
+  try {
+    let url = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=3';
+    if (langRestrict) url += '&langRestrict=' + langRestrict;
+    const r = await fetch(url);
     const j = await r.json();
     return (j.items || []).map(it => {
       const v = it.volumeInfo || {};
       const ids = (v.industryIdentifiers || []);
       const isbn13 = (ids.find(x => x.type === 'ISBN_13') || {}).identifier;
       return {
-        canonical_id: isbn13 ? _canonicalIsbn(isbn13) : _canonicalTitle(v.title, v.publishedDate && v.publishedDate.slice(0, 4), (v.authors || [])[0]),
+        canonical_id: isbn13
+          ? _canonicalIsbn(isbn13)
+          : _canonicalTitle(v.title, v.publishedDate && v.publishedDate.slice(0, 4), (v.authors || [])[0]),
         type: 'book',
         title: v.title || 'Unknown',
         author_or_director: (v.authors || []).join(', ') || '',
         year: v.publishedDate ? parseInt(String(v.publishedDate).slice(0, 4)) : null,
         cover_url: _httpsCover((v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null),
-        synopsis: v.description || ''
+        synopsis: v.description || '',
+        source: 'google_books'
+      };
+    }).filter(c => c.title && c.title !== 'Unknown');
+  } catch (e) {
+    return [];
+  }
+}
+
+async function _openLibrarySearch(query) {
+  try {
+    const r = await fetch('https://openlibrary.org/search.json?q=' + encodeURIComponent(query) + '&limit=3');
+    if (!r.ok) return [];
+    const j = await r.json();
+    return (j.docs || []).filter(d => d.title).map(d => {
+      const isbn13 = (d.isbn || []).find(i => String(i).replace(/[^0-9Xx]/g, '').length === 13);
+      const isbn = isbn13 || (d.isbn && d.isbn[0]);
+      return {
+        canonical_id: isbn
+          ? _canonicalIsbn(isbn)
+          : _canonicalTitle(d.title, d.first_publish_year, (d.author_name || [])[0]),
+        type: 'book',
+        title: d.title,
+        author_or_director: (d.author_name || []).join(', ') || '',
+        year: d.first_publish_year || null,
+        cover_url: d.cover_i ? 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-M.jpg' : null,
+        synopsis: '',
+        source: 'openlibrary'
       };
     });
   } catch (e) {
     return [];
   }
+}
+
+// ── Metadata providers ───────────────────────────────────────────
+
+async function _lookupIsbn(isbn) {
+  const clean = String(isbn).replace(/[^0-9Xx]/g, '');
+  const isbn13 = clean.length === 13 ? clean : _isbn10to13(clean);
+  const isbn10 = clean.length === 10 ? clean : _isbn13to10(clean);
+  const variants = [clean, isbn13, isbn10]
+    .filter(Boolean)
+    .filter((v, i, arr) => arr.indexOf(v) === i);
+
+  // 1. Google Books with isbn: qualifier (best signal when it hits)
+  for (const v of variants) {
+    const cand = await _googleBooksByIsbn(v);
+    if (cand) return [cand];
+  }
+  // 2. Google Books with plain numeric query (catches editions the qualifier misses)
+  for (const v of variants) {
+    const cand = await _googleBooksPlainQuery(v);
+    if (cand) return [cand];
+  }
+  // 3. OpenLibrary /isbn/<X>.json (existing endpoint, narrow)
+  for (const v of variants) {
+    const cand = await _openLibraryByIsbn(v);
+    if (cand) return [cand];
+  }
+  // 4. OpenLibrary /search.json?isbn=<X> (broader coverage)
+  for (const v of variants) {
+    const cand = await _openLibrarySearchByIsbn(v);
+    if (cand) return [cand];
+  }
+  // 5. AI fallback — knows Chilean, Spanish-language, and regional titles
+  //    that the public book databases don't index.
+  const aiCand = await _lookupFromAI({ isbn: clean });
+  if (aiCand) return [aiCand];
+
+  return [];
+}
+
+async function _searchBooks(query) {
+  // Pass 1: Google Books, no language restriction
+  let results = await _googleBooksSearch(query, null);
+
+  // Pass 2: if empty and the query looks Spanish, retry with langRestrict=es.
+  // Google Books' default ranking often buries Spanish-language titles behind
+  // unrelated English books when the title is short or common.
+  if (!results.length && _looksSpanish(query)) {
+    results = await _googleBooksSearch(query, 'es');
+  }
+
+  // Pass 3: OpenLibrary search as a secondary source.
+  if (!results.length) {
+    results = await _openLibrarySearch(query);
+  }
+
+  // Pass 4: AI fallback — e.g. "Papelucho" with no ISBN.
+  if (!results.length) {
+    const aiCand = await _lookupFromAI({ query });
+    if (aiCand) results = [aiCand];
+  }
+
+  return results.slice(0, 3);
 }
 
 async function _searchMovies(query) {
