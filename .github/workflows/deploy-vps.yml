@@ -18,5 +18,5 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
             cd /opt/zavala-sync && git pull
-            cd vps && npm install --production
+            cd vps && npm install --omit=dev
             sudo systemctl restart zavala-sync.service
