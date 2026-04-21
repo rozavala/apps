@@ -444,7 +444,11 @@ var BMC = (function() {
     })
       .then(function(res) {
         if (!res.candidates || !res.candidates.length) {
-          _setStatus('Could not find that ISBN.', 'error');
+          _setStatus(
+            'Couldn\'t find that ISBN. Try searching by title, ' +
+            'or tap "Photo of cover" to identify the book from its cover.',
+            'error'
+          );
           return;
         }
         _requestEvaluation(res.candidates[0]);
