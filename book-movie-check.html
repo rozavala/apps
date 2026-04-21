@@ -76,7 +76,7 @@
         <h2>📚 Family library</h2>
         <p>Every book and movie we've looked up together.</p>
         <div id="bmc-parent-bar" style="margin-top:12px;">
-          <button class="bmc-btn bmc-btn-secondary" id="bmc-parent-unlock"
+          <button class="bmc-btn bmc-btn-secondary bmc-parent-unlock-btn" id="bmc-parent-unlock"
                   onclick="BMC.unlockParent()">
             🔒 Parents
           </button>
@@ -91,6 +91,9 @@
           <div style="display:flex; flex-wrap:wrap; gap:8px;">
             <button class="bmc-btn bmc-btn-secondary" onclick="BMC.reviewWithNewCriteria()">
               🔄 Re-review with new criteria (<span id="bmc-stale-count">?</span>)
+            </button>
+            <button class="bmc-btn bmc-btn-secondary" onclick="BMC.rereviewFamilyLibrary()">
+              🔄 Re-review ENTIRE library
             </button>
             <button class="bmc-btn bmc-btn-secondary" onclick="BMC.clearMySearches()">
               🧹 Clear my recent checks
@@ -121,6 +124,27 @@
       <div class="bmc-section-header">
         <h2>📖 My shelf</h2>
         <p>What you've read, watched, or want to.</p>
+        <div id="bmc-shelf-parent-bar" style="margin-top:12px;">
+          <button class="bmc-btn bmc-btn-secondary bmc-parent-unlock-btn"
+                  onclick="BMC.unlockParent()">
+            🔒 Parents
+          </button>
+        </div>
+        <div id="bmc-shelf-parent-tools" style="display:none; margin-top:12px;
+             padding:14px; background:var(--bg-card);
+             border:1.5px solid var(--border-subtle); border-radius:12px;">
+          <h4 style="font-size:0.75rem; letter-spacing:0.6px; text-transform:uppercase;
+                     color:var(--text-muted); font-weight:800; margin-bottom:10px;">
+            Parent tools
+          </h4>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="bmc-btn bmc-btn-secondary" onclick="BMC.rereviewMyShelf()">
+              🔄 Re-review my shelf
+            </button>
+          </div>
+          <div id="bmc-shelf-reeval-status" style="margin-top:10px; font-size:0.85rem;
+               color:var(--text-muted);"></div>
+        </div>
       </div>
       <div id="bmc-history-list" class="bmc-list">
         <!-- Populated by JS -->

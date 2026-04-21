@@ -423,6 +423,46 @@ function init(app, dataDir) {
     }
   });
 
+  // ── POST /api/media/reevaluate-batch ── (re-eval a specific list of ids)
+  app.post('/api/media/reevaluate-batch', (req, res) => {
+    const { ids } = req.body || {};
+    if (!Array.isArray(ids) || !ids.length) {
+      return res.status(400).json({ error: 'Missing ids array' });
+    }
+    const cache = _loadCache();
+    const valid = ids.filter(id => cache[id]);
+    res.json({ started: true, count: valid.length, skipped: ids.length - valid.length });
+    // Fire-and-forget; process serially with delay to respect rate limit
+    (async () => {
+      for (const id of valid) {
+        try {
+          const entry = cache[id];
+          const metadata = {
+            title: entry.title,
+            author_or_director: entry.author_or_director,
+            year: entry.year,
+            type: entry.type,
+            synopsis: entry.summary || ''
+          };
+          const fresh = await _evaluate(metadata);
+          fresh.canonical_id = id;
+          fresh.cover_url = entry.cover_url;
+          fresh.evaluated_at = Date.now();
+          fresh.prompt_version = PROMPT_VERSION;
+          fresh.parent_reviewed = entry.parent_reviewed || false;
+          const current = _loadCache();
+          current[id] = fresh;
+          _saveCache(current);
+          console.log('[media/reevaluate-batch] Updated ' + entry.title);
+          await new Promise(r => setTimeout(r, 1500));
+        } catch (err) {
+          console.warn('[media/reevaluate-batch] Failed ' + id + ':', err.message);
+        }
+      }
+      console.log('[media/reevaluate-batch] Done ' + valid.length);
+    })();
+  });
+
   // ── POST /api/media/reevaluate-stale ── (walks cache, re-evals stale entries)
   app.post('/api/media/reevaluate-stale', async (req, res) => {
     const cache = _loadCache();

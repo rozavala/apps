@@ -135,6 +135,7 @@ var BMC = (function() {
     } else if (name === 'history') {
       document.getElementById('screen-history').classList.add('active');
       _renderHistory();
+      _refreshStaleCount();
       _activateTabButtons('.bmc-tab-btn[onclick*="history"]');
     } else if (name === 'result') {
       document.getElementById('screen-result').classList.add('active');
@@ -721,6 +722,11 @@ var BMC = (function() {
         : ''
       ) +
 
+      (isParent
+        ? '<div class="bmc-action-row"><button class="bmc-btn bmc-btn-ghost" onclick="BMC.rereviewCurrent()">🔄 Re-review this ' + ((e.type === 'movie' || e.type === 'series') ? 'title' : 'book') + '</button></div>'
+        : ''
+      ) +
+
       unlockStrip +
       confBanner;
 
@@ -785,23 +791,103 @@ var BMC = (function() {
 
   // ── Re-review / stale-count (parent tools) ─────────────────────
   function _refreshStaleCount() {
-    var tools = document.getElementById('bmc-parent-tools');
+    var libTools = document.getElementById('bmc-parent-tools');
+    var shelfTools = document.getElementById('bmc-shelf-parent-tools');
     var countEl = document.getElementById('bmc-stale-count');
-    var unlockBtn = document.getElementById('bmc-parent-unlock');
-    if (!tools) return;
-    if (!_parentMode) {
-      tools.style.display = 'none';
-      if (unlockBtn) unlockBtn.textContent = '🔒 Parents';
-      return;
-    }
-    tools.style.display = 'block';
-    if (unlockBtn) unlockBtn.textContent = '🔓 Parent mode on';
+    var unlockBtns = document.querySelectorAll('.bmc-parent-unlock-btn');
+    var display = _parentMode ? 'block' : 'none';
+    if (libTools) libTools.style.display = display;
+    if (shelfTools) shelfTools.style.display = display;
+    unlockBtns.forEach(function(b) {
+      b.textContent = _parentMode ? '🔓 Parent mode on' : '🔒 Parents';
+    });
+    if (!_parentMode) return;
     _fetchJson(VPS + '/api/media/stale-count')
       .then(function(r) {
         if (countEl) countEl.textContent = r.stale + ' of ' + r.total;
       })
       .catch(function() {
         if (countEl) countEl.textContent = '?';
+      });
+  }
+
+  // Re-review the book currently on the result screen (parent only)
+  function rereviewCurrent() {
+    if (!_currentResult) return;
+    if (!_requestParentMode()) return;
+    var id = _currentResult.canonical_id;
+    var title = _currentResult.title;
+    if (!confirm('Re-evaluate "' + title + '" from scratch? This takes a few seconds.')) return;
+    _setStatus('Re-evaluating "' + title + '"…', 'working');
+    _fetchJson(VPS + '/api/media/reevaluate/' + encodeURIComponent(id), { method: 'POST' })
+      .then(function(fresh) {
+        _familyLibrary[id] = fresh;
+        _setStatus('');
+        showResult(fresh);
+      })
+      .catch(function(err) {
+        console.warn('[BMC] Re-review failed:', err);
+        _setStatus('Re-review failed: ' + (err && err.message ? err.message : 'unknown'), 'error');
+      });
+  }
+
+  // Re-review every title on this child's shelf + wishlist + recent checks
+  function rereviewMyShelf() {
+    if (!_requestParentMode()) return;
+    var statusEl = document.getElementById('bmc-shelf-reeval-status');
+    var data = loadData();
+    var ids = {};
+    (data.consumed || []).forEach(function(c) { ids[c.canonical_id] = true; });
+    (data.wishlist || []).forEach(function(id) { ids[id] = true; });
+    Object.keys(data.lookups || {}).forEach(function(id) { ids[id] = true; });
+    var idList = Object.keys(ids).filter(function(id) { return _familyLibrary[id]; });
+    if (!idList.length) {
+      if (statusEl) statusEl.textContent = 'Nothing on this shelf to re-review.';
+      return;
+    }
+    if (!confirm('Re-review all ' + idList.length + ' titles on this child\'s shelf? This can take several minutes.')) return;
+    if (statusEl) statusEl.textContent = 'Starting…';
+    _fetchJson(VPS + '/api/media/reevaluate-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: idList })
+    })
+      .then(function(r) {
+        if (statusEl) {
+          statusEl.textContent = 'Re-reviewing ' + r.count + ' titles in the background. '
+            + 'Refresh in a few minutes.';
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
+      });
+  }
+
+  // Re-review every title in the family library, not just stale ones
+  function rereviewFamilyLibrary() {
+    if (!_requestParentMode()) return;
+    var statusEl = document.getElementById('bmc-reeval-status');
+    var idList = Object.keys(_familyLibrary);
+    if (!idList.length) {
+      if (statusEl) statusEl.textContent = 'Family library is empty.';
+      return;
+    }
+    if (!confirm('Re-review ALL ' + idList.length + ' titles in the family library? '
+                 + 'This can take a long time and uses API quota.')) return;
+    if (statusEl) statusEl.textContent = 'Starting…';
+    _fetchJson(VPS + '/api/media/reevaluate-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: idList })
+    })
+      .then(function(r) {
+        if (statusEl) {
+          statusEl.textContent = 'Re-reviewing ' + r.count + ' titles in the background. '
+            + 'Refresh in a few minutes.';
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
       });
   }
 
@@ -904,6 +990,9 @@ var BMC = (function() {
     addToWishlist: addToWishlist,
     unlockParent: unlockParent,
     reviewWithNewCriteria: reviewWithNewCriteria,
+    rereviewCurrent: rereviewCurrent,
+    rereviewMyShelf: rereviewMyShelf,
+    rereviewFamilyLibrary: rereviewFamilyLibrary,
     clearMySearches: clearMySearches,
     resetFamilyLibrary: resetFamilyLibrary
   };
