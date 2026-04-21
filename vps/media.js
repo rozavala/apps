@@ -360,11 +360,23 @@ async function _lookupIsbn(isbn) {
     const cand = await _openLibrarySearchByIsbn(v);
     if (cand) return [cand];
   }
-  // 5. AI fallback — knows Chilean, Spanish-language, and regional titles
-  //    that the public book databases don't index.
-  const aiCand = await _lookupFromAI({ isbn: clean });
-  if (aiCand) return [aiCand];
-
+  // No AI fallback for ISBN lookup.
+  //
+  // LLMs do not have a reliable ISBN→book index and will confidently
+  // pattern-match ISBN prefixes to famous titles. Example: ISBN
+  // 9789563495799 (Papelucho by Marcela Paz) was mis-identified as
+  // "El Principito" with high confidence because the model saw the
+  // Chilean ISBN prefix and guessed the most-famous Spanish-language
+  // children's book.
+  //
+  // In a kids' content safety app this is unsafe: the downstream
+  // evaluation would be run against the wrong book. When all public
+  // databases miss, we return no candidates and let the client
+  // suggest title search / cover photo / manual add instead.
+  //
+  // AI fallback is retained in _searchBooks (title queries) because
+  // there the user's input is semantically meaningful and a wrong
+  // result is visible to them.
   return [];
 }
 
