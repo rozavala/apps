@@ -251,14 +251,32 @@ var BMC = (function() {
       ? 'style="background-image:url(\'' + escAttr(coverUrl) + '\')"'
       : '';
     var emoji = (item.type === 'movie' || item.type === 'series') ? '🎬' : '📕';
-    var verdict = item.verdict || 'caution';
-    return '<button type="button" class="bmc-list-item verdict-' + escAttr(verdict) + '" onclick="BMC.selectCandidate(\'' + escAttr(item.canonical_id) + '\')">' +
+    var displayVerdict = item.verdict || 'caution';
+    var label = _verdictLabel(displayVerdict);
+
+    // If this is a grown-up book (age-gated, no values issues), show as such
+    // to kids — library lists should match the result-screen banner.
+    if (!_parentMode) {
+      var f = item.content_flags || {};
+      var valuesFlags = ['lgbtq_content', 'crt_ideology', 'anti_religious', 'occult_aspirational'];
+      var hasMod = valuesFlags.some(function(k) { return f[k] === 'moderate' || f[k] === 'significant'; });
+      var hasMRSig = f.moral_relativism === 'significant';
+      var hasDASig = f.disrespect_authority === 'significant';
+      var isGrownUp = !hasMod && !hasMRSig && !hasDASig &&
+                       item.minimum_age && item.minimum_age >= 13;
+      if (isGrownUp) {
+        displayVerdict = 'caution';  // reuse amber styling
+        label = '🧓 Grown-up';
+      }
+    }
+
+    return '<button type="button" class="bmc-list-item verdict-' + escAttr(displayVerdict) + '" onclick="BMC.selectCandidate(\'' + escAttr(item.canonical_id) + '\')">' +
       '<div class="bmc-list-cover" ' + cover + '>' + (coverUrl ? '' : emoji) + '</div>' +
       '<div class="bmc-list-body">' +
       '  <div class="bmc-list-title">' + escHtml(item.title) + '</div>' +
       '  <div class="bmc-list-meta">' + escHtml(item.author_or_director || '') + (item.year ? ' · ' + item.year : '') + ' · ages ' + (item.minimum_age || '?') + '+</div>' +
       '</div>' +
-      '<div class="bmc-list-verdict verdict-' + escAttr(verdict) + '">' + _verdictLabel(verdict) + '</div>' +
+      '<div class="bmc-list-verdict verdict-' + escAttr(displayVerdict) + '">' + label + '</div>' +
     '</button>';
   }
 
@@ -571,8 +589,13 @@ var BMC = (function() {
       ? 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
       : (e.verdict_reasoning || '');
 
-    // Maturity gate vs. values rejection — soften messaging for pure adult content
-    if (isBlocked && !isParent) {
+    // Grown-up banner vs. values-rejection banner
+    // Fires for ANY verdict when the book is age-gated (min_age >= 13)
+    // with no family-values issues. This correctly handles:
+    //  - not_recommended for sexual_content alone (mature literary novel)
+    //  - caution for violence-significant alone (Crime and Punishment)
+    //  - approved with high min_age (Brothers Karamazov)
+    if (!isParent) {
       var f = e.content_flags || {};
       var valuesFlags = ['lgbtq_content', 'crt_ideology', 'anti_religious', 'occult_aspirational'];
       var hasSignificantValues = valuesFlags.some(function(k) {
@@ -582,19 +605,19 @@ var BMC = (function() {
         return f[k] === 'moderate';
       });
       var hasSignificantRelativism = f.moral_relativism === 'significant';
-      var isPureMaturityGate =
-        !hasSignificantValues &&
-        !hasModerateValues &&
-        !hasSignificantRelativism &&
-        e.minimum_age && e.minimum_age >= 13;
-      if (isPureMaturityGate) {
+      var hasSignificantDisrespect = f.disrespect_authority === 'significant';
+      var hasValuesIssue = hasSignificantValues || hasModerateValues ||
+                           hasSignificantRelativism || hasSignificantDisrespect;
+      var isGrownUpGate = !hasValuesIssue &&
+                           e.minimum_age && e.minimum_age >= 13;
+      if (isGrownUpGate) {
         verdictEmoji = '🧓';
         verdictTitle = 'Grown-up book';
         verdictMessage = 'This one is a grown-up book. Ask Mom or Dad if it is right for you yet.';
       }
     }
 
-    var bannerVerdictClass = (isBlocked && !isParent && verdictTitle === 'Grown-up book')
+    var bannerVerdictClass = (!isParent && verdictTitle === 'Grown-up book')
       ? 'verdict-caution'  // reuse the amber caution styling for maturity
       : e.verdict;
 
