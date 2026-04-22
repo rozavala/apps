@@ -100,6 +100,54 @@ Para la mejor experiencia en dispositivos móviles:
    - **iOS (Safari):** Toca el ícono de compartir (Share) y elige "Agregar a inicio" (Add to Home Screen).
    - **Android (Chrome):** Toca el menú de tres puntos y elige "Agregar a la pantalla principal" (Add to Home Screen).
 
+### Opción 3: Ejecutar el Servidor VPS (Run the Sync / Media Server)
+
+The static apps work standalone, but **Book & Movie Check** and cross-device sync require the small Express server in `vps/`. It handles:
+- CloudSync (per-kid app data + family profiles)
+- Book & Movie Check (title lookup, AI evaluation, trailer fetch)
+
+**1. Install deps**
+
+```bash
+cd vps
+npm install
+```
+
+**2. Create `vps/.env`**
+
+`vps/.env` is loaded automatically at startup (via `dotenv`) and is git-ignored. Copy the template below into `vps/.env` and fill in whichever keys you need:
+
+```bash
+# Which AI provider evaluates books/movies for family-values fit.
+# Either "gemini" (default, free tier works) or "grok" (paid).
+AI_PROVIDER=gemini
+
+# Required when AI_PROVIDER=gemini
+# Get one at https://aistudio.google.com/ → "Get API key"
+GEMINI_API_KEY=
+
+# Required when AI_PROVIDER=grok
+# Get one at https://console.x.ai/ → API Keys
+GROK_API_KEY=
+
+# Required for movie search + trailer embeds in Book & Movie Check.
+# Without it, movie lookups silently return no results.
+# Get one at https://www.themoviedb.org/ → Settings → API → request a
+# developer key (free, instant approval). Copy the "API Key (v3 auth)"
+# string — NOT the read-access token.
+TMDB_API_KEY=
+```
+
+**Minimum to run Book & Movie Check end-to-end:** `GEMINI_API_KEY` (for evaluations) + `TMDB_API_KEY` (for movie search and trailers). Books work without TMDB; movies don't.
+
+**3. Start the server**
+
+```bash
+npm start            # listens on :3333
+```
+
+The client talks to it via the `VPS` constant at the top of `js/book-movie-check.js` and `js/sync.js`. Swap that to `http://localhost:3333` (or your own tunnel/domain) to point the static apps at a non-default backend.
+
 ## 📂 Estructura del Proyecto (Project Structure)
 
 - `index.html`: The main app hub and profile selector.

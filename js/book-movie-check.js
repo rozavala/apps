@@ -18,6 +18,7 @@ var BMC = (function() {
   var _scanActive = false;
   var _scanStream = null;
   var _parentMode = false;  // session-only, resets on page reload
+  var _libraryTypeFilter = 'all';  // 'all' | 'book' | 'movie'
 
   // Environment detection for iPad-in-WKWebView-wrapper cases
   var _cameraAvailable = null;  // null = unknown; true/false after probe
@@ -50,6 +51,7 @@ var BMC = (function() {
     if (_requestParentMode()) {
       if (_currentResult) showResult(_currentResult);
       _refreshStaleCount();
+      _rerenderActiveScreen();
     }
   }
 
@@ -61,9 +63,10 @@ var BMC = (function() {
   function _defaultData() {
     return {
       totalStars: 0,
-      lookups: {},     // canonical_id -> { ts, query, verdict }
-      consumed: [],    // [{ canonical_id, ts, rating }]
-      wishlist: []     // [canonical_id]
+      lookups: {},           // canonical_id -> { ts, query, verdict }
+      consumed: [],          // [{ canonical_id, ts, rating }]
+      wishlist: [],          // [canonical_id]
+      hiddenSuggestions: {}  // canonical_id -> true (suppressed by parent)
     };
   }
 
@@ -78,6 +81,7 @@ var BMC = (function() {
       if (!d.lookups) d.lookups = {};
       if (!d.consumed) d.consumed = [];
       if (!d.wishlist) d.wishlist = [];
+      if (!d.hiddenSuggestions) d.hiddenSuggestions = {};
       if (typeof d.totalStars !== 'number') d.totalStars = 0;
       return d;
     } catch (e) { return _defaultData(); }
@@ -161,7 +165,7 @@ var BMC = (function() {
       html += recentIds.map(function(id) {
         var lib = _familyLibrary[id];
         if (!lib) return '';
-        return _listItemHtml(lib);
+        return _listItemHtml(lib, 'recent');
       }).join('');
       recentEl.innerHTML = html;
     } else if (recentEl) {
@@ -171,11 +175,13 @@ var BMC = (function() {
     // Suggested: approved items from the family library this kid hasn't looked up yet
     var kidLookupIds = {};
     Object.keys(data.lookups || {}).forEach(function(id) { kidLookupIds[id] = true; });
+    var hidden = data.hiddenSuggestions || {};
     var suggested = Object.keys(_familyLibrary)
       .map(function(id) { return _familyLibrary[id]; })
       .filter(function(item) {
         if (!item) return false;
         if (kidLookupIds[item.canonical_id]) return false;
+        if (hidden[item.canonical_id]) return false;
         if (item.verdict === 'not_recommended') return false;
         return true;
       })
@@ -183,7 +189,7 @@ var BMC = (function() {
 
     if (suggested.length && suggestedEl) {
       var html2 = '<div class="bmc-list-group-title">Suggested for you</div>';
-      html2 += suggested.map(_listItemHtml).join('');
+      html2 += suggested.map(function(it) { return _listItemHtml(it, 'suggested'); }).join('');
       suggestedEl.innerHTML = html2;
     } else if (suggestedEl) {
       suggestedEl.innerHTML = '';
@@ -191,7 +197,36 @@ var BMC = (function() {
   }
 
   // ── Library screen (family-wide) ───────────────────────────────
+  function _renderLibraryFilter() {
+    var filterEl = document.getElementById('bmc-library-filter');
+    if (!filterEl) return;
+    var opts = [
+      { key: 'all', label: 'All' },
+      { key: 'book', label: '📕 Books' },
+      { key: 'movie', label: '🎬 Movies' }
+    ];
+    filterEl.innerHTML = opts.map(function(o) {
+      var active = _libraryTypeFilter === o.key ? ' active' : '';
+      return '<button type="button" class="bmc-filter-chip' + active +
+             '" onclick="BMC.setLibraryFilter(\'' + o.key + '\')">' + o.label + '</button>';
+    }).join('');
+  }
+
+  function setLibraryFilter(kind) {
+    _libraryTypeFilter = kind;
+    _renderLibraryFilter();
+    _renderLibrary();
+  }
+
+  function _matchesTypeFilter(item) {
+    if (_libraryTypeFilter === 'all') return true;
+    var t = item.type || 'book';
+    if (_libraryTypeFilter === 'movie') return t === 'movie' || t === 'series';
+    return t === 'book';
+  }
+
   function _renderLibrary() {
+    _renderLibraryFilter();
     var container = document.getElementById('bmc-library-list');
     if (!container) return;
     var items = Object.keys(_familyLibrary)
@@ -199,6 +234,7 @@ var BMC = (function() {
       .filter(function(item) {
         if (!item) return false;
         if (!_parentMode && item.verdict === 'not_recommended') return false;
+        if (!_matchesTypeFilter(item)) return false;
         return true;
       })
       .sort(function(a, b) { return (b.evaluated_at || 0) - (a.evaluated_at || 0); });
@@ -206,7 +242,7 @@ var BMC = (function() {
       container.innerHTML = '<div class="bmc-empty">No titles checked yet. Search for a book or movie to get started!</div>';
       return;
     }
-    container.innerHTML = items.map(_listItemHtml).join('');
+    container.innerHTML = items.map(function(it) { return _listItemHtml(it, 'library'); }).join('');
   }
 
   // ── History screen (per kid) ───────────────────────────────────
@@ -221,7 +257,7 @@ var BMC = (function() {
       html += '<div class="bmc-list-group-title">Reading / watched</div>';
       html += consumed.map(function(c) {
         var lib = _familyLibrary[c.canonical_id];
-        return lib ? _listItemHtml(lib) : '';
+        return lib ? _listItemHtml(lib, 'consumed') : '';
       }).join('');
     }
     if ((data.wishlist || []).length) {
@@ -230,7 +266,7 @@ var BMC = (function() {
         var lib = _familyLibrary[id];
         if (!lib) return '';
         if (!_parentMode && lib.verdict === 'not_recommended') return '';
-        return _listItemHtml(lib);
+        return _listItemHtml(lib, 'wishlist');
       }).join('');
     }
     if (!html) {
@@ -244,7 +280,7 @@ var BMC = (function() {
     return url ? String(url).replace(/^http:\/\//i, 'https://') : '';
   }
 
-  function _listItemHtml(item) {
+  function _listItemHtml(item, context) {
     if (!item) return '';
     var coverUrl = _httpsCover(item.cover_url);
     var cover = coverUrl
@@ -277,14 +313,28 @@ var BMC = (function() {
       label = '🤔 Not sure';
     }
 
-    return '<button type="button" class="bmc-list-item verdict-' + escAttr(displayVerdict) + '" onclick="BMC.selectCandidate(\'' + escAttr(item.canonical_id) + '\')">' +
-      '<div class="bmc-list-cover" ' + cover + '>' + (coverUrl ? '' : emoji) + '</div>' +
-      '<div class="bmc-list-body">' +
-      '  <div class="bmc-list-title">' + escHtml(item.title) + '</div>' +
-      '  <div class="bmc-list-meta">' + escHtml(item.author_or_director || '') + (item.year ? ' · ' + item.year : '') + ' · ages ' + (item.minimum_age || '?') + '+</div>' +
-      '</div>' +
-      '<div class="bmc-list-verdict verdict-' + escAttr(displayVerdict) + '">' + label + '</div>' +
-    '</button>';
+    // Parent-only per-item remove. Rendered outside the clickable card
+    // (wrapped in .bmc-list-row) so the outer element stays a real <button>.
+    var removeBtn = '';
+    if (_parentMode && context) {
+      removeBtn = '<button type="button" class="bmc-list-remove" ' +
+        'aria-label="Remove" title="Remove" ' +
+        'onclick="BMC.removeItem(\'' + escAttr(context) +
+        '\', \'' + escAttr(item.canonical_id) + '\')">✕</button>';
+    }
+
+    return '<div class="bmc-list-row">' +
+      '<button type="button" class="bmc-list-item verdict-' + escAttr(displayVerdict) + '" ' +
+        'onclick="BMC.selectCandidate(\'' + escAttr(item.canonical_id) + '\')">' +
+        '<div class="bmc-list-cover" ' + cover + '>' + (coverUrl ? '' : emoji) + '</div>' +
+        '<div class="bmc-list-body">' +
+        '  <div class="bmc-list-title">' + escHtml(item.title) + '</div>' +
+        '  <div class="bmc-list-meta">' + escHtml(item.author_or_director || '') + (item.year ? ' · ' + item.year : '') + ' · ages ' + (item.minimum_age || '?') + '+</div>' +
+        '</div>' +
+        '<div class="bmc-list-verdict verdict-' + escAttr(displayVerdict) + '">' + label + '</div>' +
+      '</button>' +
+      removeBtn +
+    '</div>';
   }
 
   // ── Safe escape helpers ────────────────────────────────────────
@@ -569,6 +619,45 @@ var BMC = (function() {
     saveData(data);
   }
 
+  // Trailer block for the result screen. Only renders for movies/series
+  // with a YouTube embed URL. Visible inline when the title is approved
+  // or the session is in parent mode; otherwise a parent-only unlock
+  // button is shown in its place.
+  function _trailerBlockHtml(e, isParent, isSafe, isBlocked) {
+    var isVideo = (e.type === 'movie' || e.type === 'series');
+    if (!isVideo || !e.trailer_url) return '';
+    var showInline = isParent || isSafe;
+    if (showInline) {
+      return '<div class="bmc-trailer">' +
+        '<h4>🎬 Trailer</h4>' +
+        '<div class="bmc-trailer-embed">' +
+          '<iframe src="' + escAttr(e.trailer_url) + '" ' +
+            'title="Trailer" allowfullscreen ' +
+            'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
+            'referrerpolicy="strict-origin-when-cross-origin"></iframe>' +
+        '</div>' +
+      '</div>';
+    }
+    // Kid mode, not approved — hide the trailer behind a parent unlock.
+    var msg = isBlocked
+      ? 'This trailer is hidden because this title isn\'t a good fit for our family.'
+      : 'This trailer is for parents to preview first.';
+    return '<div class="bmc-trailer bmc-trailer-locked">' +
+      '<h4>🎬 Trailer</h4>' +
+      '<p>' + msg + '</p>' +
+      '<button class="bmc-btn bmc-btn-ghost" onclick="BMC.unlockTrailer()">🔒 Show trailer (parent PIN)</button>' +
+    '</div>';
+  }
+
+  // Triggered by the "Show trailer" button; re-renders the current result
+  // in parent mode, which inlines the iframe.
+  function unlockTrailer() {
+    if (_requestParentMode() && _currentResult) {
+      showResult(_currentResult);
+      _refreshStaleCount();
+    }
+  }
+
   // ── Result screen render ───────────────────────────────────────
   function showResult(e) {
     _currentResult = e;
@@ -750,6 +839,8 @@ var BMC = (function() {
         ? '<div class="bmc-summary"><h4>What it\'s about</h4>' + _escHtmlLocal(e.summary) + '</div>'
         : ''
       ) +
+
+      _trailerBlockHtml(e, isParent, isSafe, isBlocked) +
 
       ((chipHtml || posHtml)
         ? '<div class="bmc-chips">' + chipHtml + posHtml + '</div>'
@@ -945,6 +1036,81 @@ var BMC = (function() {
       });
   }
 
+  // ── Per-item remove (parent only) ─────────────────────────────
+  // Scope depends on the list the button was pressed from:
+  //   'recent'    → this kid's lookups[]
+  //   'suggested' → this kid's hiddenSuggestions[] (doesn't wipe family entry)
+  //   'consumed'  → this kid's consumed[]
+  //   'wishlist'  → this kid's wishlist[]
+  //   'library'   → family library (VPS DELETE + local cache)
+  function removeItem(context, canonicalId) {
+    if (!_requestParentMode()) return;
+    var item = _familyLibrary[canonicalId];
+    var title = (item && item.title) || 'this title';
+    var data = loadData();
+    var changed = false;
+
+    if (context === 'recent') {
+      if (data.lookups && data.lookups[canonicalId]) {
+        delete data.lookups[canonicalId];
+        changed = true;
+      }
+    } else if (context === 'suggested') {
+      data.hiddenSuggestions = data.hiddenSuggestions || {};
+      if (!data.hiddenSuggestions[canonicalId]) {
+        data.hiddenSuggestions[canonicalId] = true;
+        changed = true;
+      }
+    } else if (context === 'consumed') {
+      var beforeC = (data.consumed || []).length;
+      data.consumed = (data.consumed || []).filter(function(c) {
+        return c.canonical_id !== canonicalId;
+      });
+      changed = beforeC !== data.consumed.length;
+    } else if (context === 'wishlist') {
+      var beforeW = (data.wishlist || []).length;
+      data.wishlist = (data.wishlist || []).filter(function(id) {
+        return id !== canonicalId;
+      });
+      changed = beforeW !== data.wishlist.length;
+    } else if (context === 'library') {
+      if (!confirm('Remove "' + title + '" from the family library for everyone?')) return;
+      _fetchJson(VPS + '/api/media/library/' + encodeURIComponent(canonicalId),
+                 { method: 'DELETE' })
+        .then(function() {
+          delete _familyLibrary[canonicalId];
+          // Also scrub local references so kids don't see a dangling entry
+          var d = loadData();
+          if (d.lookups) delete d.lookups[canonicalId];
+          d.consumed = (d.consumed || []).filter(function(c) {
+            return c.canonical_id !== canonicalId;
+          });
+          d.wishlist = (d.wishlist || []).filter(function(id) { return id !== canonicalId; });
+          saveData(d);
+          _rerenderActiveScreen();
+        })
+        .catch(function(err) {
+          alert('Could not remove: ' + (err && err.message ? err.message : 'unknown error'));
+        });
+      return;
+    } else {
+      return;
+    }
+
+    if (changed) saveData(data);
+    _rerenderActiveScreen();
+  }
+
+  function _rerenderActiveScreen() {
+    if (document.getElementById('screen-home').classList.contains('active')) {
+      _renderHome();
+    } else if (document.getElementById('screen-library').classList.contains('active')) {
+      _renderLibrary();
+    } else if (document.getElementById('screen-history').classList.contains('active')) {
+      _renderHistory();
+    }
+  }
+
   // Clear this kid's lookups (recent checks list on home)
   function clearMySearches() {
     if (!_requestParentMode()) return;
@@ -1048,7 +1214,10 @@ var BMC = (function() {
     rereviewMyShelf: rereviewMyShelf,
     rereviewFamilyLibrary: rereviewFamilyLibrary,
     clearMySearches: clearMySearches,
-    resetFamilyLibrary: resetFamilyLibrary
+    resetFamilyLibrary: resetFamilyLibrary,
+    removeItem: removeItem,
+    setLibraryFilter: setLibraryFilter,
+    unlockTrailer: unlockTrailer
   };
 })();
 

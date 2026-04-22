@@ -414,6 +414,7 @@ async function _searchMovies(query) {
     return (j.results || []).slice(0, 3).map(m => ({
       canonical_id: _canonicalTmdb(m.id),
       type: 'movie',
+      tmdb_id: m.id,
       title: m.title,
       author_or_director: '',  // TMDb requires a second call for director; synopsis is enough for eval
       year: m.release_date ? parseInt(m.release_date.slice(0, 4)) : null,
@@ -421,6 +422,26 @@ async function _searchMovies(query) {
       synopsis: m.overview || ''
     }));
   } catch (e) { return []; }
+}
+
+// Look up the first official YouTube trailer for a TMDB movie id.
+// Returns a YouTube embed URL (https://www.youtube.com/embed/<key>) or null.
+async function _trailerForTmdbId(tmdbId) {
+  if (!tmdbId || !process.env.TMDB_API_KEY) return null;
+  try {
+    const url = 'https://api.themoviedb.org/3/movie/' + tmdbId + '/videos?api_key=' + process.env.TMDB_API_KEY;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const videos = (j.results || []).filter(v =>
+      v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'));
+    // Prefer official trailers, then anything
+    const pick = videos.find(v => v.official && v.type === 'Trailer')
+              || videos.find(v => v.type === 'Trailer')
+              || videos.find(v => v.official)
+              || videos[0];
+    return pick ? 'https://www.youtube.com/embed/' + pick.key : null;
+  } catch (e) { return null; }
 }
 
 // ── AI providers ─────────────────────────────────────────────────
@@ -625,6 +646,15 @@ function init(app, dataDir) {
       if (!evaluation.author_or_director) evaluation.author_or_director = metadata.author_or_director;
       if (!evaluation.year && metadata.year) evaluation.year = metadata.year;
 
+      // For movies/series, attach a YouTube trailer embed URL when available.
+      // Books never get trailers — the summary is the preview.
+      if ((evaluation.type === 'movie' || evaluation.type === 'series') &&
+          (metadata.tmdb_id || String(canonical_id).startsWith('tmdb:'))) {
+        const tmdbId = metadata.tmdb_id
+                    || parseInt(String(canonical_id).replace(/^tmdb:/, ''), 10);
+        evaluation.trailer_url = await _trailerForTmdbId(tmdbId);
+      }
+
       cache[canonical_id] = evaluation;
       _saveCache(cache);
       res.json(evaluation);
@@ -682,6 +712,7 @@ function init(app, dataDir) {
       fresh.evaluated_at = Date.now();
       fresh.prompt_version = PROMPT_VERSION;
       fresh.parent_reviewed = entry.parent_reviewed || false;
+      if (entry.trailer_url) fresh.trailer_url = entry.trailer_url;
       cache[entry.canonical_id] = fresh;
       _saveCache(cache);
       res.json(fresh);
@@ -779,6 +810,25 @@ function init(app, dataDir) {
     const stale = Object.keys(cache).filter(id =>
       cache[id].prompt_version !== PROMPT_VERSION).length;
     res.json({ total: total, stale: stale, prompt_version: PROMPT_VERSION });
+  });
+
+  // ── DELETE /api/media/library/:id ──
+  // Removes a single title from the family media cache. Parent-gated on
+  // the client via PIN; the server enforces only that the id exists.
+  app.delete('/api/media/library/:id', (req, res) => {
+    try {
+      const cache = _loadCache();
+      const id = req.params.id;
+      if (!cache[id]) return res.status(404).json({ error: 'Not cached' });
+      const title = cache[id].title;
+      delete cache[id];
+      _saveCache(cache);
+      console.log('[media/library DELETE one] Removed ' + id + ' (' + title + ')');
+      res.json({ ok: true, id: id });
+    } catch (err) {
+      console.error('[media/library DELETE one]', err.message);
+      res.status(500).json({ error: err.message });
+    }
   });
 
   // ── DELETE /api/media/library ──
