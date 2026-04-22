@@ -356,18 +356,6 @@ var BMC = (function() {
     var q = (input ? input.value : '').trim();
     if (!q) return;
 
-    // Check family library first
-    var hit = Object.keys(_familyLibrary).find(function(id) {
-      var it = _familyLibrary[id];
-      return it && (
-        it.title.toLowerCase() === q.toLowerCase() ||
-        (it.title + ' ' + (it.author_or_director || '')).toLowerCase().includes(q.toLowerCase())
-      );
-    });
-    if (hit) {
-      return selectCandidate(hit);
-    }
-
     _setStatus('Searching for "' + q + '"…', 'working');
     _fetchJson(VPS + '/api/media/lookup', {
       method: 'POST',
