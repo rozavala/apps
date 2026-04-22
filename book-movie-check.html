@@ -30,6 +30,14 @@
           <input type="text" id="bmc-query" placeholder="e.g. The Hobbit" autocomplete="off" />
           <button class="bmc-btn bmc-btn-primary" onclick="BMC.search()">Search</button>
         </div>
+        <div class="bmc-search-type" id="bmc-search-type" role="radiogroup" aria-label="Search type">
+          <button type="button" class="bmc-filter-chip active" data-search-type="all"
+                  onclick="BMC.setSearchType('all')">Anything</button>
+          <button type="button" class="bmc-filter-chip" data-search-type="book"
+                  onclick="BMC.setSearchType('book')">📕 Book</button>
+          <button type="button" class="bmc-filter-chip" data-search-type="movie"
+                  onclick="BMC.setSearchType('movie')">🎬 Movie</button>
+        </div>
         <div class="bmc-search-actions">
           <button class="bmc-btn bmc-btn-secondary" onclick="BMC.scanIsbn()">📷 Scan ISBN</button>
           <button class="bmc-btn bmc-btn-secondary" onclick="BMC.capturePhoto()">🖼 Photo of cover</button>
