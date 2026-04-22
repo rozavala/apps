@@ -31,7 +31,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 
 A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities. (Una característica principal de la suite es ayudar a los niños a desarrollar hábitos digitales saludables equilibrando el tiempo de pantalla con actividades del mundo real).
 
-- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable.
+- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable. *Nota: Las aplicaciones de actividad física como "Sports Arena" no consumen tiempo de pantalla.* (Note: Physical activity apps like "Sports Arena" do not consume screen time.)
 - **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres.
 - **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra.
 - **Smart Schedule (Horario Inteligente)**: Rotación automática diaria de aplicaciones sugeridas para fomentar una dieta equilibrada de aprendizaje y evitar la fatiga de decisiones. (Automatic daily rotation of suggested apps to encourage a balanced learning diet).
@@ -60,6 +60,20 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 - **¡Nueva App "Guess Quest"!**: Desarrolla habilidades de deducción adivinando palabras ocultas en inglés y español. (Build deduction skills by guessing hidden words in English and Spanish).
 - **¡Nueva App "Fe Explorador"!**: Descubre oraciones, santos y herencia católica de Chile de manera interactiva. (Discover prayers, saints and Chilean Catholic heritage interactively).
 - **"Sports Arena" Ya Disponible**: Registra actividades deportivas al aire libre sin usar el tiempo de pantalla. (Log outdoor sports activities without consuming screen time).
+
+## 🧭 Para los Exploradores (For Explorers)
+
+```text
+    /\
+   /  \
+  |    |
+  |    |
+ /|    |\
+/ |    | \
+  |____|
+  /    \
+```
+¡Bienvenidos, exploradores! Tu misión es aprender nuevas habilidades, descubrir hechos asombrosos y completar desafíos para subir de rango, de Cadete a Leyenda. ¡Aprende jugando! (Welcome, explorers! Your mission is to learn new skills, discover amazing facts, and complete challenges to rank up from Cadet to Legend. Learn by playing!)
 
 ## 🚀 Instalación y Uso (Getting Started)
 
