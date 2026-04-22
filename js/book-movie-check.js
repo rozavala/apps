@@ -19,6 +19,7 @@ var BMC = (function() {
   var _scanStream = null;
   var _parentMode = false;  // session-only, resets on page reload
   var _libraryTypeFilter = 'all';  // 'all' | 'book' | 'movie'
+  var _searchType = 'all';         // 'all' | 'book' | 'movie' — restricts /media/lookup
 
   // Environment detection for iPad-in-WKWebView-wrapper cases
   var _cameraAvailable = null;  // null = unknown; true/false after probe
@@ -350,17 +351,32 @@ var BMC = (function() {
     return '⚠️ Caution';
   }
 
+  function setSearchType(type) {
+    _searchType = (type === 'book' || type === 'movie') ? type : 'all';
+    var row = document.getElementById('bmc-search-type');
+    if (!row) return;
+    var chips = row.querySelectorAll('[data-search-type]');
+    for (var i = 0; i < chips.length; i++) {
+      var chip = chips[i];
+      if (chip.getAttribute('data-search-type') === _searchType) chip.classList.add('active');
+      else chip.classList.remove('active');
+    }
+  }
+
   // ── Search flow (title text) ───────────────────────────────────
   function search() {
     var input = document.getElementById('bmc-query');
     var q = (input ? input.value : '').trim();
     if (!q) return;
 
+    var body = { query: q };
+    if (_searchType !== 'all') body.type = _searchType;
+
     _setStatus('Searching for "' + q + '"…', 'working');
     _fetchJson(VPS + '/api/media/lookup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: q })
+      body: JSON.stringify(body)
     })
       .then(function(res) {
         if (!res.candidates || !res.candidates.length) {
@@ -799,7 +815,10 @@ var BMC = (function() {
         '<div class="bmc-result-meta">' +
           '<h2>' + _escHtmlLocal(e.title) + '</h2>' +
           '<div class="bmc-result-author">' + _escHtmlLocal(e.author_or_director || '') + (e.year ? ' · ' + e.year : '') + '</div>' +
-          '<span class="bmc-result-type">' + _escHtmlLocal(e.type || 'book') + '</span>' +
+          '<span class="bmc-result-type bmc-result-type-' + escAttr(e.type || 'book') + '">' +
+            ((e.type === 'movie' || e.type === 'series') ? '🎬 ' : '📕 ') +
+            _escHtmlLocal(e.type === 'series' ? 'Series' : (e.type === 'movie' ? 'Movie' : 'Book')) +
+          '</span>' +
         '</div>' +
       '</div>' +
 
@@ -1205,6 +1224,7 @@ var BMC = (function() {
     resetFamilyLibrary: resetFamilyLibrary,
     removeItem: removeItem,
     setLibraryFilter: setLibraryFilter,
+    setSearchType: setSearchType,
     unlockTrailer: unlockTrailer
   };
 })();
