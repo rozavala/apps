@@ -580,10 +580,15 @@ var BMC = (function() {
     var isSafe = e.verdict === 'approved';
     var isCaution = e.verdict === 'caution';
     var isBlocked = e.verdict === 'not_recommended';
+    var isLowConf = e.confidence === 'low';
 
+    // On low confidence in kid mode, the verdict itself is unreliable:
+    // hide content details so we don't present guesses as findings.
+    var kidHideDetails = isLowConf && !isParent;
     var showSummary = isParent || isSafe || isCaution;
-    var showFlags = isParent || isSafe;
-    var showConcerns = isParent || isSafe;
+    var showFlags = (isParent || isSafe) && !kidHideDetails;
+    var showConcerns = (isParent || isSafe) && !kidHideDetails;
+    var showAgeInfo = !kidHideDetails;
     var showParentNotes = isParent;
     var showActions = isParent || !isBlocked;
 
@@ -625,8 +630,19 @@ var BMC = (function() {
       ? 'verdict-caution'  // reuse the amber caution styling for maturity
       : e.verdict;
 
-    var confBanner = (e.confidence === 'low' && (isParent || !isBlocked))
-      ? '<div class="bmc-lowconf">ℹ️ This check is low-confidence — please verify with a parent.</div>'
+    // Kid mode + low confidence: replace verdict entirely with a neutral
+    // "not sure" banner so a hedged guess doesn't read as a real concern.
+    if (!isParent && isLowConf) {
+      verdictEmoji = '🤔';
+      verdictTitle = 'Not sure yet';
+      verdictMessage = 'I couldn\'t check this one well. Please ask Mom or Dad before reading or watching it.';
+      bannerVerdictClass = 'lowconf';
+    }
+
+    // Parent mode still gets the verdict banner plus a prominent low-conf
+    // notice; kid mode doesn't need it — the banner above is the notice.
+    var confBanner = (isLowConf && isParent)
+      ? '<div class="bmc-lowconf">ℹ️ This check is low-confidence — double-check before sharing with the kids.</div>'
       : '';
 
     var data = loadData();
@@ -708,12 +724,17 @@ var BMC = (function() {
         '<div><h3>' + verdictTitle + '</h3><p>' + _escHtmlLocal(verdictMessage) + '</p></div>' +
       '</div>' +
 
-      '<div class="bmc-age-row">' +
-        '<span class="bmc-age-pill">Ages ' + (e.minimum_age || '?') + '+' + (e.ideal_age_range ? ' · ideal ' + _escHtmlLocal(e.ideal_age_range) : '') + '</span>' +
-        (isParent && e.parent_reviewed ? '<span class="bmc-reviewed-pill">✓ Parent reviewed</span>' : '') +
-      '</div>' +
+      confBanner +
 
-      (tooYoung && !isParent
+      (showAgeInfo
+        ? ('<div class="bmc-age-row">' +
+            '<span class="bmc-age-pill">Ages ' + (e.minimum_age || '?') + '+' + (e.ideal_age_range ? ' · ideal ' + _escHtmlLocal(e.ideal_age_range) : '') + '</span>' +
+            (isParent && e.parent_reviewed ? '<span class="bmc-reviewed-pill">✓ Parent reviewed</span>' : '') +
+          '</div>')
+        : ''
+      ) +
+
+      (tooYoung && !isParent && showAgeInfo
         ? '<div class="bmc-age-gate">This is recommended for age ' + e.minimum_age + '+. Ask Mom or Dad first.</div>'
         : ''
       ) +
@@ -754,8 +775,7 @@ var BMC = (function() {
         : ''
       ) +
 
-      unlockStrip +
-      confBanner;
+      unlockStrip;
 
     wrap.innerHTML = html;
   }

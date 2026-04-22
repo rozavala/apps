@@ -366,6 +366,11 @@ body {
   border-color: var(--bmc-notrec);
 }
 .bmc-verdict-banner.verdict-not_recommended h3 { color: var(--bmc-notrec); }
+.bmc-verdict-banner.verdict-lowconf {
+  background: rgba(96,165,250,0.10);
+  border-color: rgba(96,165,250,0.55);
+}
+.bmc-verdict-banner.verdict-lowconf h3 { color: var(--bmc-accent); }
 
 /* Age pill + gate banner */
 .bmc-age-row {
@@ -530,13 +535,16 @@ body {
   font-size: 0.85rem;
 }
 
-/* Low-confidence banner */
+/* Low-confidence notice (parent mode, below the verdict banner) */
 .bmc-lowconf {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 600;
+  background: rgba(96,165,250,0.10);
+  border: 1.5px solid rgba(96,165,250,0.45);
+  color: var(--bmc-accent);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
   text-align: center;
-  margin-top: 4px;
 }
 
 /* Scan modal */
