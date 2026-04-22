@@ -16,7 +16,11 @@ jobs:
           host: ${{ secrets.DROPLET_IP }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
+          script_stop: true
           script: |
-            cd /opt/zavala-sync && git pull
+            set -e
+            cd /opt/zavala-sync
+            git fetch origin main
+            git reset --hard origin/main
             cd vps && npm install --omit=dev
             sudo systemctl restart zavala-sync.service
