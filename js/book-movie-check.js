@@ -270,6 +270,13 @@ var BMC = (function() {
       }
     }
 
+    // Low-confidence: neutralize the colored border/label in kid mode so
+    // an unreliable verdict doesn't broadcast as a real concern.
+    if (!_parentMode && item.confidence === 'low') {
+      displayVerdict = 'lowconf';
+      label = '🤔 Not sure';
+    }
+
     return '<button type="button" class="bmc-list-item verdict-' + escAttr(displayVerdict) + '" onclick="BMC.selectCandidate(\'' + escAttr(item.canonical_id) + '\')">' +
       '<div class="bmc-list-cover" ' + cover + '>' + (coverUrl ? '' : emoji) + '</div>' +
       '<div class="bmc-list-body">' +
