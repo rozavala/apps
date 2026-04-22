@@ -200,6 +200,24 @@ body {
 .bmc-filter-row {
   display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
 }
+.bmc-filter-chip {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  color: var(--text-muted);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bmc-filter-chip:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+.bmc-filter-chip.active {
+  color: var(--text-primary);
+  border-color: var(--bmc-accent);
+  background: rgba(96,165,250,0.12);
+}
 
 /* Lists — shared */
 .bmc-list {
@@ -218,7 +236,15 @@ body {
   margin: 16px 0 4px;
 }
 
+/* A row wraps the clickable card + the parent-mode remove button
+   so the outer <button> stays a real button and stays keyboard-accessible. */
+.bmc-list-row {
+  position: relative;
+  display: block;
+}
+
 .bmc-list-item {
+  position: relative;
   display: flex;
   gap: 12px;
   align-items: flex-start;
@@ -230,8 +256,41 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
+  width: 100%;
+  color: inherit;
+  font-family: inherit;
 }
 .bmc-list-item:hover { transform: translateX(2px); border-color: var(--bmc-accent); }
+
+/* Parent-only per-item remove button (✕) overlaid on the top-right
+   corner of the card. */
+.bmc-list-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(239,68,68,0.45);
+  background: rgba(11,11,26,0.85);
+  color: #F87171;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: inherit;
+  transition: all 0.15s;
+  z-index: 2;
+}
+.bmc-list-remove:hover {
+  background: rgba(239,68,68,0.2);
+  color: #fff;
+  transform: scale(1.08);
+}
 .bmc-list-item.verdict-approved { border-left-color: var(--bmc-approved); }
 .bmc-list-item.verdict-caution { border-left-color: var(--bmc-caution); }
 .bmc-list-item.verdict-not_recommended { border-left-color: var(--bmc-notrec); }
@@ -535,6 +594,45 @@ body {
   color: var(--text-muted);
   font-weight: 600;
   font-size: 0.85rem;
+}
+
+/* Movie trailer block on the result screen */
+.bmc-trailer {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.bmc-trailer h4 {
+  font-size: 0.75rem;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.bmc-trailer-embed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+.bmc-trailer-embed iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+.bmc-trailer-locked {
+  text-align: center;
+}
+.bmc-trailer-locked p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 /* Low-confidence notice (parent mode, below the verdict banner) */
