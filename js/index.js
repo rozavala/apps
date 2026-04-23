@@ -104,6 +104,19 @@
   window.redeemForTime = function() { redeemForTime(); };
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
+  window.updateKidTts = function(idx, field, val) {
+    if (typeof ZsTTS === 'undefined') return;
+    var profiles = getProfiles();
+    var name = profiles[idx] && profiles[idx].name;
+    if (!name) return;
+    var patch = {};
+    patch[field] = val;
+    ZsTTS.setSettings(patch, name);
+    if (field === 'rate') {
+      var label = document.getElementById('tts-rate-val-' + idx);
+      if (label) label.textContent = Number(val).toFixed(2) + 'x';
+    }
+  };
   window.updateParentPin = function() { updateParentPin(); };
   window.renderChoresList = function() { renderChoresList(); };
   window.completeChore = function(id) { if (typeof ChoresManager !== 'undefined') ChoresManager.completeChore(id); };
@@ -1022,6 +1035,20 @@
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" onclick="addKidBonus(getProfiles()[' + i + '].name, 30)">+30 min</button>' +
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1; border-color:rgba(239,68,68,0.3); color:#F87171;" onclick="resetKidTimer(getProfiles()[' + i + '].name)">Reset Today</button>' +
               '</div>' +
+              (typeof ZsTTS !== 'undefined' ? (
+                '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+                  '<label class="pk-toggle" style="font-size:0.9rem;">' +
+                    '<input type="checkbox" ' + (ZsTTS.getSettings(p.name).enabled ? 'checked' : '') + ' onchange="updateKidTts(' + i + ', \'enabled\', this.checked)">' +
+                    ' 🗣 Read-aloud enabled' +
+                  '</label>' +
+                  '<label style="display:block;margin-top:8px;font-size:0.8rem;color:var(--text-muted);font-weight:700;">' +
+                    'Rate: <span id="tts-rate-val-' + i + '">' + ZsTTS.getSettings(p.name).rate.toFixed(2) + '×</span>' +
+                  '</label>' +
+                  '<input type="range" min="0.5" max="1.2" step="0.05" value="' + ZsTTS.getSettings(p.name).rate + '" ' +
+                         'oninput="updateKidTts(' + i + ', \'rate\', parseFloat(this.value))" ' +
+                         'style="width:100%;">' +
+                '</div>'
+              ) : '') +
             '</div>';
         }).join('') +
       '</div>' +
