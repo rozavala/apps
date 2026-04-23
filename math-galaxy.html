@@ -61,7 +61,31 @@
           <div class="rank-topics">Big numbers · Fractions · Decimals · %</div>
           <div class="best-badge empty" id="best-commander">No missions yet</div>
         </div>
+        <div class="level-card card-sprint" onclick="MathExtras.Sprint.open()">
+          <span class="rank-icon">⚡</span>
+          <div class="rank-name">Sprint</div>
+          <div class="rank-ages">Tablas · 60s</div>
+          <div class="rank-topics">Times-tables rapid-fire · per-kid best</div>
+          <div class="best-badge empty" id="best-sprint">Beat your first time!</div>
+        </div>
+        <div class="level-card card-words" onclick="MathExtras.Words.open()">
+          <span class="rank-icon">🧠</span>
+          <div class="rank-name">Word Problems</div>
+          <div class="rank-ages">Ages 4–12</div>
+          <div class="rank-topics">Real-world math · bilingual · 5 per tier</div>
+          <div class="best-badge empty" id="best-words">Try your first problem!</div>
+        </div>
       </div>
+    </div>
+
+    <!-- ============ SPRINT SCREEN ============ -->
+    <div class="screen" id="screen-sprint">
+      <div id="sprint-wrap" class="sprint-wrap"></div>
+    </div>
+
+    <!-- ============ WORD PROBLEMS SCREEN ============ -->
+    <div class="screen" id="screen-words">
+      <div id="words-wrap" class="words-wrap"></div>
     </div>
 
     <!-- ============ GAME SCREEN ============ -->
@@ -112,7 +136,7 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js"></script>
   <script src="js/math-galaxy.js"></script>
+  <script src="js/math-extras.js"></script>
   <script src="js/pwa.js"></script>
-
 </body>
 </html>
