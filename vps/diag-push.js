@@ -106,8 +106,29 @@ function fingerprint(e) {
 }
 
 // ── Git helpers ──
+// The Express service (running as root) and the systemd timer (running
+// as rodrigo) both invoke this script. To avoid "dubious ownership" or
+// missing-SSH-key errors when one user touches files owned by another,
+// every git invocation is explicit about:
+//   - safe.directory for REPO_PATH (works for any user without touching
+//     /etc/gitconfig)
+//   - GIT_SSH_COMMAND pinned to DIAG_SSH_KEY if set (so the key can live
+//     anywhere on disk as long as it's readable by the invoking user)
+const SSH_KEY = process.env.DIAG_SSH_KEY || null;
+
 function git(args, opts) {
-  return execFileSync('git', args, Object.assign({ cwd: REPO_PATH, encoding: 'utf8' }, opts || {})).trim();
+  const prefixed = ['-c', 'safe.directory=' + REPO_PATH].concat(args);
+  const childEnv = Object.assign({}, process.env);
+  if (SSH_KEY) {
+    childEnv.GIT_SSH_COMMAND = 'ssh -i "' + SSH_KEY + '"'
+      + ' -o IdentitiesOnly=yes'
+      + ' -o StrictHostKeyChecking=accept-new'
+      + ' -o UserKnownHostsFile=' + (process.env.DIAG_KNOWN_HOSTS || '~/.ssh/known_hosts');
+  }
+  return execFileSync('git', prefixed, Object.assign(
+    { cwd: REPO_PATH, encoding: 'utf8', env: childEnv },
+    opts || {}
+  )).trim();
 }
 
 function ensureBranch() {
