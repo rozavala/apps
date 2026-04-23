@@ -30,6 +30,7 @@ var CloudSync = (function() {
 
   var state = {
     online: false,
+    server: SYNC_SERVER,
     isConfigured: function() { return SYNC_SERVER.indexOf('x.x.x') === -1; },
   };
 

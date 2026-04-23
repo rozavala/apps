@@ -644,6 +644,19 @@
 
       var html = '';
 
+      // Diagnostics flush row — small utility for parents / dev
+      if (typeof ZsDiag !== 'undefined') {
+        var pending = ZsDiag.pendingCount();
+        html += '<div id="dash-diag-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(96,165,250,0.06);border:1.5px dashed rgba(96,165,250,0.2);border-radius:12px;font-size:0.82rem;">' +
+          '<div style="font-weight:700;color:var(--text-muted);">' +
+            '🩺 Diagnostics · <span id="dash-diag-pending">' + pending + '</span> pending on this device' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<button id="dash-diag-flush" class="hub-action-btn secondary" style="padding:6px 12px;font-size:0.78rem;margin:0;" onclick="flushDiagnostics(this)">📤 Flush now</button>' +
+          '</div>' +
+        '</div>';
+      }
+
       if (typeof ActivityLog !== 'undefined') {
         html += '<div style="margin-bottom:24px;">' +
           '<div style="font-weight:800; font-family:var(--font-display); font-size:1.1rem; margin-bottom:12px;">' +
@@ -868,6 +881,34 @@
     if (typeof RecitalRecorder === 'undefined') return;
     if (!confirm('Delete this recital?')) return;
     RecitalRecorder.remove(Number(id)).then(_renderRecitals);
+  };
+
+  window.flushDiagnostics = function(btn) {
+    if (typeof ZsDiag === 'undefined') return;
+    var orig = btn ? btn.textContent : null;
+    if (btn) { btn.textContent = '⏳ Flushing…'; btn.disabled = true; }
+
+    // Two steps: (1) ship local buffer to VPS, (2) ask VPS to run the
+    // scrub-and-push bridge so the digest lands on the diag branch.
+    ZsDiag.flushNow().then(function(r1) {
+      var server = (typeof CloudSync !== 'undefined' && CloudSync.server) ? CloudSync.server : null;
+      if (!server) return Promise.resolve({ status: 'no-server' });
+      return fetch(server + '/api/diag/flush', { method: 'POST' })
+        .then(function(res) { return res.json().catch(function() { return { status: 'ok' }; }); })
+        .catch(function(e) { return { status: 'error', error: e && e.message }; });
+    }).then(function(r2) {
+      if (btn) {
+        btn.textContent = (r2 && r2.status === 'ok') ? '✅ Pushed' : '⚠️ ' + (r2 && r2.status || 'unknown');
+        setTimeout(function() {
+          btn.textContent = orig || '📤 Flush now';
+          btn.disabled = false;
+        }, 2500);
+      }
+      var pendEl = document.getElementById('dash-diag-pending');
+      if (pendEl) pendEl.textContent = String(ZsDiag.pendingCount());
+    }).catch(function(e) {
+      if (btn) { btn.textContent = '❌ Failed'; setTimeout(function() { btn.textContent = orig || '📤 Flush now'; btn.disabled = false; }, 2500); }
+    });
   };
 
   function _timeAgo(ts) {

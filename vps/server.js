@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const media = require('./media');
+const diag = require('./diag');
 
 const app = express();
 const PORT = 3333;
@@ -17,6 +18,9 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // Register Book & Movie Check media endpoints
 media.init(app, DATA_DIR);
+
+// Register diag endpoints (error capture from browsers)
+diag.init(app, DATA_DIR);
 
 app.get('/api/kids', (req, res) => {
   try {
