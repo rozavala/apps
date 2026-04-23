@@ -750,20 +750,16 @@
 
         var rank = typeof getExplorerRank === 'function' ? getExplorerRank(p.name, stats) : { icon: '🛸', name: 'Cadet' };
 
-        var certHref = 'certificate.html?name=' + encodeURIComponent(p.name) + '&rank=' + encodeURIComponent(rank.name);
-        return '<div class="dash-profile" style="margin-bottom:20px;">' +
-          '<div class="dash-profile-header" style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">' +
+        return '<div class="dash-profile">' +
+          '<div class="dash-profile-header">' +
             '<div class="dash-avatar" style="background:' + safeColor(p.color) + '22;border-color:' + safeColor(p.color) + '">' + escHtml(p.avatar) + '</div>' +
-            '<div style="flex:1;min-width:0;">' +
+            '<div>' +
               '<div class="dash-name">' + escHtml(p.name) + '</div>' +
               '<div style="display:flex; gap:8px; font-size:0.78rem; font-weight:600;">' +
                 '<div class="dash-age">' + (p.age ? 'Age ' + escHtml(p.age) : '') + '</div>' +
                 '<div class="dash-rank" style="color:var(--purple);">' + rank.icon + ' ' + rank.name + '</div>' +
               '</div>' +
             '</div>' +
-            '<a href="' + certHref + '" target="_blank" rel="noopener" ' +
-               'style="padding:6px 12px;border-radius:99px;background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.3);color:#FBBF24;font-size:0.75rem;font-weight:700;text-decoration:none;white-space:nowrap;" ' +
-               'title="Print rank certificate for ' + escHtml(p.name) + '">🎓 Certificate</a>' +
           '</div>' +
           appRows +
         '</div>';
