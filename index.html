@@ -213,12 +213,24 @@
           <div class="card-tag">📚 Media Guide</div>
         </a>
 
+        <!-- 15. Trophy Room (NEW) -->
+        <a href="trophy-room.html" class="app-card card-trophy">
+          <div class="card-icon">🏆</div>
+          <div class="card-title">Trophy Room</div>
+          <div class="card-desc">Every badge, rank and milestone you've earned — all in one place.</div>
+          <div class="card-stats" id="stats-trophy"></div>
+          <div class="card-tag">🏅 Achievements</div>
+        </a>
+
       </div>
 
       <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:32px;">
         <button class="parent-btn" style="margin-top:0;" onclick="openChores()">
           🏠 Tareas del Hogar
         </button>
+        <a class="parent-btn" style="margin-top:0;text-decoration:none;display:inline-flex;align-items:center;gap:8px;" href="shopping-list.html">
+          🛒 Lista de Compras
+        </a>
         <button class="parent-btn" style="margin-top:0;" onclick="requestPinThen(function() { openParentsCorner(); })">
           🔒 Parents Corner
         </button>
@@ -365,6 +377,7 @@
   <script src="js/schedule.js?v=2"></script>
   <script src="js/activity-log.js?v=2"></script>
   <script src="js/learning-checks.js?v=2"></script>
+  <script src="js/recital.js?v=1"></script>
   <script src="js/index.js?v=2"></script>
 </body>
 </html>

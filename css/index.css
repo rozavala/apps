@@ -566,6 +566,7 @@
     .card-quest { --card-accent: #F59E0B; --card-glow: rgba(245, 158, 11, 0.3); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(245, 158, 11, 0.15); }
     .card-guess { --card-accent: #F59E0B; --card-glow: rgba(251, 191, 36, 0.3); --card-icon-bg: linear-gradient(135deg, #D97706, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
     .card-bmcheck { --card-accent: #60A5FA; --card-glow: rgba(96, 165, 250, 0.3); --card-icon-bg: linear-gradient(135deg, #2563EB, #60A5FA); --card-tag-bg: rgba(96, 165, 250, 0.15); }
+    .card-trophy  { --card-accent: #FBBF24; --card-glow: rgba(251, 191, 36, 0.35); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
 
     /* Coming Soon */
     .coming-soon .card-icon, .coming-soon .card-title, .coming-soon .card-desc { opacity: 0.5; }
