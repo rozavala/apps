@@ -1,7 +1,8 @@
 # Diagnostic log pipeline — VPS setup
 
-This document is the one-time setup Rodrigo does on the Digital Ocean droplet
-after pulling the diag changes.
+One-time setup on the Digital Ocean droplet so kid-reproduced bugs
+land as a scrubbed digest on the `diag` branch of `rozavala/apps`,
+where Claude can read them.
 
 ## Overview
 
@@ -9,8 +10,8 @@ after pulling the diag changes.
 Browser → POST /api/diag → vps/diag.js (raw JSONL, Tailscale-only)
                                   │
                                   ▼
-                          vps/diag-push.js   (cron every 15 min, or
-                          scrubs + commits    on-demand via flush btn)
+                          vps/diag-push.js   (systemd timer every 15 min,
+                          scrubs + commits   or on-demand via flush btn)
                                   │
                                   ▼
                           rozavala/apps branch `diag`
@@ -19,95 +20,113 @@ Browser → POST /api/diag → vps/diag.js (raw JSONL, Tailscale-only)
                           Claude reads via MCP
 ```
 
-Raw logs (with kid names) never leave the VPS. Only scrubbed digests
-(kid names → stable `u-<hash>`) are committed to the public repo.
+Raw logs (including kid names) stay on the VPS, reachable only over
+Tailscale. Only scrubbed digests (kid names → stable `u-<hash>`) are
+committed to the public repo.
+
+## Working assumption for paths
+
+Based on your droplet:
+
+| Thing | Path |
+|---|---|
+| Main checkout (auto-deployed from main) | `/opt/zavala-sync/` |
+| VPS code inside it | `/opt/zavala-sync/vps/` |
+| Env file | `/opt/zavala-sync/vps/.env` |
+| systemd unit | `zavala-sync.service` |
+| **Second checkout for diag pushes** | `/home/rodrigo/zavala-apps-diag/` |
+| **Deploy key** | `/home/rodrigo/.ssh/zs_diag_ed25519` |
+
+Adjust if your layout differs.
 
 ## One-time setup
 
-### 1. Pull the code and install (no new deps)
+### 1. Pull the code on the droplet
+
+The `Deploy VPS` GitHub Action already runs `git reset --hard origin/main`,
+`npm install`, and `systemctl restart zavala-sync.service` whenever a
+commit touches `vps/**` on `main`. If you merged the diag PR, this has
+already happened. Verify:
 
 ```bash
-cd /opt/zavala/apps        # or wherever the VPS checkout lives
-git pull
-cd vps
-# No new npm deps required; diag.js uses only built-ins.
+ls /opt/zavala-sync/vps/diag.js /opt/zavala-sync/vps/diag-push.js
+# Both files should exist.
 ```
 
-### 2. Set environment variables in `vps/.env`
-
-Append to the existing `.env`:
+If not, trigger manually:
 
 ```bash
-# Absolute path to a writable git working tree of rozavala/apps
-# that has a deploy key able to push the `diag` branch.
-# Keep this separate from /opt/zavala/apps so diag pushes don't
-# collide with your main checkout.
-DIAG_REPO_PATH=/opt/zavala/apps-diag
-
-# Any long, random, private string. Used to hash kid names so
-# the same kid produces the same pseudonym across commits but
-# the mapping is not reversible by outsiders.
-DIAG_SALT=<generate with: openssl rand -hex 32>
-
-# Optional: how much history to include in each digest.
-DIAG_WINDOW_HOURS=24
+cd /opt/zavala-sync && sudo git fetch origin main && sudo git reset --hard origin/main
+cd vps && sudo npm install --omit=dev
+sudo systemctl restart zavala-sync.service
 ```
 
-### 3. Create the diag working tree
+### 2. Generate the deploy key (no `sudo` needed)
 
 ```bash
-# Clone a second working copy just for diag pushes
-sudo mkdir -p /opt/zavala/apps-diag
-sudo chown $(whoami): /opt/zavala/apps-diag
-git clone git@github.com:rozavala/apps.git /opt/zavala/apps-diag
-cd /opt/zavala/apps-diag
-
-# First push of the orphan diag branch will happen automatically
-# from diag-push.js the first time it runs.
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+ssh-keygen -t ed25519 -f ~/.ssh/zs_diag_ed25519 -N '' -C "zs-diag@$(hostname)"
+cat ~/.ssh/zs_diag_ed25519.pub
 ```
 
-### 4. Install a deploy key with push rights to the `diag` branch
+Paste that public key into **GitHub → rozavala/apps → Settings → Deploy keys
+→ Add deploy key**. Tick **Allow write access**.
 
-GitHub → rozavala/apps → Settings → Deploy keys → Add deploy key.
-Generate one with `ssh-keygen`:
+### 3. SSH config alias so Git uses the right key
 
-```bash
-ssh-keygen -t ed25519 -f /etc/zs/diag-deploy-key -N ''
-cat /etc/zs/diag-deploy-key.pub   # paste into GitHub
-```
-
-Add to `~/.ssh/config` for the user that runs the cron:
+Append to `~/.ssh/config`:
 
 ```
 Host github.com-diag
   HostName github.com
-  IdentityFile /etc/zs/diag-deploy-key
+  IdentityFile ~/.ssh/zs_diag_ed25519
   IdentitiesOnly yes
 ```
 
-Then update the remote in the diag working tree:
+### 4. Clone the diag working tree and point it at the alias
 
 ```bash
-cd /opt/zavala/apps-diag
-git remote set-url origin git@github.com-diag:rozavala/apps.git
+cd ~
+git clone git@github.com-diag:rozavala/apps.git zavala-apps-diag
+cd zavala-apps-diag
+git remote -v      # should show git@github.com-diag:... for both fetch/push
+ssh -T git@github.com-diag
+# Expected: "Hi rozavala/apps! You've successfully authenticated..."
 ```
 
-> **Tip**: if you want even stricter scope, protect the default branch
-> in rozavala/apps settings so this key can only push to `diag`.
-
-### 5. Restart the Express server
+### 5. Set env vars in `/opt/zavala-sync/vps/.env`
 
 ```bash
-sudo systemctl restart zavala-sync    # or whatever unit name you use
+sudo nano /opt/zavala-sync/vps/.env
+```
+
+Append:
+
+```
+DIAG_REPO_PATH=/home/rodrigo/zavala-apps-diag
+DIAG_SALT=<run: openssl rand -hex 32>
+DIAG_WINDOW_HOURS=24
+```
+
+> `DIAG_SALT` is used to hash kid names into stable pseudonyms. Keep it
+> private; rotating it renames everyone from that point forward.
+
+### 6. Restart and verify the server is back
+
+```bash
+sudo systemctl restart zavala-sync.service
+sudo systemctl status zavala-sync.service --no-pager
 curl -sS http://localhost:3333/api/diag/health
-# expect: {"status":"ok","jsonl_bytes":0,"entries_last_24h":0}
+# expected: {"status":"ok","jsonl_bytes":0,"entries_last_24h":0}
 ```
 
-### 6. Schedule the bridge
+If `curl` returns **"Couldn't connect"** the service isn't listening.
+See *Troubleshooting* below — almost always it's a crash at startup
+visible in the journal.
 
-#### Option A — systemd timer (recommended)
+### 7. Schedule the scrub+push bridge
 
-`/etc/systemd/system/zs-diag-push.service`:
+Create `/etc/systemd/system/zs-diag-push.service`:
 
 ```ini
 [Unit]
@@ -115,14 +134,14 @@ Description=Zavala Serra diag scrub and push
 
 [Service]
 Type=oneshot
-WorkingDirectory=/opt/zavala/apps/vps
-EnvironmentFile=/opt/zavala/apps/vps/.env
-ExecStart=/usr/bin/node /opt/zavala/apps/vps/diag-push.js
 User=rodrigo
+WorkingDirectory=/opt/zavala-sync/vps
+EnvironmentFile=/opt/zavala-sync/vps/.env
+ExecStart=/usr/bin/node /opt/zavala-sync/vps/diag-push.js
 Nice=10
 ```
 
-`/etc/systemd/system/zs-diag-push.timer`:
+And `/etc/systemd/system/zs-diag-push.timer`:
 
 ```ini
 [Unit]
@@ -145,39 +164,36 @@ sudo systemctl enable --now zs-diag-push.timer
 systemctl list-timers | grep zs-diag
 ```
 
-#### Option B — plain cron
+> **Important**: the service runs as `rodrigo`, so the deploy key must be
+> readable by that user (which it is, since it's in `~rodrigo/.ssh`).
+> If you'd rather run as root, `cp ~/.ssh/zs_diag_ed25519* /root/.ssh/` and
+> add the same `~/.ssh/config` alias for root, then change `User=root`.
 
-```
-*/15 * * * * cd /opt/zavala/apps/vps && /usr/bin/node diag-push.js >> /var/log/zs-diag.log 2>&1
-```
-
-### 7. Smoke test
+### 8. End-to-end smoke test
 
 From any device on Tailscale:
 
 ```bash
-# Force-post one entry
+# Post one synthetic entry
 curl -X POST https://real-options-dev.tail57521e.ts.net/api/diag \
   -H 'Content-Type: application/json' \
   -d '{"schema":1,"entries":[{"kind":"test","message":"hello from setup","ts":'$(date +%s%3N)'}]}'
 
-# Flush now
+# Trigger a push now (equivalent to the dashboard button)
 curl -X POST https://real-options-dev.tail57521e.ts.net/api/diag/flush
 ```
 
-Then check the `diag` branch on GitHub — there should be a new commit
-with `diag/latest.json`, `diag/window.json`, and a per-day file.
+Then check the `diag` branch on GitHub — there should be a commit with
+`diag/latest.json`, `diag/window.json`, and today's per-day file.
 
 ## Day-to-day use
 
-- Kids use the apps normally. Errors capture in the background.
-- If someone hits a bug, open Parent Dashboard and tap
-  **📤 Flush now**. That ships the local buffer to the VPS and
-  triggers the push bridge. Within ~5 seconds the `diag` branch
-  has the latest digest.
-- Share the commit URL with Claude or paste a summary.
+1. Kids use the apps. Errors auto-capture in the background.
+2. After reproducing a bug, open **Parent Dashboard → 📤 Flush now**.
+3. Within ~5 seconds a new commit lands on the `diag` branch.
+4. Share that commit URL with Claude.
 
-## Privacy checklist — what the public repo contains
+## Privacy receipt — what the public repo contains
 
 - ✅ Error messages, stack traces, file+line, user agents
 - ✅ App id (`piano`, `guitar`, `story`, etc.)
@@ -188,16 +204,55 @@ with `diag/latest.json`, `diag/window.json`, and a per-day file.
 - ❌ **No** kid names
 - ❌ **No** IP addresses
 - ❌ **No** user-typed free text (shopping list items, input fields)
-- ❌ **No** breadcrumb `data` payloads (in case an app attaches free text)
+- ❌ **No** breadcrumb `data` payloads
 
 ## Troubleshooting
 
-- `diag-push.js` exits with "DIAG_REPO_PATH does not exist" → check
-  `.env` is loaded. The service file should point `EnvironmentFile`
-  at the same `.env` the Express server uses.
-- Pushes are rejected → confirm the deploy key has write access and
-  the remote URL uses the `github.com-diag` SSH alias.
-- Digest is empty even though kids hit errors → check
-  `/api/diag/health`. If `entries_last_24h` is 0, the browser isn't
-  posting — probably the device is not on Tailscale, or the
-  `CloudSync.server` URL in `js/sync.js` is wrong.
+### `curl localhost:3333/...` returns "Couldn't connect to server"
+
+The Express service isn't running. Check why:
+
+```bash
+sudo systemctl status zavala-sync.service --no-pager
+sudo journalctl -u zavala-sync.service -n 80 --no-pager
+```
+
+Common causes:
+
+- **`Error: Cannot find module './diag'`** → the droplet didn't pull the
+  new code. `cd /opt/zavala-sync && sudo git pull origin main && sudo systemctl restart zavala-sync.service`
+- **`Error: Cannot find module 'dotenv'`** → run `cd /opt/zavala-sync/vps && sudo npm install --omit=dev` then restart.
+- **`EACCES: permission denied, mkdir '.../_diag'`** → the data dir isn't writable by the service user. `sudo chown -R <service-user> /opt/zavala-sync/data`.
+- **Port 3333 already in use** → `sudo ss -tlnp | grep 3333` to find the holder; kill it then restart.
+
+### `diag-push.js` exits with "DIAG_REPO_PATH does not exist"
+
+Confirm the path in `/opt/zavala-sync/vps/.env` matches the actual
+location of the diag working tree. Remember: systemd only reads the
+`EnvironmentFile`, not your shell's env.
+
+### Pushes are rejected
+
+Confirm the deploy key has **Allow write access** checked in GitHub, and
+that `~/.ssh/config` maps `github.com-diag` to that key. Test:
+
+```bash
+ssh -T git@github.com-diag
+# "Hi rozavala/apps! You've successfully authenticated..."
+```
+
+### Digest is empty even though kids hit errors
+
+Check `/api/diag/health`:
+
+```bash
+curl -sS https://real-options-dev.tail57521e.ts.net/api/diag/health
+```
+
+If `entries_last_24h` is 0, the browser isn't posting. Possible reasons:
+
+- The device isn't on Tailscale
+- `CloudSync.server` in `js/sync.js` doesn't match your actual Tailscale
+  hostname
+- Browser's request is blocked by CORS — unlikely since `cors()` is on,
+  but check devtools Network tab
