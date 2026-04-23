@@ -361,6 +361,11 @@
       catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderHubWidget failed', e.message); }
     }
 
+    if (typeof Routines !== 'undefined') {
+      try { Routines.renderHubWidget('routines-widget'); }
+      catch(e) { if (typeof Debug !== 'undefined') Debug.error('Routines.renderHubWidget failed', e.message); }
+    }
+
     if (typeof Debug !== 'undefined') Debug.log('Rendering app cards...');
     try {
       renderAppCards(user);
