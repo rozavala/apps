@@ -14172,11 +14172,21 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
+  // Little Maestro is published in two forms:
+  //   1. Standalone (ships its own ./_assets/sw.js)
+  //   2. As part of the Zavala Serra Apps suite (no service worker)
+  // We HEAD-check before registering so the suite context stays silent
+  // instead of emitting a "Registration failed" warning on every load.
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./_assets/sw.js', { scope: './' })
-        .then(reg => console.log('[SW] Registered:', reg.scope))
-        .catch(err => console.warn('[SW] Registration failed:', err));
+      fetch('./_assets/sw.js', { method: 'HEAD', cache: 'no-store' })
+        .then(res => {
+          if (!res.ok) return; // no SW shipped in this deploy — fine
+          return navigator.serviceWorker.register('./_assets/sw.js', { scope: './' })
+            .then(reg => console.log('[SW] Registered:', reg.scope))
+            .catch(err => console.warn('[SW] Registration failed:', err));
+        })
+        .catch(() => { /* offline or network-blocked probe — ignore */ });
     });
   }
 </script>
