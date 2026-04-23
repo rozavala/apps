@@ -107,6 +107,14 @@ body {
 }
 .vocab-link:hover { background: rgba(167, 139, 250, 0.1); }
 
+/* Read-aloud word highlighting (word at a time) */
+.rw-word { transition: background 0.15s ease, color 0.15s ease; padding: 0 1px; border-radius: 4px; }
+.rw-word.speaking {
+  background: rgba(251, 191, 36, 0.25);
+  color: #FBBF24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35);
+}
+
 .page-controls { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; width: 100%; justify-content: center; }
 .nav-btn {
   padding: 10px 20px; border-radius: 12px; background: rgba(255,255,255,0.05);

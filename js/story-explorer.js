@@ -354,23 +354,102 @@ const StoryExplorer = (() => {
   }
 
   function _renderPage() {
+    stopRead();
     const page = currentStory.pages[currentPage];
     document.getElementById('story-title').textContent = lang === 'es' ? currentStory.titleEs : currentStory.title;
     document.getElementById('page-indicator').textContent = `${lang === 'es' ? 'Página' : 'Page'} ${currentPage + 1} / ${currentStory.pages.length}`;
     document.getElementById('page-icon').textContent = currentStory.icon;
 
-    let text = lang === 'es' ? page.es : page.en;
-    
-    // Highlight vocab words
+    const raw = lang === 'es' ? page.es : page.en;
+
+    // Build a vocab lookup for quick per-token enrichment.
+    const vocabMap = {};
     if (page.vocab) {
       page.vocab.forEach(v => {
-        const word = lang === 'es' ? v.wordEs : v.word;
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-        text = text.replace(regex, `<span class="vocab-link" onclick="StoryExplorer.showVocab('${word}', '${lang === 'es' ? v.defEs : v.def}')">${word}</span>`);
+        const w = (lang === 'es' ? v.wordEs : v.word).toLowerCase();
+        vocabMap[w] = lang === 'es' ? v.defEs : v.def;
       });
     }
 
-    document.getElementById('page-text').innerHTML = text;
+    // Tokenise the text preserving spaces/punctuation. Each word becomes
+    // a <span class="rw-word" data-start="N"> so we can highlight during
+    // speechSynthesis' boundary events and still let vocab taps work.
+    const pageText = document.getElementById('page-text');
+    pageText.innerHTML = '';
+
+    const re = /(\s+|[.,!?;:"'()¡¿—…]+|[^\s.,!?;:"'()¡¿—…]+)/g;
+    let m;
+    while ((m = re.exec(raw)) !== null) {
+      const chunk = m[0];
+      const start = m.index;
+      if (/^[^\s.,!?;:"'()¡¿—…]/.test(chunk)) {
+        const span = document.createElement('span');
+        span.className = 'rw-word';
+        span.dataset.start = String(start);
+        span.dataset.end = String(start + chunk.length);
+        const key = chunk.toLowerCase().replace(/[.,!?;:"'()¡¿—…]+$/g, '');
+        if (vocabMap[key]) {
+          span.classList.add('vocab-link');
+          span.dataset.vocab = key;
+          span.dataset.def = vocabMap[key];
+          span.addEventListener('click', () => showVocab(key, vocabMap[key]));
+        }
+        span.textContent = chunk;
+        pageText.appendChild(span);
+      } else {
+        pageText.appendChild(document.createTextNode(chunk));
+      }
+    }
+
+    // Cache the raw text for speech + highlighting
+    pageText.dataset.raw = raw;
+  }
+
+  // ── Read-aloud state ──
+  let _readActive = false;
+  let _readUtterance = null;
+
+  function _clearHighlight() {
+    const el = document.getElementById('page-text');
+    if (!el) return;
+    el.querySelectorAll('.rw-word.speaking').forEach(n => n.classList.remove('speaking'));
+  }
+
+  function _highlightAtChar(charIndex) {
+    const el = document.getElementById('page-text');
+    if (!el) return;
+    _clearHighlight();
+    const words = el.querySelectorAll('.rw-word');
+    for (let i = 0; i < words.length; i++) {
+      const s = Number(words[i].dataset.start);
+      const e = Number(words[i].dataset.end);
+      if (charIndex >= s && charIndex < e) {
+        words[i].classList.add('speaking');
+        // Scroll into view if out of viewport
+        const r = words[i].getBoundingClientRect();
+        if (r.top < 60 || r.bottom > window.innerHeight - 60) {
+          words[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+    }
+  }
+
+  function stopRead() {
+    _readActive = false;
+    try {
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+    } catch (e) {}
+    _clearHighlight();
+    _updateReadButton();
+  }
+
+  function _updateReadButton() {
+    const btn = document.querySelector('.audio-btn');
+    if (!btn) return;
+    btn.textContent = _readActive
+      ? (lang === 'es' ? '⏹ Detener' : '⏹ Stop')
+      : (lang === 'es' ? '🔊 Leer en voz alta' : '🔊 Read Aloud');
   }
 
   function nextPage() {
@@ -456,15 +535,43 @@ const StoryExplorer = (() => {
   }
 
   function readAloud() {
-    const page = currentStory.pages[currentPage];
-    const text = lang === 'es' ? page.es : page.en;
-    if ('speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = lang === 'es' ? 'es-CL' : 'en-US';
-      u.rate = 0.9;
-      speechSynthesis.speak(u);
+    if (!('speechSynthesis' in window)) {
+      alert(lang === 'es'
+        ? 'Este navegador no soporta lectura en voz alta.'
+        : 'This browser does not support read-aloud.');
+      return;
     }
+    if (_readActive) { stopRead(); return; }
+
+    const el = document.getElementById('page-text');
+    const text = (el && el.dataset.raw) || (currentStory.pages[currentPage][lang === 'es' ? 'es' : 'en']);
+
+    try { speechSynthesis.cancel(); } catch (e) {}
+
+    _readUtterance = new SpeechSynthesisUtterance(text);
+    _readUtterance.lang = lang === 'es' ? 'es-CL' : 'en-US';
+    _readUtterance.rate = 0.9;
+    _readUtterance.pitch = 1.0;
+
+    _readUtterance.onboundary = function(ev) {
+      if (!_readActive) return;
+      if (ev.name && ev.name !== 'word') return;
+      _highlightAtChar(ev.charIndex);
+    };
+    _readUtterance.onend = function() {
+      _readActive = false;
+      _clearHighlight();
+      _updateReadButton();
+    };
+    _readUtterance.onerror = function() {
+      _readActive = false;
+      _clearHighlight();
+      _updateReadButton();
+    };
+
+    _readActive = true;
+    _updateReadButton();
+    speechSynthesis.speak(_readUtterance);
   }
 
   function toggleLanguage() {
@@ -476,7 +583,7 @@ const StoryExplorer = (() => {
   }
 
   function backToLibrary() {
-    speechSynthesis.cancel();
+    stopRead();
     _showScreen('library');
     _renderLibrary();
   }
@@ -512,5 +619,5 @@ const StoryExplorer = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { init, startStory, nextPage, prevPage, showVocab, answerQuiz, setTier, toggleLanguage, backToLibrary, readAloud, getStats };
+  return { init, startStory, nextPage, prevPage, showVocab, answerQuiz, setTier, toggleLanguage, backToLibrary, readAloud, stopRead, getStats };
 })();
