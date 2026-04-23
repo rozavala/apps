@@ -566,6 +566,73 @@
     .card-quest { --card-accent: #F59E0B; --card-glow: rgba(245, 158, 11, 0.3); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(245, 158, 11, 0.15); }
     .card-guess { --card-accent: #F59E0B; --card-glow: rgba(251, 191, 36, 0.3); --card-icon-bg: linear-gradient(135deg, #D97706, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
     .card-bmcheck { --card-accent: #60A5FA; --card-glow: rgba(96, 165, 250, 0.3); --card-icon-bg: linear-gradient(135deg, #2563EB, #60A5FA); --card-tag-bg: rgba(96, 165, 250, 0.15); }
+    .card-trophy  { --card-accent: #FBBF24; --card-glow: rgba(251, 191, 36, 0.35); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
+
+    /* ── Hub Calendar Widget (liturgical + Chilean) ── */
+    #calendar-widget { animation: fadeUp 0.6s ease-out both; }
+    .cc-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(239,68,68,0.05));
+      border: 1.5px solid rgba(251,191,36,0.18);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .cc-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.2s ease;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .cc-row:first-child { border-top: none; }
+    .cc-row:hover { background: rgba(255,255,255,0.03); }
+    .cc-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .cc-body { flex: 1; min-width: 0; }
+    .cc-kind {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #FBBF24;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .cc-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-top: 2px;
+    }
+    .cc-title-en {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-style: italic;
+      margin-top: 1px;
+    }
+    .cc-arrow {
+      color: #FBBF24;
+      font-size: 1.1rem;
+      font-weight: 700;
+      opacity: 0.6;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+    a.cc-row:hover .cc-arrow { transform: translateX(3px); opacity: 1; }
+    a.cc-row:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+    @media (max-width: 480px) {
+      .cc-row { padding: 12px 14px; gap: 10px; }
+      .cc-icon { font-size: 1.5rem; }
+      .cc-title { font-size: 0.92rem; }
+      .cc-title-en { font-size: 0.72rem; }
+    }
 
     /* Coming Soon */
     .coming-soon .card-icon, .coming-soon .card-title, .coming-soon .card-desc { opacity: 0.5; }

@@ -206,3 +206,165 @@ body {
   .q-grid { grid-template-columns: 1fr; }
   .guess-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   DAILY WORD MODE
+   ============================================================ */
+.dw-daily-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(167,139,250,0.08));
+  border: 1.5px solid rgba(251,191,36,0.3);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.dw-daily-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(251,191,36,0.6);
+  box-shadow: 0 8px 24px -8px rgba(251,191,36,0.4);
+}
+.dw-daily-card .dw-dc-emoji { font-size: 2.2rem; flex-shrink: 0; }
+.dw-daily-card .dw-dc-body { flex: 1; }
+.dw-daily-card .dw-dc-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #FBBF24;
+}
+.dw-daily-card .dw-dc-sub {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.dw-daily-card .dw-dc-arrow { color: #FBBF24; font-size: 1.4rem; }
+
+.dw-status {
+  text-align: center;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.dw-status-line {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.dw-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.dw-stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+}
+.dw-stat-num {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #FBBF24;
+}
+.dw-stat-lbl {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dw-board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px auto 16px;
+  width: max-content;
+}
+.dw-row { display: flex; gap: 6px; }
+.dw-tile {
+  width: 52px;
+  height: 52px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.02);
+  transition: transform 0.15s;
+}
+.dw-tile.typing {
+  border-color: #FBBF24;
+  animation: popIn 0.15s ease-out;
+}
+.dw-tile.filled { animation: popIn 0.25s ease-out; }
+.dw-tile.correct { background: #10B981; border-color: #10B981; color: #fff; }
+.dw-tile.present { background: #F59E0B; border-color: #F59E0B; color: #fff; }
+.dw-tile.absent  { background: #3f3f46; border-color: #3f3f46; color: #a1a1aa; }
+
+.dw-flash {
+  text-align: center;
+  height: 22px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #F87171;
+  opacity: 0;
+  transition: opacity 0.2s;
+  margin: 6px 0;
+}
+.dw-flash.show { opacity: 1; }
+
+.dw-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.dw-kb-row { display: flex; gap: 4px; justify-content: center; }
+.dw-key {
+  flex: 1;
+  min-width: 28px;
+  max-width: 44px;
+  height: 48px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0 4px;
+}
+.dw-key.wide { flex: 1.5; max-width: 68px; font-size: 0.75rem; }
+.dw-key:hover { background: rgba(255,255,255,0.18); }
+.dw-key.correct { background: #10B981; color: #fff; }
+.dw-key.present { background: #F59E0B; color: #fff; }
+.dw-key.absent  { background: #3f3f46; color: #a1a1aa; }
+
+.dw-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .dw-tile { width: 44px; height: 44px; font-size: 1.3rem; }
+  .dw-key { height: 42px; font-size: 0.85rem; }
+  .dw-key.wide { font-size: 0.7rem; }
+  .dw-stats { grid-template-columns: repeat(2, 1fr); }
+}

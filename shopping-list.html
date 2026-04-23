@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Compras 🛒</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/shopping-list.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(52,211,153,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(251,191,36,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <div class="screen active" id="screen-main">
+      <div class="sl-header">
+        <span class="sl-icon">🛒</span>
+        <h1>Lista de Compras</h1>
+        <p id="sl-subtitle">Shared family shopping list</p>
+      </div>
+
+      <form class="sl-add" id="sl-add-form" onsubmit="ShoppingList.addItem(event)">
+        <input
+          type="text"
+          id="sl-input"
+          maxlength="60"
+          placeholder="Añadir ítem…"
+          autocomplete="off"
+          aria-label="New item"
+        />
+        <select id="sl-category" aria-label="Category">
+          <option value="general">🛒 General</option>
+          <option value="groceries">🥕 Groceries</option>
+          <option value="hardware">🔧 Hardware</option>
+          <option value="pharmacy">💊 Pharmacy</option>
+          <option value="school">✏️ School</option>
+          <option value="other">📦 Other</option>
+        </select>
+        <button type="submit" class="sl-add-btn" aria-label="Add item">＋</button>
+      </form>
+
+      <div class="sl-actions">
+        <button class="sl-action-btn" onclick="ShoppingList.archiveChecked()" id="sl-archive-btn">
+          🧹 Archive checked
+        </button>
+        <button class="sl-action-btn secondary" onclick="ShoppingList.share()">
+          📤 Share
+        </button>
+      </div>
+
+      <div class="sl-list" id="sl-list">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="sl-empty" id="sl-empty" style="display:none;">
+        <div class="sl-empty-emoji">🧺</div>
+        <div class="sl-empty-text">La lista está vacía.</div>
+        <div class="sl-empty-hint">Add something above to get started.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/debug.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/zs-diag.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/shopping-list.js"></script>
+</body>
+</html>

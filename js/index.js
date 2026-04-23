@@ -343,6 +343,11 @@
       }
     }
 
+    if (typeof ChileanCalendar !== 'undefined') {
+      try { ChileanCalendar.renderHubWidget('calendar-widget'); }
+      catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderHubWidget failed', e.message); }
+    }
+
     if (typeof Debug !== 'undefined') Debug.log('Rendering app cards...');
     try {
       renderAppCards(user);
@@ -639,6 +644,19 @@
 
       var html = '';
 
+      // Diagnostics flush row — small utility for parents / dev
+      if (typeof ZsDiag !== 'undefined') {
+        var pending = ZsDiag.pendingCount();
+        html += '<div id="dash-diag-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding:10px 14px;background:rgba(96,165,250,0.06);border:1.5px dashed rgba(96,165,250,0.2);border-radius:12px;font-size:0.82rem;">' +
+          '<div style="font-weight:700;color:var(--text-muted);">' +
+            '🩺 Diagnostics · <span id="dash-diag-pending">' + pending + '</span> pending on this device' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<button id="dash-diag-flush" class="hub-action-btn secondary" style="padding:6px 12px;font-size:0.78rem;margin:0;" onclick="flushDiagnostics(this)">📤 Flush now</button>' +
+          '</div>' +
+        '</div>';
+      }
+
       if (typeof ActivityLog !== 'undefined') {
         html += '<div style="margin-bottom:24px;">' +
           '<div style="font-weight:800; font-family:var(--font-display); font-size:1.1rem; margin-bottom:12px;">' +
@@ -680,6 +698,14 @@
           html += '</div>';
         }
         html += '</div>';
+      }
+
+      // Recitals section (music recordings via RecitalRecorder)
+      if (typeof RecitalRecorder !== 'undefined') {
+        html += '<div id="dash-recitals" style="margin-bottom:24px;">' +
+          '<div style="font-weight:800; font-family:var(--font-display); font-size:1.1rem; margin-bottom:12px;">🎙 Recitals</div>' +
+          '<div id="dash-recitals-body" style="color:var(--text-muted); font-size:0.85rem;">Loading…</div>' +
+        '</div>';
       }
 
       html += profiles.map(function(p) {
@@ -759,6 +785,11 @@
 
       content.innerHTML = html;
       document.getElementById('dash-overlay').classList.add('active');
+
+      // Populate recitals asynchronously (IndexedDB)
+      if (typeof RecitalRecorder !== 'undefined') {
+        _renderRecitals();
+      }
     };
 
     if (typeof CloudSync !== 'undefined' && CloudSync.online) {
@@ -784,6 +815,101 @@
       finishOpening();
     }
   }
+
+  function _fmtDuration(ms) {
+    var s = Math.round((ms || 0) / 1000);
+    var m = Math.floor(s / 60); s = s % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function _renderRecitals() {
+    var body = document.getElementById('dash-recitals-body');
+    if (!body) return;
+    if (typeof RecitalRecorder === 'undefined') {
+      body.textContent = 'Recitals module not loaded.';
+      return;
+    }
+    RecitalRecorder.list().then(function(recs) {
+      if (!recs || recs.length === 0) {
+        body.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">' +
+          'No recitals recorded yet. Ask your kid to tap the 🎙 button in Little Maestro or Guitar Jam.' +
+        '</p>';
+        return;
+      }
+
+      // Group by user
+      var byUser = {};
+      recs.forEach(function(r) {
+        if (!byUser[r.user]) byUser[r.user] = [];
+        byUser[r.user].push(r);
+      });
+
+      var html = '';
+      Object.keys(byUser).forEach(function(name) {
+        html += '<div style="margin-bottom:16px;">' +
+          '<div style="font-weight:800;font-size:0.95rem;margin-bottom:8px;">' + escHtml(name) + '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:6px;">';
+        byUser[name].forEach(function(r) {
+          var when = _timeAgo(r.createdAt);
+          html +=
+            '<div class="dash-recital" data-id="' + r.id + '" ' +
+              'style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">' +
+              '<span style="font-size:1.2rem;">' + (r.app === 'piano' ? '🎹' : '🎸') + '</span>' +
+              '<div style="flex:1;min-width:0;">' +
+                '<div style="font-weight:700;font-size:0.85rem;">' + escHtml(r.appTitle || r.app) + ' · ' + _fmtDuration(r.duration) + '</div>' +
+                '<div style="font-size:0.75rem;color:var(--text-muted);">' + when + '</div>' +
+              '</div>' +
+              '<button style="padding:6px 10px;border-radius:99px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text);cursor:pointer;font-size:0.78rem;font-weight:700;" ' +
+                      'onclick="playRecital(' + r.id + ')" aria-label="Play recital">▶</button>' +
+              '<button style="padding:6px 10px;border-radius:99px;border:1px solid rgba(248,113,113,0.25);background:rgba(248,113,113,0.08);color:#F87171;cursor:pointer;font-size:0.78rem;font-weight:700;" ' +
+                      'onclick="deleteRecital(' + r.id + ')" aria-label="Delete recital">🗑</button>' +
+            '</div>';
+        });
+        html += '</div></div>';
+      });
+
+      body.innerHTML = html;
+    }).catch(function(e) {
+      body.innerHTML = '<p style="color:#F87171;font-size:0.8rem;font-weight:700;">⚠️ Could not load recitals: ' + escHtml(e.message || e) + '</p>';
+    });
+  }
+
+  window.playRecital = function(id) {
+    if (typeof RecitalRecorder !== 'undefined') RecitalRecorder.play(Number(id));
+  };
+  window.deleteRecital = function(id) {
+    if (typeof RecitalRecorder === 'undefined') return;
+    if (!confirm('Delete this recital?')) return;
+    RecitalRecorder.remove(Number(id)).then(_renderRecitals);
+  };
+
+  window.flushDiagnostics = function(btn) {
+    if (typeof ZsDiag === 'undefined') return;
+    var orig = btn ? btn.textContent : null;
+    if (btn) { btn.textContent = '⏳ Flushing…'; btn.disabled = true; }
+
+    // Two steps: (1) ship local buffer to VPS, (2) ask VPS to run the
+    // scrub-and-push bridge so the digest lands on the diag branch.
+    ZsDiag.flushNow().then(function(r1) {
+      var server = (typeof CloudSync !== 'undefined' && CloudSync.server) ? CloudSync.server : null;
+      if (!server) return Promise.resolve({ status: 'no-server' });
+      return fetch(server + '/api/diag/flush', { method: 'POST' })
+        .then(function(res) { return res.json().catch(function() { return { status: 'ok' }; }); })
+        .catch(function(e) { return { status: 'error', error: e && e.message }; });
+    }).then(function(r2) {
+      if (btn) {
+        btn.textContent = (r2 && r2.status === 'ok') ? '✅ Pushed' : '⚠️ ' + (r2 && r2.status || 'unknown');
+        setTimeout(function() {
+          btn.textContent = orig || '📤 Flush now';
+          btn.disabled = false;
+        }, 2500);
+      }
+      var pendEl = document.getElementById('dash-diag-pending');
+      if (pendEl) pendEl.textContent = String(ZsDiag.pendingCount());
+    }).catch(function(e) {
+      if (btn) { btn.textContent = '❌ Failed'; setTimeout(function() { btn.textContent = orig || '📤 Flush now'; btn.disabled = false; }, 2500); }
+    });
+  };
 
   function _timeAgo(ts) {
     var diff = Date.now() - ts;
