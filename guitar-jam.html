@@ -149,5 +149,13 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js"></script>
   <script src="js/guitar-jam.js"></script>
+  <script src="js/recital.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      if (typeof RecitalRecorder !== 'undefined') {
+        RecitalRecorder.mount({ appId: 'guitar', title: 'Guitar Jam' });
+      }
+    });
+  </script>
 </body>
 </html>

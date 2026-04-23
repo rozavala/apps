@@ -14183,7 +14183,16 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/sync.js?v=2"></script>
 <script src="js/timer.js?v=2"></script>
 <script src="js/learning-checks.js?v=2"></script>
+<script src="js/activity-log.js?v=2"></script>
 <script src="js/lm-bridge.js?v=2"></script>
+<script src="js/recital.js?v=1"></script>
+<script>
+  window.addEventListener('load', function() {
+    if (typeof RecitalRecorder !== 'undefined') {
+      RecitalRecorder.mount({ appId: 'piano', title: 'Little Maestro' });
+    }
+  });
+</script>
 
 </body>
 </html>
