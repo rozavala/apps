@@ -104,6 +104,10 @@
   window.redeemForTime = function() { redeemForTime(); };
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
+  window.addRoutineItem = function(idx, which) { addRoutineItem(idx, which); };
+  window.updateRoutineItem = function(idx, which, j, val) { updateRoutineItem(idx, which, j, val); };
+  window.removeRoutineItem = function(idx, which, j) { removeRoutineItem(idx, which, j); };
+  window.resetRoutine = function(idx, which) { resetRoutine(idx, which); };
   window.updateKidTts = function(idx, field, val) {
     if (typeof ZsTTS === 'undefined') return;
     var profiles = getProfiles();
@@ -1054,6 +1058,7 @@
                          'style="width:100%;">' +
                 '</div>'
               ) : '') +
+              (typeof Routines !== 'undefined' ? _renderRoutinesEditor(p, i) : '') +
             '</div>';
         }).join('') +
       '</div>' +
@@ -1131,6 +1136,89 @@
     profiles[idx].faithVisible = checked;
     saveProfiles(profiles);
     renderAppCards();
+  }
+
+  function _renderRoutinesEditor(profile, idx) {
+    var tpls = Routines.getTemplates(profile.name);
+    function block(which, icon, label) {
+      var items = tpls[which];
+      var rows = items.map(function(it, j) {
+        return '<div class="rn-ed-row" data-which="' + which + '" data-j="' + j + '">' +
+          '<input type="text" class="rn-ed-label" value="' + escHtml(it.label) + '" ' +
+                 'maxlength="80" data-which="' + which + '" data-idx="' + idx + '" data-j="' + j + '" ' +
+                 'oninput="updateRoutineItem(' + idx + ', \'' + which + '\', ' + j + ', this.value)" />' +
+          '<button type="button" class="rn-ed-del" onclick="removeRoutineItem(' + idx + ', \'' + which + '\', ' + j + ')" aria-label="Remove">✕</button>' +
+        '</div>';
+      }).join('');
+      return '<div class="rn-ed-block">' +
+        '<div class="rn-ed-head">' +
+          '<span>' + icon + ' ' + label + '</span>' +
+          '<button type="button" class="rn-ed-reset" onclick="resetRoutine(' + idx + ', \'' + which + '\')" title="Restaurar valores por defecto">↻ Default</button>' +
+        '</div>' +
+        rows +
+        '<div class="rn-ed-row rn-ed-add">' +
+          '<input type="text" id="rn-add-' + which + '-' + idx + '" placeholder="Nueva tarea…" maxlength="80" ' +
+                 'onkeydown="if(event.key===\'Enter\'){event.preventDefault();addRoutineItem(' + idx + ', \'' + which + '\');}" />' +
+          '<button type="button" class="rn-ed-add-btn" onclick="addRoutineItem(' + idx + ', \'' + which + '\')">＋ Añadir</button>' +
+        '</div>' +
+      '</div>';
+    }
+    return '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+      '<label style="font-size:0.9rem; font-weight:700; color:var(--text); display:block; margin-bottom:10px;">📋 Rutinas</label>' +
+      block('morning', '🌅', 'Mañana') +
+      block('evening', '🌙', 'Noche') +
+    '</div>';
+  }
+
+  function addRoutineItem(idx, which) {
+    if (typeof Routines === 'undefined') return;
+    var profiles = getProfiles();
+    var name = profiles[idx] && profiles[idx].name;
+    if (!name) return;
+    var input = document.getElementById('rn-add-' + which + '-' + idx);
+    if (!input) return;
+    var val = input.value.trim();
+    if (!val) return;
+    var tpl = Routines.getTemplates(name)[which];
+    tpl.push({ id: 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5), label: val });
+    Routines.setTemplate(which, tpl, name);
+    input.value = '';
+    renderParentsCorner();
+  }
+
+  function updateRoutineItem(idx, which, j, val) {
+    if (typeof Routines === 'undefined') return;
+    var profiles = getProfiles();
+    var name = profiles[idx] && profiles[idx].name;
+    if (!name) return;
+    var tpl = Routines.getTemplates(name)[which];
+    if (!tpl[j]) return;
+    tpl[j].label = String(val).slice(0, 80);
+    Routines.setTemplate(which, tpl, name);
+    // Don't re-render on every keystroke — the input is already live.
+  }
+
+  function removeRoutineItem(idx, which, j) {
+    if (typeof Routines === 'undefined') return;
+    var profiles = getProfiles();
+    var name = profiles[idx] && profiles[idx].name;
+    if (!name) return;
+    var tpl = Routines.getTemplates(name)[which];
+    if (!tpl[j]) return;
+    if (tpl.length <= 1) { alert('Deja al menos una tarea en esta rutina.'); return; }
+    tpl.splice(j, 1);
+    Routines.setTemplate(which, tpl, name);
+    renderParentsCorner();
+  }
+
+  function resetRoutine(idx, which) {
+    if (typeof Routines === 'undefined') return;
+    var profiles = getProfiles();
+    var name = profiles[idx] && profiles[idx].name;
+    if (!name) return;
+    if (!confirm('¿Restaurar la rutina de la ' + (which === 'morning' ? 'mañana' : 'noche') + ' a los valores por defecto?')) return;
+    Routines.resetTemplate(which, name);
+    renderParentsCorner();
   }
 
   function updateParentPin() {
