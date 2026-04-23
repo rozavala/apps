@@ -26,6 +26,8 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
 | **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
 | **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
+| **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
+| **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone). | [trophy-room.html](trophy-room.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
