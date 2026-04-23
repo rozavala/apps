@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trophy Room 🏆</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/trophy-room.css">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(251,191,36,0.1);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(167,139,250,0.08);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <div class="screen active" id="screen-main">
+      <div class="tr-header">
+        <span class="tr-icon">🏆</span>
+        <h1>Trophy Room</h1>
+        <p id="tr-subtitle">Every badge, every rank, every milestone</p>
+      </div>
+
+      <div class="tr-rank-banner" id="tr-rank-banner"></div>
+
+      <div class="tr-progress-strip" id="tr-progress-strip"></div>
+
+      <div class="tr-section-label">🎮 App Badges</div>
+      <div class="tr-grid" id="tr-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="tr-section-label" id="tr-next-label" style="display:none;">🎯 Next Up</div>
+      <div class="tr-next" id="tr-next"></div>
+    </div>
+  </div>
+
+  <script src="js/debug.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/trophy-room.js"></script>
+</body>
+</html>
