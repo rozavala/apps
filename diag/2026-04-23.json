@@ -3,6 +3,89 @@
   "groups": [
     {
       "entry": {
+        "id": "e_mob5bgy4_z881a5",
+        "ts": 1776928449393,
+        "clientTs": 1776928447372,
+        "kind": "console.warn",
+        "app": "little-maestro",
+        "page": "little-maestro.html",
+        "message": "[SW] Registration failed: ServiceWorker script at https://rozavala.github.io/apps/_assets/sw.js for scope https://rozavala.github.io/apps/ encountered an error during installation.",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1776928449393,
+      "lastTs": 1776928449393,
+      "users": [
+        "u-34d354"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mob55zs4_ieu1uf",
+        "ts": 1776928193917,
+        "clientTs": 1776928191844,
+        "kind": "error",
+        "app": "index",
+        "page": "index.html",
+        "message": "Error: phase2 browser test",
+        "filename": "debugger eval code",
+        "lineno": 2,
+        "colno": 26,
+        "stack": "@debugger eval code:2:26\nsetTimeout handler*@debugger eval code:2:11\n",
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+        "trail": [
+          "test/phase2",
+          "test/phase2"
+        ]
+      },
+      "count": 1,
+      "firstTs": 1776928193917,
+      "lastTs": 1776928193917,
+      "users": [
+        "u-34d354"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mob53560_4bsbpz",
+        "ts": 1776928060904,
+        "clientTs": 1776928058856,
+        "kind": "error",
+        "app": "index",
+        "page": "index.html",
+        "message": "Error: phase2 browser test",
+        "filename": "debugger eval code",
+        "lineno": 7,
+        "colno": 26,
+        "stack": "@debugger eval code:7:26\nsetTimeout handler*@debugger eval code:7:11\n",
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+        "trail": [
+          "test/phase2"
+        ]
+      },
+      "count": 1,
+      "firstTs": 1776928060904,
+      "lastTs": 1776928060904,
+      "users": [
+        "u-34d354"
+      ]
+    },
+    {
+      "entry": {
         "ts": 1776927961579,
         "clientTs": 1776927961544,
         "kind": "test",
