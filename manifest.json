@@ -1,0 +1,27 @@
+{
+  "name": "Zavala Serra Apps",
+  "short_name": "ZS Apps",
+  "description": "Educational app suite for the Zavala Serra kids",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B0B1A",
+  "theme_color": "#7C3AED",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["education", "kids"]
+}
