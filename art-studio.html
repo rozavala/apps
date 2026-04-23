@@ -7,18 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/art-studio.css">
+  <link rel="stylesheet" href="css/copy-the-master.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
   <link rel="apple-touch-icon" href="icons/icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 </head>
 <body>
   <div class="app">
     <!-- Top navigation managed by nav.js -->
     <div class="screen active" id="screen-studio">
+    <button class="cm-entry-btn" onclick="CopyMaster.open()">🖼 Copy the Master</button>
     <div class="tabs-bar">
       <button class="tab active" data-tab="draw">Draw</button>
       <button class="tab" data-tab="learn">Learn</button>
@@ -143,6 +144,11 @@
   </div>
 </div>
 
+    <!-- Copy the Master screen (rendered by js/copy-the-master.js) -->
+    <div class="screen" id="screen-copy-master">
+      <div id="cm-wrap"></div>
+    </div>
+
   <!-- Save Dialog Overlay -->
   <div id="save-dialog" class="modal-overlay">
     <div class="modal-card">
@@ -177,7 +183,7 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js"></script>
   <script src="js/art-studio.js"></script>
+  <script src="js/copy-the-master.js"></script>
   <script src="js/pwa.js"></script>
-
 </body>
 </html>

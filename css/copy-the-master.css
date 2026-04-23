@@ -1,0 +1,132 @@
+/* ============================================================
+   ART STUDIO — Copy the Master
+   ============================================================ */
+
+#screen-copy-master.screen { width: 100%; }
+.cm-wrap, #cm-wrap { width: 100%; display: flex; flex-direction: column; gap: 14px; padding: 12px; }
+
+.cm-entry-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; margin: 10px auto 0;
+  background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(167,139,250,0.12));
+  border: 1.5px solid rgba(236,72,153,0.35);
+  border-radius: 99px;
+  color: var(--text);
+  font-family: var(--font-display); font-weight: 800; font-size: 0.9rem;
+  cursor: pointer; transition: transform 0.2s;
+}
+.cm-entry-btn:hover { transform: translateY(-2px); }
+
+.cm-header {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 4px; flex-wrap: wrap;
+}
+.cm-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem; font-weight: 800; flex: 1; text-align: center;
+}
+.cm-header p, .cm-header .cm-artist {
+  width: 100%; text-align: center;
+  color: var(--text-muted); font-weight: 700; font-size: 0.85rem; margin-top: 4px;
+}
+
+.cm-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.cm-card {
+  padding: 0; background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08); border-radius: 18px;
+  overflow: hidden; cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column;
+  color: var(--text); font-family: var(--font-body); text-align: left;
+}
+.cm-card:hover { transform: translateY(-2px); border-color: #EC4899; }
+.cm-thumb {
+  aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.cm-thumb .cm-thumb-svg { width: 100%; height: 100%; opacity: 0.32; stroke: rgba(255,255,255,0.9) !important; }
+.cm-card-title {
+  padding: 10px 12px 2px; font-family: var(--font-display);
+  font-weight: 800; font-size: 0.95rem; line-height: 1.2;
+}
+.cm-card-artist { padding: 0 12px 12px; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
+
+/* Note card */
+.cm-note {
+  padding: 12px 14px;
+  background: rgba(251,191,36,0.08);
+  border: 1.5px solid rgba(251,191,36,0.22);
+  border-radius: 14px;
+  font-size: 0.88rem; font-weight: 700; line-height: 1.4;
+  color: #FCD34D;
+}
+
+/* Stage (guide under, canvas over) */
+.cm-stage {
+  position: relative; width: 100%; aspect-ratio: 4 / 3;
+  background: #FFFBF0;
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  touch-action: none;
+}
+.cm-guide {
+  position: absolute; inset: 0;
+}
+.cm-guide svg {
+  width: 100%; height: 100%;
+  opacity: 0.22;
+}
+.cm-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Tools */
+.cm-tools {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 10px 6px;
+}
+.cm-palette { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cm-swatch {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.25);
+  cursor: pointer; transition: transform 0.15s, border-color 0.15s;
+  padding: 0;
+}
+.cm-swatch.active { border-color: #FBBF24; transform: scale(1.12); }
+.cm-swatch:focus-visible { outline: 2px solid #FBBF24; outline-offset: 2px; }
+
+.cm-sizes { display: flex; gap: 6px; justify-content: center; }
+.cm-size {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  cursor: pointer; transition: all 0.15s;
+}
+.cm-size.active { border-color: #FBBF24; background: rgba(251,191,36,0.08); }
+.cm-size-dot { border-radius: 50%; background: var(--text); }
+
+.cm-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.cm-action {
+  padding: 8px 14px; border-radius: 99px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-weight: 700; font-size: 0.82rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.cm-action:hover { border-color: #EC4899; color: #EC4899; }
+
+.back-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+  color: var(--text); font-size: 1.2rem; cursor: pointer;
+}
+.back-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
