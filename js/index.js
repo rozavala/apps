@@ -343,6 +343,11 @@
       }
     }
 
+    if (typeof ChileanCalendar !== 'undefined') {
+      try { ChileanCalendar.renderHubWidget('calendar-widget'); }
+      catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderHubWidget failed', e.message); }
+    }
+
     if (typeof Debug !== 'undefined') Debug.log('Rendering app cards...');
     try {
       renderAppCards(user);
