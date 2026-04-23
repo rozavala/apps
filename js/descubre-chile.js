@@ -337,7 +337,11 @@ const QB={
     {q:'¿Quiénes construyeron los Moai?',a:'Los Rapa Nui',o:['Los Rapa Nui','Los Mapuches','Los Incas','Los Diaguitas'], tier:'beginner'}
   ],
   history:[
-    {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar'], tier:'intermediate'},
+    {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar',
+    {q:'¿En qué año se fundó la ciudad de Santiago?',a:'1541',o:['1541','1810','1492','1900'], tier:'intermediate'},
+    {q:'¿Quién fue el primer presidente de Chile?',a:'Manuel Blanco Encalada',o:['Manuel Blanco Encalada','Bernardo O\'Higgins','Arturo Prat','José Miguel Carrera'], tier:'advanced'},
+    {q:'¿Qué combate naval ocurrió el 21 de mayo?',a:'Combate Naval de Iquique',o:['Combate Naval de Iquique','Batalla de Maipú','Desastre de Rancagua','Batalla de Chacabuco'], tier:'beginner'}
+  ], tier:'intermediate'},
     {q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero'], tier:'beginner'},
     {q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano'], tier:'intermediate'},
     {q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541'], tier:'expert'},
@@ -367,7 +371,11 @@ const QB={
     {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Octubre'], tier:'beginner'}
   ],
   nature:[
+    {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble',
+    {q:'¿Cuál es la flor nacional de Chile?',a:'Copihue',o:['Copihue','Rosa','Margarita','Girasol'], tier:'beginner'},
     {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble'], tier:'advanced'},
+    {q:'¿Qué animal nativo es un pequeño ciervo?',a:'Pudú',o:['Pudú','Huemul','Zorro','Guanaco'], tier:'intermediate'}
+  ], tier:'advanced'},
     {q:'¿Qué animal marino se puede avistar frecuentemente en la Reserva Nacional Pingüino de Humboldt?',a:'Delfín',o:['Delfín','Tiburón blanco','Estrella de mar','Caballito de mar'], tier:'expert'},
     {q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros'], tier:'advanced'},
     {q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años'], tier:'expert'},

@@ -3,6 +3,8 @@
    ================================================================ */
 
 const CHORDS = [
+  { name: 'Dm', fullName: 'D Minor', tier: 'intermediate', frets: [-1, -1, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 3, 1], funFact: 'Dm sounds slightly sad or dramatic.' },
+
   // Beginner
   { name: 'Em', fullName: 'E Minor', tier: 'beginner', frets: [0, 2, 2, 0, 0, 0], fingers: [0, 2, 3, 0, 0, 0], funFact: 'Em is one of the easiest guitar chords — just two fingers!' },
   { name: 'Am', fullName: 'A Minor', tier: 'beginner', frets: [-1, 0, 2, 2, 1, 0], fingers: [0, 0, 2, 3, 1, 0], funFact: 'Am sounds a bit sad or mysterious. It is used in millions of songs.' },
@@ -27,6 +29,8 @@ const CHORDS = [
 ];
 
 const SONGS = [
+  { id: 'lalabamba', title: 'La Bamba 2', tier: 'intermediate', bpm: 120, progression: [['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4]] },
+
   { id: 'twinkle', title: 'Twinkle Twinkle', tier: 'beginner', bpm: 90, progression: [['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['C', 4], ['G', 4], ['C', 8]] },
   { id: 'birthday', title: 'Happy Birthday', tier: 'beginner', bpm: 100, progression: [['G', 4], ['G', 4], ['G', 4], ['C', 4], ['C', 4], ['Am', 4], ['G', 4], ['G', 4], ['C', 8]] },
   { id: 'jingle', title: 'Jingle Bells', tier: 'beginner', bpm: 120, progression: [['G', 8], ['G', 8], ['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['G', 8], ['G', 8], ['C', 4], ['G', 4], ['Em', 4], ['G', 8]] },
