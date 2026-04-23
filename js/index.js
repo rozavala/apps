@@ -1198,7 +1198,13 @@
     profiles.push(newUser);
     saveProfiles(profiles);
     closeModal();
-    loginAs(newUser);
+    // Auto-login the new profile: mirror the flow used by the existing
+    // profile-card click handler (setActiveUser → invalidate cache →
+    // showHub). Previous code called a non-existent loginAs() helper,
+    // which threw ReferenceError and left the user on the login screen.
+    setActiveUser(newUser);
+    if (typeof _activeUserCached !== 'undefined') window._activeUserCached = false;
+    showHub();
   }
 
   function requestPinThen(callback) {
