@@ -1,10 +1,33 @@
 {
-  "generatedAt": "2026-04-23T06:59:16.668Z",
+  "generatedAt": "2026-04-23T07:06:03.085Z",
   "windowHours": 72,
   "days": [
     {
       "day": "2026-04-23",
       "groups": [
+        {
+          "entry": {
+            "ts": 1776927961579,
+            "clientTs": 1776927961544,
+            "kind": "test",
+            "app": null,
+            "page": null,
+            "message": "phase1",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": null,
+            "age": null,
+            "guest": false,
+            "ua": "curl/8.5.0",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1776927961579,
+          "lastTs": 1776927961579,
+          "users": []
+        },
         {
           "entry": {
             "ts": 1776927267643,
