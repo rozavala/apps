@@ -575,43 +575,69 @@ const StoryExplorer = (() => {
   }
 
   function readAloud() {
-    if (!('speechSynthesis' in window)) {
+    // Gate on the shared suite-wide TTS module if it's loaded.
+    var useShared = typeof ZsTTS !== 'undefined';
+
+    if (useShared) {
+      if (!ZsTTS.supported()) {
+        alert(lang === 'es'
+          ? 'Este navegador no soporta lectura en voz alta.'
+          : 'This browser does not support read-aloud.');
+        return;
+      }
+      if (!ZsTTS.getSettings().enabled) {
+        alert(lang === 'es'
+          ? 'Lectura en voz alta está desactivada. Un adulto puede activarla en el Dashboard.'
+          : 'Read-aloud is turned off. A grown-up can turn it on in the Dashboard.');
+        return;
+      }
+    } else if (!('speechSynthesis' in window)) {
       alert(lang === 'es'
         ? 'Este navegador no soporta lectura en voz alta.'
         : 'This browser does not support read-aloud.');
       return;
     }
+
     if (_readActive) { stopRead(); return; }
 
     const el = document.getElementById('page-text');
     const text = (el && el.dataset.raw) || (currentStory.pages[currentPage][lang === 'es' ? 'es' : 'en']);
 
-    try { speechSynthesis.cancel(); } catch (e) {}
-
-    _readUtterance = new SpeechSynthesisUtterance(text);
-    _readUtterance.lang = lang === 'es' ? 'es-CL' : 'en-US';
-    _readUtterance.rate = 0.9;
-    _readUtterance.pitch = 1.0;
-
-    _readUtterance.onboundary = function(ev) {
-      if (!_readActive) return;
-      if (ev.name && ev.name !== 'word') return;
-      _highlightAtChar(ev.charIndex);
-    };
-    _readUtterance.onend = function() {
-      _readActive = false;
-      _clearHighlight();
-      _updateReadButton();
-    };
-    _readUtterance.onerror = function() {
-      _readActive = false;
-      _clearHighlight();
-      _updateReadButton();
-    };
-
     _readActive = true;
     _updateReadButton();
-    speechSynthesis.speak(_readUtterance);
+
+    var ttsLang = lang === 'es' ? 'es-CL' : 'en-US';
+    var onBoundary = function(charIndex) {
+      if (!_readActive) return;
+      _highlightAtChar(charIndex);
+    };
+    var onEnd = function() {
+      _readActive = false;
+      _clearHighlight();
+      _updateReadButton();
+    };
+    var onError = onEnd;
+
+    if (useShared) {
+      _readUtterance = ZsTTS.speak(text, {
+        lang: ttsLang,
+        onBoundary: onBoundary,
+        onEnd: onEnd,
+        onError: onError
+      });
+    } else {
+      try { speechSynthesis.cancel(); } catch (e) {}
+      _readUtterance = new SpeechSynthesisUtterance(text);
+      _readUtterance.lang = ttsLang;
+      _readUtterance.rate = 0.9;
+      _readUtterance.onboundary = function(ev) {
+        if (ev.name && ev.name !== 'word') return;
+        onBoundary(ev.charIndex);
+      };
+      _readUtterance.onend = onEnd;
+      _readUtterance.onerror = onError;
+      speechSynthesis.speak(_readUtterance);
+    }
   }
 
   function toggleLanguage() {
