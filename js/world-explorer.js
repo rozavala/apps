@@ -233,6 +233,25 @@ const WorldExplorer = (() => {
     },
     { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [
       {
+        id: 'canada', name: 'Canada', nameEs: 'Canadá', flag: '🇨🇦',
+        capital: 'Ottawa', capitalEs: 'Ottawa',
+        facts: [
+          { en: 'Canada is the second largest country in the world by total area.', es: 'Canadá es el segundo país más grande del mundo por área total.' },
+          { en: 'The maple leaf is the national symbol of Canada.', es: 'La hoja de arce es el símbolo nacional de Canadá.' },
+          { en: 'Canada has the longest coastline of any country in the world.', es: 'Canadá tiene la costa más larga de todos los países del mundo.' },
+          { en: 'Ice hockey is the most popular sport in Canada.', es: 'El hockey sobre hielo es el deporte más popular en Canadá.' }
+        ],
+        landmark: { name: 'CN Tower', nameEs: 'Torre CN', emoji: '🗼' },
+        animal: { name: 'Beaver', nameEs: 'Castor', emoji: '🦫' },
+        quiz: [
+          { q: 'What is the capital of Canada?', qEs: '¿Cuál es la capital de Canadá?', options: ['Toronto', 'Vancouver', 'Montreal', 'Ottawa'], optionsEs: ['Toronto', 'Vancouver', 'Montreal', 'Ottawa'], answer: 3 },
+          { q: 'What symbol is on the Canadian flag?', qEs: '¿Qué símbolo está en la bandera de Canadá?', options: ['Star', 'Maple Leaf', 'Eagle', 'Sun'], optionsEs: ['Estrella', 'Hoja de Arce', 'Águila', 'Sol'], answer: 1 },
+          { q: 'What is a popular sport in Canada?', qEs: '¿Cuál es un deporte popular en Canadá?', options: ['Baseball', 'Soccer', 'Ice Hockey', 'Cricket'], optionsEs: ['Béisbol', 'Fútbol', 'Hockey sobre hielo', 'Críquet'], answer: 2 },
+          { q: 'Canada has the longest what in the world?', qEs: '¿Canadá tiene el/la más largo/a del mundo en qué?', options: ['River', 'Mountain Range', 'Coastline', 'Desert'], optionsEs: ['Río', 'Cordillera', 'Costa', 'Desierto'], answer: 2 },
+          { q: 'What animal is a symbol of Canada?', qEs: '¿Qué animal es un símbolo de Canadá?', options: ['Bear', 'Moose', 'Beaver', 'Wolf'], optionsEs: ['Oso', 'Alce', 'Castor', 'Lobo'], answer: 2 }
+        ]
+      },
+      {
         id: 'mexico', name: 'Mexico', nameEs: 'México', flag: '🇲🇽',
         capital: 'Mexico City', capitalEs: 'Ciudad de México',
         facts: [

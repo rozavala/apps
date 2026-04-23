@@ -66,6 +66,18 @@ const FeManager = (() => {
 
   const SAINTS = [
     {
+      id: 'jose',
+      name: 'San José',
+      dates: 'Siglo I',
+      country: 'Israel 🇮🇱',
+      bio: 'Fue el padre adoptivo de Jesús y esposo de la Virgen María. De oficio carpintero.',
+      questions: [
+        { q: '¿Cuál era el oficio de San José?', a: ['Carpintero', 'Pescador', 'Pastor'], correct: 0 },
+        { q: '¿De quién fue padre adoptivo?', a: ['Jesús', 'Pedro', 'Juan'], correct: 0 },
+        { q: '¿Quién fue su esposa?', a: ['María', 'Isabel', 'Marta'], correct: 0 }
+      ]
+    },
+    {
       id: 'benito',
       name: 'San Benito de Nursia',
       dates: '480–547',
@@ -234,6 +246,16 @@ const FeManager = (() => {
   ];
 
   const HERITAGE = [
+    {
+      id: 'tirana',
+      name: 'Fiesta de La Tirana',
+      location: 'Región de Tarapacá',
+      desc: 'Es una fiesta religiosa popular que se celebra en julio en honor a la Virgen del Carmen.',
+      icon: '🎭',
+      q: '¿A quién se honra en la Fiesta de La Tirana?',
+      a: ['A la Virgen del Carmen', 'A San Pedro', 'A San José'],
+      correct: 0
+    },
     {
       id: 'carmen',
       title: 'Virgen del Carmen',

@@ -10,6 +10,46 @@ const StoryExplorer = (() => {
   // ── Story Library ──
   const STORIES = [
     {
+      id: 'andes_rescue',
+      title: 'The Andes Rescue',
+      titleEs: 'El Rescate en los Andes',
+      tier: 'advanced', ageMin: 8, region: 'south', icon: '🚁',
+      pages: [
+        {
+          en: 'The helicopter flew over the snowy peaks. A climber was lost.',
+          es: 'El helicóptero voló sobre los picos nevados. Un escalador estaba perdido.',
+          vocab: [
+            { word: 'helicopter', wordEs: 'helicóptero' },
+            { word: 'peaks', wordEs: 'picos' }
+          ]
+        },
+        {
+          en: 'The wind was very strong. The pilot had to be careful.',
+          es: 'El viento era muy fuerte. El piloto tenía que ser cuidadoso.',
+          vocab: [
+            { word: 'wind', wordEs: 'viento' },
+            { word: 'strong', wordEs: 'fuerte' }
+          ]
+        },
+        {
+          en: 'Finally, they saw a red tent on the white snow.',
+          es: 'Finalmente, vieron una carpa roja sobre la nieve blanca.',
+          vocab: [
+            { word: 'tent', wordEs: 'carpa' },
+            { word: 'snow', wordEs: 'nieve' }
+          ]
+        },
+        {
+          en: 'The rescue team threw down a rope to help him.',
+          es: 'El equipo de rescate lanzó una cuerda para ayudarlo.',
+          vocab: [
+            { word: 'rope', wordEs: 'cuerda' },
+            { word: 'team', wordEs: 'equipo' }
+          ]
+        }
+      ]
+    },
+    {
       id: 'lost_compass',
       title: 'The Lost Compass',
       titleEs: 'La Brújula Perdida',
