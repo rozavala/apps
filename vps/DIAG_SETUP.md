@@ -104,9 +104,17 @@ Append:
 
 ```
 DIAG_REPO_PATH=/home/rodrigo/zavala-apps-diag
+DIAG_SSH_KEY=/home/rodrigo/.ssh/zs_diag_ed25519
 DIAG_SALT=<run: openssl rand -hex 32>
 DIAG_WINDOW_HOURS=24
 ```
+
+> `DIAG_SSH_KEY` pins the deploy key explicitly so the push works
+> regardless of which user is running `diag-push.js` (root when the
+> Parent Dashboard triggers it via the Express service, `rodrigo`
+> when the systemd timer runs on schedule). Make sure the key file
+> is readable by both users — `chmod 644` on the key plus `chmod 711
+> ~/.ssh` on the parent directory is enough.
 
 > `DIAG_SALT` is used to hash kid names into stable pseudonyms. Keep it
 > private; rotating it renames everyone from that point forward.
@@ -231,15 +239,39 @@ Confirm the path in `/opt/zavala-sync/vps/.env` matches the actual
 location of the diag working tree. Remember: systemd only reads the
 `EnvironmentFile`, not your shell's env.
 
+### `fatal: detected dubious ownership in repository`
+
+Git's protection kicks in when the user running `diag-push.js` isn't
+the owner of `DIAG_REPO_PATH`. This happens when the Express service
+(root) invokes the push but the repo is owned by `rodrigo`. The
+checked-in `diag-push.js` already passes `-c safe.directory=<path>`
+on every call to handle this — make sure `/opt/zavala-sync/` has
+pulled the latest `vps/diag-push.js`.
+
 ### Pushes are rejected
 
 Confirm the deploy key has **Allow write access** checked in GitHub, and
-that `~/.ssh/config` maps `github.com-diag` to that key. Test:
+that `DIAG_SSH_KEY` in the env file points at a key file readable by
+whichever user is running the push. Test as root AND as rodrigo:
 
 ```bash
-ssh -T git@github.com-diag
-# "Hi rozavala/apps! You've successfully authenticated..."
+# As rodrigo (systemd timer path)
+ssh -T -i ~/.ssh/zs_diag_ed25519 git@github.com
+
+# As root (Express service path)
+sudo GIT_SSH_COMMAND='ssh -i /home/rodrigo/.ssh/zs_diag_ed25519 -o IdentitiesOnly=yes' \
+  git -C /home/rodrigo/zavala-apps-diag ls-remote origin diag
 ```
+
+Both should succeed. If root can't read the key, relax its mode:
+
+```bash
+chmod 644 /home/rodrigo/.ssh/zs_diag_ed25519
+chmod 711 /home/rodrigo/.ssh
+```
+
+(`644` is slightly looser than sshd usually allows, but it's a deploy
+key with very narrow repo scope, not a shell login key.)
 
 ### Digest is empty even though kids hit errors
 
