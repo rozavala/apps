@@ -121,6 +121,16 @@
       if (label) label.textContent = Number(val).toFixed(2) + 'x';
     }
   };
+  window.updateKidA11y = function(idx, field, val) {
+    if (typeof ZsA11y === 'undefined') return;
+    var profiles = getProfiles();
+    var name = profiles[idx] && profiles[idx].name;
+    if (!name) return;
+    var patch = {};
+    patch[field] = val;
+    ZsA11y.setSettings(patch, name);
+    renderParentsCorner();
+  };
   window.updateParentPin = function() { updateParentPin(); };
   window.renderChoresList = function() { renderChoresList(); };
   window.completeChore = function(id) { if (typeof ChoresManager !== 'undefined') ChoresManager.completeChore(id); };
@@ -1202,6 +1212,7 @@
                 '</div>'
               ) : '') +
               (typeof Routines !== 'undefined' ? _renderRoutinesEditor(p, i) : '') +
+              (typeof ZsA11y !== 'undefined' ? _renderA11yEditor(p, i) : '') +
             '</div>';
         }).join('') +
       '</div>' +
@@ -1310,6 +1321,48 @@
       '<label style="font-size:0.9rem; font-weight:700; color:var(--text); display:block; margin-bottom:10px;">📋 Routines</label>' +
       block('morning', '🌅', 'Morning') +
       block('evening', '🌙', 'Night') +
+    '</div>';
+  }
+
+  function _renderA11yEditor(profile, idx) {
+    var s = ZsA11y.getSettings(profile.name);
+    var scales = [
+      { k: 's',  label: 'S' },
+      { k: 'm',  label: 'M' },
+      { k: 'l',  label: 'L' },
+      { k: 'xl', label: 'XL' }
+    ];
+    var scaleBtns = scales.map(function(sc) {
+      var on = s.scale === sc.k;
+      return '<button type="button" class="a11y-scale-btn' + (on ? ' active' : '') + '" ' +
+             'onclick="updateKidA11y(' + idx + ', \'scale\', \'' + sc.k + '\')" ' +
+             'aria-pressed="' + (on ? 'true' : 'false') + '">' + sc.label + '</button>';
+    }).join('');
+    var motionVal = s.motion;
+    return '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+      '<label style="font-size:0.9rem; font-weight:700; color:var(--text); display:block; margin-bottom:10px;">♿ Accessibility</label>' +
+
+      '<label style="display:block; font-size:0.78rem; color:var(--text-muted); font-weight:700; margin-bottom:6px;">Text size</label>' +
+      '<div class="a11y-scale-row" role="group" aria-label="Text size for ' + escHtml(profile.name) + '">' + scaleBtns + '</div>' +
+
+      '<label class="pk-toggle" style="font-size:0.9rem; margin-top:12px;">' +
+        '<input type="checkbox" ' + (s.contrast ? 'checked' : '') + ' ' +
+               'onchange="updateKidA11y(' + idx + ', \'contrast\', this.checked)">' +
+        ' 🌓 High-contrast mode' +
+      '</label>' +
+
+      '<label class="pk-toggle" style="font-size:0.9rem; margin-top:8px;">' +
+        '<input type="checkbox" ' + (s.dyslexia ? 'checked' : '') + ' ' +
+               'onchange="updateKidA11y(' + idx + ', \'dyslexia\', this.checked)">' +
+        ' 📖 Dyslexia-friendly font' +
+      '</label>' +
+
+      '<label style="display:block; font-size:0.78rem; color:var(--text-muted); font-weight:700; margin-top:12px; margin-bottom:6px;">Animations</label>' +
+      '<div class="a11y-scale-row" role="group" aria-label="Animations for ' + escHtml(profile.name) + '">' +
+        '<button type="button" class="a11y-scale-btn' + (motionVal === 'auto'   ? ' active' : '') + '" onclick="updateKidA11y(' + idx + ', \'motion\', \'auto\')">Auto</button>' +
+        '<button type="button" class="a11y-scale-btn' + (motionVal === 'normal' ? ' active' : '') + '" onclick="updateKidA11y(' + idx + ', \'motion\', \'normal\')">On</button>' +
+        '<button type="button" class="a11y-scale-btn' + (motionVal === 'reduce' ? ' active' : '') + '" onclick="updateKidA11y(' + idx + ', \'motion\', \'reduce\')">Reduce</button>' +
+      '</div>' +
     '</div>';
   }
 
