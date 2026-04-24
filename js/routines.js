@@ -90,30 +90,87 @@ var Routines = (function() {
     return day;
   }
 
+  // Returns the effective template for a routine. Priority:
+  //   1. Kid-specific override stored under data.templates.<which>
+  //   2. The hardcoded DEFAULTS.<which>
+  // Templates are arrays of { id, label } — same shape as DEFAULTS.
+  function _getTemplate(data, which) {
+    if (data && data.templates && Array.isArray(data.templates[which]) && data.templates[which].length > 0) {
+      return data.templates[which];
+    }
+    return DEFAULTS[which];
+  }
+
+  function getTemplates(userName) {
+    // Used by the Parents Corner editor.
+    var data;
+    if (userName) {
+      var k = STORAGE_PREFIX + userName.toLowerCase().replace(/\s+/g, '_');
+      try { data = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { data = {}; }
+    } else {
+      data = _load() || {};
+    }
+    return {
+      morning: _getTemplate(data, 'morning').slice(),
+      evening: _getTemplate(data, 'evening').slice()
+    };
+  }
+
+  function setTemplate(which, items, userName) {
+    if (which !== 'morning' && which !== 'evening') return;
+    var k = userName
+      ? STORAGE_PREFIX + userName.toLowerCase().replace(/\s+/g, '_')
+      : _storageKey();
+    if (!k) return;
+    var data;
+    try { data = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { data = {}; }
+    if (!data.templates) data.templates = {};
+    data.templates[which] = items.map(function(it, i) {
+      return {
+        id: it && it.id ? String(it.id) : 'custom_' + i + '_' + Date.now().toString(36),
+        label: String(it && it.label ? it.label : '').slice(0, 80)
+      };
+    }).filter(function(it) { return it.label.length > 0; });
+    try { localStorage.setItem(k, JSON.stringify(data)); } catch (e) {}
+  }
+
+  function resetTemplate(which, userName) {
+    var k = userName
+      ? STORAGE_PREFIX + userName.toLowerCase().replace(/\s+/g, '_')
+      : _storageKey();
+    if (!k) return;
+    var data;
+    try { data = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { data = {}; }
+    if (data.templates) delete data.templates[which];
+    try { localStorage.setItem(k, JSON.stringify(data)); } catch (e) {}
+  }
+
   function getStatus() {
     var data = _load();
     if (!data) return null;
     var today = _today();
     var day = _getDay(data, today);
+    var morningTpl = _getTemplate(data, 'morning');
+    var eveningTpl = _getTemplate(data, 'evening');
     return {
       date: today,
       streak: data.streak,
       bestStreak: data.bestStreak,
       morning: {
-        items: DEFAULTS.morning.map(function(c) {
+        items: morningTpl.map(function(c) {
           return { id: c.id, label: c.label, done: day.morning.indexOf(c.id) !== -1 };
         }),
         doneCount: day.morning.length,
-        total: DEFAULTS.morning.length,
-        complete: day.morning.length >= DEFAULTS.morning.length
+        total: morningTpl.length,
+        complete: day.morning.length >= morningTpl.length
       },
       evening: {
-        items: DEFAULTS.evening.map(function(c) {
+        items: eveningTpl.map(function(c) {
           return { id: c.id, label: c.label, done: day.evening.indexOf(c.id) !== -1 };
         }),
         doneCount: day.evening.length,
-        total: DEFAULTS.evening.length,
-        complete: day.evening.length >= DEFAULTS.evening.length
+        total: eveningTpl.length,
+        complete: day.evening.length >= eveningTpl.length
       }
     };
   }
@@ -126,9 +183,10 @@ var Routines = (function() {
     var day = _getDay(data, today);
     var list = day[routine];
     var idx = list.indexOf(itemId);
+    var tpl = _getTemplate(data, routine);
     if (idx === -1) {
-      // Don't add ids that aren't in the template (defence).
-      var isKnown = DEFAULTS[routine].some(function(c) { return c.id === itemId; });
+      // Don't add ids that aren't in the active template (defence).
+      var isKnown = tpl.some(function(c) { return c.id === itemId; });
       if (!isKnown) return getStatus();
       list.push(itemId);
     } else {
@@ -136,8 +194,10 @@ var Routines = (function() {
     }
 
     // Update streak when BOTH routines hit 100% for the day.
-    var bothDone = day.morning.length >= DEFAULTS.morning.length &&
-                   day.evening.length >= DEFAULTS.evening.length;
+    var morningTpl = _getTemplate(data, 'morning');
+    var eveningTpl = _getTemplate(data, 'evening');
+    var bothDone = day.morning.length >= morningTpl.length &&
+                   day.evening.length >= eveningTpl.length;
     if (bothDone && data.lastFullDay !== today) {
       if (data.lastFullDay === _yesterday()) {
         data.streak = (data.streak || 0) + 1;
@@ -281,6 +341,10 @@ var Routines = (function() {
     getActiveRoutine: getActiveRoutine,
     toggle: toggle,
     renderHubWidget: renderHubWidget,
+    getTemplates: getTemplates,
+    setTemplate: setTemplate,
+    resetTemplate: resetTemplate,
+    DEFAULTS: DEFAULTS,
     _open: _open,
     _close: _close,
     _toggle: _toggle
