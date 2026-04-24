@@ -45,7 +45,7 @@ A core feature of the Zavala Serra Apps suite is helping kids develop healthy di
 - **Rango de Explorador Unificado (Unified Explorer Rank)**: Gana rangos en toda la suite (Cadete → Leyenda) al dominar diferentes materias. (Earn ranks across the entire app suite (Cadet → Legend) by mastering different subjects).
 - **Dificultad Adaptativa (Age-Adaptive Difficulty)**: El contenido se ajusta automáticamente a la edad de cada niño para un desafío adecuado. (Content automatically adjusts to each child's age for an appropriate challenge level).
 - **Seguimiento de Progreso (Progress Tracking)**: Todas las estrellas, niveles y puntuaciones se guardan localmente usando `localStorage`. (All stars, levels, and scores are saved locally using `localStorage`).
-- **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso en todas las aplicaciones de la suite. (A secure area to monitor progress across all apps in the suite).
+- **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso y balance con insights para cada niño. (A secure area to monitor progress and balance with insights for each child).
 - **Diseño Seguro (Safe by Design)**: Sin llamadas API externas, sin contenido dinámico de terceros y sin funciones generadas por el usuario. (No external API calls, no dynamic third-party content, and no user-generated features).
 
 ## 📜 Filosofía de Contenido (Content Philosophy)
@@ -57,6 +57,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Insights para Padres (Parent Insights)**: Monitorea el balance de actividades y recibe sugerencias para cada perfil. (Monitor activity balance and receive nudges for each profile).
 - **¡Nueva App "Book & Movie Check"!**: Averigua si un libro o película es adecuado para nuestra familia. (Find out if a book or movie is right for our family).
 - **Nuevo Laboratorio "Magnets" en Lab Explorer**: Aprende sobre el magnetismo con experimentos interactivos. (Learn about magnetism with interactive experiments in the new Magnets lab).
 - **¡Nueva App "Guess Quest"!**: Desarrolla habilidades de deducción adivinando palabras ocultas en inglés y español. (Build deduction skills by guessing hidden words in English and Spanish).
