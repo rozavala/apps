@@ -125,3 +125,101 @@ body {
   border: none; width: 100%;
 }
 .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
+
+/* ============================================================
+   SEASONAL GRAND TOURS
+   ============================================================ */
+.quest-tour {
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 18px 0;
+}
+.quest-tour.current {
+  background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(167,139,250,0.06));
+  border-color: rgba(251,191,36,0.35);
+}
+.quest-tour.done {
+  background: linear-gradient(135deg, rgba(52,211,153,0.1), rgba(251,191,36,0.06));
+  border-color: rgba(52,211,153,0.35);
+}
+.quest-tour-head {
+  font-family: var(--font-display, 'Baloo 2');
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--text-primary, #F0EDFF);
+  margin-bottom: 6px;
+}
+.quest-tour.current .quest-tour-head { color: #FBBF24; }
+.quest-tour-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted, #8B86B0);
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+.quest-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quest-goal {
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.18);
+  border-radius: 10px;
+}
+.quest-goal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary, #F0EDFF);
+}
+.quest-goal-num {
+  font-family: var(--font-display, 'Baloo 2');
+  font-weight: 800;
+  color: #FBBF24;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.quest-goal-bar {
+  margin-top: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.quest-goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FBBF24, #EC4899);
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.quest-tour-done {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.28);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #34D399;
+  text-align: center;
+}
+.quest-tours-browse {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255,255,255,0.08);
+}
+.quest-tours-head {
+  font-family: var(--font-display, 'Baloo 2');
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-muted, #8B86B0);
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
