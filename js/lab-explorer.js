@@ -66,6 +66,17 @@ const LabExplorer = (() => {
       ]
     },
     {
+      id: 'weather',
+      title: 'Weather Station',
+      icon: '☁️',
+      desc: 'Identify clouds, log the weather outside, and watch your month.',
+      category: 'earth_science',
+      ageMin: 5,
+      experiments: [
+        { id: 'log', title: 'Log Today\'s Weather', instruction: 'Observe the sky outside. Pick what you see, then tap Save.' },
+      ]
+    },
+    {
       id: 'astronomy',
       title: 'Night Sky',
       icon: '🌙',
@@ -207,9 +218,218 @@ const LabExplorer = (() => {
       _initSimpleMachinesLab();
     } else if (labId === 'magnets' && expId === 'magnetism') {
       _initMagnetsLab();
+    } else if (labId === 'weather' && expId === 'log') {
+      _initWeatherLab();
     } else {
       _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
+  }
+
+  // ── Weather Station ──────────────────────────────────────────
+  // Not a canvas experiment — renders a DOM form into #exp-controls
+  // and a month-at-a-glance chart in #exp-journal. Observations live
+  // under zs_lab_<userkey>.weather.log[] as
+  //   { date:"YYYY-MM-DD", cloud:"cumulus", wind:1..5,
+  //     precip:"none|rain|snow|storm", tempC:number|null, note:"" }
+  // Cloud choices intentionally limited to the four common types so
+  // kids build recognition before nuance.
+  var _WEATHER_CLOUDS = [
+    { id: 'clear',     icon: '☀️', label: 'Clear' },
+    { id: 'cumulus',   icon: '⛅',  label: 'Cumulus (puffy)' },
+    { id: 'stratus',   icon: '🌫️', label: 'Stratus (flat grey)' },
+    { id: 'cirrus',    icon: '🌤️', label: 'Cirrus (wispy high)' },
+    { id: 'nimbus',    icon: '☁️',  label: 'Nimbus (rain)' }
+  ];
+  var _WEATHER_PRECIP = [
+    { id: 'none',  icon: '🌤️', label: 'None' },
+    { id: 'rain',  icon: '🌧️', label: 'Rain' },
+    { id: 'snow',  icon: '🌨️', label: 'Snow' },
+    { id: 'storm', icon: '⛈️', label: 'Storm' }
+  ];
+  // Simplified kid-observable Beaufort: 0=calm → 5=strong.
+  var _WEATHER_WIND = [
+    { v: 0, icon: '🍃', label: 'Calm — smoke rises straight' },
+    { v: 1, icon: '🌬️', label: 'Light — leaves rustle' },
+    { v: 2, icon: '🌬️', label: 'Breeze — flags flap' },
+    { v: 3, icon: '💨', label: 'Strong — small branches sway' },
+    { v: 4, icon: '💨', label: 'Gale — hard to walk' },
+    { v: 5, icon: '🌪️', label: 'Storm — branches break' }
+  ];
+
+  function _weatherToday() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function _weatherLoad() {
+    var d = _load();
+    if (!d.weather) d.weather = { log: [] };
+    if (!Array.isArray(d.weather.log)) d.weather.log = [];
+    return d;
+  }
+
+  // In-memory pick state (reset each time the lab opens).
+  var _weatherPick = null;
+
+  function _initWeatherLab() {
+    // Blank the canvas — weather lab is DOM-only.
+    ctx.fillStyle = '#0e1f2e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#60A5FA';
+    ctx.font = 'bold 24px Baloo 2';
+    ctx.textAlign = 'center';
+    ctx.fillText('☁️ ☀️ 🌧️ ⛈️', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.font = 'bold 14px Nunito';
+    ctx.fillStyle = '#A8C5E8';
+    ctx.fillText('Observe the sky outside, then log it below.', canvas.width / 2, canvas.height / 2 + 20);
+
+    _weatherPick = { date: _weatherToday(), cloud: null, wind: null, precip: null, tempC: null };
+    _renderWeatherForm();
+    _renderWeatherJournal();
+    document.getElementById('next-btn').style.display = 'none';
+  }
+
+  function _renderWeatherForm() {
+    var controls = document.getElementById('exp-controls');
+    if (!controls) return;
+
+    function chips(items, field, getV, getLabel, getIcon) {
+      return items.map(function(it) {
+        var v = getV(it);
+        var sel = _weatherPick[field] === v ? ' sel' : '';
+        return '<button type="button" class="wx-chip' + sel + '" ' +
+          'onclick="LabExplorer._pickWeather(\'' + field + '\', ' + (typeof v === 'number' ? v : '\'' + v + '\'') + ')">' +
+          '<span class="wx-chip-ic">' + getIcon(it) + '</span>' +
+          '<span class="wx-chip-lbl">' + getLabel(it) + '</span>' +
+        '</button>';
+      }).join('');
+    }
+
+    var cloudChips = chips(_WEATHER_CLOUDS, 'cloud', function(c){return c.id;}, function(c){return c.label;}, function(c){return c.icon;});
+    var precipChips = chips(_WEATHER_PRECIP, 'precip', function(c){return c.id;}, function(c){return c.label;}, function(c){return c.icon;});
+    var windChips = _WEATHER_WIND.map(function(w) {
+      var sel = _weatherPick.wind === w.v ? ' sel' : '';
+      return '<button type="button" class="wx-chip wx-wind' + sel + '" onclick="LabExplorer._pickWeather(\'wind\', ' + w.v + ')">' +
+        '<span class="wx-chip-ic">' + w.icon + '</span>' +
+        '<span class="wx-chip-lbl">' + w.v + ' · ' + w.label + '</span>' +
+      '</button>';
+    }).join('');
+
+    var ready = _weatherPick.cloud && _weatherPick.precip !== null && _weatherPick.wind !== null;
+
+    controls.innerHTML =
+      '<div class="wx-form">' +
+        '<div class="wx-date">📅 ' + _weatherPick.date + '</div>' +
+        '<div class="wx-group"><div class="wx-grp-title">☁️ Clouds</div><div class="wx-chips">' + cloudChips + '</div></div>' +
+        '<div class="wx-group"><div class="wx-grp-title">💧 Precipitation</div><div class="wx-chips">' + precipChips + '</div></div>' +
+        '<div class="wx-group"><div class="wx-grp-title">🌬️ Wind (0–5)</div><div class="wx-chips wx-chips-col">' + windChips + '</div></div>' +
+        '<div class="wx-group">' +
+          '<div class="wx-grp-title">🌡️ Temperature (°C, optional)</div>' +
+          '<input type="number" id="wx-temp" class="wx-temp" min="-30" max="50" step="1" ' +
+                 'placeholder="e.g. 18" value="' + (_weatherPick.tempC != null ? _weatherPick.tempC : '') + '" ' +
+                 'oninput="LabExplorer._pickWeather(\'tempC\', this.value === \'\' ? null : parseInt(this.value,10))" />' +
+        '</div>' +
+        '<div class="wx-actions">' +
+          '<button class="action-btn btn-primary" ' + (ready ? '' : 'disabled') + ' ' +
+                  'onclick="LabExplorer._saveWeather()">💾 Save observation</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function _renderWeatherJournal() {
+    var journal = document.getElementById('exp-journal');
+    if (!journal) return;
+    var data = _weatherLoad();
+    var log = data.weather.log.slice().sort(function(a, b) {
+      return (b.date || '').localeCompare(a.date || '');
+    });
+    if (log.length === 0) {
+      journal.innerHTML = '<p class="wx-empty">No observations yet. Pick today\'s weather above and tap Save — your log will show up here.</p>';
+      return;
+    }
+
+    // Last-30-days mini cloud-tally
+    var counts = { clear: 0, cumulus: 0, stratus: 0, cirrus: 0, nimbus: 0 };
+    var precipDays = 0;
+    var thirtyAgoMs = Date.now() - 30 * 24 * 3600 * 1000;
+    log.forEach(function(e) {
+      var t = Date.parse(e.date + 'T00:00:00');
+      if (!isFinite(t) || t < thirtyAgoMs) return;
+      if (counts[e.cloud] != null) counts[e.cloud]++;
+      if (e.precip && e.precip !== 'none') precipDays++;
+    });
+    var tallyHtml = _WEATHER_CLOUDS.map(function(c) {
+      var n = counts[c.id] || 0;
+      return '<div class="wx-tally"><span>' + c.icon + '</span><span class="wx-tally-n">' + n + '</span><span class="wx-tally-lbl">' + c.label.split(' ')[0] + '</span></div>';
+    }).join('');
+
+    var recentHtml = log.slice(0, 14).map(function(e) {
+      var cloud = _WEATHER_CLOUDS.filter(function(c){return c.id === e.cloud;})[0];
+      var precip = _WEATHER_PRECIP.filter(function(p){return p.id === e.precip;})[0];
+      var tempTxt = (e.tempC != null && !isNaN(e.tempC)) ? (' · ' + e.tempC + '°C') : '';
+      return '<div class="wx-row">' +
+        '<span class="wx-date-sm">' + e.date + '</span>' +
+        '<span class="wx-row-ic">' + (cloud ? cloud.icon : '') + (precip && precip.id !== 'none' ? ' ' + precip.icon : '') + '</span>' +
+        '<span class="wx-row-txt">wind ' + (e.wind != null ? e.wind : '–') + tempTxt + '</span>' +
+      '</div>';
+    }).join('');
+
+    journal.innerHTML =
+      '<div class="wx-journal">' +
+        '<div class="wx-j-head">📊 Last 30 days · ' + precipDays + ' rainy/snowy</div>' +
+        '<div class="wx-tallies">' + tallyHtml + '</div>' +
+        '<div class="wx-j-head" style="margin-top:10px;">📘 Recent observations</div>' +
+        '<div class="wx-list">' + recentHtml + '</div>' +
+      '</div>';
+  }
+
+  function _pickWeather(field, value) {
+    if (!_weatherPick) return;
+    _weatherPick[field] = value;
+    _renderWeatherForm();
+  }
+
+  function _saveWeather() {
+    if (!_weatherPick || !_weatherPick.cloud) return;
+    var data = _weatherLoad();
+    var today = _weatherPick.date;
+    // Replace today's entry if one exists (keeps the log tidy).
+    data.weather.log = data.weather.log.filter(function(e) { return e.date !== today; });
+    data.weather.log.push({
+      date: today,
+      cloud: _weatherPick.cloud,
+      wind: _weatherPick.wind,
+      precip: _weatherPick.precip,
+      tempC: _weatherPick.tempC,
+      ts: Date.now()
+    });
+    // Cap the log to last 120 entries to keep localStorage lean.
+    if (data.weather.log.length > 120) {
+      data.weather.log = data.weather.log
+        .sort(function(a, b) { return (a.date || '').localeCompare(b.date || ''); })
+        .slice(-120);
+    }
+
+    // Count this as one completed experiment for the existing star system.
+    var total = (data.totalStars || 0) + 1;
+    data.totalStars = total;
+    _save(data);
+
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      var cloud = _WEATHER_CLOUDS.filter(function(c){return c.id === _weatherPick.cloud;})[0];
+      ActivityLog.log('Lab Explorer', '☁️',
+        'Logged weather: ' + (cloud ? cloud.label : _weatherPick.cloud) +
+        (_weatherPick.tempC != null ? ' · ' + _weatherPick.tempC + '°C' : ''));
+    }
+    if (typeof showConfetti === 'function') showConfetti();
+
+    // Re-render to reflect the new entry and enable Next.
+    _weatherPick = { date: _weatherToday(), cloud: null, wind: null, precip: null, tempC: null };
+    _renderWeatherForm();
+    _renderWeatherJournal();
+    document.getElementById('exp-stars').textContent = '⭐ ' + (stars + 1);
+    stars++;
+    document.getElementById('next-btn').style.display = '';
   }
 
   function _renderPlaceholder(text) {
@@ -1320,6 +1540,9 @@ const LabExplorer = (() => {
     startLab,
     nextExperiment,
     backToTopics,
-    getStats
+    getStats,
+    // Weather Station handlers — inline onclicks call these
+    _pickWeather: _pickWeather,
+    _saveWeather: _saveWeather
   };
 })();
