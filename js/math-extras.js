@@ -239,36 +239,97 @@ var MathExtras = (function() {
      WORD PROBLEMS — age-graded bilingual banks
      ============================================================ */
   var Words = (function() {
-    // 5 problems per tier for v1. Plain text, no free-form input —
-    // we generate plausible distractors and surface them as choices.
+    // 20 problems per tier. Each session draws a random 5 so kids get
+    // variety across plays without the bank ever feeling exhausted.
+    // Chilean context used where natural (pesos, empanadas, regions).
     var BANK = {
       cadet: [
-        { en: 'Lucía has 3 apples and picks 2 more. How many apples now?', es: 'Lucía tiene 3 manzanas y recoge 2 más. ¿Cuántas tiene?', answer: 5, unit: 'apples', unitEs: 'manzanas' },
-        { en: 'A dog has 4 legs. How many legs do 2 dogs have?', es: 'Un perro tiene 4 patas. ¿Cuántas patas tienen 2 perros?', answer: 8, unit: 'legs', unitEs: 'patas' },
-        { en: 'You have 10 crayons and lose 3. How many are left?', es: 'Tienes 10 crayones y pierdes 3. ¿Cuántos te quedan?', answer: 7, unit: 'crayons', unitEs: 'crayones' },
-        { en: 'There are 6 birds. 2 fly away. How many remain?', es: 'Hay 6 pájaros. 2 se van volando. ¿Cuántos quedan?', answer: 4, unit: 'birds', unitEs: 'pájaros' },
-        { en: 'A box has 2 rows of 3 cookies. How many cookies total?', es: 'Una caja tiene 2 filas de 3 galletas. ¿Cuántas galletas?', answer: 6, unit: 'cookies', unitEs: 'galletas' }
+        { en: 'Lucía has 3 apples and picks 2 more. How many apples now?', es: 'Lucía tiene 3 manzanas y recoge 2 más. ¿Cuántas tiene?', answer: 5 },
+        { en: 'A dog has 4 legs. How many legs do 2 dogs have?', es: 'Un perro tiene 4 patas. ¿Cuántas patas tienen 2 perros?', answer: 8 },
+        { en: 'You have 10 crayons and lose 3. How many are left?', es: 'Tienes 10 crayones y pierdes 3. ¿Cuántos te quedan?', answer: 7 },
+        { en: 'There are 6 birds. 2 fly away. How many remain?', es: 'Hay 6 pájaros. 2 se van volando. ¿Cuántos quedan?', answer: 4 },
+        { en: 'A box has 2 rows of 3 cookies. How many cookies total?', es: 'Una caja tiene 2 filas de 3 galletas. ¿Cuántas galletas?', answer: 6 },
+        { en: 'You count 5 ducks. 4 more arrive. How many ducks?', es: 'Cuentas 5 patos. Llegan 4 más. ¿Cuántos patos?', answer: 9 },
+        { en: 'A plate has 8 sopaipillas. You eat 3. How many are left?', es: 'Un plato tiene 8 sopaipillas. Te comes 3. ¿Cuántas quedan?', answer: 5 },
+        { en: 'A ladybug has 2 wings. How many wings do 5 ladybugs have?', es: 'Una mariquita tiene 2 alas. ¿Cuántas alas tienen 5 mariquitas?', answer: 10 },
+        { en: 'You see 4 stars, then 3 more. How many stars altogether?', es: 'Ves 4 estrellas, luego 3 más. ¿Cuántas en total?', answer: 7 },
+        { en: 'A week has how many days?', es: '¿Cuántos días tiene una semana?', answer: 7 },
+        { en: 'How many corners does a triangle have?', es: '¿Cuántas esquinas tiene un triángulo?', answer: 3 },
+        { en: 'How many sides does a square have?', es: '¿Cuántos lados tiene un cuadrado?', answer: 4 },
+        { en: '2 red balloons + 3 blue balloons = ? balloons', es: '2 globos rojos + 3 globos azules = ? globos', answer: 5 },
+        { en: 'Mateo eats 2 empanadas, Ana eats 2. How many together?', es: 'Mateo come 2 empanadas y Ana come 2. ¿Cuántas juntos?', answer: 4 },
+        { en: 'A cat family has 1 mother and 4 kittens. How many cats?', es: 'Una familia de gatos: 1 mamá y 4 gatitos. ¿Cuántos gatos?', answer: 5 },
+        { en: 'You have 9 stickers and give away 5. How many left?', es: 'Tienes 9 stickers y regalas 5. ¿Cuántos te quedan?', answer: 4 },
+        { en: 'How many fingers on two hands?', es: '¿Cuántos dedos hay en dos manos?', answer: 10 },
+        { en: 'A basket has 7 lemons. You add 2 more. How many?', es: 'Una canasta tiene 7 limones. Agregas 2 más. ¿Cuántos hay?', answer: 9 },
+        { en: 'A bike has 2 wheels. How many wheels on 3 bikes?', es: 'Una bici tiene 2 ruedas. ¿Cuántas ruedas tienen 3 bicis?', answer: 6 },
+        { en: 'There are 10 ants. 4 leave. How many ants stay?', es: 'Hay 10 hormigas. Se van 4. ¿Cuántas quedan?', answer: 6 }
       ],
       explorer: [
-        { en: 'A bus holds 18 kids. 7 got off at school. How many remain?', es: 'Un bus lleva 18 niños. 7 bajaron en el colegio. ¿Cuántos quedan?', answer: 11, unit: 'kids', unitEs: 'niños' },
-        { en: 'Four friends share 20 empanadas equally. How many each?', es: 'Cuatro amigos comparten 20 empanadas. ¿Cuántas cada uno?', answer: 5, unit: 'each', unitEs: 'cada uno' },
-        { en: 'A class has 12 boys and 15 girls. How many kids in total?', es: 'Una clase tiene 12 niños y 15 niñas. ¿Cuántos en total?', answer: 27, unit: 'kids', unitEs: 'niños' },
-        { en: 'You walk 3 blocks, then 5 more, then back 2. How many blocks from home?', es: 'Caminas 3 cuadras, luego 5 más, y regresas 2. ¿Qué tan lejos de casa?', answer: 6, unit: 'blocks', unitEs: 'cuadras' },
-        { en: 'A book has 60 pages. You read 25. How many pages left?', es: 'Un libro tiene 60 páginas. Lees 25. ¿Cuántas faltan?', answer: 35, unit: 'pages', unitEs: 'páginas' }
+        { en: 'A bus holds 18 kids. 7 got off at school. How many remain?', es: 'Un bus lleva 18 niños. 7 bajaron en el colegio. ¿Cuántos quedan?', answer: 11 },
+        { en: 'Four friends share 20 empanadas equally. How many each?', es: 'Cuatro amigos comparten 20 empanadas. ¿Cuántas cada uno?', answer: 5 },
+        { en: 'A class has 12 boys and 15 girls. How many kids in total?', es: 'Una clase tiene 12 niños y 15 niñas. ¿Cuántos en total?', answer: 27 },
+        { en: 'You walk 3 blocks, then 5 more, then back 2. How many blocks from home?', es: 'Caminas 3 cuadras, luego 5 más, y regresas 2. ¿Qué tan lejos de casa?', answer: 6 },
+        { en: 'A book has 60 pages. You read 25. How many pages left?', es: 'Un libro tiene 60 páginas. Lees 25. ¿Cuántas faltan?', answer: 35 },
+        { en: 'A pack has 24 crayons. You buy 2 packs. How many crayons?', es: 'Una caja tiene 24 crayones. Compras 2 cajas. ¿Cuántos crayones?', answer: 48 },
+        { en: 'Juan is 9. His sister is 3 years younger. How old is she?', es: 'Juan tiene 9. Su hermana es 3 años menor. ¿Cuántos años tiene ella?', answer: 6 },
+        { en: 'A cookie jar has 30 cookies. You eat 2 a day for 5 days. How many left?', es: 'Un tarro tiene 30 galletas. Comes 2 al día por 5 días. ¿Cuántas quedan?', answer: 20 },
+        { en: 'A train leaves with 45 people. 12 get off. How many stay?', es: 'Un tren sale con 45 personas. Bajan 12. ¿Cuántos quedan?', answer: 33 },
+        { en: 'Clara saves $500 each week. How much after 4 weeks?', es: 'Clara ahorra $500 cada semana. ¿Cuánto tiene después de 4 semanas?', answer: 2000 },
+        { en: 'A soccer team has 11 players. Two teams play. How many total?', es: 'Un equipo de fútbol tiene 11 jugadores. Juegan 2 equipos. ¿Cuántos en total?', answer: 22 },
+        { en: 'A pizza is cut into 8 slices. 3 friends eat 2 each. How many slices left?', es: 'Una pizza tiene 8 rebanadas. 3 amigos comen 2 cada uno. ¿Cuántas rebanadas quedan?', answer: 2 },
+        { en: 'You have 3 groups of 6 marbles. How many marbles?', es: 'Tienes 3 grupos de 6 bolitas. ¿Cuántas bolitas hay?', answer: 18 },
+        { en: 'A year has 12 months. Half a year has how many?', es: 'Un año tiene 12 meses. Medio año ¿cuántos?', answer: 6 },
+        { en: 'A box holds 9 manzanas. You have 3 boxes. Total?', es: 'Una caja tiene 9 manzanas. Tienes 3 cajas. ¿Total?', answer: 27 },
+        { en: 'You pay $800 and get $200 back. What did it cost?', es: 'Pagas $800 y te devuelven $200. ¿Cuánto costó?', answer: 600 },
+        { en: 'A baker makes 40 breads in the morning and 35 in the evening. Total?', es: 'Un panadero hace 40 panes en la mañana y 35 en la tarde. ¿Total?', answer: 75 },
+        { en: 'How many days are in 2 weeks?', es: '¿Cuántos días hay en 2 semanas?', answer: 14 },
+        { en: 'Six friends each catch 3 fish. How many fish together?', es: 'Seis amigos pescan 3 peces cada uno. ¿Cuántos peces juntos?', answer: 18 },
+        { en: 'A classroom has 5 rows of 6 desks. How many desks?', es: 'Una sala tiene 5 filas de 6 pupitres. ¿Cuántos pupitres?', answer: 30 }
       ],
       pilot: [
-        { en: 'A shirt costs $8,000. You have $20,000. How much change after buying 2 shirts?', es: 'Una polera cuesta $8.000. Tienes $20.000. ¿Cuánto vuelto después de comprar 2 poleras?', answer: 4000, unit: 'CLP', unitEs: 'CLP' },
-        { en: 'Pizza has 8 slices. 3 friends eat 2 each. How many slices left?', es: 'Una pizza tiene 8 rebanadas. 3 amigos comen 2 cada uno. ¿Cuántas rebanadas quedan?', answer: 2, unit: 'slices', unitEs: 'rebanadas' },
-        { en: 'A train travels 60 km/h for 3 hours. How far did it go?', es: 'Un tren va a 60 km/h durante 3 horas. ¿Qué distancia recorrió?', answer: 180, unit: 'km', unitEs: 'km' },
-        { en: '3 × 7 + 2 = ?', es: '3 × 7 + 2 = ?', answer: 23, unit: '', unitEs: '' },
-        { en: 'A recipe needs 3/4 cup sugar. You double it. How many cups?', es: 'Una receta usa 3/4 taza de azúcar. La duplicas. ¿Cuántas tazas?', answer: 1.5, unit: 'cups', unitEs: 'tazas' }
+        { en: 'A shirt costs $8,000. You have $20,000. How much change after buying 2 shirts?', es: 'Una polera cuesta $8.000. Tienes $20.000. ¿Cuánto vuelto después de comprar 2 poleras?', answer: 4000 },
+        { en: 'Pizza has 8 slices. 3 friends eat 2 each. How many slices left?', es: 'Una pizza tiene 8 rebanadas. 3 amigos comen 2 cada uno. ¿Cuántas rebanadas quedan?', answer: 2 },
+        { en: 'A train travels 60 km/h for 3 hours. How far did it go?', es: 'Un tren va a 60 km/h durante 3 horas. ¿Qué distancia recorrió?', answer: 180 },
+        { en: '3 × 7 + 2 = ?', es: '3 × 7 + 2 = ?', answer: 23 },
+        { en: 'A recipe needs 3/4 cup sugar. You double it. How many cups?', es: 'Una receta usa 3/4 taza de azúcar. La duplicas. ¿Cuántas tazas?', answer: 1.5 },
+        { en: '8 × 9 = ?', es: '8 × 9 = ?', answer: 72 },
+        { en: '144 ÷ 12 = ?', es: '144 ÷ 12 = ?', answer: 12 },
+        { en: 'A movie is 120 minutes long. How many hours?', es: 'Una película dura 120 minutos. ¿Cuántas horas?', answer: 2 },
+        { en: '5 boxes each with 24 pencils — how many pencils?', es: '5 cajas con 24 lápices cada una. ¿Cuántos lápices?', answer: 120 },
+        { en: 'A tank has 50 L. You use 12 L. How much remains?', es: 'Un estanque tiene 50 L. Usas 12 L. ¿Cuánto queda?', answer: 38 },
+        { en: 'A rectangle is 9 by 4. Perimeter?', es: 'Un rectángulo mide 9 por 4. ¿Perímetro?', answer: 26 },
+        { en: 'You read 35 pages a day for 4 days. How many pages?', es: 'Lees 35 páginas al día durante 4 días. ¿Cuántas páginas?', answer: 140 },
+        { en: 'A water bottle is 750 mL. Two bottles = ? mL', es: 'Una botella tiene 750 mL. ¿Dos botellas cuántos mL?', answer: 1500 },
+        { en: 'Half of 86 is ?', es: 'La mitad de 86 es ?', answer: 43 },
+        { en: 'A farmer has 6 cows. Each gives 15 L milk/day. Total per day?', es: 'Un granjero tiene 6 vacas. Cada una da 15 L de leche/día. ¿Total diario?', answer: 90 },
+        { en: 'A bus ticket costs $450. How much for 6 tickets?', es: 'Un pasaje cuesta $450. ¿Cuánto cuestan 6 pasajes?', answer: 2700 },
+        { en: 'A year has 365 days. How many weeks approximately? (divide by 7, round down)', es: 'Un año tiene 365 días. ¿Cuántas semanas aprox? (divide por 7, redondea hacia abajo)', answer: 52 },
+        { en: 'If 1 kg = 1,000 g, then 2.5 kg = ? g', es: 'Si 1 kg = 1.000 g, entonces 2,5 kg = ? g', answer: 2500 },
+        { en: '7 × 11 − 5 = ?', es: '7 × 11 − 5 = ?', answer: 72 },
+        { en: 'A rope is 8 m. You cut 1/4 off. How many metres are cut?', es: 'Una cuerda mide 8 m. Cortas 1/4. ¿Cuántos metros cortas?', answer: 2 }
       ],
       commander: [
-        { en: 'A store marks a $12,000 toy 25% off. What is the sale price?', es: 'Una tienda rebaja un juguete de $12.000 un 25%. ¿Precio final?', answer: 9000, unit: 'CLP', unitEs: 'CLP' },
-        { en: 'A rectangle is 6 m by 4 m. Area?', es: 'Un rectángulo mide 6 m por 4 m. ¿Área?', answer: 24, unit: 'm²', unitEs: 'm²' },
-        { en: 'Average of 7, 9, 11, 13?', es: 'Promedio de 7, 9, 11, 13?', answer: 10, unit: '', unitEs: '' },
-        { en: 'A car uses 8 L per 100 km. How much fuel for 250 km?', es: 'Un auto usa 8 L cada 100 km. ¿Cuántos litros para 250 km?', answer: 20, unit: 'L', unitEs: 'L' },
-        { en: '1/2 + 1/3 = ? (as a decimal, rounded to 2 places)', es: '1/2 + 1/3 = ? (decimal con 2 cifras)', answer: 0.83, unit: '', unitEs: '' }
+        { en: 'A store marks a $12,000 toy 25% off. What is the sale price?', es: 'Una tienda rebaja un juguete de $12.000 un 25%. ¿Precio final?', answer: 9000 },
+        { en: 'A rectangle is 6 m by 4 m. Area?', es: 'Un rectángulo mide 6 m por 4 m. ¿Área?', answer: 24 },
+        { en: 'Average of 7, 9, 11, 13?', es: 'Promedio de 7, 9, 11, 13?', answer: 10 },
+        { en: 'A car uses 8 L per 100 km. How much fuel for 250 km?', es: 'Un auto usa 8 L cada 100 km. ¿Cuántos litros para 250 km?', answer: 20 },
+        { en: '1/2 + 1/3 = ? (as a decimal, rounded to 2 places)', es: '1/2 + 1/3 = ? (decimal con 2 cifras)', answer: 0.83 },
+        { en: 'A jacket is $24,000 with 15% off. Final price?', es: 'Una chaqueta cuesta $24.000 con 15% descuento. ¿Precio final?', answer: 20400 },
+        { en: 'A triangle has base 10, height 6. Area? (½ × b × h)', es: 'Un triángulo tiene base 10 y altura 6. ¿Área? (½ × b × h)', answer: 30 },
+        { en: 'A recipe serves 4. You cook for 10. Multiply by how much?', es: 'Una receta es para 4. Cocinas para 10. ¿Por cuánto multiplicas?', answer: 2.5 },
+        { en: 'You save $5,000/week. How many weeks to save $65,000?', es: 'Ahorras $5.000/semana. ¿Cuántas semanas para juntar $65.000?', answer: 13 },
+        { en: 'A square has side 9. Area?', es: 'Un cuadrado tiene lado 9. ¿Área?', answer: 81 },
+        { en: 'Convert 0.6 to a percent: ?%', es: 'Convierte 0,6 a porcentaje: ?%', answer: 60 },
+        { en: 'A bag of flour is 2 kg. 15 bags weigh how many kg?', es: 'Una bolsa de harina es 2 kg. ¿Cuánto pesan 15 bolsas?', answer: 30 },
+        { en: '15% of 200 = ?', es: '15% de 200 = ?', answer: 30 },
+        { en: 'A circle has radius 5. Area ≈ π r² using π=3. Answer?', es: 'Un círculo tiene radio 5. Área ≈ π r² con π=3. ¿Respuesta?', answer: 75 },
+        { en: 'Speed = distance/time. You drive 180 km in 3 h. Speed?', es: 'Rapidez = distancia/tiempo. Manejas 180 km en 3 h. ¿Rapidez?', answer: 60 },
+        { en: 'Median of {4, 7, 9, 12, 15} = ?', es: 'Mediana de {4, 7, 9, 12, 15} = ?', answer: 9 },
+        { en: 'A bottle is 3/4 full holding 750 mL. Full capacity?', es: 'Una botella llena 3/4 tiene 750 mL. ¿Capacidad total?', answer: 1000 },
+        { en: 'A cube has side 4. Volume = s³ = ?', es: 'Un cubo tiene lado 4. Volumen = s³ = ?', answer: 64 },
+        { en: 'If 3 kg of grapes cost $6,600, what does 1 kg cost?', es: 'Si 3 kg de uvas cuestan $6.600, ¿cuánto cuesta 1 kg?', answer: 2200 },
+        { en: 'A project is 40% done after 10 days. Days to finish total?', es: 'Un proyecto va 40% tras 10 días. ¿Días totales para terminar?', answer: 25 }
       ]
     };
 
@@ -325,11 +386,14 @@ var MathExtras = (function() {
     function start(tier) {
       var bank = BANK[tier];
       if (!bank) return;
+      // Shuffle the bank and take 5 so sessions stay short and the kid
+      // sees variety across plays even though the bank is ~20 items.
+      var shuffled = bank.slice().sort(function() { return Math.random() - 0.5; });
       state = {
         tier: tier,
         idx: 0,
         correct: 0,
-        questions: bank.slice() // sequential; keep order stable so sharing a score is meaningful
+        questions: shuffled.slice(0, 5)
       };
       _renderQuestion();
     }
