@@ -77,27 +77,36 @@ const REGIONS={
   norte:{icon:'🏜️',title:'Norte Grande',sub:'El desierto más seco del mundo',facts:[
     {t:'🏜️ Desierto de Atacama',p:'El norte de Chile alberga el Desierto de Atacama, uno de los lugares más secos del planeta. Tiene salares, géiseres y flamencos en lagos de altura.',f:'¡La NASA prueba sus robots para Marte en el Atacama porque el suelo es muy parecido!'},
     {t:'⭐ Cielos estrellados',p:'El Atacama tiene los cielos más limpios del mundo para observar estrellas. Chile tiene los telescopios más grandes del planeta.',f:'Desde el norte de Chile puedes ver más de 5.000 estrellas a simple vista.'},
-    {t:'🦩 Altiplano',p:'En las alturas del norte viven flamencos, vicuñas y llamas. Los pueblos aymaras han habitado esta zona por miles de años.',f:'Los géiseres del Tatio (a 4.300 m) son los más altos del mundo.'}
+    {t:'🦩 Altiplano',p:'En las alturas del norte viven flamencos, vicuñas y llamas. Los pueblos aymaras han habitado esta zona por miles de años.',f:'Los géiseres del Tatio (a 4.300 m) son los más altos del mundo.'},
+    {t:'🏴 Iquique y Arica',p:'Dos ciudades norteñas con grandes playas, historia del salitre y recientemente importantes puertos pesqueros.',f:'Arica es la ciudad más al norte de Chile y a veces se llama "la ciudad de la eterna primavera".'},
+    {t:'⚓ Glorias Navales',p:'El 21 de mayo de 1879, Arturo Prat dio su vida en Iquique a bordo de la Esmeralda durante la Guerra del Pacífico. Hoy es el Día de las Glorias Navales.',f:'Prat tenía sólo 31 años cuando saltó al abordaje del Huáscar.'}
   ]},
   centro:{icon:'🏙️',title:'Chile Central',sub:'Santiago, Valparaíso y los valles',facts:[
     {t:'🏙️ Santiago',p:'La capital fue fundada en 1541 por Pedro de Valdivia junto al río Mapocho. Hoy tiene más de 7 millones de habitantes rodeados por los Andes.',f:'Desde Santiago puedes ver la cordillera nevada ¡a solo 45 minutos en auto!'},
     {t:'🎨 Valparaíso',p:'Ciudad famosa por sus cerros coloridos, ascensores históricos y arte callejero. Es Patrimonio de la Humanidad.',f:'Valparaíso tiene más de 15 ascensores funiculares, algunos con más de 100 años.'},
-    {t:'🍇 Valles',p:'El centro tiene valles fértiles con clima mediterráneo ideal para la agricultura y los viñedos.',f:'Chile es el cuarto exportador de vino del mundo.'}
+    {t:'🍇 Valles',p:'El centro tiene valles fértiles con clima mediterráneo ideal para la agricultura y los viñedos.',f:'Chile es el cuarto exportador de vino del mundo.'},
+    {t:'🏔️ Cajón del Maipo',p:'Cordón cordillerano cerca de Santiago, con ríos, termas y glaciares. Destino favorito de excursiones.',f:'En invierno, centros como Farellones y Valle Nevado reciben nieve cada año.'},
+    {t:'🌊 Viña del Mar',p:'La "Ciudad Jardín" colinda con Valparaíso y celebra cada febrero el Festival de la Canción.',f:'El Reloj de Flores de Viña tiene más de 60 años y sigue marcando la hora.'}
   ]},
   sur:{icon:'🌲',title:'Sur de Chile',sub:'Lagos, volcanes y pueblos originarios',facts:[
     {t:'🌋 Volcanes y lagos',p:'El sur tiene decenas de volcanes activos rodeados de lagos cristalinos. El Villarrica es uno de los más activos de Sudamérica.',f:'Chile tiene más de 2.000 volcanes y unos 90 están activos.'},
     {t:'🪶 El pueblo Mapuche',p:'Los Mapuche son el pueblo originario más grande de Chile. Nunca fueron conquistados por los españoles.',f:'Los Mapuche resistieron por más de 300 años, desde 1536 hasta 1883.'},
-    {t:'🌲 Bosques milenarios',p:'Los bosques del sur tienen araucarias que existen hace más de 200 millones de años y alerces de más de 3.000 años.',f:'La araucaria es un "fósil viviente" porque casi no ha cambiado desde la era de los dinosaurios.'}
+    {t:'🌲 Bosques milenarios',p:'Los bosques del sur tienen araucarias que existen hace más de 200 millones de años y alerces de más de 3.000 años.',f:'La araucaria es un "fósil viviente" porque casi no ha cambiado desde la era de los dinosaurios.'},
+    {t:'🌿 Chiloé',p:'Archipiélago con iglesias de madera (Patrimonio de la Humanidad), palafitos de colores y leyendas como la del Trauco y la Pincoya.',f:'Hay 16 iglesias chilotas declaradas Patrimonio por la UNESCO.'},
+    {t:'🏛️ Concepción y el Biobío',p:'Concepción es la segunda zona metropolitana del país, a orillas del río Biobío. Durante siglos fue la frontera de guerra entre Chile y el pueblo Mapuche.',f:'El puente Juan Pablo II en el Biobío tiene 2,3 km — el más largo sobre un río en Chile.'}
   ]},
   patagonia:{icon:'🧊',title:'Patagonia',sub:'Glaciares, viento y Torres del Paine',facts:[
     {t:'🏔️ Torres del Paine',p:'Uno de los lugares más hermosos del planeta. Torres de granito, lagos turquesa y glaciares impresionantes.',f:'El Glaciar Grey tiene más de 6 km de ancho y miles de años de antigüedad.'},
     {t:'🐆 Pumas',p:'Torres del Paine tiene una de las poblaciones más densas de pumas del mundo.',f:'Si visitas Torres del Paine, ¡tienes buenas chances de ver un puma!'},
-    {t:'🐧 Pingüinos',p:'En el extremo sur viven pingüinos de Magallanes y de Humboldt.',f:'El pingüino de Humboldt lleva ese nombre por la corriente fría desde la Antártida.'}
+    {t:'🐧 Pingüinos',p:'En el extremo sur viven pingüinos de Magallanes y de Humboldt.',f:'El pingüino de Humboldt lleva ese nombre por la corriente fría desde la Antártida.'},
+    {t:'🚢 Estrecho de Magallanes',p:'El paso natural entre el Atlántico y el Pacífico descubierto por Fernando de Magallanes en 1520. Punta Arenas es la capital regional.',f:'Antes del Canal de Panamá, todos los barcos entre Europa y Asia cruzaban este estrecho.'},
+    {t:'🐏 Estancias ovejeras',p:'Las estancias patagónicas criaron ovejas por millones en los siglos XIX y XX. Muchas siguen funcionando hoy.',f:'Un huaso patagónico se llama "gaucho" al otro lado de los Andes en Argentina.'}
   ]},
   pascua:{icon:'🗿',title:'Rapa Nui',sub:'Moai, misterio y cultura polinésica',facts:[
     {t:'🗿 Los Moai',p:'Isla de Pascua está a 3.700 km de la costa. El pueblo Rapa Nui talló casi 1.000 estatuas gigantes, ¡algunas de más de 80 toneladas!',f:'Nadie sabe con certeza cómo movieron los Moai — algunos creen que los "caminaron" meciéndolos.'},
     {t:'🏝️ Cultura Rapa Nui',p:'Desarrollaron una escritura única llamada Rongorongo que aún no ha sido descifrada. Inventaron el Tangata Manu (hombre pájaro).',f:'Rapa Nui es uno de los lugares habitados más aislados del mundo.'},
-    {t:'🌺 Naturaleza',p:'La isla tiene cráteres volcánicos con lagos, playas de arena rosa y caballos salvajes.',f:'El lugar habitado más cercano es isla Pitcairn, ¡a 2.000 km!'}
+    {t:'🌺 Naturaleza',p:'La isla tiene cráteres volcánicos con lagos, playas de arena rosa y caballos salvajes.',f:'El lugar habitado más cercano es isla Pitcairn, ¡a 2.000 km!'},
+    {t:'🗣️ El idioma Rapa Nui',p:'Además del español, en la isla se habla el rapa nui, idioma polinésico emparentado con el tahitiano y el hawaiano.',f:'"Iorana" significa hola, adiós y bienvenida.'}
   ]}
 };
 
@@ -155,9 +164,11 @@ const TOPICS=[
     {t:'🐆 Pumas y Huemules',p:'Los pumas recorren los bosques del sur. El huemul es un ciervo en peligro que aparece en el escudo junto al cóndor.',f:'Torres del Paine tiene una de las poblaciones más densas de pumas.'}
   ]},
   {id:'famous',icon:'🌟',name:'Chilenos famosos',stories:[
-    {t:'📝 Pablo Neruda',p:'El poeta más famoso de Chile, Nobel de Literatura 1971. Escribió sobre el amor, la naturaleza y Chile.',f:'Neruda coleccionaba objetos curiosos — una casa tiene un bar con forma de barco.'},
-    {t:'📖 Gabriela Mistral',p:'Primera latinoamericana en ganar el Nobel de Literatura (1945). Maestra y diplomática que luchó por la educación.',f:'Su rostro aparece en el billete de 5.000 pesos.'},
-    {t:'⚽ Alexis Sánchez',p:'Jugó en Barcelona y Arsenal. Chile ganó la Copa América en 2015 y 2016.',f:'Marcelo Ríos fue el primer tenista latinoamericano #1 del mundo en 1998.'}
+    {t:'📝 Pablo Neruda',p:'El poeta más famoso de Chile, Nobel de Literatura 1971. Escribió sobre el amor, la naturaleza y Chile. "Puedo escribir los versos más tristes esta noche. / Escribir, por ejemplo: La noche está estrellada, / y tiritan, azules, los astros, a lo lejos."',f:'Neruda coleccionaba objetos curiosos — una de sus casas tiene un bar con forma de barco.'},
+    {t:'📖 Gabriela Mistral',p:'Primera latinoamericana en ganar el Nobel de Literatura (1945). Maestra y diplomática que luchó por la educación. "Donde haya un árbol que plantar, plántalo tú; / donde haya un error que enmendar, enmiéndalo tú; / donde haya un esfuerzo que todos esquivan, acéptalo tú."',f:'Su rostro aparece en el billete de 5.000 pesos chilenos.'},
+    {t:'🖋️ Nicanor Parra',p:'Creador de la "antipoesía" — versos simples con humor y crítica. Vivió 103 años. "Durante medio siglo / la poesía fue / el paraíso del tonto solemne. / Hasta que vine yo / y me instalé con mi montaña rusa."',f:'Además de poeta, Parra era físico y profesor de matemáticas.'},
+    {t:'⚽ Alexis Sánchez',p:'Jugó en Barcelona y Arsenal. Chile ganó la Copa América en 2015 y 2016.',f:'Marcelo Ríos fue el primer tenista latinoamericano #1 del mundo en 1998.'},
+    {t:'🎶 Violeta Parra',p:'Hermana mayor de Nicanor. Rescató y cantó música del campo chileno. Autora de "Gracias a la vida" y "Volver a los 17". Su canto inspira a toda Latinoamérica hasta hoy.',f:'El 4 de octubre (su cumpleaños) se celebra el Día de la Música Chilena.'}
   ]},
   {id:'inventors',icon:'🔬',name:'Ciencia e Inventos',stories:[
     {t:'🔬 Vacuna contra la hepatitis B',p:'El bioquímico chileno Pablo Valenzuela fue clave en la creación de la primera vacuna recombinante contra la hepatitis B.',f:'Valenzuela también ayudó a descubrir el virus de la hepatitis C.'},
@@ -170,10 +181,16 @@ const TOPICS=[
   {id:'animales',icon:'🦙',name:'Fauna Local',stories:[
     {t:'🦙 Vicuñas y Guanacos',p:'Son camélidos sudamericanos que habitan en los Andes. La vicuña vive a gran altitud y tiene una lana muy fina y valiosa.',f:'El guanaco es más grande y puede correr a casi 60 km/h.'}
   ]},
-  {id:'volcanes_chile',icon:'🌋',name:'Los Volcanes de Chile',stories:[
-    {t:'🌋 Un país de volcanes',p:'Chile está en el Cinturón de Fuego del Pacífico. Hay más de 2.000 volcanes, y muchos están activos.',f:'El volcán Villarrica tiene un lago de lava en su cráter.'}
+  {id:'folk',icon:'🎶',name:'Canto y Folclor',stories:[
+    {t:'🪗 Si vas para Chile',p:'Canción tradicional escrita por Chito Faró en 1942, casi un himno no oficial. "Si vas para Chile, te ruego que pases / por donde vive mi amada…"',f:'La toca cada grupo folclórico en cualquier peña chilena.'},
+    {t:'🌷 Gracias a la vida',p:'Violeta Parra compuso este canto en 1966, pocos meses antes de su muerte. Un agradecimiento a la vida por el oído, la vista, los pasos y el canto. Tiene versiones en muchos idiomas.',f:'Mercedes Sosa y Joan Baez grabaron versiones famosas.'},
+    {t:'⛰️ Arriba en la cordillera',p:'Patricio Manns la escribió en 1965. Cuenta la historia de un arriero solitario. "Arriba en la cordillera / donde el viento hace empinado / anduvo una vez un hombre…"',f:'Es una de las cuecas más interpretadas fuera del género típico.'},
+    {t:'💃 La cueca',p:'Baile nacional desde 1979. Representa el cortejo del gallo y la gallina: los bailarines se mueven en círculos, se esquivan y agitan pañuelos al aire.',f:'Hay cueca brava urbana, cueca chilota del sur y cueca nortina con quenas.'},
+    {t:'🐎 Tonadas del campo',p:'La tonada es el canto rural acompañado de guitarra. Habla de la tierra, el trabajo, el amor y la fiesta. Su prima cercana es el corrido.',f:'Los Huasos Quincheros mantuvieron vivo este repertorio por más de 80 años.'},
+    {t:'🪕 Instrumentos típicos',p:'La guitarra, el arpa (sí, un arpa pequeña), el bombo y las cajas andinas se escuchan en cualquier peña. En el altiplano se suma la zampoña.',f:'El charango (un tipo de guitarrita) tenía caparazón de armadillo antiguamente; hoy se hace de madera.'}
   ]},
   // PRUNED [2026-04-03]: Removed 'astronomia' and 'cocina' to make room for 'fiestas_patrias' and stay within MAX 12 limit.
+  // UPDATED [2026-04-24]: Replaced duplicate 'volcanes_chile' with 'folk' to add a canto + folclor topic without exceeding the cap.
   {id:'fiestas_patrias',icon:'🪁',name:'Fiestas Patrias',stories:[
     {t:'🇨🇱 El 18 de Septiembre',p:'Celebramos el inicio de nuestra independencia. Las familias se reúnen en las fondas para comer, bailar y celebrar.',f:'En esta fecha se declaran feriados irrenunciables para celebrar.'},
     {t:'💃 La Cueca',p:'Es el baile nacional. Representa el cortejo del gallo y la gallina, y se baila agitando pañuelos al aire.',f:'Fue declarada baile nacional de Chile en el año 1979.'}
