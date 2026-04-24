@@ -52,6 +52,145 @@ const QuestAdventure = (() => {
     },
   ];
 
+  // ── Seasonal Grand Tours ───────────────────────────────────────
+  // Each tour is a multi-app expedition with 3 goals. The current
+  // tour is auto-picked from the calendar month (Southern hemisphere
+  // seasons); the others are still browsable below the map.
+  // Goals are read from whatever storage each app already writes —
+  // no schema changes to other apps.
+  const TOURS = [
+    {
+      id: 'summer_andes',
+      name: 'Summer of the Andes',
+      icon: '☀️',
+      months: [12, 1, 2],
+      description: 'Long days, outdoor adventures, and deep dives into Chilean culture.',
+      goals: [
+        { id: 'chile',  label: 'Earn 20 stars in Descubre Chile',      target: 20 },
+        { id: 'sports', label: 'Log 10 activities in Sports Arena',    target: 10 },
+        { id: 'lab',    label: 'Complete 5 Lab Explorer experiments',  target: 5  }
+      ]
+    },
+    {
+      id: 'back_to_school',
+      name: 'Back to School',
+      icon: '📚',
+      months: [3, 4, 5],
+      description: 'Settle into a new term: sharpen math, reading, and strategy.',
+      goals: [
+        { id: 'math',   label: 'Earn 30 stars in Math Galaxy',        target: 30 },
+        { id: 'story',  label: 'Read 5 stories in Story Explorer',    target: 5  },
+        { id: 'chess',  label: 'Solve 15 Chess puzzles or rush runs', target: 15 }
+      ]
+    },
+    {
+      id: 'winter_music',
+      name: 'Winter of Music',
+      icon: '🎼',
+      months: [6, 7, 8],
+      description: 'Cozy season — pick up an instrument and fill the house with songs.',
+      goals: [
+        { id: 'piano',  label: 'Earn 20 stars in Little Maestro', target: 20 },
+        { id: 'guitar', label: 'Earn 15 stars in Guitar Jam',     target: 15 },
+        { id: 'art',    label: 'Complete 5 Art Studio pieces',    target: 5  }
+      ]
+    },
+    {
+      id: 'advent_pilgrimage',
+      name: 'Advent Pilgrimage',
+      icon: '🕯️',
+      months: [9, 10, 11],
+      description: 'Spring into Christmas. Prayer, stories, and a steady routine.',
+      goals: [
+        { id: 'faith',    label: 'Earn 20 stars in Fe Explorador',       target: 20 },
+        { id: 'story',    label: 'Read 5 stories in Story Explorer',     target: 5  },
+        { id: 'routines', label: 'Reach a 7-day routine streak',         target: 7  }
+      ]
+    }
+  ];
+
+  // Goal readers — one function per app id. Each takes the userKey
+  // (lowercased name) and returns the kid's current count for a
+  // simplified metric consistent with the tour target.
+  function _tourMetric(goalId, userKey) {
+    function safe(key) {
+      try { return JSON.parse(localStorage.getItem(key)) || {}; }
+      catch (e) { return {}; }
+    }
+    if (goalId === 'chile') {
+      const d = safe('zs_chile_' + userKey);
+      let s = 0;
+      for (const k in d) if (k !== 'vr' && k !== 'memBest' && d[k]) s += (d[k].bestStars || 0);
+      return s;
+    }
+    if (goalId === 'sports') {
+      const d = safe('zs_sports_' + userKey);
+      return (d.activities || []).length;
+    }
+    if (goalId === 'lab') {
+      const d = safe('zs_lab_' + userKey);
+      let count = 0;
+      for (const k in d) {
+        if (k === 'totalStars' || k === 'weather') continue;
+        if (d[k] && (d[k].completed || 0) > 0) count++;
+      }
+      return count;
+    }
+    if (goalId === 'math') {
+      const d = safe('zs_mathgalaxy_' + userKey);
+      let s = 0;
+      for (const k in d) { if (d[k] && typeof d[k] === 'object') s += (d[k].bestStars || 0); }
+      return s;
+    }
+    if (goalId === 'story') {
+      const d = safe('zs_story_' + userKey);
+      return (d.storiesRead || []).length;
+    }
+    if (goalId === 'chess') {
+      const d = safe('zs_chess_' + userKey);
+      const rush = (d.rushBest && d.rushBest.score) || 0;
+      return (d.puzzlesSolved || 0) + (d.wins || 0) + rush;
+    }
+    if (goalId === 'piano') {
+      const d = safe('littlemaestro_' + userKey);
+      let s = 0;
+      if (d.progress) {
+        for (const k in d.progress) {
+          const v = d.progress[k];
+          if (v && typeof v === 'object' && v.stars) s += v.stars;
+        }
+      }
+      return s;
+    }
+    if (goalId === 'guitar') return safe('zs_guitar_' + userKey).totalStars || 0;
+    if (goalId === 'art')    return safe('zs_art_' + userKey).totalStars || 0;
+    if (goalId === 'faith')  return safe('zs_fe_' + userKey).totalStars || 0;
+    if (goalId === 'routines') {
+      const d = safe('zs_routines_' + userKey);
+      return d.streak || 0;
+    }
+    return 0;
+  }
+
+  function _currentTour() {
+    const m = new Date().getMonth() + 1; // 1-12
+    for (let i = 0; i < TOURS.length; i++) {
+      if (TOURS[i].months.indexOf(m) !== -1) return TOURS[i];
+    }
+    return TOURS[0];
+  }
+
+  function _tourProgress(tour, userKey) {
+    let achieved = 0;
+    const goals = tour.goals.map(function(g) {
+      const v = _tourMetric(g.id, userKey);
+      const hit = v >= g.target;
+      if (hit) achieved++;
+      return { goal: g, value: v, hit: hit, pct: Math.min(100, Math.round((v / g.target) * 100)) };
+    });
+    return { goals: goals, achieved: achieved, total: goals.length, complete: achieved === goals.length };
+  }
+
   // ── EP Calculation ──
   function calculateEP() {
     const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
@@ -122,6 +261,11 @@ const QuestAdventure = (() => {
     const mapEl = document.getElementById('quest-map');
     if (!mapEl) return;
 
+    const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    const userKey = user ? user.name.toLowerCase().replace(/\s+/g, '_') : '';
+    const saved = _load();
+    const completedTours = saved.tours || {};
+
     let html = `
       <div class="quest-ep-bar">
         <div class="quest-ep-label">⚡ ${ep} Expedition Points</div>
@@ -130,6 +274,31 @@ const QuestAdventure = (() => {
         </div>
       </div>
     `;
+
+    // ── Current Seasonal Tour ──
+    const now = _currentTour();
+    const prog = _tourProgress(now, userKey);
+    const wasComplete = !!completedTours[now.id];
+    // Auto-record completion the moment the kid hits all goals.
+    if (prog.complete && !wasComplete) {
+      saved.tours = completedTours;
+      saved.tours[now.id] = { completedAt: new Date().toISOString() };
+      _save(saved);
+      if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+        ActivityLog.log('Quest Adventure', '🏅',
+          'Completed the Grand Tour: ' + now.name);
+      }
+    }
+    html += _renderTour(now, prog, true, completedTours[now.id]);
+
+    // ── Other tours (browseable) ──
+    html += '<div class="quest-tours-browse"><h3 class="quest-tours-head">Other Grand Tours</h3>';
+    TOURS.forEach(function(t) {
+      if (t.id === now.id) return;
+      const p = _tourProgress(t, userKey);
+      html += _renderTour(t, p, false, completedTours[t.id]);
+    });
+    html += '</div>';
 
     REGIONS.forEach((region, i) => {
       const unlocked = ep >= region.epRequired;
@@ -150,6 +319,35 @@ const QuestAdventure = (() => {
     });
 
     mapEl.innerHTML = html;
+  }
+
+  function _renderTour(tour, prog, isCurrent, completedMeta) {
+    var done = !!completedMeta || prog.complete;
+    var cls = 'quest-tour' + (isCurrent ? ' current' : '') + (done ? ' done' : '');
+    var header = (isCurrent ? '🎯 ' : '') + tour.icon + ' ' + tour.name +
+      (done ? ' ✅' : '');
+    var goalsHtml = prog.goals.map(function(g) {
+      return '<div class="quest-goal">' +
+        '<div class="quest-goal-head">' +
+          '<span>' + (g.hit ? '✅ ' : '') + g.goal.label + '</span>' +
+          '<span class="quest-goal-num">' + g.value + ' / ' + g.goal.target + '</span>' +
+        '</div>' +
+        '<div class="quest-goal-bar"><div class="quest-goal-fill" style="width:' + g.pct + '%"></div></div>' +
+      '</div>';
+    }).join('');
+    var doneLine = done
+      ? '<div class="quest-tour-done">🏅 Tour complete' +
+          (completedMeta && completedMeta.completedAt
+            ? ' · ' + new Date(completedMeta.completedAt).toLocaleDateString()
+            : '') +
+        '</div>'
+      : '';
+    return '<div class="' + cls + '">' +
+      '<div class="quest-tour-head">' + header + '</div>' +
+      (isCurrent ? '<div class="quest-tour-desc">' + tour.description + '</div>' : '') +
+      '<div class="quest-goals">' + goalsHtml + '</div>' +
+      doneLine +
+    '</div>';
   }
 
   function openRegion(regionId) {
@@ -193,5 +391,5 @@ const QuestAdventure = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { init, openRegion, calculateEP, getStats, REGIONS };
+  return { init, openRegion, calculateEP, getStats, REGIONS, TOURS };
 })();
