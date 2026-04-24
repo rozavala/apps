@@ -55,7 +55,33 @@
           <span class="m-badge prog" id="playBadge"></span>
         </div>
       </div>
+      <div class="mode-card" onclick="ChessExtras.Rush.open()">
+        <span class="m-icon">⚡</span>
+        <div>
+          <div class="m-title">Puzzle Rush</div>
+          <div class="m-desc">How many tactics can you solve in 3 minutes?</div>
+          <span class="m-badge prog" id="rushBadge"></span>
+        </div>
+      </div>
+      <div class="mode-card" onclick="ChessExtras.Openings.open()">
+        <span class="m-icon">📖</span>
+        <div>
+          <div class="m-title">Openings Primer</div>
+          <div class="m-desc">Six classic openings and the ideas behind them.</div>
+          <span class="m-badge prog" id="openingsBadge"></span>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- PUZZLE RUSH -->
+  <div class="screen" id="screen-puzzle-rush">
+    <div id="rush-wrap"></div>
+  </div>
+
+  <!-- OPENINGS PRIMER -->
+  <div class="screen" id="screen-openings">
+    <div id="openings-wrap"></div>
   </div>
 
   <!-- LEARN: piece list -->
@@ -109,6 +135,7 @@
 <script src="js/activity-log.js"></script>
 <script src="js/learning-checks.js"></script>
 <script src="js/chess-quest.js"></script>
+<script src="js/chess-extras.js"></script>
   <script src="js/pwa.js"></script>
 
 </body>
