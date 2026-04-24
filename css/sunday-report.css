@@ -1,0 +1,257 @@
+/* ============================================================
+   FAMILY SUNDAY REPORT
+   ============================================================ */
+
+.sr-body {
+  background: #2a2040;
+  min-height: 100vh;
+  padding: 24px;
+  font-family: var(--font-body, 'Nunito', sans-serif);
+  display: block;
+}
+.sr-body::before { display: none; }
+
+.sr-toolbar {
+  max-width: 880px;
+  margin: 0 auto 18px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.sr-tb-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  color: #F0EDFF;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+.sr-tb-btn:hover { background: rgba(255,255,255,0.14); }
+.sr-tb-btn.primary {
+  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+  border-color: transparent;
+  color: #fff;
+}
+
+.sr-sheet {
+  max-width: 880px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #FFFAF0, #FFF8E7);
+  color: #1f1934;
+  padding: 36px 40px;
+  border-radius: 16px;
+  box-shadow: 0 30px 80px -30px rgba(0,0,0,0.5);
+}
+
+.sr-header {
+  text-align: center;
+  border-bottom: 2px solid rgba(201,164,73,0.35);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+.sr-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  font-weight: 800;
+  color: #1f1934;
+  line-height: 1.1;
+}
+.sr-subtitle {
+  font-size: 0.95rem;
+  color: #6b5a82;
+  font-style: italic;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.sr-dates {
+  display: inline-block;
+  padding: 4px 14px;
+  margin-top: 8px;
+  border-radius: 99px;
+  background: rgba(201,164,73,0.15);
+  color: #7a2a2a;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.sr-family {
+  background: rgba(201,164,73,0.08);
+  border: 1px solid rgba(201,164,73,0.25);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+.sr-family h2 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1f1934;
+  margin-bottom: 10px;
+}
+.sr-family-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.sr-family-stat {
+  text-align: center;
+}
+.sr-family-stat .num {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #7a2a2a;
+  line-height: 1;
+}
+.sr-family-stat .lbl {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6b5a82;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+.sr-family-highlight {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(122,42,42,0.06);
+  border-radius: 10px;
+  font-weight: 700;
+  color: #1f1934;
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+/* Per-kid card */
+.sr-kid {
+  border: 1.5px solid rgba(201,164,73,0.28);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.sr-kid-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.sr-kid-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  border: 2.5px solid;
+  flex-shrink: 0;
+}
+.sr-kid-name {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1f1934;
+}
+.sr-kid-rank {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b5a82;
+}
+.sr-kid-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sr-stat-pill {
+  background: rgba(201,164,73,0.08);
+  border: 1px solid rgba(201,164,73,0.18);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.sr-stat-pill .num {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #7a2a2a;
+  line-height: 1;
+}
+.sr-stat-pill .lbl {
+  font-size: 0.7rem;
+  color: #6b5a82;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+.sr-moments {
+  margin-top: 8px;
+}
+.sr-moments h3 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1f1934;
+  margin-bottom: 6px;
+}
+.sr-moment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #3c3256;
+  padding: 4px 0;
+  border-top: 1px dashed rgba(201,164,73,0.25);
+}
+.sr-moment:first-child { border-top: none; }
+.sr-moment .ic { flex-shrink: 0; width: 20px; text-align: center; }
+.sr-moment .ds { flex: 1; min-width: 0; }
+.sr-moment .ts { color: #6b5a82; font-weight: 700; font-size: 0.78rem; flex-shrink: 0; }
+
+.sr-kid-empty {
+  font-size: 0.9rem;
+  color: #6b5a82;
+  font-style: italic;
+  text-align: center;
+  padding: 14px 0;
+}
+
+.sr-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #6b5a82;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* Print */
+@page { size: letter portrait; margin: 12mm; }
+@media print {
+  body.sr-body { background: #fff !important; padding: 0 !important; }
+  .no-print { display: none !important; }
+  .sr-sheet { box-shadow: none; max-width: none; margin: 0; padding: 0; border-radius: 0; background: #fff !important; }
+  .sr-kid, .sr-family { background: #fff; }
+  .sr-body { color: #000; }
+}
+
+@media (max-width: 640px) {
+  .sr-body { padding: 12px; }
+  .sr-sheet { padding: 20px 18px; border-radius: 12px; }
+  .sr-family-stats { grid-template-columns: repeat(2, 1fr); }
+  .sr-kid-grid { grid-template-columns: repeat(2, 1fr); }
+}
