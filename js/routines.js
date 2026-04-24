@@ -23,20 +23,22 @@ var Routines = (function() {
   var STORAGE_PREFIX = 'zs_routines_';
 
   // Default morning/evening templates. Kid-authored text only.
+  // Labels are English by default; parents can edit (and translate)
+  // via the Routines editor in Parents Corner.
   var DEFAULTS = {
     morning: [
-      { id: 'bed',       label: 'Hacer la cama 🛏️' },
-      { id: 'teeth',     label: 'Cepillarse los dientes 🦷' },
-      { id: 'dressed',   label: 'Vestirse 👕' },
-      { id: 'breakfast', label: 'Desayunar 🥣' },
-      { id: 'backpack',  label: 'Preparar la mochila 🎒' }
+      { id: 'bed',       label: 'Make the bed 🛏️' },
+      { id: 'teeth',     label: 'Brush teeth 🦷' },
+      { id: 'dressed',   label: 'Get dressed 👕' },
+      { id: 'breakfast', label: 'Eat breakfast 🥣' },
+      { id: 'backpack',  label: 'Pack the backpack 🎒' }
     ],
     evening: [
-      { id: 'homework',  label: 'Tarea del cole ✏️' },
-      { id: 'tidy',      label: 'Ordenar el cuarto 🧸' },
-      { id: 'laundry',   label: 'Guardar la ropa 🧦' },
-      { id: 'teeth_pm',  label: 'Cepillarse los dientes 🦷' },
-      { id: 'read',      label: 'Leer un rato 📖' }
+      { id: 'homework',  label: 'Homework ✏️' },
+      { id: 'tidy',      label: 'Tidy the room 🧸' },
+      { id: 'laundry',   label: 'Put laundry away 🧦' },
+      { id: 'teeth_pm',  label: 'Brush teeth 🦷' },
+      { id: 'read',      label: 'Read for a bit 📖' }
     ]
   };
 
@@ -209,6 +211,7 @@ var Routines = (function() {
       if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
         ActivityLog.log('Routines', '✅', 'Day complete (streak ' + data.streak + ')');
       }
+      // Already English — left as-is.
     }
     _save(data);
     return getStatus();
@@ -230,15 +233,15 @@ var Routines = (function() {
 
     var which = getActiveRoutine();
     var block = which === 'morning' ? status.morning : status.evening;
-    var heading = which === 'morning' ? '🌅 Buenos días' : '🌙 Buenas noches';
+    var heading = which === 'morning' ? '🌅 Good morning' : '🌙 Good night';
 
     if (block.complete) {
       el.innerHTML =
         '<div class="rn-card rn-done" onclick="Routines._open(\'' + which + '\')">' +
           '<div class="rn-emoji">🎉</div>' +
           '<div class="rn-body">' +
-            '<div class="rn-title">' + heading + ' — ¡listo!</div>' +
-            '<div class="rn-sub">Racha: 🔥 ' + status.streak + ' día' + (status.streak === 1 ? '' : 's') + '</div>' +
+            '<div class="rn-title">' + heading + ' — all done!</div>' +
+            '<div class="rn-sub">Streak: 🔥 ' + status.streak + ' day' + (status.streak === 1 ? '' : 's') + '</div>' +
           '</div>' +
           '<div class="rn-arrow">→</div>' +
         '</div>';
@@ -251,7 +254,7 @@ var Routines = (function() {
         '<div class="rn-emoji">' + (which === 'morning' ? '🌅' : '🌙') + '</div>' +
         '<div class="rn-body">' +
           '<div class="rn-title">' + heading + '</div>' +
-          '<div class="rn-sub">' + remaining + ' cosa' + (remaining === 1 ? '' : 's') + ' por hacer' +
+          '<div class="rn-sub">' + remaining + ' thing' + (remaining === 1 ? '' : 's') + ' to do' +
           (status.streak > 0 ? ' · 🔥 ' + status.streak : '') + '</div>' +
           '<div class="rn-bar"><div class="rn-bar-fill" style="width:' + Math.round((block.doneCount / block.total) * 100) + '%"></div></div>' +
         '</div>' +
@@ -270,7 +273,7 @@ var Routines = (function() {
       '<div class="dash-panel" style="max-width:480px;">' +
         '<h2 style="display:flex;align-items:center;justify-content:space-between;">' +
           '<span id="routines-title">Routine</span>' +
-          '<button class="dash-close" onclick="Routines._close()" aria-label="Cerrar">✕</button>' +
+          '<button class="dash-close" onclick="Routines._close()" aria-label="Close">✕</button>' +
         '</h2>' +
         '<div id="routines-body"></div>' +
       '</div>';
@@ -292,9 +295,9 @@ var Routines = (function() {
   function _renderModal(which) {
     var status = getStatus();
     var block = which === 'morning' ? status.morning : status.evening;
-    var title = which === 'morning' ? '🌅 Rutina de la mañana' : '🌙 Rutina de la noche';
+    var title = which === 'morning' ? '🌅 Morning routine' : '🌙 Night routine';
     var other = which === 'morning' ? 'evening' : 'morning';
-    var otherLabel = which === 'morning' ? '🌙 Noche' : '🌅 Mañana';
+    var otherLabel = which === 'morning' ? '🌙 Night' : '🌅 Morning';
 
     var titleEl = document.getElementById('routines-title');
     if (titleEl) titleEl.textContent = title;
@@ -304,9 +307,9 @@ var Routines = (function() {
 
     var progressPct = Math.round((block.doneCount / block.total) * 100);
     var streakLine = status.streak > 0
-      ? '<div class="rn-streak">🔥 Racha de ' + status.streak + ' día' + (status.streak === 1 ? '' : 's') +
-        (status.bestStreak > status.streak ? ' · Mejor: ' + status.bestStreak : '') + '</div>'
-      : '<div class="rn-streak rn-streak-empty">Completa ambas rutinas para empezar una racha</div>';
+      ? '<div class="rn-streak">🔥 ' + status.streak + '-day streak' +
+        (status.bestStreak > status.streak ? ' · Best: ' + status.bestStreak : '') + '</div>'
+      : '<div class="rn-streak rn-streak-empty">Finish both routines in the same day to start a streak</div>';
 
     var itemsHtml = block.items.map(function(it) {
       return '<label class="rn-item ' + (it.done ? 'rn-done-item' : '') + '">' +
@@ -325,7 +328,7 @@ var Routines = (function() {
       '<div class="rn-list">' + itemsHtml + '</div>' +
       '<div class="rn-switch">' +
         '<button class="hub-action-btn secondary" onclick="Routines._open(\'' + other + '\')">' +
-          'Ver ' + otherLabel +
+          'See ' + otherLabel +
         '</button>' +
       '</div>';
   }
