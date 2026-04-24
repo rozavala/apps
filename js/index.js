@@ -1296,20 +1296,20 @@
       return '<div class="rn-ed-block">' +
         '<div class="rn-ed-head">' +
           '<span>' + icon + ' ' + label + '</span>' +
-          '<button type="button" class="rn-ed-reset" onclick="resetRoutine(' + idx + ', \'' + which + '\')" title="Restaurar valores por defecto">↻ Default</button>' +
+          '<button type="button" class="rn-ed-reset" onclick="resetRoutine(' + idx + ', \'' + which + '\')" title="Restore defaults">↻ Default</button>' +
         '</div>' +
         rows +
         '<div class="rn-ed-row rn-ed-add">' +
-          '<input type="text" id="rn-add-' + which + '-' + idx + '" placeholder="Nueva tarea…" maxlength="80" ' +
+          '<input type="text" id="rn-add-' + which + '-' + idx + '" placeholder="New task…" maxlength="80" ' +
                  'onkeydown="if(event.key===\'Enter\'){event.preventDefault();addRoutineItem(' + idx + ', \'' + which + '\');}" />' +
-          '<button type="button" class="rn-ed-add-btn" onclick="addRoutineItem(' + idx + ', \'' + which + '\')">＋ Añadir</button>' +
+          '<button type="button" class="rn-ed-add-btn" onclick="addRoutineItem(' + idx + ', \'' + which + '\')">＋ Add</button>' +
         '</div>' +
       '</div>';
     }
     return '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
-      '<label style="font-size:0.9rem; font-weight:700; color:var(--text); display:block; margin-bottom:10px;">📋 Rutinas</label>' +
-      block('morning', '🌅', 'Mañana') +
-      block('evening', '🌙', 'Noche') +
+      '<label style="font-size:0.9rem; font-weight:700; color:var(--text); display:block; margin-bottom:10px;">📋 Routines</label>' +
+      block('morning', '🌅', 'Morning') +
+      block('evening', '🌙', 'Night') +
     '</div>';
   }
 
@@ -1348,7 +1348,7 @@
     if (!name) return;
     var tpl = Routines.getTemplates(name)[which];
     if (!tpl[j]) return;
-    if (tpl.length <= 1) { alert('Deja al menos una tarea en esta rutina.'); return; }
+    if (tpl.length <= 1) { alert('Keep at least one task in this routine.'); return; }
     tpl.splice(j, 1);
     Routines.setTemplate(which, tpl, name);
     renderParentsCorner();
@@ -1359,7 +1359,7 @@
     var profiles = getProfiles();
     var name = profiles[idx] && profiles[idx].name;
     if (!name) return;
-    if (!confirm('¿Restaurar la rutina de la ' + (which === 'morning' ? 'mañana' : 'noche') + ' a los valores por defecto?')) return;
+    if (!confirm('Restore the ' + (which === 'morning' ? 'morning' : 'night') + ' routine to defaults?')) return;
     Routines.resetTemplate(which, name);
     renderParentsCorner();
   }
