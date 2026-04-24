@@ -679,6 +679,11 @@
         '</div>';
       }
 
+      // ── Insights & nudges — passive, rule-based (no AI) ──
+      if (typeof ActivityLog !== 'undefined') {
+        html += _renderInsights(profiles);
+      }
+
       if (typeof ActivityLog !== 'undefined') {
         html += '<div style="margin-bottom:24px;">' +
           '<div style="font-weight:800; font-family:var(--font-display); font-size:1.1rem; margin-bottom:12px;">' +
@@ -842,6 +847,144 @@
     var s = Math.round((ms || 0) / 1000);
     var m = Math.floor(s / 60); s = s % 60;
     return m + ':' + String(s).padStart(2, '0');
+  }
+
+  // ── Insights & nudges ──────────────────────────────────────────
+  // Purely rule-based. Reads last-7-day ActivityLog entries for each
+  // kid, classifies events by category, and surfaces:
+  //   - A tiny horizontal bar showing category split (where time
+  //     actually went this week)
+  //   - One or two nudge chips ("Only 1 physical activity —
+  //     suggest Sports Arena?") when the balance is skewed
+  // No writes, no push notifications — nudges live inside this panel.
+  var _INSIGHT_CATEGORIES = {
+    physical:       { label: 'Physical', color: '#34D399', apps: ['Sports Arena'] },
+    math:           { label: 'Math',     color: '#60A5FA', apps: ['Math Galaxy'] },
+    music:          { label: 'Music',    color: '#A78BFA', apps: ['Little Maestro', 'Guitar Jam'] },
+    creative:       { label: 'Creative', color: '#F472B6', apps: ['Art Studio'] },
+    language:       { label: 'Language', color: '#F59E0B', apps: ['Story Explorer', 'Guess Quest'] },
+    culture:        { label: 'Culture',  color: '#F87171', apps: ['Descubre Chile', 'Fe Explorador', 'World Explorer'] },
+    science:        { label: 'Science',  color: '#22D3EE', apps: ['Lab Explorer'] },
+    strategy:       { label: 'Strategy', color: '#FBBF24', apps: ['Chess Quest'] },
+    adventure:      { label: 'Quests',   color: '#8B5CF6', apps: ['Quest Adventure', 'Book & Movie Check'] },
+    habit:          { label: 'Habits',   color: '#10B981', apps: ['Routines'] }
+  };
+
+  function _classifyApp(appName) {
+    if (!appName) return null;
+    for (var k in _INSIGHT_CATEGORIES) {
+      if (_INSIGHT_CATEGORIES[k].apps.indexOf(appName) !== -1) return k;
+    }
+    return null;
+  }
+
+  function _weekInsightsFor(profileName) {
+    var events = [];
+    try {
+      if (typeof ActivityLog !== 'undefined' && ActivityLog.getRecent) {
+        events = ActivityLog.getRecent(profileName, 7) || [];
+      }
+    } catch (e) { events = []; }
+
+    var total = 0;
+    var byCat = {};
+    var distinctApps = {};
+    events.forEach(function(e) {
+      var cat = _classifyApp(e.app);
+      if (!cat) return;
+      total++;
+      byCat[cat] = (byCat[cat] || 0) + 1;
+      if (e.app) distinctApps[e.app] = true;
+    });
+
+    // Routine streak
+    var streak = 0;
+    try {
+      var rk = 'zs_routines_' + profileName.toLowerCase().replace(/\s+/g, '_');
+      var raw = localStorage.getItem(rk);
+      if (raw) {
+        var rd = JSON.parse(raw);
+        if (rd && typeof rd.streak === 'number') streak = rd.streak;
+      }
+    } catch (e) {}
+
+    // Nudges — simple, honest, age-agnostic rules.
+    var nudges = [];
+    var physCount = byCat.physical || 0;
+    if (total > 0 && physCount < 2) {
+      nudges.push({ icon: '🏓', text: 'Only ' + physCount + ' physical activit' + (physCount === 1 ? 'y' : 'ies') + ' this week — try Sports Arena.' });
+    }
+    var topCat = null, topCount = 0;
+    Object.keys(byCat).forEach(function(c) {
+      if (byCat[c] > topCount) { topCount = byCat[c]; topCat = c; }
+    });
+    if (total >= 8 && topCat && topCount / total >= 0.6) {
+      nudges.push({ icon: '🎯', text: 'Heavy on ' + _INSIGHT_CATEGORIES[topCat].label + ' (' + Math.round(topCount / total * 100) + '%) — try something new.' });
+    }
+    if (total > 0 && streak === 0) {
+      nudges.push({ icon: '🌅', text: 'No routine streak yet this week — the morning checklist is a fast win.' });
+    }
+    if (total === 0) {
+      nudges.push({ icon: '👀', text: 'No recorded activity this week — a quiet stretch or a sign to nudge?' });
+    }
+    return { total: total, byCat: byCat, appCount: Object.keys(distinctApps).length, nudges: nudges, streak: streak };
+  }
+
+  function _renderInsights(profiles) {
+    if (!profiles || profiles.length === 0) return '';
+
+    var cards = profiles.map(function(p) {
+      var ins = _weekInsightsFor(p.name);
+      var barSegments = '';
+      if (ins.total > 0) {
+        barSegments = Object.keys(_INSIGHT_CATEGORIES).map(function(cat) {
+          var n = ins.byCat[cat] || 0;
+          if (n === 0) return '';
+          var pct = (n / ins.total) * 100;
+          var c = _INSIGHT_CATEGORIES[cat];
+          return '<span class="ins-seg" title="' + escHtml(c.label) + ': ' + n + '" ' +
+                 'style="width:' + pct.toFixed(1) + '%;background:' + c.color + ';"></span>';
+        }).join('');
+      }
+
+      var legend = Object.keys(_INSIGHT_CATEGORIES).map(function(cat) {
+        var n = ins.byCat[cat] || 0;
+        if (n === 0) return '';
+        var c = _INSIGHT_CATEGORIES[cat];
+        return '<span class="ins-legend"><span class="ins-dot" style="background:' + c.color + ';"></span>' +
+               escHtml(c.label) + ' ' + n + '</span>';
+      }).join('');
+
+      var nudgeHtml = ins.nudges.slice(0, 2).map(function(n) {
+        return '<div class="ins-nudge"><span class="ins-n-ic">' + escHtml(n.icon) + '</span><span>' + escHtml(n.text) + '</span></div>';
+      }).join('');
+
+      var avatar = '<div class="ins-avatar" style="background:' + safeColor(p.color) + '22;border-color:' + safeColor(p.color) + ';">' + escHtml(p.avatar) + '</div>';
+      var summary = ins.total === 0
+        ? '<div class="ins-empty">No activity recorded this week.</div>'
+        : '<div class="ins-bar" role="img" aria-label="Activity by category">' + barSegments + '</div>' +
+          '<div class="ins-legend-row">' + legend + '</div>' +
+          '<div class="ins-stats">' +
+            '<span>✨ ' + ins.total + ' events</span>' +
+            '<span>🎨 ' + ins.appCount + ' apps</span>' +
+            '<span>🔥 Streak ' + ins.streak + '</span>' +
+          '</div>';
+
+      return '<div class="ins-card">' +
+        '<div class="ins-head">' + avatar +
+          '<div class="ins-name">' + escHtml(p.name) + '</div>' +
+        '</div>' +
+        summary +
+        (nudgeHtml ? '<div class="ins-nudges">' + nudgeHtml + '</div>' : '') +
+      '</div>';
+    }).join('');
+
+    return '<div style="margin-bottom:24px;">' +
+      '<div style="font-weight:800; font-family:var(--font-display); font-size:1.1rem; margin-bottom:12px;">' +
+        '🧭 Insights & nudges (Last 7 Days)' +
+      '</div>' +
+      '<div class="ins-grid">' + cards + '</div>' +
+    '</div>';
   }
 
   function _renderRecitals() {
