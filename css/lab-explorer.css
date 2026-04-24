@@ -154,3 +154,79 @@ body {
 }
 .feedback.active { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .feedback-emoji { font-size: 8rem; }
+
+/* ============================================================
+   WEATHER STATION LAB
+   ============================================================ */
+.wx-form { display: flex; flex-direction: column; gap: 14px; }
+.wx-date {
+  align-self: center;
+  padding: 4px 14px; border-radius: 99px;
+  background: rgba(96,165,250,0.15); color: #60A5FA;
+  font-family: var(--font-display); font-weight: 800; font-size: 0.9rem;
+}
+.wx-group { display: flex; flex-direction: column; gap: 6px; }
+.wx-grp-title { font-weight: 800; font-size: 0.85rem; color: var(--text); }
+.wx-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.wx-chips-col { flex-direction: column; }
+.wx-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px; border-radius: 99px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  color: var(--text, #F0EDFF);
+  font-family: var(--font-body); font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.wx-chip:hover { border-color: rgba(96,165,250,0.45); }
+.wx-chip.sel {
+  background: rgba(96,165,250,0.18); border-color: #60A5FA;
+  box-shadow: 0 0 0 2px rgba(96,165,250,0.25);
+}
+.wx-chip-ic { font-size: 1.1rem; }
+.wx-wind { justify-content: flex-start; }
+.wx-temp {
+  padding: 10px 12px; border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.2); color: var(--text, #F0EDFF);
+  font-family: var(--font-body); font-size: 1rem; font-weight: 700;
+  outline: none; max-width: 180px;
+}
+.wx-temp:focus { border-color: #60A5FA; }
+.wx-actions { display: flex; justify-content: center; margin-top: 4px; }
+.wx-actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.wx-journal {
+  margin-top: 10px; padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+}
+.wx-j-head {
+  font-weight: 800; font-family: var(--font-display);
+  font-size: 0.88rem; color: var(--text);
+  margin-bottom: 6px;
+}
+.wx-tallies { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 4px; }
+.wx-tally {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 4px; border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  font-size: 1rem;
+}
+.wx-tally-n { font-family: var(--font-display); font-weight: 800; color: var(--text); }
+.wx-tally-lbl { font-size: 0.68rem; color: var(--text-muted); font-weight: 700; }
+
+.wx-list { display: flex; flex-direction: column; gap: 4px; }
+.wx-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 2px;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+  font-size: 0.82rem; font-weight: 600;
+}
+.wx-row:first-child { border-top: none; }
+.wx-date-sm { color: var(--text-muted); font-family: var(--font-body); font-weight: 700; min-width: 88px; }
+.wx-row-ic { font-size: 1.1rem; min-width: 48px; }
+.wx-row-txt { color: var(--text); }
+
+.wx-empty { color: var(--text-muted); font-weight: 600; font-size: 0.9rem; text-align: center; padding: 14px 8px; }
