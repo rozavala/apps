@@ -571,6 +571,118 @@
 
     /* ── Hub Calendar Widget (liturgical + Chilean) ── */
     #calendar-widget { animation: fadeUp 0.6s ease-out both; }
+
+    #family-calendar-widget { animation: fadeUp 0.6s ease-out 0.1s both; margin-bottom: 12px; }
+    .fcal-widget {
+      padding: 14px 18px;
+      background: rgba(96,165,250,0.08);
+      border: 1.5px solid rgba(96,165,250,0.18);
+      border-radius: 16px;
+    }
+    .fcal-widget-head {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+      font-family: var(--font-display);
+      font-weight: 800;
+    }
+    .fcal-w-icon { font-size: 1.1rem; }
+    .fcal-w-title { font-size: 0.95rem; }
+    .fcal-w-empty { font-size: 0.82rem; color: var(--text-muted); font-weight: 700; }
+    .fcal-w-row {
+      display: flex; gap: 12px; align-items: baseline;
+      padding: 6px 0;
+      border-left: 3px solid var(--fcal-color, #60A5FA);
+      padding-left: 10px;
+      margin-top: 4px;
+    }
+    .fcal-w-when {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      min-width: 130px;
+    }
+    .fcal-w-summary { font-weight: 700; font-size: 0.92rem; flex: 1; }
+
+    .fcal-editor {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .fcal-editor-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+    .fcal-editor-help {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .fcal-editor-help code {
+      background: rgba(255,255,255,0.06);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+    }
+    .fcal-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+    .fcal-row-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .fcal-row-body { flex: 1; min-width: 0; }
+    .fcal-row-label { font-weight: 800; font-size: 0.92rem; }
+    .fcal-row-url {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .fcal-row-del {
+      background: none; border: none;
+      color: #F87171;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .fcal-empty {
+      padding: 12px;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .fcal-add { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .fcal-add input {
+      flex: 1; min-width: 120px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+    }
+    .fcal-add-btn {
+      padding: 8px 16px;
+      background: rgba(96,165,250,0.15);
+      border: 1px solid #60A5FA;
+      color: #60A5FA;
+      border-radius: 8px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .fcal-editor-msg { font-size: 0.82rem; font-weight: 700; margin-top: 8px; min-height: 1em; }
     .cc-card {
       display: flex;
       flex-direction: column;
