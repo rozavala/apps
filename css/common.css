@@ -252,3 +252,73 @@ body::before {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   ACCESSIBILITY OVERRIDES (driven by js/a11y.js)
+   ============================================================ */
+
+/* Explicit reduced-motion class for kids who toggle it on a device
+   whose OS isn't set to "reduce motion". */
+html.zs-a11y-reduce-motion *,
+html.zs-a11y-reduce-motion *::before,
+html.zs-a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Dyslexia-friendly typography: keep our display headings, but
+   switch body copy to a clean sans with extra spacing. We use the
+   system "OpenDyslexic"/"Atkinson Hyperlegible" if installed,
+   otherwise a generous fallback stack. */
+html.zs-a11y-dyslexia {
+  --font-body: 'OpenDyslexic', 'Atkinson Hyperlegible', 'Verdana', 'Tahoma', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+html.zs-a11y-dyslexia body { line-height: 1.55; }
+
+/* High-contrast mode: replace gradients with flat colours, push
+   text to pure white, and bump borders. Kept as an override of
+   the existing :root vars so individual apps don't need changes. */
+html.zs-a11y-hc {
+  --bg-deep: #000000;
+  --bg-surface: #050510;
+  --bg-card: #0F0F1F;
+  --border-subtle: rgba(255,255,255,0.6);
+  --text: #FFFFFF;
+  --text-primary: #FFFFFF;
+  --text-muted: #DEDEEF;
+  --purple: #C4B5FD;
+  --green:  #6EE7B7;
+  --red:    #FCA5A5;
+  --gold:   #FDE68A;
+  --blue:   #93C5FD;
+  --cyan:   #67E8F9;
+}
+html.zs-a11y-hc body::before,
+html.zs-a11y-hc .aurora,
+html.zs-a11y-hc .atmo,
+html.zs-a11y-hc .nebula {
+  display: none !important;
+}
+html.zs-a11y-hc * {
+  text-shadow: none !important;
+}
+html.zs-a11y-hc a,
+html.zs-a11y-hc button,
+html.zs-a11y-hc input,
+html.zs-a11y-hc select,
+html.zs-a11y-hc textarea {
+  outline-offset: 2px;
+}
+html.zs-a11y-hc :focus-visible {
+  outline: 2.5px solid #FDE68A !important;
+  outline-offset: 3px !important;
+}
+
+/* Always-visible focus ring across the suite — independent of HC. */
+:focus-visible {
+  outline: 2px solid var(--purple, #A78BFA);
+  outline-offset: 2px;
+}

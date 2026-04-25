@@ -875,6 +875,28 @@
     .pk-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .pk-toggle input { width: 18px; height: 18px; accent-color: var(--purple); }
 
+    .a11y-scale-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .a11y-scale-btn {
+      flex: 1; min-width: 56px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font-display, var(--font-body));
+      font-weight: 700; font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .a11y-scale-btn:hover { background: rgba(255,255,255,0.08); }
+    .a11y-scale-btn.active {
+      background: rgba(124,58,237,0.25);
+      border-color: var(--purple);
+      color: #fff;
+    }
+
     /* App Cards */
     .card-faith { 
       --card-accent: #F59E0B; 
