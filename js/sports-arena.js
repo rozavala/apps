@@ -40,17 +40,89 @@ const SportsArena = (() => {
     return 'zs_sports_' + user.name.toLowerCase().replace(/\s+/g, '_');
   }
 
+  // Matches live in a shared family bucket so any profile can edit or
+  // delete a match the family played together (you don't have to switch
+  // to the kid who logged it). Per-kid bucket still holds personal
+  // counters (totalStars, custom sports, activities, tournaments).
+  const SHARED_MATCHES_KEY = 'zs_sports_matches_shared';
+  const MIGRATION_FLAG = 'zs_sports_matches_migrated_v1';
+
+  function _matchFingerprint(m) {
+    if (!m) return '';
+    const players = [String(m.player1 || ''), String(m.player2 || '')].sort().join('|');
+    return [m.date || '', m.sportId || '', players, m.score1, m.score2].join('::');
+  }
+
+  function _migrateMatchesIfNeeded() {
+    if (localStorage.getItem(MIGRATION_FLAG)) return;
+    try {
+      const seen = {};
+      const merged = [];
+      const existing = JSON.parse(localStorage.getItem(SHARED_MATCHES_KEY) || '[]');
+      if (Array.isArray(existing)) {
+        existing.forEach(function(m) {
+          const fp = _matchFingerprint(m);
+          if (!seen[fp]) { seen[fp] = 1; merged.push(m); }
+        });
+      }
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || key.indexOf('zs_sports_') !== 0) continue;
+        if (key === SHARED_MATCHES_KEY || key === MIGRATION_FLAG) continue;
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          if (data && Array.isArray(data.matches)) {
+            data.matches.forEach(function(m) {
+              const fp = _matchFingerprint(m);
+              if (!seen[fp]) { seen[fp] = 1; merged.push(m); }
+            });
+          }
+        } catch (e) {}
+      }
+      localStorage.setItem(SHARED_MATCHES_KEY, JSON.stringify(merged));
+      localStorage.setItem(MIGRATION_FLAG, '1');
+    } catch (e) {}
+  }
+
+  function _getSharedMatches() {
+    _migrateMatchesIfNeeded();
+    try {
+      const arr = JSON.parse(localStorage.getItem(SHARED_MATCHES_KEY) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  function _saveSharedMatches(matches) {
+    try { localStorage.setItem(SHARED_MATCHES_KEY, JSON.stringify(matches || [])); } catch (e) {}
+  }
+
   function _getData() {
     const key = _key();
-    if (!key) return _emptyData();
+    if (!key) {
+      const empty = _emptyData();
+      empty.matches = _getSharedMatches();
+      return empty;
+    }
     try {
-      return JSON.parse(localStorage.getItem(key)) || _emptyData();
+      const data = JSON.parse(localStorage.getItem(key)) || _emptyData();
+      // Always project shared matches into the data view so callers that
+      // read data.matches keep working unchanged.
+      data.matches = _getSharedMatches();
+      return data;
     } catch { return _emptyData(); }
   }
 
   function _saveData(data) {
     const key = _key();
-    if (key) localStorage.setItem(key, JSON.stringify(data));
+    if (!key) {
+      // No active user — only the matches bucket is shared, so still save it.
+      if (data && Array.isArray(data.matches)) _saveSharedMatches(data.matches);
+      return;
+    }
+    if (data && Array.isArray(data.matches)) _saveSharedMatches(data.matches);
+    const perKid = Object.assign({}, data);
+    delete perKid.matches;
+    localStorage.setItem(key, JSON.stringify(perKid));
   }
 
   function _emptyData() {
@@ -104,6 +176,30 @@ const SportsArena = (() => {
     }
 
     return match;
+  }
+
+  function editMatch(matchId, patch) {
+    const matches = _getSharedMatches();
+    let touched = false;
+    for (let i = 0; i < matches.length; i++) {
+      if (matches[i].id === matchId) {
+        const m = Object.assign({}, matches[i], patch || {});
+        m.winner = _determineWinner(m);
+        matches[i] = m;
+        touched = true;
+        break;
+      }
+    }
+    if (touched) _saveSharedMatches(matches);
+    return touched;
+  }
+
+  function deleteMatch(matchId) {
+    const matches = _getSharedMatches();
+    const filtered = matches.filter(m => m.id !== matchId);
+    if (filtered.length === matches.length) return false;
+    _saveSharedMatches(filtered);
+    return true;
   }
 
   function _determineWinner(match) {
@@ -425,6 +521,8 @@ const SportsArena = (() => {
     addCustomSport,
     removeCustomSport,
     logMatch,
+    editMatch,
+    deleteMatch,
     getMatches,
     getRecentMatches,
     createTournament,

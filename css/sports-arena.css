@@ -240,6 +240,21 @@
     .match-score { font-weight: 800; font-size: 1.1rem; color: var(--green-light); }
     .match-date { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
     .match-winner { font-size: 0.78rem; color: var(--gold); font-weight: 700; }
+    .match-actions { display: flex; gap: 4px; align-items: center; margin-left: 8px; }
+    .match-edit, .match-delete {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .match-edit:hover { background: rgba(96,165,250,0.15); border-color: var(--blue); }
+    .match-delete:hover { background: rgba(248,113,113,0.15); border-color: var(--red); }
+    .match-edit:active, .match-delete:active { transform: scale(0.92); }
 
     /* ---- Tournament bracket ---- */
     .tournament-match {

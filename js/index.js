@@ -1701,6 +1701,11 @@
     if (!confirm('Delete ' + name + '?')) return;
     profiles.splice(editingIndex, 1);
     saveProfiles(profiles);
+    // Push the deletion to the server. syncProfiles() does an additive
+    // merge that would otherwise resurrect this profile on next sync.
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
     closeEditModal();
     switchUser();
   }

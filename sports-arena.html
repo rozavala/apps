@@ -707,8 +707,17 @@
         const date = new Date(m.date);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const winner = m.winner === 'draw' ? 'Draw' : m.winner;
+        const id = escHtml(m.id || '');
+        // Tournament matches are managed inside the tournament view, so
+        // skip the inline edit/delete affordances there.
+        const canEdit = !m.tournamentName && !!m.id;
+        const actions = canEdit ? `
+          <div class="match-actions">
+            <button class="match-edit" title="Edit match" aria-label="Edit match" onclick="editMatchInline('${id}')">✏️</button>
+            <button class="match-delete" title="Delete match" aria-label="Delete match" onclick="deleteMatchInline('${id}')">🗑</button>
+          </div>` : '';
         return `
-          <div class="match-item">
+          <div class="match-item" data-match-id="${id}">
             <span class="match-sport">${sport ? sport.icon : '🏅'}</span>
             <div class="match-players">
               <div class="match-vs">${escHtml(m.player1)} vs ${escHtml(m.player2)}</div>
@@ -718,9 +727,37 @@
               <div class="match-score">${m.score1} – ${m.score2}</div>
               <div class="match-winner">${winner === 'Draw' ? '🤝 Draw' : '🏆 ' + escHtml(winner)}</div>
             </div>
+            ${actions}
           </div>`;
       }).join('');
     }
+  }
+
+  function editMatchInline(matchId) {
+    const all = SportsArena.getRecentMatches(500);
+    const m = all.find(x => x.id === matchId);
+    if (!m) return;
+    const newScore1 = prompt(`Score for ${m.player1}:`, m.score1);
+    if (newScore1 === null) return;
+    const newScore2 = prompt(`Score for ${m.player2}:`, m.score2);
+    if (newScore2 === null) return;
+    const s1 = parseInt(newScore1, 10);
+    const s2 = parseInt(newScore2, 10);
+    if (isNaN(s1) || isNaN(s2)) {
+      alert('Scores must be numbers.');
+      return;
+    }
+    SportsArena.editMatch(matchId, { score1: s1, score2: s2 });
+    renderHistory();
+  }
+
+  function deleteMatchInline(matchId) {
+    const all = SportsArena.getRecentMatches(500);
+    const m = all.find(x => x.id === matchId);
+    if (!m) return;
+    if (!confirm(`Delete this match?\n${m.player1} ${m.score1} – ${m.score2} ${m.player2}`)) return;
+    SportsArena.deleteMatch(matchId);
+    renderHistory();
   }
 
   // ════════════════════════════════════════
