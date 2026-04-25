@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-25T14:04:42.815Z",
+  "generatedAt": "2026-04-25T14:19:42.918Z",
   "windowHours": 72,
   "days": [
     {
@@ -191,6 +191,32 @@
       "groups": [
         {
           "entry": {
+            "id": "e_moef9pz2_wpm1w6",
+            "ts": 1777126562501,
+            "clientTs": 1777126560446,
+            "kind": "error",
+            "app": "art-studio",
+            "page": "art-studio.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/art-studio.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/art-studio.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1302,
+          "firstTs": 1777126562501,
+          "lastTs": 1777126782826,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
             "id": "e_moeeuw6k_uotjht",
             "ts": 1777125870716,
             "clientTs": 1777125868652,
@@ -208,9 +234,165 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 70,
+          "count": 1006,
           "firstTs": 1777125870716,
-          "lastTs": 1777125881440,
+          "lastTs": 1777126073308,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moeez8ii_axfmsg",
+            "ts": 1777126073308,
+            "clientTs": 1777126071259,
+            "kind": "error",
+            "app": "money-master",
+            "page": "money-master.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/money-master.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/money-master.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 620,
+          "firstTs": 1777126073308,
+          "lastTs": 1777126195016,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moef2toi_a81egg",
+            "ts": 1777126240709,
+            "clientTs": 1777126238658,
+            "kind": "error",
+            "app": "world-explorer",
+            "page": "world-explorer.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/world-explorer.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/world-explorer.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 528,
+          "firstTs": 1777126240709,
+          "lastTs": 1777126342517,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moef85g8_z1cp0v",
+            "ts": 1777126489248,
+            "clientTs": 1777126487192,
+            "kind": "error",
+            "app": "descubre-chile",
+            "page": "descubre-chile.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/descubre-chile.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/descubre-chile.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 379,
+          "firstTs": 1777126489248,
+          "lastTs": 1777126557236,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moef5093_74z7iv",
+            "ts": 1777126342517,
+            "clientTs": 1777126340487,
+            "kind": "error",
+            "app": "fe-explorador",
+            "page": "fe-explorador.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/fe-explorador.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/fe-explorador.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 331,
+          "firstTs": 1777126342517,
+          "lastTs": 1777126407228,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moef6u7n_kn0vad",
+            "ts": 1777126428068,
+            "clientTs": 1777126425971,
+            "kind": "error",
+            "app": "lab-explorer",
+            "page": "lab-explorer.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/lab-explorer.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/lab-explorer.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 291,
+          "firstTs": 1777126428068,
+          "lastTs": 1777126489248,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moef8a6u_rm2hdk",
+            "ts": 1777126493542,
+            "clientTs": 1777126493334,
+            "kind": "error",
+            "app": "descubre-chile",
+            "page": "descubre-chile.html",
+            "message": "TypeError: undefined is not an object (evaluating 'QB[id].slice')",
+            "filename": "https://rozavala.github.io/apps/js/descubre-chile.js",
+            "lineno": 476,
+            "colno": 18,
+            "stack": "startQuiz@https://rozavala.github.io/apps/js/descubre-chile.js:476:18\nonclick@https://rozavala.github.io/apps/descubre-chile.html:89:10",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 4,
+          "firstTs": 1777126493542,
+          "lastTs": 1777126555660,
           "users": [
             "u-3bda7c"
           ]
