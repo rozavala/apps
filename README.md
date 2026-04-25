@@ -27,6 +27,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
 | **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
 | **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
+| **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
 | **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone). | [trophy-room.html](trophy-room.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
@@ -57,6 +58,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nuevo "Family Wall"!**: Dashboard compartido para la familia. (Shared family dashboard for the fridge).
 - **Insights para Padres (Parent Insights)**: Monitorea el balance de actividades y recibe sugerencias para cada perfil. (Monitor activity balance and receive nudges for each profile).
 - **¡Nueva App "Book & Movie Check"!**: Averigua si un libro o película es adecuado para nuestra familia. (Find out if a book or movie is right for our family).
 - **Nuevo Laboratorio "Magnets" en Lab Explorer**: Aprende sobre el magnetismo con experimentos interactivos. (Learn about magnetism with interactive experiments in the new Magnets lab).
