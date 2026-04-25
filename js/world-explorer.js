@@ -522,6 +522,8 @@ const WorldExplorer = (() => {
         `).join('')}
       </div>
 
+      ${typeof WorldExplorerExtras !== 'undefined' ? WorldExplorerExtras.renderExtras(id, lang) : ''}
+
       <button class="action-btn btn-primary" onclick="WorldExplorer.markVisited('${id}')" ${isVisited ? 'disabled' : ''}>
         ${isVisited ? '✅ ' + (lang === 'es' ? 'Visitado' : 'Visited') : '🗺️ ' + (lang === 'es' ? 'Marcar como Visitado' : 'Mark as Visited')}
       </button>

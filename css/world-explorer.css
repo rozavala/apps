@@ -129,6 +129,50 @@ path.country.visited { fill: #10B981; fill-opacity: 0.3; stroke: #34D399; }
 .fact-item { margin-bottom: 12px; font-size: 0.95rem; line-height: 1.5; font-weight: 600; display: flex; gap: 10px; }
 .fact-item:last-child { margin-bottom: 0; }
 
+.we-extras { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
+@media (min-width: 560px) { .we-extras { grid-template-columns: 1fr 1fr; } }
+.we-extra-card {
+  text-align: left;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 16px;
+}
+.we-extra-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.we-extra-icon { font-size: 1.4rem; }
+.we-extra-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.we-currency-body { display: flex; align-items: center; gap: 14px; }
+.we-currency-symbol {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: #FBBF24;
+  min-width: 44px;
+  text-align: center;
+}
+.we-currency-name { font-weight: 800; font-size: 1rem; }
+.we-currency-sample { font-size: 0.82rem; color: var(--text-muted); font-weight: 700; margin-top: 2px; }
+
+.we-anthem-name { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
+.we-anthem-meta { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+.we-anthem-opening {
+  font-style: italic;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 8px 12px;
+  background: rgba(96,165,250,0.08);
+  border-left: 3px solid #60A5FA;
+  border-radius: 6px;
+}
+
 .action-btn {
   padding: 16px 32px; border-radius: var(--radius-sm); font-family: var(--font-body);
   font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease;
