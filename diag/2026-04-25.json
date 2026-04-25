@@ -3,6 +3,32 @@
   "groups": [
     {
       "entry": {
+        "id": "e_moeeuw6k_uotjht",
+        "ts": 1777125870716,
+        "clientTs": 1777125868652,
+        "kind": "error",
+        "app": "guess-quest",
+        "page": "guess-quest.html",
+        "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+        "filename": "https://rozavala.github.io/apps/guess-quest.html",
+        "lineno": 1,
+        "colno": 29,
+        "stack": "global code@https://rozavala.github.io/apps/guess-quest.html:1:29",
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 70,
+      "firstTs": 1777125870716,
+      "lastTs": 1777125881440,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
         "id": "e_modr9v1u_p5skvx",
         "ts": 1777086258321,
         "clientTs": 1777086256242,
@@ -24,6 +50,58 @@
       "firstTs": 1777086258321,
       "lastTs": 1777086261784,
       "users": []
+    },
+    {
+      "entry": {
+        "id": "e_moeepmzb_ymsyyp",
+        "ts": 1777125625556,
+        "clientTs": 1777125623447,
+        "kind": "error",
+        "app": "little-maestro",
+        "page": "little-maestro.html",
+        "message": "TypeError: undefined is not an object (near '...})...')",
+        "filename": "https://rozavala.github.io/apps/little-maestro.html",
+        "lineno": 7993,
+        "colno": 9,
+        "stack": "init@https://rozavala.github.io/apps/little-maestro.html:7993:9\n@https://rozavala.github.io/apps/little-maestro.html:8217:19",
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1777125625556,
+      "lastTs": 1777125802036,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_moeepn5x_ma7vrl",
+        "ts": 1777125625556,
+        "clientTs": 1777125623685,
+        "kind": "error",
+        "app": "little-maestro",
+        "page": "little-maestro.html",
+        "message": "Script error.",
+        "filename": null,
+        "lineno": 0,
+        "colno": 0,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1777125625556,
+      "lastTs": 1777125802036,
+      "users": [
+        "u-3bda7c"
+      ]
     },
     {
       "entry": {
