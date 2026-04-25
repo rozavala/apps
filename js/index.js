@@ -1236,11 +1236,17 @@
             '</div>';
         }).join('') +
       '</div>' +
+      (typeof FamilyCalendar !== 'undefined' ?
+        '<div id="parents-fcal-editor" data-fcal-editor style="margin-top:24px;"></div>' : '') +
       '<div style="margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); text-align:center;">' +
         '<button class="parent-btn" style="background:#333; font-size:0.8rem;" onclick="if(typeof Debug!==\'undefined\')Debug.show()">' +
           '🛠 View Debug Log' +
         '</button>' +
       '</div>';
+
+    if (typeof FamilyCalendar !== 'undefined') {
+      try { FamilyCalendar.renderEditor('parents-fcal-editor'); } catch (e) {}
+    }
   }
 
   function toggleAllTimers(paused) {
