@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-25T14:19:42.918Z",
+  "generatedAt": "2026-04-25T14:34:46.016Z",
   "windowHours": 72,
   "days": [
     {
@@ -208,9 +208,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 1302,
+          "count": 3530,
           "firstTs": 1777126562501,
-          "lastTs": 1777126782826,
+          "lastTs": 1777127164893,
           "users": [
             "u-3bda7c"
           ]
@@ -373,6 +373,59 @@
         },
         {
           "entry": {
+            "id": "e_moefmmry_q034lj",
+            "ts": 1777127164893,
+            "clientTs": 1777127162830,
+            "kind": "error",
+            "app": "sports-arena",
+            "page": "sports-arena.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/sports-arena.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/sports-arena.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 287,
+          "firstTs": 1777127164893,
+          "lastTs": 1777127254028,
+          "users": [
+            "u-3bda7c",
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moeea8n0_a0yihq",
+            "ts": 1777124907110,
+            "clientTs": 1777124905022,
+            "kind": "error",
+            "app": "index",
+            "page": "index.html",
+            "message": "Script error.",
+            "filename": null,
+            "lineno": 0,
+            "colno": 0,
+            "stack": null,
+            "user": null,
+            "age": null,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 4,
+          "firstTs": 1777124907110,
+          "lastTs": 1777127441620,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
             "id": "e_moef8a6u_rm2hdk",
             "ts": 1777126493542,
             "clientTs": 1777126493334,
@@ -475,30 +528,6 @@
         },
         {
           "entry": {
-            "id": "e_moeea8n0_a0yihq",
-            "ts": 1777124907110,
-            "clientTs": 1777124905022,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "Script error.",
-            "filename": null,
-            "lineno": 0,
-            "colno": 0,
-            "stack": null,
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777124907110,
-          "lastTs": 1777124907110,
-          "users": []
-        },
-        {
-          "entry": {
             "id": "e_modr9sij_wl3o5x",
             "ts": 1777086255112,
             "clientTs": 1777086252955,
@@ -519,6 +548,30 @@
           "count": 2,
           "firstTs": 1777086255112,
           "lastTs": 1777086258321,
+          "users": []
+        },
+        {
+          "entry": {
+            "id": "e_moefojg4_ruzh0j",
+            "ts": 1777127254028,
+            "clientTs": 1777127251828,
+            "kind": "error",
+            "app": "index",
+            "page": "index.html",
+            "message": "ReferenceError: Can't find variable: closeEditModal",
+            "filename": "https://rozavala.github.io/apps/index.html",
+            "lineno": 378,
+            "colno": 38,
+            "stack": "onclick@https://rozavala.github.io/apps/index.html:378:38",
+            "user": null,
+            "age": null,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1777127254028,
+          "lastTs": 1777127254028,
           "users": []
         }
       ]
