@@ -339,8 +339,87 @@ var Routines = (function() {
     renderHubWidget('routines-widget');
   }
 
+  // Status + toggle for any kid by name (used by Family Wall, where
+  // multiple kids' routines render side-by-side without switching the
+  // active user). Reads/writes zs_routines_<kid>.
+  function getStatusFor(userName) {
+    if (!userName) return null;
+    var k = STORAGE_PREFIX + userName.toLowerCase().replace(/\s+/g, '_');
+    var data;
+    try { data = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { data = {}; }
+    if (!data.days) data.days = {};
+    if (typeof data.streak !== 'number') data.streak = 0;
+    if (typeof data.bestStreak !== 'number') data.bestStreak = 0;
+    var today = _today();
+    if (!data.days[today]) data.days[today] = { morning: [], evening: [] };
+    var day = data.days[today];
+    var morningTpl = _getTemplate(data, 'morning');
+    var eveningTpl = _getTemplate(data, 'evening');
+    return {
+      userName: userName,
+      date: today,
+      streak: data.streak,
+      bestStreak: data.bestStreak,
+      morning: {
+        items: morningTpl.map(function(c) {
+          return { id: c.id, label: c.label, done: day.morning.indexOf(c.id) !== -1 };
+        }),
+        doneCount: day.morning.length,
+        total: morningTpl.length,
+        complete: day.morning.length >= morningTpl.length
+      },
+      evening: {
+        items: eveningTpl.map(function(c) {
+          return { id: c.id, label: c.label, done: day.evening.indexOf(c.id) !== -1 };
+        }),
+        doneCount: day.evening.length,
+        total: eveningTpl.length,
+        complete: day.evening.length >= eveningTpl.length
+      }
+    };
+  }
+
+  function toggleFor(userName, routine, itemId) {
+    if (!userName) return null;
+    if (routine !== 'morning' && routine !== 'evening') return getStatusFor(userName);
+    var k = STORAGE_PREFIX + userName.toLowerCase().replace(/\s+/g, '_');
+    var data;
+    try { data = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { data = {}; }
+    if (!data.days) data.days = {};
+    var today = _today();
+    if (!data.days[today]) data.days[today] = { morning: [], evening: [] };
+    var day = data.days[today];
+    var list = day[routine];
+    var tpl = _getTemplate(data, routine);
+    var idx = list.indexOf(itemId);
+    if (idx === -1) {
+      var isKnown = tpl.some(function(c) { return c.id === itemId; });
+      if (!isKnown) return getStatusFor(userName);
+      list.push(itemId);
+    } else {
+      list.splice(idx, 1);
+    }
+
+    // Update streak when both routines are complete for the day.
+    var morningTpl = _getTemplate(data, 'morning');
+    var eveningTpl = _getTemplate(data, 'evening');
+    var bothDone = day.morning.length >= morningTpl.length &&
+                   day.evening.length >= eveningTpl.length;
+    if (bothDone && data.lastFullDay !== today) {
+      if (data.lastFullDay === _yesterday()) data.streak = (data.streak || 0) + 1;
+      else data.streak = 1;
+      data.lastFullDay = today;
+      if (data.streak > (data.bestStreak || 0)) data.bestStreak = data.streak;
+    }
+
+    try { localStorage.setItem(k, JSON.stringify(data)); } catch (e) {}
+    return getStatusFor(userName);
+  }
+
   return {
     getStatus: getStatus,
+    getStatusFor: getStatusFor,
+    toggleFor: toggleFor,
     getActiveRoutine: getActiveRoutine,
     toggle: toggle,
     renderHubWidget: renderHubWidget,
