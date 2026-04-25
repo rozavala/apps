@@ -70,6 +70,18 @@ var MathExtras = (function() {
         wordsEl.classList.add('empty');
       }
     }
+
+    var duelEl = document.getElementById('best-duel');
+    if (duelEl) {
+      var last = data.duel && data.duel.last;
+      if (last) {
+        duelEl.textContent = 'Last: ' + last.a + ' ' + last.scoreA + ' — ' + last.scoreB + ' ' + last.b;
+        duelEl.classList.remove('empty');
+      } else {
+        duelEl.textContent = 'Pick two players to begin!';
+        duelEl.classList.add('empty');
+      }
+    }
   }
 
   /* ============================================================
@@ -517,9 +529,295 @@ var MathExtras = (function() {
     return { open: open, start: start, toggleLang: toggleLang, _answer: _answer };
   })();
 
+  /* ============================================================
+     DUEL — pass-and-play sibling sprint (#182)
+     Both players get the SAME pre-generated 60s problem set so it's
+     fair. Player A plays first; Player B gets the same problems in
+     the same order; higher score wins.
+     ============================================================ */
+  var Duel = (function() {
+    var DUEL_SECONDS = 60;
+    var state = null;
+    // state = {
+    //   problems[], table, playerA, playerB,
+    //   scoreA, scoreB, current ('A'|'B'), idx, deadline, timerId
+    // }
+
+    function open() {
+      _showScreen('screen-duel');
+      _renderPicker();
+    }
+
+    function _profileList() {
+      var profs = (typeof getProfiles === 'function') ? getProfiles() : [];
+      // Guest option always available (lowercase to match _userKey style elsewhere).
+      return profs.concat([{ name: 'Guest', avatar: '🛸', color: '#60A5FA' }]);
+    }
+
+    var pickedA = null, pickedB = null, pickedTable = 0;
+
+    function _renderPicker() {
+      var wrap = document.getElementById('duel-wrap');
+      if (!wrap) return;
+      var profiles = _profileList();
+      var data = _load();
+      var lastDuel = (data.duel && data.duel.last) || null;
+
+      function tile(p, side) {
+        var sel = (side === 'A' ? pickedA : pickedB);
+        var on = sel && sel.name === p.name;
+        return '<button type="button" class="duel-tile ' + (on ? 'active' : '') + '" ' +
+                 'style="--accent:' + (p.color || '#A78BFA') + '" ' +
+                 'onclick="MathExtras.Duel._pick(\'' + side + '\', \'' + p.name.replace(/'/g, "\\'") + '\')">' +
+            '<span class="duel-avatar">' + (p.avatar || '🛸') + '</span>' +
+            '<span class="duel-pname">' + p.name + '</span>' +
+          '</button>';
+      }
+
+      var tablesRow = [0,2,3,4,5,6,7,8,9,10,11,12].map(function(t) {
+        var on = pickedTable === t;
+        var label = t === 0 ? 'Mix' : '×' + t;
+        return '<button type="button" class="duel-table-btn ' + (on ? 'active' : '') + '" ' +
+                 'onclick="MathExtras.Duel._setTable(' + t + ')">' + label + '</button>';
+      }).join('');
+
+      var canStart = pickedA && pickedB && pickedA.name !== pickedB.name;
+      var lastLine = lastDuel
+        ? '<div class="duel-last">Last duel: ' + lastDuel.a + ' ' + lastDuel.scoreA + ' — ' + lastDuel.scoreB + ' ' + lastDuel.b + ' (×' + (lastDuel.table || 'Mix') + ')</div>'
+        : '';
+
+      wrap.innerHTML =
+        '<div class="sprint-header">' +
+          '<button class="back-btn" onclick="MathExtras._goHome()" aria-label="Back">←</button>' +
+          '<h2>🤝 Sibling Duel</h2>' +
+          '<p>Pass-and-play. Same problems, same order — fair fight.</p>' +
+        '</div>' +
+        '<div class="duel-picker">' +
+          '<div class="duel-side"><div class="duel-side-label">Player 1</div>' +
+            '<div class="duel-tiles">' + profiles.map(function(p) { return tile(p, 'A'); }).join('') + '</div>' +
+          '</div>' +
+          '<div class="duel-vs">VS</div>' +
+          '<div class="duel-side"><div class="duel-side-label">Player 2</div>' +
+            '<div class="duel-tiles">' + profiles.map(function(p) { return tile(p, 'B'); }).join('') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="duel-tables">' +
+          '<div class="duel-tables-label">Pick a table</div>' +
+          '<div class="duel-tables-row">' + tablesRow + '</div>' +
+        '</div>' +
+        lastLine +
+        '<div class="duel-go">' +
+          '<button class="action-btn btn-primary ' + (canStart ? '' : 'disabled') + '" ' +
+                  (canStart ? 'onclick="MathExtras.Duel._begin()"' : 'disabled') + '>' +
+            'Start Duel ⚔️' +
+          '</button>' +
+        '</div>';
+    }
+
+    function _pick(side, name) {
+      var p = _profileList().filter(function(x) { return x.name === name; })[0];
+      if (!p) return;
+      if (side === 'A') pickedA = p;
+      else pickedB = p;
+      _renderPicker();
+    }
+
+    function _setTable(t) {
+      pickedTable = t;
+      _renderPicker();
+    }
+
+    function _genProblems(table, count) {
+      var probs = [];
+      for (var i = 0; i < count; i++) {
+        var t = table === 0 ? (2 + Math.floor(Math.random() * 11)) : table;
+        var n = 1 + Math.floor(Math.random() * 12);
+        probs.push({ a: t, b: n, answer: t * n });
+      }
+      return probs;
+    }
+
+    function _begin() {
+      if (!pickedA || !pickedB || pickedA.name === pickedB.name) return;
+      state = {
+        problems: _genProblems(pickedTable, 80), // generous so neither runs out
+        table: pickedTable,
+        playerA: pickedA, playerB: pickedB,
+        scoreA: 0, scoreB: 0,
+        wrongA: 0, wrongB: 0,
+        current: 'A',
+        idx: 0,
+        deadline: 0,
+        timerId: null
+      };
+      _renderHandoff();
+    }
+
+    function _renderHandoff() {
+      var wrap = document.getElementById('duel-wrap');
+      if (!wrap || !state) return;
+      var who = state.current === 'A' ? state.playerA : state.playerB;
+      var label = state.current === 'A' ? 'goes first' : 'is up next';
+      wrap.innerHTML =
+        '<div class="duel-handoff">' +
+          '<div class="duel-handoff-emoji">' + (who.avatar || '🛸') + '</div>' +
+          '<div class="duel-handoff-name" style="--accent:' + (who.color || '#A78BFA') + '">' + who.name + '</div>' +
+          '<div class="duel-handoff-sub">' + label + ' — ' + DUEL_SECONDS + ' seconds, same problems for both.</div>' +
+          '<button class="action-btn btn-primary" onclick="MathExtras.Duel._startTurn()">I\'m ready ▶</button>' +
+        '</div>';
+    }
+
+    function _startTurn() {
+      if (!state) return;
+      state.idx = 0;
+      state.deadline = Date.now() + DUEL_SECONDS * 1000;
+      _renderTurn();
+      if (state.timerId) clearInterval(state.timerId);
+      state.timerId = setInterval(_tick, 250);
+      setTimeout(function() {
+        var inp = document.getElementById('duel-input');
+        if (inp) inp.focus();
+      }, 80);
+    }
+
+    function _tick() {
+      if (!state) return;
+      var rem = state.deadline - Date.now();
+      if (rem <= 0) { _endTurn(); return; }
+      var el = document.getElementById('duel-time');
+      if (el) el.textContent = Math.max(0, Math.ceil(rem / 1000)) + 's';
+    }
+
+    function _renderTurn() {
+      var wrap = document.getElementById('duel-wrap');
+      if (!wrap || !state) return;
+      var who = state.current === 'A' ? state.playerA : state.playerB;
+      var score = state.current === 'A' ? state.scoreA : state.scoreB;
+      var q = state.problems[state.idx];
+      wrap.innerHTML =
+        '<div class="sprint-header">' +
+          '<div class="sprint-chip" id="duel-time">' + DUEL_SECONDS + 's</div>' +
+          '<h2 style="color:' + (who.color || '#A78BFA') + ';">' + (who.avatar || '🛸') + ' ' + who.name + '</h2>' +
+          '<div class="sprint-chip correct">✓ ' + score + '</div>' +
+        '</div>' +
+        '<div class="sprint-question">' +
+          '<div class="sprint-q-text">' + q.a + ' × ' + q.b + ' = ?</div>' +
+          '<input type="number" id="duel-input" class="sprint-input" autocomplete="off" inputmode="numeric" />' +
+        '</div>' +
+        '<div class="sprint-hint">Press Enter to submit</div>';
+      var inp = document.getElementById('duel-input');
+      if (inp) {
+        inp.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); _submit(); }
+        });
+      }
+    }
+
+    function _submit() {
+      if (!state) return;
+      var inp = document.getElementById('duel-input');
+      if (!inp) return;
+      var val = parseInt(inp.value, 10);
+      if (isNaN(val)) return;
+      var q = state.problems[state.idx];
+      var correct = val === q.answer;
+      if (state.current === 'A') {
+        if (correct) state.scoreA++; else state.wrongA++;
+      } else {
+        if (correct) state.scoreB++; else state.wrongB++;
+      }
+      if (correct && typeof SFX !== 'undefined' && SFX.tick) SFX.tick();
+      else if (!correct && typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
+      state.idx++;
+      if (state.idx >= state.problems.length) { _endTurn(); return; }
+      _renderTurn();
+      var next = document.getElementById('duel-input');
+      if (next) next.focus();
+    }
+
+    function _endTurn() {
+      if (!state) return;
+      if (state.timerId) clearInterval(state.timerId);
+      state.timerId = null;
+      if (state.current === 'A') {
+        state.current = 'B';
+        _renderHandoff();
+      } else {
+        _finish();
+      }
+    }
+
+    function _finish() {
+      if (!state) return;
+      var winner;
+      if (state.scoreA > state.scoreB) winner = state.playerA;
+      else if (state.scoreB > state.scoreA) winner = state.playerB;
+      else winner = null; // tie
+
+      // Save last result for "rematch" memory
+      var data = _load();
+      if (!data.duel) data.duel = {};
+      data.duel.last = {
+        a: state.playerA.name, b: state.playerB.name,
+        scoreA: state.scoreA, scoreB: state.scoreB,
+        table: state.table, ts: Date.now()
+      };
+      _save(data);
+
+      if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+        var summary = 'Duel ×' + (state.table || 'Mix') + ' — ' +
+          state.playerA.name + ' ' + state.scoreA + ' vs ' + state.scoreB + ' ' + state.playerB.name +
+          (winner ? ' (winner: ' + winner.name + ')' : ' (tie)');
+        ActivityLog.log('Math Galaxy', '🤝', summary);
+      }
+
+      var wrap = document.getElementById('duel-wrap');
+      var winLine = winner
+        ? '<div class="duel-winner-line">🏆 ' + (winner.avatar || '🛸') + ' ' + winner.name + ' wins!</div>'
+        : '<div class="duel-winner-line">🤝 It\'s a tie!</div>';
+
+      wrap.innerHTML =
+        '<div class="sprint-header">' +
+          '<button class="back-btn" onclick="MathExtras.Duel.open()" aria-label="Back">←</button>' +
+          '<h2>Duel results</h2>' +
+        '</div>' +
+        winLine +
+        '<div class="duel-scoreboard">' +
+          '<div class="duel-score-card" style="--accent:' + (state.playerA.color || '#A78BFA') + '">' +
+            '<div class="duel-score-emoji">' + (state.playerA.avatar || '🛸') + '</div>' +
+            '<div class="duel-score-name">' + state.playerA.name + '</div>' +
+            '<div class="duel-score-num">' + state.scoreA + '</div>' +
+            '<div class="duel-score-sub">' + state.wrongA + ' wrong</div>' +
+          '</div>' +
+          '<div class="duel-score-card" style="--accent:' + (state.playerB.color || '#A78BFA') + '">' +
+            '<div class="duel-score-emoji">' + (state.playerB.avatar || '🛸') + '</div>' +
+            '<div class="duel-score-name">' + state.playerB.name + '</div>' +
+            '<div class="duel-score-num">' + state.scoreB + '</div>' +
+            '<div class="duel-score-sub">' + state.wrongB + ' wrong</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sprint-actions">' +
+          '<button class="action-btn btn-primary" onclick="MathExtras.Duel._begin()">Rematch ⚔️</button>' +
+          '<button class="action-btn btn-secondary" onclick="MathExtras.Duel.open()">New Duel</button>' +
+          '<button class="action-btn btn-secondary" onclick="MathExtras._goHome()">🪐 Home</button>' +
+        '</div>';
+
+      state = null;
+    }
+
+    return {
+      open: open,
+      _pick: _pick,
+      _setTable: _setTable,
+      _begin: _begin,
+      _startTurn: _startTurn
+    };
+  })();
+
   return {
     Sprint: Sprint,
     Words: Words,
+    Duel: Duel,
     _goHome: goHome,
     _refreshBestBadges: _refreshBestBadges
   };

@@ -75,6 +75,13 @@
           <div class="rank-topics">Real-world math · bilingual · 5 per tier</div>
           <div class="best-badge empty" id="best-words">Try your first problem!</div>
         </div>
+        <div class="level-card card-duel" onclick="MathExtras.Duel.open()">
+          <span class="rank-icon">🤝</span>
+          <div class="rank-name">Sibling Duel</div>
+          <div class="rank-ages">2 players · 60s each</div>
+          <div class="rank-topics">Pass-and-play · same problems · best score wins</div>
+          <div class="best-badge empty" id="best-duel">Pick two players to begin!</div>
+        </div>
       </div>
     </div>
 
@@ -86,6 +93,11 @@
     <!-- ============ WORD PROBLEMS SCREEN ============ -->
     <div class="screen" id="screen-words">
       <div id="words-wrap" class="words-wrap"></div>
+    </div>
+
+    <!-- ============ DUEL SCREEN ============ -->
+    <div class="screen" id="screen-duel">
+      <div id="duel-wrap" class="duel-wrap"></div>
     </div>
 
     <!-- ============ GAME SCREEN ============ -->
