@@ -510,7 +510,8 @@
         world:  document.getElementById('stats-world'),
         story:  document.getElementById('stats-story'),
         quest:  document.getElementById('stats-quest'),
-        guess:  document.getElementById('stats-guess')
+        guess:  document.getElementById('stats-guess'),
+        money:  document.getElementById('stats-money')
       };
 
       var stats = precalculatedStats || (typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} });
@@ -653,6 +654,25 @@
           var gs = GuessQuest.getStats();
           if (gs.roundsPlayed > 0) {
             els.guess.innerHTML = '<span class="cs-item active">⭐ ' + gs.totalStars + '</span><span class="cs-item">🎮 ' + gs.roundsWon + '/' + gs.roundsPlayed + '</span>';
+          }
+        }
+      } catch (e) {}
+
+      try {
+        if (els.money) {
+          var mkey = 'zs_money_' + (user.name ? user.name.toLowerCase().replace(/\s+/g, '_') : '_default');
+          var mraw = localStorage.getItem(mkey);
+          var mdata = mraw ? (JSON.parse(mraw) || {}) : {};
+          var mStars = 0, mRounds = 0;
+          ['clp', 'usd'].forEach(function(c) {
+            var bucket = mdata[c] || {};
+            for (var mk in bucket) {
+              mStars += (bucket[mk].stars || 0);
+              if (bucket[mk].score) mRounds++;
+            }
+          });
+          if (mStars > 0 || mRounds > 0) {
+            els.money.innerHTML = '<span class="cs-item active">⭐ ' + mStars + '</span><span class="cs-item">🪙 ' + mRounds + ' modes</span>';
           }
         }
       } catch (e) {}
