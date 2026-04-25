@@ -217,6 +217,35 @@ var FamilyCalendar = (function() {
   }
 
   // ---- Fetch + cache ----
+  // Most public iCal hosts (Google Calendar, iCloud, Outlook) don't
+  // return CORS headers, so a direct browser fetch is blocked. When
+  // the Tailscale sync server is reachable we route through its
+  // /api/ical proxy (allowlisted, server-side fetch). Direct fetch is
+  // still attempted as a fallback for hosts that DO send CORS.
+  function _fetchIcs(url) {
+    var useProxy = (typeof CloudSync !== 'undefined') &&
+                   CloudSync.isConfigured && CloudSync.isConfigured() &&
+                   CloudSync.online && CloudSync.server;
+    var primary = useProxy
+      ? CloudSync.server + '/api/ical?url=' + encodeURIComponent(url)
+      : url;
+
+    return fetch(primary, { cache: 'no-store' })
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .catch(function(err) {
+        if (!useProxy) throw err;
+        // Proxy unreachable — try direct as a last resort (works for
+        // hosts that already serve CORS).
+        return fetch(url, { cache: 'no-store' }).then(function(res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        });
+      });
+  }
+
   function refresh(force) {
     var urls = getUrls();
     if (!urls.length) return Promise.resolve([]);
@@ -228,11 +257,7 @@ var FamilyCalendar = (function() {
       if (!force && entry && entry.fetchedTs && (now - entry.fetchedTs) < CACHE_TTL_MS) {
         return Promise.resolve();
       }
-      return fetch(u.url, { cache: 'no-store' })
-        .then(function(res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.text();
-        })
+      return _fetchIcs(u.url)
         .then(function(text) {
           cache[u.url] = {
             fetchedTs: now,

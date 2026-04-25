@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const media = require('./media');
 const diag = require('./diag');
+const ical = require('./ical');
 
 const app = express();
 const PORT = 3333;
@@ -21,6 +22,9 @@ media.init(app, DATA_DIR);
 
 // Register diag endpoints (error capture from browsers)
 diag.init(app, DATA_DIR);
+
+// Register iCal proxy (CORS-safe family calendar fetches)
+ical.init(app);
 
 app.get('/api/kids', (req, res) => {
   try {
