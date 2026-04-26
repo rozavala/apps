@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T07:13:34.242Z",
+  "generatedAt": "2026-04-26T07:28:40.645Z",
   "windowHours": 72,
   "days": [
     {
@@ -54,32 +54,6 @@
           "firstTs": 1776961863171,
           "lastTs": 1776961863171,
           "users": []
-        },
-        {
-          "entry": {
-            "id": "e_mob5bgy4_z881a5",
-            "ts": 1776928449393,
-            "clientTs": 1776928447372,
-            "kind": "console.warn",
-            "app": "little-maestro",
-            "page": "little-maestro.html",
-            "message": "[SW] Registration failed: ServiceWorker script at https://rozavala.github.io/apps/_assets/sw.js for scope https://rozavala.github.io/apps/ encountered an error during installation.",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-34d354",
-            "age": 12,
-            "guest": false,
-            "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1776928449393,
-          "lastTs": 1776928449393,
-          "users": [
-            "u-34d354"
-          ]
         }
       ]
     },
