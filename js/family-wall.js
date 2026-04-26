@@ -285,19 +285,20 @@ var FamilyWall = (function() {
         '<div class="fw-card-empty">Add a profile to start tracking routines.</div>' +
       '</div>';
     }
+    // Show only the routine that matches the current time of day:
+    //  - before 14:00  → morning
+    //  - 14:00 onwards → evening
+    var hour = new Date().getHours();
+    var which = hour < 14 ? 'morning' : 'evening';
+    var sectionLabel = which === 'morning' ? '🌅 Morning' : '🌙 Night';
+
     var rows = profiles.map(function(p) {
       var status = Routines.getStatusFor(p.name);
       if (!status) return '';
-      var morningChips = status.morning.items.map(function(it) {
+      var bucket = status[which];
+      var chips = bucket.items.map(function(it) {
         return '<button class="fw-r-task ' + (it.done ? 'done' : '') + '" ' +
-                 'onclick="FamilyWall.toggleRoutine(\'' + _escAttr(p.name) + '\', \'morning\', \'' + _escAttr(it.id) + '\')">' +
-          '<span class="fw-r-check">' + (it.done ? '✓' : '') + '</span>' +
-          _esc(it.label) +
-        '</button>';
-      }).join('');
-      var eveningChips = status.evening.items.map(function(it) {
-        return '<button class="fw-r-task ' + (it.done ? 'done' : '') + '" ' +
-                 'onclick="FamilyWall.toggleRoutine(\'' + _escAttr(p.name) + '\', \'evening\', \'' + _escAttr(it.id) + '\')">' +
+                 'onclick="FamilyWall.toggleRoutine(\'' + _escAttr(p.name) + '\', \'' + which + '\', \'' + _escAttr(it.id) + '\')">' +
           '<span class="fw-r-check">' + (it.done ? '✓' : '') + '</span>' +
           _esc(it.label) +
         '</button>';
@@ -310,13 +311,14 @@ var FamilyWall = (function() {
           '</div>' +
         '</div>' +
         '<div class="fw-r-tasks">' +
-          (morningChips ? '<div class="fw-r-section"><span class="fw-r-section-label">🌅 AM</span>' + morningChips + '</div>' : '') +
-          (eveningChips ? '<div class="fw-r-section"><span class="fw-r-section-label">🌙 PM</span>' + eveningChips + '</div>' : '') +
+          (chips
+            ? '<div class="fw-r-section"><span class="fw-r-section-label">' + sectionLabel + '</span>' + chips + '</div>'
+            : '<div class="fw-r-empty">No ' + which + ' tasks set.</div>') +
         '</div>';
     }).join('');
 
     return '<div class="fw-card fw-card-routines">' +
-      '<div class="fw-card-head"><span class="fw-card-icon">📋</span> Routines · today</div>' +
+      '<div class="fw-card-head"><span class="fw-card-icon">📋</span> Routines · ' + sectionLabel + '</div>' +
       '<div class="fw-routines">' +
         '<div class="fw-routines-head"><div>Kid</div><div>Tasks</div></div>' +
         rows +
@@ -425,25 +427,28 @@ var FamilyWall = (function() {
         d.toLocaleDateString(undefined, { weekday: 'long' });
       var dateLabel = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-      inner += '<div class="fw-week-day">' +
-        '<div class="fw-week-day-head">' +
-          '<span class="fw-week-day-name">' + _esc(dayLabel) + '</span>' +
-          '<span class="fw-week-day-date">' + _esc(dateLabel) + '</span>' +
-        '</div>';
+      var eventsHtml = '';
       if (!dayEvents.length) {
-        inner += '<div class="fw-week-empty">No events.</div>';
+        eventsHtml = '<div class="fw-week-empty">No events.</div>';
       } else {
         dayEvents.forEach(function(ev) {
           var when = ev.allDay ? 'All day'
             : ev.start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-          inner += '<div class="fw-event-row">' +
+          eventsHtml += '<div class="fw-event-row">' +
             '<div class="fw-stripe" style="--stripe:' + _esc(ev.calColor || '#60A5FA') + '"></div>' +
             '<div class="fw-when">' + _esc(when) + '</div>' +
             '<div class="fw-summary">' + _esc(ev.summary) + '</div>' +
           '</div>';
         });
       }
-      inner += '</div>';
+
+      inner += '<div class="fw-week-day">' +
+        '<div class="fw-week-day-head">' +
+          '<span class="fw-week-day-name">' + _esc(dayLabel) + '</span>' +
+          '<span class="fw-week-day-date">' + _esc(dateLabel) + '</span>' +
+        '</div>' +
+        '<div class="fw-week-events">' + eventsHtml + '</div>' +
+      '</div>';
     }
 
     if (!inner) {

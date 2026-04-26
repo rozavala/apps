@@ -262,6 +262,13 @@ body {
   border-color: var(--fw-green);
   color: #073b27;
 }
+.fw-r-empty {
+  font-size: 0.78rem;
+  color: var(--fw-muted);
+  font-weight: 700;
+  font-style: italic;
+  padding: 4px 0;
+}
 
 /* ---- Calendar / Menu / Shopping rows ---- */
 .fw-event-row, .fw-menu-row, .fw-shop-row {
@@ -296,7 +303,7 @@ body {
 }
 
 /* This-week card: stacked day buckets with sticky-ish day headers */
-.fw-card-week { max-height: 520px; }
+.fw-card-week { max-height: 320px; }
 .fw-card-week .fw-card-head { flex-shrink: 0; }
 .fw-week-body {
   flex: 1 1 auto;
@@ -313,28 +320,37 @@ body {
 }
 .fw-week-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
-.fw-week-day { padding: 6px 0; border-bottom: 1px solid var(--fw-border); }
+/* Compact two-column day row: label on the left, events on the right */
+.fw-week-day {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--fw-border);
+  align-items: start;
+}
 .fw-week-day:last-child { border-bottom: none; }
 .fw-week-day-head {
-  display: flex; align-items: baseline; justify-content: space-between;
-  padding: 6px 0 4px;
-  position: sticky;
-  top: 0;
-  background: linear-gradient(to bottom, rgba(11,11,26,0.95), rgba(11,11,26,0.85));
-  backdrop-filter: blur(6px);
-  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 4px 0 0;
 }
 .fw-week-day-name {
   font-family: var(--font-display, sans-serif);
-  font-weight: 800; font-size: 0.92rem;
+  font-weight: 800; font-size: 0.9rem;
   text-transform: capitalize;
+  line-height: 1.1;
 }
 .fw-week-day-date {
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   color: var(--fw-muted);
   font-weight: 800;
   letter-spacing: 0.04em;
+  margin-top: 1px;
 }
+.fw-week-events { display: flex; flex-direction: column; gap: 0; }
+.fw-week-events .fw-event-row { padding: 3px 0; border-bottom: none; }
 .fw-week-empty {
   font-size: 0.78rem; color: var(--fw-muted);
   font-weight: 700;
