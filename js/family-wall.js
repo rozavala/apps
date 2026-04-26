@@ -331,10 +331,17 @@ var FamilyWall = (function() {
     if (typeof FamilyCalendar === 'undefined' || !FamilyCalendar.getUpcoming) {
       return '<div class="fw-card-empty">Family Calendar not loaded.</div>';
     }
-    var todayStr = new Date().toDateString();
-    var events = FamilyCalendar.getUpcoming(50).filter(function(ev) {
-      return ev.start.toDateString() === todayStr;
-    });
+    var events;
+    try {
+      var todayStr = new Date().toDateString();
+      events = FamilyCalendar.getUpcoming(50).filter(function(ev) {
+        return ev.start && typeof ev.start.toDateString === 'function' &&
+               ev.start.toDateString() === todayStr;
+      });
+    } catch (e) {
+      // A bad cached event shouldn't black out the whole wall.
+      return '<div class="fw-card-empty">Calendar unavailable right now.</div>';
+    }
     if (!events.length) {
       var urls = FamilyCalendar.getUrls();
       if (!urls.length) {

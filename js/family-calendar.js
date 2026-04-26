@@ -69,7 +69,25 @@ var FamilyCalendar = (function() {
   }
 
   function _getCache() {
-    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {}; }
+    try {
+      var raw = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {};
+      // Re-hydrate Date fields after JSON round-trip — saved events
+      // store start/end/rrule.until as Dates but JSON serializes them
+      // to ISO strings. Without this, _expand throws when calling
+      // start.getTime() on a string (#150 hot fix).
+      Object.keys(raw).forEach(function(url) {
+        var entry = raw[url];
+        if (!entry || !Array.isArray(entry.events)) return;
+        entry.events.forEach(function(ev) {
+          if (ev.start && !(ev.start instanceof Date)) ev.start = new Date(ev.start);
+          if (ev.end   && !(ev.end   instanceof Date)) ev.end   = new Date(ev.end);
+          if (ev.rrule && ev.rrule.until && !(ev.rrule.until instanceof Date)) {
+            ev.rrule.until = new Date(ev.rrule.until);
+          }
+        });
+      });
+      return raw;
+    }
     catch (e) { return {}; }
   }
 
