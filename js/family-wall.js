@@ -212,6 +212,7 @@ var FamilyWall = (function() {
         _renderWeatherCard() +
         _renderRoutinesCard(profiles) +
         _renderCalendarCard() +
+        _renderWeekCard() +
         _renderMenuCard() +
         _renderShoppingCard() +
         _renderQuickCard() +
@@ -220,7 +221,10 @@ var FamilyWall = (function() {
     // After paint, populate location modal cities and lazy-fetch calendar.
     _populateCityList();
     if (typeof FamilyCalendar !== 'undefined' && FamilyCalendar.refresh) {
-      FamilyCalendar.refresh(false).then(_paintCalendar).catch(function() {});
+      FamilyCalendar.refresh(false).then(function() {
+        _paintCalendar();
+        _paintWeek();
+      }).catch(function() {});
     }
   }
 
@@ -364,6 +368,97 @@ var FamilyWall = (function() {
     var card = document.getElementById('fw-calendar-card');
     if (!card) return;
     card.innerHTML = '<div class="fw-card-head"><span class="fw-card-icon">📅</span> Today</div>' + _calendarBodyHtml();
+  }
+
+  function _renderWeekCard() {
+    return '<div class="fw-card fw-card-week" id="fw-week-card">' +
+      '<div class="fw-card-head"><span class="fw-card-icon">🗓</span> This week</div>' +
+      _weekBodyHtml() +
+    '</div>';
+  }
+
+  function _weekBodyHtml() {
+    if (typeof FamilyCalendar === 'undefined' || !FamilyCalendar.getUpcoming) {
+      return '<div class="fw-card-empty">Family Calendar not loaded.</div>';
+    }
+    var urls;
+    try { urls = FamilyCalendar.getUrls(); } catch (e) { urls = []; }
+    if (!urls.length) {
+      return '<div class="fw-card-empty">No calendars yet — add one in Parents Corner.</div>';
+    }
+
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var endOfRange = new Date(today.getTime() + 7 * 86400000);
+    var events;
+    try {
+      events = FamilyCalendar.getUpcoming(200).filter(function(ev) {
+        return ev.start && typeof ev.start.getTime === 'function' &&
+               ev.start.getTime() >= today.getTime() &&
+               ev.start.getTime() < endOfRange.getTime();
+      });
+    } catch (e) {
+      return '<div class="fw-card-empty">Calendar unavailable right now.</div>';
+    }
+
+    // Bucket by YYYY-MM-DD so we can render 7 day groups in order.
+    var buckets = {};
+    events.forEach(function(ev) {
+      var d = new Date(ev.start);
+      d.setHours(0, 0, 0, 0);
+      var key = d.toDateString();
+      if (!buckets[key]) buckets[key] = [];
+      buckets[key].push(ev);
+    });
+
+    var html = '';
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(today.getTime() + i * 86400000);
+      var key = d.toDateString();
+      var dayEvents = buckets[key] || [];
+      // Skip the first day (today) — already in the "Today" tile.
+      // Skip days with no events except tomorrow (so the kid has at
+      // least one anchor when nothing's happening this week).
+      if (i === 0) continue;
+      if (!dayEvents.length && i > 1) continue;
+
+      var dayLabel = i === 1 ? 'Tomorrow' :
+        d.toLocaleDateString(undefined, { weekday: 'long' });
+      var dateLabel = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+      html += '<div class="fw-week-day">' +
+        '<div class="fw-week-day-head">' +
+          '<span class="fw-week-day-name">' + _esc(dayLabel) + '</span>' +
+          '<span class="fw-week-day-date">' + _esc(dateLabel) + '</span>' +
+        '</div>';
+      if (!dayEvents.length) {
+        html += '<div class="fw-week-empty">No events.</div>';
+      } else {
+        dayEvents.slice(0, 4).forEach(function(ev) {
+          var when = ev.allDay ? 'All day'
+            : ev.start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+          html += '<div class="fw-event-row">' +
+            '<div class="fw-stripe" style="--stripe:' + _esc(ev.calColor || '#60A5FA') + '"></div>' +
+            '<div class="fw-when">' + _esc(when) + '</div>' +
+            '<div class="fw-summary">' + _esc(ev.summary) + '</div>' +
+          '</div>';
+        });
+        if (dayEvents.length > 4) {
+          html += '<div class="fw-week-more">+ ' + (dayEvents.length - 4) + ' more</div>';
+        }
+      }
+      html += '</div>';
+    }
+
+    if (!html) {
+      return '<div class="fw-card-empty">Nothing on the calendar for the next 7 days.</div>';
+    }
+    return html;
+  }
+
+  function _paintWeek() {
+    var card = document.getElementById('fw-week-card');
+    if (!card) return;
+    card.innerHTML = '<div class="fw-card-head"><span class="fw-card-icon">🗓</span> This week</div>' + _weekBodyHtml();
   }
 
   function _renderMenuCard() {

@@ -114,9 +114,10 @@ body {
   .fw-card-routines { grid-column: span 3; }
   .fw-card-weather { grid-column: span 1; }
   .fw-card-calendar { grid-column: span 1; }
+  .fw-card-week { grid-column: span 1; }
   .fw-card-menu { grid-column: span 1; }
   .fw-card-shopping { grid-column: span 1; }
-  .fw-card-quick { grid-column: span 2; }
+  .fw-card-quick { grid-column: span 3; }
 }
 
 /* ---- Card ---- */
@@ -292,6 +293,35 @@ body {
 .fw-shop-row .fw-shop-cat {
   font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
   color: var(--fw-muted); letter-spacing: 0.04em; min-width: 70px;
+}
+
+/* This-week card: stacked day buckets with sticky-ish day headers */
+.fw-week-day { padding: 6px 0; border-bottom: 1px solid var(--fw-border); }
+.fw-week-day:last-child { border-bottom: none; }
+.fw-week-day-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 6px 0 4px;
+}
+.fw-week-day-name {
+  font-family: var(--font-display, sans-serif);
+  font-weight: 800; font-size: 0.92rem;
+  text-transform: capitalize;
+}
+.fw-week-day-date {
+  font-size: 0.74rem;
+  color: var(--fw-muted);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.fw-week-empty {
+  font-size: 0.78rem; color: var(--fw-muted);
+  font-weight: 700;
+  padding: 4px 0;
+  font-style: italic;
+}
+.fw-week-more {
+  font-size: 0.74rem; color: var(--fw-muted);
+  font-weight: 700; padding: 4px 0 0;
 }
 .fw-shop-row .fw-summary { font-size: 0.88rem; }
 .fw-shop-more {
