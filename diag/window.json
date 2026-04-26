@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T06:58:33.259Z",
+  "generatedAt": "2026-04-26T07:13:34.242Z",
   "windowHours": 72,
   "days": [
     {
@@ -80,86 +80,6 @@
           "users": [
             "u-34d354"
           ]
-        },
-        {
-          "entry": {
-            "id": "e_mob55zs4_ieu1uf",
-            "ts": 1776928193917,
-            "clientTs": 1776928191844,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "Error: phase2 browser test",
-            "filename": "debugger eval code",
-            "lineno": 2,
-            "colno": 26,
-            "stack": "@debugger eval code:2:26\nsetTimeout handler*@debugger eval code:2:11\n",
-            "user": "u-34d354",
-            "age": 12,
-            "guest": false,
-            "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
-            "trail": [
-              "test/phase2",
-              "test/phase2"
-            ]
-          },
-          "count": 1,
-          "firstTs": 1776928193917,
-          "lastTs": 1776928193917,
-          "users": [
-            "u-34d354"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mob53560_4bsbpz",
-            "ts": 1776928060904,
-            "clientTs": 1776928058856,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "Error: phase2 browser test",
-            "filename": "debugger eval code",
-            "lineno": 7,
-            "colno": 26,
-            "stack": "@debugger eval code:7:26\nsetTimeout handler*@debugger eval code:7:11\n",
-            "user": "u-34d354",
-            "age": 12,
-            "guest": false,
-            "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
-            "trail": [
-              "test/phase2"
-            ]
-          },
-          "count": 1,
-          "firstTs": 1776928060904,
-          "lastTs": 1776928060904,
-          "users": [
-            "u-34d354"
-          ]
-        },
-        {
-          "entry": {
-            "ts": 1776927961579,
-            "clientTs": 1776927961544,
-            "kind": "test",
-            "app": null,
-            "page": null,
-            "message": "phase1",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "curl/8.5.0",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1776927961579,
-          "lastTs": 1776927961579,
-          "users": []
         }
       ]
     },
