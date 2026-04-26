@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T16:19:46.306Z",
+  "generatedAt": "2026-04-26T16:35:19.276Z",
   "windowHours": 72,
   "days": [
     {
@@ -30,30 +30,6 @@
           "users": [
             "u-fdd496"
           ]
-        },
-        {
-          "entry": {
-            "id": "e_mobp7mz0_4uxzyr",
-            "ts": 1776961863171,
-            "clientTs": 1776961860876,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "Uncaught ReferenceError: loginAs is not defined",
-            "filename": "https://rozavala.github.io/apps/js/index.js?v=2",
-            "lineno": 1201,
-            "colno": 5,
-            "stack": "ReferenceError: loginAs is not defined\n    at createProfile (https://rozavala.github.io/apps/js/index.js?v=2:1201:5)\n    at window.createProfile (https://rozavala.github.io/apps/js/index.js?v=2:91:39)\n    at HTMLButtonElement.onclick (https://rozavala.github.io/apps/:314:62)",
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1776961863171,
-          "lastTs": 1776961863171,
-          "users": []
         }
       ]
     },
