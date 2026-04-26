@@ -296,11 +296,33 @@ body {
 }
 
 /* This-week card: stacked day buckets with sticky-ish day headers */
+.fw-card-week { max-height: 520px; }
+.fw-card-week .fw-card-head { flex-shrink: 0; }
+.fw-week-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+/* Subtle scrollbar so the scroll affordance is obvious without being loud */
+.fw-week-body::-webkit-scrollbar { width: 8px; }
+.fw-week-body::-webkit-scrollbar-track { background: transparent; }
+.fw-week-body::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 4px;
+}
+.fw-week-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
 .fw-week-day { padding: 6px 0; border-bottom: 1px solid var(--fw-border); }
 .fw-week-day:last-child { border-bottom: none; }
 .fw-week-day-head {
   display: flex; align-items: baseline; justify-content: space-between;
   padding: 6px 0 4px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(to bottom, rgba(11,11,26,0.95), rgba(11,11,26,0.85));
+  backdrop-filter: blur(6px);
+  z-index: 1;
 }
 .fw-week-day-name {
   font-family: var(--font-display, sans-serif);
@@ -318,10 +340,6 @@ body {
   font-weight: 700;
   padding: 4px 0;
   font-style: italic;
-}
-.fw-week-more {
-  font-size: 0.74rem; color: var(--fw-muted);
-  font-weight: 700; padding: 4px 0 0;
 }
 .fw-shop-row .fw-summary { font-size: 0.88rem; }
 .fw-shop-more {

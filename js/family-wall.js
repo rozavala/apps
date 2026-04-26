@@ -391,7 +391,7 @@ var FamilyWall = (function() {
     var endOfRange = new Date(today.getTime() + 7 * 86400000);
     var events;
     try {
-      events = FamilyCalendar.getUpcoming(200).filter(function(ev) {
+      events = FamilyCalendar.getUpcoming(500).filter(function(ev) {
         return ev.start && typeof ev.start.getTime === 'function' &&
                ev.start.getTime() >= today.getTime() &&
                ev.start.getTime() < endOfRange.getTime();
@@ -410,7 +410,7 @@ var FamilyWall = (function() {
       buckets[key].push(ev);
     });
 
-    var html = '';
+    var inner = '';
     for (var i = 0; i < 7; i++) {
       var d = new Date(today.getTime() + i * 86400000);
       var key = d.toDateString();
@@ -425,34 +425,31 @@ var FamilyWall = (function() {
         d.toLocaleDateString(undefined, { weekday: 'long' });
       var dateLabel = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-      html += '<div class="fw-week-day">' +
+      inner += '<div class="fw-week-day">' +
         '<div class="fw-week-day-head">' +
           '<span class="fw-week-day-name">' + _esc(dayLabel) + '</span>' +
           '<span class="fw-week-day-date">' + _esc(dateLabel) + '</span>' +
         '</div>';
       if (!dayEvents.length) {
-        html += '<div class="fw-week-empty">No events.</div>';
+        inner += '<div class="fw-week-empty">No events.</div>';
       } else {
-        dayEvents.slice(0, 4).forEach(function(ev) {
+        dayEvents.forEach(function(ev) {
           var when = ev.allDay ? 'All day'
             : ev.start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-          html += '<div class="fw-event-row">' +
+          inner += '<div class="fw-event-row">' +
             '<div class="fw-stripe" style="--stripe:' + _esc(ev.calColor || '#60A5FA') + '"></div>' +
             '<div class="fw-when">' + _esc(when) + '</div>' +
             '<div class="fw-summary">' + _esc(ev.summary) + '</div>' +
           '</div>';
         });
-        if (dayEvents.length > 4) {
-          html += '<div class="fw-week-more">+ ' + (dayEvents.length - 4) + ' more</div>';
-        }
       }
-      html += '</div>';
+      inner += '</div>';
     }
 
-    if (!html) {
+    if (!inner) {
       return '<div class="fw-card-empty">Nothing on the calendar for the next 7 days.</div>';
     }
-    return html;
+    return '<div class="fw-week-body">' + inner + '</div>';
   }
 
   function _paintWeek() {
