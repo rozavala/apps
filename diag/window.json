@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T21:51:19.021Z",
+  "generatedAt": "2026-04-26T22:06:20.653Z",
   "windowHours": 72,
   "days": [
     {
@@ -572,9 +572,9 @@
             "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
             "trail": []
           },
-          "count": 2,
+          "count": 4,
           "firstTs": 1777240129295,
-          "lastTs": 1777240137760,
+          "lastTs": 1777240821931,
           "users": []
         },
         {
