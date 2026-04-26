@@ -55,6 +55,30 @@
     },
     {
       "entry": {
+        "id": "e_mogavuph_o8jyyp",
+        "ts": 1777240129295,
+        "clientTs": 1777240127285,
+        "kind": "error",
+        "app": "family",
+        "page": "family.html",
+        "message": "TypeError: start.getTime is not a function",
+        "filename": "https://rozavala.github.io/apps/js/family-calendar.js",
+        "lineno": 179,
+        "colno": 31,
+        "stack": "pushIfInRange@https://rozavala.github.io/apps/js/family-calendar.js:179:31\n_expand@https://rozavala.github.io/apps/js/family-calendar.js:186:20\ngetUpcoming/</<@https://rozavala.github.io/apps/js/family-calendar.js:289:16\ngetUpcoming/<@https://rozavala.github.io/apps/js/family-calendar.js:288:20\ngetUpcoming@https://rozavala.github.io/apps/js/family-calendar.js:285:10\n_calendarBodyHtml@https://rozavala.github.io/apps/js/family-wall.js:335:33\n_renderCalendarCard@https://rozavala.github.io/apps/js/family-wall.js:326:7\n_paint@https://rozavala.github.io/apps/js/family-wall.js:214:9\n",
+        "user": null,
+        "age": null,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1777240129295,
+      "lastTs": 1777240137760,
+      "users": []
+    },
+    {
+      "entry": {
         "id": "e_mofwen8f_sxjryy",
         "ts": 1777215811943,
         "clientTs": 1777215809823,
@@ -77,6 +101,32 @@
       "lastTs": 1777215811943,
       "users": [
         "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mogaux04_gmmtbg",
+        "ts": 1777240085628,
+        "clientTs": 1777240083604,
+        "kind": "rejection",
+        "app": "index",
+        "page": "index.html",
+        "message": "start.getTime is not a function",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": "pushIfInRange@https://rozavala.github.io/apps/js/family-calendar.js?v=1:179:31\n_expand@https://rozavala.github.io/apps/js/family-calendar.js?v=1:186:20\ngetUpcoming/</<@https://rozavala.github.io/apps/js/family-calendar.js?v=1:289:16\ngetUpcoming/<@https://rozavala.github.io/apps/js/family-calendar.js?v=1:288:20\ngetUpcoming@https://rozavala.github.io/apps/js/family-calendar.js?v=1:285:10\n_paintHubWidget@https://rozavala.github.io/apps/js/family-calendar.js?v=1:313:29\nrenderHubWidget/<@https://rozavala.github.io/apps/js/family-calendar.js?v=1:308:96\n",
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1777240085628,
+      "lastTs": 1777240085628,
+      "users": [
+        "u-34d354"
       ]
     }
   ]
