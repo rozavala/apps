@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T14:18:36.174Z",
+  "generatedAt": "2026-04-26T14:33:45.906Z",
   "windowHours": 72,
   "days": [
     {
@@ -550,6 +550,63 @@
           "firstTs": 1777127254028,
           "lastTs": 1777127254028,
           "users": []
+        }
+      ]
+    },
+    {
+      "day": "2026-04-26",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mofv7qqs_y9698p",
+            "ts": 1777213810186,
+            "clientTs": 1777213808164,
+            "kind": "error",
+            "app": "book-movie-check",
+            "page": "book-movie-check.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/book-movie-check.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/book-movie-check.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1047,
+          "firstTs": 1777213810186,
+          "lastTs": 1777214025235,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mofv6km2_54z8e2",
+            "ts": 1777213755589,
+            "clientTs": 1777213753562,
+            "kind": "error",
+            "app": "family",
+            "page": "family.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/family.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/family.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 141,
+          "firstTs": 1777213755589,
+          "lastTs": 1777213801231,
+          "users": [
+            "u-3bda7c"
+          ]
         }
       ]
     }
