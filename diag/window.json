@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-26T14:48:46.920Z",
+  "generatedAt": "2026-04-26T15:04:34.710Z",
   "windowHours": 72,
   "days": [
     {
@@ -575,9 +575,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 5527,
+          "count": 10236,
           "firstTs": 1777213810186,
-          "lastTs": 1777214924803,
+          "lastTs": 1777215811943,
           "users": [
             "u-3bda7c"
           ]
@@ -604,6 +604,32 @@
           "count": 141,
           "firstTs": 1777213755589,
           "lastTs": 1777213801231,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mofwen8f_sxjryy",
+            "ts": 1777215811943,
+            "clientTs": 1777215809823,
+            "kind": "error",
+            "app": "index",
+            "page": "index.html",
+            "message": "Script error.",
+            "filename": null,
+            "lineno": 0,
+            "colno": 0,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1777215811943,
+          "lastTs": 1777215811943,
           "users": [
             "u-3bda7c"
           ]
