@@ -84,7 +84,9 @@ const LabExplorer = (() => {
       category: 'astronomy',
       ageMin: 6,
       experiments: [
-        { id: 'space',     title: 'Space Explorer',     instruction: 'Astronomy lab coming soon!' },
+        { id: 'constellations', title: 'Constellations', instruction: 'Tap the bright stars in order to draw the constellation!' },
+        { id: 'moon', title: 'Moon Phases', instruction: 'Drag the slider to see how the moon changes over 28 days.' },
+        { id: 'planets', title: 'Planet Sizes', instruction: 'Tap a planet to compare its size to Earth!' }
       ]
     }
   ];
@@ -220,6 +222,8 @@ const LabExplorer = (() => {
       _initMagnetsLab();
     } else if (labId === 'weather' && expId === 'log') {
       _initWeatherLab();
+    } else if (labId === 'astronomy') {
+      _initAstronomyLab(expId);
     } else {
       _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
@@ -1443,6 +1447,322 @@ const LabExplorer = (() => {
       mx: (e.clientX - rect.left) * scaleX,
       my: (e.clientY - rect.top) * scaleY
     };
+  }
+
+  // ── Astronomy Lab Implementation ──
+  let astroState = {
+    expId: null,
+    animFrame: null,
+    // Constellations
+    constellationIdx: 0,
+    starsTapped: 0,
+    constellations: [
+      { name: 'Big Dipper', stars: [{x:100,y:150},{x:150,y:170},{x:200,y:180},{x:250,y:220},{x:270,y:280},{x:350,y:260},{x:320,y:200}] },
+      { name: 'Cassiopeia', stars: [{x:100,y:200},{x:150,y:280},{x:220,y:220},{x:280,y:270},{x:350,y:180}] }
+    ],
+    // Moon
+    day: 14,
+    // Planets
+    selectedPlanet: null,
+    planets: [
+      { id: 'moon', name: 'Moon', r: 10, color: '#D1D5DB', facts: ['1/4 the size of Earth', 'Orbits Earth'] },
+      { id: 'earth', name: 'Earth', r: 40, color: '#3B82F6', facts: ['Our home planet!'] },
+      { id: 'mars', name: 'Mars', r: 21, color: '#EF4444', facts: ['About half the size of Earth', 'The Red Planet'] },
+      { id: 'jupiter', name: 'Jupiter', r: 120, color: '#F59E0B', facts: ['11 times wider than Earth!', 'The largest planet'] }
+    ]
+  };
+
+  function _initAstronomyLab(expId) {
+    if (astroState.animFrame) cancelAnimationFrame(astroState.animFrame);
+    astroState.expId = expId;
+
+    if (expId === 'constellations') {
+      _initConstellations();
+    } else if (expId === 'moon') {
+      _initMoonPhases();
+    } else if (expId === 'planets') {
+      _initPlanets();
+    }
+  }
+
+  function _initConstellations() {
+    astroState.constellationIdx = 0;
+    astroState.starsTapped = 0;
+
+    canvas.onpointerdown = (e) => {
+      const { mx, my } = _getMousePos(e);
+      const currentC = astroState.constellations[astroState.constellationIdx];
+      if (!currentC) return;
+
+      const targetStar = currentC.stars[astroState.starsTapped];
+      if (targetStar && Math.hypot(targetStar.x - mx, targetStar.y - my) < 30) {
+        astroState.starsTapped++;
+        if (typeof playSound === 'function') playSound('click');
+
+        if (astroState.starsTapped === currentC.stars.length) {
+          stars++;
+          document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+          _showFeedback('✨');
+          if (typeof playSound === 'function') playSound('correct');
+          _addJournalEntry(`Found constellation: ${currentC.name}!`);
+
+          setTimeout(() => {
+            astroState.constellationIdx++;
+            astroState.starsTapped = 0;
+            if (astroState.constellationIdx >= astroState.constellations.length) {
+              document.getElementById('next-btn').style.display = 'block';
+              _saveProgress();
+            }
+            _drawConstellations();
+          }, 1000);
+        }
+        _drawConstellations();
+      }
+    };
+
+    _drawConstellations();
+  }
+
+  function _drawConstellations() {
+    ctx.fillStyle = '#0F172A'; // Dark night sky
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw background stars
+    ctx.fillStyle = '#FFFFFF';
+    for (let i = 0; i < 50; i++) {
+       const bx = (Math.sin(i * 12.3) * 0.5 + 0.5) * canvas.width;
+       const by = (Math.cos(i * 34.5) * 0.5 + 0.5) * canvas.height;
+       ctx.beginPath();
+       ctx.arc(bx, by, 1, 0, Math.PI*2);
+       ctx.fill();
+    }
+
+    const currentC = astroState.constellations[astroState.constellationIdx];
+    if (!currentC) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '24px Nunito';
+        ctx.textAlign = 'center';
+        ctx.fillText('Great job finding the stars!', canvas.width/2, canvas.height/2);
+        return;
+    }
+
+    // Draw lines for tapped stars
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i < astroState.starsTapped; i++) {
+      const s = currentC.stars[i];
+      if (i === 0) ctx.moveTo(s.x, s.y);
+      else ctx.lineTo(s.x, s.y);
+    }
+    ctx.stroke();
+
+    // Draw constellation stars
+    currentC.stars.forEach((s, i) => {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, i < astroState.starsTapped ? 6 : 4, 0, Math.PI*2);
+      ctx.fillStyle = i < astroState.starsTapped ? '#FBBF24' : '#FFFFFF';
+      ctx.fill();
+
+      // Pulse the next star
+      if (i === astroState.starsTapped) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 10 + Math.sin(Date.now()/200)*2, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    });
+
+    if (astroState.starsTapped < currentC.stars.length) {
+      astroState.animFrame = requestAnimationFrame(_drawConstellations);
+    }
+  }
+
+  function _initMoonPhases() {
+    astroState.day = 14; // Full moon
+
+    const controls = document.getElementById('exp-controls');
+    controls.innerHTML += `
+      <div style="margin-top: 15px; text-align: center;">
+        <label for="moon-slider" style="display:block; margin-bottom: 5px; color: #4B5563; font-weight: bold;">Day of the Lunar Month: <span id="moon-day-val">14</span></label>
+        <input type="range" id="moon-slider" min="0" max="28" value="14" style="width: 80%; max-width: 300px;">
+      </div>
+    `;
+
+    document.getElementById('moon-slider').oninput = (e) => {
+      astroState.day = parseInt(e.target.value, 10);
+      document.getElementById('moon-day-val').textContent = astroState.day;
+      _drawMoonPhases();
+
+      // Award stars for key phases
+      if (astroState.day === 0 || astroState.day === 14 || astroState.day === 28) {
+         if (!astroState.planets.some(p => p.id === 'moon_star_' + astroState.day)) { // Using planets array as generic storage hack, better to use separate array but this keeps state clean
+             astroState.planets.push({id: 'moon_star_' + astroState.day});
+             stars++;
+             document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+             _showFeedback('🌕');
+             if (typeof playSound === 'function') playSound('correct');
+             if (astroState.day === 0 || astroState.day === 28) _addJournalEntry('Discovered New Moon phase!');
+             if (astroState.day === 14) _addJournalEntry('Discovered Full Moon phase!');
+
+             if (stars >= 2) {
+                 document.getElementById('next-btn').style.display = 'block';
+                 _saveProgress();
+             }
+         }
+      }
+    };
+
+    _drawMoonPhases();
+  }
+
+  function _drawMoonPhases() {
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = 80;
+
+    // Draw full moon as base (lit part)
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#FDE68A';
+    ctx.fill();
+
+    // Calculate phase shadow
+    // Day 0 = New Moon (Fully covered)
+    // Day 14 = Full Moon (Fully exposed)
+    // Day 28 = New Moon (Fully covered)
+
+    const phase = astroState.day / 28; // 0 to 1
+
+    ctx.fillStyle = '#1E293B'; // Shadow color
+
+    // Draw left/right hemisphere shadow depending on waxing/waning
+    ctx.beginPath();
+    if (phase < 0.5) {
+       // Waxing (right side lit)
+       ctx.arc(cx, cy, r, Math.PI/2, Math.PI*1.5);
+       ctx.fill();
+
+       // Draw terminator ellipse
+       ctx.beginPath();
+       const width = r * (1 - phase * 4); // 1 at day 0, -1 at day 14
+       ctx.ellipse(cx, cy, Math.abs(width), r, 0, Math.PI/2, Math.PI*1.5, phase > 0.25);
+       ctx.fill();
+    } else {
+       // Waning (left side lit)
+       ctx.arc(cx, cy, r, Math.PI*1.5, Math.PI/2);
+       ctx.fill();
+
+       ctx.beginPath();
+       const width = r * ((phase - 0.5) * 4 - 1);
+       ctx.ellipse(cx, cy, Math.abs(width), r, 0, Math.PI*1.5, Math.PI/2, phase < 0.75);
+       ctx.fill();
+    }
+
+    // Phase label
+    let phaseName = '';
+    if (astroState.day === 0 || astroState.day === 28) phaseName = 'New Moon';
+    else if (astroState.day < 7) phaseName = 'Waxing Crescent';
+    else if (astroState.day === 7) phaseName = 'First Quarter';
+    else if (astroState.day < 14) phaseName = 'Waxing Gibbous';
+    else if (astroState.day === 14) phaseName = 'Full Moon';
+    else if (astroState.day < 21) phaseName = 'Waning Gibbous';
+    else if (astroState.day === 21) phaseName = 'Third Quarter';
+    else phaseName = 'Waning Crescent';
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '24px Nunito';
+    ctx.textAlign = 'center';
+    ctx.fillText(phaseName, cx, cy + r + 40);
+  }
+
+  function _initPlanets() {
+    astroState.selectedPlanet = null;
+
+    const controls = document.getElementById('exp-controls');
+    controls.innerHTML += `
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+        <button class="action-btn btn-secondary" id="btn-moon">Moon</button>
+        <button class="action-btn btn-secondary" id="btn-mars">Mars</button>
+        <button class="action-btn btn-secondary" id="btn-jupiter">Jupiter</button>
+      </div>
+    `;
+
+    const selectPlanet = (id) => {
+        astroState.selectedPlanet = astroState.planets.find(p => p.id === id);
+
+        // Track discovered
+        if (!astroState.planets.some(p => p.id === id + '_discovered')) {
+            astroState.planets.push({id: id + '_discovered'});
+            stars++;
+            document.getElementById('exp-stars').textContent = `⭐ ${stars}`;
+            _showFeedback('🪐');
+            if (typeof playSound === 'function') playSound('correct');
+            _addJournalEntry(`Compared size of Earth and ${astroState.selectedPlanet.name}!`);
+
+            if (stars >= 3) { // Need to view all 3
+                document.getElementById('next-btn').style.display = 'block';
+                _saveProgress();
+            }
+        }
+
+        _drawPlanets();
+    };
+
+    document.getElementById('btn-moon').onclick = () => selectPlanet('moon');
+    document.getElementById('btn-mars').onclick = () => selectPlanet('mars');
+    document.getElementById('btn-jupiter').onclick = () => selectPlanet('jupiter');
+
+    _drawPlanets();
+  }
+
+  function _drawPlanets() {
+    ctx.fillStyle = '#0F172A';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const earth = astroState.planets.find(p => p.id === 'earth');
+    const p2 = astroState.selectedPlanet;
+
+    // Draw Earth
+    const cx1 = canvas.width / 3;
+    const cy1 = canvas.height / 2;
+
+    ctx.beginPath();
+    ctx.arc(cx1, cy1, earth.r, 0, Math.PI * 2);
+    ctx.fillStyle = earth.color;
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '16px Nunito';
+    ctx.textAlign = 'center';
+    ctx.fillText('Earth', cx1, cy1 + earth.r + 20);
+
+    if (p2) {
+       const cx2 = (canvas.width / 3) * 2;
+
+       ctx.beginPath();
+       ctx.arc(cx2, cy1, p2.r, 0, Math.PI * 2);
+       ctx.fillStyle = p2.color;
+       ctx.fill();
+       ctx.fillStyle = '#FFFFFF';
+       ctx.font = '16px Nunito';
+       ctx.fillText(p2.name, cx2, cy1 + p2.r + 20);
+
+       // Draw facts
+       ctx.font = '14px Nunito';
+       ctx.fillStyle = '#9CA3AF';
+       p2.facts.forEach((fact, i) => {
+           ctx.fillText(fact, cx2, cy1 + p2.r + 40 + (i * 20));
+       });
+    } else {
+       ctx.fillStyle = '#9CA3AF';
+       ctx.font = '16px Nunito';
+       ctx.textAlign = 'center';
+       ctx.fillText('Select a planet below to compare!', (canvas.width / 3) * 2, canvas.height / 2);
+    }
   }
 
   // ── Journal & UI ──
