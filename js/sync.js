@@ -25,8 +25,23 @@ var CloudSync = (function() {
     'zs_guess_': 'guess',
     'zs_bmcheck_': 'bmcheck',
     'zs_activity_': 'activity',
+    'zs_routines_': 'routines',
+    'zs_money_': 'money',
     'littlemaestro_': 'littlemaestro',
   };
+
+  // Household-shared single-key items (no per-kid prefix). All clients
+  // sync these to/from the synthetic kid `_household` so the family
+  // sees the same shopping list, weekly menu, and calendar URLs across
+  // every device. Sports matches use a dedicated shared bucket of
+  // their own (zs_sports_matches_shared) and ride along here too.
+  var HOUSEHOLD_KEYS = {
+    'zs_shopping_list':         'shopping',
+    'zs_menu':                  'menu',
+    'zs_fcal_urls':             'fcal_urls',
+    'zs_sports_matches_shared': 'sports_matches'
+  };
+  var HOUSEHOLD_KID = '_household';
 
   var state = {
     online: false,
@@ -36,6 +51,9 @@ var CloudSync = (function() {
 
   function _getAppInfo(key) {
     if (!key) return null;
+    if (HOUSEHOLD_KEYS[key]) {
+      return { kidKey: HOUSEHOLD_KID, appName: HOUSEHOLD_KEYS[key], household: true };
+    }
     for (var prefix in KEY_MAP) {
       if (key.indexOf(prefix) === 0) {
         var kidKey = key.replace(prefix, '').replace('_recital', '');
@@ -372,6 +390,29 @@ var CloudSync = (function() {
     });
   };
 
+  // Pull every household-shared key (shopping list, menu, calendar
+  // URLs, sports matches) from the synthetic _household kid bucket
+  // so a new device picks up the family-wide state on first sync.
+  state.pullHousehold = function() {
+    if (!state.isConfigured() || !state.online) return Promise.resolve();
+    var promises = [];
+    for (var key in HOUSEHOLD_KEYS) {
+      promises.push(state.pull(key));
+    }
+    return Promise.all(promises);
+  };
+
+  // Push every household-shared key from this device. Used by the
+  // "Push All to Cloud" button and on profile sync.
+  state.pushHousehold = function() {
+    if (!state.isConfigured() || !state.online) return Promise.resolve();
+    var promises = [];
+    for (var key in HOUSEHOLD_KEYS) {
+      if (localStorage.getItem(key)) promises.push(state.push(key));
+    }
+    return Promise.all(promises);
+  };
+
   state.pushAllKids = function() {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
@@ -433,7 +474,14 @@ var CloudSync = (function() {
 
           var path = window.location.pathname;
           var isHub = path.indexOf('index.html') !== -1 || path === '/' || (path.length > 0 && path[path.length - 1] === '/');
-          
+
+          // Always pull the household-shared bucket so shopping list,
+          // weekly menu, calendar URLs, and shared sports matches mirror
+          // across devices regardless of which page just loaded.
+          state.pullHousehold().then(function() {
+            try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
+          });
+
           if (isHub) {
             state.syncProfiles()
               .then(function() {

@@ -108,15 +108,31 @@
 
   // ── Capture handlers ─────────────────────────────────────────────
 
+  // Errors from third-party browser shells we want to ignore — they
+  // pollute the diag log without being real bugs in our code.
+  // - WebMIDIBrowser (an iOS Safari shell that polyfills WebMIDI)
+  //   injects globals named _callback_receiveMIDIMessage,
+  //   _callback_addSource, _callback_addDestination. When the
+  //   polyfill misses, every page load throws a ReferenceError for
+  //   them — thousands of identical entries that drown out signal.
+  function _shouldIgnoreError(message) {
+    if (!message) return false;
+    var s = String(message);
+    if (/_callback_receiveMIDIMessage|_callback_addSource|_callback_addDestination/.test(s)) return true;
+    return false;
+  }
+
   window.addEventListener('error', function(ev) {
     try {
+      var msg = ev && ev.message ? String(ev.message) : 'unknown error';
+      if (_shouldIgnoreError(msg)) return;
       _enqueue({
         id: _uid(),
         ts: Date.now(),
         kind: 'error',
         app: _appId(),
         page: _pageTag(),
-        message: ev && ev.message ? String(ev.message) : 'unknown error',
+        message: msg,
         filename: ev && ev.filename ? String(ev.filename) : null,
         lineno: ev && typeof ev.lineno === 'number' ? ev.lineno : null,
         colno: ev && typeof ev.colno === 'number' ? ev.colno : null,

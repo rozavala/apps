@@ -473,6 +473,11 @@ function startQuiz(id) {
   const user = getActiveUser();
   const tier = getAgeTier(user ? user.age : null);
 
+  if (!QB[id] || !Array.isArray(QB[id]) || !QB[id].length) {
+    console.warn('[Descubre Chile] No quiz bank for id:', id);
+    if (typeof showScreen === 'function') showScreen('menu');
+    return;
+  }
   let qs = QB[id].slice();
 
   // Filter: include questions at or below the kid's tier

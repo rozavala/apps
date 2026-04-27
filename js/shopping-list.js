@@ -29,6 +29,7 @@ var ShoppingList = (function() {
   function _save(items) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(STORAGE_KEY);
     } catch (e) {
       if (typeof Debug !== 'undefined') Debug.error('[ShoppingList] save failed', e.message);
     }

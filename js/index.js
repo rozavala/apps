@@ -101,6 +101,7 @@
   window._syncPushAll = function(b) { _syncPushAll(b); };
   window._syncPullAll = function(b) { _syncPullAll(b); };
   window.openEditModal = function(i) { openEditModal(i); };
+  window.closeEditModal = function() { closeEditModal(); };
   window.redeemForTime = function() { redeemForTime(); };
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };

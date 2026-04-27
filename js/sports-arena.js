@@ -93,7 +93,10 @@ const SportsArena = (() => {
   }
 
   function _saveSharedMatches(matches) {
-    try { localStorage.setItem(SHARED_MATCHES_KEY, JSON.stringify(matches || [])); } catch (e) {}
+    try {
+      localStorage.setItem(SHARED_MATCHES_KEY, JSON.stringify(matches || []));
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(SHARED_MATCHES_KEY);
+    } catch (e) {}
   }
 
   function _getData() {

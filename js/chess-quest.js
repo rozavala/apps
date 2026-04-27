@@ -58,7 +58,12 @@ function getMoves(board,r,c,checkLegal=true){
 }
 function allMoves(board,color){
   const moves=[];
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]&&board[r][c].color===color)moves = moves.concat(getMoves(board,r,c));
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    if(board[r][c]&&board[r][c].color===color){
+      const sub=getMoves(board,r,c);
+      for(let i=0;i<sub.length;i++) moves.push(sub[i]);
+    }
+  }
   return moves;
 }
 function isInCheck(board,color){
