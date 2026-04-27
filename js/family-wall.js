@@ -91,28 +91,53 @@ var FamilyWall = (function() {
   }
 
   // Open-Meteo geocoding — no API key, CORS-friendly. Pass a place
-  // name like "Antofagasta" or "Punta Arenas, Chile" and we get
-  // back lat/lon plus the formatted name (city, region, country).
+  // name like "Antofagasta" or "Santa Clara, CA" and we get back
+  // lat/lon plus the formatted name (city, region, country).
+  // Open-Meteo only matches on the city name itself, so anything
+  // after the first comma is treated as a soft filter against the
+  // returned admin1 / country fields.
   function searchPlaces(query) {
-    var q = String(query || '').trim();
-    if (!q) return Promise.resolve([]);
+    var raw = String(query || '').trim();
+    if (!raw) return Promise.resolve([]);
+
+    var commaIdx = raw.indexOf(',');
+    var cityPart = commaIdx >= 0 ? raw.slice(0, commaIdx).trim() : raw;
+    var hint = commaIdx >= 0 ? raw.slice(commaIdx + 1).trim().toLowerCase() : '';
+
+    if (!cityPart) return Promise.resolve([]);
+
     var url = 'https://geocoding-api.open-meteo.com/v1/search' +
-              '?name=' + encodeURIComponent(q) +
-              '&count=6&language=en&format=json';
+              '?name=' + encodeURIComponent(cityPart) +
+              '&count=10&language=en&format=json';
+
     return fetch(url, { cache: 'no-store' })
       .then(function(res) { return res.ok ? res.json() : { results: [] }; })
       .then(function(payload) {
         var results = (payload && payload.results) || [];
-        return results.map(function(r) {
+        var mapped = results.map(function(r) {
           var parts = [r.name];
           if (r.admin1 && r.admin1 !== r.name) parts.push(r.admin1);
           if (r.country) parts.push(r.country);
           return {
             label: parts.join(', '),
             lat: Math.round(r.latitude * 100) / 100,
-            lon: Math.round(r.longitude * 100) / 100
+            lon: Math.round(r.longitude * 100) / 100,
+            admin1: r.admin1 || '',
+            country: r.country || '',
+            countryCode: r.country_code || ''
           };
         });
+
+        if (!hint) return mapped.slice(0, 6);
+
+        // Soft filter: prefer entries whose admin1 / country / iso code
+        // contain the hint. If nothing matches, fall back to the full
+        // list so the user still sees something rather than "no matches".
+        var filtered = mapped.filter(function(r) {
+          var hay = (r.admin1 + ' ' + r.country + ' ' + r.countryCode).toLowerCase();
+          return hay.indexOf(hint) !== -1;
+        });
+        return (filtered.length ? filtered : mapped).slice(0, 6);
       })
       .catch(function() { return []; });
   }
