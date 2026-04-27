@@ -64,14 +64,29 @@
   color: #FCD34D;
 }
 
-/* Stage (guide under, canvas over) */
+/* Stage (guide under, canvas over)
+   aspect-ratio is unsupported in older WebKit (iPad WebMIDIBrowser),
+   so fall back to a padding-top trick when the property isn't honored. */
 .cm-stage {
-  position: relative; width: 100%; aspect-ratio: 4 / 3;
+  position: relative; width: 100%;
   background: #FFFBF0;
   border: 1.5px solid rgba(0,0,0,0.08);
   border-radius: 16px;
   overflow: hidden;
   touch-action: none;
+  min-height: 320px;          /* hard floor so the canvas never collapses */
+}
+@supports (aspect-ratio: 4 / 3) {
+  .cm-stage { aspect-ratio: 4 / 3; min-height: 0; }
+}
+@supports not (aspect-ratio: 4 / 3) {
+  /* Padding-top hack: 75% of width = 4:3 ratio */
+  .cm-stage::before {
+    content: '';
+    display: block;
+    padding-top: 75%;
+  }
+  .cm-guide, .cm-canvas { position: absolute; inset: 0; }
 }
 .cm-guide {
   position: absolute; inset: 0;

@@ -81,7 +81,10 @@ var WeeklyMenu = (function() {
   }
 
   function _save(data) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(STORAGE_KEY);
+    } catch (e) {}
   }
 
   function _getWeek(data, anchorIso) {

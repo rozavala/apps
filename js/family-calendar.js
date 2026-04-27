@@ -38,7 +38,12 @@ var FamilyCalendar = (function() {
   }
 
   function _saveUrls(urls) {
-    try { localStorage.setItem(URLS_KEY, JSON.stringify(urls)); } catch (e) {}
+    try {
+      localStorage.setItem(URLS_KEY, JSON.stringify(urls));
+      // Calendar URLs are household-shared; mirror them to the VPS so
+      // every device sees the same family calendars.
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(URLS_KEY);
+    } catch (e) {}
   }
 
   function addUrl(label, url, color) {

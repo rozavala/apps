@@ -268,7 +268,14 @@ var CopyMaster = (function() {
         '</div>' +
       '</div>';
 
-    _mountCanvas();
+    // Defer one frame so the new screen has had a chance to lay out
+    // before we read getBoundingClientRect — older WebKit (iPad
+    // WebMIDIBrowser shell) can return 0×0 if we read synchronously.
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(_mountCanvas);
+    } else {
+      setTimeout(_mountCanvas, 0);
+    }
   }
 
   function _backToPicker() {
