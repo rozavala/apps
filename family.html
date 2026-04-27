@@ -25,10 +25,20 @@
   <div id="fw-loc-modal" class="fw-modal" onclick="if(event.target===this)FamilyWall.closeLocationModal()">
     <div class="fw-modal-card">
       <h2>Set Home Location 📍</h2>
-      <p>Used for the weather card. Stored on this device only.</p>
+      <p>Used for the weather card. Synced across all family devices.</p>
       <button class="fw-btn fw-btn-primary" onclick="FamilyWall.requestGeo()">📍 Use my current location</button>
-      <div class="fw-or">or pick a city</div>
+
+      <div class="fw-or">or search for a city</div>
+      <div class="fw-loc-search">
+        <input type="text" id="fw-loc-query" placeholder="e.g. Antofagasta, Madrid, Buenos Aires"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();FamilyWall.runLocationSearch();}" />
+        <button class="fw-btn fw-btn-ghost" onclick="FamilyWall.runLocationSearch()">Search</button>
+      </div>
+      <div id="fw-loc-results" class="fw-loc-results"></div>
+
+      <div class="fw-or">or pick a preset</div>
       <div id="fw-loc-cities" class="fw-loc-cities"></div>
+
       <div class="fw-modal-btns">
         <button class="fw-btn fw-btn-ghost" onclick="FamilyWall.closeLocationModal()">Cancel</button>
       </div>

@@ -79,12 +79,42 @@ var FamilyWall = (function() {
 
   function setLocation(loc) {
     if (!loc || typeof loc.lat !== 'number' || typeof loc.lon !== 'number') return;
-    localStorage.setItem(LOCATION_KEY, JSON.stringify({
+    var record = {
       lat: loc.lat, lon: loc.lon, label: loc.label || 'Home', ts: Date.now()
-    }));
+    };
+    localStorage.setItem(LOCATION_KEY, JSON.stringify(record));
+    // Mirror to the household bucket so other family devices pick it up.
+    if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(LOCATION_KEY);
     // Force a fresh weather fetch
     localStorage.removeItem(WEATHER_KEY);
     fetchWeather().then(_paint).catch(_paint);
+  }
+
+  // Open-Meteo geocoding — no API key, CORS-friendly. Pass a place
+  // name like "Antofagasta" or "Punta Arenas, Chile" and we get
+  // back lat/lon plus the formatted name (city, region, country).
+  function searchPlaces(query) {
+    var q = String(query || '').trim();
+    if (!q) return Promise.resolve([]);
+    var url = 'https://geocoding-api.open-meteo.com/v1/search' +
+              '?name=' + encodeURIComponent(q) +
+              '&count=6&language=en&format=json';
+    return fetch(url, { cache: 'no-store' })
+      .then(function(res) { return res.ok ? res.json() : { results: [] }; })
+      .then(function(payload) {
+        var results = (payload && payload.results) || [];
+        return results.map(function(r) {
+          var parts = [r.name];
+          if (r.admin1 && r.admin1 !== r.name) parts.push(r.admin1);
+          if (r.country) parts.push(r.country);
+          return {
+            label: parts.join(', '),
+            lat: Math.round(r.latitude * 100) / 100,
+            lon: Math.round(r.longitude * 100) / 100
+          };
+        });
+      })
+      .catch(function() { return []; });
   }
 
   // ---- Weather (Open-Meteo, free, no key) ----
@@ -573,6 +603,31 @@ var FamilyWall = (function() {
     _paint();
   }
 
+  function runLocationSearch() {
+    var input = document.getElementById('fw-loc-query');
+    var resultsEl = document.getElementById('fw-loc-results');
+    if (!input || !resultsEl) return;
+    var q = input.value.trim();
+    if (!q) {
+      resultsEl.innerHTML = '';
+      return;
+    }
+    resultsEl.innerHTML = '<div class="fw-loc-empty">Searching…</div>';
+    searchPlaces(q).then(function(results) {
+      if (!results.length) {
+        resultsEl.innerHTML = '<div class="fw-loc-empty">No matches. Try a nearby town or different spelling.</div>';
+        return;
+      }
+      resultsEl.innerHTML = results.map(function(r) {
+        return '<button class="fw-loc-result" onclick="FamilyWall._pickCity(' +
+          r.lat + ',' + r.lon + ',\'' + _escAttr(r.label) + '\')">' +
+          '<span class="fw-loc-result-label">' + _esc(r.label) + '</span>' +
+          '<span class="fw-loc-result-coords">' + r.lat.toFixed(2) + ', ' + r.lon.toFixed(2) + '</span>' +
+        '</button>';
+      }).join('');
+    });
+  }
+
   function requestGeo() {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser. Pick a city instead.');
@@ -604,6 +659,16 @@ var FamilyWall = (function() {
     _paint();
   }
 
+  // Repaint when another device pushes a household update (eg. shared
+  // home location changed on the iPad while we're looking at the laptop).
+  if (typeof window !== 'undefined') {
+    window.addEventListener('zs:household-synced', function() {
+      // Wipe the local weather cache so the new location's forecast loads.
+      try { localStorage.removeItem(WEATHER_KEY); } catch (e) {}
+      _paint();
+    });
+  }
+
   return {
     paint: _paint,
     loginAs: loginAs,
@@ -613,6 +678,8 @@ var FamilyWall = (function() {
     requestGeo: requestGeo,
     setLocation: setLocation,
     getLocation: getLocation,
+    searchPlaces: searchPlaces,
+    runLocationSearch: runLocationSearch,
     _pickCity: _pickCity
   };
 })();
