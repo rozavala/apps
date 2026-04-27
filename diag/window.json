@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T05:52:20.744Z",
+  "generatedAt": "2026-04-27T06:07:20.917Z",
   "windowHours": 72,
   "days": [
     {
@@ -680,6 +680,30 @@
           "count": 4,
           "firstTs": 1777264484551,
           "lastTs": 1777264535996,
+          "users": []
+        },
+        {
+          "entry": {
+            "id": "e_mogskwmw_gk5klf",
+            "ts": 1777269850044,
+            "clientTs": 1777269849657,
+            "kind": "rejection",
+            "app": "index",
+            "page": "index.html",
+            "message": "NetworkError when attempting to fetch resource.",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": null,
+            "age": null,
+            "guest": false,
+            "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1777269850044,
+          "lastTs": 1777269925653,
           "users": []
         },
         {

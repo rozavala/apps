@@ -27,6 +27,30 @@
     },
     {
       "entry": {
+        "id": "e_mogskwmw_gk5klf",
+        "ts": 1777269850044,
+        "clientTs": 1777269849657,
+        "kind": "rejection",
+        "app": "index",
+        "page": "index.html",
+        "message": "NetworkError when attempting to fetch resource.",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": null,
+        "age": null,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1777269850044,
+      "lastTs": 1777269925653,
+      "users": []
+    },
+    {
+      "entry": {
         "id": "e_mogpe4a1_j1m0bn",
         "ts": 1777264496224,
         "clientTs": 1777264494121,
