@@ -414,6 +414,60 @@ body {
   font-weight: 800; font-size: 0.78rem;
   margin: 14px 0 8px;
 }
+.fw-loc-search {
+  display: flex; gap: 8px; margin-bottom: 8px;
+}
+.fw-loc-search input {
+  flex: 1; min-width: 0;
+  padding: 10px 12px;
+  background: var(--fw-card);
+  border: 1px solid var(--fw-border);
+  border-radius: 10px;
+  color: var(--fw-text);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.9rem;
+}
+.fw-loc-search input:focus {
+  outline: none;
+  border-color: var(--fw-accent);
+}
+.fw-loc-search .fw-btn { width: auto; padding: 10px 14px; }
+
+.fw-loc-results {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.fw-loc-result {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--fw-card);
+  border: 1px solid var(--fw-border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--fw-text);
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.fw-loc-result:hover {
+  border-color: var(--fw-accent);
+  background: rgba(167,139,250,0.10);
+}
+.fw-loc-result-label { font-weight: 700; font-size: 0.9rem; }
+.fw-loc-result-coords {
+  font-size: 0.72rem; color: var(--fw-muted); font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.fw-loc-empty {
+  padding: 8px 4px;
+  font-size: 0.82rem;
+  color: var(--fw-muted);
+  font-weight: 700;
+  font-style: italic;
+}
+
 .fw-loc-cities {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   margin-bottom: 16px;

@@ -39,7 +39,8 @@ var CloudSync = (function() {
     'zs_shopping_list':         'shopping',
     'zs_menu':                  'menu',
     'zs_fcal_urls':             'fcal_urls',
-    'zs_sports_matches_shared': 'sports_matches'
+    'zs_sports_matches_shared': 'sports_matches',
+    'zs_home_location':         'home_location'
   };
   var HOUSEHOLD_KID = '_household';
 
