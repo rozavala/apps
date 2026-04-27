@@ -40,7 +40,8 @@ var CloudSync = (function() {
     'zs_menu':                  'menu',
     'zs_fcal_urls':             'fcal_urls',
     'zs_sports_matches_shared': 'sports_matches',
-    'zs_home_location':         'home_location'
+    'zs_home_location':         'home_location',
+    'zs_deleted_profiles':      'deleted_profiles'
   };
   var HOUSEHOLD_KID = '_household';
 
@@ -346,6 +347,20 @@ var CloudSync = (function() {
       .then(function(serverProfiles) {
         var localProfiles = (typeof getProfiles === 'function') ? getProfiles() : [];
         var profileMap = {};
+        // Read tombstones (zs_deleted_profiles) so a profile that was
+        // deleted on any device stays gone on this one. Tombstones are
+        // synced as part of HOUSEHOLD_KEYS so they reach every device.
+        var tombstones = {};
+        try {
+          var rawTomb = localStorage.getItem('zs_deleted_profiles');
+          var tombArr = rawTomb ? JSON.parse(rawTomb) : [];
+          if (Array.isArray(tombArr)) {
+            tombArr.forEach(function(t) {
+              if (t && t.name) tombstones[t.name.toLowerCase()] = Number(t.ts) || 0;
+            });
+          }
+        } catch (e) {}
+
         var merged = [].concat(serverProfiles || [], localProfiles);
         var finalProfiles = [];
         var nameToIdx = {};
@@ -354,6 +369,11 @@ var CloudSync = (function() {
           var p = merged[i];
           if (!p || !p.name) continue;
           var key = p.name.toLowerCase();
+          // Skip tombstoned names unless the profile was created after
+          // the deletion (createdAt > tombstone ts) — that lets you
+          // legitimately recreate a profile with the same name later.
+          if (tombstones[key] && (!p.createdAt || p.createdAt < tombstones[key])) continue;
+
           if (nameToIdx.hasOwnProperty(key)) {
             var existing = finalProfiles[nameToIdx[key]];
             if (p.age > existing.age) {
@@ -476,28 +496,29 @@ var CloudSync = (function() {
           var path = window.location.pathname;
           var isHub = path.indexOf('index.html') !== -1 || path === '/' || (path.length > 0 && path[path.length - 1] === '/');
 
-          // Always pull the household-shared bucket so shopping list,
-          // weekly menu, calendar URLs, and shared sports matches mirror
-          // across devices regardless of which page just loaded.
+          // Pull household-shared state first (shopping list, menu,
+          // calendar URLs, sports matches, home location, *and the
+          // profile-deletion tombstones*) before profile sync, so the
+          // syncProfiles merge can honor the latest tombstones.
           state.pullHousehold().then(function() {
             try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
-          });
 
-          if (isHub) {
-            state.syncProfiles()
-              .then(function() {
-                var loginScr = document.getElementById('login-screen');
-                if (typeof renderLogin === 'function' && loginScr && loginScr.style.display !== 'none') {
-                  renderLogin();
-                }
-              });
-          } else {
-            var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
-            if (user) {
-              var kidKey = user.name.toLowerCase().replace(/\s+/g, '_');
-              state.pullAll(kidKey);
+            if (isHub) {
+              state.syncProfiles()
+                .then(function() {
+                  var loginScr = document.getElementById('login-screen');
+                  if (typeof renderLogin === 'function' && loginScr && loginScr.style.display !== 'none') {
+                    renderLogin();
+                  }
+                });
+            } else {
+              var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+              if (user) {
+                var kidKey = user.name.toLowerCase().replace(/\s+/g, '_');
+                state.pullAll(kidKey);
+              }
             }
-          }
+          });
         } else {
           state.online = false;
           _updatePill('offline');

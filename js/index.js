@@ -1708,11 +1708,33 @@
     if (!confirm('Delete ' + name + '?')) return;
     profiles.splice(editingIndex, 1);
     saveProfiles(profiles);
-    // Push the deletion to the server. syncProfiles() does an additive
-    // merge that would otherwise resurrect this profile on next sync.
+
+    // Write a household-synced tombstone so other devices know not to
+    // resurrect this profile from their local copy. zs_deleted_profiles
+    // is in HOUSEHOLD_KEYS, so CloudSync.push mirrors it to the VPS.
+    try {
+      var key = 'zs_deleted_profiles';
+      var existing = [];
+      try { existing = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+      if (!Array.isArray(existing)) existing = [];
+      // Drop any older tombstone for the same name, then add a fresh one.
+      var lname = name.toLowerCase();
+      existing = existing.filter(function(t) {
+        return !t || !t.name || t.name.toLowerCase() !== lname;
+      });
+      existing.push({ name: name, ts: Date.now() });
+      localStorage.setItem(key, JSON.stringify(existing));
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(key);
+    } catch (e) {
+      if (typeof Debug !== 'undefined') Debug.error('[Profile] tombstone failed', e.message);
+    }
+
+    // Push the shorter profile list to the server so even devices that
+    // sync before they see the tombstone get a clean state.
     if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
       try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
     }
+
     closeEditModal();
     switchUser();
   }
