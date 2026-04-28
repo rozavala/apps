@@ -474,6 +474,26 @@
       text-align: center; outline: none; transition: border-color 0.2s;
     }
     .sprint-input:focus { border-color: #FBBF24; }
+    .sprint-submit {
+      display: inline-block;
+      margin-left: 12px;
+      padding: 14px 22px;
+      border-radius: 16px;
+      border: 2px solid #FBBF24;
+      background: linear-gradient(135deg, #F59E0B, #FBBF24);
+      color: #1B1209;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 4px 14px rgba(251,191,36,0.35);
+    }
+    .sprint-submit:hover { transform: translateY(-1px); }
+    .sprint-submit:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(251,191,36,0.3); }
+    @media (max-width: 480px) {
+      .sprint-submit { display: block; margin: 14px auto 0; width: 80%; }
+    }
     .sprint-hint { text-align: center; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; }
 
     .sprint-result {
