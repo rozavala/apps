@@ -1,37 +1,10 @@
 {
-  "generatedAt": "2026-04-28T16:44:43.386Z",
+  "generatedAt": "2026-04-28T16:59:46.159Z",
   "windowHours": 72,
   "days": [
     {
       "day": "2026-04-25",
       "groups": [
-        {
-          "entry": {
-            "id": "e_moekogvi_9mqujs",
-            "ts": 1777135648677,
-            "clientTs": 1777135646575,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "Script error.",
-            "filename": null,
-            "lineno": 0,
-            "colno": 0,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 6,
-          "firstTs": 1777135648677,
-          "lastTs": 1777137905667,
-          "users": [
-            "u-3bda7c",
-            "u-9b4aef"
-          ]
-        },
         {
           "entry": {
             "id": "e_moey14le_ofh1wk",
@@ -56,6 +29,32 @@
           "lastTs": 1777158074254,
           "users": [
             "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moem0ucv_dbn35y",
+            "ts": 1777137905667,
+            "clientTs": 1777137903536,
+            "kind": "error",
+            "app": "index",
+            "page": "index.html",
+            "message": "Script error.",
+            "filename": null,
+            "lineno": 0,
+            "colno": 0,
+            "stack": null,
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1777137905667,
+          "lastTs": 1777137905667,
+          "users": [
+            "u-9b4aef"
           ]
         },
         {
