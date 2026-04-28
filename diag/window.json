@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T15:29:21.264Z",
+  "generatedAt": "2026-04-28T15:44:22.074Z",
   "windowHours": 72,
   "days": [
     {
@@ -33,9 +33,9 @@
         },
         {
           "entry": {
-            "id": "e_moei6td3_jx8x2u",
-            "ts": 1777131466016,
-            "clientTs": 1777131463720,
+            "id": "e_moekogvi_9mqujs",
+            "ts": 1777135648677,
+            "clientTs": 1777135646575,
             "kind": "error",
             "app": "index",
             "page": "index.html",
@@ -44,14 +44,14 @@
             "lineno": 0,
             "colno": 0,
             "stack": null,
-            "user": null,
-            "age": null,
+            "user": "u-3bda7c",
+            "age": 11,
             "guest": false,
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 10,
-          "firstTs": 1777131466016,
+          "count": 6,
+          "firstTs": 1777135648677,
           "lastTs": 1777137905667,
           "users": [
             "u-3bda7c",
