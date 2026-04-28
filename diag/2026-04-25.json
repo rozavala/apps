@@ -29,9 +29,9 @@
     },
     {
       "entry": {
-        "id": "e_moefsk7n_6o30mz",
-        "ts": 1777127441620,
-        "clientTs": 1777127439443,
+        "id": "e_moei6td3_jx8x2u",
+        "ts": 1777131466016,
+        "clientTs": 1777131463720,
         "kind": "error",
         "app": "index",
         "page": "index.html",
@@ -40,14 +40,14 @@
         "lineno": 0,
         "colno": 0,
         "stack": null,
-        "user": "u-3bda7c",
-        "age": 11,
+        "user": null,
+        "age": null,
         "guest": false,
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 12,
-      "firstTs": 1777127441620,
+      "count": 10,
+      "firstTs": 1777131466016,
       "lastTs": 1777137905667,
       "users": [
         "u-3bda7c",
