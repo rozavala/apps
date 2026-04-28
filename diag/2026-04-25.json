@@ -29,32 +29,6 @@
     },
     {
       "entry": {
-        "id": "e_moem0ucv_dbn35y",
-        "ts": 1777137905667,
-        "clientTs": 1777137903536,
-        "kind": "error",
-        "app": "index",
-        "page": "index.html",
-        "message": "Script error.",
-        "filename": null,
-        "lineno": 0,
-        "colno": 0,
-        "stack": null,
-        "user": "u-9b4aef",
-        "age": 9,
-        "guest": false,
-        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-        "trail": []
-      },
-      "count": 2,
-      "firstTs": 1777137905667,
-      "lastTs": 1777137905667,
-      "users": [
-        "u-9b4aef"
-      ]
-    },
-    {
-      "entry": {
         "id": "e_moerkl0o_nyto9b",
         "ts": 1777147224726,
         "clientTs": 1777147222632,
