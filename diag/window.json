@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T02:50:46.176Z",
+  "generatedAt": "2026-04-28T03:06:06.029Z",
   "windowHours": 72,
   "days": [
     {
@@ -270,30 +270,6 @@
         },
         {
           "entry": {
-            "id": "e_modr9v1u_p5skvx",
-            "ts": 1777086258321,
-            "clientTs": 1777086256242,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "ReferenceError: Can't find variable: closeEditModal",
-            "filename": "https://rozavala.github.io/apps/index.html",
-            "lineno": 397,
-            "colno": 15,
-            "stack": "onclick@https://rozavala.github.io/apps/index.html:397:15",
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 3,
-          "firstTs": 1777086258321,
-          "lastTs": 1777086261784,
-          "users": []
-        },
-        {
-          "entry": {
             "id": "e_moejm2bg_nbxbx1",
             "ts": 1777133859815,
             "clientTs": 1777133854780,
@@ -369,30 +345,6 @@
           "users": [
             "u-3bda7c"
           ]
-        },
-        {
-          "entry": {
-            "id": "e_modr9sij_wl3o5x",
-            "ts": 1777086255112,
-            "clientTs": 1777086252955,
-            "kind": "error",
-            "app": "index",
-            "page": "index.html",
-            "message": "ReferenceError: Can't find variable: closeEditModal",
-            "filename": "https://rozavala.github.io/apps/index.html",
-            "lineno": 371,
-            "colno": 38,
-            "stack": "onclick@https://rozavala.github.io/apps/index.html:371:38",
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777086255112,
-          "lastTs": 1777086258321,
-          "users": []
         },
         {
           "entry": {
