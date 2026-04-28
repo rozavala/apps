@@ -105,6 +105,7 @@
   window.redeemForTime = function() { redeemForTime(); };
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
+  window.updateKidRoutinesEnabled = function(idx, val) { updateKidRoutinesEnabled(idx, val); };
   window.addRoutineItem = function(idx, which) { addRoutineItem(idx, which); };
   window.updateRoutineItem = function(idx, which, j, val) { updateRoutineItem(idx, which, j, val); };
   window.removeRoutineItem = function(idx, which, j) { removeRoutineItem(idx, which, j); };
@@ -1319,6 +1320,24 @@
     renderAppCards();
   }
 
+  function updateKidRoutinesEnabled(idx, checked) {
+    var profiles = getProfiles();
+    if (!profiles[idx]) return;
+    profiles[idx].routinesEnabled = !!checked;
+    saveProfiles(profiles);
+    // Profiles array is part of the standard profiles sync; push.
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
+    // Re-render the corner so the editor body collapses/expands.
+    renderParentsCorner();
+    // Refresh the hub widget if the active user just toggled themselves.
+    var active = getActiveUser();
+    if (active && active.name === profiles[idx].name && typeof Routines !== 'undefined') {
+      try { Routines.renderHubWidget('routines-widget'); } catch (e) {}
+    }
+  }
+
   function _renderRoutinesEditor(profile, idx) {
     var tpls = Routines.getTemplates(profile.name);
     function block(which, icon, label) {
@@ -1344,10 +1363,16 @@
         '</div>' +
       '</div>';
     }
+    var enabled = profile.routinesEnabled !== false;
     return '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
       '<label style="font-size:0.9rem; font-weight:700; color:var(--text); display:block; margin-bottom:10px;">📋 Routines</label>' +
-      block('morning', '🌅', 'Morning') +
-      block('evening', '🌙', 'Night') +
+      '<label class="pk-toggle" style="font-size:0.88rem; margin-bottom:10px;">' +
+        '<input type="checkbox" ' + (enabled ? 'checked' : '') + ' onchange="updateKidRoutinesEnabled(' + idx + ', this.checked)">' +
+        ' Show routines for ' + escHtml(profile.name) +
+      '</label>' +
+      (enabled
+        ? block('morning', '🌅', 'Morning') + block('evening', '🌙', 'Night')
+        : '<div class="pk-hint" style="font-size:0.82rem; color:var(--text-muted); font-weight:600;">Routines hidden from the hub and Family Wall for ' + escHtml(profile.name) + '.</div>') +
     '</div>';
   }
 

@@ -225,9 +225,27 @@ var Routines = (function() {
   }
 
   // ── Hub widget ──
+  // A profile can opt out of routines entirely (eg. parent profiles
+  // who don't want a "Good morning, brush teeth" widget on their hub).
+  // The flag lives on the profile itself, not in zs_routines, so it
+  // syncs as part of the standard profiles bucket. Default true.
+  function isEnabledFor(userName) {
+    if (typeof getProfiles !== 'function') return true;
+    var profiles = getProfiles();
+    if (!Array.isArray(profiles)) return true;
+    var match = profiles.filter(function(p) { return p && p.name === userName; })[0];
+    if (!match) return true;
+    return match.routinesEnabled !== false;
+  }
+
   function renderHubWidget(containerId) {
     var el = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
     if (!el) return;
+    var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+    if (active && !isEnabledFor(active.name)) {
+      el.innerHTML = '';
+      return;
+    }
     var status = getStatus();
     if (!status) { el.innerHTML = ''; return; }
 
@@ -426,6 +444,7 @@ var Routines = (function() {
     getTemplates: getTemplates,
     setTemplate: setTemplate,
     resetTemplate: resetTemplate,
+    isEnabledFor: isEnabledFor,
     DEFAULTS: DEFAULTS,
     _open: _open,
     _close: _close,
