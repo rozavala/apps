@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T13:57:46.241Z",
+  "generatedAt": "2026-04-28T14:12:56.056Z",
   "windowHours": 72,
   "days": [
     {
@@ -33,9 +33,9 @@
         },
         {
           "entry": {
-            "id": "e_moeeuw6k_uotjht",
-            "ts": 1777125870716,
-            "clientTs": 1777125868652,
+            "id": "e_moeiglhd_t69kmc",
+            "ts": 1777131922415,
+            "clientTs": 1777131920065,
             "kind": "error",
             "app": "guess-quest",
             "page": "guess-quest.html",
@@ -44,70 +44,17 @@
             "lineno": 1,
             "colno": 29,
             "stack": "global code@https://rozavala.github.io/apps/guess-quest.html:1:29",
-            "user": "u-3bda7c",
-            "age": 11,
+            "user": "u-9b4aef",
+            "age": 9,
             "guest": false,
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 3122,
-          "firstTs": 1777125870716,
+          "count": 2116,
+          "firstTs": 1777131922415,
           "lastTs": 1777133859815,
           "users": [
-            "u-3bda7c",
             "u-9b4aef"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moeez8ii_axfmsg",
-            "ts": 1777126073308,
-            "clientTs": 1777126071259,
-            "kind": "error",
-            "app": "money-master",
-            "page": "money-master.html",
-            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
-            "filename": "https://rozavala.github.io/apps/money-master.html",
-            "lineno": 1,
-            "colno": 29,
-            "stack": "global code@https://rozavala.github.io/apps/money-master.html:1:29",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 620,
-          "firstTs": 1777126073308,
-          "lastTs": 1777126195016,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moef2toi_a81egg",
-            "ts": 1777126240709,
-            "clientTs": 1777126238658,
-            "kind": "error",
-            "app": "world-explorer",
-            "page": "world-explorer.html",
-            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
-            "filename": "https://rozavala.github.io/apps/world-explorer.html",
-            "lineno": 1,
-            "colno": 29,
-            "stack": "global code@https://rozavala.github.io/apps/world-explorer.html:1:29",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 528,
-          "firstTs": 1777126240709,
-          "lastTs": 1777126342517,
-          "users": [
-            "u-3bda7c"
           ]
         },
         {
@@ -132,32 +79,6 @@
           "count": 379,
           "firstTs": 1777126489248,
           "lastTs": 1777126557236,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moef5093_74z7iv",
-            "ts": 1777126342517,
-            "clientTs": 1777126340487,
-            "kind": "error",
-            "app": "fe-explorador",
-            "page": "fe-explorador.html",
-            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
-            "filename": "https://rozavala.github.io/apps/fe-explorador.html",
-            "lineno": 1,
-            "colno": 29,
-            "stack": "global code@https://rozavala.github.io/apps/fe-explorador.html:1:29",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 331,
-          "firstTs": 1777126342517,
-          "lastTs": 1777126407228,
           "users": [
             "u-3bda7c"
           ]
@@ -213,6 +134,32 @@
           "users": [
             "u-3bda7c",
             "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moef5qvn_cmzzro",
+            "ts": 1777126377021,
+            "clientTs": 1777126374995,
+            "kind": "error",
+            "app": "fe-explorador",
+            "page": "fe-explorador.html",
+            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
+            "filename": "https://rozavala.github.io/apps/fe-explorador.html",
+            "lineno": 1,
+            "colno": 29,
+            "stack": "global code@https://rozavala.github.io/apps/fe-explorador.html:1:29",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 161,
+          "firstTs": 1777126377021,
+          "lastTs": 1777126407228,
+          "users": [
+            "u-3bda7c"
           ]
         },
         {
@@ -290,58 +237,6 @@
           "count": 2,
           "firstTs": 1777133859815,
           "lastTs": 1777133859815,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moeepmzb_ymsyyp",
-            "ts": 1777125625556,
-            "clientTs": 1777125623447,
-            "kind": "error",
-            "app": "little-maestro",
-            "page": "little-maestro.html",
-            "message": "TypeError: undefined is not an object (near '...})...')",
-            "filename": "https://rozavala.github.io/apps/little-maestro.html",
-            "lineno": 7993,
-            "colno": 9,
-            "stack": "init@https://rozavala.github.io/apps/little-maestro.html:7993:9\n@https://rozavala.github.io/apps/little-maestro.html:8217:19",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777125625556,
-          "lastTs": 1777125802036,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moeepn5x_ma7vrl",
-            "ts": 1777125625556,
-            "clientTs": 1777125623685,
-            "kind": "error",
-            "app": "little-maestro",
-            "page": "little-maestro.html",
-            "message": "Script error.",
-            "filename": null,
-            "lineno": 0,
-            "colno": 0,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777125625556,
-          "lastTs": 1777125802036,
           "users": [
             "u-3bda7c"
           ]
