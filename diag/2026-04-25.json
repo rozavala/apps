@@ -3,9 +3,9 @@
   "groups": [
     {
       "entry": {
-        "id": "e_moeiglhd_t69kmc",
-        "ts": 1777131922415,
-        "clientTs": 1777131920065,
+        "id": "e_moeijmz8_nvmvij",
+        "ts": 1777133852850,
+        "clientTs": 1777132061972,
         "kind": "error",
         "app": "guess-quest",
         "page": "guess-quest.html",
@@ -20,8 +20,8 @@
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 2116,
-      "firstTs": 1777131922415,
+      "count": 54,
+      "firstTs": 1777133852850,
       "lastTs": 1777133859815,
       "users": [
         "u-9b4aef"
