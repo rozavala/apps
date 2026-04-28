@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T01:34:54.038Z",
+  "generatedAt": "2026-04-28T01:49:59.371Z",
   "windowHours": 72,
   "days": [
     {
@@ -865,6 +865,32 @@
     {
       "day": "2026-04-28",
       "groups": [
+        {
+          "entry": {
+            "id": "e_mohyrf98_9egxw2",
+            "ts": 1777340699738,
+            "clientTs": 1777340697597,
+            "kind": "error",
+            "app": "index",
+            "page": "index.html",
+            "message": "Script error.",
+            "filename": null,
+            "lineno": 0,
+            "colno": 0,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1777340699738,
+          "lastTs": 1777340699738,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
         {
           "entry": {
             "id": "e_mohviu1b_k6h3vy",
