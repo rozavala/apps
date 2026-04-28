@@ -1,36 +1,10 @@
 {
-  "generatedAt": "2026-04-28T16:14:32.968Z",
+  "generatedAt": "2026-04-28T16:29:34.336Z",
   "windowHours": 72,
   "days": [
     {
       "day": "2026-04-25",
       "groups": [
-        {
-          "entry": {
-            "id": "e_moeijmz8_nvmvij",
-            "ts": 1777133852850,
-            "clientTs": 1777132061972,
-            "kind": "error",
-            "app": "guess-quest",
-            "page": "guess-quest.html",
-            "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
-            "filename": "https://rozavala.github.io/apps/guess-quest.html",
-            "lineno": 1,
-            "colno": 29,
-            "stack": "global code@https://rozavala.github.io/apps/guess-quest.html:1:29",
-            "user": "u-9b4aef",
-            "age": 9,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 54,
-          "firstTs": 1777133852850,
-          "lastTs": 1777133859815,
-          "users": [
-            "u-9b4aef"
-          ]
-        },
         {
           "entry": {
             "id": "e_moekogvi_9mqujs",
@@ -86,32 +60,6 @@
         },
         {
           "entry": {
-            "id": "e_moejm2bg_nbxbx1",
-            "ts": 1777133859815,
-            "clientTs": 1777133854780,
-            "kind": "error",
-            "app": "book-movie-check",
-            "page": "book-movie-check.html",
-            "message": "Script error.",
-            "filename": null,
-            "lineno": 0,
-            "colno": 0,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777133859815,
-          "lastTs": 1777133859815,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
             "id": "e_moerkl0o_nyto9b",
             "ts": 1777147224726,
             "clientTs": 1777147222632,
@@ -134,58 +82,6 @@
           "lastTs": 1777147224726,
           "users": [
             "u-289c54"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moejm2bm_88xk4c",
-            "ts": 1777133859815,
-            "clientTs": 1777133854786,
-            "kind": "error",
-            "app": "book-movie-check",
-            "page": "book-movie-check.html",
-            "message": "ReferenceError: Can't find variable: _callback_addSource",
-            "filename": "https://rozavala.github.io/apps/book-movie-check.html",
-            "lineno": 1,
-            "colno": 20,
-            "stack": "global code@https://rozavala.github.io/apps/book-movie-check.html:1:20",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1777133859815,
-          "lastTs": 1777133859815,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moejm2bn_3obrrg",
-            "ts": 1777133859815,
-            "clientTs": 1777133854787,
-            "kind": "error",
-            "app": "book-movie-check",
-            "page": "book-movie-check.html",
-            "message": "ReferenceError: Can't find variable: _callback_addDestination",
-            "filename": "https://rozavala.github.io/apps/book-movie-check.html",
-            "lineno": 1,
-            "colno": 25,
-            "stack": "global code@https://rozavala.github.io/apps/book-movie-check.html:1:25",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1777133859815,
-          "lastTs": 1777133859815,
-          "users": [
-            "u-3bda7c"
           ]
         }
       ]
