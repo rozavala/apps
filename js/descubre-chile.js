@@ -445,6 +445,18 @@ const QB={
     {q:'¿Qué instrumento se usa para medir los sismos cerca de un volcán?',a:'Sismógrafo',o:['Sismógrafo','Termómetro','Telescopio','Barómetro'], tier:'advanced'},
     {q:'¿Qué volcán hizo erupción en 2015 en la Región de Los Lagos?',a:'Calbuco',o:['Calbuco','Villarrica','Osorno','Llaima'], tier:'expert'}
   ],
+  folk:[
+    {q:'¿Quién compuso "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Mercedes Sosa','Patricio Manns','Víctor Jara'], tier:'beginner'},
+    {q:'¿Cuál es el baile nacional de Chile?',a:'La Cueca',o:['La Cueca','El Tango','La Cumbia','El Vals'], tier:'beginner'},
+    {q:'¿En qué año fue declarada la cueca baile nacional?',a:'1979',o:['1979','1810','1950','2000'], tier:'expert'},
+    {q:'¿Qué pañuelo agitan los bailarines de cueca?',a:'Un pañuelo blanco',o:['Un pañuelo blanco','Una bandera','Un sombrero','Una flor'], tier:'beginner'},
+    {q:'¿Quién escribió "Si vas para Chile"?',a:'Chito Faró',o:['Chito Faró','Víctor Jara','Patricio Manns','Los Huasos Quincheros'], tier:'intermediate'},
+    {q:'¿Quién escribió "Arriba en la cordillera"?',a:'Patricio Manns',o:['Patricio Manns','Violeta Parra','Víctor Jara','Chito Faró'], tier:'intermediate'},
+    {q:'¿Qué tipo de canto rural se acompaña con guitarra?',a:'La tonada',o:['La tonada','La cueca','La sirilla','El corrido'], tier:'intermediate'},
+    {q:'¿Cuál de estos NO es una variante de la cueca?',a:'Cueca tropical',o:['Cueca tropical','Cueca brava','Cueca chilota','Cueca nortina'], tier:'advanced'},
+    {q:'¿Qué instrumento andino de cuerda tenía caparazón de armadillo antiguamente?',a:'El charango',o:['El charango','La guitarra','El bombo','La quena'], tier:'advanced'},
+    {q:'¿Qué grupo folclórico mantuvo vivo el repertorio de tonadas por más de 80 años?',a:'Los Huasos Quincheros',o:['Los Huasos Quincheros','Inti-Illimani','Quilapayún','Los Jaivas'], tier:'advanced'}
+  ],
   fiestas_patrias:[
     {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},
     {q:'¿Qué baile tradicional se baila en las fondas?',a:'La Cueca',o:['La Cueca','La Cumbia','El Tango','El Reggaetón'], tier:'beginner'},
