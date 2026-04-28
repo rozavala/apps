@@ -176,7 +176,7 @@ var CloudSync = (function() {
         _updatePill('idle');
       });
     }).catch(function(e) {
-      if (typeof Debug !== 'undefined') Debug.error('[Sync] Push failed', e.message);
+      if (typeof Debug !== 'undefined') Debug.error('[Sync] Push failed: ' + key, e && e.message ? e.message : '(no message)');
       _updatePill('error');
     });
   };
