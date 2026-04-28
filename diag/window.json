@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T19:46:24.189Z",
+  "generatedAt": "2026-04-28T20:01:26.282Z",
   "windowHours": 72,
   "days": [
     {
@@ -29,32 +29,6 @@
           "lastTs": 1777158074254,
           "users": [
             "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moerkl0o_nyto9b",
-            "ts": 1777147224726,
-            "clientTs": 1777147222632,
-            "kind": "error",
-            "app": "chess-quest",
-            "page": "chess-quest.html",
-            "message": "TypeError: Attempted to assign to readonly property.",
-            "filename": "https://rozavala.github.io/apps/js/chess-quest.js",
-            "lineno": 61,
-            "colno": 105,
-            "stack": "allMoves@https://rozavala.github.io/apps/js/chess-quest.js:61:105\nisStalemate@https://rozavala.github.io/apps/js/chess-quest.js:78:74\ncheckGameEnd@https://rozavala.github.io/apps/js/chess-quest.js:502:17\nonClick@https://rozavala.github.io/apps/js/chess-quest.js:387:26\n@https://rozavala.github.io/apps/js/chess-quest.js:96:38",
-            "user": "u-289c54",
-            "age": 5,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1777147224726,
-          "lastTs": 1777147224726,
-          "users": [
-            "u-289c54"
           ]
         }
       ]
