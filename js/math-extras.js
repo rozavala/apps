@@ -169,8 +169,9 @@ var MathExtras = (function() {
         '<div class="sprint-question">' +
           '<div class="sprint-q-text">' + q.a + ' × ' + q.b + ' = ?</div>' +
           '<input type="number" id="sprint-input" class="sprint-input" autocomplete="off" inputmode="numeric" />' +
+          '<button type="button" class="sprint-submit" onclick="MathExtras.Sprint._submit()">Enviar ✓</button>' +
         '</div>' +
-        '<div class="sprint-hint">Presiona Enter para enviar</div>';
+        '<div class="sprint-hint">Toca Enviar o presiona Enter</div>';
       var inp = document.getElementById('sprint-input');
       if (inp) {
         inp.addEventListener('keydown', function(e) {
@@ -244,7 +245,7 @@ var MathExtras = (function() {
       state = null;
     }
 
-    return { open: open, start: start };
+    return { open: open, start: start, _submit: _submit };
   })();
 
   /* ============================================================
@@ -703,8 +704,9 @@ var MathExtras = (function() {
         '<div class="sprint-question">' +
           '<div class="sprint-q-text">' + q.a + ' × ' + q.b + ' = ?</div>' +
           '<input type="number" id="duel-input" class="sprint-input" autocomplete="off" inputmode="numeric" />' +
+          '<button type="button" class="sprint-submit" onclick="MathExtras.Duel._submit()">Submit ✓</button>' +
         '</div>' +
-        '<div class="sprint-hint">Press Enter to submit</div>';
+        '<div class="sprint-hint">Tap Submit or press Enter</div>';
       var inp = document.getElementById('duel-input');
       if (inp) {
         inp.addEventListener('keydown', function(e) {
@@ -810,7 +812,8 @@ var MathExtras = (function() {
       _pick: _pick,
       _setTable: _setTable,
       _begin: _begin,
-      _startTurn: _startTurn
+      _startTurn: _startTurn,
+      _submit: _submit
     };
   })();
 
