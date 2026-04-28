@@ -101,6 +101,18 @@ var CloudSync = (function() {
     return merged.sort(function(a, b) { return b.ts - a.ts; }).slice(0, 100);
   }
 
+  // Parse _syncedAt regardless of whether the producer wrote a number
+  // (client) or an ISO string (server.js stamps `new Date().toISOString()`
+  // on every PUT). Without this, Number(isoString) → NaN → 0, and the
+  // pull comparison `sTime > lTime` was always 0 > 0 = false. The
+  // server-stored copy was only ever written to a fresh device.
+  function _parseTs(v) {
+    if (!v) return 0;
+    if (typeof v === 'number') return v;
+    var n = new Date(v).getTime();
+    return isNaN(n) ? 0 : n;
+  }
+
   state.push = function(key) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var info = _getAppInfo(key);
@@ -194,8 +206,8 @@ var CloudSync = (function() {
           localData = rawLocal ? JSON.parse(rawLocal) : {};
         } catch(e) {}
         
-        var sTime = Number(serverData._syncedAt) || 0;
-        var lTime = Number(localData._syncedAt) || 0;
+        var sTime = _parseTs(serverData._syncedAt);
+        var lTime = _parseTs(localData._syncedAt);
         var localMissing = !localStorage.getItem(key);
 
         if (sTime > lTime || localMissing || info.appName === 'activity') {
@@ -255,8 +267,8 @@ var CloudSync = (function() {
               localData = rawLocal ? JSON.parse(rawLocal) : {};
             } catch(e) {}
             
-            var sTime = Number(serverData._syncedAt) || 0;
-            var lTime = Number(localData._syncedAt) || 0;
+            var sTime = _parseTs(serverData._syncedAt);
+            var lTime = _parseTs(localData._syncedAt);
             var localMissing = !localStorage.getItem(key);
 
             if (sTime > lTime || localMissing || appName === 'activity') {
@@ -296,8 +308,8 @@ var CloudSync = (function() {
             var rawRecital = localStorage.getItem(rKey);
             lData = rawRecital ? JSON.parse(rawRecital) : {};
           } catch(e) {}
-          var sTimeR = Number(sData._syncedAt) || 0;
-          var lTimeR = Number(lData._syncedAt) || 0;
+          var sTimeR = _parseTs(sData._syncedAt);
+          var lTimeR = _parseTs(lData._syncedAt);
           if (sTimeR > lTimeR || !localStorage.getItem(rKey)) {
             try {
               localStorage.setItem(rKey, JSON.stringify(sData));

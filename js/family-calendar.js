@@ -438,6 +438,19 @@ var FamilyCalendar = (function() {
     renderHubWidget('family-calendar-widget');
   }
 
+  // When another device pushes new calendar URLs (handled by sync.js
+  // pullHousehold → fires `zs:household-synced`), re-render the hub
+  // widget. This also force-fetches any newly-pulled URLs that have
+  // no local cache entry yet.
+  if (typeof window !== 'undefined') {
+    window.addEventListener('zs:household-synced', function() {
+      renderHubWidget('family-calendar-widget');
+      // Also re-render any open editor so the row list updates.
+      var holder = document.querySelector('[data-fcal-editor]');
+      if (holder) { try { renderEditor(holder.id); } catch (e) {} }
+    });
+  }
+
   return {
     getUrls: getUrls,
     addUrl: addUrl,
