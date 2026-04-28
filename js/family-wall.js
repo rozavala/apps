@@ -340,6 +340,17 @@ var FamilyWall = (function() {
         '<div class="fw-card-empty">Add a profile to start tracking routines.</div>' +
       '</div>';
     }
+    // Hide profiles that opted out of routines (eg. parent profiles).
+    var withRoutines = profiles.filter(function(p) {
+      if (typeof Routines.isEnabledFor === 'function') return Routines.isEnabledFor(p.name);
+      return p && p.routinesEnabled !== false;
+    });
+    if (!withRoutines.length) {
+      return '<div class="fw-card fw-card-routines">' +
+        '<div class="fw-card-head"><span class="fw-card-icon">📋</span> Routines</div>' +
+        '<div class="fw-card-empty">No profiles have routines enabled.</div>' +
+      '</div>';
+    }
     // Show only the routine that matches the current time of day:
     //  - before 14:00  → morning
     //  - 14:00 onwards → evening
@@ -347,7 +358,7 @@ var FamilyWall = (function() {
     var which = hour < 14 ? 'morning' : 'evening';
     var sectionLabel = which === 'morning' ? '🌅 Morning' : '🌙 Night';
 
-    var rows = profiles.map(function(p) {
+    var rows = withRoutines.map(function(p) {
       var status = Routines.getStatusFor(p.name);
       if (!status) return '';
       var bucket = status[which];
@@ -692,6 +703,9 @@ var FamilyWall = (function() {
       try { localStorage.removeItem(WEATHER_KEY); } catch (e) {}
       _paint();
     });
+    // syncProfiles fires zs:synced when the merged profile list changed.
+    // Repaint so things like routinesEnabled toggles reflect immediately.
+    window.addEventListener('zs:synced', function() { _paint(); });
   }
 
   return {
