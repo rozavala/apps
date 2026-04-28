@@ -453,6 +453,11 @@ var CloudSync = (function() {
     for (var i = 0; i < profiles.length; i++) {
       promises.push(state.pushAll(profiles[i].name.toLowerCase().replace(/\s+/g, '_')));
     }
+    // Also push the household-shared bucket (shopping, menu, calendar
+    // URLs, sports matches, home location, profile tombstones). This
+    // is the recovery path for state that was added when CloudSync was
+    // still offline (e.g. before the initial Tailscale ping resolved).
+    promises.push(state.pushHousehold());
     return Promise.all(promises).then(function() { return state.syncProfiles(); });
   };
 
@@ -465,6 +470,9 @@ var CloudSync = (function() {
         for (var i = 0; i < profiles.length; i++) {
           promises.push(state.pullAll(profiles[i].name.toLowerCase().replace(/\s+/g, '_')));
         }
+        // And mirror the household bucket back so a fresh device picks
+        // up the same shopping list / menu / calendar URLs.
+        promises.push(state.pullHousehold());
         return Promise.all(promises);
       })
       .then(function() {
@@ -511,9 +519,13 @@ var CloudSync = (function() {
           // Pull household-shared state first (shopping list, menu,
           // calendar URLs, sports matches, home location, *and the
           // profile-deletion tombstones*) before profile sync, so the
-          // syncProfiles merge can honor the latest tombstones.
+          // syncProfiles merge can honor the latest tombstones. Then
+          // push any local household state that was changed while
+          // CloudSync was still offline (so this device's edits before
+          // the first ping resolved propagate to others).
           state.pullHousehold().then(function() {
             try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
+            state.pushHousehold();
 
             if (isHub) {
               state.syncProfiles()
