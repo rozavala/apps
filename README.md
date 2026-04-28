@@ -30,6 +30,9 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
 | **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
 | **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone). | [trophy-room.html](trophy-room.html) |
+| **👨‍👩‍👧‍👦 Sunday Report** | Resumen semanal de actividades familiares. (Weekly family activity summary). | [sunday-report.html](sunday-report.html) |
+| **✈️ Vacation Planner** | Herramienta para planificar viajes familiares. (Tool for planning family trips). | [vacation.html](vacation.html) |
+| **⏱ Home Timer** | Temporizador útil para actividades de la casa. (Useful timer for home activities). | [home-timer.html](home-timer.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
