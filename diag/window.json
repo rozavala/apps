@@ -1,38 +1,7 @@
 {
-  "generatedAt": "2026-04-28T22:47:58.284Z",
+  "generatedAt": "2026-04-28T23:03:00.360Z",
   "windowHours": 72,
   "days": [
-    {
-      "day": "2026-04-25",
-      "groups": [
-        {
-          "entry": {
-            "id": "e_moey14le_ofh1wk",
-            "ts": 1777158074254,
-            "clientTs": 1777158072194,
-            "kind": "error",
-            "app": "descubre-chile",
-            "page": "descubre-chile.html",
-            "message": "TypeError: undefined is not an object (evaluating 'QB[id].slice')",
-            "filename": "https://rozavala.github.io/apps/js/descubre-chile.js",
-            "lineno": 476,
-            "colno": 18,
-            "stack": "startQuiz@https://rozavala.github.io/apps/js/descubre-chile.js:476:18\nonclick@https://rozavala.github.io/apps/descubre-chile.html:89:10",
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 4,
-          "firstTs": 1777158074254,
-          "lastTs": 1777158074254,
-          "users": [
-            "u-3bda7c"
-          ]
-        }
-      ]
-    },
     {
       "day": "2026-04-26",
       "groups": [
@@ -478,6 +447,32 @@
           "lastTs": 1777383584374,
           "users": [
             "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moj8eac7_z3n9go",
+            "ts": 1777417347275,
+            "clientTs": 1777417347031,
+            "kind": "rejection",
+            "app": "index",
+            "page": "index.html",
+            "message": "Load failed",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1777417347275,
+          "lastTs": 1777417351646,
+          "users": [
+            "u-9b4aef"
           ]
         },
         {

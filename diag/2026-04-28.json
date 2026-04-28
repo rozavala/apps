@@ -83,6 +83,32 @@
     },
     {
       "entry": {
+        "id": "e_moj8eac7_z3n9go",
+        "ts": 1777417347275,
+        "clientTs": 1777417347031,
+        "kind": "rejection",
+        "app": "index",
+        "page": "index.html",
+        "message": "Load failed",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1777417347275,
+      "lastTs": 1777417351646,
+      "users": [
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
         "id": "e_mohviu1b_k6h3vy",
         "ts": 1777335260148,
         "clientTs": 1777335257999,
