@@ -7,27 +7,34 @@ var AppSchedule = (function() {
   'use strict';
 
   var ALL_APPS = [
-    { id: 'math',   card: '.card-math' },
-    { id: 'chile',  card: '.card-chile' },
-    { id: 'chess',  card: '.card-chess' },
-    { id: 'piano',  card: '.card-piano' },
-    { id: 'guitar', card: '.card-guitar' },
-    { id: 'art',    card: '.card-art' },
-    { id: 'lab',    card: '.card-lab' },
-    { id: 'world',  card: '.card-world' },
-    { id: 'story',  card: '.card-story' },
-    { id: 'quest',  card: '.card-quest' },
-    { id: 'guess',  card: '.card-guess' }
+    { id: 'math',    card: '.card-math' },
+    // Descubre Chile uses class `card-history` on the hub; the previous
+    // .card-chile selector returned null, so the rotation never hid this
+    // app on its off-days. Same lesson: keep this list in sync with
+    // index.html's class names.
+    { id: 'chile',   card: '.card-history' },
+    { id: 'chess',   card: '.card-chess' },
+    { id: 'piano',   card: '.card-piano' },
+    { id: 'guitar',  card: '.card-guitar' },
+    { id: 'art',     card: '.card-art' },
+    { id: 'lab',     card: '.card-lab' },
+    { id: 'world',   card: '.card-world' },
+    { id: 'story',   card: '.card-story' },
+    { id: 'quest',   card: '.card-quest' },
+    { id: 'guess',   card: '.card-guess' },
+    { id: 'money',   card: '.card-money' },
+    { id: 'bmcheck', card: '.card-bmcheck', alwaysVisible: true },
+    { id: 'trophy',  card: '.card-trophy',  alwaysVisible: true }
   ];
 
   var SMART_SCHEDULE = {
-    0: ['piano', 'math', 'art', 'world', 'guess'], // Sunday
-    1: ['piano', 'math', 'chile', 'lab', 'guess'], // Monday
-    2: ['piano', 'chess', 'guitar', 'story', 'guess'], // Tuesday
-    3: ['piano', 'math', 'art', 'world', 'guess'], // Wednesday
-    4: ['piano', 'math', 'chile', 'lab', 'guess'], // Thursday
-    5: ['piano', 'chess', 'guitar', 'story', 'guess'], // Friday
-    6: ['piano', 'math', 'art', 'world', 'guess']  // Saturday
+    0: ['piano', 'math', 'art', 'world', 'guess'],            // Sunday
+    1: ['piano', 'math', 'chile', 'lab', 'guess', 'money'],   // Monday
+    2: ['piano', 'chess', 'guitar', 'story', 'guess'],        // Tuesday
+    3: ['piano', 'math', 'art', 'world', 'guess', 'money'],   // Wednesday
+    4: ['piano', 'math', 'chile', 'lab', 'guess'],            // Thursday
+    5: ['piano', 'chess', 'guitar', 'story', 'guess', 'money'], // Friday
+    6: ['piano', 'math', 'art', 'world', 'guess']             // Saturday
   };
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
@@ -71,15 +78,14 @@ var AppSchedule = (function() {
     var visibleIds = getTodayApps();
     ALL_APPS.forEach(function(app) {
       var el = document.querySelector(app.card);
-      if (el) {
-        var isVisible = visibleIds.indexOf(app.id) !== -1;
-        // Special rules
-        if (app.id === 'faith' && user && user.faithVisible === false) isVisible = false;
-        if (app.id === 'sports') isVisible = true; // Always visible
-        if (app.id === 'quest') isVisible = true;  // Always visible
-        
-        el.style.display = isVisible ? 'flex' : 'none';
-      }
+      if (!el) return;
+      var isVisible = !!app.alwaysVisible || visibleIds.indexOf(app.id) !== -1;
+      // Faith follows its own per-kid faithVisible toggle (set elsewhere).
+      if (app.id === 'faith' && user && user.faithVisible === false) isVisible = false;
+      // Quest is the always-on world map and Sports is the outdoor logger;
+      // keep them visible regardless of the rotation.
+      if (app.id === 'sports' || app.id === 'quest') isVisible = true;
+      el.style.display = isVisible ? 'flex' : 'none';
     });
   }
 
