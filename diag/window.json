@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T13:27:17.787Z",
+  "generatedAt": "2026-04-28T13:42:44.941Z",
   "windowHours": 72,
   "days": [
     {
@@ -836,9 +836,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 6,
+          "count": 8,
           "firstTs": 1777340699738,
-          "lastTs": 1777342831577,
+          "lastTs": 1777383085063,
           "users": [
             "u-3bda7c"
           ]
@@ -862,11 +862,37 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 2,
+          "count": 6,
           "firstTs": 1777343080061,
-          "lastTs": 1777343080061,
+          "lastTs": 1777383085063,
           "users": [
             "u-46a6e4"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moioaga8_rm4wkc",
+            "ts": 1777383577871,
+            "clientTs": 1777383575792,
+            "kind": "error",
+            "app": "story-explorer",
+            "page": "story-explorer.html",
+            "message": "TypeError: undefined is not an object (evaluating 'currentStory.quiz[0]')",
+            "filename": "https://rozavala.github.io/apps/js/story-explorer.js",
+            "lineno": 520,
+            "colno": 32,
+            "stack": "_startQuiz@https://rozavala.github.io/apps/js/story-explorer.js:520:32\nnextPage@https://rozavala.github.io/apps/js/story-explorer.js:500:17\nonclick@https://rozavala.github.io/apps/story-explorer.html:58:23",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 3,
+          "firstTs": 1777383577871,
+          "lastTs": 1777383584374,
+          "users": [
+            "u-3bda7c"
           ]
         },
         {
@@ -891,6 +917,32 @@
           "count": 2,
           "firstTs": 1777335260148,
           "lastTs": 1777335260148,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moio9fo6_8ta32h",
+            "ts": 1777383530382,
+            "clientTs": 1777383528342,
+            "kind": "error",
+            "app": "little-maestro",
+            "page": "little-maestro.html",
+            "message": "TypeError: undefined is not an object (near '...})...')",
+            "filename": "https://rozavala.github.io/apps/little-maestro.html",
+            "lineno": 7993,
+            "colno": 9,
+            "stack": "init@https://rozavala.github.io/apps/little-maestro.html:7993:9\n@https://rozavala.github.io/apps/little-maestro.html:8217:19",
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1777383530382,
+          "lastTs": 1777383530382,
           "users": [
             "u-3bda7c"
           ]
