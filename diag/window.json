@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T23:48:09.119Z",
+  "generatedAt": "2026-04-29T00:03:09.512Z",
   "windowHours": 72,
   "days": [
     {
@@ -388,9 +388,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 20,
+          "count": 22,
           "firstTs": 1777340699738,
-          "lastTs": 1777415799935,
+          "lastTs": 1777420264433,
           "users": [
             "u-3bda7c",
             "u-9b4aef"
@@ -525,6 +525,37 @@
           "lastTs": 1777383530382,
           "users": [
             "u-3bda7c"
+          ]
+        }
+      ]
+    },
+    {
+      "day": "2026-04-29",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mojahjiv_c1ug0i",
+            "ts": 1777420860228,
+            "clientTs": 1777420858135,
+            "kind": "error",
+            "app": "story-explorer",
+            "page": "story-explorer.html",
+            "message": "TypeError: undefined is not an object (evaluating 'currentStory.quiz[0]')",
+            "filename": "https://rozavala.github.io/apps/js/story-explorer.js",
+            "lineno": 520,
+            "colno": 32,
+            "stack": "_startQuiz@https://rozavala.github.io/apps/js/story-explorer.js:520:32\nnextPage@https://rozavala.github.io/apps/js/story-explorer.js:500:17\nonclick@https://rozavala.github.io/apps/story-explorer.html:58:23",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 10,
+          "firstTs": 1777420860228,
+          "lastTs": 1777420957015,
+          "users": [
+            "u-9b4aef"
           ]
         }
       ]
