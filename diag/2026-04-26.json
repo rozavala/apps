@@ -3,32 +3,6 @@
   "groups": [
     {
       "entry": {
-        "id": "e_mofw4fbz_ngjju3",
-        "ts": 1777215335064,
-        "clientTs": 1777215333023,
-        "kind": "error",
-        "app": "book-movie-check",
-        "page": "book-movie-check.html",
-        "message": "ReferenceError: Can't find variable: _callback_receiveMIDIMessage",
-        "filename": "https://rozavala.github.io/apps/book-movie-check.html",
-        "lineno": 1,
-        "colno": 29,
-        "stack": "global code@https://rozavala.github.io/apps/book-movie-check.html:1:29",
-        "user": "u-3bda7c",
-        "age": 11,
-        "guest": false,
-        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-        "trail": []
-      },
-      "count": 2425,
-      "firstTs": 1777215335064,
-      "lastTs": 1777215811943,
-      "users": [
-        "u-3bda7c"
-      ]
-    },
-    {
-      "entry": {
         "id": "e_mogavuph_o8jyyp",
         "ts": 1777240129295,
         "clientTs": 1777240127285,
@@ -75,32 +49,6 @@
       "lastTs": 1777241355225,
       "users": [
         "u-34d354"
-      ]
-    },
-    {
-      "entry": {
-        "id": "e_mofwen8f_sxjryy",
-        "ts": 1777215811943,
-        "clientTs": 1777215809823,
-        "kind": "error",
-        "app": "index",
-        "page": "index.html",
-        "message": "Script error.",
-        "filename": null,
-        "lineno": 0,
-        "colno": 0,
-        "stack": null,
-        "user": "u-3bda7c",
-        "age": 11,
-        "guest": false,
-        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-        "trail": []
-      },
-      "count": 2,
-      "firstTs": 1777215811943,
-      "lastTs": 1777215811943,
-      "users": [
-        "u-3bda7c"
       ]
     },
     {
