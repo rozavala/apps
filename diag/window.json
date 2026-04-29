@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-29T14:40:26.006Z",
+  "generatedAt": "2026-04-29T14:55:34.823Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mofvkyy5_oyotuu",
-            "ts": 1777214427355,
-            "clientTs": 1777214425325,
+            "id": "e_mofw4fbz_ngjju3",
+            "ts": 1777215335064,
+            "clientTs": 1777215333023,
             "kind": "error",
             "app": "book-movie-check",
             "page": "book-movie-check.html",
@@ -24,8 +24,8 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 7177,
-          "firstTs": 1777214427355,
+          "count": 2425,
+          "firstTs": 1777215335064,
           "lastTs": 1777215811943,
           "users": [
             "u-3bda7c"
