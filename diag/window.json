@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-29T01:33:18.653Z",
+  "generatedAt": "2026-04-29T01:48:23.398Z",
   "windowHours": 72,
   "days": [
     {
@@ -554,6 +554,32 @@
           "count": 10,
           "firstTs": 1777420860228,
           "lastTs": 1777420957015,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moje7ygs_7qj21l",
+            "ts": 1777427131592,
+            "clientTs": 1777427129405,
+            "kind": "error",
+            "app": "index",
+            "page": "index.html",
+            "message": "Script error.",
+            "filename": null,
+            "lineno": 0,
+            "colno": 0,
+            "stack": null,
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1777427131592,
+          "lastTs": 1777427131592,
           "users": [
             "u-9b4aef"
           ]
