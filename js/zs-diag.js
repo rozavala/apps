@@ -115,17 +115,31 @@
   //   _callback_addSource, _callback_addDestination. When the
   //   polyfill misses, every page load throws a ReferenceError for
   //   them — thousands of identical entries that drown out signal.
-  function _shouldIgnoreError(message) {
+  function _shouldIgnoreError(message, filename) {
     if (!message) return false;
     var s = String(message);
     if (/_callback_receiveMIDIMessage|_callback_addSource|_callback_addDestination/.test(s)) return true;
     return false;
   }
 
+  // Generic cross-origin "Script error." with no filename/lineno/stack
+  // carries zero signal — drop it. Real same-origin errors always
+  // include at least filename + lineno.
+  function _isGenericScriptError(ev) {
+    if (!ev) return false;
+    var msg = ev.message ? String(ev.message) : '';
+    if (msg !== 'Script error.' && msg !== 'Script error') return false;
+    var hasFile = ev.filename && String(ev.filename).length > 0;
+    var hasLine = typeof ev.lineno === 'number' && ev.lineno > 0;
+    var hasStack = ev.error && ev.error.stack;
+    return !hasFile && !hasLine && !hasStack;
+  }
+
   window.addEventListener('error', function(ev) {
     try {
       var msg = ev && ev.message ? String(ev.message) : 'unknown error';
       if (_shouldIgnoreError(msg)) return;
+      if (_isGenericScriptError(ev)) return;
       _enqueue({
         id: _uid(),
         ts: Date.now(),
