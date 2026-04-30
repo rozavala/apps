@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T04:34:55.016Z",
+  "generatedAt": "2026-04-30T04:50:03.460Z",
   "windowHours": 72,
   "days": [
     {
@@ -157,54 +157,6 @@
           "count": 2,
           "firstTs": 1777269850044,
           "lastTs": 1777269925653,
-          "users": []
-        },
-        {
-          "entry": {
-            "id": "e_mogpe7gv_073kjd",
-            "ts": 1777264500282,
-            "clientTs": 1777264498255,
-            "kind": "error",
-            "app": "family",
-            "page": "family.html",
-            "message": "TypeError: FamilyWall.runLocationSearch is not a function",
-            "filename": "https://rozavala.github.io/apps/family.html",
-            "lineno": 1,
-            "colno": 12,
-            "stack": "onclick@https://rozavala.github.io/apps/family.html:1:12\n",
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777264500282,
-          "lastTs": 1777264535996,
-          "users": []
-        },
-        {
-          "entry": {
-            "id": "e_mogpe4a1_j1m0bn",
-            "ts": 1777264496224,
-            "clientTs": 1777264494121,
-            "kind": "error",
-            "app": "family",
-            "page": "family.html",
-            "message": "TypeError: FamilyWall.runLocationSearch is not a function",
-            "filename": "https://rozavala.github.io/apps/family.html",
-            "lineno": 1,
-            "colno": 59,
-            "stack": "onkeydown@https://rozavala.github.io/apps/family.html:1:59\n",
-            "user": null,
-            "age": null,
-            "guest": false,
-            "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:149.0) Gecko/20100101 Firefox/149.0",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1777264496224,
-          "lastTs": 1777264496224,
           "users": []
         }
       ]
