@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T14:40:38.379Z",
+  "generatedAt": "2026-04-30T14:55:46.075Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mohb8a20_kh1vhi",
-            "ts": 1777301175308,
-            "clientTs": 1777301173224,
+            "id": "e_mohrfsfg_r2obh9",
+            "ts": 1777328399573,
+            "clientTs": 1777328397484,
             "kind": "error",
             "app": "index",
             "page": "index.html",
@@ -18,44 +18,16 @@
             "lineno": 0,
             "colno": 0,
             "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
+            "user": null,
+            "age": null,
             "guest": false,
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 16,
-          "firstTs": 1777301175308,
+          "count": 4,
+          "firstTs": 1777328399573,
           "lastTs": 1777334073119,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mohbfl3v_2nsmtx",
-            "ts": 1777301514633,
-            "clientTs": 1777301514139,
-            "kind": "console.warn",
-            "app": "index",
-            "page": "index.html",
-            "message": "[Debug] Cloud push failed",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 10,
-          "firstTs": 1777301514633,
-          "lastTs": 1777301544935,
-          "users": [
-            "u-3bda7c"
-          ]
+          "users": []
         },
         {
           "entry": {
@@ -79,32 +51,6 @@
           "count": 2,
           "firstTs": 1777331472332,
           "lastTs": 1777331472332,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mohbjm2n_9ted8z",
-            "ts": 1777301704224,
-            "clientTs": 1777301702015,
-            "kind": "error",
-            "app": "lab-explorer",
-            "page": "lab-explorer.html",
-            "message": "Script error.",
-            "filename": null,
-            "lineno": 0,
-            "colno": 0,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777301704224,
-          "lastTs": 1777301704224,
           "users": [
             "u-3bda7c"
           ]
