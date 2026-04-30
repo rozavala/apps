@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T22:14:46.231Z",
+  "generatedAt": "2026-04-30T22:29:46.117Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mohrfsfg_r2obh9",
-            "ts": 1777328399573,
-            "clientTs": 1777328397484,
+            "id": "e_mohute5i_2cziwr",
+            "ts": 1777334073119,
+            "clientTs": 1777334071015,
             "kind": "error",
             "app": "index",
             "page": "index.html",
@@ -24,8 +24,8 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 4,
-          "firstTs": 1777328399573,
+          "count": 2,
+          "firstTs": 1777334073119,
           "lastTs": 1777334073119,
           "users": []
         },
