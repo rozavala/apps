@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T18:28:03.403Z",
+  "generatedAt": "2026-04-30T18:43:09.356Z",
   "windowHours": 72,
   "days": [
     {
@@ -299,6 +299,37 @@
           "lastTs": 1777427131592,
           "users": [
             "u-9b4aef"
+          ]
+        }
+      ]
+    },
+    {
+      "day": "2026-04-30",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_moltq86a_56c5xd",
+            "ts": 1777574110612,
+            "clientTs": 1777574108386,
+            "kind": "rejection",
+            "app": "index",
+            "page": "index.html",
+            "message": "Failed to fetch",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": "TypeError: Failed to fetch\n    at _fetchWithTimeout (https://rozavala.github.io/apps/js/sync.js?v=5:81:14)\n    at state.syncProfiles (https://rozavala.github.io/apps/js/sync.js?v=5:354:12)\n    at https://rozavala.github.io/apps/js/sync.js?v=5:531:21",
+            "user": "u-34d354",
+            "age": 12,
+            "guest": false,
+            "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1777574110612,
+          "lastTs": 1777574110612,
+          "users": [
+            "u-34d354"
           ]
         }
       ]
