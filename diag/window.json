@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T13:10:00.111Z",
+  "generatedAt": "2026-04-30T13:25:11.603Z",
   "windowHours": 72,
   "days": [
     {
@@ -53,32 +53,6 @@
           "count": 10,
           "firstTs": 1777301514633,
           "lastTs": 1777301544935,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_moh83w1c_3i0abh",
-            "ts": 1777295931644,
-            "clientTs": 1777295929584,
-            "kind": "console.warn",
-            "app": "descubre-chile",
-            "page": "descubre-chile.html",
-            "message": "[Descubre Chile] No quiz bank for id: folk",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 3,
-          "firstTs": 1777295931644,
-          "lastTs": 1777295931644,
           "users": [
             "u-3bda7c"
           ]
