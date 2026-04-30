@@ -30,6 +30,10 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
 | **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
 | **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone). | [trophy-room.html](trophy-room.html) |
+| **🍽️ Menú Semanal** | Planifica las comidas semanales de la familia. (Plan the family's weekly meals). | [menu.html](menu.html) |
+| **✈️ Vacation Planner** | Planifica las próximas vacaciones familiares. (Plan the next family vacations). | [vacation.html](vacation.html) |
+| **⏱️ Home Timer** | Temporizador visual para tareas del hogar. (Visual timer for home chores). | [home-timer.html](home-timer.html) |
+| **👨‍👩‍👧‍👦 Sunday Report** | Resumen semanal de actividades y aprendizaje. (Weekly summary of activities and learning). | [sunday-report.html](sunday-report.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -59,6 +63,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Nuevas Utilidades Familiares**: Planifica comidas, vacaciones y tareas con las nuevas herramientas (Menú Semanal, Vacation Planner, Home Timer, Sunday Report).
 - **¡Nueva App "Money Master"!**: Aprende sobre el valor del dinero, monedas y billetes. (Learn about money value, coins and bills).
 - **¡Nuevo "Family Wall"!**: Dashboard compartido para la familia. (Shared family dashboard for the fridge).
 - **Insights para Padres (Parent Insights)**: Monitorea el balance de actividades y recibe sugerencias para cada perfil. (Monitor activity balance and receive nudges for each profile).
