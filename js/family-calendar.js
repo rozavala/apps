@@ -200,7 +200,7 @@ var FamilyCalendar = (function() {
         case 'UID':       cur.uid = value; break;
         case 'SUMMARY':   cur.summary = _unescapeText(value); break;
         case 'LOCATION':  cur.location = _unescapeText(value); break;
-        case 'DTSTART':   var sParams = _parseParams(lhs); var s = _parseIcsDate(value, sParams.TZID); if (s) { cur.start = s.date; cur.allDay = s.allDay; } break;
+        case 'DTSTART':   var sParams = _parseParams(lhs); var s = _parseIcsDate(value, sParams.TZID); if (s) { cur.start = s.date; cur.allDay = s.allDay; if (sParams.TZID) cur.tzid = sParams.TZID; } break;
         case 'DTEND':     var eParams = _parseParams(lhs); var e = _parseIcsDate(value, eParams.TZID); if (e) cur.end = e.date; break;
         case 'RRULE':     cur.rrule = _parseRrule(value); break;
         default: /* ignore */ break;
@@ -235,13 +235,53 @@ var FamilyCalendar = (function() {
     };
   }
 
+  // Read wall-clock parts of `date` in `tzid` (or local if no tzid).
+  // Used to anchor recurrences in the source calendar's zone so they
+  // don't drift when the device crosses a DST boundary.
+  function _wallPartsOf(date, tzid) {
+    if (tzid) {
+      try {
+        var dtf = new Intl.DateTimeFormat('en-US', {
+          timeZone: tzid, hourCycle: 'h23',
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+        var parts = dtf.formatToParts(date);
+        var p = {};
+        parts.forEach(function(x) { p[x.type] = x.value; });
+        return { y: +p.year, m: +p.month - 1, d: +p.day, hh: +p.hour, mn: +p.minute, ss: +p.second };
+      } catch (e) {}
+    }
+    return {
+      y: date.getFullYear(), m: date.getMonth(), d: date.getDate(),
+      hh: date.getHours(), mn: date.getMinutes(), ss: date.getSeconds()
+    };
+  }
+
+  // Add a calendar offset to wall-clock parts using a UTC scratch Date
+  // (UTC has no DST, so date arithmetic is exact). Returns new parts.
+  function _addToParts(parts, deltaDays, deltaMonths, deltaYears) {
+    var d = new Date(Date.UTC(parts.y, parts.m, parts.d, parts.hh, parts.mn, parts.ss));
+    if (deltaDays)   d.setUTCDate(d.getUTCDate() + deltaDays);
+    if (deltaMonths) d.setUTCMonth(d.getUTCMonth() + deltaMonths);
+    if (deltaYears)  d.setUTCFullYear(d.getUTCFullYear() + deltaYears);
+    return {
+      y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(),
+      hh: d.getUTCHours(), mn: d.getUTCMinutes(), ss: d.getUTCSeconds()
+    };
+  }
+
+  function _partsToDate(parts, tzid) {
+    if (tzid) return _wallTimeInTzToDate(parts.y, parts.m, parts.d, parts.hh, parts.mn, parts.ss, tzid);
+    return new Date(parts.y, parts.m, parts.d, parts.hh, parts.mn, parts.ss);
+  }
+
   // Expand a single VEVENT into instances within [from, to].
   function _expand(event, from, to) {
     var instances = [];
     if (!event || !event.start) return instances;
 
-    function pushIfInRange(start) {
-      if (start < from || start > to) return;
+    function pushInstance(start) {
       var duration = (event.end && event.start) ? (event.end - event.start) : 0;
       instances.push({
         uid: event.uid || (start.getTime() + '_' + (event.summary || '')),
@@ -254,35 +294,33 @@ var FamilyCalendar = (function() {
     }
 
     if (!event.rrule) {
-      pushIfInRange(event.start);
+      if (event.start >= from && event.start <= to) pushInstance(event.start);
       return instances;
     }
 
     var rr = event.rrule;
-    var step = { DAILY: 1, WEEKLY: 7, MONTHLY: 0, YEARLY: 0 }[rr.freq] || 0;
-    var cur = new Date(event.start.getTime());
+    // Anchor recurrences on the wall-clock parts in the source zone so
+    // a 14:00 LA weekly event stays at 14:00 LA across DST boundaries
+    // (instead of drifting by the offset every time we cross spring-
+    // forward / fall-back). All-day events have no zone — use local.
+    var tzid = event.allDay ? null : event.tzid;
+    var basis = _wallPartsOf(event.start, tzid);
     var n = 0;
     var maxIter = 366 * 2;
     while (n < maxIter) {
+      var nextParts;
+      if (rr.freq === 'DAILY')        nextParts = _addToParts(basis, n * rr.interval, 0, 0);
+      else if (rr.freq === 'WEEKLY')  nextParts = _addToParts(basis, n * rr.interval * 7, 0, 0);
+      else if (rr.freq === 'MONTHLY') nextParts = _addToParts(basis, 0, n * rr.interval, 0);
+      else if (rr.freq === 'YEARLY')  nextParts = _addToParts(basis, 0, 0, n * rr.interval);
+      else break;
+
+      var cur = _partsToDate(nextParts, tzid);
       if (rr.until && cur > rr.until) break;
       if (rr.count && n >= rr.count) break;
       if (cur > to) break;
-      pushIfInRange(cur);
+      if (cur >= from) pushInstance(cur);
       n++;
-      // Advance by interval according to freq
-      if (rr.freq === 'DAILY' || rr.freq === 'WEEKLY') {
-        cur = new Date(cur.getTime() + step * rr.interval * 86400000);
-      } else if (rr.freq === 'MONTHLY') {
-        var next = new Date(cur);
-        next.setMonth(next.getMonth() + rr.interval);
-        cur = next;
-      } else if (rr.freq === 'YEARLY') {
-        var nextY = new Date(cur);
-        nextY.setFullYear(nextY.getFullYear() + rr.interval);
-        cur = nextY;
-      } else {
-        break;
-      }
     }
     return instances;
   }
