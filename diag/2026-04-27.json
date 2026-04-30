@@ -24,32 +24,6 @@
       "firstTs": 1777334073119,
       "lastTs": 1777334073119,
       "users": []
-    },
-    {
-      "entry": {
-        "id": "e_moht9nc7_r7zbc6",
-        "ts": 1777331472332,
-        "clientTs": 1777331470184,
-        "kind": "error",
-        "app": "book-movie-check",
-        "page": "book-movie-check.html",
-        "message": "TypeError: BMC.setSearchType is not a function. (In 'BMC.setSearchType('movie')', 'BMC.setSearchType' is undefined)",
-        "filename": "https://rozavala.github.io/apps/book-movie-check.html",
-        "lineno": 46,
-        "colno": 18,
-        "stack": "onclick@https://rozavala.github.io/apps/book-movie-check.html:46:18",
-        "user": "u-3bda7c",
-        "age": 10,
-        "guest": false,
-        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/137.0.7151.107 Mobile/15E148 Safari/604.1",
-        "trail": []
-      },
-      "count": 2,
-      "firstTs": 1777331472332,
-      "lastTs": 1777331472332,
-      "users": [
-        "u-3bda7c"
-      ]
     }
   ]
 }
