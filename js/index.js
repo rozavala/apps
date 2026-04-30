@@ -1298,6 +1298,9 @@
     var profiles = getProfiles();
     profiles[idx].maxMinutes = parseInt(val);
     saveProfiles(profiles);
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
     var label = document.getElementById('val-' + idx);
     if (label) label.textContent = val;
     var active = getActiveUser();
@@ -1316,6 +1319,9 @@
     var profiles = getProfiles();
     profiles[idx].chessPlaysPerWeek = parseInt(val);
     saveProfiles(profiles);
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
     var label = document.getElementById('chess-val-' + idx);
     if (label) label.textContent = _chessLabel(val);
   }
@@ -1324,6 +1330,9 @@
     var profiles = getProfiles();
     profiles[idx].faithVisible = checked;
     saveProfiles(profiles);
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
     renderAppCards();
   }
 
