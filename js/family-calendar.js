@@ -18,8 +18,11 @@
      "every Mon/Wed" rules will collapse to FREQ=WEEKLY without
      respecting day list — events still appear at the right cadence
      starting from DTSTART).
-   - Timezones: TZID tag is stripped and the time is treated as
-     local. Good enough for one-household calendars.
+   - Timezones: events tagged with TZID (e.g. Google Calendar's
+     TZID=America/Santiago) are converted to a real UTC instant via
+     Intl.DateTimeFormat, so they display correctly even when the
+     source calendar's zone differs from this device's zone.
+     Floating-time events (no TZID, no Z suffix) fall back to local.
    - No write-back. No OAuth. Public ICS URLs only.
    ================================================================ */
 
@@ -107,7 +110,32 @@ var FamilyCalendar = (function() {
     return text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
   }
 
-  function _parseIcsDate(value) {
+  // Convert (y, m, d, hh, mn, ss) wall-clock numbers in a given IANA
+  // timezone into a real UTC instant. Strategy: pretend the wall-clock
+  // numbers ARE UTC, then ask Intl what wall-clock that "fake UTC"
+  // displays as in the target zone. The difference between the two is
+  // the zone's offset at that moment — subtract it and we land on the
+  // correct UTC instant. Falls back to a local-time Date if the zone
+  // is unknown or Intl is unavailable (older WebKit).
+  function _wallTimeInTzToDate(y, m, d, hh, mn, ss, tzid) {
+    try {
+      var asUtc = Date.UTC(y, m, d, hh, mn, ss);
+      var dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone: tzid, hourCycle: 'h23',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      var parts = dtf.formatToParts(new Date(asUtc));
+      var p = {};
+      parts.forEach(function(x) { p[x.type] = x.value; });
+      var displayed = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+      return new Date(asUtc - (displayed - asUtc));
+    } catch (e) {
+      return new Date(y, m, d, hh, mn, ss);
+    }
+  }
+
+  function _parseIcsDate(value, tzid) {
     if (!value) return null;
     // Date only: YYYYMMDD
     if (/^\d{8}$/.test(value)) {
@@ -119,12 +147,32 @@ var FamilyCalendar = (function() {
     if (match) {
       var yy = +match[1], mm = +match[2] - 1, dd = +match[3];
       var hh = +match[4], mn = +match[5], ss = +match[6];
-      var dt = match[7] === 'Z'
-        ? new Date(Date.UTC(yy, mm, dd, hh, mn, ss))
-        : new Date(yy, mm, dd, hh, mn, ss);
+      var dt;
+      if (match[7] === 'Z') {
+        dt = new Date(Date.UTC(yy, mm, dd, hh, mn, ss));
+      } else if (tzid) {
+        dt = _wallTimeInTzToDate(yy, mm, dd, hh, mn, ss, tzid);
+      } else {
+        // Floating time — no zone info. Treat as device-local.
+        dt = new Date(yy, mm, dd, hh, mn, ss);
+      }
       return { date: dt, allDay: false };
     }
     return null;
+  }
+
+  // Pull the parameter map out of a property's left-hand side. For
+  // `DTSTART;TZID=America/Santiago;VALUE=DATE-TIME`, returns
+  // `{ TZID: 'America/Santiago', VALUE: 'DATE-TIME' }`.
+  function _parseParams(lhs) {
+    var params = {};
+    var parts = lhs.split(';');
+    for (var i = 1; i < parts.length; i++) {
+      var eq = parts[i].indexOf('=');
+      if (eq < 0) continue;
+      params[parts[i].slice(0, eq)] = parts[i].slice(eq + 1);
+    }
+    return params;
   }
 
   function parseIcs(text) {
@@ -152,8 +200,8 @@ var FamilyCalendar = (function() {
         case 'UID':       cur.uid = value; break;
         case 'SUMMARY':   cur.summary = _unescapeText(value); break;
         case 'LOCATION':  cur.location = _unescapeText(value); break;
-        case 'DTSTART':   var s = _parseIcsDate(value); if (s) { cur.start = s.date; cur.allDay = s.allDay; } break;
-        case 'DTEND':     var e = _parseIcsDate(value); if (e) cur.end = e.date; break;
+        case 'DTSTART':   var sParams = _parseParams(lhs); var s = _parseIcsDate(value, sParams.TZID); if (s) { cur.start = s.date; cur.allDay = s.allDay; } break;
+        case 'DTEND':     var eParams = _parseParams(lhs); var e = _parseIcsDate(value, eParams.TZID); if (e) cur.end = e.date; break;
         case 'RRULE':     cur.rrule = _parseRrule(value); break;
         default: /* ignore */ break;
       }
