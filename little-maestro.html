@@ -7808,19 +7808,23 @@ const MIDIManager = (() => {
   // ── internal: choose best input from MIDI access ──
   function _findBestInput(inputs) {
     const inputArr = [];
-    // Use forEach instead of .values().next() for wider browser compat
-    inputs.forEach(input => inputArr.push(input));
+    // Use forEach instead of .values().next() for wider browser compat.
+    // Some 3rd-party iOS MIDI hosts (eg. WebMIDIBrowser) expose a
+    // non-iterable inputs object — guard so init doesn't blow up.
+    if (inputs && typeof inputs.forEach === 'function') {
+      inputs.forEach(input => { if (input) inputArr.push(input); });
+    }
     if (inputArr.length === 0) return null;
 
     // 1. Prefer any device with common piano keywords
     const pianoKeywords = ['yamaha', 'roland', 'casio', 'kawai', 'korg', 'akai', 'alesis', 'arturia', 'native instruments', 'novation', 'piano', 'keyboard', 'midi'];
     for (const input of inputArr) {
-      const name = input.name.toLowerCase();
-      if (pianoKeywords.some(kw => name.includes(kw))) return input;
+      const name = (input && typeof input.name === 'string') ? input.name.toLowerCase() : '';
+      if (name && pianoKeywords.some(kw => name.includes(kw))) return input;
     }
     // 2. Prefer any device that is in "connected" state
     for (const input of inputArr) {
-      if (input.state === 'connected') return input;
+      if (input && input.state === 'connected') return input;
     }
     // 3. Fall back to first available
     return inputArr[0] || null;
@@ -14195,7 +14199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script src="js/a11y.js?v=2"></script>
 <script src="js/sync.js?v=2"></script>
-<script src="js/zs-diag.js?v=2"></script>
+<script src="js/zs-diag.js?v=3"></script>
 <script src="js/timer.js?v=2"></script>
 <script src="js/learning-checks.js?v=2"></script>
 <script src="js/activity-log.js?v=2"></script>

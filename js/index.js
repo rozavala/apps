@@ -1214,6 +1214,10 @@
                 '<label>Daily Time Limit: <span id="val-' + i + '">' + escHtml(p.maxMinutes || 45) + '</span> min</label>' +
                 '<input type="range" min="15" max="120" step="15" value="' + escHtml(p.maxMinutes || 45) + '" oninput="updateKidLimit(' + i + ', this.value)">' +
               '</div>' +
+              '<div class="pk-setting" style="margin-top:12px;">' +
+                '<label>♟ Chess Plays/Week: <span id="chess-val-' + i + '">' + escHtml(_chessLabel(p.chessPlaysPerWeek)) + '</span></label>' +
+                '<input type="range" min="0" max="7" step="1" value="' + (p.chessPlaysPerWeek === undefined ? 2 : p.chessPlaysPerWeek) + '" oninput="updateKidChess(' + i + ', this.value)">' +
+              '</div>' +
               '<div class="pk-setting" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">' +
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" onclick="addKidBonus(getProfiles()[' + i + '].name, 15)">+15 min</button>' +
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" onclick="addKidBonus(getProfiles()[' + i + '].name, 30)">+30 min</button>' +
@@ -1302,15 +1306,18 @@
     }
   }
 
+  function _chessLabel(v) {
+    if (v === undefined || v === null || isNaN(v)) v = 2;
+    v = parseInt(v);
+    return v >= 7 ? 'Daily' : v <= 0 ? 'Off' : v + 'x';
+  }
+
   function updateKidChess(idx, val) {
     var profiles = getProfiles();
     profiles[idx].chessPlaysPerWeek = parseInt(val);
     saveProfiles(profiles);
     var label = document.getElementById('chess-val-' + idx);
-    if (label) {
-      var v = parseInt(val);
-      label.textContent = (v === 7 ? 'Daily' : v === 0 ? 'Off' : v + 'x');
-    }
+    if (label) label.textContent = _chessLabel(val);
   }
 
   function updateKidFaith(idx, checked) {

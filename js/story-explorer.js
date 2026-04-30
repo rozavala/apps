@@ -516,9 +516,15 @@ const StoryExplorer = (() => {
   }
 
   function _startQuiz() {
+    // Some stories ship without a quiz block — finish straight to the
+    // results screen instead of crashing on `quiz[0]` (#diag).
+    if (!currentStory || !Array.isArray(currentStory.quiz) || !currentStory.quiz.length) {
+      _showResults(2);
+      return;
+    }
     const wrap = document.getElementById('quiz-wrap');
     const q = currentStory.quiz[0]; // Simple: one question for now or loop through all
-    
+
     wrap.innerHTML = `
       <div class="quiz-q">${lang === 'es' ? q.qEs : q.q}</div>
       <div class="quiz-options">
