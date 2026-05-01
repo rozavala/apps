@@ -3,33 +3,6 @@
   "groups": [
     {
       "entry": {
-        "id": "e_moir0ytm_gb6zlf",
-        "ts": 1777388174221,
-        "clientTs": 1777388172106,
-        "kind": "error",
-        "app": "index",
-        "page": "index.html",
-        "message": "Script error.",
-        "filename": null,
-        "lineno": 0,
-        "colno": 0,
-        "stack": null,
-        "user": "u-3bda7c",
-        "age": 11,
-        "guest": false,
-        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-        "trail": []
-      },
-      "count": 6,
-      "firstTs": 1777388174221,
-      "lastTs": 1777420264433,
-      "users": [
-        "u-3bda7c",
-        "u-9b4aef"
-      ]
-    },
-    {
-      "entry": {
         "id": "e_moj8eac7_z3n9go",
         "ts": 1777417347275,
         "clientTs": 1777417347031,
@@ -50,6 +23,32 @@
       "count": 5,
       "firstTs": 1777417347275,
       "lastTs": 1777417445066,
+      "users": [
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_moj7h2z6_1auftv",
+        "ts": 1777415799935,
+        "clientTs": 1777415797843,
+        "kind": "error",
+        "app": "index",
+        "page": "index.html",
+        "message": "Script error.",
+        "filename": null,
+        "lineno": 0,
+        "colno": 0,
+        "stack": null,
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 4,
+      "firstTs": 1777415799935,
+      "lastTs": 1777420264433,
       "users": [
         "u-9b4aef"
       ]
