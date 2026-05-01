@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T14:24:52.749Z",
+  "generatedAt": "2026-05-01T14:39:56.026Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_moiqccql_4a1bgh",
-            "ts": 1777387025856,
-            "clientTs": 1777387023741,
+            "id": "e_moiqieaa_i3rk0r",
+            "ts": 1777387307793,
+            "clientTs": 1777387305683,
             "kind": "error",
             "app": "index",
             "page": "index.html",
@@ -24,8 +24,8 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 12,
-          "firstTs": 1777387025856,
+          "count": 10,
+          "firstTs": 1777387307793,
           "lastTs": 1777420264433,
           "users": [
             "u-3bda7c",
