@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T00:01:04.497Z",
+  "generatedAt": "2026-05-01T00:16:21.043Z",
   "windowHours": 72,
   "days": [
     {
@@ -107,32 +107,6 @@
           "count": 3,
           "firstTs": 1777383577871,
           "lastTs": 1777383584374,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mohviu1b_k6h3vy",
-            "ts": 1777335260148,
-            "clientTs": 1777335257999,
-            "kind": "error",
-            "app": "math-galaxy",
-            "page": "math-galaxy.html",
-            "message": "Script error.",
-            "filename": null,
-            "lineno": 0,
-            "colno": 0,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1777335260148,
-          "lastTs": 1777335260148,
           "users": [
             "u-3bda7c"
           ]
