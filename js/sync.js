@@ -523,6 +523,9 @@ var CloudSync = (function() {
           // push any local household state that was changed while
           // CloudSync was still offline (so this device's edits before
           // the first ping resolved propagate to others).
+          // Network can drop between the ping and the follow-up calls.
+          // Swallow transient sync failures so they don't surface as
+          // unhandled promise rejections (#diag).
           state.pullHousehold().then(function() {
             try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
             state.pushHousehold();
@@ -534,15 +537,16 @@ var CloudSync = (function() {
                   if (typeof renderLogin === 'function' && loginScr && loginScr.style.display !== 'none') {
                     renderLogin();
                   }
-                });
+                })
+                .catch(function() { _updatePill('offline'); });
             } else {
               var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
               if (user) {
                 var kidKey = user.name.toLowerCase().replace(/\s+/g, '_');
-                state.pullAll(kidKey);
+                state.pullAll(kidKey).catch(function() { _updatePill('offline'); });
               }
             }
-          });
+          }).catch(function() { _updatePill('offline'); });
         } else {
           state.online = false;
           _updatePill('offline');

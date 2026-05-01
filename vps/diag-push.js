@@ -52,6 +52,15 @@ function pseudonym(name) {
 }
 
 // ── Read + filter raw entries ──
+// Drop generic cross-origin "Script error." reports — the browser
+// strips filename/line/stack from them so they're unactionable noise.
+function isUnactionable(e) {
+  if (!e) return true;
+  const msg = (e.message || '').trim();
+  const noStack = !e.stack && !e.filename && !e.lineno;
+  return noStack && (msg === 'Script error.' || msg === 'Script error');
+}
+
 function readWindow(hours) {
   if (!fs.existsSync(JSONL_PATH)) return [];
   const cutoff = Date.now() - hours * 3600 * 1000;
@@ -61,7 +70,7 @@ function readWindow(hours) {
     if (!line) return;
     try {
       const e = JSON.parse(line);
-      if (e && e.ts >= cutoff) out.push(e);
+      if (e && e.ts >= cutoff && !isUnactionable(e)) out.push(e);
     } catch {}
   });
   return out;
@@ -218,6 +227,16 @@ function buildDigest() {
 
   fs.writeFileSync(path.join(diagDir, 'latest.json'), JSON.stringify(latest, null, 2));
   fs.writeFileSync(path.join(diagDir, 'window.json'), JSON.stringify(digest, null, 2));
+
+  // Drop day files that fell out of the window so the branch doesn't
+  // accumulate stale daily archives forever.
+  const keepDays = new Set(digest.days.map(d => d.day));
+  fs.readdirSync(diagDir).forEach(name => {
+    const m = name.match(/^(\d{4}-\d{2}-\d{2})\.json$/);
+    if (m && !keepDays.has(m[1])) {
+      try { fs.unlinkSync(path.join(diagDir, name)); } catch {}
+    }
+  });
 
   // Per-day archive (overwrites each run with the latest grouping for that day)
   digest.days.forEach(d => {
