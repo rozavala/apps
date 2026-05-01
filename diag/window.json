@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T02:17:50.179Z",
+  "generatedAt": "2026-05-01T02:33:04.751Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mohzvj8x_mo0ig8",
-            "ts": 1777342831577,
-            "clientTs": 1777342569009,
+            "id": "e_moinzw0x_7nejbg",
+            "ts": 1777383085063,
+            "clientTs": 1777383082977,
             "kind": "error",
             "app": "index",
             "page": "index.html",
@@ -24,8 +24,8 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 18,
-          "firstTs": 1777342831577,
+          "count": 16,
+          "firstTs": 1777383085063,
           "lastTs": 1777420264433,
           "users": [
             "u-3bda7c",
@@ -35,7 +35,7 @@
         {
           "entry": {
             "id": "e_moi06h2u_uhbxms",
-            "ts": 1777343080061,
+            "ts": 1777383076262,
             "clientTs": 1777343079415,
             "kind": "error",
             "app": "lab-explorer",
@@ -51,8 +51,8 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 8,
-          "firstTs": 1777343080061,
+          "count": 6,
+          "firstTs": 1777383076262,
           "lastTs": 1777414861560,
           "users": [
             "u-46a6e4",
