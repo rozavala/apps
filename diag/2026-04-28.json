@@ -3,9 +3,9 @@
   "groups": [
     {
       "entry": {
-        "id": "e_mohzjxg8_zxm01w",
-        "ts": 1777342029599,
-        "clientTs": 1777342027545,
+        "id": "e_mohzvj8x_mo0ig8",
+        "ts": 1777342831577,
+        "clientTs": 1777342569009,
         "kind": "error",
         "app": "index",
         "page": "index.html",
@@ -20,8 +20,8 @@
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 20,
-      "firstTs": 1777342029599,
+      "count": 18,
+      "firstTs": 1777342831577,
       "lastTs": 1777420264433,
       "users": [
         "u-3bda7c",
