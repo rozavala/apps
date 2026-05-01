@@ -108,11 +108,14 @@ var Debug = (function() {
       _syncedAt: Date.now()
     };
 
+    // Swallow network failures silently. zs-diag.js wraps console.warn
+    // and would otherwise bounce this back into the diag pipeline as
+    // noise on every offline blip (#diag).
     return fetch(SYNC_SERVER + '/api/kids/debug/logs_' + deviceId, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
-    }).catch(function(e) { console.warn('[Debug] Cloud push failed'); });
+    }).catch(function() {});
   }
 
   // Catch global JS errors
