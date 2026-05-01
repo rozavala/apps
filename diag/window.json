@@ -1,38 +1,7 @@
 {
-  "generatedAt": "2026-05-01T22:59:42.724Z",
+  "generatedAt": "2026-05-01T23:14:43.123Z",
   "windowHours": 72,
   "days": [
-    {
-      "day": "2026-04-28",
-      "groups": [
-        {
-          "entry": {
-            "id": "e_moj8eac7_z3n9go",
-            "ts": 1777417347275,
-            "clientTs": 1777417347031,
-            "kind": "rejection",
-            "app": "index",
-            "page": "index.html",
-            "message": "Load failed",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-9b4aef",
-            "age": 9,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 5,
-          "firstTs": 1777417347275,
-          "lastTs": 1777417445066,
-          "users": [
-            "u-9b4aef"
-          ]
-        }
-      ]
-    },
     {
       "day": "2026-04-29",
       "groups": [
