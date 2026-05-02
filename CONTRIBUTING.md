@@ -52,3 +52,11 @@ grep -r -i -E "genero|género|identidad|diversidad|inclusi[oó]n|pronombre|trans
 - **Prioridad del Español:** La documentación orientada a la familia debe estar primero en español, o ser bilingüe (Español/Inglés).
 - **Sin Marketing:** Concéntrate en los hechos, guías de uso y beneficios familiares. Evita el tono comercial.
 - **Preservación del Contenido:** Nunca elimines contenido de la documentación a menos que sea claramente obsoleto o esté roto.
+
+## 🤖 Reglas para Agentes (Agent Rules)
+
+- **Documentation Guardian:** Añade/actualiza documentación limitando el alcance a 1-3 cambios. Sin eliminar contenido no obsoleto, respetando el formato y la prioridad del idioma español.
+- **Content Guardian:** Asegura el cumplimiento estricto de `content-guidelines.md` respondiendo a la checklist de 5 puntos. Verifica los límites de ítems en los bancos de preguntas para no superar los máximos.
+- **Zavala Serra Module Builder:** Asegura que nuevos módulos sean Vanilla JS puros (sin frameworks, sin bundlers) e integren los scripts de base en el orden adecuado.
+- **Palette (UX):** Registra aprendizajes en `.Jules/palette.md` manteniéndolos breves, usando clases CSS existentes y limitando modificaciones de estilo.
+- **Bolt (Performance):** Registra aprendizajes en `.jules/bolt.md`. Evita el parseo sincrónico redundante de `localStorage` implementando cachés en memoria a nivel de módulo.
