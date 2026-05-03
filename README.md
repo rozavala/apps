@@ -39,9 +39,9 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 
 A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities. (Una característica principal de la suite es ayudar a los niños a desarrollar hábitos digitales saludables equilibrando el tiempo de pantalla con actividades del mundo real).
 
-- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable. *Nota: Las aplicaciones de actividad física como "Sports Arena" no consumen tiempo de pantalla.* (Note: Physical activity apps like "Sports Arena" do not consume screen time.)
-- **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres.
-- **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra.
+- **Daily Play Timer (Temporizador Diario)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable. (Every profile has a daily limit (default 20 minutes) to encourage breaks. When time is up, the screen locks in a friendly way). *Nota: Las aplicaciones de actividad física como "Sports Arena" no consumen tiempo de pantalla.* (Note: Physical activity apps like "Sports Arena" do not consume screen time.)
+- **Daily Limits (Límites Diarios)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres. (Parents can configure specific limits per app or child from the Parent Dashboard).
+- **Chores System (Sistema de Tareas)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra. (When time is up, kids can earn extra time (tokens) by completing real-world chores (e.g. "Make the bed", "Read 20 minutes"). A parent PIN is required to approve extra time).
 - **Smart Schedule (Horario Inteligente)**: Rotación automática diaria de aplicaciones sugeridas para fomentar una dieta equilibrada de aprendizaje y evitar la fatiga de decisiones. (Automatic daily rotation of suggested apps to encourage a balanced learning diet).
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
 
@@ -114,11 +114,11 @@ Para la mejor experiencia en dispositivos móviles:
 
 ### Opción 3: Ejecutar el Servidor VPS (Run the Sync / Media Server)
 
-The static apps work standalone, but **Book & Movie Check** and cross-device sync require the small Express server in `vps/`. It handles:
-- CloudSync (per-kid app data + family profiles)
-- Book & Movie Check (title lookup, AI evaluation, trailer fetch)
+The static apps work standalone, but **Book & Movie Check** and cross-device sync require the small Express server in `vps/`. It handles: (Las aplicaciones estáticas funcionan solas, pero **Book & Movie Check** y la sincronización entre dispositivos requieren el pequeño servidor Express en `vps/`. Este maneja:)
+- CloudSync (per-kid app data + family profiles) (datos de aplicaciones por niño + perfiles familiares)
+- Book & Movie Check (title lookup, AI evaluation, trailer fetch) (búsqueda de títulos, evaluación con IA, obtención de trailers)
 
-**1. Install deps**
+**1. Install deps (Instalar dependencias)**
 
 ```bash
 cd vps
