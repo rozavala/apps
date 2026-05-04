@@ -84,7 +84,7 @@ const LabExplorer = (() => {
       category: 'astronomy',
       ageMin: 6,
       experiments: [
-        { id: 'space',     title: 'Space Explorer',     instruction: 'Astronomy lab coming soon!' },
+        { id: 'space',     title: 'Space Explorer',     instruction: 'Tap the glowing stars to connect the constellations!' },
       ]
     }
   ];
@@ -106,6 +106,13 @@ const LabExplorer = (() => {
     items: [],
     magnet: { x: 300, y: 150, w: 100, h: 100 },
     tested: []
+  };
+
+  // ── Astronomy Lab State ──
+  let astronomyState = {
+    constellations: [],
+    currentConstellation: 0,
+    foundStars: []
   };
 
   // ── Simple Machines Lab State ──
@@ -220,6 +227,8 @@ const LabExplorer = (() => {
       _initMagnetsLab();
     } else if (labId === 'weather' && expId === 'log') {
       _initWeatherLab();
+    } else if (labId === 'astronomy' && expId === 'space') {
+      _initAstronomyLab();
     } else {
       _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
@@ -1443,6 +1452,167 @@ const LabExplorer = (() => {
       mx: (e.clientX - rect.left) * scaleX,
       my: (e.clientY - rect.top) * scaleY
     };
+  }
+
+  // ── Astronomy Lab Implementation ──
+  function _initAstronomyLab() {
+    astronomyState.currentConstellation = 0;
+    astronomyState.foundStars = [];
+
+    astronomyState.constellations = [
+      {
+        id: 'ursa_major',
+        name: 'Ursa Major (Big Dipper)',
+        stars: [
+          { x: 150, y: 250, r: 8 },
+          { x: 220, y: 240, r: 8 },
+          { x: 280, y: 260, r: 8 },
+          { x: 350, y: 280, r: 8 },
+          { x: 380, y: 350, r: 8 },
+          { x: 480, y: 330, r: 8 },
+          { x: 450, y: 250, r: 8 }
+        ],
+        connections: [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,3]]
+      },
+      {
+        id: 'cassiopeia',
+        name: 'Cassiopeia (The Queen)',
+        stars: [
+          { x: 120, y: 150, r: 8 },
+          { x: 200, y: 250, r: 8 },
+          { x: 280, y: 180, r: 8 },
+          { x: 360, y: 280, r: 8 },
+          { x: 480, y: 140, r: 8 }
+        ],
+        connections: [[0,1], [1,2], [2,3], [3,4]]
+      }
+    ];
+
+    canvas.onpointerdown = (e) => {
+      const { mx, my } = _getMousePos(e);
+      const constell = astronomyState.constellations[astronomyState.currentConstellation];
+
+      let clickedStar = -1;
+      for (let i = 0; i < constell.stars.length; i++) {
+        const s = constell.stars[i];
+        if (Math.hypot(s.x - mx, s.y - my) < s.r + 15) {
+          clickedStar = i;
+          break;
+        }
+      }
+
+      if (clickedStar !== -1 && !astronomyState.foundStars.includes(clickedStar)) {
+        astronomyState.foundStars.push(clickedStar);
+        if (typeof SFX !== 'undefined' && SFX.click) SFX.click();
+        else if (typeof playSound === 'function') playSound('click');
+
+        _drawAstronomyLab();
+
+        if (astronomyState.foundStars.length === constell.stars.length) {
+          _addJournalEntry('Discovered constellation: ' + constell.name);
+          _showFeedback('✨');
+          if (typeof SFX !== 'undefined' && SFX.correct) SFX.correct();
+          else if (typeof playSound === 'function') playSound('correct');
+
+          stars++;
+          document.getElementById('exp-stars').textContent = '⭐ ' + stars;
+
+          setTimeout(() => {
+            if (astronomyState.currentConstellation < astronomyState.constellations.length - 1) {
+              astronomyState.currentConstellation++;
+              astronomyState.foundStars = [];
+              _drawAstronomyLab();
+            } else {
+              if (typeof ActivityLog !== 'undefined') {
+                ActivityLog.log('Lab Explorer', '🌙', 'Completed the Night Sky constellations!');
+              }
+              document.getElementById('next-btn').style.display = 'block';
+              _saveProgress();
+            }
+          }, 1500);
+        }
+      }
+    };
+
+    _drawAstronomyLab();
+  }
+
+  function _drawAstronomyLab() {
+    // Stop loop if we navigate away from the astronomy lab
+    if (!currentLab || currentLab.id !== 'astronomy') {
+      if (astronomyState.animFrame) cancelAnimationFrame(astronomyState.animFrame);
+      return;
+    }
+
+    // Night sky background
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw some random background stars
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 50; i++) {
+      // Use pseudo-random based on index so it stays stable-ish
+      const x = (i * 73) % canvas.width;
+      const y = (i * 41) % canvas.height;
+      ctx.beginPath();
+      ctx.arc(x, y, 1 + (i%2), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const constell = astronomyState.constellations[astronomyState.currentConstellation];
+
+    // Draw connections if all stars found
+    if (astronomyState.foundStars.length === constell.stars.length) {
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let conn of constell.connections) {
+        ctx.moveTo(constell.stars[conn[0]].x, constell.stars[conn[0]].y);
+        ctx.lineTo(constell.stars[conn[1]].x, constell.stars[conn[1]].y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 24px Nunito';
+      ctx.textAlign = 'center';
+      ctx.fillText(constell.name, canvas.width / 2, 40);
+    }
+
+    // Draw constellation stars
+    for (let i = 0; i < constell.stars.length; i++) {
+      const s = constell.stars[i];
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+
+      if (astronomyState.foundStars.includes(i)) {
+        ctx.fillStyle = '#fef08a';
+        ctx.shadowColor = '#fef08a';
+        ctx.shadowBlur = 15;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else {
+        ctx.fillStyle = '#94a3b8';
+        ctx.fill();
+        // Pulsing hint effect
+        const pulse = Math.abs(Math.sin(Date.now() / 300));
+        ctx.strokeStyle = 'rgba(255, 255, 255, ' + (0.3 + pulse * 0.4) + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r + 4 + pulse * 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    // Keep animating pulsing hint if not complete
+    if (astronomyState.foundStars.length < constell.stars.length) {
+      if (astronomyState.animFrame) cancelAnimationFrame(astronomyState.animFrame);
+      astronomyState.animFrame = requestAnimationFrame(_drawAstronomyLab);
+    } else {
+      if (astronomyState.animFrame) {
+        cancelAnimationFrame(astronomyState.animFrame);
+        astronomyState.animFrame = null;
+      }
+    }
   }
 
   // ── Journal & UI ──
