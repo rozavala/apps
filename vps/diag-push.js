@@ -182,7 +182,10 @@ function buildDigest() {
     if (bucket.has(fp)) {
       const b = bucket.get(fp);
       b.count++;
-      b.lastTs = Math.max(b.lastTs, s.ts);
+      if (typeof s.ts === 'number') {
+        b.firstTs = typeof b.firstTs === 'number' ? Math.min(b.firstTs, s.ts) : s.ts;
+        b.lastTs = typeof b.lastTs === 'number' ? Math.max(b.lastTs, s.ts) : s.ts;
+      }
       if (b.users.indexOf(s.user) === -1 && s.user) b.users.push(s.user);
     } else {
       bucket.set(fp, {
@@ -205,14 +208,49 @@ function buildDigest() {
     }))
   };
 
-  // Also a latest.json for easy reading
+  // Flatten groups across days, ranked by recency × frequency, so
+  // latest.json carries enough signal to act on without opening
+  // window.json. Each entry keeps just the high-signal scrubbed fields.
+  const flat = [];
+  digest.days.forEach(d => d.groups.forEach(g => flat.push(g)));
+  flat.sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0) || b.count - a.count);
+  const TOP_N = 10;
+  const topGroups = flat.slice(0, TOP_N).map(g => ({
+    app: g.entry.app,
+    kind: g.entry.kind,
+    page: g.entry.page,
+    message: g.entry.message,
+    filename: g.entry.filename,
+    lineno: g.entry.lineno,
+    colno: g.entry.colno,
+    count: g.count,
+    firstTs: g.firstTs,
+    lastTs: g.lastTs,
+    users: g.users.length
+  }));
+
   const latest = {
     generatedAt: digest.generatedAt,
+    windowHours: WINDOW_HOURS,
     totalGroups: digest.days.reduce((acc, d) => acc + d.groups.length, 0),
-    totalEvents: digest.days.reduce((acc, d) => acc + d.groups.reduce((a, g) => a + g.count, 0), 0)
+    totalEvents: digest.days.reduce((acc, d) => acc + d.groups.reduce((a, g) => a + g.count, 0), 0),
+    topGroups
   };
 
   return { digest, latest };
+}
+
+// Strip generatedAt so two digests with different timestamps but
+// identical content compare equal. Prevents an empty refresh every
+// 15 minutes from filling the branch with no-op commits.
+function withoutTimestamp(obj) {
+  const clone = JSON.parse(JSON.stringify(obj));
+  delete clone.generatedAt;
+  return clone;
+}
+
+function readJsonIfExists(p) {
+  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
 }
 
 // ── Main ──
@@ -225,8 +263,22 @@ function buildDigest() {
   const diagDir = path.join(REPO_PATH, 'diag');
   if (!fs.existsSync(diagDir)) fs.mkdirSync(diagDir, { recursive: true });
 
-  fs.writeFileSync(path.join(diagDir, 'latest.json'), JSON.stringify(latest, null, 2));
-  fs.writeFileSync(path.join(diagDir, 'window.json'), JSON.stringify(digest, null, 2));
+  const latestPath = path.join(diagDir, 'latest.json');
+  const windowPath = path.join(diagDir, 'window.json');
+
+  // Decide whether the meaningful digest changed before writing. If
+  // not, leave the working tree alone — no diff, no commit, no churn.
+  const prevLatest = readJsonIfExists(latestPath);
+  const prevWindow = readJsonIfExists(windowPath);
+  const sameLatest = prevLatest && JSON.stringify(withoutTimestamp(prevLatest)) === JSON.stringify(withoutTimestamp(latest));
+  const sameWindow = prevWindow && JSON.stringify(withoutTimestamp(prevWindow)) === JSON.stringify(withoutTimestamp(digest));
+  if (sameLatest && sameWindow) {
+    log('Digest unchanged since last push; skipping.');
+    return;
+  }
+
+  fs.writeFileSync(latestPath, JSON.stringify(latest, null, 2));
+  fs.writeFileSync(windowPath, JSON.stringify(digest, null, 2));
 
   // Drop day files that fell out of the window so the branch doesn't
   // accumulate stale daily archives forever.
