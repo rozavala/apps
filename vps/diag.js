@@ -68,11 +68,26 @@ function init(app, dataDir) {
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').toString().split(',')[0].trim();
     const ua = (req.headers['user-agent'] || '').toString();
 
+    // Accept the client-supplied ts when it's a sane number — within
+    // 30 days past or 5 minutes future of now. Falling back to `now`
+    // for missing or out-of-range values means a batch that was
+    // buffered offline for hours still groups under the day the bug
+    // actually occurred, instead of all events sharing one server
+    // timestamp and aging out of the digest window in lockstep.
+    const TS_PAST_LIMIT = now - 30 * 24 * 3600 * 1000;
+    const TS_FUTURE_LIMIT = now + 5 * 60 * 1000;
+    function _canonicalTs(e) {
+      if (e && typeof e.ts === 'number' && e.ts >= TS_PAST_LIMIT && e.ts <= TS_FUTURE_LIMIT) {
+        return e.ts;
+      }
+      return now;
+    }
+
     return body.entries.slice(0, MAX_ENTRIES_PER_BATCH).map(e => ({
       id: e && e.id ? String(e.id).slice(0, 40) : undefined,
       clientTs: e && typeof e.ts === 'number' ? e.ts : now,
       serverTs: now,
-      ts: now, // canonical timestamp
+      ts: _canonicalTs(e),
       kind: e && e.kind ? String(e.kind).slice(0, 40) : 'unknown',
       app: e && e.app ? String(e.app).slice(0, 60) : null,
       page: e && e.page ? String(e.page).slice(0, 120) : null,
@@ -132,10 +147,15 @@ function init(app, dataDir) {
   app.get('/api/diag/health', (req, res) => {
     let size = 0;
     try { size = fs.statSync(JSONL_PATH).size; } catch (e) {}
+    const windowH = Math.max(parseInt(process.env.DIAG_WINDOW_HOURS || '24', 10) || 24, 1);
+    const inWindow = _readSince(windowH * 60 * 60 * 1000).length;
     res.json({
       status: 'ok',
       jsonl_bytes: size,
-      entries_last_24h: _readSince(24 * 60 * 60 * 1000).length
+      window_hours: windowH,
+      entries_in_window: inWindow,
+      // Kept for back-compat with any external monitor wired to the old key.
+      entries_last_24h: windowH === 24 ? inWindow : _readSince(24 * 60 * 60 * 1000).length
     });
   });
 
