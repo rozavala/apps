@@ -112,7 +112,8 @@ const LabExplorer = (() => {
   let astronomyState = {
     constellations: [],
     currentConstellation: 0,
-    foundStars: []
+    foundStars: [],
+    animFrame: null
   };
 
   // ── Simple Machines Lab State ──
