@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Code Cadet 🤖</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/code-cadet.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#22D3EE">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(34,211,238,0.10);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(99,102,241,0.07);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: World select -->
+    <div class="cc-screen active" id="cc-screen-select">
+      <div class="cc-header">
+        <span class="icon">🤖</span>
+        <h1>Code Cadet</h1>
+        <p>Mueve al rover. Compón bloques. Resuelve el rompecabezas.</p>
+      </div>
+      <div class="cc-world-grid" id="cc-world-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- SCREEN: Game -->
+    <div class="cc-screen" id="cc-screen-game">
+      <div class="cc-game-top">
+        <button class="cc-back-btn" id="cc-back-btn" aria-label="Back to worlds">←</button>
+        <div class="cc-puzzle-info">
+          <span class="cc-world-tag" id="cc-puzzle-world">World 1</span>
+          <h2 id="cc-puzzle-name">First Steps</h2>
+        </div>
+        <div class="cc-hud">
+          <span>🧱 <span id="cc-used">0</span>/<span id="cc-ideal">-</span></span>
+          <span id="cc-dir">➡️</span>
+        </div>
+      </div>
+
+      <div class="cc-stage">
+        <div class="cc-board-wrap">
+          <canvas id="cc-canvas" width="320" height="192"></canvas>
+        </div>
+        <div class="cc-program">
+          <div id="cc-lane-main" class="cc-lane"></div>
+          <div id="cc-lane-f1" class="cc-lane"></div>
+          <div class="cc-palette" id="cc-palette"></div>
+        </div>
+      </div>
+
+      <div class="cc-controls">
+        <button class="cc-ctrl-btn cc-primary" id="cc-run-btn">▶ Run</button>
+        <button class="cc-ctrl-btn" id="cc-step-btn">⏯ Step</button>
+        <button class="cc-ctrl-btn" id="cc-reset-btn">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cc-feedback" id="cc-feedback"></div>
+
+  <div class="cc-win-overlay" id="cc-win">
+    <div class="cc-win-card">
+      <h2>¡Lo lograste! 🎉</h2>
+      <div class="cc-win-stars-big" id="cc-win-stars">⭐⭐⭐</div>
+      <p class="cc-win-stats">
+        Bloques usados: <strong id="cc-win-used">-</strong>
+        · Ideal: <strong id="cc-win-ideal">-</strong>
+      </p>
+      <div class="cc-win-actions">
+        <button class="cc-ctrl-btn" id="cc-win-replay">↺ Replay</button>
+        <button class="cc-ctrl-btn cc-primary" id="cc-win-next">Next →</button>
+        <button class="cc-ctrl-btn" id="cc-win-back">Worlds</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/zs-diag.js?v=3"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/code-cadet.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
