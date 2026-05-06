@@ -26,6 +26,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
 | **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
 | **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
+| **🚀 Code Cadet** | Resuelve puzzles de lógica usando bloques de programación para mover tu rover. (Solve logic puzzles using programming blocks to drive your rover.) | [code-cadet.html](code-cadet.html) |
 | **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
 | **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
 | **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
@@ -63,6 +64,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Code Cadet"!**: Resuelve puzzles de lógica y aprende a programar con bloques. (Solve logic puzzles and learn to code with blocks).
 - **Nuevas Utilidades Familiares**: ¡Agregamos Menú Semanal, Home Timer, Sunday Report y Vacation Planner! (Added Menu Planner, Home Timer, Sunday Report and Vacation Planner!)
 - **¡Nueva App "Money Master"!**: Aprende sobre el valor del dinero, monedas y billetes. (Learn about money value, coins and bills).
 - **¡Nuevo "Family Wall"!**: Dashboard compartido para la familia. (Shared family dashboard for the fridge).
