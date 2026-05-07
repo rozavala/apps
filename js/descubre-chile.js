@@ -331,6 +331,8 @@ const QB={
     {q:'¿En qué región se encuentra el desierto de Atacama?',a:'Norte Grande',o:['Norte Grande','Zona Central','Patagonia','Sur'], tier:'beginner'}
   ],
   antartica:[
+    {q:'¿Cuál es la temperatura media en el interior de la Antártica?',a:'Bajo cero',o:['Bajo cero','10 grados','20 grados','30 grados'], tier:'intermediate'},
+    {q:'¿Qué océano rodea la Antártica?',a:'Océano Antártico',o:['Océano Antártico','Océano Atlántico','Océano Pacífico','Océano Índico'], tier:'beginner'},
     {q:'¿Cuál es la base civil más conocida de Chile en la Antártica?',a:'Villa Las Estrellas',o:['Villa Las Estrellas','Punta Arenas','Puerto Williams','Base Prat'], tier:'advanced'},
     {q:'¿Qué tratado regula la presencia de países en la Antártica?',a:'Tratado Antártico',o:['Tratado Antártico','Acuerdo de París','Pacto de Santiago','Convención de Ginebra'], tier:'expert'},
     {q:'¿Qué animal es común encontrar en la Antártica?',a:'Pingüino',o:['Pingüino','Oso Polar','León','Mono'], tier:'beginner'},
@@ -377,6 +379,8 @@ const QB={
     {q:'¿En qué siglo se fundó la ciudad de Santiago?',a:'Siglo XVI (16)',o:['Siglo XVI (16)','Siglo XVIII (18)','Siglo XIX (19)','Siglo XV (15)'], tier:'advanced'}
   ],
   culture:[
+    {q:'¿Qué instrumento folclórico se parece a un charango o guitarrita?',a:'Guitarrón chileno',o:['Guitarrón chileno','Violín','Arpa','Flauta'], tier:'advanced'},
+    {q:'¿Qué comida chilena se hace con choclo molido?',a:'Pastel de choclo',o:['Pastel de choclo','Empanada de pino','Cazuela','Completos'], tier:'beginner'},
     {q:'¿Cuál es el baile nacional de Chile?',a:'La Cueca',o:['La Cueca','El Tango','La Salsa','El Candombe'], tier:'beginner'},
     {q:'¿Qué instrumento de cuerdas se usa frecuentemente en la música folclórica chilena?',a:'La guitarra',o:['La guitarra','El violín','El piano','La trompeta'], tier:'intermediate'},
     {q:'¿Qué lleva la empanada de pino?',a:'Carne, cebolla, huevo, aceitunas',o:['Carne, cebolla, huevo, aceitunas','Pollo con queso','Porotos con arroz','Pescado con limón'], tier:'beginner'},
@@ -404,6 +408,8 @@ const QB={
     {q:'¿Qué pájaro habita en los salares del norte?',a:'Flamenco',o:['Flamenco','Cóndor','Gaviota','Pelícano'], tier:'beginner'}
   ],
   famous:[
+    {q:'¿Quién escribió "Altazor"?',a:'Vicente Huidobro',o:['Vicente Huidobro','Pablo Neruda','Gabriela Mistral','Nicanor Parra'], tier:'expert'},
+    {q:'¿Qué famoso pianista chileno toca a nivel mundial?',a:'Claudio Arrau',o:['Claudio Arrau','Roberto Bravo','Valentín Trujillo','Tomás González'], tier:'advanced'},
     {q:'¿Poeta chileno Nobel en 1971?',a:'Pablo Neruda',o:['Pablo Neruda','Gabriela Mistral','Isabel Allende','Huidobro'], tier:'intermediate'},
     {q:'¿Primera Nobel latina de Literatura?',a:'Gabriela Mistral',o:['Gabriela Mistral','Neruda','García Márquez','Vargas Llosa'], tier:'intermediate'},
     {q:'¿Futbolista chileno del Barcelona?',a:'Alexis Sánchez',o:['Alexis Sánchez','Arturo Vidal','Marcelo Ríos','Claudio Bravo'], tier:'beginner'},
