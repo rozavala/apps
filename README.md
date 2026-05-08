@@ -14,6 +14,7 @@ Fun, factual, and skill-based learning adventures for kids. A suite of interacti
 | --- | --- | --- |
 | **🎹 Little Maestro** | Aprende a tocar el piano con lecciones interactivas, canciones reales y desafíos divertidos para pequeños músicos. (Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.) | [little-maestro.html](little-maestro.html) |
 | **🧮 Math Galaxy** | Supera desafíos matemáticos—suma, multiplicación, fracciones y más en una aventura espacial. (Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.) | [math-galaxy.html](math-galaxy.html) |
+| **🤖 Code Cadet** | Resuelve rompecabezas de lógica con programación visual en bloques. (Solve logic puzzles with visual block-based programming.) | [code-cadet.html](code-cadet.html) |
 | **💰 Money Master** | Aprende sobre monedas, billetes y a dar vuelto — practica con CLP y USD. (Coins, bills, and change-making — practice with CLP & USD.) | [money-master.html](money-master.html) |
 | **🇨🇱 Descubre Chile** | Explora la increíble historia de Chile—desde el pueblo Mapuche hasta los Andes, a través de historias y cuestionarios. (Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.) | [descubre-chile.html](descubre-chile.html) |
 | **♟️ Chess Quest** | Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI. | [chess-quest.html](chess-quest.html) |
@@ -64,6 +65,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 ## 🆕 Novedades de la Semana (What's New This Week)
 
 - **Nuevas Utilidades Familiares**: ¡Agregamos Menú Semanal, Home Timer, Sunday Report y Vacation Planner! (Added Menu Planner, Home Timer, Sunday Report and Vacation Planner!)
+- **¡Nueva App "Code Cadet"!**: Aprende lógica de programación moviendo un rover con bloques. (Learn programming logic by moving a rover with blocks).
 - **¡Nueva App "Money Master"!**: Aprende sobre el valor del dinero, monedas y billetes. (Learn about money value, coins and bills).
 - **¡Nuevo "Family Wall"!**: Dashboard compartido para la familia. (Shared family dashboard for the fridge).
 - **Insights para Padres (Parent Insights)**: Monitorea el balance de actividades y recibe sugerencias para cada perfil. (Monitor activity balance and receive nudges for each profile).
