@@ -113,6 +113,24 @@ var BMC = (function() {
       });
   }
 
+  // Classify a fetch failure into a kid-friendly message. Distinguishes
+  // "the device can't reach the VPS at all" (the iPad isn't on Tailscale,
+  // or the VPS is asleep) from a timeout or HTTP error so the parent
+  // knows where to look.
+  function _userMsgForFetchErr(err, context) {
+    if (err && err.name === 'AbortError') {
+      return 'The ' + context + ' timed out. Check your connection and try again.';
+    }
+    var msg = err && err.message ? String(err.message) : '';
+    // Safari (iOS) → "Load failed". Chrome/Firefox → "Failed to fetch".
+    var unreachable = err && err.name === 'TypeError' &&
+      (msg === 'Load failed' || msg === 'Failed to fetch' || /NetworkError/i.test(msg));
+    if (unreachable) {
+      return 'Can\'t reach the book server. Open the Tailscale app on this device, then try again.';
+    }
+    return 'Could not reach the book server. Please try again.';
+  }
+
   // ── Status display ─────────────────────────────────────────────
   function _setStatus(msg, kind) {
     var el = document.getElementById('bmc-status');
@@ -391,10 +409,7 @@ var BMC = (function() {
       })
       .catch(function(err) {
         console.warn('[BMC] Lookup failed:', err);
-        var msg = (err && err.name === 'AbortError')
-          ? 'The search timed out. Check your connection and try again.'
-          : 'Could not reach the book server. Please try again.';
-        _setStatus(msg, 'error');
+        _setStatus(_userMsgForFetchErr(err, 'search'), 'error');
       });
   }
 
@@ -516,7 +531,7 @@ var BMC = (function() {
       })
       .catch(function(err) {
         console.warn('[BMC] ISBN lookup failed:', err);
-        _setStatus('Could not look up that ISBN right now.', 'error');
+        _setStatus(_userMsgForFetchErr(err, 'ISBN lookup'), 'error');
       });
   }
 
@@ -547,7 +562,7 @@ var BMC = (function() {
           })
           .catch(function(err) {
             console.warn('[BMC] Photo lookup failed:', err);
-            _setStatus('Could not identify the photo right now.', 'error');
+            _setStatus(_userMsgForFetchErr(err, 'photo lookup'), 'error');
           });
       };
       reader.readAsDataURL(file);
@@ -608,7 +623,9 @@ var BMC = (function() {
       })
       .catch(function(err) {
         console.warn('[BMC] Evaluate failed:', err);
-        if (wrap) wrap.innerHTML = '<div class="bmc-empty">Could not finish the check right now. Please try again.</div>';
+        if (wrap) {
+          wrap.innerHTML = '<div class="bmc-empty">' + _userMsgForFetchErr(err, 'review') + '</div>';
+        }
         _setStatus('');
       });
   }
@@ -931,14 +948,17 @@ var BMC = (function() {
 
   // ── VPS family library hydration ───────────────────────────────
   function _hydrateFamilyLibrary() {
-    // Pulls the full server-side cache of evaluated titles
+    // Pulls the full server-side cache of evaluated titles. This is
+    // an optimisation, not a requirement — every other BMC feature
+    // works without it. When the device is off the tailnet (kid hasn't
+    // opened Tailscale, or the VPS is asleep) this fetch fails with
+    // "Load failed". That's expected, not a bug; don't pollute the
+    // diag log with a warn for it.
     return _fetchJson(VPS + '/api/media/library')
       .then(function(library) {
         _familyLibrary = library || {};
       })
-      .catch(function(err) {
-        console.warn('[BMC] Library hydrate failed:', err);
-      });
+      .catch(function() { /* silent — see comment above */ });
   }
 
   // ── Re-review / stale-count (parent tools) ─────────────────────
