@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-08T23:40:08.699Z",
+  "generatedAt": "2026-05-09T01:40:22.390Z",
   "windowHours": 72,
   "days": [
     {
@@ -81,6 +81,63 @@
           "lastTs": 1778277503128,
           "users": [
             "u-9b4aef"
+          ]
+        }
+      ]
+    },
+    {
+      "day": "2026-05-09",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_moxo7iqn_sk1rxn",
+            "ts": 1778290431647,
+            "clientTs": 1778290431647,
+            "kind": "console.warn",
+            "app": "book-movie-check",
+            "page": "book-movie-check.html",
+            "message": "Trying to play video that is already playing.",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-34d354",
+            "age": 12,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 10,
+          "firstTs": 1778290431647,
+          "lastTs": 1778290489216,
+          "users": [
+            "u-34d354"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moxo8o09_aq6o5d",
+            "ts": 1778290485130,
+            "clientTs": 1778290485130,
+            "kind": "console.warn",
+            "app": "book-movie-check",
+            "page": "book-movie-check.html",
+            "message": "[BMC] ISBN lookup failed: Fetch is aborted",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-34d354",
+            "age": 12,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1778290485130,
+          "lastTs": 1778290485130,
+          "users": [
+            "u-34d354"
           ]
         }
       ]
