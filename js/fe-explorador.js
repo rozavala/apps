@@ -234,6 +234,18 @@ const FeManager = (() => {
         { q: '¿A quién se le considera el primer Papa?', a: ['San Pablo', 'San Pedro', 'San Juan'], correct: 1 },
         { q: '¿En qué siglo vivió?', a: ['Siglo V', 'Siglo III', 'Siglo I'], correct: 2 }
       ]
+    },
+    {
+      id: 'juan_cruz',
+      name: 'San Juan de la Cruz',
+      dates: '1542–1591',
+      country: 'España 🇪🇸',
+      bio: 'Famoso místico y poeta que ayudó a Santa Teresa de Ávila a reformar la Orden del Carmelo.',
+      questions: [
+        { q: '¿A quién ayudó a reformar su orden?', a: ['Santa Teresa de Ávila', 'Santa Rosa de Lima', 'San Francisco de Asís'], correct: 0 },
+        { q: '¿Por qué es famoso?', a: ['Por ser místico y poeta', 'Por fundar Roma', 'Por inventar la imprenta'], correct: 0 },
+        { q: '¿De qué país era?', a: ['España', 'Francia', 'Italia'], correct: 0 }
+      ]
     }
   ];
 

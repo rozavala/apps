@@ -273,6 +273,23 @@ const WorldExplorer = (() => {
     ] },
     { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [
       {
+        id: 'spain', name: 'Spain', nameEs: 'España', flag: '🇪🇸',
+        capital: 'Madrid', capitalEs: 'Madrid',
+        facts: [
+          { en: 'Spain is located on the Iberian Peninsula.', es: 'España se encuentra en la península ibérica.' },
+          { en: 'The famous Sagrada Familia is in Barcelona.', es: 'La famosa Sagrada Familia está en Barcelona.' },
+          { en: 'Spanish is the second most spoken native language in the world.', es: 'El español es el segundo idioma nativo más hablado en el mundo.' },
+          { en: 'Flamenco is a famous Spanish art form of music and dance.', es: 'El flamenco es una famosa forma de arte español de música y baile.' }
+        ],
+        landmark: { name: 'Sagrada Familia', nameEs: 'Sagrada Familia', emoji: '⛪' },
+        animal: { name: 'Iberian Lynx', nameEs: 'Lince ibérico', emoji: '🐱' },
+        quiz: [
+          { q: 'What is the capital of Spain?', qEs: '¿Cuál es la capital de España?', options: ['Barcelona', 'Seville', 'Madrid', 'Valencia'], optionsEs: ['Barcelona', 'Sevilla', 'Madrid', 'Valencia'], answer: 2 },
+          { q: 'What famous church is in Barcelona?', qEs: '¿Qué famosa iglesia está en Barcelona?', options: ['Notre Dame', 'Sagrada Familia', 'St. Peter\'s', 'Westminster'], optionsEs: ['Notre Dame', 'Sagrada Familia', 'San Pedro', 'Westminster'], answer: 1 },
+          { q: 'Which dance is a famous Spanish art form?', qEs: '¿Qué baile es un famoso arte español?', options: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], answer: 2 }
+        ]
+      },
+      {
         id: 'france', name: 'France', nameEs: 'Francia', flag: '🇫🇷',
         capital: 'Paris', capitalEs: 'París',
         facts: [
@@ -291,6 +308,23 @@ const WorldExplorer = (() => {
       }
     ] },
     { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [
+      {
+        id: 'kenya', name: 'Kenya', nameEs: 'Kenia', flag: '🇰🇪',
+        capital: 'Nairobi', capitalEs: 'Nairobi',
+        facts: [
+          { en: 'Kenya is famous for its wildlife savannas.', es: 'Kenia es famosa por sus sabanas de vida silvestre.' },
+          { en: 'Mount Kenya is the second highest mountain in Africa.', es: 'El monte Kenia es la segunda montaña más alta de África.' },
+          { en: 'Swahili and English are its official languages.', es: 'El suajili y el inglés son sus idiomas oficiales.' },
+          { en: 'The Great Rift Valley runs through Kenya.', es: 'El Gran Valle del Rift atraviesa Kenia.' }
+        ],
+        landmark: { name: 'Mount Kenya', nameEs: 'Monte Kenia', emoji: '⛰️' },
+        animal: { name: 'Lion', nameEs: 'León', emoji: '🦁' },
+        quiz: [
+          { q: 'What is the capital of Kenya?', qEs: '¿Cuál es la capital de Kenia?', options: ['Cairo', 'Nairobi', 'Lagos', 'Pretoria'], optionsEs: ['El Cairo', 'Nairobi', 'Lagos', 'Pretoria'], answer: 1 },
+          { q: 'What landscape is Kenya famous for?', qEs: '¿Por qué paisaje es famosa Kenia?', options: ['Deserts', 'Rainforests', 'Tundras', 'Savannas'], optionsEs: ['Desiertos', 'Selvas', 'Tundras', 'Sabanas'], answer: 3 },
+          { q: 'What is the second highest mountain in Africa?', qEs: '¿Cuál es la segunda montaña más alta de África?', options: ['Kilimanjaro', 'Mount Kenya', 'Atlas', 'Ruwenzori'], optionsEs: ['Kilimanjaro', 'Monte Kenia', 'Atlas', 'Ruwenzori'], answer: 1 }
+        ]
+      },
       {
         id: 'egypt', name: 'Egypt', nameEs: 'Egipto', flag: '🇪🇬',
         capital: 'Cairo', capitalEs: 'El Cairo',

@@ -318,6 +318,35 @@ const StoryExplorer = (() => {
         { q: 'Where did the explorer find the map?', qEs: '¿Dónde encontró el explorador el mapa?', options: ['In a house', 'In a cave', 'In a tree', 'In the river'], optionsEs: ['En una casa', 'En una cueva', 'En un árbol', 'En el río'], answer: 1 },
         { q: 'What did the map show the way to?', qEs: '¿Hacia dónde mostraba el camino el mapa?', options: ['A castle', 'A hidden waterfall', 'A city', 'A treasure chest'], optionsEs: ['A un castillo', 'A una cascada oculta', 'A una ciudad', 'A un cofre del tesoro'], answer: 1 }
       ]
+    },
+    {
+      id: 'atacama_desert',
+      title: 'The Atacama Desert',
+      titleEs: 'El Desierto de Atacama',
+      tier: 'explorer', ageMin: 6, region: 'north', icon: '🏜️',
+      pages: [
+        {
+          en: 'The desert is very dry. It has not rained in years.',
+          es: 'El desierto es muy seco. No ha llovido en años.',
+          vocab: [
+            { word: 'desert', wordEs: 'desierto', def: 'A very dry place with little water.', defEs: 'Un lugar muy seco con poca agua.' },
+            { word: 'dry', wordEs: 'seco', def: 'Having no water or rain.', defEs: 'Que no tiene agua ni lluvia.' }
+          ]
+        },
+        {
+          en: 'At night, the sky is full of stars and the moon shines bright.',
+          es: 'Por la noche, el cielo está lleno de estrellas y la luna brilla.',
+          vocab: [
+            { word: 'night', wordEs: 'noche', def: 'The time when the sun is down.', defEs: 'El momento en que el sol se oculta.' },
+            { word: 'sky', wordEs: 'cielo', def: 'The space over the earth where we see clouds and stars.', defEs: 'El espacio sobre la tierra donde vemos nubes y estrellas.' },
+            { word: 'stars', wordEs: 'estrellas', def: 'Bright lights in the night sky.', defEs: 'Luces brillantes en el cielo nocturno.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What is the desert like?', qEs: '¿Cómo es el desierto?', options: ['Wet', 'Cold', 'Dry', 'Green'], optionsEs: ['Húmedo', 'Frío', 'Seco', 'Verde'], answer: 2 },
+        { q: 'What can you see at night?', qEs: '¿Qué puedes ver de noche?', options: ['Birds', 'Stars', 'Clouds', 'Sun'], optionsEs: ['Pájaros', 'Estrellas', 'Nubes', 'Sol'], answer: 1 }
+      ]
     }
   ];
 
