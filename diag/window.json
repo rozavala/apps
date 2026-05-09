@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-09T03:10:33.485Z",
+  "generatedAt": "2026-05-09T03:25:35.366Z",
   "windowHours": 72,
   "days": [
     {
@@ -107,11 +107,12 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 10,
+          "count": 11,
           "firstTs": 1778290431647,
-          "lastTs": 1778290489216,
+          "lastTs": 1778296266017,
           "users": [
-            "u-34d354"
+            "u-34d354",
+            "u-3bda7c"
           ]
         },
         {
@@ -138,6 +139,32 @@
           "lastTs": 1778296126238,
           "users": [
             "u-34d354"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_moxro0nt_xw1lrp",
+            "ts": 1778296240217,
+            "clientTs": 1778296240217,
+            "kind": "console.warn",
+            "app": "book-movie-check",
+            "page": "book-movie-check.html",
+            "message": "[BMC] Photo lookup failed: Fetch is aborted",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1778296240217,
+          "lastTs": 1778296464965,
+          "users": [
+            "u-3bda7c"
           ]
         }
       ]
