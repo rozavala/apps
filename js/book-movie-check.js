@@ -424,20 +424,94 @@ var BMC = (function() {
   }
 
   function scanIsbn() {
-    // BarcodeDetector is Chromium-only; on all WebKit iPads it is undefined.
+    // BarcodeDetector is Chromium-only — undefined on every iOS browser
+    // (all are WebKit by App Store rule). When it's missing, fall through
+    // to ZXing if it loaded, otherwise to the manual entry prompt.
     if (typeof BarcodeDetector === 'undefined') {
+      if (typeof ZXing !== 'undefined' && ZXing.BrowserMultiFormatReader) {
+        return _startZxingScan();
+      }
       if (_showScanModalWithHint()) return;
       return promptManualIsbn();
     }
     BarcodeDetector.getSupportedFormats().then(function(formats) {
       if (formats.indexOf('ean_13') === -1 && formats.indexOf('isbn_13') === -1) {
+        if (typeof ZXing !== 'undefined' && ZXing.BrowserMultiFormatReader) {
+          return _startZxingScan();
+        }
         if (_showScanModalWithHint()) return;
         return promptManualIsbn();
       }
       _startScan(formats);
     }).catch(function() {
+      if (typeof ZXing !== 'undefined' && ZXing.BrowserMultiFormatReader) {
+        return _startZxingScan();
+      }
       if (_showScanModalWithHint()) return;
       promptManualIsbn();
+    });
+  }
+
+  // ZXing fallback for browsers without BarcodeDetector (notably iOS
+  // Safari / every iOS browser). Uses the vendored UMD bundle to read
+  // ISBN-13 / EAN-13 directly from the rear-camera video feed.
+  var _zxingReader = null;
+  function _startZxingScan() {
+    var modal = document.getElementById('bmc-scan-modal');
+    var video = document.getElementById('bmc-scan-video');
+    var hint = document.getElementById('bmc-scan-hint');
+    var ipadHint = document.getElementById('bmc-scan-ipad-hint');
+    if (!modal || !video) return promptManualIsbn();
+    modal.classList.add('active');
+    if (ipadHint) ipadHint.style.display = 'none';
+    if (hint) hint.textContent = 'Apunta al código de barras…';
+
+    try {
+      // Restrict to the formats actually printed on book barcodes — keeps
+      // false positives down compared to scanning every supported format.
+      var hints = null;
+      if (ZXing.DecodeHintType && ZXing.BarcodeFormat) {
+        hints = new Map();
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+          ZXing.BarcodeFormat.EAN_13,
+          ZXing.BarcodeFormat.EAN_8,
+          ZXing.BarcodeFormat.UPC_A
+        ]);
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      }
+      _zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+    } catch (e) {
+      if (ipadHint) {
+        ipadHint.style.display = 'block';
+        ipadHint.textContent = 'Could not start the scanner. Tap "Type ISBN instead" below.';
+      }
+      return;
+    }
+
+    _scanActive = true;
+    _zxingReader.decodeFromConstraints(
+      { audio: false, video: { facingMode: 'environment' } },
+      video,
+      function(result, err) {
+        if (!_scanActive) return;
+        if (result) {
+          var code = (result.getText && result.getText()) || result.text;
+          closeScan();
+          if (code) _lookupByIsbn(code.replace(/[^0-9Xx]/g, ''));
+        }
+        // err is fired on every empty frame — only surface real errors.
+        if (err && err.name && !/NotFoundException|ChecksumException|FormatException/.test(err.name)) {
+          if (ipadHint) {
+            ipadHint.style.display = 'block';
+            ipadHint.textContent = 'Camera blocked or not available. Check Safari Settings → Camera, or tap "Type ISBN instead" below.';
+          }
+        }
+      }
+    ).catch(function() {
+      if (ipadHint) {
+        ipadHint.style.display = 'block';
+        ipadHint.textContent = 'Camera blocked or not available. Check Safari Settings → Camera, or tap "Type ISBN instead" below.';
+      }
     });
   }
 
@@ -496,6 +570,10 @@ var BMC = (function() {
     if (_scanStream) {
       _scanStream.getTracks().forEach(function(t) { t.stop(); });
       _scanStream = null;
+    }
+    if (_zxingReader) {
+      try { _zxingReader.reset(); } catch (e) {}
+      _zxingReader = null;
     }
   }
 
