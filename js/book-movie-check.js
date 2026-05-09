@@ -457,6 +457,12 @@ var BMC = (function() {
   // ISBN-13 / EAN-13 directly from the rear-camera video feed.
   var _zxingReader = null;
   function _startZxingScan() {
+    // Re-entry guard. If the kid taps "Scan ISBN" while a scan is
+    // already running, the second decodeFromConstraints call ends up
+    // invoking video.play() on an already-playing element, which Safari
+    // logs as "Trying to play video that is already playing." Just bail.
+    if (_scanActive) return;
+
     var modal = document.getElementById('bmc-scan-modal');
     var video = document.getElementById('bmc-scan-video');
     var hint = document.getElementById('bmc-scan-hint');
@@ -516,6 +522,7 @@ var BMC = (function() {
   }
 
   function _startScan(formats) {
+    if (_scanActive) return;  // re-entry guard, see _startZxingScan
     var modal = document.getElementById('bmc-scan-modal');
     var video = document.getElementById('bmc-scan-video');
     var hint = document.getElementById('bmc-scan-hint');
