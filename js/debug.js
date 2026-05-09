@@ -258,6 +258,7 @@ var Debug = (function() {
 
   return {
     log: function(msg, meta) { _add('info', msg, meta); },
+    warn: function(msg, meta) { _add('warn', msg, meta); },
     error: function(msg, meta) { _add('error', msg, meta); },
     show: show,
     hide: hide,
