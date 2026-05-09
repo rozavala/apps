@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-09T01:40:22.390Z",
+  "generatedAt": "2026-05-09T03:10:33.485Z",
   "windowHours": 72,
   "totalGroups": 5,
-  "totalEvents": 21,
+  "totalEvents": 25,
   "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] ISBN lookup failed: Fetch is aborted",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 5,
+      "firstTs": 1778290485130,
+      "lastTs": 1778296126238,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
@@ -15,19 +28,6 @@
       "count": 10,
       "firstTs": 1778290431647,
       "lastTs": 1778290489216,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] ISBN lookup failed: Fetch is aborted",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1778290485130,
-      "lastTs": 1778290485130,
       "users": 1
     },
     {
