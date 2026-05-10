@@ -7852,20 +7852,29 @@ const MIDIManager = (() => {
   // ── internal: scan all inputs and connect to best one ──
   function _scanInputs() {
     if (!_access) return;
-    const best = _findBestInput(_access.inputs);
-    if (best) {
-      _connectInput(best);
-    } else {
-      if (_activeInput) { try { _activeInput.onmidimessage = null; } catch(e) {} }
-      _activeInput = null;
-      _deviceName  = null;
-      _status      = 'disconnected';
-      _updateStatusUI();
-      _notifyStatusChange();
-      document.querySelectorAll('.lesson-panel--keyboard').forEach(el => el.classList.remove('midi-connected'));
-      _updateMidiBanner();
-      // Auto-retry if we had a connection and lost it
-      _scheduleRetry();
+    try {
+      const best = _findBestInput(_access.inputs);
+      if (best) {
+        _connectInput(best);
+      } else {
+        if (_activeInput) { try { _activeInput.onmidimessage = null; } catch(e) {} }
+        _activeInput = null;
+        _deviceName  = null;
+        _status      = 'disconnected';
+        _updateStatusUI();
+        _notifyStatusChange();
+        document.querySelectorAll('.lesson-panel--keyboard').forEach(el => el.classList.remove('midi-connected'));
+        _updateMidiBanner();
+        // Auto-retry if we had a connection and lost it
+        _scheduleRetry();
+      }
+    } catch (e) {
+      // _scanInputs runs deferred (setTimeout from onstatechange and from
+      // the retry timer). An uncaught throw here surfaces in the diag as
+      // a window.onerror at the .then() closing brace — useless to debug.
+      // Capture the real message and surface it through Debug instead.
+      if (typeof Debug !== 'undefined') Debug.error('[MIDI] _scanInputs threw: ' + (e && e.message));
+      try { _status = 'disconnected'; _updateStatusUI(); _notifyStatusChange(); } catch (e2) {}
     }
   }
 
@@ -7881,13 +7890,17 @@ const MIDIManager = (() => {
     _logEvent(`Retry ${_retryCount}/${MAX_RETRIES} in ${delay/1000}s...`);
     clearTimeout(_retryTimer);
     _retryTimer = setTimeout(() => {
-      if (_status !== 'connected') {
-        _scanInputs();
-        // If still not connected after scan, try full re-init
-        if (_status !== 'connected' && _access) {
-          _access.onstatechange = null;
-          init();
+      try {
+        if (_status !== 'connected') {
+          _scanInputs();
+          // If still not connected after scan, try full re-init
+          if (_status !== 'connected' && _access) {
+            _access.onstatechange = null;
+            init();
+          }
         }
+      } catch (e) {
+        if (typeof Debug !== 'undefined') Debug.error('[MIDI] retry timer threw: ' + (e && e.message));
       }
     }, delay);
   }
