@@ -9249,6 +9249,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const section = document.getElementById('screen-lesson');
       if (!hw) return;
 
+      // Idempotent: if a previous star screen is still in the DOM (e.g.
+      // an animation-loop race fired this twice), drop it before adding
+      // a fresh one so two overlays don't stack.
+      const prev = document.getElementById('fn-star-screen');
+      if (prev) prev.remove();
+
       // Expand highway to cover full lesson section so nothing clips
       if (section) hw.style.height = section.offsetHeight + 'px';
 
@@ -11577,7 +11583,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // ══════════════════════════════════════════════════════════
       function _startPhase2() {
         // Hide the falling notes highway if it was visible from a previous phase 4
-        if (typeof FallingNotes !== 'undefined') FallingNotes.hide();
+        if (typeof FallingNotes !== 'undefined') {
+          FallingNotes.hide();
+          // hide() only adds a CSS class to the highway. The end-of-song
+          // overlay lives inside that highway, so it'd come back the next
+          // time .show() runs unless we drop the DOM node here.
+          FallingNotes.hideStarScreen();
+        }
         _s.phase      = 2;
         _s.listenCount = 0;
 
@@ -11602,6 +11614,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function _playListen() {
         _stopPlayback();
+        // Clean up any leftover end-of-song overlay so the listen-mode
+        // sheet/ball isn't drawn underneath an "AMAZING! 🌟" screen.
+        if (typeof FallingNotes !== 'undefined') FallingNotes.hideStarScreen();
         _createBall();
 
         // Ensure AudioContext is running — it's suspended until a user gesture
