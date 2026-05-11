@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-11T13:16:56.185Z",
+  "generatedAt": "2026-05-11T22:05:32.437Z",
   "windowHours": 72,
-  "totalGroups": 9,
-  "totalEvents": 34,
+  "totalGroups": 6,
+  "totalEvents": 24,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -80,45 +80,6 @@
       "count": 5,
       "firstTs": 1778290485130,
       "lastTs": 1778296126238,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Library hydrate failed: Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 4,
-      "firstTs": 1778277468757,
-      "lastTs": 1778277690605,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Lookup failed: Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 3,
-      "firstTs": 1778277640933,
-      "lastTs": 1778277640933,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Photo lookup failed: Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 3,
-      "firstTs": 1778277503128,
-      "lastTs": 1778277503128,
       "users": 1
     }
   ]
