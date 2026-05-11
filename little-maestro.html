@@ -7982,31 +7982,52 @@ const MIDIManager = (() => {
 
     return navigator.requestMIDIAccess({ sysex: false })
       .then(access => {
-        if (typeof Debug !== 'undefined') Debug.log('[MIDI] Access granted');
-        _access = access;
-        _scanInputs();
-
-        // Hot-plug: fires when any MIDI device connects or disconnects
-        _access.onstatechange = (event) => {
-          try {
-            if (event && event.port && event.port.type === 'input') {
-              if (typeof Debug !== 'undefined') Debug.log('[MIDI] State change: ' + event.port.name + ' is ' + event.port.state);
-              _logEvent(`Device ${event.port.state}: ${event.port.name}`);
-              // Delay to let device fully initialize
-              setTimeout(_scanInputs, 400);
-            }
-          } catch(e) {
-            if (typeof Debug !== 'undefined') Debug.error('[MIDI] onstatechange failed', e.message);
+        try {
+          if (typeof Debug !== 'undefined') Debug.log('[MIDI] Access granted');
+          // Guard against shim MIDI environments (e.g. iOS WebMIDIBrowser
+          // wrappers) that resolve with null/undefined instead of rejecting.
+          // Without this, `_access.onstatechange = ...` on the next line
+          // throws "undefined is not an object" and Safari attributes the
+          // error to the .then() close, which is useless to diagnose.
+          if (!access || typeof access !== 'object') {
+            throw new Error('requestMIDIAccess resolved without a MIDIAccess object');
           }
-        };
+          _access = access;
+          _scanInputs();
 
-        // If no device found on first init, start auto-retry
-        if (_status !== 'connected') {
-          if (typeof Debug !== 'undefined') Debug.log('[MIDI] No device found, starting retry loop');
-          _scheduleRetry();
+          // Hot-plug: fires when any MIDI device connects or disconnects
+          _access.onstatechange = (event) => {
+            try {
+              if (event && event.port && event.port.type === 'input') {
+                if (typeof Debug !== 'undefined') Debug.log('[MIDI] State change: ' + event.port.name + ' is ' + event.port.state);
+                _logEvent(`Device ${event.port.state}: ${event.port.name}`);
+                // Delay to let device fully initialize
+                setTimeout(_scanInputs, 400);
+              }
+            } catch(e) {
+              if (typeof Debug !== 'undefined') Debug.error('[MIDI] onstatechange failed', e.message);
+            }
+          };
+
+          // If no device found on first init, start auto-retry
+          if (_status !== 'connected') {
+            if (typeof Debug !== 'undefined') Debug.log('[MIDI] No device found, starting retry loop');
+            _scheduleRetry();
+          }
+
+          return _status === 'connected';
+        } catch (bodyErr) {
+          // Any sync throw inside the .then() callback gets attributed to
+          // the closing brace of the arrow function by Safari, which
+          // surfaces in the diag as a useless lineno-only entry. Log the
+          // real message and fall through to the disconnected path so the
+          // kid still gets a working "Reconnect" button.
+          const m = bodyErr && bodyErr.message ? bodyErr.message : String(bodyErr);
+          if (typeof Debug !== 'undefined') Debug.error('[MIDI] init body threw: ' + m);
+          _status = 'disconnected';
+          try { _updateStatusUI(); _notifyStatusChange(); _updateMidiBanner(); } catch (e) {}
+          return false;
         }
-
-        return _status === 'connected';
       })
       .catch(err => {
         const errMsg = err ? (err.message || err.name || 'Unknown error') : 'Unknown error';
