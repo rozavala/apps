@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-11T01:35:22.900Z",
+  "generatedAt": "2026-05-11T13:01:45.946Z",
   "windowHours": 72,
   "totalGroups": 9,
-  "totalEvents": 32,
+  "totalEvents": 33,
   "topGroups": [
+    {
+      "app": "little-maestro",
+      "kind": "error",
+      "page": "little-maestro.html",
+      "message": "TypeError: undefined is not an object (near '...})...')",
+      "filename": "https://rozavala.github.io/apps/little-maestro.html",
+      "lineno": 8010,
+      "colno": 9,
+      "count": 2,
+      "firstTs": 1778462911862,
+      "lastTs": 1778504157442,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
@@ -15,19 +28,6 @@
       "count": 2,
       "firstTs": 1778463277502,
       "lastTs": 1778463277502,
-      "users": 1
-    },
-    {
-      "app": "little-maestro",
-      "kind": "error",
-      "page": "little-maestro.html",
-      "message": "TypeError: undefined is not an object (near '...})...')",
-      "filename": "https://rozavala.github.io/apps/little-maestro.html",
-      "lineno": 8010,
-      "colno": 9,
-      "count": 1,
-      "firstTs": 1778462911862,
-      "lastTs": 1778462911862,
       "users": 1
     },
     {
