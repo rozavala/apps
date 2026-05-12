@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-11T22:05:32.437Z",
+  "generatedAt": "2026-05-12T01:37:46.205Z",
   "windowHours": 72,
   "totalGroups": 6,
-  "totalEvents": 24,
+  "totalEvents": 13,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -64,10 +64,10 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 11,
-      "firstTs": 1778290431647,
+      "count": 1,
+      "firstTs": 1778296266017,
       "lastTs": 1778296266017,
-      "users": 2
+      "users": 1
     },
     {
       "app": "book-movie-check",
@@ -77,8 +77,8 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 5,
-      "firstTs": 1778290485130,
+      "count": 4,
+      "firstTs": 1778296126238,
       "lastTs": 1778296126238,
       "users": 1
     }
