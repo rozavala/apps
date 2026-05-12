@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-12T01:37:46.205Z",
+  "generatedAt": "2026-05-12T02:22:57.245Z",
   "windowHours": 72,
-  "totalGroups": 6,
-  "totalEvents": 13,
+  "totalGroups": 7,
+  "totalEvents": 14,
   "topGroups": [
+    {
+      "app": "little-maestro",
+      "kind": "error",
+      "page": "little-maestro.html",
+      "message": "TypeError: undefined is not an object (near '...})...')",
+      "filename": "https://rozavala.github.io/apps/little-maestro.html",
+      "lineno": 8031,
+      "colno": 9,
+      "count": 1,
+      "firstTs": 1778551882346,
+      "lastTs": 1778551882346,
+      "users": 1
+    },
     {
       "app": "little-maestro",
       "kind": "error",
