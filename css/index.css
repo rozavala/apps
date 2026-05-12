@@ -569,6 +569,7 @@
     .card-trophy  { --card-accent: #FBBF24; --card-glow: rgba(251, 191, 36, 0.35); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
     .card-money   { --card-accent: #34D399; --card-glow: rgba(52, 211, 153, 0.30); --card-icon-bg: linear-gradient(135deg, #047857, #34D399); --card-tag-bg: rgba(52, 211, 153, 0.15); }
     .card-code    { --card-accent: #22D3EE; --card-glow: rgba(34, 211, 238, 0.30); --card-icon-bg: linear-gradient(135deg, #0891B2, #22D3EE); --card-tag-bg: rgba(34, 211, 238, 0.15); }
+    .card-bible   { --card-accent: #818CF8; --card-glow: rgba(129, 140, 248, 0.30); --card-icon-bg: linear-gradient(135deg, #4338CA, #818CF8); --card-tag-bg: rgba(129, 140, 248, 0.15); }
 
     /* ── Hub Calendar Widget (liturgical + Chilean) ── */
     #calendar-widget { animation: fadeUp 0.6s ease-out both; }

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bible Explorer 📖</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/bible-explorer.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#818CF8">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(129,140,248,0.10);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(251,191,36,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: Home -->
+    <div class="bx-screen active" id="bx-screen-home">
+      <div class="bx-header">
+        <button class="bx-lang-toggle" id="bx-lang-toggle">
+          <span id="bx-lang-label">EN / ES</span> 🌐
+        </button>
+        <span class="icon">📖</span>
+        <h1>Bible Explorer</h1>
+        <p>Historias, versículos y los libros de la Sagrada Escritura.</p>
+      </div>
+      <div class="bx-tiles">
+        <button class="bx-tile" id="bx-tile-stories">
+          <span class="bx-tile-icon">📖</span>
+          <div class="bx-tile-title">Historias</div>
+          <div class="bx-tile-desc">Stories from the Bible</div>
+          <div class="bx-tile-stat" id="bx-stories-stat">0/0</div>
+        </button>
+        <button class="bx-tile" id="bx-tile-verses">
+          <span class="bx-tile-icon">✨</span>
+          <div class="bx-tile-title">Memoriza</div>
+          <div class="bx-tile-desc">Memorise verses</div>
+          <div class="bx-tile-stat" id="bx-verses-stat">0/0</div>
+        </button>
+        <button class="bx-tile" id="bx-tile-books">
+          <span class="bx-tile-icon">📚</span>
+          <div class="bx-tile-title">Libros</div>
+          <div class="bx-tile-desc">Books of the Bible</div>
+          <div class="bx-tile-stat" id="bx-books-stat">0/0</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: Stories list -->
+    <div class="bx-screen" id="bx-screen-stories">
+      <button class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button>
+      <h2 class="bx-section-title">📖 Historias / Stories</h2>
+      <div class="bx-story-grid" id="bx-story-grid"></div>
+    </div>
+
+    <!-- SCREEN: Story detail + summary -->
+    <div class="bx-screen" id="bx-screen-story-detail">
+      <div id="bx-story-detail"></div>
+    </div>
+
+    <!-- SCREEN: Story quiz -->
+    <div class="bx-screen" id="bx-screen-story-quiz">
+      <button class="bx-back-btn" onclick="BibleExplorer.backToStoryList()">←</button>
+      <div id="bx-quiz-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Story quiz result -->
+    <div class="bx-screen" id="bx-screen-story-result">
+      <div class="bx-quiz-result" id="bx-quiz-result"></div>
+    </div>
+
+    <!-- SCREEN: Verses list -->
+    <div class="bx-screen" id="bx-screen-verses">
+      <button class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button>
+      <h2 class="bx-section-title">✨ Memoriza / Memorise</h2>
+      <div class="bx-verse-grid" id="bx-verse-grid"></div>
+    </div>
+
+    <!-- SCREEN: Verse detail / fill-in-the-blank -->
+    <div class="bx-screen" id="bx-screen-verse-detail">
+      <div id="bx-verse-detail"></div>
+    </div>
+
+    <!-- SCREEN: Books list -->
+    <div class="bx-screen" id="bx-screen-books">
+      <button class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button>
+      <h2 class="bx-section-title">📚 Libros / Books</h2>
+      <div class="bx-book-grid" id="bx-book-grid"></div>
+    </div>
+
+    <!-- SCREEN: Books drill -->
+    <div class="bx-screen" id="bx-screen-book-drill">
+      <div id="bx-book-drill"></div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/zs-diag.js?v=3"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/bible-explorer.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
