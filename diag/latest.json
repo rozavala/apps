@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-12T02:22:57.245Z",
+  "generatedAt": "2026-05-12T03:23:01.674Z",
   "windowHours": 72,
-  "totalGroups": 7,
-  "totalEvents": 14,
+  "totalGroups": 4,
+  "totalEvents": 7,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -54,45 +54,6 @@
       "count": 1,
       "firstTs": 1778379213523,
       "lastTs": 1778379213523,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Photo lookup failed: Fetch is aborted",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1778296240217,
-      "lastTs": 1778296464965,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "Trying to play video that is already playing.",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1778296266017,
-      "lastTs": 1778296266017,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] ISBN lookup failed: Fetch is aborted",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 4,
-      "firstTs": 1778296126238,
-      "lastTs": 1778296126238,
       "users": 1
     }
   ]
