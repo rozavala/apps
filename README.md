@@ -27,6 +27,8 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
 | **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
 | **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
+| **📖 Bible Explorer** | Historias, versículos y los libros de la Sagrada Escritura. (Stories, verses, and the books of the Holy Scripture.) | [bible-explorer.html](bible-explorer.html) |
+| **📚 Vocabulario Vivo** | Aprende inglés y español por raíces latinas y griegas. (Learn English and Spanish through Latin and Greek roots.) | [vocabulario-vivo.html](vocabulario-vivo.html) |
 | **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
 | **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
 | **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
