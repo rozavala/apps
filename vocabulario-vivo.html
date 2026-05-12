@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocabulario Vivo 📚</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/vocabulario-vivo.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F472B6">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(244,114,182,0.10);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(249,115,22,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: Home -->
+    <div class="vv-screen active" id="vv-screen-home">
+      <div class="vv-header">
+        <button class="vv-lang-toggle" id="vv-lang-toggle">
+          <span id="vv-lang-label">EN / ES</span> 🌐
+        </button>
+        <span class="icon">📚</span>
+        <h1>Vocabulario Vivo</h1>
+        <p>Aprende inglés y español a través de las raíces latinas y griegas.</p>
+      </div>
+      <div class="vv-tiles">
+        <button class="vv-tile" id="vv-tile-roots">
+          <span class="vv-tile-icon">🌱</span>
+          <div class="vv-tile-title">Raíces</div>
+          <div class="vv-tile-desc">Learn Latin &amp; Greek roots</div>
+          <div class="vv-tile-stat" id="vv-roots-stat">0/0</div>
+        </button>
+        <button class="vv-tile" id="vv-tile-match">
+          <span class="vv-tile-icon">🎯</span>
+          <div class="vv-tile-title">Empareja</div>
+          <div class="vv-tile-desc">Match the root</div>
+          <div class="vv-tile-stat" id="vv-match-stat">0 best</div>
+        </button>
+        <button class="vv-tile" id="vv-tile-build">
+          <span class="vv-tile-icon">🔨</span>
+          <div class="vv-tile-title">Construye</div>
+          <div class="vv-tile-desc">Build a word</div>
+          <div class="vv-tile-stat" id="vv-build-stat">0/0</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: Roots list -->
+    <div class="vv-screen" id="vv-screen-roots">
+      <button class="vv-back-btn vv-home-btn" aria-label="Back to home">←</button>
+      <h2 class="vv-section-title">🌱 Raíces / Roots</h2>
+      <div class="vv-tier-bar">
+        <button class="vv-tier-filter vv-active" data-tier="all">Todas / All</button>
+        <button class="vv-tier-filter" data-tier="1">🟢 6-7</button>
+        <button class="vv-tier-filter" data-tier="2">🟢🟢 8-9</button>
+        <button class="vv-tier-filter" data-tier="3">🟢🟢🟢 10+</button>
+      </div>
+      <div class="vv-root-grid" id="vv-root-grid"></div>
+    </div>
+
+    <!-- SCREEN: Root detail -->
+    <div class="vv-screen" id="vv-screen-root-detail">
+      <div id="vv-root-detail"></div>
+    </div>
+
+    <!-- SCREEN: Match -->
+    <div class="vv-screen" id="vv-screen-match">
+      <button class="vv-back-btn vv-home-btn" aria-label="Back to home">←</button>
+      <div id="vv-match-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Match result -->
+    <div class="vv-screen" id="vv-screen-match-result">
+      <div id="vv-match-result"></div>
+    </div>
+
+    <!-- SCREEN: Build -->
+    <div class="vv-screen" id="vv-screen-build">
+      <button class="vv-back-btn vv-home-btn" aria-label="Back to home">←</button>
+      <div id="vv-build-wrap"></div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/zs-diag.js?v=3"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/vocabulario-vivo.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
