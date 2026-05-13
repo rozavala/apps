@@ -24,6 +24,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **🏓 Sports Arena** | Track matches, run tournaments, and log outdoor activities to balance screen time. | [sports-arena.html](sports-arena.html) |
 | **🔬 Lab Explorer** | Mix colors, grow plants, explore magnets, and discover how the world works through interactive experiments. | [lab-explorer.html](lab-explorer.html) |
 | **🌍 World Explorer** | Travel the globe—learn flags, capitals, and landmarks across all continents. | [world-explorer.html](world-explorer.html) |
+| **📚 Vocabulario Vivo** | Aprende inglés y español por raíces latinas y griegas. (Learn English and Spanish through Latin and Greek roots). | [vocabulario-vivo.html](vocabulario-vivo.html) |
 | **📚 Story Explorer** | Read adventure tales and build vocabulary in English and Spanish. | [story-explorer.html](story-explorer.html) |
 | **🧗 Quest Adventure** | An RPG-style quest where your progress in every app unlocks new regions on a world map. | [quest-adventure.html](quest-adventure.html) |
 | **🎯 Guess Quest** | Build deduction skills and vocabulary by guessing hidden words in English and Spanish. | [guess-quest.html](guess-quest.html) |
@@ -64,6 +65,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Vocabulario Vivo"!**: Aprende inglés y español por raíces latinas y griegas. (Learn English and Spanish through Latin and Greek roots).
 - **Nuevas Utilidades Familiares**: ¡Agregamos Menú Semanal, Home Timer, Sunday Report y Vacation Planner! (Added Menu Planner, Home Timer, Sunday Report and Vacation Planner!)
 - **¡Nueva App "Code Cadet"!**: Aprende lógica de programación moviendo un rover con bloques. (Learn programming logic by moving a rover with blocks).
 - **¡Nueva App "Money Master"!**: Aprende sobre el valor del dinero, monedas y billetes. (Learn about money value, coins and bills).
