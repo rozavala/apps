@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-13T02:17:46.003Z",
+  "generatedAt": "2026-05-14T01:40:53.735Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 6,
+  "totalGroups": 2,
+  "totalEvents": 3,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -25,22 +25,9 @@
       "filename": "https://rozavala.github.io/apps/little-maestro.html",
       "lineno": 8010,
       "colno": 9,
-      "count": 3,
-      "firstTs": 1778462911862,
-      "lastTs": 1778504698645,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Lookup failed: Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
       "count": 2,
-      "firstTs": 1778463277502,
-      "lastTs": 1778463277502,
+      "firstTs": 1778504157442,
+      "lastTs": 1778504698645,
       "users": 1
     }
   ]

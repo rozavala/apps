@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T02:17:46.003Z",
+  "generatedAt": "2026-05-14T01:40:53.735Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mp0iwdbq_bmespe",
-            "ts": 1778462911862,
-            "clientTs": 1778462911862,
+            "id": "e_mp17gema_tiej3q",
+            "ts": 1778504157442,
+            "clientTs": 1778504157442,
             "kind": "error",
             "app": "little-maestro",
             "page": "little-maestro.html",
@@ -24,35 +24,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 3,
-          "firstTs": 1778462911862,
-          "lastTs": 1778504698645,
-          "users": [
-            "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mp0j47ge_0ldngf",
-            "ts": 1778463277502,
-            "clientTs": 1778463277502,
-            "kind": "console.warn",
-            "app": "book-movie-check",
-            "page": "book-movie-check.html",
-            "message": "[BMC] Lookup failed: Load failed",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
           "count": 2,
-          "firstTs": 1778463277502,
-          "lastTs": 1778463277502,
+          "firstTs": 1778504157442,
+          "lastTs": 1778504698645,
           "users": [
             "u-3bda7c"
           ]
