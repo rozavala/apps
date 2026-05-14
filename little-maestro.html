@@ -7980,7 +7980,35 @@ const MIDIManager = (() => {
 
     _logEvent('Requesting MIDI access...');
 
-    return navigator.requestMIDIAccess({ sysex: false })
+    // Some iOS MIDI shim apps (e.g. WebMIDIBrowser 1.0.6) define
+    // navigator.requestMIDIAccess but either return undefined or throw
+    // synchronously instead of returning a Promise. In both cases the
+    // subsequent .then() would throw "undefined is not an object" and
+    // Safari would attribute the error to the .then() close brace,
+    // bypassing every try/catch inside the callback. Guard explicitly
+    // here so we degrade to the unsupported state instead of crashing.
+    let _accessPromise;
+    try {
+      _accessPromise = navigator.requestMIDIAccess({ sysex: false });
+    } catch (syncErr) {
+      const m = syncErr && syncErr.message ? syncErr.message : String(syncErr);
+      if (typeof Debug !== 'undefined') Debug.error('[MIDI] requestMIDIAccess threw synchronously: ' + m);
+      _status = 'unsupported';
+      _updateStatusUI();
+      _notifyStatusChange();
+      _updateMidiBanner();
+      return Promise.resolve(false);
+    }
+    if (!_accessPromise || typeof _accessPromise.then !== 'function') {
+      if (typeof Debug !== 'undefined') Debug.error('[MIDI] requestMIDIAccess did not return a Promise (shim?)');
+      _status = 'unsupported';
+      _updateStatusUI();
+      _notifyStatusChange();
+      _updateMidiBanner();
+      return Promise.resolve(false);
+    }
+
+    return _accessPromise
       .then(access => {
         try {
           if (typeof Debug !== 'undefined') Debug.log('[MIDI] Access granted');
