@@ -18,6 +18,14 @@ Todas las adiciones de contenido deben cumplir al 100% con el archivo [`content-
 - **Sin Agendas:** Queda estrictamente prohibido el uso de lenguaje, marcos o narrativas modernas relacionadas con temas políticos, sociales, de equidad, inclusión, diversidad (DEI) o identitarios.
 - **Tono Familiar:** El enfoque siempre debe estar en la curiosidad, la aventura, la familia y las habilidades.
 
+## 🤖 Reglas para Agentes (Agent Rules)
+
+Al usar agentes de IA (AI Agents) para modificar este repositorio, deben seguir estas reglas estrictas:
+1. **Adherencia de Contenido:** Cumplir rigurosamente con `content-guidelines.md` en todo momento (neutralidad, precisión factual, sin agendas sociales).
+2. **Pequeños Cambios:** Realizar modificaciones en pequeños lotes, idealmente 1 a 3 cambios por ejecución.
+3. **Markdown Vanilla:** Usar solo Markdown estándar y sencillo (sin HTML incrustado complejo para la documentación) y preferir el idioma español (o bilingüe).
+4. **Verificación Estricta:** Ejecutar el `grep` hook de palabras restringidas antes de finalizar, sin modificar los tests a menos que sea el objetivo explícito.
+
 ## ✅ Lista de Verificación (Review Checklist)
 
 Antes de agregar cualquier funcionalidad o contenido nuevo, debes responder estas 5 preguntas internamente:
