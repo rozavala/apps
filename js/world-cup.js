@@ -2278,6 +2278,14 @@
       .filter(m => m.date === dateStr)
       .sort((a,b) => a.time.localeCompare(b.time));
   }
+  // All matches on the same date as `dateStr`, excluding `dateStr` itself —
+  // used to surface the rest of the day's slate when showing "next match".
+  function matchesOnAfter(dateStr) {
+    return state.matches
+      .filter(m => m.date === dateStr)
+      .sort((a,b) => a.time.localeCompare(b.time))
+      .slice(1);
+  }
 
   /* ----------------------------------------------------------------
      "Today in World Cup history" — dataset keyed by MM-DD.
@@ -2773,19 +2781,28 @@
       .filter(m => !m.result)
       .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
 
-    // Today section: list every game today with mini countdowns
+    // Today section: show today's games if any, otherwise the next
+    // upcoming fixture rendered as a real match row (not just a date line).
+    let todayCardTitle;
     let todayHTML;
     if (todays.length > 0) {
+      todayCardTitle = `📅 Today — ${todays.length} match${todays.length===1?'':'es'}`;
       todayHTML = todays.map(m => renderTodayRow(m)).join('');
     } else if (next) {
       const dayDiff = Math.ceil((new Date(next.date+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
-      todayHTML = `<div class="empty" style="padding:18px 12px;">No matches today. <br>Next up: <b>${fmtDate(next.date)}</b> (in ${dayDiff} day${dayDiff===1?'':'s'}).</div>`;
+      const dayLabel = dayDiff === 1 ? 'Tomorrow' : (dayDiff <= 0 ? 'Coming up' : 'Coming up — in ' + dayDiff + ' days');
+      todayCardTitle = `⚽ Next match — ${dayLabel}`;
+      todayHTML = `
+        <p class="muted" style="font-size:0.85rem;margin-bottom:8px;">${fmtDate(next.date)} · ${next.time} local</p>
+        ${renderTodayRow(next)}
+        ${matchesOnAfter(next.date).slice(0, 4).map(m => renderTodayRow(m)).join('')}
+        <p class="muted" style="font-size:0.78rem;margin-top:10px;text-align:center;">No fixtures today — these are the next up.</p>
+      `;
     } else {
+      todayCardTitle = '🏆 Tournament complete';
       todayHTML = '<div class="empty">All 104 matches played — final whistle has blown!</div>';
     }
 
-    const nextHTML = next ? renderMatchRow(next, true) : '<div class="empty">All matches played — see Standings.</div>';
-    const preTournament = days > 0;
     const tourneyOver = !next && todays.length === 0;
 
     root.innerHTML = `
@@ -2802,15 +2819,9 @@
       </div>` : ''}
 
       <div class="card">
-        <h2>📅 ${todays.length > 0 ? `Today — ${todays.length} match${todays.length===1?'':'es'}` : 'Today'}</h2>
+        <h2>${todayCardTitle}</h2>
         <div id="today-list">${todayHTML}</div>
       </div>
-
-      ${!preTournament && !tourneyOver ? `
-      <div class="card">
-        <h2>⚽ Next up</h2>
-        <div id="home-next">${nextHTML}</div>
-      </div>` : ''}
 
       <div class="card fact-card">
         <h2>📜 Today in World Cup history</h2>
