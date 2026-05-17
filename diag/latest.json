@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-17T14:09:40.643Z",
+  "generatedAt": "2026-05-17T15:40:51.183Z",
   "windowHours": 72,
   "totalGroups": 2,
-  "totalEvents": 132,
+  "totalEvents": 137,
   "topGroups": [
+    {
+      "app": "little-maestro",
+      "kind": "error",
+      "page": "little-maestro.html",
+      "message": "TypeError: undefined is not an object (near '...})...')",
+      "filename": "https://rozavala.github.io/apps/little-maestro.html",
+      "lineno": 9549,
+      "colno": 9,
+      "count": 6,
+      "firstTs": 1779025640637,
+      "lastTs": 1779032206553,
+      "users": 2
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
@@ -16,19 +29,6 @@
       "firstTs": 1779024638528,
       "lastTs": 1779026412408,
       "users": 2
-    },
-    {
-      "app": "little-maestro",
-      "kind": "error",
-      "page": "little-maestro.html",
-      "message": "TypeError: undefined is not an object (near '...})...')",
-      "filename": "https://rozavala.github.io/apps/little-maestro.html",
-      "lineno": 9549,
-      "colno": 9,
-      "count": 1,
-      "firstTs": 1779025640637,
-      "lastTs": 1779025640637,
-      "users": 1
     }
   ]
 }
