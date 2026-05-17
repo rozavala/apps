@@ -1,0 +1,308 @@
+/* ============================================================
+   CIVICS LAB — civics-lab.css
+   Theme: deep navy + gold (civic / institutional feel).
+   ============================================================ */
+
+:root {
+  --cv-accent: #FBBF24;       /* gold */
+  --cv-accent-deep: #B45309;
+  --cv-navy: #1E3A8A;
+  --cv-navy-deep: #0B1E5A;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 920px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cv-screen { display: none; width: 100%; }
+.cv-screen.active { display: block; }
+
+/* ── Header ── */
+.cv-header {
+  text-align: center;
+  margin: 16px 0 24px;
+  position: relative;
+}
+.cv-header .icon { font-size: 4rem; display: block; margin-bottom: 8px; }
+.cv-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--cv-accent);
+}
+.cv-header p {
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-weight: 600;
+}
+.cv-lang-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.cv-lang-toggle:hover { border-color: var(--cv-accent); }
+
+/* ── Home tiles ── */
+.cv-tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 600px) {
+  .cv-tiles { grid-template-columns: repeat(2, 1fr); }
+}
+.cv-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.1s ease, border-color 0.15s ease;
+  color: var(--text);
+}
+.cv-tile:hover { transform: translateY(-3px); border-color: var(--cv-accent); }
+.cv-tile-icon { font-size: 2.6rem; display: block; margin-bottom: 6px; }
+.cv-tile-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--cv-accent);
+}
+.cv-tile-desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+.cv-tile-stat {
+  margin-top: 10px;
+  font-weight: 800;
+  color: var(--cv-accent-deep);
+}
+
+/* ── Back / section title ── */
+.cv-back-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.cv-back-btn:hover { border-color: var(--cv-accent); }
+.cv-section-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--cv-accent);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+/* ── Generic card grid for branches + institutions ── */
+.cv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.cv-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 16px 12px;
+  cursor: pointer;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+.cv-card:hover { transform: translateY(-2px); border-color: var(--cv-accent); }
+.cv-card.cv-done { border-color: var(--cv-accent-deep); }
+.cv-icon { font-size: 2rem; }
+.cv-card h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text);
+  margin: 0;
+}
+.cv-sub {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.cv-star {
+  position: absolute;
+  top: 8px; right: 10px;
+}
+
+/* ── Detail screens ── */
+.cv-detail-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.cv-detail-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 6px;
+}
+.cv-detail-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text);
+}
+.cv-meta-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+@media (min-width: 600px) {
+  .cv-meta-row { grid-template-columns: repeat(3, 1fr); }
+}
+.cv-meta-cell { text-align: left; }
+.cv-meta-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cv-accent);
+  margin-bottom: 4px;
+}
+.cv-meta-value {
+  display: block;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.cv-body-text {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 18px;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+/* ── Primary / secondary buttons ── */
+.cv-primary-btn, .cv-secondary-btn {
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-block;
+  margin: 4px;
+  border: none;
+}
+.cv-primary-btn {
+  background: var(--cv-accent-deep);
+  color: white;
+  box-shadow: 0 6px 18px rgba(180,83,9,0.4);
+}
+.cv-primary-btn:hover { background: var(--cv-accent); color: #1A1030; }
+.cv-secondary-btn {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border-subtle);
+}
+.cv-secondary-btn:hover { border-color: var(--cv-accent); }
+
+/* ── Law-making mode ── */
+.cv-law-progress {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--cv-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.1em;
+}
+.cv-law-nav {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* ── Quiz ── */
+.cv-quiz-counter {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--cv-accent);
+  margin-bottom: 10px;
+}
+.cv-quiz-q {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 18px;
+  color: var(--text);
+}
+.cv-quiz-options {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 600px) {
+  .cv-quiz-options { grid-template-columns: 1fr 1fr; }
+}
+.cv-quiz-opt {
+  background: var(--bg-card);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 1rem;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+.cv-quiz-opt:hover { transform: translateY(-2px); border-color: var(--cv-accent); }
+.cv-quiz-opt.cv-correct {
+  background: rgba(52,211,153,0.25);
+  border-color: var(--green);
+}
+.cv-quiz-opt.cv-wrong {
+  background: rgba(248,113,113,0.25);
+  border-color: var(--red);
+}
+
+#cv-quiz-result {
+  text-align: center;
+  padding: 30px 0;
+}
+.cv-stars-big {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
