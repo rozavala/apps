@@ -2225,23 +2225,121 @@
     picks: {}, // memberId -> { champion, runnerUp, goldenBoot, ko: { R32: {matchId: code}, R16:..., QF:..., SF:..., Final:... }, groupWinners: { A: code, B: code, ... }, groupRunnersUp: { A: code, ... } }
   };
 
+  // Fields that can be mutated per match (vs the canonical OpenFootball
+  // baseline). Anything else stays read-only at the OFFICIAL_SCHEDULE level.
+  const MATCH_OVERRIDE_FIELDS = ['home', 'away', 'date', 'time', 'venue', 'result'];
+
+  function _scheduleBaseline(id) {
+    return OFFICIAL_SCHEDULE.find(x => x.id === id);
+  }
+  function _diffGroups() {
+    for (const g of GROUP_LETTERS) {
+      const a = (state.groups[g] || []).slice().sort().join(',');
+      const b = (defaultGroups[g] || []).slice().sort().join(',');
+      if (a !== b) return state.groups;
+    }
+    return null;
+  }
+  function _diffMatches() {
+    const overrides = {};
+    for (const m of state.matches) {
+      const base = _scheduleBaseline(m.id);
+      if (!base) continue;
+      const diff = {};
+      for (const k of MATCH_OVERRIDE_FIELDS) {
+        const mv = m[k] === undefined ? null : m[k];
+        const bv = base[k] === undefined ? null : base[k];
+        if (JSON.stringify(mv) !== JSON.stringify(bv)) diff[k] = m[k];
+      }
+      if (Object.keys(diff).length > 0) overrides[m.id] = diff;
+    }
+    return Object.keys(overrides).length > 0 ? overrides : null;
+  }
+
   function load() {
+    // Always re-seed matches from the canonical schedule so we don't carry
+    // 30KB of redundant fixture data through every save cycle.
+    state.matches = JSON.parse(JSON.stringify(OFFICIAL_SCHEDULE));
+    state.groups = JSON.parse(JSON.stringify(defaultGroups));
+
     try {
       const raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw);
-        // shallow merge — keep canonical groups/matches if saved missing
-        state = Object.assign(state, saved);
-        if (!state.groups || Object.keys(state.groups).length === 0) state.groups = defaultGroups;
-        if (!state.matches || state.matches.length === 0) state.matches = defaultMatches;
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+
+      if (saved.groups && Object.keys(saved.groups).length > 0) {
+        state.groups = saved.groups;
       }
+
+      // New slim shape — matchOverrides keyed by match id
+      if (saved.matchOverrides && typeof saved.matchOverrides === 'object') {
+        for (const id of Object.keys(saved.matchOverrides)) {
+          const m = state.matches.find(x => x.id === id);
+          if (!m) continue;
+          const diff = saved.matchOverrides[id] || {};
+          for (const k of MATCH_OVERRIDE_FIELDS) {
+            if (k in diff) m[k] = diff[k];
+          }
+        }
+      }
+
+      // Back-compat: old payloads stored the whole matches array inline.
+      if (Array.isArray(saved.matches)) {
+        for (const sm of saved.matches) {
+          if (!sm || !sm.id) continue;
+          const m = state.matches.find(x => x.id === sm.id);
+          if (!m) continue;
+          const base = _scheduleBaseline(sm.id);
+          for (const k of MATCH_OVERRIDE_FIELDS) {
+            if (k in sm) {
+              const sv = sm[k] === undefined ? null : sm[k];
+              const bv = base && base[k] !== undefined ? base[k] : null;
+              if (JSON.stringify(sv) !== JSON.stringify(bv)) m[k] = sm[k];
+            }
+          }
+        }
+      }
+
+      state.members = Array.isArray(saved.members) ? saved.members : [];
+      state.picks = (saved.picks && typeof saved.picks === 'object') ? saved.picks : {};
+      state.uiSelectedMember = saved.uiSelectedMember || null;
     } catch (e) { console.warn('wc load failed', e); }
   }
+
+  // Throttle save() so a flurry of edits doesn't write 20 times in a row,
+  // and persist only diffs to keep the payload tiny.
+  let _saveTimer = null;
+  let _lastQuotaWarn = 0;
   function save() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
-    catch (e) { console.warn('wc save failed', e); }
-    // Best-effort cross-device sync (no-op if CloudSync not loaded/online)
-    try { if (window.CloudSync && CloudSync.online && CloudSync.push) CloudSync.push(STORE_KEY); } catch (e) {}
+    if (_saveTimer) return;
+    _saveTimer = setTimeout(() => {
+      _saveTimer = null;
+      const slim = {
+        members: state.members,
+        picks: state.picks,
+        uiSelectedMember: state.uiSelectedMember || null,
+      };
+      const gd = _diffGroups();
+      if (gd) slim.groups = gd;
+      const md = _diffMatches();
+      if (md) slim.matchOverrides = md;
+
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(slim));
+      } catch (e) {
+        // Quota exceeded — surface once per minute instead of spamming.
+        const now = Date.now();
+        if (now - _lastQuotaWarn > 60000) {
+          _lastQuotaWarn = now;
+          console.warn('wc save failed', e);
+          if (typeof toast === 'function') {
+            toast('⚠️ Storage full — clear another app\'s data to keep saving picks.');
+          }
+        }
+      }
+      // Best-effort cross-device sync (no-op if CloudSync not loaded/online)
+      try { if (window.CloudSync && CloudSync.online && CloudSync.push) CloudSync.push(STORE_KEY); } catch (e) {}
+    }, 200);
   }
 
   /* ----------------------------------------------------------------
