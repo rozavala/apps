@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Cup 2026 🏆</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/world-cup.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#16A34A">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="atmo" style="width:420px;height:420px;background:rgba(22,163,74,0.10);top:-120px;left:-100px;"></div>
+  <div class="atmo" style="width:380px;height:380px;background:rgba(37,99,235,0.08);bottom:-100px;right:-90px;animation-delay:-8s;"></div>
+  <div class="atmo" style="width:300px;height:300px;background:rgba(220,38,38,0.06);top:40%;right:-80px;animation-delay:-14s;"></div>
+
+  <div class="app">
+    <a href="index.html" class="wc-back" aria-label="Back to apps">←</a>
+
+    <header class="wc-header">
+      <div class="trophy">🏆</div>
+      <h1>World Cup 2026</h1>
+      <div class="sub">USA · CANADA · MEXICO &nbsp;·&nbsp; Jun 11 – Jul 19</div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="home"      role="tab">🏠 Home</button>
+      <button class="tab"        data-tab="teams"     role="tab">🌍 Teams</button>
+      <button class="tab"        data-tab="matches"   role="tab">⚽ Matches</button>
+      <button class="tab"        data-tab="venues"    role="tab">🏟 Venues</button>
+      <button class="tab"        data-tab="standings" role="tab">📊 Standings</button>
+      <button class="tab"        data-tab="pool"      role="tab">👨‍👩‍👧‍👦 Bracket Pool</button>
+      <button class="tab"        data-tab="about"     role="tab">ℹ About</button>
+    </nav>
+
+    <main>
+      <section class="screen active" id="screen-home"></section>
+      <section class="screen"        id="screen-teams"></section>
+      <section class="screen"        id="screen-country"></section>
+      <section class="screen"        id="screen-matches"></section>
+      <section class="screen"        id="screen-venues"></section>
+      <section class="screen"        id="screen-standings"></section>
+      <section class="screen"        id="screen-pool"></section>
+      <section class="screen"        id="screen-about"></section>
+    </main>
+  </div>
+
+  <!-- Match result / group editor modal -->
+  <div class="modal" id="match-modal" onclick="if(event.target===this)WC.closeModal()">
+    <div class="modal-inner"></div>
+  </div>
+
+  <script src="js/world-cup.js"></script>
+</body>
+</html>

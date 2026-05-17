@@ -1143,6 +1143,14 @@
   --card-tag-bg: rgba(16, 185, 129, 0.15);
 }
 
+/* World Cup 2026 card */
+.card-worldcup {
+  --card-accent: #16A34A;
+  --card-glow: rgba(22, 163, 74, 0.30);
+  --card-icon-bg: linear-gradient(135deg, #DC2626 0%, #F59E0B 50%, #2563EB 100%);
+  --card-tag-bg: rgba(22, 163, 74, 0.18);
+}
+
 /* ============================================================
    PARENT DASHBOARD — Insights & nudges
    ============================================================ */
