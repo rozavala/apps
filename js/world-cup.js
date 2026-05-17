@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  const STORE_KEY = 'wc2026.v1';
+  const STORE_KEY = 'wc2026.v2';
   const TOURNAMENT_START = '2026-06-11T20:00:00-05:00';
   const TOURNAMENT_END   = '2026-07-19T15:00:00-04:00';
 
@@ -70,19 +70,16 @@
      draw fills these in). The family can update groups in setup.
      ---------------------------------------------------------------- */
   const COUNTRIES = [
-    /* --- CONCACAF hosts --- */
-    { code:'CAN', name:'Canada',  flag:'🇨🇦', group:'A', pot:1,
-      capital:'Ottawa', population:'40M', area:'9.98M km²', languages:'English, French', currency:'Canadian dollar (CAD)',
-      geography:'The world\'s second-largest country by area, stretching from the Atlantic to the Pacific to the Arctic. Home to the Rockies, the Great Lakes, and vast boreal forests.',
-      history:'Confederated in 1867, Canada grew from French and British colonies into a bilingual federation. It became fully sovereign with the Constitution Act of 1982.',
-      funFacts:['Has more lakes than the rest of the world combined','The longest coastline of any country (>200,000 km)','Hockey, lacrosse, and curling are deeply ingrained in culture'],
-      wc:{ appearances:2, best:'Group stage (1986, 2022)', titles:0 },
+    { code:'CZE', name:'Czech Republic', flag:'🇨🇿', group:'A', pot:3,
+      capital:'Prague', population:'10.7M', area:'79,000 km²', languages:'Czech', currency:'Czech koruna (CZK)',
+      geography:'Landlocked central Europe — Bohemia in the west, Moravia in the east. Rolling forests, rivers, and the Bohemian Massif.',
+      history:'Part of the Habsburg Empire until 1918; split peacefully from Slovakia in 1993.',
+      funFacts:['Consumes the most beer per capita on earth','Charles Bridge dates to 1357','Prague is one of Europe\'s best-preserved medieval cities'],
+      wc:{ appearances:10, best:'Runners-up (1934, 62 as Czechoslovakia)', titles:0 },
       stars:[
-        { name:'Alphonso Davies',     pos:'LB',  club:'Bayern Munich',     age:25, note:'Born in a Ghanaian refugee camp; one of the fastest players in world football.' },
-        { name:'Jonathan David',      pos:'ST',  club:'Juventus',          age:26, note:'Canada\'s record scorer, clinical in front of goal.' },
-        { name:'Stephen Eustáquio',   pos:'CM',  club:'FC Porto',          age:29, note:'Metronomic Portuguese-born midfielder.' },
-        { name:'Tajon Buchanan',      pos:'RW',  club:'Inter Milan',       age:27, note:'Pacey wide attacker.' },
-        { name:'Cyle Larin',          pos:'ST',  club:'Mallorca',          age:31, note:'Aerial threat and second-top scorer in Canada history.' },
+        { name:'Patrik Schick',     pos:'ST', club:'Bayer Leverkusen', age:30, note:'Tall, technical striker.' },
+        { name:'Tomáš Souček',      pos:'CM', club:'West Ham',         age:31, note:'Box-to-box runner.' },
+        { name:'Adam Hložek',       pos:'AM', club:'Hoffenheim',       age:23, note:'Versatile attacker.' },
       ]
     },
     { code:'MEX', name:'Mexico',  flag:'🇲🇽', group:'A', pot:1,
@@ -100,6 +97,178 @@
         { name:'Luis Chávez',             pos:'CM', club:'Dynamo Moscow',  age:30, note:'Scored a 30-yard free kick at Qatar 2022.' },
       ]
     },
+    { code:'ZAF', name:"South Africa", flag:"\ud83c\uddff\ud83c\udde6", group:'A', pot:3,
+      capital:"Pretoria / Cape Town / Bloemfontein", population:"62M", area:"1.22M km\u00b2", languages:"12 official (incl. Zulu, Xhosa, Afrikaans, English)", currency:"South African rand (ZAR)",
+      geography:"Two ocean coasts meet at the Cape. Highveld plateau, Drakensberg mountains, Karoo semi-desert, and Kruger's subtropical bushveld.",
+      history:"A 1652 Dutch trading post grew into apartheid colonialism; democracy in 1994 with Mandela's presidency.",
+      funFacts:["First nation to voluntarily give up nuclear weapons","Home to Kruger National Park","Hosted the 2010 World Cup"],
+      wc:{ appearances:3, best:"Group stage", titles:0 },
+      stars:[
+        { name:"Lyle Foster", pos:"ST", club:"Burnley", age:25, note:"Powerful young forward." },
+        { name:"Teboho Mokoena", pos:"CM", club:"Mamelodi Sundowns", age:29, note:"Set-piece specialist." },
+        { name:"Themba Zwane", pos:"AM", club:"Mamelodi Sundowns", age:36, note:"Veteran creator." },
+        { name:"Ronwen Williams", pos:"GK", club:"Mamelodi Sundowns", age:34, note:"Penalty-shootout hero at AFCON 2023." },
+        { name:"Percy Tau", pos:"AM", club:"Al Ahly", age:31, note:"Bafana Bafana captain at times." },
+      ]
+    },
+    { code:'KOR', name:'South Korea', flag:'🇰🇷', group:'A', pot:3,
+      capital:'Seoul', population:'52M', area:'100,000 km²', languages:'Korean', currency:'South Korean won (KRW)',
+      geography:'A mountainous peninsula in East Asia. 70% of the country is mountainous; long coastlines on three sides.',
+      history:'A unified kingdom since 668 AD. Liberated from Japan in 1945; the Korean War split it in 1953.',
+      funFacts:['Co-hosted the 2002 World Cup (reached semifinals)','K-pop is a global phenomenon','Has won 12 of the last 19 archery Olympic golds'],
+      wc:{ appearances:11, best:'4th place (2002)', titles:0 },
+      stars:[
+        { name:'Son Heung-min',     pos:'LW/ST', club:'LAFC',         age:33, note:'Captain, two-footed scorer.' },
+        { name:'Lee Kang-in',       pos:'AM', club:'PSG',             age:25, note:'Creative spark.' },
+        { name:'Kim Min-jae',       pos:'CB', club:'Bayern Munich',   age:29, note:'"Monster" centre-back.' },
+        { name:'Hwang Hee-chan',    pos:'ST', club:'Wolves',          age:30, note:'Pacey forward.' },
+      ]
+    },
+    { code:'BIH', name:"Bosnia & Herzegovina", flag:"\ud83c\udde7\ud83c\udde6", group:'B', pot:4,
+      capital:"Sarajevo", population:"3.2M", area:"51,000 km\u00b2", languages:"Bosnian, Croatian, Serbian", currency:"Convertible mark (BAM)",
+      geography:"Western Balkans, mostly mountainous (Dinaric Alps). A short 20-km Adriatic coastline at Neum.",
+      history:"Independent from Yugoslavia in 1992 after a brutal war (1992\u201395). Sarajevo hosted the 1984 Winter Olympics.",
+      funFacts:["Only previous World Cup appearance was 2014","Sarajevo's siege (1992\u201396) was the longest in modern history","Famous for \u0107evapi and Bosnian coffee"],
+      wc:{ appearances:1, best:"Group stage (2014)", titles:0 },
+      stars:[
+        { name:"Edin D\u017eeko", pos:"ST", club:"Fenerbah\u00e7e", age:40, note:"All-time top scorer, evergreen captain." },
+        { name:"Sead Kola\u0161inac", pos:"LB", club:"Atalanta", age:32, note:"Powerful overlapping defender." },
+        { name:"Miralem Pjani\u0107", pos:"CM", club:"CSKA Moscow", age:35, note:"Elegant passing midfielder." },
+        { name:"Ermedin Demirovi\u0107", pos:"ST", club:"VfB Stuttgart", age:28, note:"Reliable goal-scorer." },
+      ]
+    },
+    { code:'CAN', name:'Canada',  flag:'🇨🇦', group:'B', pot:1,
+      capital:'Ottawa', population:'40M', area:'9.98M km²', languages:'English, French', currency:'Canadian dollar (CAD)',
+      geography:'The world\'s second-largest country by area, stretching from the Atlantic to the Pacific to the Arctic. Home to the Rockies, the Great Lakes, and vast boreal forests.',
+      history:'Confederated in 1867, Canada grew from French and British colonies into a bilingual federation. It became fully sovereign with the Constitution Act of 1982.',
+      funFacts:['Has more lakes than the rest of the world combined','The longest coastline of any country (>200,000 km)','Hockey, lacrosse, and curling are deeply ingrained in culture'],
+      wc:{ appearances:2, best:'Group stage (1986, 2022)', titles:0 },
+      stars:[
+        { name:'Alphonso Davies',     pos:'LB',  club:'Bayern Munich',     age:25, note:'Born in a Ghanaian refugee camp; one of the fastest players in world football.' },
+        { name:'Jonathan David',      pos:'ST',  club:'Juventus',          age:26, note:'Canada\'s record scorer, clinical in front of goal.' },
+        { name:'Stephen Eustáquio',   pos:'CM',  club:'FC Porto',          age:29, note:'Metronomic Portuguese-born midfielder.' },
+        { name:'Tajon Buchanan',      pos:'RW',  club:'Inter Milan',       age:27, note:'Pacey wide attacker.' },
+        { name:'Cyle Larin',          pos:'ST',  club:'Mallorca',          age:31, note:'Aerial threat and second-top scorer in Canada history.' },
+      ]
+    },
+    { code:'QAT', name:'Qatar', flag:'🇶🇦', group:'B', pot:4,
+      capital:'Doha', population:'2.9M', area:'12,000 km²', languages:'Arabic', currency:'Qatari riyal (QAR)',
+      geography:'A small peninsula jutting into the Persian Gulf. Mostly flat, sandy desert.',
+      history:'A British protectorate until 1971. Hosted the 2022 World Cup.',
+      funFacts:['Hosted the 2022 World Cup','Highest GDP per capita in the world by some measures','Home of Al Jazeera'],
+      wc:{ appearances:1, best:'Group stage (2022, host)', titles:0 },
+      stars:[
+        { name:'Akram Afif',        pos:'LW', club:'Al-Sadd',    age:29, note:'AFC Asian Cup MVP.' },
+        { name:'Almoez Ali',        pos:'ST', club:'Al-Duhail',  age:29, note:'Top scorer of the 2019 Asian Cup.' },
+        { name:'Hassan Al-Haydos',  pos:'AM', club:'Al-Sadd',    age:35, note:'Long-time captain.' },
+      ]
+    },
+    { code:'SUI', name:'Switzerland', flag:'🇨🇭', group:'B', pot:2,
+      capital:'Bern', population:'8.8M', area:'41,000 km²', languages:'German, French, Italian, Romansh', currency:'Swiss franc (CHF)',
+      geography:'Alpine heart of Europe. The Rhine and Rhône rivers both start here.',
+      history:'A confederation since 1291 — one of the oldest in the world. Famously neutral.',
+      funFacts:['Four official languages','Direct democracy by national referendum','Birthplace of FIFA (1904, Zürich)'],
+      wc:{ appearances:12, best:'Quarterfinals (1934, 38, 54)', titles:0 },
+      stars:[
+        { name:'Granit Xhaka',     pos:'CM', club:'Bayer Leverkusen', age:33, note:'Captain and midfield leader.' },
+        { name:'Manuel Akanji',    pos:'CB', club:'Man City',         age:30, note:'Calm modern centre-back.' },
+        { name:'Breel Embolo',     pos:'ST', club:'Monaco',           age:28, note:'Physical forward.' },
+        { name:'Yann Sommer',      pos:'GK', club:'Inter Milan',      age:37, note:'Reflex shot-stopper.' },
+      ]
+    },
+    { code:'BRA', name:'Brazil', flag:'🇧🇷', group:'C', pot:1,
+      capital:'Brasília', population:'215M', area:'8.51M km²', languages:'Portuguese', currency:'Brazilian real (BRL)',
+      geography:'The largest country in South America, holding most of the Amazon rainforest. Long Atlantic coastline; the Iguaçu Falls; vast cerrado savannah.',
+      history:'A Portuguese colony from 1500, independent in 1822, a republic since 1889. Slavery left a deep mark; Afro-Brazilian culture defines its music and food.',
+      funFacts:['Five-time world champion — more than any country','Football born in São Paulo in 1894 thanks to Charles Miller','The Amazon produces 20% of the world\'s oxygen'],
+      wc:{ appearances:22, best:'Champions ×5 (1958, 62, 70, 94, 02)', titles:5 },
+      stars:[
+        { name:'Vinícius Júnior', pos:'LW', club:'Real Madrid', age:25, note:'Electric left winger, two-footed nightmare.' },
+        { name:'Rodrygo',         pos:'RW', club:'Real Madrid', age:25, note:'Calm finisher in big moments.' },
+        { name:'Endrick',         pos:'ST', club:'Real Madrid', age:19, note:'The teenage No.9 of Brazil\'s future.' },
+        { name:'Bruno Guimarães', pos:'CM', club:'Newcastle',   age:28, note:'All-action midfield engine.' },
+        { name:'Marquinhos',      pos:'CB', club:'PSG',         age:32, note:'Captain and rock at the back.' },
+        { name:'Alisson Becker',  pos:'GK', club:'Liverpool',   age:33, note:'Among the world\'s best goalkeepers.' },
+      ]
+    },
+    { code:'HAI', name:"Haiti", flag:"\ud83c\udded\ud83c\uddf9", group:'C', pot:4,
+      capital:"Port-au-Prince", population:"11.5M", area:"27,750 km\u00b2", languages:"French, Haitian Creole", currency:"Gourde (HTG)",
+      geography:"Western third of Hispaniola, sharing with the Dominican Republic. Mountainous interior; Caribbean coastline.",
+      history:"First independent Black republic, 1804, after a successful slave revolt against France.",
+      funFacts:["First Black-led republic in the world","Won independence from France in 1804","Returns to the World Cup after a 52-year absence (last in 1974)"],
+      wc:{ appearances:1, best:"Group stage (1974)", titles:0 },
+      stars:[
+        { name:"Duckens Nazon", pos:"ST", club:"Caen", age:32, note:"Veteran scorer." },
+        { name:"Frantzdy Pierrot", pos:"ST", club:"Damac", age:30, note:"Target man." },
+        { name:"Carl Saint\u00e9", pos:"CM", club:"Saint-\u00c9tienne", age:24, note:"Midfield engine." },
+      ]
+    },
+    { code:'MAR', name:'Morocco', flag:'🇲🇦', group:'C', pot:2,
+      capital:'Rabat', population:'37M', area:'447,000 km²', languages:'Arabic, Berber', currency:'Moroccan dirham (MAD)',
+      geography:'Atlantic and Mediterranean coasts, Atlas Mountains, and the Sahara to the south.',
+      history:'A continuous monarchy since the 8th century — one of the world\'s oldest. Independent from France in 1956.',
+      funFacts:['First African team to reach the World Cup semifinals (2022)','Co-hosting the 2030 World Cup with Spain & Portugal','Marrakech\'s Jemaa el-Fnaa is UNESCO heritage'],
+      wc:{ appearances:6, best:'4th place (2022)', titles:0 },
+      stars:[
+        { name:'Achraf Hakimi',     pos:'RB', club:'PSG',           age:27, note:'World-class attacking fullback.' },
+        { name:'Hakim Ziyech',      pos:'AM', club:'Al-Duhail',     age:32, note:'Left-footed creator.' },
+        { name:'Yassine Bounou',    pos:'GK', club:'Al-Hilal',      age:34, note:'Penalty-shootout hero of 2022.' },
+        { name:'Sofyan Amrabat',    pos:'CDM',club:'Fenerbahçe',    age:29, note:'Tournament breakout of 2022.' },
+        { name:'Youssef En-Nesyri', pos:'ST', club:'Fenerbahçe',    age:28, note:'Scored the historic goal vs Portugal.' },
+      ]
+    },
+    { code:'SCO', name:'Scotland', flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', group:'C', pot:3,
+      capital:'Edinburgh', population:'5.5M', area:'78,000 km²', languages:'English, Scots, Scottish Gaelic', currency:'Pound sterling (GBP)',
+      geography:'Highlands in the north, Lowlands in the south, 790 islands. Crossed by Loch Ness and Loch Lomond.',
+      history:'Joined with England by the Acts of Union in 1707. The Scottish FA, founded 1873, is the second oldest in the world.',
+      funFacts:['Invented modern golf','Bagpipes, kilts, whisky','Played the first international match (vs England, 1872)'],
+      wc:{ appearances:8, best:'Group stage', titles:0 },
+      stars:[
+        { name:'Andrew Robertson',  pos:'LB', club:'Liverpool',  age:31, note:'Captain and overlapping fullback.' },
+        { name:'Scott McTominay',   pos:'CM', club:'Napoli',     age:28, note:'Goal-scoring midfielder.' },
+        { name:'John McGinn',       pos:'AM', club:'Aston Villa',age:31, note:'Energetic midfielder.' },
+        { name:'Kieran Tierney',    pos:'LB', club:'Celtic',     age:28, note:'Hard-running defender.' },
+      ]
+    },
+    { code:'AUS', name:'Australia', flag:'🇦🇺', group:'D', pot:3,
+      capital:'Canberra', population:'26M', area:'7.69M km²', languages:'English', currency:'Australian dollar (AUD)',
+      geography:'A whole continent. The Great Barrier Reef stretches 2,300 km off the coast; the Outback covers most of the interior.',
+      history:'Indigenous peoples here for 65,000+ years. British colonisation from 1788; federation in 1901.',
+      funFacts:['Has 21 of the world\'s 25 most venomous snakes','Hosts the Australian Open tennis','Switched from Oceania to AFC for football in 2006'],
+      wc:{ appearances:6, best:'Round of 16 (2006, 2022)', titles:0 },
+      stars:[
+        { name:'Mathew Ryan',       pos:'GK', club:'Roma',           age:34, note:'Captain and No.1.' },
+        { name:'Mitchell Duke',     pos:'ST', club:'Machida Zelvia', age:35, note:'Veteran target man.' },
+        { name:'Jackson Irvine',    pos:'CM', club:'St Pauli',       age:33, note:'Midfield captain.' },
+        { name:'Cameron Devlin',    pos:'CM', club:'Hearts',         age:27, note:'Industrious midfielder.' },
+      ]
+    },
+    { code:'PAR', name:'Paraguay', flag:'🇵🇾', group:'D', pot:3,
+      capital:'Asunción', population:'7M', area:'407,000 km²', languages:'Spanish, Guaraní', currency:'Guaraní (PYG)',
+      geography:'Landlocked in the heart of South America. The Paraguay river splits Chaco scrubland from greener eastern hills.',
+      history:'Independent in 1811. Endured the brutal 1864–70 War of the Triple Alliance and a long 20th-century dictatorship.',
+      funFacts:['One of the few officially bilingual countries (Spanish + Guaraní)','Itaipú is one of the world\'s largest hydro dams','Tereré (cold mate) is the national drink'],
+      wc:{ appearances:9, best:'Quarterfinals (2010)', titles:0 },
+      stars:[
+        { name:'Miguel Almirón',     pos:'AM', club:'Atlanta United', age:31, note:'Quick, hard-running playmaker.' },
+        { name:'Diego Gómez',        pos:'CM', club:'Brighton',       age:23, note:'Box-to-box runner.' },
+        { name:'Antonio Sanabria',   pos:'ST', club:'Torino',         age:29, note:'Experienced striker.' },
+        { name:'Gustavo Gómez',      pos:'CB', club:'Palmeiras',      age:32, note:'Captain at the back.' },
+      ]
+    },
+    { code:'TUR', name:'Türkiye (Turkey)', flag:'🇹🇷', group:'D', pot:2,
+      capital:'Ankara', population:'85M', area:'784,000 km²', languages:'Turkish', currency:'Turkish lira (TRY)',
+      geography:'Bridges Europe and Asia across the Bosphorus. Black Sea, Aegean, Mediterranean coasts; the Anatolian plateau in between.',
+      history:'Founded as a republic in 1923 by Atatürk from the ruins of the Ottoman Empire.',
+      funFacts:['Istanbul is the only city on two continents','Hagia Sophia is 1,500 years old','Turkish coffee is UNESCO heritage'],
+      wc:{ appearances:2, best:'3rd place (2002)', titles:0 },
+      stars:[
+        { name:'Hakan Çalhanoğlu',  pos:'CM', club:'Inter Milan',  age:32, note:'Set-piece magician.' },
+        { name:'Arda Güler',        pos:'AM', club:'Real Madrid',  age:21, note:'Silky left-footed creator.' },
+        { name:'Kenan Yıldız',      pos:'AM', club:'Juventus',     age:21, note:'Two-footed playmaker.' },
+        { name:'Merih Demiral',     pos:'CB', club:'Al-Ahli',      age:28, note:'Aggressive defender.' },
+      ]
+    },
     { code:'USA', name:'United States', flag:'🇺🇸', group:'D', pot:1,
       capital:'Washington, D.C.', population:'335M', area:'9.83M km²', languages:'English (de facto)', currency:'US dollar (USD)',
       geography:'A continental country with mountains, plains, deserts, swamps, and two ocean coasts. From Death Valley to Mt. McKinley/Denali, the geographic variety is enormous.',
@@ -115,67 +284,20 @@
         { name:'Matt Turner',       pos:'GK', club:'Crystal Palace',  age:31, note:'Late-blooming No.1.' },
       ]
     },
-
-    /* --- CONMEBOL --- */
-    { code:'ARG', name:'Argentina', flag:'🇦🇷', group:'B', pot:1,
-      capital:'Buenos Aires', population:'46M', area:'2.78M km²', languages:'Spanish', currency:'Argentine peso (ARS)',
-      geography:'From subtropical Iguazú falls to Patagonian glaciers, Argentina covers nearly the whole length of South America. The Pampas grasslands feed millions of cattle.',
-      history:'Independent from Spain in 1816, shaped by waves of European immigration. Tango was born in the ports of Buenos Aires.',
-      funFacts:['Defending world champions (Qatar 2022)','Birthplace of Maradona and Messi','Eats the most beef per capita in the world'],
-      wc:{ appearances:18, best:'Champions (1978, 1986, 2022)', titles:3 },
+    { code:'CUW', name:"Cura\u00e7ao", flag:"\ud83c\udde8\ud83c\uddfc", group:'E', pot:4,
+      capital:"Willemstad", population:"150,000", area:"444 km\u00b2", languages:"Dutch, Papiamento, English", currency:"Caribbean guilder (XCG)",
+      geography:"A small Dutch Caribbean island off the coast of Venezuela. Arid, breezy, and ringed by coral reefs.",
+      history:"Dutch colony since 1634; constituent country of the Kingdom of the Netherlands since 2010.",
+      funFacts:["Smallest country (by population) ever to qualify for a World Cup","Willemstad's colourful colonial centre is UNESCO heritage","Many players are Dutch-born with Cura\u00e7aoan heritage"],
+      wc:{ appearances:0, best:"Debut", titles:0 },
       stars:[
-        { name:'Lionel Messi',       pos:'RW/AM', club:'Inter Miami',  age:38, note:'Eight Ballons d\'Or, the 2022 champion, and likely his last World Cup.' },
-        { name:'Lautaro Martínez',   pos:'ST',    club:'Inter Milan',  age:28, note:'Captain-in-waiting and prolific finisher.' },
-        { name:'Julián Álvarez',     pos:'ST',    club:'Atlético Madrid', age:26, note:'Quick, intelligent forward.' },
-        { name:'Enzo Fernández',     pos:'CM',    club:'Chelsea',      age:25, note:'2022 Young Player of the Tournament.' },
-        { name:'Cristian Romero',    pos:'CB',    club:'Tottenham',    age:28, note:'"Cuti" — fearsome, ball-playing defender.' },
-        { name:'Emiliano Martínez',  pos:'GK',    club:'Aston Villa',  age:33, note:'Penalty-shootout specialist nicknamed "Dibu".' },
+        { name:"Leandro Bacuna", pos:"CM", club:"unattached", age:35, note:"Veteran captain." },
+        { name:"Tahith Chong", pos:"AM", club:"Sheffield United", age:26, note:"Former Man Utd youth product." },
+        { name:"Juninho Bacuna", pos:"CM", club:"Birmingham City", age:28, note:"Long-shot specialist." },
+        { name:"Cuco Martina", pos:"RB", club:"unattached", age:36, note:"Experienced fullback." },
       ]
     },
-    { code:'BRA', name:'Brazil', flag:'🇧🇷', group:'C', pot:1,
-      capital:'Brasília', population:'215M', area:'8.51M km²', languages:'Portuguese', currency:'Brazilian real (BRL)',
-      geography:'The largest country in South America, holding most of the Amazon rainforest. Long Atlantic coastline; the Iguaçu Falls; vast cerrado savannah.',
-      history:'A Portuguese colony from 1500, independent in 1822, a republic since 1889. Slavery left a deep mark; Afro-Brazilian culture defines its music and food.',
-      funFacts:['Five-time world champion — more than any country','Football born in São Paulo in 1894 thanks to Charles Miller','The Amazon produces 20% of the world\'s oxygen'],
-      wc:{ appearances:22, best:'Champions ×5 (1958, 62, 70, 94, 02)', titles:5 },
-      stars:[
-        { name:'Vinícius Júnior', pos:'LW', club:'Real Madrid', age:25, note:'Electric left winger, two-footed nightmare.' },
-        { name:'Rodrygo',         pos:'RW', club:'Real Madrid', age:25, note:'Calm finisher in big moments.' },
-        { name:'Endrick',         pos:'ST', club:'Real Madrid', age:19, note:'The teenage No.9 of Brazil\'s future.' },
-        { name:'Bruno Guimarães', pos:'CM', club:'Newcastle',   age:28, note:'All-action midfield engine.' },
-        { name:'Marquinhos',      pos:'CB', club:'PSG',         age:31, note:'Captain and rock at the back.' },
-        { name:'Alisson Becker',  pos:'GK', club:'Liverpool',   age:33, note:'Among the world\'s best goalkeepers.' },
-      ]
-    },
-    { code:'URU', name:'Uruguay', flag:'🇺🇾', group:'E', pot:2,
-      capital:'Montevideo', population:'3.5M', area:'176,000 km²', languages:'Spanish', currency:'Uruguayan peso (UYU)',
-      geography:'Small, flat, and Atlantic-facing. Rolling pampas, sandy beaches, and the wide Río de la Plata estuary.',
-      history:'Independent in 1825, sandwiched between Brazil and Argentina. Famous for an early progressive welfare state and a deep football tradition.',
-      funFacts:['Hosted and won the first World Cup in 1930','For its size, no country has produced more football per capita','Beef and yerba mate are national obsessions'],
-      wc:{ appearances:14, best:'Champions (1930, 1950)', titles:2 },
-      stars:[
-        { name:'Federico Valverde', pos:'CM', club:'Real Madrid',   age:27, note:'Rampaging midfielder with a missile of a shot.' },
-        { name:'Darwin Núñez',      pos:'ST', club:'Al-Hilal',      age:26, note:'Powerful, direct centre-forward.' },
-        { name:'Ronald Araújo',     pos:'CB', club:'Barcelona',     age:27, note:'Imposing modern centre-back.' },
-        { name:'Manuel Ugarte',     pos:'CDM',club:'Manchester Utd',age:24, note:'Combative ball-winner.' },
-        { name:'Maximiliano Araújo',pos:'LW', club:'Sporting CP',   age:25, note:'Bursting on the scene as a creator.' },
-      ]
-    },
-    { code:'COL', name:'Colombia', flag:'🇨🇴', group:'F', pot:2,
-      capital:'Bogotá', population:'52M', area:'1.14M km²', languages:'Spanish', currency:'Colombian peso (COP)',
-      geography:'The only South American country with both Atlantic (Caribbean) and Pacific coasts. The Andes split into three ranges here; the Amazon stretches south.',
-      history:'Independent from Spain in 1810. Coffee, emeralds, and a long post-conflict recovery shape the modern republic.',
-      funFacts:['World\'s 2nd most biodiverse country','Produces some of the world\'s finest coffee','Cumbia and salsa are national rhythms'],
-      wc:{ appearances:6, best:'Quarterfinals (2014)', titles:0 },
-      stars:[
-        { name:'Luis Díaz',          pos:'LW', club:'Bayern Munich', age:28, note:'Direct, hard-running left winger.' },
-        { name:'James Rodríguez',    pos:'AM', club:'Club León',     age:34, note:'The Golden-Boot winner of 2014, still pulling strings.' },
-        { name:'Richard Ríos',       pos:'CM', club:'Benfica',       age:25, note:'Tough, technical midfielder.' },
-        { name:'Jhon Durán',         pos:'ST', club:'Al-Nassr',      age:22, note:'Explosive young striker.' },
-        { name:'Daniel Muñoz',       pos:'RB', club:'Crystal Palace',age:29, note:'Marauding right-back.' },
-      ]
-    },
-    { code:'ECU', name:'Ecuador', flag:'🇪🇨', group:'G', pot:3,
+    { code:'ECU', name:'Ecuador', flag:'🇪🇨', group:'E', pot:3,
       capital:'Quito', population:'18M', area:'283,000 km²', languages:'Spanish, Kichwa', currency:'US dollar (USD)',
       geography:'Straddles the equator (the country\'s name). From Andes peaks and Amazon jungle to the Galápagos Islands.',
       history:'Independent in 1822 as part of Gran Colombia; a separate republic from 1830. Adopted the US dollar in 2000.',
@@ -186,76 +308,6 @@
         { name:'Pervis Estupiñán',pos:'LB', club:'AC Milan',    age:27, note:'Attacking, set-piece-skilled fullback.' },
         { name:'Piero Hincapié', pos:'CB', club:'Arsenal',      age:24, note:'Left-footed defender, calm on the ball.' },
         { name:'Kendry Páez',    pos:'AM', club:'Chelsea',      age:19, note:'Teenage creator labelled the next big star.' },
-      ]
-    },
-    { code:'PAR', name:'Paraguay', flag:'🇵🇾', group:'H', pot:3,
-      capital:'Asunción', population:'7M', area:'407,000 km²', languages:'Spanish, Guaraní', currency:'Guaraní (PYG)',
-      geography:'Landlocked in the heart of South America. The Paraguay river splits Chaco scrubland from greener eastern hills.',
-      history:'Independent in 1811. Endured the brutal 1864–70 War of the Triple Alliance and a long 20th-century dictatorship.',
-      funFacts:['One of the few officially bilingual countries (Spanish + Guaraní)','Itaipú is one of the world\'s largest hydro dams','Tereré (cold mate) is the national drink'],
-      wc:{ appearances:9, best:'Quarterfinals (2010)', titles:0 },
-      stars:[
-        { name:'Miguel Almirón',     pos:'AM', club:'Atlanta United', age:31, note:'Quick, hard-running playmaker.' },
-        { name:'Diego Gómez',        pos:'CM', club:'Brighton',       age:23, note:'Box-to-box runner.' },
-        { name:'Antonio Sanabria',   pos:'ST', club:'Torino',         age:29, note:'Experienced striker.' },
-        { name:'Gustavo Gómez',      pos:'CB', club:'Palmeiras',      age:32, note:'Captain at the back.' },
-      ]
-    },
-    { code:'BOL', name:'Bolivia', flag:'🇧🇴', group:'I', pot:4,
-      capital:'Sucre / La Paz', population:'12M', area:'1.10M km²', languages:'Spanish, Quechua, Aymara', currency:'Boliviano (BOB)',
-      geography:'High-altitude Andes give way to Amazon lowlands. La Paz is the world\'s highest administrative capital at 3,640 m.',
-      history:'Independent in 1825, named after Simón Bolívar. Rich in lithium, tin, and silver — Potosí once funded Spain\'s empire.',
-      funFacts:['Lake Titicaca, the highest large navigable lake in the world','Salar de Uyuni: the world\'s largest salt flat','Three official capitals depending on how you count'],
-      wc:{ appearances:3, best:'Group stage', titles:0 },
-      stars:[
-        { name:'Marcelo Moreno Martins', pos:'ST', club:'Always Ready',    age:38, note:'Veteran top scorer in national history.' },
-        { name:'Miguel Terceros',        pos:'AM', club:'Santos',          age:21, note:'Young attacking talent.' },
-        { name:'Roberto Carlos Fernández', pos:'GK', club:'Bolívar',       age:27, note:'Reliable national keeper.' },
-      ]
-    },
-
-    /* --- UEFA (Europe) --- */
-    { code:'FRA', name:'France', flag:'🇫🇷', group:'B', pot:1,
-      capital:'Paris', population:'68M', area:'544,000 km²', languages:'French', currency:'Euro (EUR)',
-      geography:'From Mediterranean beaches to Alpine peaks, from Atlantic surf to wine-country plains. Six neighbours.',
-      history:'A republic since the 1789 Revolution. The Fifth Republic, founded by de Gaulle in 1958, governs today.',
-      funFacts:['World\'s most-visited country','Two-time recent finalist (Champions 2018, runners-up 2022)','Home of the metric system'],
-      wc:{ appearances:17, best:'Champions (1998, 2018)', titles:2 },
-      stars:[
-        { name:'Kylian Mbappé',    pos:'ST/LW', club:'Real Madrid',   age:27, note:'Sensational pace; already has 3 World Cup final goals.' },
-        { name:'Aurélien Tchouaméni', pos:'CDM', club:'Real Madrid',  age:26, note:'Anchor of midfield.' },
-        { name:'Antoine Griezmann',pos:'AM',    club:'Atlético Madrid', age:35, note:'France\'s most-capped attacker in the modern era.' },
-        { name:'William Saliba',   pos:'CB',    club:'Arsenal',       age:25, note:'Cool, modern centre-back.' },
-        { name:'Theo Hernández',   pos:'LB',    club:'Al-Hilal',      age:28, note:'Powerful overlapping fullback.' },
-      ]
-    },
-    { code:'ENG', name:'England', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', group:'C', pot:1,
-      capital:'London', population:'56M (England) / 67M (UK)', area:'130,000 km² (England)', languages:'English', currency:'Pound sterling (GBP)',
-      geography:'Rolling chalk downs, moors, and a long coastline. Highest point Scafell Pike (978m). Crossed by the Thames, Severn, and Mersey.',
-      history:'United with Wales in 1536, with Scotland in 1707. Birthplace of modern football — codified at the Football Association in 1863.',
-      funFacts:['Invented modern football','Wembley Stadium has hosted 7 European finals','The Premier League is the world\'s richest league'],
-      wc:{ appearances:16, best:'Champions (1966)', titles:1 },
-      stars:[
-        { name:'Jude Bellingham', pos:'AM', club:'Real Madrid',    age:22, note:'Modern complete midfielder.' },
-        { name:'Harry Kane',      pos:'ST', club:'Bayern Munich',  age:32, note:'England\'s all-time top scorer.' },
-        { name:'Bukayo Saka',     pos:'RW', club:'Arsenal',        age:24, note:'Direct, creative wide forward.' },
-        { name:'Phil Foden',      pos:'AM', club:'Man City',       age:25, note:'Two-footed playmaker.' },
-        { name:'Declan Rice',     pos:'CM', club:'Arsenal',        age:27, note:'England\'s midfield captain.' },
-        { name:'Cole Palmer',     pos:'AM', club:'Chelsea',        age:23, note:'Ice-cold finisher and creator.' },
-      ]
-    },
-    { code:'ESP', name:'Spain', flag:'🇪🇸', group:'D', pot:1,
-      capital:'Madrid', population:'48M', area:'506,000 km²', languages:'Spanish (Castilian), Catalan, Galician, Basque', currency:'Euro (EUR)',
-      geography:'Iberian Peninsula plus the Canary and Balearic islands. The Meseta plateau dominates the interior; mountains in north and south.',
-      history:'A union of Castile and Aragon in 1469; explorers crossed the Atlantic. Modern democracy since 1978.',
-      funFacts:['Reigning European champions (2024) and 2010 world champions','Has 49 UNESCO World Heritage Sites','Siesta and tapas are real cultural staples'],
-      wc:{ appearances:16, best:'Champions (2010)', titles:1 },
-      stars:[
-        { name:'Lamine Yamal',      pos:'RW', club:'Barcelona',   age:18, note:'A generational left-footed winger.' },
-        { name:'Rodri',             pos:'CDM',club:'Man City',    age:29, note:'Ballon d\'Or winner; controls every game he plays.' },
-        { name:'Nico Williams',     pos:'LW', club:'Barcelona',   age:23, note:'Pacey, fearless on the dribble.' },
-        { name:'Pedri',             pos:'CM', club:'Barcelona',   age:23, note:'Press-resistant midfielder.' },
-        { name:'Álvaro Morata',     pos:'ST', club:'Galatasaray', age:33, note:'Veteran captain in attack.' },
       ]
     },
     { code:'GER', name:'Germany', flag:'🇩🇪', group:'E', pot:1,
@@ -272,207 +324,20 @@
         { name:'Antonio Rüdiger',   pos:'CB', club:'Real Madrid',   age:33, note:'Aggressive, vocal defender.' },
       ]
     },
-    { code:'POR', name:'Portugal', flag:'🇵🇹', group:'F', pot:1,
-      capital:'Lisbon', population:'10M', area:'92,000 km²', languages:'Portuguese', currency:'Euro (EUR)',
-      geography:'Westernmost European country, a long Atlantic coastline, plus the Azores and Madeira islands.',
-      history:'A continuous nation since 1143. Led the Age of Discoveries — first to round Africa and reach India and Brazil.',
-      funFacts:['Oldest borders in Europe (since 1297)','Fado music is UNESCO heritage','Portuguese is spoken by ~260M people worldwide'],
-      wc:{ appearances:9, best:'3rd place (1966)', titles:0 },
+    { code:'CIV', name:'Ivory Coast', flag:'🇨🇮', group:'E', pot:2,
+      capital:'Yamoussoukro', population:'29M', area:'322,000 km²', languages:'French', currency:'CFA franc (XOF)',
+      geography:'West African Gulf-of-Guinea coast. Coastal lagoons, rainforests, savannah.',
+      history:'Independent from France in 1960. Cocoa now drives ~40% of the economy.',
+      funFacts:['World\'s largest cocoa producer','African champions of 2023 (won at home)','Drogba is a national hero'],
+      wc:{ appearances:3, best:'Group stage', titles:0 },
       stars:[
-        { name:'Cristiano Ronaldo', pos:'ST', club:'Al-Nassr',      age:41, note:'All-time top international scorer; record sixth World Cup.' },
-        { name:'Bruno Fernandes',   pos:'AM', club:'Manchester Utd', age:31, note:'Captain and creative engine.' },
-        { name:'Bernardo Silva',    pos:'AM', club:'Man City',      age:31, note:'Technically gifted glue player.' },
-        { name:'Rúben Dias',        pos:'CB', club:'Man City',      age:28, note:'Defensive leader.' },
-        { name:'Vitinha',           pos:'CM', club:'PSG',           age:26, note:'Press-resistant orchestrator.' },
-        { name:'Rafael Leão',       pos:'LW', club:'AC Milan',      age:26, note:'Direct, devastating in transition.' },
+        { name:'Sébastien Haller',  pos:'ST', club:'Borussia Dortmund', age:31, note:'Powerful forward.' },
+        { name:'Franck Kessié',     pos:'CM', club:'Al-Ahli',       age:29, note:'Box-to-box leader.' },
+        { name:'Simon Adingra',     pos:'LW', club:'Brighton',      age:24, note:'Pacey winger.' },
+        { name:'Évann Guessand',    pos:'ST', club:'Aston Villa',   age:24, note:'Mobile forward.' },
       ]
     },
-    { code:'NED', name:'Netherlands', flag:'🇳🇱', group:'G', pot:1,
-      capital:'Amsterdam', population:'17.9M', area:'42,000 km²', languages:'Dutch', currency:'Euro (EUR)',
-      geography:'Mostly below sea level, defended by dikes and reclaimed polders. The Rhine, Meuse, and Scheldt rivers fan out to the sea.',
-      history:'Independent from Spain in 1648, a global trading power in the 17th century. A constitutional monarchy today.',
-      funFacts:['"Total Football" revolutionised the sport in the 1970s','More bicycles than people','One third of the country is below sea level'],
-      wc:{ appearances:11, best:'Runners-up (1974, 78, 2010)', titles:0 },
-      stars:[
-        { name:'Virgil van Dijk',     pos:'CB', club:'Liverpool',     age:34, note:'Captain and defensive leader.' },
-        { name:'Cody Gakpo',          pos:'LW/ST', club:'Liverpool',  age:26, note:'Powerful left-footed forward.' },
-        { name:'Memphis Depay',       pos:'ST', club:'Corinthians',   age:32, note:'Veteran goal-scorer.' },
-        { name:'Frenkie de Jong',     pos:'CM', club:'Barcelona',     age:28, note:'Press-breaking midfielder.' },
-        { name:'Xavi Simons',         pos:'AM', club:'Tottenham',     age:22, note:'Creative young attacker.' },
-      ]
-    },
-    { code:'BEL', name:'Belgium', flag:'🇧🇪', group:'H', pot:1,
-      capital:'Brussels', population:'11.6M', area:'30,500 km²', languages:'Dutch, French, German', currency:'Euro (EUR)',
-      geography:'Tiny, dense, and flat to gently rolling. Split between Flemish north and French-speaking Wallonia.',
-      history:'Independent in 1830. Brussels hosts the European Union and NATO.',
-      funFacts:['Invented French fries (the Belgians insist)','World capital of comic books — Tintin, Smurfs','Has more castles per km² than any country'],
-      wc:{ appearances:14, best:'3rd place (2018)', titles:0 },
-      stars:[
-        { name:'Kevin De Bruyne',  pos:'AM', club:'Napoli',         age:34, note:'World-class playmaker.' },
-        { name:'Romelu Lukaku',    pos:'ST', club:'Napoli',         age:32, note:'Belgium\'s all-time top scorer.' },
-        { name:'Jérémy Doku',      pos:'LW', club:'Man City',       age:23, note:'Devastating one-v-one dribbler.' },
-        { name:'Amadou Onana',     pos:'CM', club:'Aston Villa',    age:24, note:'Tall, athletic midfielder.' },
-        { name:'Thibaut Courtois', pos:'GK', club:'Real Madrid',    age:33, note:'Among the world\'s best keepers.' },
-      ]
-    },
-    { code:'ITA', name:'Italy', flag:'🇮🇹', group:'I', pot:2,
-      capital:'Rome', population:'59M', area:'301,000 km²', languages:'Italian', currency:'Euro (EUR)',
-      geography:'A boot-shaped peninsula plus Sicily and Sardinia. Alps in the north, the Apennines down the spine, three seas around it.',
-      history:'Unified in 1861. A republic since 1946. Cradle of the Roman Empire and the Renaissance.',
-      funFacts:['Four-time world champion','Has more UNESCO sites than any country','Espresso, pizza, and opera all originated here'],
-      wc:{ appearances:18, best:'Champions ×4 (1934, 38, 82, 2006)', titles:4 },
-      stars:[
-        { name:'Nicolò Barella',   pos:'CM', club:'Inter Milan',  age:29, note:'Energetic complete midfielder.' },
-        { name:'Federico Chiesa',  pos:'RW', club:'Liverpool',    age:28, note:'Pacey, two-footed forward.' },
-        { name:'Gianluigi Donnarumma', pos:'GK', club:'Man City', age:27, note:'Towering keeper.' },
-        { name:'Alessandro Bastoni', pos:'CB', club:'Inter Milan', age:26, note:'Left-footed ball-playing defender.' },
-        { name:'Mateo Retegui',    pos:'ST', club:'Atalanta',     age:26, note:'Argentine-born goal-scorer.' },
-      ]
-    },
-    { code:'CRO', name:'Croatia', flag:'🇭🇷', group:'J', pot:2,
-      capital:'Zagreb', population:'3.9M', area:'56,000 km²', languages:'Croatian', currency:'Euro (EUR)',
-      geography:'Crescent-shaped along the Adriatic with more than 1,000 islands. The Dinaric Alps rise just inland.',
-      history:'Part of Yugoslavia until 1991; independent after a four-year war. Joined the EU in 2013.',
-      funFacts:['The necktie ("cravat") was invented here','Beat Argentina to reach the 2018 final','Stunning UNESCO old towns: Dubrovnik, Split'],
-      wc:{ appearances:6, best:'Runners-up (2018), 3rd (2022)', titles:0 },
-      stars:[
-        { name:'Luka Modrić',     pos:'CM', club:'AC Milan',  age:40, note:'2018 Ballon d\'Or; midfield maestro.' },
-        { name:'Joško Gvardiol',  pos:'CB/LB', club:'Man City', age:24, note:'Modern attacking defender.' },
-        { name:'Mateo Kovačić',   pos:'CM', club:'Man City',  age:31, note:'Glue midfielder.' },
-        { name:'Andrej Kramarić', pos:'ST', club:'Hoffenheim', age:34, note:'Veteran goal-scorer.' },
-      ]
-    },
-    { code:'SUI', name:'Switzerland', flag:'🇨🇭', group:'K', pot:2,
-      capital:'Bern', population:'8.8M', area:'41,000 km²', languages:'German, French, Italian, Romansh', currency:'Swiss franc (CHF)',
-      geography:'Alpine heart of Europe. The Rhine and Rhône rivers both start here.',
-      history:'A confederation since 1291 — one of the oldest in the world. Famously neutral.',
-      funFacts:['Four official languages','Direct democracy by national referendum','Birthplace of FIFA (1904, Zürich)'],
-      wc:{ appearances:12, best:'Quarterfinals (1934, 38, 54)', titles:0 },
-      stars:[
-        { name:'Granit Xhaka',     pos:'CM', club:'Bayer Leverkusen', age:33, note:'Captain and midfield leader.' },
-        { name:'Manuel Akanji',    pos:'CB', club:'Man City',         age:30, note:'Calm modern centre-back.' },
-        { name:'Breel Embolo',     pos:'ST', club:'Monaco',           age:28, note:'Physical forward.' },
-        { name:'Yann Sommer',      pos:'GK', club:'Inter Milan',      age:37, note:'Reflex shot-stopper.' },
-      ]
-    },
-    { code:'DEN', name:'Denmark', flag:'🇩🇰', group:'L', pot:2,
-      capital:'Copenhagen', population:'5.9M', area:'43,000 km²', languages:'Danish', currency:'Danish krone (DKK)',
-      geography:'A peninsula plus 400+ islands between the North and Baltic seas. Flat, with the highest point under 200m.',
-      history:'The world\'s oldest continuously running monarchy. Vikings sailed from here a millennium ago.',
-      funFacts:['"Hygge" is the famous cozy lifestyle word','LEGO was invented in Billund','Has the oldest national flag in the world (Dannebrog)'],
-      wc:{ appearances:6, best:'Quarterfinals (1998)', titles:0 },
-      stars:[
-        { name:'Christian Eriksen', pos:'AM', club:'Wolfsburg',       age:34, note:'Free-kick specialist and captain.' },
-        { name:'Rasmus Højlund',    pos:'ST', club:'Napoli',          age:23, note:'Powerful young centre-forward.' },
-        { name:'Andreas Christensen', pos:'CB', club:'Bayer Leverkusen', age:30, note:'Ball-playing defender.' },
-        { name:'Pierre-Emile Højbjerg', pos:'CM', club:'Marseille',   age:30, note:'Combative midfielder.' },
-      ]
-    },
-    { code:'AUT', name:'Austria', flag:'🇦🇹', group:'A', pot:2,
-      capital:'Vienna', population:'9.1M', area:'84,000 km²', languages:'German', currency:'Euro (EUR)',
-      geography:'Alpine, landlocked, drained by the Danube. Six of seven federal-state capitals lie along it.',
-      history:'Heart of the Habsburg Empire until 1918. A federal republic and EU member.',
-      funFacts:['Birthplace of Mozart, Freud, and the Sound of Music','Vienna often tops "most liveable city" rankings','Strudel and schnitzel are national dishes'],
-      wc:{ appearances:8, best:'3rd place (1954)', titles:0 },
-      stars:[
-        { name:'David Alaba',      pos:'CB/LB', club:'Real Madrid',  age:33, note:'Versatile, classy leader.' },
-        { name:'Marcel Sabitzer',  pos:'CM', club:'Borussia Dortmund', age:32, note:'Long-range threat.' },
-        { name:'Marko Arnautović', pos:'ST', club:'Inter Milan',    age:37, note:'Veteran forward.' },
-        { name:'Konrad Laimer',    pos:'CM', club:'Bayern Munich',  age:28, note:'Ball-winning runner.' },
-      ]
-    },
-    { code:'POL', name:'Poland', flag:'🇵🇱', group:'B', pot:2,
-      capital:'Warsaw', population:'37M', area:'313,000 km²', languages:'Polish', currency:'Złoty (PLN)',
-      geography:'Wide central-European plain, Baltic coastline to the north, Tatra Mountains to the south.',
-      history:'Once Europe\'s largest country in the 1600s. Erased from the map 1795–1918. Joined the EU in 2004.',
-      funFacts:['Marie Curie was born in Warsaw','Has 23 national parks','Pierogi: 200+ recognised varieties'],
-      wc:{ appearances:9, best:'3rd place (1974, 1982)', titles:0 },
-      stars:[
-        { name:'Robert Lewandowski', pos:'ST', club:'Barcelona',    age:37, note:'One of the great strikers of his era.' },
-        { name:'Piotr Zieliński',    pos:'CM', club:'Inter Milan',  age:31, note:'Technical midfielder.' },
-        { name:'Nicola Zalewski',    pos:'LW', club:'Inter Milan',  age:24, note:'Two-footed wide player.' },
-        { name:'Wojciech Szczęsny',  pos:'GK', club:'Barcelona',    age:35, note:'Experienced No.1.' },
-      ]
-    },
-    { code:'TUR', name:'Türkiye (Turkey)', flag:'🇹🇷', group:'C', pot:2,
-      capital:'Ankara', population:'85M', area:'784,000 km²', languages:'Turkish', currency:'Turkish lira (TRY)',
-      geography:'Bridges Europe and Asia across the Bosphorus. Black Sea, Aegean, Mediterranean coasts; the Anatolian plateau in between.',
-      history:'Founded as a republic in 1923 by Atatürk from the ruins of the Ottoman Empire.',
-      funFacts:['Istanbul is the only city on two continents','Hagia Sophia is 1,500 years old','Turkish coffee is UNESCO heritage'],
-      wc:{ appearances:2, best:'3rd place (2002)', titles:0 },
-      stars:[
-        { name:'Hakan Çalhanoğlu',  pos:'CM', club:'Inter Milan',  age:32, note:'Set-piece magician.' },
-        { name:'Arda Güler',        pos:'AM', club:'Real Madrid',  age:21, note:'Silky left-footed creator.' },
-        { name:'Kenan Yıldız',      pos:'AM', club:'Juventus',     age:21, note:'Two-footed playmaker.' },
-        { name:'Merih Demiral',     pos:'CB', club:'Al-Ahli',      age:28, note:'Aggressive defender.' },
-      ]
-    },
-    { code:'HUN', name:'Hungary', flag:'🇭🇺', group:'D', pot:3,
-      capital:'Budapest', population:'9.6M', area:'93,000 km²', languages:'Hungarian', currency:'Forint (HUF)',
-      geography:'A landlocked Carpathian-basin country crossed by the Danube and Tisza. Lake Balaton is central Europe\'s biggest lake.',
-      history:'A magyar kingdom since the year 1000; an EU member since 2004.',
-      funFacts:['The "Mighty Magyars" thrashed England 6-3 at Wembley in 1953','Rubik\'s Cube invented here in 1974','Goulash and paprika are national symbols'],
-      wc:{ appearances:9, best:'Runners-up (1938, 1954)', titles:0 },
-      stars:[
-        { name:'Dominik Szoboszlai', pos:'AM', club:'Liverpool',   age:25, note:'Captain and creative leader.' },
-        { name:'Milos Kerkez',       pos:'LB', club:'Liverpool',   age:22, note:'Energetic young fullback.' },
-        { name:'Roland Sallai',      pos:'RW', club:'Galatasaray', age:28, note:'Direct winger.' },
-      ]
-    },
-    { code:'SRB', name:'Serbia', flag:'🇷🇸', group:'E', pot:3,
-      capital:'Belgrade', population:'6.7M', area:'77,000 km²', languages:'Serbian', currency:'Serbian dinar (RSD)',
-      geography:'Landlocked Balkans, divided by the Danube. Fertile Vojvodina plains in the north; mountains in the south.',
-      history:'A medieval kingdom; led Yugoslavia until its 1990s breakup. Independent (with Montenegro) in 2006.',
-      funFacts:['Birthplace of Nikola Tesla (born in modern Croatia, Serb father)','Belgrade sits at the confluence of two great rivers','Rakija is the national spirit'],
-      wc:{ appearances:13, best:'4th place (1930, 62 as Yugoslavia)', titles:0 },
-      stars:[
-        { name:'Aleksandar Mitrović', pos:'ST', club:'Al-Hilal',   age:31, note:'Powerful goal-scorer.' },
-        { name:'Dušan Vlahović',      pos:'ST', club:'Juventus',   age:26, note:'Tall, physical striker.' },
-        { name:'Dušan Tadić',         pos:'AM', club:'Al-Wahda',   age:37, note:'Veteran captain.' },
-        { name:'Sergej Milinković-Savić', pos:'CM', club:'Al-Hilal', age:31, note:'Towering midfielder.' },
-      ]
-    },
-    { code:'NOR', name:'Norway', flag:'🇳🇴', group:'F', pot:3,
-      capital:'Oslo', population:'5.5M', area:'385,000 km²', languages:'Norwegian', currency:'Norwegian krone (NOK)',
-      geography:'Long, narrow, fjord-carved Atlantic coast. The northernmost mainland in Europe; the midnight sun shines all summer above the Arctic Circle.',
-      history:'Independent from Sweden in 1905. One of the world\'s wealthiest countries via North Sea oil and a $1.6T sovereign wealth fund.',
-      funFacts:['Has won the most Winter Olympic medals ever','Hosts the Nobel Peace Prize','First WC appearance since 1998'],
-      wc:{ appearances:3, best:'Round of 16 (1998)', titles:0 },
-      stars:[
-        { name:'Erling Haaland',     pos:'ST', club:'Man City',         age:25, note:'Generational goal-scorer.' },
-        { name:'Martin Ødegaard',    pos:'AM', club:'Arsenal',          age:27, note:'Captain and creative hub.' },
-        { name:'Alexander Sørloth',  pos:'ST', club:'Atlético Madrid',  age:30, note:'Powerful target man.' },
-        { name:'Antonio Nusa',       pos:'LW', club:'RB Leipzig',       age:20, note:'Exciting young winger.' },
-      ]
-    },
-    { code:'CZE', name:'Czech Republic', flag:'🇨🇿', group:'G', pot:3,
-      capital:'Prague', population:'10.7M', area:'79,000 km²', languages:'Czech', currency:'Czech koruna (CZK)',
-      geography:'Landlocked central Europe — Bohemia in the west, Moravia in the east. Rolling forests, rivers, and the Bohemian Massif.',
-      history:'Part of the Habsburg Empire until 1918; split peacefully from Slovakia in 1993.',
-      funFacts:['Consumes the most beer per capita on earth','Charles Bridge dates to 1357','Prague is one of Europe\'s best-preserved medieval cities'],
-      wc:{ appearances:10, best:'Runners-up (1934, 62 as Czechoslovakia)', titles:0 },
-      stars:[
-        { name:'Patrik Schick',     pos:'ST', club:'Bayer Leverkusen', age:30, note:'Tall, technical striker.' },
-        { name:'Tomáš Souček',      pos:'CM', club:'West Ham',         age:31, note:'Box-to-box runner.' },
-        { name:'Adam Hložek',       pos:'AM', club:'Hoffenheim',       age:23, note:'Versatile attacker.' },
-      ]
-    },
-    { code:'SCO', name:'Scotland', flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', group:'H', pot:3,
-      capital:'Edinburgh', population:'5.5M', area:'78,000 km²', languages:'English, Scots, Scottish Gaelic', currency:'Pound sterling (GBP)',
-      geography:'Highlands in the north, Lowlands in the south, 790 islands. Crossed by Loch Ness and Loch Lomond.',
-      history:'Joined with England by the Acts of Union in 1707. The Scottish FA, founded 1873, is the second oldest in the world.',
-      funFacts:['Invented modern golf','Bagpipes, kilts, whisky','Played the first international match (vs England, 1872)'],
-      wc:{ appearances:8, best:'Group stage', titles:0 },
-      stars:[
-        { name:'Andrew Robertson',  pos:'LB', club:'Liverpool',  age:31, note:'Captain and overlapping fullback.' },
-        { name:'Scott McTominay',   pos:'CM', club:'Napoli',     age:28, note:'Goal-scoring midfielder.' },
-        { name:'John McGinn',       pos:'AM', club:'Aston Villa',age:31, note:'Energetic midfielder.' },
-        { name:'Kieran Tierney',    pos:'LB', club:'Celtic',     age:28, note:'Hard-running defender.' },
-      ]
-    },
-
-    /* --- AFC (Asia) --- */
-    { code:'JPN', name:'Japan', flag:'🇯🇵', group:'I', pot:1,
+    { code:'JPN', name:'Japan', flag:'🇯🇵', group:'F', pot:1,
       capital:'Tokyo', population:'125M', area:'378,000 km²', languages:'Japanese', currency:'Yen (JPY)',
       geography:'An archipelago of 14,000+ islands across the Pacific. Mount Fuji is the highest point at 3,776m. On the Pacific Ring of Fire.',
       history:'Imperial throne unbroken for ~1,500 years. Opened to the world in 1853; an economic miracle after WWII.',
@@ -486,121 +351,58 @@
         { name:'Daichi Kamada',     pos:'AM', club:'Crystal Palace', age:29, note:'Box-arriving playmaker.' },
       ]
     },
-    { code:'KOR', name:'South Korea', flag:'🇰🇷', group:'J', pot:3,
-      capital:'Seoul', population:'52M', area:'100,000 km²', languages:'Korean', currency:'South Korean won (KRW)',
-      geography:'A mountainous peninsula in East Asia. 70% of the country is mountainous; long coastlines on three sides.',
-      history:'A unified kingdom since 668 AD. Liberated from Japan in 1945; the Korean War split it in 1953.',
-      funFacts:['Co-hosted the 2002 World Cup (reached semifinals)','K-pop is a global phenomenon','Has won 12 of the last 19 archery Olympic golds'],
-      wc:{ appearances:11, best:'4th place (2002)', titles:0 },
+    { code:'NED', name:'Netherlands', flag:'🇳🇱', group:'F', pot:1,
+      capital:'Amsterdam', population:'17.9M', area:'42,000 km²', languages:'Dutch', currency:'Euro (EUR)',
+      geography:'Mostly below sea level, defended by dikes and reclaimed polders. The Rhine, Meuse, and Scheldt rivers fan out to the sea.',
+      history:'Independent from Spain in 1648, a global trading power in the 17th century. A constitutional monarchy today.',
+      funFacts:['"Total Football" revolutionised the sport in the 1970s','More bicycles than people','One third of the country is below sea level'],
+      wc:{ appearances:11, best:'Runners-up (1974, 78, 2010)', titles:0 },
       stars:[
-        { name:'Son Heung-min',     pos:'LW/ST', club:'LAFC',         age:33, note:'Captain, two-footed scorer.' },
-        { name:'Lee Kang-in',       pos:'AM', club:'PSG',             age:25, note:'Creative spark.' },
-        { name:'Kim Min-jae',       pos:'CB', club:'Bayern Munich',   age:29, note:'"Monster" centre-back.' },
-        { name:'Hwang Hee-chan',    pos:'ST', club:'Wolves',          age:30, note:'Pacey forward.' },
+        { name:'Virgil van Dijk',     pos:'CB', club:'Liverpool',     age:34, note:'Captain and defensive leader.' },
+        { name:'Cody Gakpo',          pos:'LW/ST', club:'Liverpool',  age:26, note:'Powerful left-footed forward.' },
+        { name:'Memphis Depay',       pos:'ST', club:'Corinthians',   age:32, note:'Veteran goal-scorer.' },
+        { name:'Frenkie de Jong',     pos:'CM', club:'Barcelona',     age:28, note:'Press-breaking midfielder.' },
+        { name:'Xavi Simons',         pos:'AM', club:'Tottenham',     age:22, note:'Creative young attacker.' },
       ]
     },
-    { code:'AUS', name:'Australia', flag:'🇦🇺', group:'K', pot:3,
-      capital:'Canberra', population:'26M', area:'7.69M km²', languages:'English', currency:'Australian dollar (AUD)',
-      geography:'A whole continent. The Great Barrier Reef stretches 2,300 km off the coast; the Outback covers most of the interior.',
-      history:'Indigenous peoples here for 65,000+ years. British colonisation from 1788; federation in 1901.',
-      funFacts:['Has 21 of the world\'s 25 most venomous snakes','Hosts the Australian Open tennis','Switched from Oceania to AFC for football in 2006'],
-      wc:{ appearances:6, best:'Round of 16 (2006, 2022)', titles:0 },
+    { code:'SWE', name:"Sweden", flag:"\ud83c\uddf8\ud83c\uddea", group:'F', pot:2,
+      capital:"Stockholm", population:"10.6M", area:"450,000 km\u00b2", languages:"Swedish", currency:"Swedish krona (SEK)",
+      geography:"Long, narrow Scandinavian country: forested south, rugged north stretching above the Arctic Circle. Thousands of lakes and an archipelagic coast.",
+      history:"A unified kingdom since the Viking age; a great European power in the 1600s; famously neutral in modern wars.",
+      funFacts:["IKEA, ABBA, Spotify and Volvo are all Swedish","Hosts the Nobel Prizes (except Peace)","Made the 1958 World Cup final on home soil"],
+      wc:{ appearances:13, best:"Runners-up (1958), 3rd (1950, 94)", titles:0 },
       stars:[
-        { name:'Mathew Ryan',       pos:'GK', club:'Roma',           age:34, note:'Captain and No.1.' },
-        { name:'Mitchell Duke',     pos:'ST', club:'Machida Zelvia', age:35, note:'Veteran target man.' },
-        { name:'Jackson Irvine',    pos:'CM', club:'St Pauli',       age:33, note:'Midfield captain.' },
-        { name:'Cameron Devlin',    pos:'CM', club:'Hearts',         age:27, note:'Industrious midfielder.' },
+        { name:"Alexander Isak", pos:"ST", club:"Liverpool", age:26, note:"Lethal modern centre-forward." },
+        { name:"Viktor Gy\u00f6keres", pos:"ST", club:"Arsenal", age:27, note:"Powerful, prolific striker." },
+        { name:"Dejan Kulusevski", pos:"AM", club:"Tottenham", age:26, note:"Two-footed creator on the right." },
+        { name:"Anthony Elanga", pos:"RW", club:"Newcastle", age:24, note:"Lightning-quick winger." },
+        { name:"Lucas Bergvall", pos:"CM", club:"Tottenham", age:20, note:"Emerging midfield talent." },
       ]
     },
-    { code:'IRN', name:'Iran', flag:'🇮🇷', group:'L', pot:3,
-      capital:'Tehran', population:'89M', area:'1.65M km²', languages:'Persian (Farsi)', currency:'Iranian rial (IRR)',
-      geography:'A Middle-Eastern plateau between mountains and deserts. Has both Caspian Sea and Persian Gulf coasts.',
-      history:'Heir to the ancient Persian Empire. Islamic Republic founded after the 1979 revolution.',
-      funFacts:['Persepolis was the ceremonial capital of the Persian Empire','Persian carpets are world-renowned','First country to officially recognise religious freedom (Cyrus Cylinder, 539 BC)'],
-      wc:{ appearances:7, best:'Group stage', titles:0 },
+    { code:'TUN', name:'Tunisia', flag:'🇹🇳', group:'F', pot:3,
+      capital:'Tunis', population:'12M', area:'164,000 km²', languages:'Arabic', currency:'Tunisian dinar (TND)',
+      geography:'North African Mediterranean coast. Atlas Mountains in the north, Sahara in the south.',
+      history:'Site of ancient Carthage. The 2011 revolution sparked the Arab Spring.',
+      funFacts:['Carthage was Rome\'s great rival in the Punic Wars','Beat France in Qatar 2022','Has 8 UNESCO sites'],
+      wc:{ appearances:6, best:'Group stage', titles:0 },
       stars:[
-        { name:'Mehdi Taremi',      pos:'ST', club:'Olympiacos',     age:33, note:'Clinical centre-forward.' },
-        { name:'Sardar Azmoun',     pos:'ST', club:'Shabab Al-Ahli', age:30, note:'"Iranian Messi" — versatile forward.' },
-        { name:'Alireza Jahanbakhsh', pos:'RW', club:'Heerenveen',   age:32, note:'Captain, technical winger.' },
-        { name:'Saeid Ezatolahi',   pos:'CDM', club:'Al-Wakrah',     age:29, note:'Defensive anchor.' },
+        { name:'Hannibal Mejbri',   pos:'CM', club:'Burnley',    age:23, note:'Energetic midfielder.' },
+        { name:'Wahbi Khazri',      pos:'AM', club:'Montpellier',age:35, note:'Veteran creator.' },
+        { name:'Aïssa Laïdouni',    pos:'CM', club:'Union Berlin', age:28, note:'Industrious midfielder.' },
       ]
     },
-    { code:'KSA', name:'Saudi Arabia', flag:'🇸🇦', group:'A', pot:3,
-      capital:'Riyadh', population:'36M', area:'2.15M km²', languages:'Arabic', currency:'Saudi riyal (SAR)',
-      geography:'Dominates the Arabian Peninsula. 95% desert, including the vast Empty Quarter (Rub\' al Khali).',
-      history:'Unified under Ibn Saud in 1932. Modern oil-based economy now diversifying via Vision 2030.',
-      funFacts:['Home of Mecca and Medina, Islam\'s holiest cities','Stunned Argentina 2-1 in Qatar 2022','Will host the 2034 World Cup'],
-      wc:{ appearances:6, best:'Round of 16 (1994)', titles:0 },
+    { code:'BEL', name:'Belgium', flag:'🇧🇪', group:'G', pot:1,
+      capital:'Brussels', population:'11.6M', area:'30,500 km²', languages:'Dutch, French, German', currency:'Euro (EUR)',
+      geography:'Tiny, dense, and flat to gently rolling. Split between Flemish north and French-speaking Wallonia.',
+      history:'Independent in 1830. Brussels hosts the European Union and NATO.',
+      funFacts:['Invented French fries (the Belgians insist)','World capital of comic books — Tintin, Smurfs','Has more castles per km² than any country'],
+      wc:{ appearances:14, best:'3rd place (2018)', titles:0 },
       stars:[
-        { name:'Salem Al-Dawsari',  pos:'LW', club:'Al-Hilal', age:34, note:'Scored the famous goal vs Argentina.' },
-        { name:'Saleh Al-Shehri',   pos:'ST', club:'Al-Ahli',  age:32, note:'Scored vs Argentina in 2022.' },
-        { name:'Mohammed Kanno',    pos:'CM', club:'Al-Hilal', age:31, note:'Captain in midfield.' },
-        { name:'Yasser Al-Shahrani',pos:'LB', club:'Al-Hilal', age:33, note:'Veteran fullback.' },
-      ]
-    },
-    { code:'QAT', name:'Qatar', flag:'🇶🇦', group:'B', pot:4,
-      capital:'Doha', population:'2.9M', area:'12,000 km²', languages:'Arabic', currency:'Qatari riyal (QAR)',
-      geography:'A small peninsula jutting into the Persian Gulf. Mostly flat, sandy desert.',
-      history:'A British protectorate until 1971. Hosted the 2022 World Cup.',
-      funFacts:['Hosted the 2022 World Cup','Highest GDP per capita in the world by some measures','Home of Al Jazeera'],
-      wc:{ appearances:1, best:'Group stage (2022, host)', titles:0 },
-      stars:[
-        { name:'Akram Afif',        pos:'LW', club:'Al-Sadd',    age:29, note:'AFC Asian Cup MVP.' },
-        { name:'Almoez Ali',        pos:'ST', club:'Al-Duhail',  age:29, note:'Top scorer of the 2019 Asian Cup.' },
-        { name:'Hassan Al-Haydos',  pos:'AM', club:'Al-Sadd',    age:35, note:'Long-time captain.' },
-      ]
-    },
-    { code:'UZB', name:'Uzbekistan', flag:'🇺🇿', group:'C', pot:4,
-      capital:'Tashkent', population:'36M', area:'448,000 km²', languages:'Uzbek, Russian', currency:'Uzbek som (UZS)',
-      geography:'Doubly landlocked Central Asia — sand desert in the west, the Tien Shan mountains in the east.',
-      history:'On the ancient Silk Road, home to Samarkand and Bukhara. Independent from the USSR in 1991.',
-      funFacts:['First-ever World Cup appearance','Samarkand was Tamerlane\'s 14th-century capital','One of only two doubly landlocked countries'],
-      wc:{ appearances:0, best:'Debut', titles:0 },
-      stars:[
-        { name:'Eldor Shomurodov',  pos:'ST', club:'Roma',       age:30, note:'Italy-tested forward.' },
-        { name:'Abdukodir Khusanov',pos:'CB', club:'Man City',   age:21, note:'Big-money emerging defender.' },
-        { name:'Jaloliddin Masharipov', pos:'AM', club:'Pakhtakor', age:32, note:'Creative midfielder.' },
-      ]
-    },
-    { code:'JOR', name:'Jordan', flag:'🇯🇴', group:'D', pot:4,
-      capital:'Amman', population:'11M', area:'89,000 km²', languages:'Arabic', currency:'Jordanian dinar (JOD)',
-      geography:'Largely desert, with the Jordan River and the lowest point on earth (the Dead Sea, -430m).',
-      history:'An emirate under the British mandate; independent 1946. Stable monarchy in a volatile region.',
-      funFacts:['Petra, the rose-red Nabatean city, is a New Wonder of the World','First-ever World Cup appearance','Hosts ~700,000 refugees'],
-      wc:{ appearances:0, best:'Debut', titles:0 },
-      stars:[
-        { name:'Mousa Tamari',      pos:'RW', club:'Rennes',     age:29, note:'Quick, technical winger.' },
-        { name:'Yazan Al-Naimat',   pos:'ST', club:'Al-Ahli',    age:27, note:'Captain in attack.' },
-        { name:'Ehsan Haddad',      pos:'CB', club:'Al-Faisaly', age:28, note:'Dependable defender.' },
-      ]
-    },
-
-    /* --- CAF (Africa) --- */
-    { code:'MAR', name:'Morocco', flag:'🇲🇦', group:'E', pot:2,
-      capital:'Rabat', population:'37M', area:'447,000 km²', languages:'Arabic, Berber', currency:'Moroccan dirham (MAD)',
-      geography:'Atlantic and Mediterranean coasts, Atlas Mountains, and the Sahara to the south.',
-      history:'A continuous monarchy since the 8th century — one of the world\'s oldest. Independent from France in 1956.',
-      funFacts:['First African team to reach the World Cup semifinals (2022)','Co-hosting the 2030 World Cup with Spain & Portugal','Marrakech\'s Jemaa el-Fnaa is UNESCO heritage'],
-      wc:{ appearances:6, best:'4th place (2022)', titles:0 },
-      stars:[
-        { name:'Achraf Hakimi',     pos:'RB', club:'PSG',           age:27, note:'World-class attacking fullback.' },
-        { name:'Hakim Ziyech',      pos:'AM', club:'Al-Duhail',     age:32, note:'Left-footed creator.' },
-        { name:'Yassine Bounou',    pos:'GK', club:'Al-Hilal',      age:34, note:'Penalty-shootout hero of 2022.' },
-        { name:'Sofyan Amrabat',    pos:'CDM',club:'Fenerbahçe',    age:29, note:'Tournament breakout of 2022.' },
-        { name:'Youssef En-Nesyri', pos:'ST', club:'Fenerbahçe',    age:28, note:'Scored the historic goal vs Portugal.' },
-      ]
-    },
-    { code:'SEN', name:'Senegal', flag:'🇸🇳', group:'F', pot:2,
-      capital:'Dakar', population:'18M', area:'197,000 km²', languages:'French, Wolof', currency:'CFA franc (XOF)',
-      geography:'West African Atlantic coast. The Sahel\'s flat plains and the Casamance river system in the south.',
-      history:'Independent from France in 1960; a model of African democratic stability.',
-      funFacts:['Reigning African champions (2022 AFCON)','Lac Rose turns bright pink in the dry season','Mbalax music is a national export'],
-      wc:{ appearances:3, best:'Quarterfinals (2002)', titles:0 },
-      stars:[
-        { name:'Sadio Mané',        pos:'LW/ST', club:'Al-Nassr', age:33, note:'Talisman and 2022 AFCON winner.' },
-        { name:'Kalidou Koulibaly', pos:'CB', club:'Al-Hilal',    age:34, note:'Captain at the back.' },
-        { name:'Édouard Mendy',     pos:'GK', club:'Al-Ahli',     age:33, note:'Former CL-winning keeper.' },
-        { name:'Ismaïla Sarr',      pos:'RW', club:'Crystal Palace', age:28, note:'Direct, fast winger.' },
+        { name:'Kevin De Bruyne',  pos:'AM', club:'Napoli',         age:34, note:'World-class playmaker.' },
+        { name:'Romelu Lukaku',    pos:'ST', club:'Napoli',         age:32, note:'Belgium\'s all-time top scorer.' },
+        { name:'Jérémy Doku',      pos:'LW', club:'Man City',       age:23, note:'Devastating one-v-one dribbler.' },
+        { name:'Amadou Onana',     pos:'CM', club:'Aston Villa',    age:24, note:'Tall, athletic midfielder.' },
+        { name:'Thibaut Courtois', pos:'GK', club:'Real Madrid',    age:33, note:'Among the world\'s best keepers.' },
       ]
     },
     { code:'EGY', name:'Egypt', flag:'🇪🇬', group:'G', pot:2,
@@ -616,32 +418,276 @@
         { name:'Mohamed Hamdy',     pos:'CB', club:'Pyramids',   age:24, note:'Emerging young defender.' },
       ]
     },
-    { code:'CIV', name:'Ivory Coast', flag:'🇨🇮', group:'H', pot:2,
-      capital:'Yamoussoukro', population:'29M', area:'322,000 km²', languages:'French', currency:'CFA franc (XOF)',
-      geography:'West African Gulf-of-Guinea coast. Coastal lagoons, rainforests, savannah.',
-      history:'Independent from France in 1960. Cocoa now drives ~40% of the economy.',
-      funFacts:['World\'s largest cocoa producer','African champions of 2023 (won at home)','Drogba is a national hero'],
+    { code:'IRN', name:'Iran', flag:'🇮🇷', group:'G', pot:3,
+      capital:'Tehran', population:'89M', area:'1.65M km²', languages:'Persian (Farsi)', currency:'Iranian rial (IRR)',
+      geography:'A Middle-Eastern plateau between mountains and deserts. Has both Caspian Sea and Persian Gulf coasts.',
+      history:'Heir to the ancient Persian Empire. Islamic Republic founded after the 1979 revolution.',
+      funFacts:['Persepolis was the ceremonial capital of the Persian Empire','Persian carpets are world-renowned','First country to officially recognise religious freedom (Cyrus Cylinder, 539 BC)'],
+      wc:{ appearances:7, best:'Group stage', titles:0 },
+      stars:[
+        { name:'Mehdi Taremi',      pos:'ST', club:'Olympiacos',     age:33, note:'Clinical centre-forward.' },
+        { name:'Sardar Azmoun',     pos:'ST', club:'Shabab Al-Ahli', age:30, note:'"Iranian Messi" — versatile forward.' },
+        { name:'Alireza Jahanbakhsh', pos:'RW', club:'Heerenveen',   age:32, note:'Captain, technical winger.' },
+        { name:'Saeid Ezatolahi',   pos:'CDM', club:'Al-Wakrah',     age:29, note:'Defensive anchor.' },
+      ]
+    },
+    { code:'NZL', name:'New Zealand', flag:'🇳🇿', group:'G', pot:4,
+      capital:'Wellington', population:'5.2M', area:'268,000 km²', languages:'English, Māori', currency:'New Zealand dollar (NZD)',
+      geography:'Two main islands in the South Pacific. Fjords, geysers, the Southern Alps, and rolling sheep country.',
+      history:'Māori settled c. 1300; British annexation in 1840 via the Treaty of Waitangi.',
+      funFacts:['More sheep than people','Filming location for Lord of the Rings','The All Blacks (rugby) are world-renowned'],
       wc:{ appearances:3, best:'Group stage', titles:0 },
       stars:[
-        { name:'Sébastien Haller',  pos:'ST', club:'Borussia Dortmund', age:31, note:'Powerful forward.' },
-        { name:'Franck Kessié',     pos:'CM', club:'Al-Ahli',       age:29, note:'Box-to-box leader.' },
-        { name:'Simon Adingra',     pos:'LW', club:'Brighton',      age:24, note:'Pacey winger.' },
-        { name:'Évann Guessand',    pos:'ST', club:'Aston Villa',   age:24, note:'Mobile forward.' },
+        { name:'Chris Wood',        pos:'ST', club:'Nottingham Forest', age:34, note:'Captain and goal-scorer.' },
+        { name:'Marko Stamenić',    pos:'CM', club:'Olympiacos',        age:23, note:'Young midfielder.' },
+        { name:'Liberato Cacace',   pos:'LB', club:'Wellington Phoenix',age:25, note:'Attacking fullback.' },
       ]
     },
-    { code:'TUN', name:'Tunisia', flag:'🇹🇳', group:'I', pot:3,
-      capital:'Tunis', population:'12M', area:'164,000 km²', languages:'Arabic', currency:'Tunisian dinar (TND)',
-      geography:'North African Mediterranean coast. Atlas Mountains in the north, Sahara in the south.',
-      history:'Site of ancient Carthage. The 2011 revolution sparked the Arab Spring.',
-      funFacts:['Carthage was Rome\'s great rival in the Punic Wars','Beat France in Qatar 2022','Has 8 UNESCO sites'],
-      wc:{ appearances:6, best:'Group stage', titles:0 },
+    { code:'CPV', name:"Cape Verde", flag:"\ud83c\udde8\ud83c\uddfb", group:'H', pot:4,
+      capital:"Praia", population:"600,000", area:"4,033 km\u00b2", languages:"Portuguese, Cape Verdean Creole", currency:"Cape Verdean escudo (CVE)",
+      geography:"A volcanic archipelago of 10 islands off the West African coast. Trade winds and warm year-round.",
+      history:"Uninhabited Portuguese colony from the 1460s; independent in 1975. A regional democratic success story.",
+      funFacts:["Smallest African nation ever to qualify for a World Cup","Ces\u00e1ria \u00c9vora made morna music world-famous","Population on the islands is dwarfed by the global diaspora"],
+      wc:{ appearances:0, best:"Debut", titles:0 },
       stars:[
-        { name:'Hannibal Mejbri',   pos:'CM', club:'Burnley',    age:23, note:'Energetic midfielder.' },
-        { name:'Wahbi Khazri',      pos:'AM', club:'Montpellier',age:35, note:'Veteran creator.' },
-        { name:'Aïssa Laïdouni',    pos:'CM', club:'Union Berlin', age:28, note:'Industrious midfielder.' },
+        { name:"Ryan Mendes", pos:"AM", club:"Al-Wakrah", age:36, note:"Captain and historic talisman." },
+        { name:"Beb\u00e9", pos:"LW", club:"Cova da Piedade", age:35, note:"Former Man Utd winger turned Cape Verde stalwart." },
+        { name:"Garry Rodrigues", pos:"LW", club:"unattached", age:35, note:"Tricky wide attacker." },
+        { name:"Logan Costa", pos:"CB", club:"Toulouse", age:24, note:"Composed young defender." },
       ]
     },
-    { code:'GHA', name:'Ghana', flag:'🇬🇭', group:'J', pot:4,
+    { code:'KSA', name:'Saudi Arabia', flag:'🇸🇦', group:'H', pot:3,
+      capital:'Riyadh', population:'36M', area:'2.15M km²', languages:'Arabic', currency:'Saudi riyal (SAR)',
+      geography:'Dominates the Arabian Peninsula. 95% desert, including the vast Empty Quarter (Rub\' al Khali).',
+      history:'Unified under Ibn Saud in 1932. Modern oil-based economy now diversifying via Vision 2030.',
+      funFacts:['Home of Mecca and Medina, Islam\'s holiest cities','Stunned Argentina 2-1 in Qatar 2022','Will host the 2034 World Cup'],
+      wc:{ appearances:6, best:'Round of 16 (1994)', titles:0 },
+      stars:[
+        { name:'Salem Al-Dawsari',  pos:'LW', club:'Al-Hilal', age:34, note:'Scored the famous goal vs Argentina.' },
+        { name:'Saleh Al-Shehri',   pos:'ST', club:'Al-Ahli',  age:32, note:'Scored vs Argentina in 2022.' },
+        { name:'Mohammed Kanno',    pos:'CM', club:'Al-Hilal', age:31, note:'Captain in midfield.' },
+        { name:'Yasser Al-Shahrani',pos:'LB', club:'Al-Hilal', age:33, note:'Veteran fullback.' },
+      ]
+    },
+    { code:'ESP', name:'Spain', flag:'🇪🇸', group:'H', pot:1,
+      capital:'Madrid', population:'48M', area:'506,000 km²', languages:'Spanish (Castilian), Catalan, Galician, Basque', currency:'Euro (EUR)',
+      geography:'Iberian Peninsula plus the Canary and Balearic islands. The Meseta plateau dominates the interior; mountains in north and south.',
+      history:'A union of Castile and Aragon in 1469; explorers crossed the Atlantic. Modern democracy since 1978.',
+      funFacts:['Reigning European champions (2024) and 2010 world champions','Has 49 UNESCO World Heritage Sites','Siesta and tapas are real cultural staples'],
+      wc:{ appearances:16, best:'Champions (2010)', titles:1 },
+      stars:[
+        { name:'Lamine Yamal',      pos:'RW', club:'Barcelona',   age:18, note:'A generational left-footed winger.' },
+        { name:'Rodri',             pos:'CDM',club:'Man City',    age:29, note:'Ballon d\'Or winner; controls every game he plays.' },
+        { name:'Nico Williams',     pos:'LW', club:'Barcelona',   age:23, note:'Pacey, fearless on the dribble.' },
+        { name:'Pedri',             pos:'CM', club:'Barcelona',   age:23, note:'Press-resistant midfielder.' },
+        { name:'Álvaro Morata',     pos:'ST', club:'Galatasaray', age:33, note:'Veteran captain in attack.' },
+      ]
+    },
+    { code:'URU', name:'Uruguay', flag:'🇺🇾', group:'H', pot:2,
+      capital:'Montevideo', population:'3.5M', area:'176,000 km²', languages:'Spanish', currency:'Uruguayan peso (UYU)',
+      geography:'Small, flat, and Atlantic-facing. Rolling pampas, sandy beaches, and the wide Río de la Plata estuary.',
+      history:'Independent in 1825, sandwiched between Brazil and Argentina. Famous for an early progressive welfare state and a deep football tradition.',
+      funFacts:['Hosted and won the first World Cup in 1930','For its size, no country has produced more football per capita','Beef and yerba mate are national obsessions'],
+      wc:{ appearances:14, best:'Champions (1930, 1950)', titles:2 },
+      stars:[
+        { name:'Federico Valverde', pos:'CM', club:'Real Madrid',   age:27, note:'Rampaging midfielder with a missile of a shot.' },
+        { name:'Darwin Núñez',      pos:'ST', club:'Al-Hilal',      age:26, note:'Powerful, direct centre-forward.' },
+        { name:'Ronald Araújo',     pos:'CB', club:'Barcelona',     age:27, note:'Imposing modern centre-back.' },
+        { name:'Manuel Ugarte',     pos:'CDM',club:'Manchester Utd',age:24, note:'Combative ball-winner.' },
+        { name:'Maximiliano Araújo',pos:'LW', club:'Sporting CP',   age:25, note:'Bursting on the scene as a creator.' },
+      ]
+    },
+    { code:'FRA', name:'France', flag:'🇫🇷', group:'I', pot:1,
+      capital:'Paris', population:'68M', area:'544,000 km²', languages:'French', currency:'Euro (EUR)',
+      geography:'From Mediterranean beaches to Alpine peaks, from Atlantic surf to wine-country plains. Six neighbours.',
+      history:'A republic since the 1789 Revolution. The Fifth Republic, founded by de Gaulle in 1958, governs today.',
+      funFacts:['World\'s most-visited country','Two-time recent finalist (Champions 2018, runners-up 2022)','Home of the metric system'],
+      wc:{ appearances:17, best:'Champions (1998, 2018)', titles:2 },
+      stars:[
+        { name:'Kylian Mbappé',    pos:'ST/LW', club:'Real Madrid',   age:27, note:'Sensational pace; already has 3 World Cup final goals.' },
+        { name:'Aurélien Tchouaméni', pos:'CDM', club:'Real Madrid',  age:26, note:'Anchor of midfield.' },
+        { name:'Antoine Griezmann',pos:'AM',    club:'Atlético Madrid', age:35, note:'France\'s most-capped attacker in the modern era.' },
+        { name:'William Saliba',   pos:'CB',    club:'Arsenal',       age:25, note:'Cool, modern centre-back.' },
+        { name:'Theo Hernández',   pos:'LB',    club:'Al-Hilal',      age:28, note:'Powerful overlapping fullback.' },
+      ]
+    },
+    { code:'IRQ', name:"Iraq", flag:"\ud83c\uddee\ud83c\uddf6", group:'I', pot:4,
+      capital:"Baghdad", population:"45M", area:"438,000 km\u00b2", languages:"Arabic, Kurdish", currency:"Iraqi dinar (IQD)",
+      geography:"Mesopotamia \u2014 the land between the Tigris and Euphrates. Mountains in the Kurdish north, marshes in the south, desert in the west.",
+      history:"Cradle of civilization; modern republic since 1958. Has rebuilt football amid decades of conflict.",
+      funFacts:["Site of ancient Babylon and Ur \u2014 among the world's oldest cities","Won the 2007 AFC Asian Cup","Second-ever World Cup appearance (first was 1986)"],
+      wc:{ appearances:1, best:"Group stage (1986)", titles:0 },
+      stars:[
+        { name:"Aymen Hussein", pos:"ST", club:"Al-Qadsiah", age:29, note:"Aerial threat in attack." },
+        { name:"Ali Al-Hamadi", pos:"ST", club:"Stoke City", age:24, note:"England-raised forward." },
+        { name:"Zidane Iqbal", pos:"AM", club:"Utrecht", age:23, note:"Former Man Utd academy product." },
+        { name:"Ibrahim Bayesh", pos:"AM", club:"Al-Zawraa", age:28, note:"Creative midfielder." },
+      ]
+    },
+    { code:'NOR', name:'Norway', flag:'🇳🇴', group:'I', pot:3,
+      capital:'Oslo', population:'5.5M', area:'385,000 km²', languages:'Norwegian', currency:'Norwegian krone (NOK)',
+      geography:'Long, narrow, fjord-carved Atlantic coast. The northernmost mainland in Europe; the midnight sun shines all summer above the Arctic Circle.',
+      history:'Independent from Sweden in 1905. One of the world\'s wealthiest countries via North Sea oil and a $1.6T sovereign wealth fund.',
+      funFacts:['Has won the most Winter Olympic medals ever','Hosts the Nobel Peace Prize','First WC appearance since 1998'],
+      wc:{ appearances:3, best:'Round of 16 (1998)', titles:0 },
+      stars:[
+        { name:'Erling Haaland',     pos:'ST', club:'Man City',         age:25, note:'Generational goal-scorer.' },
+        { name:'Martin Ødegaard',    pos:'AM', club:'Arsenal',          age:27, note:'Captain and creative hub.' },
+        { name:'Alexander Sørloth',  pos:'ST', club:'Atlético Madrid',  age:30, note:'Powerful target man.' },
+        { name:'Antonio Nusa',       pos:'LW', club:'RB Leipzig',       age:20, note:'Exciting young winger.' },
+      ]
+    },
+    { code:'SEN', name:'Senegal', flag:'🇸🇳', group:'I', pot:2,
+      capital:'Dakar', population:'18M', area:'197,000 km²', languages:'French, Wolof', currency:'CFA franc (XOF)',
+      geography:'West African Atlantic coast. The Sahel\'s flat plains and the Casamance river system in the south.',
+      history:'Independent from France in 1960; a model of African democratic stability.',
+      funFacts:['Reigning African champions (2022 AFCON)','Lac Rose turns bright pink in the dry season','Mbalax music is a national export'],
+      wc:{ appearances:3, best:'Quarterfinals (2002)', titles:0 },
+      stars:[
+        { name:'Sadio Mané',        pos:'LW/ST', club:'Al-Nassr', age:33, note:'Talisman and 2022 AFCON winner.' },
+        { name:'Kalidou Koulibaly', pos:'CB', club:'Al-Hilal',    age:34, note:'Captain at the back.' },
+        { name:'Édouard Mendy',     pos:'GK', club:'Al-Ahli',     age:33, note:'Former CL-winning keeper.' },
+        { name:'Ismaïla Sarr',      pos:'RW', club:'Crystal Palace', age:28, note:'Direct, fast winger.' },
+      ]
+    },
+    { code:'ALG', name:"Algeria", flag:"\ud83c\udde9\ud83c\uddff", group:'J', pot:3,
+      capital:"Algiers", population:"45M", area:"2.38M km\u00b2", languages:"Arabic, Berber", currency:"Algerian dinar (DZD)",
+      geography:"Africa's largest country. Mediterranean coast, Atlas Mountains, vast Sahara stretching south.",
+      history:"A long French colonial period ended with independence in 1962 after a brutal war.",
+      funFacts:["Largest country in Africa","African champion in 1990 and 2019","Famous for \"Disaster of Gij\u00f3n\" upset of West Germany in 1982"],
+      wc:{ appearances:5, best:"Round of 16 (2014)", titles:0 },
+      stars:[
+        { name:"Riyad Mahrez", pos:"RW", club:"Al-Ahli", age:35, note:"Captain and left-footed wizard." },
+        { name:"Isma\u00ebl Bennacer", pos:"CM", club:"Marseille", age:28, note:"Press-resistant midfielder." },
+        { name:"Houssem Aouar", pos:"AM", club:"Al-Ittihad", age:27, note:"Creative midfielder." },
+        { name:"Sa\u00efd Benrahma", pos:"LW", club:"Lyon", age:30, note:"Tricky winger." },
+        { name:"Amine Gouiri", pos:"ST", club:"Marseille", age:26, note:"Mobile forward." },
+      ]
+    },
+    { code:'ARG', name:'Argentina', flag:'🇦🇷', group:'J', pot:1,
+      capital:'Buenos Aires', population:'46M', area:'2.78M km²', languages:'Spanish', currency:'Argentine peso (ARS)',
+      geography:'From subtropical Iguazú falls to Patagonian glaciers, Argentina covers nearly the whole length of South America. The Pampas grasslands feed millions of cattle.',
+      history:'Independent from Spain in 1816, shaped by waves of European immigration. Tango was born in the ports of Buenos Aires.',
+      funFacts:['Defending world champions (Qatar 2022)','Birthplace of Maradona and Messi','Eats the most beef per capita in the world'],
+      wc:{ appearances:18, best:'Champions (1978, 1986, 2022)', titles:3 },
+      stars:[
+        { name:'Lionel Messi',       pos:'RW/AM', club:'Inter Miami',  age:38, note:'Eight Ballons d\'Or, the 2022 champion, and likely his last World Cup.' },
+        { name:'Lautaro Martínez',   pos:'ST',    club:'Inter Milan',  age:28, note:'Captain-in-waiting and prolific finisher.' },
+        { name:'Julián Álvarez',     pos:'ST',    club:'Atlético Madrid', age:26, note:'Quick, intelligent forward.' },
+        { name:'Enzo Fernández',     pos:'CM',    club:'Chelsea',      age:25, note:'2022 Young Player of the Tournament.' },
+        { name:'Cristian Romero',    pos:'CB',    club:'Tottenham',    age:28, note:'"Cuti" — fearsome, ball-playing defender.' },
+        { name:'Emiliano Martínez',  pos:'GK',    club:'Aston Villa',  age:33, note:'Penalty-shootout specialist nicknamed "Dibu".' },
+      ]
+    },
+    { code:'AUT', name:'Austria', flag:'🇦🇹', group:'J', pot:2,
+      capital:'Vienna', population:'9.1M', area:'84,000 km²', languages:'German', currency:'Euro (EUR)',
+      geography:'Alpine, landlocked, drained by the Danube. Six of seven federal-state capitals lie along it.',
+      history:'Heart of the Habsburg Empire until 1918. A federal republic and EU member.',
+      funFacts:['Birthplace of Mozart, Freud, and the Sound of Music','Vienna often tops "most liveable city" rankings','Strudel and schnitzel are national dishes'],
+      wc:{ appearances:8, best:'3rd place (1954)', titles:0 },
+      stars:[
+        { name:'David Alaba',      pos:'CB/LB', club:'Real Madrid',  age:33, note:'Versatile, classy leader.' },
+        { name:'Marcel Sabitzer',  pos:'CM', club:'Borussia Dortmund', age:32, note:'Long-range threat.' },
+        { name:'Marko Arnautović', pos:'ST', club:'Inter Milan',    age:37, note:'Veteran forward.' },
+        { name:'Konrad Laimer',    pos:'CM', club:'Bayern Munich',  age:28, note:'Ball-winning runner.' },
+      ]
+    },
+    { code:'JOR', name:'Jordan', flag:'🇯🇴', group:'J', pot:4,
+      capital:'Amman', population:'11M', area:'89,000 km²', languages:'Arabic', currency:'Jordanian dinar (JOD)',
+      geography:'Largely desert, with the Jordan River and the lowest point on earth (the Dead Sea, -430m).',
+      history:'An emirate under the British mandate; independent 1946. Stable monarchy in a volatile region.',
+      funFacts:['Petra, the rose-red Nabatean city, is a New Wonder of the World','First-ever World Cup appearance','Hosts ~700,000 refugees'],
+      wc:{ appearances:0, best:'Debut', titles:0 },
+      stars:[
+        { name:'Mousa Tamari',      pos:'RW', club:'Rennes',     age:29, note:'Quick, technical winger.' },
+        { name:'Yazan Al-Naimat',   pos:'ST', club:'Al-Ahli',    age:27, note:'Captain in attack.' },
+        { name:'Ehsan Haddad',      pos:'CB', club:'Al-Faisaly', age:28, note:'Dependable defender.' },
+      ]
+    },
+    { code:'COL', name:'Colombia', flag:'🇨🇴', group:'K', pot:2,
+      capital:'Bogotá', population:'52M', area:'1.14M km²', languages:'Spanish', currency:'Colombian peso (COP)',
+      geography:'The only South American country with both Atlantic (Caribbean) and Pacific coasts. The Andes split into three ranges here; the Amazon stretches south.',
+      history:'Independent from Spain in 1810. Coffee, emeralds, and a long post-conflict recovery shape the modern republic.',
+      funFacts:['World\'s 2nd most biodiverse country','Produces some of the world\'s finest coffee','Cumbia and salsa are national rhythms'],
+      wc:{ appearances:6, best:'Quarterfinals (2014)', titles:0 },
+      stars:[
+        { name:'Luis Díaz',          pos:'LW', club:'Bayern Munich', age:28, note:'Direct, hard-running left winger.' },
+        { name:'James Rodríguez',    pos:'AM', club:'Club León',     age:34, note:'The Golden-Boot winner of 2014, still pulling strings.' },
+        { name:'Richard Ríos',       pos:'CM', club:'Benfica',       age:25, note:'Tough, technical midfielder.' },
+        { name:'Jhon Durán',         pos:'ST', club:'Al-Nassr',      age:22, note:'Explosive young striker.' },
+        { name:'Daniel Muñoz',       pos:'RB', club:'Crystal Palace',age:29, note:'Marauding right-back.' },
+      ]
+    },
+    { code:'COD', name:"DR Congo", flag:"\ud83c\udde8\ud83c\udde9", group:'K', pot:4,
+      capital:"Kinshasa", population:"109M", area:"2.34M km\u00b2", languages:"French, Lingala, Swahili, Kikongo, Tshiluba", currency:"Congolese franc (CDF)",
+      geography:"Africa's second-largest country. Most of the Congo rainforest is here, plus the mighty Congo river.",
+      history:"Brutal Belgian colonization until 1960; long instability followed. Kinshasa is one of the world's largest French-speaking cities.",
+      funFacts:["Second-largest country in Africa","Home to the largest rainforest after the Amazon","Returns to the World Cup after a 52-year absence (1974 as Zaire)"],
+      wc:{ appearances:1, best:"Group stage (1974 as Zaire)", titles:0 },
+      stars:[
+        { name:"C\u00e9dric Bakambu", pos:"ST", club:"Real Betis", age:35, note:"Captain and goal-scorer." },
+        { name:"Yoane Wissa", pos:"ST", club:"Newcastle", age:29, note:"Tireless forward." },
+        { name:"Th\u00e9o Bongonda", pos:"LW", club:"Krasnodar", age:30, note:"Pacey winger." },
+        { name:"Chancel Mbemba", pos:"CB", club:"Lille", age:31, note:"Defensive leader." },
+        { name:"Axel Tuanzebe", pos:"CB", club:"Burnley", age:28, note:"Former Man Utd defender." },
+      ]
+    },
+    { code:'POR', name:'Portugal', flag:'🇵🇹', group:'K', pot:1,
+      capital:'Lisbon', population:'10M', area:'92,000 km²', languages:'Portuguese', currency:'Euro (EUR)',
+      geography:'Westernmost European country, a long Atlantic coastline, plus the Azores and Madeira islands.',
+      history:'A continuous nation since 1143. Led the Age of Discoveries — first to round Africa and reach India and Brazil.',
+      funFacts:['Oldest borders in Europe (since 1297)','Fado music is UNESCO heritage','Portuguese is spoken by ~260M people worldwide'],
+      wc:{ appearances:9, best:'3rd place (1966)', titles:0 },
+      stars:[
+        { name:'Cristiano Ronaldo', pos:'ST', club:'Al-Nassr',      age:41, note:'All-time top international scorer; record sixth World Cup.' },
+        { name:'Bruno Fernandes',   pos:'AM', club:'Manchester Utd', age:31, note:'Captain and creative engine.' },
+        { name:'Bernardo Silva',    pos:'AM', club:'Man City',      age:31, note:'Technically gifted glue player.' },
+        { name:'Rúben Dias',        pos:'CB', club:'Man City',      age:28, note:'Defensive leader.' },
+        { name:'Vitinha',           pos:'CM', club:'PSG',           age:26, note:'Press-resistant orchestrator.' },
+        { name:'Rafael Leão',       pos:'LW', club:'AC Milan',      age:26, note:'Direct, devastating in transition.' },
+      ]
+    },
+    { code:'UZB', name:'Uzbekistan', flag:'🇺🇿', group:'K', pot:4,
+      capital:'Tashkent', population:'36M', area:'448,000 km²', languages:'Uzbek, Russian', currency:'Uzbek som (UZS)',
+      geography:'Doubly landlocked Central Asia — sand desert in the west, the Tien Shan mountains in the east.',
+      history:'On the ancient Silk Road, home to Samarkand and Bukhara. Independent from the USSR in 1991.',
+      funFacts:['First-ever World Cup appearance','Samarkand was Tamerlane\'s 14th-century capital','One of only two doubly landlocked countries'],
+      wc:{ appearances:0, best:'Debut', titles:0 },
+      stars:[
+        { name:'Eldor Shomurodov',  pos:'ST', club:'Roma',       age:30, note:'Italy-tested forward.' },
+        { name:'Abdukodir Khusanov',pos:'CB', club:'Man City',   age:21, note:'Big-money emerging defender.' },
+        { name:'Jaloliddin Masharipov', pos:'AM', club:'Pakhtakor', age:32, note:'Creative midfielder.' },
+      ]
+    },
+    { code:'CRO', name:'Croatia', flag:'🇭🇷', group:'L', pot:2,
+      capital:'Zagreb', population:'3.9M', area:'56,000 km²', languages:'Croatian', currency:'Euro (EUR)',
+      geography:'Crescent-shaped along the Adriatic with more than 1,000 islands. The Dinaric Alps rise just inland.',
+      history:'Part of Yugoslavia until 1991; independent after a four-year war. Joined the EU in 2013.',
+      funFacts:['The necktie ("cravat") was invented here','Beat Argentina to reach the 2018 final','Stunning UNESCO old towns: Dubrovnik, Split'],
+      wc:{ appearances:6, best:'Runners-up (2018), 3rd (2022)', titles:0 },
+      stars:[
+        { name:'Luka Modrić',     pos:'CM', club:'AC Milan',  age:40, note:'2018 Ballon d\'Or; midfield maestro.' },
+        { name:'Joško Gvardiol',  pos:'CB/LB', club:'Man City', age:24, note:'Modern attacking defender.' },
+        { name:'Mateo Kovačić',   pos:'CM', club:'Man City',  age:31, note:'Glue midfielder.' },
+        { name:'Andrej Kramarić', pos:'ST', club:'Hoffenheim', age:34, note:'Veteran goal-scorer.' },
+      ]
+    },
+    { code:'ENG', name:'England', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', group:'L', pot:1,
+      capital:'London', population:'56M (England) / 67M (UK)', area:'130,000 km² (England)', languages:'English', currency:'Pound sterling (GBP)',
+      geography:'Rolling chalk downs, moors, and a long coastline. Highest point Scafell Pike (978m). Crossed by the Thames, Severn, and Mersey.',
+      history:'United with Wales in 1536, with Scotland in 1707. Birthplace of modern football — codified at the Football Association in 1863.',
+      funFacts:['Invented modern football','Wembley Stadium has hosted 7 European finals','The Premier League is the world\'s richest league'],
+      wc:{ appearances:16, best:'Champions (1966)', titles:1 },
+      stars:[
+        { name:'Jude Bellingham', pos:'AM', club:'Real Madrid',    age:22, note:'Modern complete midfielder.' },
+        { name:'Harry Kane',      pos:'ST', club:'Bayern Munich',  age:32, note:'England\'s all-time top scorer.' },
+        { name:'Bukayo Saka',     pos:'RW', club:'Arsenal',        age:24, note:'Direct, creative wide forward.' },
+        { name:'Phil Foden',      pos:'AM', club:'Man City',       age:25, note:'Two-footed playmaker.' },
+        { name:'Declan Rice',     pos:'CM', club:'Arsenal',        age:27, note:'England\'s midfield captain.' },
+        { name:'Cole Palmer',     pos:'AM', club:'Chelsea',        age:24, note:'Ice-cold finisher and creator.' },
+      ]
+    },
+    { code:'GHA', name:'Ghana', flag:'🇬🇭', group:'L', pot:4,
       capital:'Accra', population:'33M', area:'239,000 km²', languages:'English, Twi', currency:'Ghanaian cedi (GHS)',
       geography:'West African Gulf-of-Guinea coast. Lake Volta is one of the world\'s largest reservoirs.',
       history:'First sub-Saharan African colony to gain independence (1957). A stable multi-party democracy.',
@@ -654,46 +700,7 @@
         { name:'Jordan Ayew',       pos:'ST', club:'Leicester',  age:34, note:'Experienced forward.' },
       ]
     },
-    { code:'NGA', name:'Nigeria', flag:'🇳🇬', group:'K', pot:4,
-      capital:'Abuja', population:'225M', area:'924,000 km²', languages:'English (plus 500+ languages)', currency:'Naira (NGN)',
-      geography:'Africa\'s most populous country. Tropical south on the Atlantic, savannah and semi-desert north.',
-      history:'Independent from Britain in 1960. The economy is dominated by oil and a booming film industry (Nollywood).',
-      funFacts:['Largest population in Africa','Afrobeats is now a global music genre','3-time African champions'],
-      wc:{ appearances:6, best:'Round of 16 (1994, 98, 2014)', titles:0 },
-      stars:[
-        { name:'Victor Osimhen',    pos:'ST', club:'Galatasaray', age:27, note:'2023 African Player of the Year.' },
-        { name:'Ademola Lookman',   pos:'LW', club:'Atalanta',    age:28, note:'Hat-trick scorer in 2024 Europa League final.' },
-        { name:'Wilfred Ndidi',     pos:'CDM', club:'Besiktas',   age:29, note:'Ball-winning machine.' },
-        { name:'Alex Iwobi',        pos:'AM', club:'Fulham',      age:30, note:'Two-footed midfielder.' },
-      ]
-    },
-    { code:'CMR', name:'Cameroon', flag:'🇨🇲', group:'L', pot:4,
-      capital:'Yaoundé', population:'28M', area:'476,000 km²', languages:'French, English', currency:'CFA franc (XAF)',
-      geography:'"Africa in miniature": coast, mountains, jungle, savannah, desert. Mount Cameroon erupts often.',
-      history:'Once a German colony, partitioned between France and Britain, reunified in 1961.',
-      funFacts:['First African team to reach a WC quarterfinal (1990)','Roger Milla\'s 1990 dance is iconic','5-time AFCON champions'],
-      wc:{ appearances:8, best:'Quarterfinals (1990)', titles:0 },
-      stars:[
-        { name:'André Onana',       pos:'GK', club:'Manchester Utd',  age:30, note:'Sweeper-keeper.' },
-        { name:'Bryan Mbeumo',      pos:'RW', club:'Manchester Utd',  age:26, note:'Direct, two-footed forward.' },
-        { name:'Vincent Aboubakar', pos:'ST', club:'Hatayspor',       age:34, note:'Veteran goal-scorer.' },
-        { name:'Karl Toko Ekambi',  pos:'LW', club:'Abha',            age:33, note:'Experienced winger.' },
-      ]
-    },
-    /* --- OFC + intercontinental --- */
-    { code:'NZL', name:'New Zealand', flag:'🇳🇿', group:'J', pot:4,
-      capital:'Wellington', population:'5.2M', area:'268,000 km²', languages:'English, Māori', currency:'New Zealand dollar (NZD)',
-      geography:'Two main islands in the South Pacific. Fjords, geysers, the Southern Alps, and rolling sheep country.',
-      history:'Māori settled c. 1300; British annexation in 1840 via the Treaty of Waitangi.',
-      funFacts:['More sheep than people','Filming location for Lord of the Rings','The All Blacks (rugby) are world-renowned'],
-      wc:{ appearances:3, best:'Group stage', titles:0 },
-      stars:[
-        { name:'Chris Wood',        pos:'ST', club:'Nottingham Forest', age:34, note:'Captain and goal-scorer.' },
-        { name:'Marko Stamenić',    pos:'CM', club:'Olympiacos',        age:23, note:'Young midfielder.' },
-        { name:'Liberato Cacace',   pos:'LB', club:'Wellington Phoenix',age:25, note:'Attacking fullback.' },
-      ]
-    },
-    { code:'PAN', name:'Panama', flag:'🇵🇦', group:'K', pot:4,
+    { code:'PAN', name:'Panama', flag:'🇵🇦', group:'L', pot:4,
       capital:'Panama City', population:'4.5M', area:'75,000 km²', languages:'Spanish', currency:'Balboa / US dollar',
       geography:'A narrow isthmus joining Central and South America. The Panama Canal cuts through it, connecting two oceans.',
       history:'Independent from Colombia in 1903 (with US support); regained the canal in 1999.',
@@ -704,19 +711,7 @@
         { name:'Adalberto Carrasquilla', pos:'CM', club:'Pumas', age:27, note:'Set-piece weapon.' },
         { name:'Aníbal Godoy',      pos:'CM', club:'San Diego FC', age:36, note:'Captain in midfield.' },
       ]
-    },
-    { code:'JAM', name:'Jamaica', flag:'🇯🇲', group:'L', pot:4,
-      capital:'Kingston', population:'2.8M', area:'11,000 km²', languages:'English, Jamaican Patois', currency:'Jamaican dollar (JMD)',
-      geography:'A Caribbean island with the Blue Mountains, lush forests, and famous beaches.',
-      history:'British colony from 1655 until independence in 1962. Reggae and Rastafari born here in the 1960s.',
-      funFacts:['Reggae and Bob Marley are global icons','Usain Bolt was born here','Has the fastest sprinters per capita'],
-      wc:{ appearances:1, best:'Group stage (1998)', titles:0 },
-      stars:[
-        { name:'Leon Bailey',       pos:'RW', club:'Aston Villa', age:28, note:'Pacey, direct winger.' },
-        { name:'Demarai Gray',      pos:'LW', club:'Saudi Arabia',age:29, note:'Tricky wide attacker.' },
-        { name:'Michail Antonio',   pos:'ST', club:'West Ham',    age:35, note:'Powerful forward.' },
-      ]
-    },
+    }
   ];
 
   /* ----------------------------------------------------------------
@@ -751,92 +746,1470 @@
     [[0,3],[1,2]],
   ];
 
-  function buildMatches(groups) {
-    const matches = [];
-    const start = new Date('2026-06-11T00:00:00');
-    let mid = 1;
+  // Real 2026 World Cup schedule sourced from OpenFootball (public domain).
+  // Source: https://github.com/openfootball/worldcup.json
+  const OFFICIAL_SCHEDULE = [
+  {
+    "id": "m001",
+    "date": "2026-06-11",
+    "time": "13:00",
+    "stage": "group",
+    "group": "A",
+    "round": "Matchday 1",
+    "home": "MEX",
+    "away": "ZAF",
+    "venue": "azt",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m002",
+    "date": "2026-06-11",
+    "time": "20:00",
+    "stage": "group",
+    "group": "A",
+    "round": "Matchday 1",
+    "home": "KOR",
+    "away": "CZE",
+    "venue": "akr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m003",
+    "date": "2026-06-12",
+    "time": "15:00",
+    "stage": "group",
+    "group": "B",
+    "round": "Matchday 2",
+    "home": "CAN",
+    "away": "BIH",
+    "venue": "bmo",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m004",
+    "date": "2026-06-12",
+    "time": "18:00",
+    "stage": "group",
+    "group": "D",
+    "round": "Matchday 2",
+    "home": "USA",
+    "away": "PAR",
+    "venue": "sofi",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m005",
+    "date": "2026-06-13",
+    "time": "12:00",
+    "stage": "group",
+    "group": "B",
+    "round": "Matchday 3",
+    "home": "QAT",
+    "away": "SUI",
+    "venue": "lev",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m006",
+    "date": "2026-06-13",
+    "time": "18:00",
+    "stage": "group",
+    "group": "C",
+    "round": "Matchday 3",
+    "home": "BRA",
+    "away": "MAR",
+    "venue": "met",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m007",
+    "date": "2026-06-13",
+    "time": "21:00",
+    "stage": "group",
+    "group": "C",
+    "round": "Matchday 3",
+    "home": "HAI",
+    "away": "SCO",
+    "venue": "gil",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m008",
+    "date": "2026-06-13",
+    "time": "21:00",
+    "stage": "group",
+    "group": "D",
+    "round": "Matchday 3",
+    "home": "AUS",
+    "away": "TUR",
+    "venue": "bc",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m009",
+    "date": "2026-06-14",
+    "time": "12:00",
+    "stage": "group",
+    "group": "E",
+    "round": "Matchday 4",
+    "home": "GER",
+    "away": "CUW",
+    "venue": "nrg",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m010",
+    "date": "2026-06-14",
+    "time": "15:00",
+    "stage": "group",
+    "group": "F",
+    "round": "Matchday 4",
+    "home": "NED",
+    "away": "JPN",
+    "venue": "att",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m011",
+    "date": "2026-06-14",
+    "time": "19:00",
+    "stage": "group",
+    "group": "E",
+    "round": "Matchday 4",
+    "home": "CIV",
+    "away": "ECU",
+    "venue": "lin",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m012",
+    "date": "2026-06-14",
+    "time": "20:00",
+    "stage": "group",
+    "group": "F",
+    "round": "Matchday 4",
+    "home": "SWE",
+    "away": "TUN",
+    "venue": "bbva",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m013",
+    "date": "2026-06-15",
+    "time": "12:00",
+    "stage": "group",
+    "group": "G",
+    "round": "Matchday 5",
+    "home": "BEL",
+    "away": "EGY",
+    "venue": "lum",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m014",
+    "date": "2026-06-15",
+    "time": "12:00",
+    "stage": "group",
+    "group": "H",
+    "round": "Matchday 5",
+    "home": "ESP",
+    "away": "CPV",
+    "venue": "mer",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m015",
+    "date": "2026-06-15",
+    "time": "18:00",
+    "stage": "group",
+    "group": "G",
+    "round": "Matchday 5",
+    "home": "IRN",
+    "away": "NZL",
+    "venue": "sofi",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m016",
+    "date": "2026-06-15",
+    "time": "18:00",
+    "stage": "group",
+    "group": "H",
+    "round": "Matchday 5",
+    "home": "KSA",
+    "away": "URU",
+    "venue": "hrs",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m017",
+    "date": "2026-06-16",
+    "time": "15:00",
+    "stage": "group",
+    "group": "I",
+    "round": "Matchday 6",
+    "home": "FRA",
+    "away": "SEN",
+    "venue": "met",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m018",
+    "date": "2026-06-16",
+    "time": "18:00",
+    "stage": "group",
+    "group": "I",
+    "round": "Matchday 6",
+    "home": "IRQ",
+    "away": "NOR",
+    "venue": "gil",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m019",
+    "date": "2026-06-16",
+    "time": "20:00",
+    "stage": "group",
+    "group": "J",
+    "round": "Matchday 6",
+    "home": "ARG",
+    "away": "ALG",
+    "venue": "arr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m020",
+    "date": "2026-06-16",
+    "time": "21:00",
+    "stage": "group",
+    "group": "J",
+    "round": "Matchday 6",
+    "home": "AUT",
+    "away": "JOR",
+    "venue": "lev",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m021",
+    "date": "2026-06-17",
+    "time": "12:00",
+    "stage": "group",
+    "group": "K",
+    "round": "Matchday 7",
+    "home": "POR",
+    "away": "COD",
+    "venue": "nrg",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m022",
+    "date": "2026-06-17",
+    "time": "15:00",
+    "stage": "group",
+    "group": "L",
+    "round": "Matchday 7",
+    "home": "ENG",
+    "away": "CRO",
+    "venue": "att",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m023",
+    "date": "2026-06-17",
+    "time": "19:00",
+    "stage": "group",
+    "group": "L",
+    "round": "Matchday 7",
+    "home": "GHA",
+    "away": "PAN",
+    "venue": "bmo",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m024",
+    "date": "2026-06-17",
+    "time": "20:00",
+    "stage": "group",
+    "group": "K",
+    "round": "Matchday 7",
+    "home": "UZB",
+    "away": "COL",
+    "venue": "azt",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m025",
+    "date": "2026-06-18",
+    "time": "12:00",
+    "stage": "group",
+    "group": "A",
+    "round": "Matchday 8",
+    "home": "CZE",
+    "away": "ZAF",
+    "venue": "mer",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m026",
+    "date": "2026-06-18",
+    "time": "12:00",
+    "stage": "group",
+    "group": "B",
+    "round": "Matchday 8",
+    "home": "SUI",
+    "away": "BIH",
+    "venue": "sofi",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m027",
+    "date": "2026-06-18",
+    "time": "15:00",
+    "stage": "group",
+    "group": "B",
+    "round": "Matchday 8",
+    "home": "CAN",
+    "away": "QAT",
+    "venue": "bc",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m028",
+    "date": "2026-06-18",
+    "time": "19:00",
+    "stage": "group",
+    "group": "A",
+    "round": "Matchday 8",
+    "home": "MEX",
+    "away": "KOR",
+    "venue": "akr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m029",
+    "date": "2026-06-19",
+    "time": "12:00",
+    "stage": "group",
+    "group": "D",
+    "round": "Matchday 9",
+    "home": "USA",
+    "away": "AUS",
+    "venue": "lum",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m030",
+    "date": "2026-06-19",
+    "time": "18:00",
+    "stage": "group",
+    "group": "C",
+    "round": "Matchday 9",
+    "home": "SCO",
+    "away": "MAR",
+    "venue": "gil",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m031",
+    "date": "2026-06-19",
+    "time": "20:00",
+    "stage": "group",
+    "group": "D",
+    "round": "Matchday 9",
+    "home": "TUR",
+    "away": "PAR",
+    "venue": "lev",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m032",
+    "date": "2026-06-19",
+    "time": "20:30",
+    "stage": "group",
+    "group": "C",
+    "round": "Matchday 9",
+    "home": "BRA",
+    "away": "HAI",
+    "venue": "lin",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m033",
+    "date": "2026-06-20",
+    "time": "12:00",
+    "stage": "group",
+    "group": "F",
+    "round": "Matchday 10",
+    "home": "NED",
+    "away": "SWE",
+    "venue": "nrg",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m034",
+    "date": "2026-06-20",
+    "time": "16:00",
+    "stage": "group",
+    "group": "E",
+    "round": "Matchday 10",
+    "home": "GER",
+    "away": "CIV",
+    "venue": "bmo",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m035",
+    "date": "2026-06-20",
+    "time": "19:00",
+    "stage": "group",
+    "group": "E",
+    "round": "Matchday 10",
+    "home": "ECU",
+    "away": "CUW",
+    "venue": "arr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m036",
+    "date": "2026-06-20",
+    "time": "22:00",
+    "stage": "group",
+    "group": "F",
+    "round": "Matchday 10",
+    "home": "TUN",
+    "away": "JPN",
+    "venue": "bbva",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m037",
+    "date": "2026-06-21",
+    "time": "12:00",
+    "stage": "group",
+    "group": "G",
+    "round": "Matchday 11",
+    "home": "BEL",
+    "away": "IRN",
+    "venue": "sofi",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m038",
+    "date": "2026-06-21",
+    "time": "12:00",
+    "stage": "group",
+    "group": "H",
+    "round": "Matchday 11",
+    "home": "ESP",
+    "away": "KSA",
+    "venue": "mer",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m039",
+    "date": "2026-06-21",
+    "time": "18:00",
+    "stage": "group",
+    "group": "G",
+    "round": "Matchday 11",
+    "home": "NZL",
+    "away": "EGY",
+    "venue": "bc",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m040",
+    "date": "2026-06-21",
+    "time": "18:00",
+    "stage": "group",
+    "group": "H",
+    "round": "Matchday 11",
+    "home": "URU",
+    "away": "CPV",
+    "venue": "hrs",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m041",
+    "date": "2026-06-22",
+    "time": "12:00",
+    "stage": "group",
+    "group": "J",
+    "round": "Matchday 12",
+    "home": "ARG",
+    "away": "AUT",
+    "venue": "att",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m042",
+    "date": "2026-06-22",
+    "time": "17:00",
+    "stage": "group",
+    "group": "I",
+    "round": "Matchday 12",
+    "home": "FRA",
+    "away": "IRQ",
+    "venue": "lin",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m043",
+    "date": "2026-06-22",
+    "time": "20:00",
+    "stage": "group",
+    "group": "I",
+    "round": "Matchday 12",
+    "home": "NOR",
+    "away": "SEN",
+    "venue": "met",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m044",
+    "date": "2026-06-22",
+    "time": "20:00",
+    "stage": "group",
+    "group": "J",
+    "round": "Matchday 12",
+    "home": "JOR",
+    "away": "ALG",
+    "venue": "lev",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m045",
+    "date": "2026-06-23",
+    "time": "12:00",
+    "stage": "group",
+    "group": "K",
+    "round": "Matchday 13",
+    "home": "POR",
+    "away": "UZB",
+    "venue": "nrg",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m046",
+    "date": "2026-06-23",
+    "time": "16:00",
+    "stage": "group",
+    "group": "L",
+    "round": "Matchday 13",
+    "home": "ENG",
+    "away": "GHA",
+    "venue": "gil",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m047",
+    "date": "2026-06-23",
+    "time": "19:00",
+    "stage": "group",
+    "group": "L",
+    "round": "Matchday 13",
+    "home": "PAN",
+    "away": "CRO",
+    "venue": "bmo",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m048",
+    "date": "2026-06-23",
+    "time": "20:00",
+    "stage": "group",
+    "group": "K",
+    "round": "Matchday 13",
+    "home": "COL",
+    "away": "COD",
+    "venue": "akr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m049",
+    "date": "2026-06-24",
+    "time": "12:00",
+    "stage": "group",
+    "group": "B",
+    "round": "Matchday 14",
+    "home": "SUI",
+    "away": "CAN",
+    "venue": "bc",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m050",
+    "date": "2026-06-24",
+    "time": "12:00",
+    "stage": "group",
+    "group": "B",
+    "round": "Matchday 14",
+    "home": "BIH",
+    "away": "QAT",
+    "venue": "lum",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m051",
+    "date": "2026-06-24",
+    "time": "18:00",
+    "stage": "group",
+    "group": "C",
+    "round": "Matchday 14",
+    "home": "SCO",
+    "away": "BRA",
+    "venue": "hrs",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m052",
+    "date": "2026-06-24",
+    "time": "18:00",
+    "stage": "group",
+    "group": "C",
+    "round": "Matchday 14",
+    "home": "MAR",
+    "away": "HAI",
+    "venue": "mer",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m053",
+    "date": "2026-06-24",
+    "time": "19:00",
+    "stage": "group",
+    "group": "A",
+    "round": "Matchday 14",
+    "home": "CZE",
+    "away": "MEX",
+    "venue": "azt",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m054",
+    "date": "2026-06-24",
+    "time": "19:00",
+    "stage": "group",
+    "group": "A",
+    "round": "Matchday 14",
+    "home": "ZAF",
+    "away": "KOR",
+    "venue": "bbva",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m055",
+    "date": "2026-06-25",
+    "time": "16:00",
+    "stage": "group",
+    "group": "E",
+    "round": "Matchday 15",
+    "home": "CUW",
+    "away": "CIV",
+    "venue": "lin",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m056",
+    "date": "2026-06-25",
+    "time": "16:00",
+    "stage": "group",
+    "group": "E",
+    "round": "Matchday 15",
+    "home": "ECU",
+    "away": "GER",
+    "venue": "met",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m057",
+    "date": "2026-06-25",
+    "time": "18:00",
+    "stage": "group",
+    "group": "F",
+    "round": "Matchday 15",
+    "home": "JPN",
+    "away": "SWE",
+    "venue": "att",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m058",
+    "date": "2026-06-25",
+    "time": "18:00",
+    "stage": "group",
+    "group": "F",
+    "round": "Matchday 15",
+    "home": "TUN",
+    "away": "NED",
+    "venue": "arr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m059",
+    "date": "2026-06-25",
+    "time": "19:00",
+    "stage": "group",
+    "group": "D",
+    "round": "Matchday 15",
+    "home": "TUR",
+    "away": "USA",
+    "venue": "sofi",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m060",
+    "date": "2026-06-25",
+    "time": "19:00",
+    "stage": "group",
+    "group": "D",
+    "round": "Matchday 15",
+    "home": "PAR",
+    "away": "AUS",
+    "venue": "lev",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m061",
+    "date": "2026-06-26",
+    "time": "15:00",
+    "stage": "group",
+    "group": "I",
+    "round": "Matchday 16",
+    "home": "NOR",
+    "away": "FRA",
+    "venue": "gil",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m062",
+    "date": "2026-06-26",
+    "time": "15:00",
+    "stage": "group",
+    "group": "I",
+    "round": "Matchday 16",
+    "home": "SEN",
+    "away": "IRQ",
+    "venue": "bmo",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m063",
+    "date": "2026-06-26",
+    "time": "18:00",
+    "stage": "group",
+    "group": "H",
+    "round": "Matchday 16",
+    "home": "URU",
+    "away": "ESP",
+    "venue": "akr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m064",
+    "date": "2026-06-26",
+    "time": "19:00",
+    "stage": "group",
+    "group": "H",
+    "round": "Matchday 16",
+    "home": "CPV",
+    "away": "KSA",
+    "venue": "nrg",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m065",
+    "date": "2026-06-26",
+    "time": "20:00",
+    "stage": "group",
+    "group": "G",
+    "round": "Matchday 16",
+    "home": "EGY",
+    "away": "IRN",
+    "venue": "lum",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m066",
+    "date": "2026-06-26",
+    "time": "20:00",
+    "stage": "group",
+    "group": "G",
+    "round": "Matchday 16",
+    "home": "NZL",
+    "away": "BEL",
+    "venue": "bc",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m067",
+    "date": "2026-06-27",
+    "time": "17:00",
+    "stage": "group",
+    "group": "L",
+    "round": "Matchday 17",
+    "home": "PAN",
+    "away": "ENG",
+    "venue": "met",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m068",
+    "date": "2026-06-27",
+    "time": "17:00",
+    "stage": "group",
+    "group": "L",
+    "round": "Matchday 17",
+    "home": "CRO",
+    "away": "GHA",
+    "venue": "lin",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m069",
+    "date": "2026-06-27",
+    "time": "19:30",
+    "stage": "group",
+    "group": "K",
+    "round": "Matchday 17",
+    "home": "COL",
+    "away": "POR",
+    "venue": "hrs",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m070",
+    "date": "2026-06-27",
+    "time": "19:30",
+    "stage": "group",
+    "group": "K",
+    "round": "Matchday 17",
+    "home": "COD",
+    "away": "UZB",
+    "venue": "mer",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m071",
+    "date": "2026-06-27",
+    "time": "21:00",
+    "stage": "group",
+    "group": "J",
+    "round": "Matchday 17",
+    "home": "ALG",
+    "away": "AUT",
+    "venue": "arr",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m072",
+    "date": "2026-06-27",
+    "time": "21:00",
+    "stage": "group",
+    "group": "J",
+    "round": "Matchday 17",
+    "home": "JOR",
+    "away": "ARG",
+    "venue": "att",
+    "result": null,
+    "home_label": null,
+    "away_label": null
+  },
+  {
+    "id": "m073",
+    "date": "2026-06-28",
+    "time": "12:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "sofi",
+    "result": null,
+    "home_label": "2A",
+    "away_label": "2B"
+  },
+  {
+    "id": "m074",
+    "date": "2026-06-29",
+    "time": "12:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "nrg",
+    "result": null,
+    "home_label": "1C",
+    "away_label": "2F"
+  },
+  {
+    "id": "m075",
+    "date": "2026-06-29",
+    "time": "16:30",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "gil",
+    "result": null,
+    "home_label": "1E",
+    "away_label": "3A/B/C/D/F"
+  },
+  {
+    "id": "m076",
+    "date": "2026-06-29",
+    "time": "19:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "bbva",
+    "result": null,
+    "home_label": "1F",
+    "away_label": "2C"
+  },
+  {
+    "id": "m077",
+    "date": "2026-06-30",
+    "time": "12:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "att",
+    "result": null,
+    "home_label": "2E",
+    "away_label": "2I"
+  },
+  {
+    "id": "m078",
+    "date": "2026-06-30",
+    "time": "17:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "met",
+    "result": null,
+    "home_label": "1I",
+    "away_label": "3C/D/F/G/H"
+  },
+  {
+    "id": "m079",
+    "date": "2026-06-30",
+    "time": "19:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "azt",
+    "result": null,
+    "home_label": "1A",
+    "away_label": "3C/E/F/H/I"
+  },
+  {
+    "id": "m080",
+    "date": "2026-07-01",
+    "time": "12:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "mer",
+    "result": null,
+    "home_label": "1L",
+    "away_label": "3E/H/I/J/K"
+  },
+  {
+    "id": "m081",
+    "date": "2026-07-01",
+    "time": "13:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "lum",
+    "result": null,
+    "home_label": "1G",
+    "away_label": "3A/E/H/I/J"
+  },
+  {
+    "id": "m082",
+    "date": "2026-07-01",
+    "time": "17:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "lev",
+    "result": null,
+    "home_label": "1D",
+    "away_label": "3B/E/F/I/J"
+  },
+  {
+    "id": "m083",
+    "date": "2026-07-02",
+    "time": "12:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "sofi",
+    "result": null,
+    "home_label": "1H",
+    "away_label": "2J"
+  },
+  {
+    "id": "m084",
+    "date": "2026-07-02",
+    "time": "19:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "bmo",
+    "result": null,
+    "home_label": "2K",
+    "away_label": "2L"
+  },
+  {
+    "id": "m085",
+    "date": "2026-07-02",
+    "time": "20:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "bc",
+    "result": null,
+    "home_label": "1B",
+    "away_label": "3E/F/G/I/J"
+  },
+  {
+    "id": "m086",
+    "date": "2026-07-03",
+    "time": "13:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "att",
+    "result": null,
+    "home_label": "2D",
+    "away_label": "2G"
+  },
+  {
+    "id": "m087",
+    "date": "2026-07-03",
+    "time": "18:00",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "hrs",
+    "result": null,
+    "home_label": "1J",
+    "away_label": "2H"
+  },
+  {
+    "id": "m088",
+    "date": "2026-07-03",
+    "time": "20:30",
+    "stage": "R32",
+    "group": null,
+    "round": "Round of 32",
+    "home": null,
+    "away": null,
+    "venue": "arr",
+    "result": null,
+    "home_label": "1K",
+    "away_label": "3D/E/I/J/L"
+  },
+  {
+    "id": "m089",
+    "date": "2026-07-04",
+    "time": "12:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "nrg",
+    "result": null,
+    "home_label": "W73",
+    "away_label": "W75"
+  },
+  {
+    "id": "m090",
+    "date": "2026-07-04",
+    "time": "17:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "lin",
+    "result": null,
+    "home_label": "W74",
+    "away_label": "W77"
+  },
+  {
+    "id": "m091",
+    "date": "2026-07-05",
+    "time": "16:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "met",
+    "result": null,
+    "home_label": "W76",
+    "away_label": "W78"
+  },
+  {
+    "id": "m092",
+    "date": "2026-07-05",
+    "time": "18:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "azt",
+    "result": null,
+    "home_label": "W79",
+    "away_label": "W80"
+  },
+  {
+    "id": "m093",
+    "date": "2026-07-06",
+    "time": "14:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "att",
+    "result": null,
+    "home_label": "W83",
+    "away_label": "W84"
+  },
+  {
+    "id": "m094",
+    "date": "2026-07-06",
+    "time": "17:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "lum",
+    "result": null,
+    "home_label": "W81",
+    "away_label": "W82"
+  },
+  {
+    "id": "m095",
+    "date": "2026-07-07",
+    "time": "12:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "mer",
+    "result": null,
+    "home_label": "W86",
+    "away_label": "W88"
+  },
+  {
+    "id": "m096",
+    "date": "2026-07-07",
+    "time": "13:00",
+    "stage": "R16",
+    "group": null,
+    "round": "Round of 16",
+    "home": null,
+    "away": null,
+    "venue": "bc",
+    "result": null,
+    "home_label": "W85",
+    "away_label": "W87"
+  },
+  {
+    "id": "m097",
+    "date": "2026-07-09",
+    "time": "16:00",
+    "stage": "QF",
+    "group": null,
+    "round": "Quarter-final",
+    "home": null,
+    "away": null,
+    "venue": "gil",
+    "result": null,
+    "home_label": "W89",
+    "away_label": "W90"
+  },
+  {
+    "id": "m098",
+    "date": "2026-07-10",
+    "time": "12:00",
+    "stage": "QF",
+    "group": null,
+    "round": "Quarter-final",
+    "home": null,
+    "away": null,
+    "venue": "sofi",
+    "result": null,
+    "home_label": "W93",
+    "away_label": "W94"
+  },
+  {
+    "id": "m099",
+    "date": "2026-07-11",
+    "time": "17:00",
+    "stage": "QF",
+    "group": null,
+    "round": "Quarter-final",
+    "home": null,
+    "away": null,
+    "venue": "hrs",
+    "result": null,
+    "home_label": "W91",
+    "away_label": "W92"
+  },
+  {
+    "id": "m100",
+    "date": "2026-07-11",
+    "time": "20:00",
+    "stage": "QF",
+    "group": null,
+    "round": "Quarter-final",
+    "home": null,
+    "away": null,
+    "venue": "arr",
+    "result": null,
+    "home_label": "W95",
+    "away_label": "W96"
+  },
+  {
+    "id": "m101",
+    "date": "2026-07-14",
+    "time": "14:00",
+    "stage": "SF",
+    "group": null,
+    "round": "Semi-final",
+    "home": null,
+    "away": null,
+    "venue": "att",
+    "result": null,
+    "home_label": "W97",
+    "away_label": "W98"
+  },
+  {
+    "id": "m102",
+    "date": "2026-07-15",
+    "time": "15:00",
+    "stage": "SF",
+    "group": null,
+    "round": "Semi-final",
+    "home": null,
+    "away": null,
+    "venue": "mer",
+    "result": null,
+    "home_label": "W99",
+    "away_label": "W100"
+  },
+  {
+    "id": "m103",
+    "date": "2026-07-18",
+    "time": "17:00",
+    "stage": "3rd",
+    "group": null,
+    "round": "Match for third place",
+    "home": null,
+    "away": null,
+    "venue": "hrs",
+    "result": null,
+    "home_label": "L101",
+    "away_label": "L102"
+  },
+  {
+    "id": "m104",
+    "date": "2026-07-19",
+    "time": "15:00",
+    "stage": "Final",
+    "group": null,
+    "round": "Final",
+    "home": null,
+    "away": null,
+    "venue": "met",
+    "result": null,
+    "home_label": "W101",
+    "away_label": "W102"
+  }
+];
 
-    /* --- Group stage --- */
-    // 12 groups × 3 matchdays × 2 matches = 72 group matches.
-    // Schedule 6 matches per day across 12 days (Jun 11 – Jun 27), venue round-robin.
-    const groupMatches = [];
-    for (let mdIdx = 0; mdIdx < 3; mdIdx++) {
-      for (let gi = 0; gi < GROUP_LETTERS.length; gi++) {
-        const letter = GROUP_LETTERS[gi];
-        const teams = groups[letter];
-        if (!teams || teams.length < 4) continue;
-        const pairs = GROUP_PAIRINGS[mdIdx];
-        for (const [a,b] of pairs) {
-          groupMatches.push({
-            stage: 'group',
-            group: letter,
-            home: teams[a],
-            away: teams[b],
-            md: mdIdx,
-          });
-        }
-      }
-    }
-    // 72 matches, ~6 per day → 12 days
-    const perDay = 6;
-    groupMatches.forEach((gm, idx) => {
-      const day = Math.floor(idx / perDay);
-      const slot = idx % perDay;
-      const date = addDays(start, day);
-      const hour = 12 + slot * 2; // 12,14,16,18,20,22 local
-      const venue = VENUES[(idx) % VENUES.length].id;
-      matches.push({
-        id: 'm' + pad(mid++),
-        date: ymd(date),
-        time: pad(hour) + ':00',
-        stage: 'group',
-        group: gm.group,
-        round: 'MD' + (gm.md+1),
-        home: gm.home,
-        away: gm.away,
-        venue,
-        result: null,
-      });
-    });
-
-    /* --- Knockout placeholders ---
-       R32 (16) Jun 27–30; R16 (8) Jul 3–6; QF (4) Jul 9–11;
-       SF (2) Jul 14–15; 3rd place Jul 18; Final Jul 19.
-    */
-    const koPlan = [
-      { stage:'R32',   round:'R32',          dateStart:'2026-06-27', games:16, perDay:4 },
-      { stage:'R16',   round:'Round of 16',  dateStart:'2026-07-03', games:8,  perDay:2 },
-      { stage:'QF',    round:'Quarterfinal', dateStart:'2026-07-09', games:4,  perDay:2 },
-      { stage:'SF',    round:'Semifinal',    dateStart:'2026-07-14', games:2,  perDay:1 },
-      { stage:'3rd',   round:'3rd-place',    dateStart:'2026-07-18', games:1,  perDay:1 },
-      { stage:'Final', round:'Final',        dateStart:'2026-07-19', games:1,  perDay:1 },
-    ];
-
-    for (const ko of koPlan) {
-      for (let i = 0; i < ko.games; i++) {
-        const day = Math.floor(i / ko.perDay);
-        const slot = i % ko.perDay;
-        const date = addDays(new Date(ko.dateStart + 'T00:00:00'), day);
-        const hour = 14 + slot * 3;
-        const venue = ko.stage === 'Final' ? 'met'
-                    : ko.stage === '3rd'   ? 'hrs'
-                    : VENUES[(matches.length + i) % VENUES.length].id;
-        matches.push({
-          id: 'm' + pad(mid++),
-          date: ymd(date),
-          time: pad(hour)+':00',
-          stage: ko.stage,
-          group: null,
-          round: ko.round,
-          home: null,
-          away: null,
-          venue,
-          result: null,
-        });
-      }
-    }
-
-    return matches;
+  function buildMatches(_groups) {
+    // Deep clone OFFICIAL_SCHEDULE so editing one match doesn't mutate the constant.
+    return JSON.parse(JSON.stringify(OFFICIAL_SCHEDULE));
   }
 
   /* ----------------------------------------------------------------
@@ -1094,11 +2467,17 @@
           <span class="chip gold">Our home games</span>
         </div>
         <div class="sc-stats">
-          <div class="sc-stat"><div class="n">${matches.length}</div><div class="l">games here</div></div>
+          <div class="sc-stat"><div class="n">${matches.length}</div><div class="l">assigned here</div></div>
           <div class="sc-stat"><div class="n">${groupCount}</div><div class="l">group</div></div>
           <div class="sc-stat"><div class="n">${koCount}</div><div class="l">knockout</div></div>
           <div class="sc-stat"><div class="n">${playedCount}/${matches.length}</div><div class="l">played</div></div>
         </div>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--wc-green);">
+        <h2>✅ Real official 2026 schedule</h2>
+        <p style="font-size:0.88rem;">Matches below are the <b>actual 6 games</b> Levi's Stadium will host — 5 group games (Jun 13–25) plus a Round of 32 on Jul 1 — sourced from the official FIFA draw. Tap any match to record scores as they're played.</p>
+        <p style="font-size:0.88rem;margin-top:6px;">Want live scores? Use <button class="btn gold" style="padding:4px 10px;font-size:0.78rem;" onclick="WC.syncScores()">⟳ Sync from OpenFootball</button> below to pull the latest results.</p>
       </div>
 
       <div class="card">
@@ -1182,8 +2561,8 @@
     const homeStars = topStars(home, 2);
     const awayStars = topStars(away, 2);
 
-    const teamCol = (c, side) => {
-      if (!c) return `<div class="dm-team"><div class="flag">❔</div><div class="name muted">TBD</div><div class="meta">—</div></div>`;
+    const teamCol = (c, side, label) => {
+      if (!c) return `<div class="dm-team"><div class="flag">❔</div><div class="name muted">${label ? escapeHTML(label) : 'TBD'}</div><div class="meta">${label ? 'qualifier slot' : '—'}</div></div>`;
       return `<div class="dm-team" onclick="WC.openCountry('${c.code}')">
         <div class="flag">${c.flag}</div>
         <div class="name">${escapeHTML(c.name)}</div>
@@ -1205,9 +2584,9 @@
         <div class="dm-when">${fmtDate(m.date)}<br>${m.time} PT</div>
       </div>
       <div class="dm-teams">
-        ${teamCol(home, 'left')}
+        ${teamCol(home, 'left', m.home_label)}
         ${score}
-        ${teamCol(away, 'right')}
+        ${teamCol(away, 'right', m.away_label)}
       </div>
       <div class="dm-storyline">${escapeHTML(buildStoryline(m))}</div>
       <div class="dm-watch">
@@ -1279,7 +2658,7 @@
     const groups = state.groups;
     let html = `<div class="muted" style="font-size:0.85rem; margin-bottom:10px;">
       All 48 teams, grouped A–L. Tap a country for its history, geography, and star players.
-      <span style="display:block;margin-top:4px;">Groups are placeholders you can edit any time — tap ✎ to reshuffle.</span>
+      <span style="display:block;margin-top:4px;">Groups reflect the official December 2025 draw. (You can still reshuffle for fun via ✎.)</span>
       <button class="btn ghost" style="margin-top:8px;" onclick="WC.openGroupEditor()">✎ Edit groups</button>
     </div>`;
     for (const letter of GROUP_LETTERS) {
@@ -1355,6 +2734,9 @@
               <div class="note">${escapeHTML(p.note)}</div>
             </div>`).join('')}
         </div>
+        <p class="muted" style="font-size:0.78rem;margin-top:10px;line-height:1.5;">
+          Player snapshot — clubs, ages, and squad selections may have changed since mid-2025.
+        </p>
       </div>
     `;
     // hide all screens, show country
@@ -1397,7 +2779,12 @@
       </div>
     `;
 
-    let html = filterHTML;
+    let html = `<div class="card" style="border-left:3px solid var(--wc-green);padding:12px 16px;margin-bottom:10px;">
+      <div style="font-size:0.86rem;line-height:1.5;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span>✅ <b>Official 2026 schedule</b> — sourced from FIFA via the public OpenFootball dataset. Tap any match to enter scores or edit details.</span>
+        <button class="btn gold" style="padding:6px 12px;font-size:0.78rem;flex-shrink:0;" onclick="WC.syncScores()">⟳ Sync scores</button>
+      </div>
+    </div>` + filterHTML;
     if (list.length === 0) html += '<div class="empty">No matches for these filters.</div>';
     Object.keys(byDate).sort().forEach(date => {
       html += `<div class="day-label">${fmtDate(date)}</div>`;
@@ -1413,8 +2800,8 @@
     const played = !!m.result;
     const koClass = m.stage !== 'group' ? ' knockout' : '';
     const stage = m.stage === 'group' ? `Group ${m.group} · ${m.round}` : m.round;
-    const homeLabel = home ? `${home.flag} ${escapeHTML(home.name)}` : '<span class="muted">TBD</span>';
-    const awayLabel = away ? `${away.flag} ${escapeHTML(away.name)}` : '<span class="muted">TBD</span>';
+    const homeLabel = home ? `${home.flag} ${escapeHTML(home.name)}` : (m.home_label ? `<span class="muted">${escapeHTML(m.home_label)}</span>` : '<span class="muted">TBD</span>');
+    const awayLabel = away ? `${away.flag} ${escapeHTML(away.name)}` : (m.away_label ? `<span class="muted">${escapeHTML(m.away_label)}</span>` : '<span class="muted">TBD</span>');
     const score = played ? `<span class="score">${m.result.home}–${m.result.away}</span>` : `<span class="vs">vs</span>`;
     return `
       <div class="match${played?' played':''}${koClass}" onclick="WC.editResult('${m.id}')">
@@ -1520,9 +2907,11 @@
       homeCls = homeW ? 'winner' : (awayW ? 'loser' : '');
       awayCls = awayW ? 'winner' : (homeW ? 'loser' : '');
     }
+    const homeText = home ? home.flag+' '+escapeHTML(home.name) : (m.home_label ? escapeHTML(m.home_label) : 'TBD');
+    const awayText = away ? away.flag+' '+escapeHTML(away.name) : (m.away_label ? escapeHTML(m.away_label) : 'TBD');
     return `<div class="bracket-tie" onclick="WC.editResult('${m.id}')" style="cursor:pointer;">
-      <div class="l ${homeCls}"><span>${home ? home.flag+' '+escapeHTML(home.name) : 'TBD'}</span><span class="s">${hs}</span></div>
-      <div class="l ${awayCls}"><span>${away ? away.flag+' '+escapeHTML(away.name) : 'TBD'}</span><span class="s">${as}</span></div>
+      <div class="l ${homeCls}"><span>${homeText}</span><span class="s">${hs}</span></div>
+      <div class="l ${awayCls}"><span>${awayText}</span><span class="s">${as}</span></div>
       <div class="muted" style="font-size:0.7rem; margin-top:4px;">${m.date.slice(5)} · ${m.time}</div>
     </div>`;
   }
@@ -1634,8 +3023,8 @@
         const cur = pickStage[m.id] || '';
         const actual = koActual[stage][m.id];
         const mark = actual ? (cur === actual ? `<span class="correct">✓ ${ptsLabel}</span>` : (cur ? '<span class="miss">✗</span>' : '')) : '';
-        const homeName = m.home ? countryByCode(m.home).flag+' '+countryByCode(m.home).name : 'TBD';
-        const awayName = m.away ? countryByCode(m.away).flag+' '+countryByCode(m.away).name : 'TBD';
+        const homeName = m.home ? countryByCode(m.home).flag+' '+countryByCode(m.home).name : (m.home_label || 'TBD');
+        const awayName = m.away ? countryByCode(m.away).flag+' '+countryByCode(m.away).name : (m.away_label || 'TBD');
         return `<div class="pick-row">
           <div class="lbl" style="font-size:0.7rem;">${escapeHTML(homeName)} vs ${escapeHTML(awayName)}</div>
           <div>${teamSelect(cur, optionsList, `WC.setKoPick('${member.id}','${stage}','${m.id}',this.value)`)}${mark}</div>
@@ -1697,8 +3086,15 @@
         </ul>
         <h3>How the picks work</h3>
         <p>Each family member predicts group winners + runners-up, knockout-round winners, plus the eventual champion, runner-up, and Golden Boot. Points are awarded automatically as you enter real match results.</p>
-        <h3>One note about the data</h3>
-        <p>The qualified teams, venues, dates, and player rosters reflect publicly known information about the 2026 World Cup. The <b>group draw and fixtures are placeholders</b> — once the official schedule comes out, tap <b>"Edit groups"</b> on the Teams tab to shuffle them to match.</p>
+        <h3>Where the data comes from</h3>
+        <ul style="padding-left:18px;line-height:1.6;font-size:0.9rem;">
+          <li><b>Schedule</b> — all 104 official matches (teams, dates, times, venues) sourced from the public-domain <a href="https://github.com/openfootball/worldcup.json" target="_blank" rel="noopener" style="color:var(--wc-gold);">OpenFootball</a> dataset. Group stage matchups, knockout-round placeholders ("1A", "W73", "3B/E/F/I/J"), and venues all match the official FIFA draw.</li>
+          <li><b>Groups</b> — the 12 groups (A–L) reflect the December 5, 2025 final draw.</li>
+          <li><b>Teams</b> — all 48 qualified nations.</li>
+          <li><b>Venues</b> — all 16 host stadiums, confirmed.</li>
+          <li><b>Live scores</b> — tap <b>⟳ Sync scores</b> on the Matches or Santa Clara tab to pull the latest results from OpenFootball (a community-maintained feed, refreshed during matches).</li>
+          <li><b>Player rosters</b> — a mid-2025 snapshot. Clubs, ages, and final squad selections may have changed since.</li>
+        </ul>
         <h3>Reset</h3>
         <p>Want to start fresh? <button class="btn danger" onclick="WC.resetAll()">Clear all data</button></p>
       </div>
@@ -1711,36 +3107,41 @@
   function editResult(matchId) {
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
-    if (!m.home || !m.away) {
-      toast('Set the teams via the Knockout bracket or play earlier rounds first.');
-      // still allow editing teams for KO via small prompt? Keep simple — allow score only if teams known.
-    }
 
     const modal = document.getElementById('match-modal');
     const home = m.home ? countryByCode(m.home) : null;
     const away = m.away ? countryByCode(m.away) : null;
     const stage = m.stage === 'group' ? `Group ${m.group} · ${m.round}` : m.round;
-    const venue = venueById(m.venue);
-    const koTeamPicker = m.stage !== 'group';
+
+    const teamOptions = ['<option value="">— TBD —</option>'].concat(
+      COUNTRIES.map(c => `<option value="${c.code}">${c.flag} ${escapeHTML(c.name)}</option>`)
+    ).join('');
+    const venueOptions = VENUES.map(v =>
+      `<option value="${v.id}" ${m.venue===v.id?'selected':''}>${escapeHTML(v.name)} — ${escapeHTML(v.city)}</option>`
+    ).join('');
+
+    const inputStyle = 'background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;';
 
     modal.querySelector('.modal-inner').innerHTML = `
       <h3>${stage}</h3>
-      <div class="sub">${fmtDate(m.date)} · ${m.time} · ${venue ? escapeHTML(venue.name+', '+venue.city) : ''}</div>
+      <div class="sub">Edit any field below — match, score, or schedule.</div>
 
-      ${koTeamPicker ? `
-        <div class="pick-row"><div class="lbl">Home</div><div>
-          <select id="ko-home" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;">
-            <option value="">— TBD —</option>
-            ${COUNTRIES.map(c => `<option value="${c.code}" ${m.home===c.code?'selected':''}>${c.flag} ${escapeHTML(c.name)}</option>`).join('')}
-          </select>
-        </div></div>
-        <div class="pick-row"><div class="lbl">Away</div><div>
-          <select id="ko-away" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;">
-            <option value="">— TBD —</option>
-            ${COUNTRIES.map(c => `<option value="${c.code}" ${m.away===c.code?'selected':''}>${c.flag} ${escapeHTML(c.name)}</option>`).join('')}
-          </select>
-        </div></div>
-      ` : ''}
+      <div class="pick-row"><div class="lbl">Home</div><div>
+        <select id="ed-home" style="${inputStyle}">${teamOptions.replace(`value="${m.home||''}"`, `value="${m.home||''}" selected`)}</select>
+      </div></div>
+      <div class="pick-row"><div class="lbl">Away</div><div>
+        <select id="ed-away" style="${inputStyle}">${teamOptions.replace(`value="${m.away||''}"`, `value="${m.away||''}" selected`)}</select>
+      </div></div>
+
+      <div class="pick-row"><div class="lbl">Date</div><div>
+        <input type="date" id="ed-date" value="${m.date}" style="${inputStyle}" />
+      </div></div>
+      <div class="pick-row"><div class="lbl">Time</div><div>
+        <input type="time" id="ed-time" value="${m.time}" style="${inputStyle}" />
+      </div></div>
+      <div class="pick-row"><div class="lbl">Venue</div><div>
+        <select id="ed-venue" style="${inputStyle}">${venueOptions}</select>
+      </div></div>
 
       <div class="score-input">
         <div class="side left">${home ? home.flag+' '+escapeHTML(home.name) : '<span class="muted">TBD</span>'}</div>
@@ -1752,7 +3153,7 @@
 
       ${m.stage !== 'group' ? `
         <div class="pick-row"><div class="lbl">PK winner<br><span style="font-size:0.7rem;">(only if draw)</span></div><div>
-          <select id="pk-winner" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;">
+          <select id="pk-winner" style="${inputStyle}">
             <option value="">— none —</option>
             ${home ? `<option value="${home.code}" ${m.result&&m.result.pkWinner===home.code?'selected':''}>${home.flag} ${escapeHTML(home.name)}</option>`:''}
             ${away ? `<option value="${away.code}" ${m.result&&m.result.pkWinner===away.code?'selected':''}>${away.flag} ${escapeHTML(away.name)}</option>`:''}
@@ -1760,7 +3161,7 @@
         </div></div>` : ''}
 
       <div class="modal-actions">
-        <button class="btn ghost" onclick="WC.clearResult('${m.id}')">Clear</button>
+        <button class="btn ghost" onclick="WC.clearResult('${m.id}')">Clear score</button>
         <button class="btn ghost" onclick="WC.closeModal()">Cancel</button>
         <button class="btn" onclick="WC.saveResult('${m.id}')">Save</button>
       </div>
@@ -1771,17 +3172,20 @@
   function saveResult(matchId) {
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
-    const koTeamPicker = m.stage !== 'group';
-    if (koTeamPicker) {
-      const newHome = document.getElementById('ko-home').value || null;
-      const newAway = document.getElementById('ko-away').value || null;
-      m.home = newHome;
-      m.away = newAway;
-    }
+    const homeEl  = document.getElementById('ed-home');
+    const awayEl  = document.getElementById('ed-away');
+    const dateEl  = document.getElementById('ed-date');
+    const timeEl  = document.getElementById('ed-time');
+    const venueEl = document.getElementById('ed-venue');
+    if (homeEl)  m.home  = homeEl.value || null;
+    if (awayEl)  m.away  = awayEl.value || null;
+    if (dateEl  && dateEl.value)  m.date  = dateEl.value;
+    if (timeEl  && timeEl.value)  m.time  = timeEl.value;
+    if (venueEl && venueEl.value) m.venue = venueEl.value;
+
     const hs = parseInt(document.getElementById('sc-home').value, 10);
     const as = parseInt(document.getElementById('sc-away').value, 10);
     if (isNaN(hs) || isNaN(as)) {
-      // clearing
       m.result = null;
     } else {
       const pkEl = document.getElementById('pk-winner');
@@ -1790,8 +3194,7 @@
     }
     save();
     closeModal();
-    toast('Result saved');
-    // refresh current screen
+    toast('Match saved');
     const cur = document.querySelector('.tab.active')?.dataset.tab;
     if (cur) activateTab(cur);
   }
@@ -1949,6 +3352,101 @@
     activateTab('home');
   }
 
+  /* ----------------------------------------------------------------
+     SYNC — pull latest scores from OpenFootball (community-maintained
+     public-domain dataset). Updates results without overwriting any
+     manual edits unless the remote also has a score for that match.
+     ---------------------------------------------------------------- */
+  const OPENFOOTBALL_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+
+  async function syncScores() {
+    toast('Fetching latest scores…');
+    try {
+      const res = await fetch(OPENFOOTBALL_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const remote = data.matches || [];
+
+      let updated = 0, teamsResolved = 0;
+      // Build a lookup: by (date, team1, team2) and also by team codes if mapping known.
+      // Local: state.matches has id, date, time, home, away, home_label, away_label, group, stage, venue, result.
+      // Remote: { date, time, team1, team2, group, ground, round, score: {ft:[h,a], ht?:[..]} | undefined }
+      // We match by date + team labels/codes. For unresolved KO matches with placeholder labels,
+      // we also try to fill in the now-known teams.
+
+      // Build a remote-team-name → code map from our COUNTRIES list.
+      const nameToCode = {};
+      for (const c of COUNTRIES) nameToCode[c.name] = c.code;
+      // Some openfootball names differ
+      nameToCode['Bosnia & Herzegovina'] = 'BIH';
+      nameToCode['Czech Republic'] = 'CZE';
+      nameToCode['DR Congo'] = 'COD';
+      nameToCode['Ivory Coast'] = 'CIV';
+      nameToCode['Saudi Arabia'] = 'KSA';
+      nameToCode['South Africa'] = 'ZAF';
+      nameToCode['South Korea'] = 'KOR';
+      nameToCode['Cape Verde'] = 'CPV';
+      nameToCode['Turkey'] = 'TUR';
+      nameToCode['USA'] = 'USA';
+      nameToCode['Curaçao'] = 'CUW';
+      nameToCode['New Zealand'] = 'NZL';
+      nameToCode['Sweden'] = 'SWE';
+      nameToCode['Iraq'] = 'IRQ';
+      nameToCode['Haiti'] = 'HAI';
+      nameToCode['Algeria'] = 'ALG';
+      // Inverse for placeholders like "1A" (Group A winner)
+      function placeholderMatchesCode(label, code) {
+        // We don't compute placeholders dynamically here — just match by date+raw labels.
+        return false;
+      }
+
+      for (const rm of remote) {
+        const rh = nameToCode[rm.team1] || rm.team1;  // real code or placeholder string
+        const ra = nameToCode[rm.team2] || rm.team2;
+        // Find local match: same date, and either (codes match) or (labels match)
+        const local = state.matches.find(lm => {
+          if (lm.date !== rm.date) return false;
+          const lh = lm.home || lm.home_label;
+          const la = lm.away || lm.away_label;
+          return lh === rh && la === ra;
+        });
+        if (!local) continue;
+
+        // If local has placeholder labels but remote has resolved teams, fill them in
+        if (!local.home && nameToCode[rm.team1]) { local.home = nameToCode[rm.team1]; local.home_label = null; teamsResolved++; }
+        if (!local.away && nameToCode[rm.team2]) { local.away = nameToCode[rm.team2]; local.away_label = null; teamsResolved++; }
+
+        // Score: OpenFootball uses rm.score.ft = [home, away] (or sometimes top-level rm.score1/rm.score2)
+        let hs = null, as = null;
+        if (rm.score && Array.isArray(rm.score.ft)) { hs = rm.score.ft[0]; as = rm.score.ft[1]; }
+        else if (typeof rm.score1 === 'number' && typeof rm.score2 === 'number') { hs = rm.score1; as = rm.score2; }
+        if (hs !== null && as !== null) {
+          // Only update if different to avoid spurious "updated" counts
+          if (!local.result || local.result.home !== hs || local.result.away !== as) {
+            // Preserve any existing PK winner if the remote score is a draw and we already had one
+            const prevPK = local.result && local.result.pkWinner;
+            // Try to read PK from remote (rm.score.p = [h,a] for penalty shootouts)
+            let pkWinner = prevPK || null;
+            if (rm.score && Array.isArray(rm.score.p)) {
+              if (rm.score.p[0] > rm.score.p[1]) pkWinner = local.home;
+              else if (rm.score.p[1] > rm.score.p[0]) pkWinner = local.away;
+            }
+            local.result = { home: hs, away: as, pkWinner };
+            updated++;
+          }
+        }
+      }
+
+      save();
+      const cur = document.querySelector('.tab.active')?.dataset.tab;
+      if (cur) activateTab(cur);
+      toast(`Synced — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}`);
+    } catch (e) {
+      console.error('Sync failed', e);
+      toast('Sync failed: ' + (e.message || 'network error'));
+    }
+  }
+
   // expose
   window.WC = {
     tab: activateTab,
@@ -1959,6 +3457,7 @@
     addMember, removeMember, selectMember,
     setGroupPick, setKoPick, setOutcomePick,
     resetAll,
+    syncScores,
   };
 
   document.addEventListener('DOMContentLoaded', init);
