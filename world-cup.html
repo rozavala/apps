@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/world-cup.css?v=5">
+  <link rel="stylesheet" href="css/world-cup.css?v=6">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#16A34A">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
@@ -38,6 +38,7 @@
       <button class="tab"        data-tab="venues"    role="tab">🏟 Venues</button>
       <button class="tab"        data-tab="standings" role="tab">📊 Standings</button>
       <button class="tab"        data-tab="pool"      role="tab">👨‍👩‍👧‍👦 Bracket Pool</button>
+      <button class="tab"        data-tab="quiz"      role="tab">🧠 Quiz</button>
       <button class="tab"        data-tab="about"     role="tab">ℹ About</button>
     </nav>
 
@@ -50,6 +51,7 @@
       <section class="screen"        id="screen-venues"></section>
       <section class="screen"        id="screen-standings"></section>
       <section class="screen"        id="screen-pool"></section>
+      <section class="screen"        id="screen-quiz"></section>
       <section class="screen"        id="screen-about"></section>
     </main>
   </div>
@@ -60,6 +62,7 @@
   </div>
 
   <script src="js/auth.js"></script>
-  <script src="js/world-cup.js?v=5"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/world-cup.js?v=6"></script>
 </body>
 </html>

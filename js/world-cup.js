@@ -2240,6 +2240,93 @@
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
     catch (e) { console.warn('wc save failed', e); }
+    // Best-effort cross-device sync (no-op if CloudSync not loaded/online)
+    try { if (window.CloudSync && CloudSync.online && CloudSync.push) CloudSync.push(STORE_KEY); } catch (e) {}
+  }
+
+  /* ----------------------------------------------------------------
+     Lock deadlines — each group/stage locks once its first match starts.
+     ---------------------------------------------------------------- */
+  function _matchStarted(m) {
+    if (!m) return false;
+    const dt = new Date(m.date + 'T' + (m.time || '12:00') + ':00');
+    return dt.getTime() <= Date.now();
+  }
+  function isGroupLocked(letter) {
+    const first = state.matches
+      .filter(m => m.stage === 'group' && m.group === letter)
+      .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
+    return _matchStarted(first);
+  }
+  function isStageLocked(stage) {
+    const first = state.matches
+      .filter(m => m.stage === stage)
+      .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
+    return _matchStarted(first);
+  }
+  function areOutcomesLocked() { return isStageLocked('Final'); }
+
+  /* ----------------------------------------------------------------
+     "Today" view helpers
+     ---------------------------------------------------------------- */
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+  function matchesOn(dateStr) {
+    return state.matches
+      .filter(m => m.date === dateStr)
+      .sort((a,b) => a.time.localeCompare(b.time));
+  }
+
+  /* ----------------------------------------------------------------
+     "Today in World Cup history" — dataset keyed by MM-DD.
+     ---------------------------------------------------------------- */
+  const WC_HISTORY = {
+    '06-11': '1978 — Argentina ’78 kicks off in Buenos Aires. The home side would go on to win their first World Cup, beating Netherlands 3-1 in extra time.',
+    '06-12': '2014 — Brazil ’14 opens at the Arena Corinthians with Brazil 3-1 Croatia. Neymar grabs a brace.',
+    '06-13': '1930 — The very first World Cup match is played in Uruguay: France beats Mexico 4-1, with Lucien Laurent scoring history\'s first WC goal.',
+    '06-14': '2002 — Senegal stuns France 1-0 in the opening match of Korea/Japan, on their World Cup debut.',
+    '06-15': '1958 — A 17-year-old named Pelé makes his World Cup debut for Brazil in Sweden.',
+    '06-16': '1994 — USA ’94 opens at Soldier Field. Germany 1-0 Bolivia in the first match of the tournament that put the sport on the US map.',
+    '06-17': '1970 — England 0-1 Brazil in Guadalajara. Pelé\'s header is saved by Gordon Banks in what many call the greatest save ever.',
+    '06-18': '1994 — Andrés Escobar scores an own goal vs the USA. He was tragically killed weeks after returning home.',
+    '06-19': '1966 — North Korea shocks Italy 1-0 at Ayresome Park, knocking the Azzurri out and reaching the quarterfinals.',
+    '06-20': '1974 — West Germany 0-1 East Germany in Hamburg, the only meeting of the two German sides at a World Cup.',
+    '06-21': '1970 — Brazil 4-1 Italy in the Mexico City final: Pelé\'s third World Cup, and the trophy is awarded permanently to Brazil.',
+    '06-22': '1986 — Maradona\'s "Hand of God" and "Goal of the Century" in Argentina 2-1 England at the Estadio Azteca.',
+    '06-23': '2010 — USA 1-0 Algeria, Donovan\'s 91st-minute winner sends the Americans through as group winners.',
+    '06-24': '1990 — Cameroon 2-1 Colombia in extra time — Roger Milla\'s legend grows, dancing at the corner flag.',
+    '06-25': '1978 — A controversial 6-0 win by Argentina over Peru clears their path to the final.',
+    '06-26': '1994 — Romania 3-2 Argentina in the round of 16, ending Maradona\'s World Cup career.',
+    '06-27': '1954 — Hungary 4-2 Brazil in the "Battle of Berne" — three red cards and a tunnel brawl.',
+    '06-28': '1998 — Argentina 2-2 England (Argentina win on pens). Owen\'s solo wonder goal; Beckham\'s red card.',
+    '06-29': '2014 — James Rodríguez\'s thunderbolt vs Uruguay wins Goal of the Tournament.',
+    '06-30': '1974 — Holland 2-0 Brazil in Dortmund — Cruyff puts Total Football into the final.',
+    '07-01': '1990 — Argentina 0-0 Yugoslavia (Argentina win on pens). Maradona converts his spot kick.',
+    '07-02': '1978 — Argentina 6-0 Peru (see Jun 25). The "scandal of Rosario" continues to be debated.',
+    '07-03': '2010 — Uruguay beat Ghana on penalties after Suárez\'s handball denied a last-minute goal.',
+    '07-04': '1990 — West Germany 1-1 England (Germany win on pens). Gascoigne in tears.',
+    '07-05': '1998 — France 0-0 Italy (France win on pens). Les Bleus march toward home glory.',
+    '07-06': '2002 — Brazil 1-0 Turkey in the semifinal — Ronaldo back from injury to lead Brazil to the final.',
+    '07-07': '1974 — West Germany 2-1 Holland in Munich. Müller scores the title-winning goal.',
+    '07-08': '2014 — Germany 7-1 Brazil. The most shocking semifinal result in World Cup history.',
+    '07-09': '2006 — France 1-0 Portugal in the semifinal; Zidane scores in his final tournament.',
+    '07-10': '1966 — England 2-1 Portugal, Bobby Charlton sends the hosts to the final.',
+    '07-11': '2010 — Spain 1-0 Netherlands in Johannesburg. Iniesta\'s extra-time goal wins La Roja\'s first.',
+    '07-12': '1998 — France 3-0 Brazil — Zidane heads twice in his country\'s first World Cup win.',
+    '07-13': '2014 — Germany 1-0 Argentina at the Maracanã; Götze\'s late winner clinches Die Mannschaft\'s 4th star.',
+    '07-14': '1974 — Holland 2-0 Brazil (see Jun 30). Cruyff\'s Total Football conquers South America.',
+    '07-15': '2018 — France 4-2 Croatia in Moscow. Mbappé becomes the second teenager (after Pelé) to score in a WC Final.',
+    '07-16': '1950 — The "Maracanazo": Uruguay 2-1 Brazil in front of 200,000 silent fans.',
+    '07-17': '1994 — Brazil beat Italy on penalties at the Rose Bowl. Baggio skies the decisive PK.',
+    '07-18': '2010 — Iker Casillas lifts the Cup in Johannesburg. (Bonus: 2026 hosts will play their 3rd-place match today.)',
+    '07-19': '2026 — Tournament Final at MetLife Stadium. (Watch this space.)',
+  };
+  function wcHistoryToday() {
+    const d = new Date();
+    const key = pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    return WC_HISTORY[key] || 'A World Cup story for every date — check back tomorrow!';
   }
 
   /* ----------------------------------------------------------------
@@ -2360,6 +2447,10 @@
     champion: 25,
     runnerUp: 10,
     goldenBoot: 10,
+    // Score-prediction bonuses (group-stage only)
+    scoreExact:  5,
+    scoreGD:     3,
+    scoreResult: 1,
   };
 
   function getActualGroupTop2() {
@@ -2411,7 +2502,7 @@
     const picks = state.picks[memberId];
     if (!picks) return { total:0, breakdown:{} };
     let total = 0;
-    const breakdown = { groups:0, ko:0, champion:0, runnerUp:0, goldenBoot:0 };
+    const breakdown = { groups:0, ko:0, champion:0, runnerUp:0, goldenBoot:0, scores:0 };
 
     const actualTop2 = getActualGroupTop2();
     for (const g of GROUP_LETTERS) {
@@ -2430,6 +2521,27 @@
         if (koActual[stage][matchId] && stagePicks[matchId] === koActual[stage][matchId]) {
           total += SCORING[stage];
           breakdown.ko += SCORING[stage];
+        }
+      }
+    }
+
+    // Score-prediction bonuses on group-stage matches with recorded results
+    const scorePicks = picks.scores || {};
+    for (const m of state.matches.filter(x => x.stage === 'group' && x.result)) {
+      const sp = scorePicks[m.id];
+      if (!sp || typeof sp.home !== 'number' || typeof sp.away !== 'number') continue;
+      if (sp.home === m.result.home && sp.away === m.result.away) {
+        total += SCORING.scoreExact; breakdown.scores += SCORING.scoreExact;
+      } else {
+        const sign = Math.sign(sp.home - sp.away);
+        const actualSign = Math.sign(m.result.home - m.result.away);
+        if (sign === actualSign) {
+          // Same result; check goal difference
+          if ((sp.home - sp.away) === (m.result.home - m.result.away)) {
+            total += SCORING.scoreGD; breakdown.scores += SCORING.scoreGD;
+          } else {
+            total += SCORING.scoreResult; breakdown.scores += SCORING.scoreResult;
+          }
         }
       }
     }
@@ -2455,6 +2567,7 @@
     if (name === 'venues')      renderVenues();
     if (name === 'standings')   renderStandings();
     if (name === 'pool')        renderPool();
+    if (name === 'quiz')        renderQuiz();
     if (name === 'about')       renderAbout();
     window.scrollTo({ top:0, behavior:'instant' });
   }
@@ -2654,13 +2767,29 @@
     const mins = Math.floor(diff / 60000) % 60;
     const secs = Math.floor(diff / 1000) % 60;
 
+    const today = todayKey();
+    const todays = matchesOn(today);
     const next = state.matches
       .filter(m => !m.result)
       .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
 
+    // Today section: list every game today with mini countdowns
+    let todayHTML;
+    if (todays.length > 0) {
+      todayHTML = todays.map(m => renderTodayRow(m)).join('');
+    } else if (next) {
+      const dayDiff = Math.ceil((new Date(next.date+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
+      todayHTML = `<div class="empty" style="padding:18px 12px;">No matches today. <br>Next up: <b>${fmtDate(next.date)}</b> (in ${dayDiff} day${dayDiff===1?'':'s'}).</div>`;
+    } else {
+      todayHTML = '<div class="empty">All 104 matches played — final whistle has blown!</div>';
+    }
+
     const nextHTML = next ? renderMatchRow(next, true) : '<div class="empty">All matches played — see Standings.</div>';
+    const preTournament = days > 0;
+    const tourneyOver = !next && todays.length === 0;
 
     root.innerHTML = `
+      ${preTournament ? `
       <div class="card">
         <h2>⏱ Kick-off countdown</h2>
         <p class="muted">First match: <b>${fmtDate('2026-06-11')}</b> · Estadio Azteca · Mexico City</p>
@@ -2670,11 +2799,24 @@
           <div class="cd-cell"><div class="n">${pad(mins)}</div><div class="l">min</div></div>
           <div class="cd-cell"><div class="n">${pad(secs)}</div><div class="l">sec</div></div>
         </div>
+      </div>` : ''}
+
+      <div class="card">
+        <h2>📅 ${todays.length > 0 ? `Today — ${todays.length} match${todays.length===1?'':'es'}` : 'Today'}</h2>
+        <div id="today-list">${todayHTML}</div>
       </div>
+
+      ${!preTournament && !tourneyOver ? `
       <div class="card">
         <h2>⚽ Next up</h2>
         <div id="home-next">${nextHTML}</div>
+      </div>` : ''}
+
+      <div class="card fact-card">
+        <h2>📜 Today in World Cup history</h2>
+        <p>${escapeHTML(wcHistoryToday())}</p>
       </div>
+
       <div class="card fact-card">
         <h2>🌎 The 2026 World Cup at a glance</h2>
         <p>The first 48-team World Cup. Three host nations — <b>Canada · Mexico · United States</b>. <b>16 cities</b> and <b>104 matches</b> across 39 days. The opener is at the Estadio Azteca; the final at MetLife Stadium on July 19.</p>
@@ -2688,10 +2830,44 @@
       </div>
       <div class="card">
         <h2>👨‍👩‍👧‍👦 Family bracket pool</h2>
-        <p class="muted">Add family members, lock in your picks, watch the leaderboard as the tournament unfolds.</p>
+        <p class="muted">Lock in your picks, then watch the leaderboard as results come in. Your hub profile signs you in automatically.</p>
         <button class="btn" onclick="WC.tab('pool')">Open Bracket Pool →</button>
       </div>
     `;
+  }
+
+  function renderTodayRow(m) {
+    const home = m.home ? countryByCode(m.home) : null;
+    const away = m.away ? countryByCode(m.away) : null;
+    const venue = venueById(m.venue);
+    const played = !!m.result;
+    const kickoff = new Date(m.date+'T'+m.time+':00');
+    const diffMs = kickoff.getTime() - Date.now();
+    let when;
+    if (played) {
+      when = '<span style="color:var(--wc-green);font-weight:800;">FT</span>';
+    } else if (diffMs <= 0 && diffMs > -2*3600*1000) {
+      when = '<span style="color:var(--wc-red);font-weight:800;">LIVE</span>';
+    } else if (diffMs > 0) {
+      const hrs = Math.floor(diffMs / 3600000);
+      const mins = Math.floor(diffMs / 60000) % 60;
+      when = hrs > 0 ? `in ${hrs}h ${mins}m` : `in ${mins}m`;
+    } else {
+      when = '<span class="muted">finished</span>';
+    }
+    const hLabel = home ? `${home.flag} ${escapeHTML(home.name)}` : (m.home_label ? `<span class="muted">${escapeHTML(m.home_label)}</span>` : 'TBD');
+    const aLabel = away ? `${away.flag} ${escapeHTML(away.name)}` : (m.away_label ? `<span class="muted">${escapeHTML(m.away_label)}</span>` : 'TBD');
+    const score = played ? `<span class="score">${m.result.home}–${m.result.away}</span>` : `<span class="vs">${m.time}</span>`;
+    return `
+      <div class="match" onclick="WC.editResult('${m.id}')" style="grid-template-columns: 60px 1fr auto;">
+        <div class="when"><div class="time">${when}</div><div>${venue ? escapeHTML(venue.city.split(',')[0]) : ''}</div></div>
+        <div class="teams">
+          <div class="side left"><span class="name">${hLabel}</span></div>
+          ${score}
+          <div class="side"><span class="name">${aLabel}</span></div>
+        </div>
+        <div class="badge">${m.stage === 'group' ? 'Group '+m.group : m.round}</div>
+      </div>`;
   }
 
   /* ---- TEAMS ---- */
@@ -3008,6 +3184,7 @@
         <h3 style="margin-top:14px;">📋 Scoring rules</h3>
         <div class="scoring-rules">
           <b>Group stage</b>: 2 pts per correct group winner · 1 pt per correct runner-up<br>
+          <b>Score predictions</b> (group games only): exact = 5 · correct GD = 3 · right winner = 1<br>
           <b>Knockouts</b>: R32 = 1 · R16 = 2 · QF = 4 · SF = 8 · Final winner = 16<br>
           <b>Bonuses</b>: Champion = 25 · Runner-up = 10 · Golden Boot = 10
         </div>
@@ -3030,8 +3207,8 @@
     const koActual = getKnockoutWinners();
     const champRu = getChampionAndRunnerUp();
 
-    function teamSelect(currentCode, options, onchange) {
-      return `<select onchange="${onchange}">
+    function teamSelect(currentCode, options, onchange, disabled) {
+      return `<select onchange="${onchange}" ${disabled ? 'disabled' : ''}>
         <option value="">— pick —</option>
         ${options.map(code => {
           const c = countryByCode(code);
@@ -3041,8 +3218,9 @@
       </select>`;
     }
     const allTeamCodes = COUNTRIES.map(c => c.code);
+    const outcomesLocked = areOutcomesLocked();
 
-    // Group picks
+    // Group picks (per-group locks)
     let groupsHTML = '';
     for (const g of GROUP_LETTERS) {
       const codes = state.groups[g] || [];
@@ -3051,21 +3229,24 @@
       const actual = actualTop2[g];
       const winMark = actual ? (winPick === actual.winner ? `<span class="correct">✓ ${SCORING.groupWinner}</span>` : (winPick ? '<span class="miss">✗</span>' : '')) : '';
       const ruMark  = actual ? (ruPick  === actual.runnerUp ? `<span class="correct">✓ ${SCORING.groupRunnerUp}</span>` : (ruPick ? '<span class="miss">✗</span>' : '')) : '';
+      const locked = isGroupLocked(g);
+      const lockChip = locked ? ' <span class="chip" style="background:rgba(239,68,68,0.12);color:#FCA5A5;font-size:0.65rem;padding:2px 6px;">🔒 locked</span>' : '';
       groupsHTML += `<div style="margin-bottom:10px;">
-        <div style="font-weight:800;color:var(--wc-gold);margin-bottom:4px;">Group ${g}</div>
-        <div class="pick-row"><div class="lbl">Winner</div><div>${teamSelect(winPick, codes, `WC.setGroupPick('${member.id}','${g}','winner',this.value)`)}${winMark}</div></div>
-        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(ruPick, codes, `WC.setGroupPick('${member.id}','${g}','runnerUp',this.value)`)}${ruMark}</div></div>
+        <div style="font-weight:800;color:var(--wc-gold);margin-bottom:4px;">Group ${g}${lockChip}</div>
+        <div class="pick-row"><div class="lbl">Winner</div><div>${teamSelect(winPick, codes, `WC.setGroupPick('${member.id}','${g}','winner',this.value)`, locked)}${winMark}</div></div>
+        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(ruPick, codes, `WC.setGroupPick('${member.id}','${g}','runnerUp',this.value)`, locked)}${ruMark}</div></div>
       </div>`;
     }
 
-    // Knockouts — candidates come from the bracket structure
+    // Knockouts — candidates come from the bracket structure; lock per stage
     function koPicksFor(stage) {
       const matches = state.matches.filter(m => m.stage === stage);
       if (matches.length === 0) return '';
       const label = stage === 'R32' ? 'Round of 32' : stage === 'R16' ? 'Round of 16' : stage === 'QF' ? 'Quarterfinals' : stage === 'SF' ? 'Semifinals' : 'Final';
       const ptsLabel = SCORING[stage];
+      const stageLocked = isStageLocked(stage);
+      const lockChip = stageLocked ? ' <span class="chip" style="background:rgba(239,68,68,0.12);color:#FCA5A5;font-size:0.65rem;padding:2px 6px;">🔒 locked</span>' : '';
       const items = matches.map(m => {
-        // Possible teams that could reach either side of this fixture
         const optionsList = candidatesForMatch(m);
         const pickStage = picks.ko[stage] || (picks.ko[stage] = {});
         const cur = pickStage[m.id] || '';
@@ -3075,10 +3256,52 @@
         const awayName = m.away ? countryByCode(m.away).flag+' '+countryByCode(m.away).name : (m.away_label || 'TBD');
         return `<div class="pick-row">
           <div class="lbl" style="font-size:0.7rem;">${escapeHTML(homeName)} vs ${escapeHTML(awayName)}</div>
-          <div>${teamSelect(cur, optionsList, `WC.setKoPick('${member.id}','${stage}','${m.id}',this.value)`)}${mark}</div>
+          <div>${teamSelect(cur, optionsList, `WC.setKoPick('${member.id}','${stage}','${m.id}',this.value)`, stageLocked)}${mark}</div>
         </div>`;
       }).join('');
-      return `<h3>${label} <span class="muted" style="font-size:0.75rem;font-weight:600;">(${ptsLabel} pt${ptsLabel>1?'s':''} per correct pick)</span></h3>${items}`;
+      return `<h3>${label}${lockChip} <span class="muted" style="font-size:0.75rem;font-weight:600;">(${ptsLabel} pt${ptsLabel>1?'s':''} per correct pick)</span></h3>${items}`;
+    }
+
+    // Score predictions per group match (collapsed by default)
+    function scorePredictionsHTML() {
+      picks.scores = picks.scores || {};
+      const groups = {};
+      for (const m of state.matches.filter(x => x.stage === 'group')) {
+        (groups[m.group] = groups[m.group] || []).push(m);
+      }
+      let inner = '';
+      for (const g of GROUP_LETTERS) {
+        const list = (groups[g] || []).sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+        if (list.length === 0) continue;
+        const locked = isGroupLocked(g);
+        const lockChip = locked ? ' <span class="chip" style="background:rgba(239,68,68,0.12);color:#FCA5A5;font-size:0.65rem;padding:2px 6px;">🔒</span>' : '';
+        inner += `<div style="margin-top:10px;"><div style="font-weight:800;color:var(--wc-gold);margin-bottom:4px;">Group ${g}${lockChip}</div>`;
+        for (const m of list) {
+          const sp = picks.scores[m.id] || {};
+          const home = m.home ? countryByCode(m.home) : null;
+          const away = m.away ? countryByCode(m.away) : null;
+          const matchLocked = locked || _matchStarted(m);
+          const played = !!m.result;
+          let mark = '';
+          if (played && typeof sp.home === 'number' && typeof sp.away === 'number') {
+            if (sp.home === m.result.home && sp.away === m.result.away) mark = `<span class="correct">✓ ${SCORING.scoreExact}</span>`;
+            else if (Math.sign(sp.home-sp.away) === Math.sign(m.result.home-m.result.away) && (sp.home-sp.away) === (m.result.home-m.result.away)) mark = `<span class="correct">+${SCORING.scoreGD}</span>`;
+            else if (Math.sign(sp.home-sp.away) === Math.sign(m.result.home-m.result.away)) mark = `<span class="correct">+${SCORING.scoreResult}</span>`;
+            else mark = '<span class="miss">✗</span>';
+          }
+          inner += `<div style="display:grid;grid-template-columns:1fr 50px 12px 50px;gap:6px;align-items:center;font-size:0.82rem;padding:4px 0;">
+            <span>${home ? home.flag+' '+escapeHTML(home.name) : 'TBD'} <span style="opacity:0.5;">vs</span> ${away ? away.flag+' '+escapeHTML(away.name) : 'TBD'} ${mark}</span>
+            <input type="number" min="0" max="20" ${matchLocked ? 'disabled' : ''} value="${typeof sp.home === 'number' ? sp.home : ''}" oninput="WC.setScorePred('${member.id}','${m.id}','home',this.value)" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:6px;padding:4px;text-align:center;font-weight:700;" />
+            <span style="text-align:center;opacity:0.6;">–</span>
+            <input type="number" min="0" max="20" ${matchLocked ? 'disabled' : ''} value="${typeof sp.away === 'number' ? sp.away : ''}" oninput="WC.setScorePred('${member.id}','${m.id}','away',this.value)" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:6px;padding:4px;text-align:center;font-weight:700;" />
+          </div>`;
+        }
+        inner += '</div>';
+      }
+      return `<details style="margin-top:14px;">
+        <summary style="cursor:pointer;font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--wc-gold);padding:4px 0;">💯 Score predictions <span style="font-weight:600;font-size:0.75rem;color:var(--text-muted);">(group games — optional bonus pts)</span></summary>
+        <div style="margin-top:6px;">${inner}</div>
+      </details>`;
     }
 
     // Champion + Runner-up — narrow to teams that could reach the Final
@@ -3115,12 +3338,20 @@
           </div>
         </div>`}
 
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;">
+          <button class="btn ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="WC.quickFill('${member.id}','favorites')">⭐ Pick all favorites</button>
+          <button class="btn ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="WC.quickFill('${member.id}','underdogs')">🌶 Pick all underdogs</button>
+          <button class="btn ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="WC.quickFill('${member.id}','random')">🎲 Random</button>
+        </div>
+        <p class="muted" style="font-size:0.72rem;margin-bottom:8px;">Quick-fill only overwrites unlocked picks.</p>
+
         <h3>🏆 Tournament outcome</h3>
-        <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', finalistCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`)}${champMark}</div></div>
-        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(picks.runnerUp || '', finalistCodes, `WC.setOutcomePick('${member.id}','runnerUp',this.value)`)}${ruMark}</div></div>
+        <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', finalistCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`, outcomesLocked)}${champMark}</div></div>
+        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(picks.runnerUp || '', finalistCodes, `WC.setOutcomePick('${member.id}','runnerUp',this.value)`, outcomesLocked)}${ruMark}</div></div>
         <div class="pick-row"><div class="lbl">Golden Boot</div><div>
           <input style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;"
                  placeholder="Player name" value="${escapeHTML(picks.goldenBoot || '')}"
+                 ${outcomesLocked ? 'disabled' : ''}
                  onchange="WC.setOutcomePick('${member.id}','goldenBoot',this.value)" />
           <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:0.78rem;color:var(--text-muted);">
             <input type="checkbox" ${picks.goldenBootCorrect ? 'checked' : ''}
@@ -3131,6 +3362,8 @@
 
         <h3>🎯 Group winners & runners-up</h3>
         ${groupsHTML}
+
+        ${scorePredictionsHTML()}
 
         <h3>⚔️ Knockout winners</h3>
         ${koPicksFor('R32')}
@@ -3144,6 +3377,178 @@
         </div>
       </div>
     `;
+  }
+
+  /* ----------------------------------------------------------------
+     QUIZ — 10-question multiple-choice rounds. Mixes question types.
+     Best score per profile persisted.
+     ---------------------------------------------------------------- */
+  function _shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function _pickN(arr, n) { return _shuffle(arr).slice(0, n); }
+
+  function generateQuestion() {
+    const types = ['flag', 'capital', 'player', 'group'];
+    const t = types[Math.floor(Math.random() * types.length)];
+    if (t === 'flag') {
+      const correct = _pickN(COUNTRIES, 1)[0];
+      const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code), 3);
+      const opts = _shuffle([correct, ...distractors]);
+      return {
+        q: `Whose flag is this? <span style="font-size:3rem;display:block;margin-top:8px;">${correct.flag}</span>`,
+        options: opts.map(o => ({ label: o.name, correct: o.code === correct.code })),
+      };
+    }
+    if (t === 'capital') {
+      const correct = _pickN(COUNTRIES, 1)[0];
+      const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code), 3);
+      const opts = _shuffle([correct, ...distractors]);
+      return {
+        q: `What is the capital of <b>${escapeHTML(correct.name)}</b> ${correct.flag}?`,
+        options: opts.map(o => ({ label: o.capital, correct: o.code === correct.code })),
+      };
+    }
+    if (t === 'player') {
+      // Pick a country with stars, ask which country a star plays for
+      const country = _pickN(COUNTRIES.filter(c => c.stars && c.stars.length), 1)[0];
+      const star = country.stars[Math.floor(Math.random() * country.stars.length)];
+      const distractors = _pickN(COUNTRIES.filter(c => c.code !== country.code), 3);
+      const opts = _shuffle([country, ...distractors]);
+      return {
+        q: `Which country does <b>${escapeHTML(star.name)}</b> play for?`,
+        options: opts.map(o => ({ label: o.flag + ' ' + o.name, correct: o.code === country.code })),
+      };
+    }
+    // group
+    const country = _pickN(COUNTRIES, 1)[0];
+    const groups = _shuffle(GROUP_LETTERS).slice(0, 4);
+    if (!groups.includes(country.group)) groups[0] = country.group;
+    const opts = _shuffle(groups.map(g => ({ label: 'Group ' + g, correct: g === country.group })));
+    return {
+      q: `Which group is <b>${country.flag} ${escapeHTML(country.name)}</b> in?`,
+      options: opts,
+    };
+  }
+
+  const quizState = { questions: [], current: 0, score: 0, answered: false };
+
+  function startQuiz() {
+    quizState.questions = Array.from({ length: 10 }, generateQuestion);
+    quizState.current = 0;
+    quizState.score = 0;
+    quizState.answered = false;
+    renderQuiz();
+  }
+  function answerQuiz(idx) {
+    if (quizState.answered) return;
+    quizState.answered = true;
+    const q = quizState.questions[quizState.current];
+    const opt = q.options[idx];
+    if (opt && opt.correct) quizState.score++;
+    renderQuiz();
+  }
+  function nextQuestion() {
+    if (quizState.current < quizState.questions.length - 1) {
+      quizState.current++;
+      quizState.answered = false;
+      renderQuiz();
+    } else {
+      // Quiz finished — persist best score per profile (name keyed)
+      const user = currentActiveUser();
+      const key = user && user.name ? 'wc_quiz_best_' + user.name.toLowerCase().replace(/\s+/g,'_') : 'wc_quiz_best_guest';
+      let best = 0;
+      try { best = parseInt(localStorage.getItem(key) || '0', 10) || 0; } catch (e) {}
+      if (quizState.score > best) {
+        try { localStorage.setItem(key, String(quizState.score)); } catch (e) {}
+      }
+      quizState.current = -1; // signals "results"
+      renderQuiz();
+    }
+  }
+
+  function renderQuiz() {
+    const root = document.getElementById('screen-quiz');
+    const user = currentActiveUser();
+    const key = user && user.name ? 'wc_quiz_best_' + user.name.toLowerCase().replace(/\s+/g,'_') : 'wc_quiz_best_guest';
+    let best = 0;
+    try { best = parseInt(localStorage.getItem(key) || '0', 10) || 0; } catch (e) {}
+
+    // No quiz in progress
+    if (quizState.questions.length === 0) {
+      root.innerHTML = `
+        <div class="card" style="text-align:center;">
+          <h2>🧠 World Cup Quiz</h2>
+          <p class="muted" style="font-size:0.9rem;">10 questions on flags, capitals, star players and groups.</p>
+          ${best > 0 ? `<p style="margin-top:10px;">Your best score: <b style="color:var(--wc-gold);">${best} / 10</b></p>` : ''}
+          <button class="btn gold" style="margin-top:14px;font-size:1rem;padding:12px 24px;" onclick="WC.startQuiz()">▶ Start a quiz</button>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--wc-gold);">Question types</h3>
+          <ul style="padding-left:18px;line-height:1.6;font-size:0.9rem;">
+            <li>🏳 <b>Flag → Country</b> — which nation does this flag belong to?</li>
+            <li>🏛 <b>Capital city</b> — what's the capital of this country?</li>
+            <li>⭐ <b>Star player → Country</b> — which national team does this player represent?</li>
+            <li>📋 <b>Group draw</b> — which group is this team in?</li>
+          </ul>
+        </div>
+      `;
+      return;
+    }
+    // Results screen
+    if (quizState.current === -1) {
+      const pct = Math.round((quizState.score / quizState.questions.length) * 100);
+      let emoji = '🥉';
+      if (pct >= 90) emoji = '🏆';
+      else if (pct >= 70) emoji = '🥇';
+      else if (pct >= 50) emoji = '🥈';
+      root.innerHTML = `
+        <div class="card" style="text-align:center;">
+          <h2>${emoji} Quiz complete!</h2>
+          <p style="font-size:1.4rem;font-family:var(--font-display);font-weight:800;color:var(--wc-gold);margin:10px 0;">${quizState.score} / ${quizState.questions.length}</p>
+          <p class="muted">${pct >= 90 ? 'World Cup expert!' : pct >= 70 ? 'Great job!' : pct >= 50 ? 'Not bad — try again to improve.' : 'Keep practicing!'}</p>
+          ${quizState.score > best || (quizState.score === best && best > 0) ? '<p style="color:var(--wc-green);font-weight:800;margin-top:8px;">⭐ New best score!</p>' : best > 0 ? `<p class="muted" style="margin-top:8px;">Best: ${best} / 10</p>` : ''}
+          <button class="btn gold" style="margin-top:14px;" onclick="WC.startQuiz()">▶ Play again</button>
+          <button class="btn ghost" style="margin-top:14px;margin-left:8px;" onclick="WC.resetQuiz()">Done</button>
+        </div>
+      `;
+      return;
+    }
+    // Active question
+    const q = quizState.questions[quizState.current];
+    root.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span class="muted" style="font-size:0.85rem;">Question ${quizState.current+1} of ${quizState.questions.length}</span>
+          <span style="font-weight:800;color:var(--wc-gold);">Score: ${quizState.score}</span>
+        </div>
+        <h2 style="margin-bottom:14px;">${q.q}</h2>
+        <div style="display:grid;gap:8px;">
+          ${q.options.map((o, i) => {
+            let cls = 'btn ghost';
+            let extra = '';
+            if (quizState.answered) {
+              if (o.correct) { cls = 'btn'; extra = 'background:var(--wc-green);'; }
+              else cls = 'btn ghost';
+            }
+            return `<button class="${cls}" style="text-align:left;padding:12px 14px;font-size:0.95rem;${extra}" onclick="WC.answerQuiz(${i})">${o.label} ${quizState.answered && o.correct ? '✓' : ''}</button>`;
+          }).join('')}
+        </div>
+        ${quizState.answered ? `<div style="text-align:right;margin-top:14px;"><button class="btn gold" onclick="WC.nextQuestion()">${quizState.current < quizState.questions.length-1 ? 'Next →' : 'See results →'}</button></div>` : ''}
+      </div>
+    `;
+  }
+  function resetQuiz() {
+    quizState.questions = [];
+    quizState.current = 0;
+    quizState.score = 0;
+    quizState.answered = false;
+    renderQuiz();
   }
 
   /* ---- ABOUT ---- */
@@ -3431,6 +3836,83 @@
     save();
     renderPool();
   }
+  function setScorePred(memberId, matchId, side, raw) {
+    const p = state.picks[memberId];
+    if (!p) return;
+    p.scores = p.scores || {};
+    p.scores[matchId] = p.scores[matchId] || {};
+    const n = raw === '' ? null : parseInt(raw, 10);
+    if (n === null || isNaN(n)) delete p.scores[matchId][side];
+    else p.scores[matchId][side] = n;
+    if (p.scores[matchId].home === undefined && p.scores[matchId].away === undefined) delete p.scores[matchId];
+    save();
+    // No re-render — keep focus in the input
+  }
+
+  /* ----------------------------------------------------------------
+     Quick-fill — favorites / underdogs / random
+     Skips any pick whose stage/group is already locked.
+     "Favorite" = team in pot 1 (or lowest pot) within candidate set.
+     ---------------------------------------------------------------- */
+  function _potOf(code) {
+    const c = countryByCode(code);
+    return c && c.pot ? c.pot : 9;
+  }
+  function _quickPick(candidates, mode) {
+    if (!candidates || candidates.length === 0) return null;
+    if (mode === 'random') return candidates[Math.floor(Math.random() * candidates.length)];
+    const sorted = candidates.slice().sort((a,b) => _potOf(a) - _potOf(b));
+    if (mode === 'favorites') return sorted[0];
+    if (mode === 'underdogs') return sorted[sorted.length - 1];
+    return sorted[0];
+  }
+  function quickFill(memberId, mode) {
+    const p = state.picks[memberId];
+    if (!p) return;
+    if (!confirm(`Quick-fill all UNLOCKED picks with ${mode}? Already-locked picks won't change.`)) return;
+    // Groups
+    for (const g of GROUP_LETTERS) {
+      if (isGroupLocked(g)) continue;
+      const codes = (state.groups[g] || []).slice();
+      const sorted = codes.slice().sort((a,b) => _potOf(a) - _potOf(b));
+      let winner, ru;
+      if (mode === 'random') {
+        const shuf = codes.slice().sort(() => Math.random() - 0.5);
+        winner = shuf[0]; ru = shuf[1];
+      } else if (mode === 'favorites') {
+        winner = sorted[0]; ru = sorted[1];
+      } else {
+        winner = sorted[sorted.length - 1]; ru = sorted[sorted.length - 2];
+      }
+      p.groupWinners = p.groupWinners || {};
+      p.groupRunnersUp = p.groupRunnersUp || {};
+      p.groupWinners[g] = winner;
+      p.groupRunnersUp[g] = ru;
+    }
+    // KOs
+    for (const stage of ['R32','R16','QF','SF','Final']) {
+      if (isStageLocked(stage)) continue;
+      p.ko[stage] = p.ko[stage] || {};
+      for (const m of state.matches.filter(x => x.stage === stage)) {
+        const pick = _quickPick(candidatesForMatch(m), mode);
+        if (pick) p.ko[stage][m.id] = pick;
+      }
+    }
+    // Outcomes
+    if (!areOutcomesLocked()) {
+      const finalMatch = state.matches.find(m => m.stage === 'Final');
+      const finalists = finalMatch ? candidatesForMatch(finalMatch) : COUNTRIES.map(c => c.code);
+      const picked = _quickPick(finalists, mode);
+      if (picked) p.champion = picked;
+      // Runner-up: pick a different one
+      const ruPool = finalists.filter(c => c !== p.champion);
+      const ruPick = _quickPick(ruPool, mode);
+      if (ruPick) p.runnerUp = ruPick;
+    }
+    save();
+    toast(`Filled ${mode} picks`);
+    renderPool();
+  }
 
   function resetAll() {
     if (!confirm('This will erase all results, members, picks, and group customizations. Continue?')) return;
@@ -3474,6 +3956,45 @@
         `;
       }
     }, 1000);
+
+    // Auto-sync when the tab is reactivated after being hidden 10+ min,
+    // and pull cross-device picks via CloudSync on every visibility return.
+    let hiddenSince = null;
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenSince = Date.now();
+        return;
+      }
+      // Became visible
+      if (window.CloudSync && CloudSync.online && CloudSync.pull) {
+        try {
+          CloudSync.pull(STORE_KEY).then(() => {
+            // Re-read storage after pull
+            load();
+            const cur = document.querySelector('.tab.active')?.dataset.tab;
+            if (cur) activateTab(cur);
+          }).catch(() => {});
+        } catch (e) {}
+      }
+      if (hiddenSince && (Date.now() - hiddenSince) > 10 * 60 * 1000) {
+        if (typeof syncScores === 'function') syncScores();
+      }
+      hiddenSince = null;
+    });
+
+    // Initial cross-device pull so a new device picks up family picks
+    if (window.CloudSync && CloudSync.pull) {
+      setTimeout(() => {
+        try {
+          CloudSync.pull(STORE_KEY).then(() => {
+            load();
+            const cur = document.querySelector('.tab.active')?.dataset.tab;
+            if (cur) activateTab(cur);
+          }).catch(() => {});
+        } catch (e) {}
+      }, 800);
+    }
+
     activateTab('home');
   }
 
@@ -3580,7 +4101,9 @@
     editResult, saveResult, clearResult, closeModal,
     openGroupEditor, saveGroups,
     startEntry, editEntry, doneEntry, setEntrantName, removeMember,
-    setGroupPick, setKoPick, setOutcomePick,
+    setGroupPick, setKoPick, setOutcomePick, setScorePred,
+    quickFill,
+    startQuiz, answerQuiz, nextQuestion, resetQuiz,
     resetAll,
     syncScores,
   };
