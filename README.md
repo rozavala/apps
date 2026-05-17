@@ -31,6 +31,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **📚 Vocabulario Vivo** | Aprende inglés y español por raíces latinas y griegas. (Learn English and Spanish through Latin and Greek roots.) | [vocabulario-vivo.html](vocabulario-vivo.html) |
 | **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
 | **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
+| **🏆 World Cup 2026** | Sigue los partidos, equipos y estadios del Mundial 2026. (Track matches, teams, and venues of the 2026 World Cup). | [world-cup.html](world-cup.html) |
 | **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
 | **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone). | [trophy-room.html](trophy-room.html) |
 | **🍽️ Menú Semanal** | Planifica las comidas de la semana con la familia. (Plan the weekly meals with the family.) | [menu.html](menu.html) |
@@ -66,6 +67,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "World Cup 2026"!**: ¡Prepárate para el Mundial 2026! Sigue los partidos, equipos y estadios. (Get ready for the 2026 World Cup! Track matches, teams, and venues).
 - **Nuevas Utilidades Familiares**: ¡Agregamos Menú Semanal, Home Timer, Sunday Report y Vacation Planner! (Added Menu Planner, Home Timer, Sunday Report and Vacation Planner!)
 - **¡Nueva App "Code Cadet"!**: Aprende lógica de programación moviendo un rover con bloques. (Learn programming logic by moving a rover with blocks).
 - **¡Nueva App "Money Master"!**: Aprende sobre el valor del dinero, monedas y billetes. (Learn about money value, coins and bills).
