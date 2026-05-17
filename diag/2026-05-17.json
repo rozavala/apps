@@ -20,9 +20,36 @@
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 44,
+      "count": 108,
       "firstTs": 1779024638528,
-      "lastTs": 1779025166713,
+      "lastTs": 1779026069276,
+      "users": [
+        "u-3bda7c",
+        "u-8620c5"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mp9txlml_eu6qa8",
+        "ts": 1779025640637,
+        "clientTs": 1779025640637,
+        "kind": "error",
+        "app": "little-maestro",
+        "page": "little-maestro.html",
+        "message": "TypeError: undefined is not an object (near '...})...')",
+        "filename": "https://rozavala.github.io/apps/little-maestro.html",
+        "lineno": 9549,
+        "colno": 9,
+        "stack": "init@https://rozavala.github.io/apps/little-maestro.html:9549:9\n@https://rozavala.github.io/apps/little-maestro.html:9773:19",
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1779025640637,
+      "lastTs": 1779025640637,
       "users": [
         "u-3bda7c"
       ]
