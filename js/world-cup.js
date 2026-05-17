@@ -2253,6 +2253,48 @@
   }
   function escapeHTML(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
+  /* ----------------------------------------------------------------
+     Bracket candidate resolver — given a placeholder label like
+     "1A", "2B", "3A/B/C/D/F", "W73", "L101", return the set of team
+     codes that could fill that slot. Cascades recursively so R16+
+     picks narrow naturally as earlier rounds are decided.
+     ---------------------------------------------------------------- */
+  function candidatesForSlot(label, _seen) {
+    if (!label) return [];
+    _seen = _seen || new Set();
+    if (_seen.has(label)) return [];   // safety against cycles
+    _seen.add(label);
+
+    let m;
+    if ((m = /^([12])([A-L])$/.exec(label))) {
+      return (state.groups[m[2]] || []).slice();
+    }
+    if ((m = /^3((?:[A-L])(?:\/[A-L])+)$/.exec(label))) {
+      const letters = m[1].split('/');
+      const out = [];
+      for (const l of letters) for (const c of (state.groups[l] || [])) if (!out.includes(c)) out.push(c);
+      return out;
+    }
+    if ((m = /^[WL](\d+)$/.exec(label))) {
+      const refId = 'm' + String(parseInt(m[1])).padStart(3, '0');
+      const prev = state.matches.find(x => x.id === refId);
+      if (!prev) return [];
+      const homeC = prev.home ? [prev.home] : candidatesForSlot(prev.home_label, _seen);
+      const awayC = prev.away ? [prev.away] : candidatesForSlot(prev.away_label, _seen);
+      const out = [];
+      for (const c of [...homeC, ...awayC]) if (c && !out.includes(c)) out.push(c);
+      return out;
+    }
+    return [];
+  }
+  function candidatesForMatch(m) {
+    const homeC = m.home ? [m.home] : candidatesForSlot(m.home_label);
+    const awayC = m.away ? [m.away] : candidatesForSlot(m.away_label);
+    const out = [];
+    for (const c of [...homeC, ...awayC]) if (c && !out.includes(c)) out.push(c);
+    return out;
+  }
+
   function toast(msg) {
     let t = document.getElementById('wc-toast');
     if (!t) {
@@ -2930,10 +2972,18 @@
       })
       .sort((a,b) => b.total - a.total);
 
+    const activeUser = currentActiveUser();
+    const myEntry = activeUser ? state.members.find(m => m.name && m.name.toLowerCase() === activeUser.name.toLowerCase()) : null;
+    const ctaLabel = activeUser
+      ? (myEntry ? `✎ Edit ${escapeHTML(activeUser.name)}'s bracket` : `🎯 Submit your bracket, ${escapeHTML(activeUser.name)}`)
+      : '🎯 Submit your bracket';
+
     let html = `
       <div class="card">
         <h2>👨‍👩‍👧‍👦 Family Bracket Pool</h2>
-        <p class="muted" style="font-size:0.85rem;">Enter your name and your picks — once you've saved at least your name, you're in the pool. Scores update automatically as real results land on the Matches tab.</p>
+        <p class="muted" style="font-size:0.85rem;">${activeUser
+          ? 'Each profile gets one bracket — your picks are saved against your name automatically. Scores update as real results come in.'
+          : 'Enter your name and your picks — once you\'ve saved at least your name, you\'re in the pool. Scores update automatically as real results land on the Matches tab.'}</p>
 
         <h3 style="margin-top:14px;">🏅 Leaderboard</h3>
         ${board.length === 0
@@ -2941,7 +2991,7 @@
           : board.map((m, i) => `
               <div class="leader ${i===0?'top1':''}">
                 <div class="rank">${i+1}</div>
-                <div class="who">${escapeHTML(m.name)}<div class="muted" style="font-size:0.75rem;font-weight:600;">G:${m.breakdown.groups} · KO:${m.breakdown.ko} · 🏆:${m.breakdown.champion+m.breakdown.runnerUp} · 👟:${m.breakdown.goldenBoot}</div></div>
+                <div class="who">${m.avatar ? '<span style="margin-right:6px;">'+escapeHTML(m.avatar)+'</span>' : ''}${escapeHTML(m.name)}<div class="muted" style="font-size:0.75rem;font-weight:600;">G:${m.breakdown.groups} · KO:${m.breakdown.ko} · 🏆:${m.breakdown.champion+m.breakdown.runnerUp} · 👟:${m.breakdown.goldenBoot}</div></div>
                 <div class="pts">${m.total}</div>
                 <div class="actions">
                   <button title="Edit picks" onclick="WC.editEntry('${m.id}')">✎</button>
@@ -2951,7 +3001,7 @@
 
         ${selectedId ? '' : `
           <div style="text-align:center;margin-top:14px;">
-            <button class="btn gold" style="font-size:1rem;padding:12px 24px;" onclick="WC.startEntry()">🎯 Submit your bracket</button>
+            <button class="btn gold" style="font-size:1rem;padding:12px 24px;" onclick="WC.startEntry()">${ctaLabel}</button>
           </div>
         `}
 
@@ -3008,17 +3058,15 @@
       </div>`;
     }
 
-    // Knockouts
+    // Knockouts — candidates come from the bracket structure
     function koPicksFor(stage) {
       const matches = state.matches.filter(m => m.stage === stage);
       if (matches.length === 0) return '';
       const label = stage === 'R32' ? 'Round of 32' : stage === 'R16' ? 'Round of 16' : stage === 'QF' ? 'Quarterfinals' : stage === 'SF' ? 'Semifinals' : 'Final';
       const ptsLabel = SCORING[stage];
       const items = matches.map(m => {
-        const opts = [];
-        if (m.home) opts.push(m.home);
-        if (m.away) opts.push(m.away);
-        const optionsList = opts.length > 0 ? opts : allTeamCodes;
+        // Possible teams that could reach either side of this fixture
+        const optionsList = candidatesForMatch(m);
         const pickStage = picks.ko[stage] || (picks.ko[stage] = {});
         const cur = pickStage[m.id] || '';
         const actual = koActual[stage][m.id];
@@ -3033,20 +3081,30 @@
       return `<h3>${label} <span class="muted" style="font-size:0.75rem;font-weight:600;">(${ptsLabel} pt${ptsLabel>1?'s':''} per correct pick)</span></h3>${items}`;
     }
 
+    // Champion + Runner-up — narrow to teams that could reach the Final
+    const finalMatch = state.matches.find(m => m.stage === 'Final');
+    const finalistCodes = finalMatch ? candidatesForMatch(finalMatch) : allTeamCodes;
+
     const champMark = champRu.champion ? (picks.champion === champRu.champion ? `<span class="correct">✓ ${SCORING.champion}</span>` : '<span class="miss">✗</span>') : '';
     const ruMark    = champRu.runnerUp ? (picks.runnerUp === champRu.runnerUp ? `<span class="correct">✓ ${SCORING.runnerUp}</span>` : '<span class="miss">✗</span>') : '';
 
     const hasName = !!(member.name && member.name.trim());
+    const activeUser = currentActiveUser();
+    const isActiveUserEntry = !!(activeUser && hasName && member.name.toLowerCase() === activeUser.name.toLowerCase());
     return `
       <div class="card picks-section">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-          <h2 style="margin:0;">${hasName ? escapeHTML(member.name)+'\'s bracket' : 'Your bracket'}</h2>
+          <h2 style="margin:0;display:flex;align-items:center;gap:8px;">
+            ${member.avatar ? `<span style="font-size:1.2em;">${escapeHTML(member.avatar)}</span>` : ''}
+            ${hasName ? escapeHTML(member.name)+'\'s bracket' : 'Your bracket'}
+          </h2>
           <button class="btn ghost" style="padding:6px 12px;font-size:0.85rem;" onclick="WC.doneEntry()">${hasName ? '✓ Done' : '× Cancel'}</button>
         </div>
         <p class="muted" style="font-size:0.85rem;margin-top:6px;">${hasName ? 'Changes save automatically as you make them.' : 'Enter your name to lock in your bracket. Picks save automatically.'}</p>
 
+        ${isActiveUserEntry ? '' : `
         <div class="pick-row" style="border-bottom:1px solid var(--wc-line);padding-bottom:10px;margin-bottom:10px;">
-          <div class="lbl">Your name</div>
+          <div class="lbl">${activeUser ? 'Bracket for' : 'Your name'}</div>
           <div>
             <input id="entrant-name"
                    style="background:var(--wc-card-strong);border:1px solid ${hasName ? 'var(--wc-line)' : 'var(--wc-gold)'};color:var(--text-primary);border-radius:8px;padding:8px 10px;font-size:0.95rem;width:100%;font-weight:700;"
@@ -3055,11 +3113,11 @@
                    maxlength="24"
                    oninput="WC.setEntrantName('${member.id}', this.value)" />
           </div>
-        </div>
+        </div>`}
 
         <h3>🏆 Tournament outcome</h3>
-        <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', allTeamCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`)}${champMark}</div></div>
-        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(picks.runnerUp || '', allTeamCodes, `WC.setOutcomePick('${member.id}','runnerUp',this.value)`)}${ruMark}</div></div>
+        <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', finalistCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`)}${champMark}</div></div>
+        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(picks.runnerUp || '', finalistCodes, `WC.setOutcomePick('${member.id}','runnerUp',this.value)`)}${ruMark}</div></div>
         <div class="pick-row"><div class="lbl">Golden Boot</div><div>
           <input style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;"
                  placeholder="Player name" value="${escapeHTML(picks.goldenBoot || '')}"
@@ -3277,16 +3335,44 @@
   /* ----------------------------------------------------------------
      Pool entry + pick helpers (exposed)
      ---------------------------------------------------------------- */
-  function startEntry() {
-    // Create a fresh unnamed entry and open the form for it
+  // Returns the currently signed-in profile, if the hub auth is loaded.
+  function currentActiveUser() {
+    try { return (typeof getActiveUser === 'function') ? getActiveUser() : null; }
+    catch (e) { return null; }
+  }
+  // Find or create a bracket entry for the active user.
+  function ensureEntryForActiveUser(user) {
+    const existing = state.members.find(m => m.name && m.name.toLowerCase() === user.name.toLowerCase());
+    if (existing) {
+      // Refresh the avatar in case it changed since they last saved a bracket
+      if (user.avatar && existing.avatar !== user.avatar) existing.avatar = user.avatar;
+      return existing;
+    }
     const id = 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,5);
-    state.members.push({ id, name: '' });
+    const entry = { id, name: user.name, avatar: user.avatar || null };
+    state.members.push(entry);
     state.picks[id] = { groupWinners:{}, groupRunnersUp:{}, ko:{}, champion:null, runnerUp:null, goldenBoot:'', goldenBootCorrect:false };
-    state.uiSelectedMember = id;
+    return entry;
+  }
+  function startEntry() {
+    const user = currentActiveUser();
+    let entry;
+    if (user && user.name) {
+      entry = ensureEntryForActiveUser(user);
+    } else {
+      const id = 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,5);
+      entry = { id, name: '' };
+      state.members.push(entry);
+      state.picks[id] = { groupWinners:{}, groupRunnersUp:{}, ko:{}, champion:null, runnerUp:null, goldenBoot:'', goldenBootCorrect:false };
+    }
+    state.uiSelectedMember = entry.id;
     save();
     renderPool();
-    // Focus the name input
-    setTimeout(() => { const n = document.getElementById('entrant-name'); if (n) n.focus(); }, 50);
+    // Focus the name input only if it's still empty (i.e. no session user)
+    setTimeout(() => {
+      const n = document.getElementById('entrant-name');
+      if (n && !n.value) n.focus();
+    }, 50);
   }
   function editEntry(id) {
     state.uiSelectedMember = id;
