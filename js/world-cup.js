@@ -2919,37 +2919,41 @@
   /* ---- BRACKET POOL ---- */
   function renderPool() {
     const root = document.getElementById('screen-pool');
-    const memberOpts = state.members.map(m => `<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('');
-    const selectedId = state.uiSelectedMember || (state.members[0] && state.members[0].id) || null;
+    const selectedId = state.uiSelectedMember || null;
 
-    // Leaderboard
-    const board = state.members.map(m => {
-      const { total, breakdown } = scoreMember(m.id);
-      return { ...m, total, breakdown };
-    }).sort((a,b) => b.total - a.total);
+    // Leaderboard — only entries with a name show up
+    const board = state.members
+      .filter(m => m.name && m.name.trim())
+      .map(m => {
+        const { total, breakdown } = scoreMember(m.id);
+        return { ...m, total, breakdown };
+      })
+      .sort((a,b) => b.total - a.total);
 
     let html = `
       <div class="card">
-        <h2>👨‍👩‍👧‍👦 Family Pool</h2>
-        <p class="muted" style="font-size:0.85rem;">Add each family member, then have each fill in their picks. Scores update automatically as you record real match results in the Matches tab.</p>
-        <div class="pool-toolbar">
-          <input id="new-member" placeholder="Add a family member" maxlength="24" />
-          <button class="btn" onclick="WC.addMember()">+ Add</button>
-        </div>
+        <h2>👨‍👩‍👧‍👦 Family Bracket Pool</h2>
+        <p class="muted" style="font-size:0.85rem;">Enter your name and your picks — once you've saved at least your name, you're in the pool. Scores update automatically as real results land on the Matches tab.</p>
 
         <h3 style="margin-top:14px;">🏅 Leaderboard</h3>
         ${board.length === 0
-          ? '<div class="empty">No members yet. Add the family above to get started!</div>'
+          ? '<div class="empty">Be the first to submit a bracket! Hit the button below to get started.</div>'
           : board.map((m, i) => `
               <div class="leader ${i===0?'top1':''}">
                 <div class="rank">${i+1}</div>
                 <div class="who">${escapeHTML(m.name)}<div class="muted" style="font-size:0.75rem;font-weight:600;">G:${m.breakdown.groups} · KO:${m.breakdown.ko} · 🏆:${m.breakdown.champion+m.breakdown.runnerUp} · 👟:${m.breakdown.goldenBoot}</div></div>
                 <div class="pts">${m.total}</div>
                 <div class="actions">
-                  <button title="Edit picks" onclick="WC.selectMember('${m.id}')">✎</button>
-                  <button title="Remove" onclick="WC.removeMember('${m.id}')">✕</button>
+                  <button title="Edit picks" onclick="WC.editEntry('${m.id}')">✎</button>
+                  <button title="Remove from pool" onclick="WC.removeMember('${m.id}')">✕</button>
                 </div>
               </div>`).join('')}
+
+        ${selectedId ? '' : `
+          <div style="text-align:center;margin-top:14px;">
+            <button class="btn gold" style="font-size:1rem;padding:12px 24px;" onclick="WC.startEntry()">🎯 Submit your bracket</button>
+          </div>
+        `}
 
         <h3 style="margin-top:14px;">📋 Scoring rules</h3>
         <div class="scoring-rules">
@@ -2968,10 +2972,6 @@
     }
 
     root.innerHTML = html;
-
-    // wire enter key
-    const inp = document.getElementById('new-member');
-    if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addMember(); });
   }
 
   function renderMemberPicks(member) {
@@ -3036,10 +3036,26 @@
     const champMark = champRu.champion ? (picks.champion === champRu.champion ? `<span class="correct">✓ ${SCORING.champion}</span>` : '<span class="miss">✗</span>') : '';
     const ruMark    = champRu.runnerUp ? (picks.runnerUp === champRu.runnerUp ? `<span class="correct">✓ ${SCORING.runnerUp}</span>` : '<span class="miss">✗</span>') : '';
 
+    const hasName = !!(member.name && member.name.trim());
     return `
       <div class="card picks-section">
-        <h2>${escapeHTML(member.name)}'s picks</h2>
-        <p class="muted" style="font-size:0.85rem;">Changes save automatically.</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h2 style="margin:0;">${hasName ? escapeHTML(member.name)+'\'s bracket' : 'Your bracket'}</h2>
+          <button class="btn ghost" style="padding:6px 12px;font-size:0.85rem;" onclick="WC.doneEntry()">${hasName ? '✓ Done' : '× Cancel'}</button>
+        </div>
+        <p class="muted" style="font-size:0.85rem;margin-top:6px;">${hasName ? 'Changes save automatically as you make them.' : 'Enter your name to lock in your bracket. Picks save automatically.'}</p>
+
+        <div class="pick-row" style="border-bottom:1px solid var(--wc-line);padding-bottom:10px;margin-bottom:10px;">
+          <div class="lbl">Your name</div>
+          <div>
+            <input id="entrant-name"
+                   style="background:var(--wc-card-strong);border:1px solid ${hasName ? 'var(--wc-line)' : 'var(--wc-gold)'};color:var(--text-primary);border-radius:8px;padding:8px 10px;font-size:0.95rem;width:100%;font-weight:700;"
+                   placeholder="Type your name to enter the pool"
+                   value="${escapeHTML(member.name || '')}"
+                   maxlength="24"
+                   oninput="WC.setEntrantName('${member.id}', this.value)" />
+          </div>
+        </div>
 
         <h3>🏆 Tournament outcome</h3>
         <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', allTeamCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`)}${champMark}</div></div>
@@ -3064,6 +3080,10 @@
         ${koPicksFor('QF')}
         ${koPicksFor('SF')}
         ${koPicksFor('Final')}
+
+        <div style="text-align:center;margin-top:18px;">
+          <button class="btn" onclick="WC.doneEntry()">${hasName ? '✓ Done' : 'Save & enter the pool'}</button>
+        </div>
       </div>
     `;
   }
@@ -3255,31 +3275,50 @@
   }
 
   /* ----------------------------------------------------------------
-     Pool member + pick helpers (exposed)
+     Pool entry + pick helpers (exposed)
      ---------------------------------------------------------------- */
-  function addMember() {
-    const inp = document.getElementById('new-member');
-    if (!inp) return;
-    const name = (inp.value || '').trim();
-    if (!name) return;
+  function startEntry() {
+    // Create a fresh unnamed entry and open the form for it
     const id = 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,5);
-    state.members.push({ id, name });
+    state.members.push({ id, name: '' });
     state.picks[id] = { groupWinners:{}, groupRunnersUp:{}, ko:{}, champion:null, runnerUp:null, goldenBoot:'', goldenBootCorrect:false };
     state.uiSelectedMember = id;
     save();
-    inp.value = '';
+    renderPool();
+    // Focus the name input
+    setTimeout(() => { const n = document.getElementById('entrant-name'); if (n) n.focus(); }, 50);
+  }
+  function editEntry(id) {
+    state.uiSelectedMember = id;
     renderPool();
   }
+  function doneEntry() {
+    const id = state.uiSelectedMember;
+    if (id) {
+      const m = state.members.find(x => x.id === id);
+      // Drop unnamed entries on Done so the leaderboard stays clean
+      if (m && !(m.name && m.name.trim())) {
+        state.members = state.members.filter(x => x.id !== id);
+        delete state.picks[id];
+      }
+    }
+    state.uiSelectedMember = null;
+    save();
+    renderPool();
+  }
+  function setEntrantName(id, value) {
+    const m = state.members.find(x => x.id === id);
+    if (!m) return;
+    m.name = (value || '').slice(0, 24);
+    save();
+    // Don't re-render on every keystroke — just persist. Leaderboard updates on Done.
+  }
   function removeMember(id) {
-    if (!confirm('Remove this member and their picks?')) return;
+    if (!confirm('Remove this bracket from the pool?')) return;
     state.members = state.members.filter(m => m.id !== id);
     delete state.picks[id];
     if (state.uiSelectedMember === id) state.uiSelectedMember = null;
     save();
-    renderPool();
-  }
-  function selectMember(id) {
-    state.uiSelectedMember = id;
     renderPool();
   }
   function setGroupPick(memberId, group, slot, value) {
@@ -3454,7 +3493,7 @@
     renderMatches,
     editResult, saveResult, clearResult, closeModal,
     openGroupEditor, saveGroups,
-    addMember, removeMember, selectMember,
+    startEntry, editEntry, doneEntry, setEntrantName, removeMember,
     setGroupPick, setKoPick, setOutcomePick,
     resetAll,
     syncScores,
