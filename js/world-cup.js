@@ -2803,6 +2803,7 @@
       todayHTML = '<div class="empty">All 104 matches played — final whistle has blown!</div>';
     }
 
+    const preTournament = days > 0;
     const tourneyOver = !next && todays.length === 0;
 
     root.innerHTML = `
