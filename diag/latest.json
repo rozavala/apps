@@ -1,7 +1,21 @@
 {
-  "generatedAt": "2026-05-15T02:25:26.041Z",
+  "generatedAt": "2026-05-17T13:39:38.332Z",
   "windowHours": 72,
-  "totalGroups": 0,
-  "totalEvents": 0,
-  "topGroups": []
+  "totalGroups": 1,
+  "totalEvents": 44,
+  "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "wc save failed The quota has been exceeded.",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 44,
+      "firstTs": 1779024638528,
+      "lastTs": 1779025166713,
+      "users": 1
+    }
+  ]
 }

@@ -1,5 +1,37 @@
 {
-  "generatedAt": "2026-05-15T02:25:26.041Z",
+  "generatedAt": "2026-05-17T13:39:38.332Z",
   "windowHours": 72,
-  "days": []
+  "days": [
+    {
+      "day": "2026-05-17",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mp9tc4e8_k8jmok",
+            "ts": 1779024638528,
+            "clientTs": 1779024638528,
+            "kind": "console.warn",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "wc save failed The quota has been exceeded.",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 44,
+          "firstTs": 1779024638528,
+          "lastTs": 1779025166713,
+          "users": [
+            "u-3bda7c"
+          ]
+        }
+      ]
+    }
+  ]
 }
