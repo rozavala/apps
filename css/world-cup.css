@@ -557,6 +557,186 @@ body {
 .score-input .side.left { text-align: right; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 
+/* ---- Santa Clara tab ---- */
+.sc-hero {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(220,38,38,0.18), rgba(245,158,11,0.12) 50%, rgba(37,99,235,0.18)),
+    var(--wc-card-strong);
+  border: 1px solid var(--wc-line);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.sc-hero .badge-row {
+  display:flex; flex-wrap:wrap; gap:6px;
+  margin-top: 8px;
+}
+.sc-hero h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.sc-hero .city {
+  color: var(--wc-gold);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sc-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+.sc-stat {
+  background: var(--wc-card);
+  border: 1px solid var(--wc-line);
+  border-radius: 12px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.sc-stat .n {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--wc-gold);
+}
+.sc-stat .l {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.detail-match {
+  background: var(--wc-card);
+  border: 1px solid var(--wc-line);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.detail-match.played { border-color: rgba(22,163,74,0.35); }
+.detail-match .dm-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.detail-match .dm-stage {
+  font-size: 0.72rem;
+  color: var(--wc-gold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.detail-match .dm-when {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+.detail-match .dm-teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 4px;
+}
+.detail-match .dm-team {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.detail-match .dm-team .flag { font-size: 2rem; line-height: 1; }
+.detail-match .dm-team .name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.detail-match .dm-team .meta {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.detail-match .dm-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--wc-gold);
+}
+.detail-match .dm-score.played { font-size: 1.5rem; }
+.detail-match .dm-score.vs { font-size: 0.75rem; letter-spacing: 0.12em; color: var(--text-muted); }
+.detail-match .dm-storyline {
+  background: rgba(245,158,11,0.06);
+  border-left: 3px solid var(--wc-gold);
+  border-radius: 0 10px 10px 0;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.detail-match .dm-watch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.detail-match .dm-watch .col {
+  background: var(--wc-card-strong);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.detail-match .dm-watch .col .ctitle {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.detail-match .dm-watch .col .star {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.detail-match .dm-watch .col .pos {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.detail-match .dm-actions {
+  display: flex; gap: 6px;
+  margin-top: 10px;
+}
+.detail-match .dm-actions .btn { font-size: 0.78rem; padding: 6px 10px; }
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.guide-tile {
+  background: var(--wc-card-strong);
+  border: 1px solid var(--wc-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.guide-tile .ttitle {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.guide-tile p { font-size: 0.86rem; line-height: 1.5; color: var(--text-primary); }
+
+@media (max-width: 480px) {
+  .sc-stats { grid-template-columns: repeat(2, 1fr); }
+  .detail-match .dm-watch { grid-template-columns: 1fr; }
+}
+
 /* ---- Toast ---- */
 .toast {
   position: fixed;

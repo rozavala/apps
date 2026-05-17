@@ -1033,14 +1033,193 @@
   function activateTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-'+name));
-    if (name === 'home')     renderHome();
-    if (name === 'teams')    renderTeams();
-    if (name === 'matches')  renderMatches();
-    if (name === 'venues')   renderVenues();
-    if (name === 'standings')renderStandings();
-    if (name === 'pool')     renderPool();
-    if (name === 'about')    renderAbout();
+    if (name === 'home')        renderHome();
+    if (name === 'santaclara')  renderSantaClara();
+    if (name === 'teams')       renderTeams();
+    if (name === 'matches')     renderMatches();
+    if (name === 'venues')      renderVenues();
+    if (name === 'standings')   renderStandings();
+    if (name === 'pool')        renderPool();
+    if (name === 'about')       renderAbout();
     window.scrollTo({ top:0, behavior:'instant' });
+  }
+
+  /* ---- SANTA CLARA — Levi's Stadium spotlight ---- */
+  function stageLabel(m) {
+    if (m.stage === 'group') return 'Group ' + m.group + ' · ' + m.round;
+    return m.round;
+  }
+  function buildStoryline(m) {
+    const a = m.home ? countryByCode(m.home) : null;
+    const b = m.away ? countryByCode(m.away) : null;
+    if (!a || !b) return 'Bracket spot still to be decided. We won\'t know the teams until earlier rounds finish — but Levi\'s will be packed either way.';
+    const bits = [];
+    if (a.wc.titles && b.wc.titles) bits.push(`A heavyweight clash — ${a.wc.titles}-time champions ${a.name} against ${b.wc.titles}-time champions ${b.name}.`);
+    else if (a.wc.titles)           bits.push(`${a.name}'s ${a.wc.titles} World Cup title${a.wc.titles>1?'s':''} meet ${b.name}'s rising story.`);
+    else if (b.wc.titles)           bits.push(`${b.name} (${b.wc.titles}× champion) tested by ${a.name}.`);
+    else if ((a.wc.appearances||0) <= 1 || (b.wc.appearances||0) <= 1) bits.push(`A history-making fixture — at least one of these sides is still writing its World Cup story.`);
+    else                            bits.push(`${a.name} vs ${b.name} — two proud football nations meet in the Bay Area sunshine.`);
+    if (m.stage === 'group') {
+      bits.push(`Three points up for grabs in Group ${m.group}. Lose this and the maths get hard fast.`);
+    } else {
+      bits.push(`Win or go home — knockout football at its loudest.`);
+    }
+    return bits.join(' ');
+  }
+  function topStars(country, n) {
+    if (!country || !country.stars) return [];
+    return country.stars.slice(0, n);
+  }
+
+  function renderSantaClara() {
+    const root = document.getElementById('screen-santaclara');
+    const venue = venueById('lev');
+    const matches = state.matches
+      .filter(m => m.venue === 'lev')
+      .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+
+    const groupCount    = matches.filter(m => m.stage === 'group').length;
+    const koCount       = matches.length - groupCount;
+    const playedCount   = matches.filter(m => m.result).length;
+    const nextOne       = matches.find(m => !m.result);
+
+    let html = `
+      <div class="sc-hero">
+        <div class="city">Santa Clara · Bay Area</div>
+        <h2>🌉 Levi's Stadium</h2>
+        <div class="badge-row">
+          <span class="chip">Home of the 49ers</span>
+          <span class="chip">Opened ${venue.opened}</span>
+          <span class="chip">${venue.cap.toLocaleString()} seats</span>
+          <span class="chip gold">Our home games</span>
+        </div>
+        <div class="sc-stats">
+          <div class="sc-stat"><div class="n">${matches.length}</div><div class="l">games here</div></div>
+          <div class="sc-stat"><div class="n">${groupCount}</div><div class="l">group</div></div>
+          <div class="sc-stat"><div class="n">${koCount}</div><div class="l">knockout</div></div>
+          <div class="sc-stat"><div class="n">${playedCount}/${matches.length}</div><div class="l">played</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>About the stadium</h2>
+        <p>${escapeHTML(venue.notes)}</p>
+        <h3>Why Levi's stands out</h3>
+        <ul style="padding-left:18px;line-height:1.6;font-size:0.9rem;">
+          <li><b>LEED Gold</b> — one of the first major US stadiums certified for sustainability</li>
+          <li><b>Solar bridges</b> & a <b>green roof</b> on the suite tower visible from BART/light rail</li>
+          <li>Hosted <b>Super Bowl 50</b> (2016), <b>Super Bowl LX</b> (2026), <b>Copa América</b> (2016, 2024), and the College Football Playoff Final</li>
+          <li>Field runs <b>north–south</b> — afternoon sun hits the west sideline; bring a hat for sunny seats</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>🎟 Our matches at Levi's</h2>
+        <p class="muted" style="font-size:0.86rem;margin-bottom:8px;">
+          ${matches.length} match${matches.length===1?'':'es'} scheduled here.
+          ${nextOne ? 'Next up: <b>'+stageLabel(nextOne)+'</b> on '+fmtDate(nextOne.date)+'.' : 'Every Levi\'s match has been played.'}
+          Tap a country to see its full profile, or hit <b>Enter result</b> to record a score.
+        </p>
+        ${matches.length === 0 ? `<div class="empty">No matches currently assigned to Levi's. Reshuffle groups on the Teams tab and matches will rebuild here.</div>` : ''}
+        ${matches.map(m => renderDetailMatch(m)).join('')}
+      </div>
+
+      <div class="card">
+        <h2>🚗 Going to the game</h2>
+        <div class="guide-grid">
+          <div class="guide-tile">
+            <div class="ttitle">📍 Address</div>
+            <p>4900 Marie P. DeBartolo Way, Santa Clara, CA 95054. ~45 min south of SF, ~10 min from SJC airport.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">🚆 Transit</div>
+            <p>VTA light rail "Mountain View – Winchester" line stops at the Great America station, right next to the stadium. From SF: Caltrain to Mountain View, then VTA south. Fans get free game-day VTA on match tickets.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">🅿️ Parking</div>
+            <p>Pre-paid official lots are the safest bet (closes early in the day). Nearby Levi's lots, Great America, and several private lots open ~4 hours before kickoff.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">☀️ Weather</div>
+            <p>Bay Area summer is mild — daytime 70–80°F (21–27°C). Evenings can dip to 55°F (13°C) and fog rolls in late. Bring a light layer for night games.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">👨‍👩‍👧‍👦 Family tips</div>
+            <p>Family restrooms on every concourse. Bring noise-cancelling earmuffs for younger kids — the south-end supporters' section gets very loud. Empty water bottles allowed; fill at fountains.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">🍔 Food on site</div>
+            <p>Local Bay Area vendors throughout the concourse — Bobby G's pizza, Mexicali tacos, garlic fries, and burritos. Plant-based options around section 121.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">⚽ Best place to sit (kids)</div>
+            <p>Lower-bowl sideline 100s have the best sightlines; upper-300s east are cheapest and out of the sun. Avoid south-end-zone for first-time fans — that\'s the supporters' chant zone.</p>
+          </div>
+          <div class="guide-tile">
+            <div class="ttitle">📱 Stadium app</div>
+            <p>The official Levi's app shows real-time gate wait times, mobile ordering, and seat-finder. Worth downloading the morning of the match.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card fact-card">
+        <h2>🌎 What to expect at a World Cup match</h2>
+        <p><b>Gates open 2 hours before kickoff</b> — and security can take a while, so plan to arrive 90+ minutes early. The crowd will be a mix of locals and travelling supporters in full kit; expect drums, anthems, and a serious party.</p>
+        <p style="margin-top:8px;">FIFA enforces <b>strict no-political-message rules</b> on signs and banners. Bags must be clear and under the listed size — check the venue site before you go.</p>
+      </div>
+    `;
+
+    root.innerHTML = html;
+  }
+
+  function renderDetailMatch(m) {
+    const home = m.home ? countryByCode(m.home) : null;
+    const away = m.away ? countryByCode(m.away) : null;
+    const played = !!m.result;
+    const score = played
+      ? `<div class="dm-score played">${m.result.home}–${m.result.away}</div>`
+      : `<div class="dm-score vs">vs</div>`;
+    const homeStars = topStars(home, 2);
+    const awayStars = topStars(away, 2);
+
+    const teamCol = (c, side) => {
+      if (!c) return `<div class="dm-team"><div class="flag">❔</div><div class="name muted">TBD</div><div class="meta">—</div></div>`;
+      return `<div class="dm-team" onclick="WC.openCountry('${c.code}')">
+        <div class="flag">${c.flag}</div>
+        <div class="name">${escapeHTML(c.name)}</div>
+        <div class="meta">${c.wc.titles ? c.wc.titles+'× champion' : c.wc.appearances+' WC apps'}</div>
+      </div>`;
+    };
+
+    const watchCol = (c, stars) => {
+      if (!c) return `<div class="col"><div class="ctitle">—</div><div class="muted" style="font-size:0.78rem;">Awaiting team</div></div>`;
+      return `<div class="col">
+        <div class="ctitle">${c.flag} Watch for</div>
+        ${stars.map(s => `<div><span class="star">${escapeHTML(s.name)}</span> <span class="pos">${escapeHTML(s.pos)}</span></div>`).join('')}
+      </div>`;
+    };
+
+    return `<div class="detail-match${played?' played':''}">
+      <div class="dm-head">
+        <div class="dm-stage">${stageLabel(m)}</div>
+        <div class="dm-when">${fmtDate(m.date)}<br>${m.time} PT</div>
+      </div>
+      <div class="dm-teams">
+        ${teamCol(home, 'left')}
+        ${score}
+        ${teamCol(away, 'right')}
+      </div>
+      <div class="dm-storyline">${escapeHTML(buildStoryline(m))}</div>
+      <div class="dm-watch">
+        ${watchCol(home, homeStars)}
+        ${watchCol(away, awayStars)}
+      </div>
+      <div class="dm-actions">
+        <button class="btn" onclick="WC.editResult('${m.id}')">${played ? '✎ Edit result' : '⚽ Enter result'}</button>
+        ${home ? `<button class="btn ghost" onclick="WC.openCountry('${home.code}')">${home.flag} ${escapeHTML(home.name)}</button>` : ''}
+        ${away ? `<button class="btn ghost" onclick="WC.openCountry('${away.code}')">${away.flag} ${escapeHTML(away.name)}</button>` : ''}
+      </div>
+    </div>`;
   }
 
   /* ---- HOME ---- */
@@ -1080,6 +1259,11 @@
         <p>The first 48-team World Cup. Three host nations — <b>Canada · Mexico · United States</b>. <b>16 cities</b> and <b>104 matches</b> across 39 days. The opener is at the Estadio Azteca; the final at MetLife Stadium on July 19.</p>
         <h3>Format</h3>
         <p>12 groups of 4. Top two from each group plus the eight best third-placed teams qualify for a new Round of 32, then standard knockouts.</p>
+      </div>
+      <div class="card">
+        <h2>🌉 Our home games — Santa Clara</h2>
+        <p class="muted">Levi's Stadium is hosting World Cup matches just up the road. Detailed previews, key players, and a "going to the game" guide are in their own tab.</p>
+        <button class="btn gold" onclick="WC.tab('santaclara')">Open Santa Clara tab →</button>
       </div>
       <div class="card">
         <h2>👨‍👩‍👧‍👦 Family bracket pool</h2>
@@ -1504,6 +1688,7 @@
         <p>A family-built companion for the <b>2026 FIFA World Cup</b> — the first 48-team World Cup, co-hosted by Canada, Mexico, and the United States from June 11 to July 19, 2026.</p>
         <h3>What's inside</h3>
         <ul style="padding-left:18px;line-height:1.6;">
+          <li><b>Santa Clara</b> — our home venue (Levi's Stadium): every match here with previews, key players, and a family travel guide</li>
           <li><b>Teams</b> — all 48 nations with capital, geography, history, fun facts, and star players</li>
           <li><b>Matches</b> — 104 fixtures with venue, date, and stage. Tap one to enter the score.</li>
           <li><b>Venues</b> — all 16 host stadiums across the three countries</li>
