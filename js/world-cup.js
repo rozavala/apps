@@ -143,7 +143,7 @@
         { name:'Rodrygo',         pos:'RW', club:'Real Madrid', age:25, note:'Calm finisher in big moments.' },
         { name:'Endrick',         pos:'ST', club:'Real Madrid', age:19, note:'The teenage No.9 of Brazil\'s future.' },
         { name:'Bruno Guimarães', pos:'CM', club:'Newcastle',   age:28, note:'All-action midfield engine.' },
-        { name:'Marquinhos',      pos:'CB', club:'PSG',         age:31, note:'Captain and rock at the back.' },
+        { name:'Marquinhos',      pos:'CB', club:'PSG',         age:32, note:'Captain and rock at the back.' },
         { name:'Alisson Becker',  pos:'GK', club:'Liverpool',   age:33, note:'Among the world\'s best goalkeepers.' },
       ]
     },
@@ -241,7 +241,7 @@
         { name:'Bukayo Saka',     pos:'RW', club:'Arsenal',        age:24, note:'Direct, creative wide forward.' },
         { name:'Phil Foden',      pos:'AM', club:'Man City',       age:25, note:'Two-footed playmaker.' },
         { name:'Declan Rice',     pos:'CM', club:'Arsenal',        age:27, note:'England\'s midfield captain.' },
-        { name:'Cole Palmer',     pos:'AM', club:'Chelsea',        age:23, note:'Ice-cold finisher and creator.' },
+        { name:'Cole Palmer',     pos:'AM', club:'Chelsea',        age:24, note:'Ice-cold finisher and creator.' },
       ]
     },
     { code:'ESP', name:'Spain', flag:'🇪🇸', group:'D', pot:1,
@@ -674,7 +674,7 @@
       funFacts:['First African team to reach a WC quarterfinal (1990)','Roger Milla\'s 1990 dance is iconic','5-time AFCON champions'],
       wc:{ appearances:8, best:'Quarterfinals (1990)', titles:0 },
       stars:[
-        { name:'André Onana',       pos:'GK', club:'Manchester Utd',  age:30, note:'Sweeper-keeper.' },
+        { name:'André Onana',       pos:'GK', club:'Trabzonspor (loan from Man Utd)',  age:30, note:'Sweeper-keeper.' },
         { name:'Bryan Mbeumo',      pos:'RW', club:'Manchester Utd',  age:26, note:'Direct, two-footed forward.' },
         { name:'Vincent Aboubakar', pos:'ST', club:'Hatayspor',       age:34, note:'Veteran goal-scorer.' },
         { name:'Karl Toko Ekambi',  pos:'LW', club:'Abha',            age:33, note:'Experienced winger.' },
@@ -713,7 +713,7 @@
       wc:{ appearances:1, best:'Group stage (1998)', titles:0 },
       stars:[
         { name:'Leon Bailey',       pos:'RW', club:'Aston Villa', age:28, note:'Pacey, direct winger.' },
-        { name:'Demarai Gray',      pos:'LW', club:'Saudi Arabia',age:29, note:'Tricky wide attacker.' },
+        { name:'Demarai Gray',      pos:'LW', club:'Al-Ettifaq',  age:29, note:'Tricky wide attacker.' },
         { name:'Michail Antonio',   pos:'ST', club:'West Ham',    age:35, note:'Powerful forward.' },
       ]
     },
@@ -1094,11 +1094,17 @@
           <span class="chip gold">Our home games</span>
         </div>
         <div class="sc-stats">
-          <div class="sc-stat"><div class="n">${matches.length}</div><div class="l">games here</div></div>
+          <div class="sc-stat"><div class="n">${matches.length}</div><div class="l">assigned here</div></div>
           <div class="sc-stat"><div class="n">${groupCount}</div><div class="l">group</div></div>
           <div class="sc-stat"><div class="n">${koCount}</div><div class="l">knockout</div></div>
           <div class="sc-stat"><div class="n">${playedCount}/${matches.length}</div><div class="l">played</div></div>
         </div>
+      </div>
+
+      <div class="card" style="border-left:3px solid var(--wc-gold);">
+        <h2>⚠️ Heads up — these are placeholders</h2>
+        <p style="font-size:0.88rem;">The official 2026 schedule was set after the December 2025 draw, and Levi's Stadium is confirmed to host <b>6 matches</b> (5 group stage + 1 Round of 32) — but the specific games shown here are auto-generated, not the real ones.</p>
+        <p style="font-size:0.88rem;margin-top:6px;">Tap any match below → edit the <b>teams, date, time, and venue</b> to make it match reality. To move a match <i>to</i> Levi's from elsewhere, open it from the Matches tab and switch its venue to "Levi's Stadium".</p>
       </div>
 
       <div class="card">
@@ -1355,6 +1361,9 @@
               <div class="note">${escapeHTML(p.note)}</div>
             </div>`).join('')}
         </div>
+        <p class="muted" style="font-size:0.78rem;margin-top:10px;line-height:1.5;">
+          Player snapshot — clubs, ages, and squad selections may have changed since mid-2025.
+        </p>
       </div>
     `;
     // hide all screens, show country
@@ -1397,7 +1406,11 @@
       </div>
     `;
 
-    let html = filterHTML;
+    let html = `<div class="card" style="border-left:3px solid var(--wc-gold);padding:12px 16px;margin-bottom:10px;">
+      <div style="font-size:0.86rem;line-height:1.5;">
+        ⚠️ <b>Fixtures are placeholders.</b> The real schedule was set after the Dec 2025 draw — tap any match to edit its teams, date, time, or venue.
+      </div>
+    </div>` + filterHTML;
     if (list.length === 0) html += '<div class="empty">No matches for these filters.</div>';
     Object.keys(byDate).sort().forEach(date => {
       html += `<div class="day-label">${fmtDate(date)}</div>`;
@@ -1697,8 +1710,14 @@
         </ul>
         <h3>How the picks work</h3>
         <p>Each family member predicts group winners + runners-up, knockout-round winners, plus the eventual champion, runner-up, and Golden Boot. Points are awarded automatically as you enter real match results.</p>
-        <h3>One note about the data</h3>
-        <p>The qualified teams, venues, dates, and player rosters reflect publicly known information about the 2026 World Cup. The <b>group draw and fixtures are placeholders</b> — once the official schedule comes out, tap <b>"Edit groups"</b> on the Teams tab to shuffle them to match.</p>
+        <h3>Honest notes about the data</h3>
+        <ul style="padding-left:18px;line-height:1.6;font-size:0.9rem;">
+          <li><b>Venues, dates, and format</b> — confirmed and accurate (16 host stadiums; June 11 → July 19; 12 groups of 4 → R32 with 8 best 3rd-placed teams).</li>
+          <li><b>Fixtures</b> are <b>auto-generated placeholders</b>, not the real schedule. The actual draw and full match calendar were published after the December 2025 draw. Use the <b>match editor</b> (tap any match) to set the real teams, date, time, and venue.</li>
+          <li><b>Group draw</b> is also placeholder — tap <b>"✎ Edit groups"</b> on the Teams tab to set the official A–L groups.</li>
+          <li><b>Team list</b> reflects the most likely 48 qualifiers. The final two spots from the March 2026 intercontinental playoffs may differ — edit any country's group as needed.</li>
+          <li><b>Player rosters</b> are a mid-2025 snapshot. Some clubs, ages, and squad selections will have shifted by kickoff — treat the "star players" list as a starting point, not a final 26-man squad.</li>
+        </ul>
         <h3>Reset</h3>
         <p>Want to start fresh? <button class="btn danger" onclick="WC.resetAll()">Clear all data</button></p>
       </div>
@@ -1711,36 +1730,41 @@
   function editResult(matchId) {
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
-    if (!m.home || !m.away) {
-      toast('Set the teams via the Knockout bracket or play earlier rounds first.');
-      // still allow editing teams for KO via small prompt? Keep simple — allow score only if teams known.
-    }
 
     const modal = document.getElementById('match-modal');
     const home = m.home ? countryByCode(m.home) : null;
     const away = m.away ? countryByCode(m.away) : null;
     const stage = m.stage === 'group' ? `Group ${m.group} · ${m.round}` : m.round;
-    const venue = venueById(m.venue);
-    const koTeamPicker = m.stage !== 'group';
+
+    const teamOptions = ['<option value="">— TBD —</option>'].concat(
+      COUNTRIES.map(c => `<option value="${c.code}">${c.flag} ${escapeHTML(c.name)}</option>`)
+    ).join('');
+    const venueOptions = VENUES.map(v =>
+      `<option value="${v.id}" ${m.venue===v.id?'selected':''}>${escapeHTML(v.name)} — ${escapeHTML(v.city)}</option>`
+    ).join('');
+
+    const inputStyle = 'background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;';
 
     modal.querySelector('.modal-inner').innerHTML = `
       <h3>${stage}</h3>
-      <div class="sub">${fmtDate(m.date)} · ${m.time} · ${venue ? escapeHTML(venue.name+', '+venue.city) : ''}</div>
+      <div class="sub">Edit any field below — match, score, or schedule.</div>
 
-      ${koTeamPicker ? `
-        <div class="pick-row"><div class="lbl">Home</div><div>
-          <select id="ko-home" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;">
-            <option value="">— TBD —</option>
-            ${COUNTRIES.map(c => `<option value="${c.code}" ${m.home===c.code?'selected':''}>${c.flag} ${escapeHTML(c.name)}</option>`).join('')}
-          </select>
-        </div></div>
-        <div class="pick-row"><div class="lbl">Away</div><div>
-          <select id="ko-away" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;">
-            <option value="">— TBD —</option>
-            ${COUNTRIES.map(c => `<option value="${c.code}" ${m.away===c.code?'selected':''}>${c.flag} ${escapeHTML(c.name)}</option>`).join('')}
-          </select>
-        </div></div>
-      ` : ''}
+      <div class="pick-row"><div class="lbl">Home</div><div>
+        <select id="ed-home" style="${inputStyle}">${teamOptions.replace(`value="${m.home||''}"`, `value="${m.home||''}" selected`)}</select>
+      </div></div>
+      <div class="pick-row"><div class="lbl">Away</div><div>
+        <select id="ed-away" style="${inputStyle}">${teamOptions.replace(`value="${m.away||''}"`, `value="${m.away||''}" selected`)}</select>
+      </div></div>
+
+      <div class="pick-row"><div class="lbl">Date</div><div>
+        <input type="date" id="ed-date" value="${m.date}" style="${inputStyle}" />
+      </div></div>
+      <div class="pick-row"><div class="lbl">Time</div><div>
+        <input type="time" id="ed-time" value="${m.time}" style="${inputStyle}" />
+      </div></div>
+      <div class="pick-row"><div class="lbl">Venue</div><div>
+        <select id="ed-venue" style="${inputStyle}">${venueOptions}</select>
+      </div></div>
 
       <div class="score-input">
         <div class="side left">${home ? home.flag+' '+escapeHTML(home.name) : '<span class="muted">TBD</span>'}</div>
@@ -1752,7 +1776,7 @@
 
       ${m.stage !== 'group' ? `
         <div class="pick-row"><div class="lbl">PK winner<br><span style="font-size:0.7rem;">(only if draw)</span></div><div>
-          <select id="pk-winner" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;">
+          <select id="pk-winner" style="${inputStyle}">
             <option value="">— none —</option>
             ${home ? `<option value="${home.code}" ${m.result&&m.result.pkWinner===home.code?'selected':''}>${home.flag} ${escapeHTML(home.name)}</option>`:''}
             ${away ? `<option value="${away.code}" ${m.result&&m.result.pkWinner===away.code?'selected':''}>${away.flag} ${escapeHTML(away.name)}</option>`:''}
@@ -1760,7 +1784,7 @@
         </div></div>` : ''}
 
       <div class="modal-actions">
-        <button class="btn ghost" onclick="WC.clearResult('${m.id}')">Clear</button>
+        <button class="btn ghost" onclick="WC.clearResult('${m.id}')">Clear score</button>
         <button class="btn ghost" onclick="WC.closeModal()">Cancel</button>
         <button class="btn" onclick="WC.saveResult('${m.id}')">Save</button>
       </div>
@@ -1771,17 +1795,20 @@
   function saveResult(matchId) {
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
-    const koTeamPicker = m.stage !== 'group';
-    if (koTeamPicker) {
-      const newHome = document.getElementById('ko-home').value || null;
-      const newAway = document.getElementById('ko-away').value || null;
-      m.home = newHome;
-      m.away = newAway;
-    }
+    const homeEl  = document.getElementById('ed-home');
+    const awayEl  = document.getElementById('ed-away');
+    const dateEl  = document.getElementById('ed-date');
+    const timeEl  = document.getElementById('ed-time');
+    const venueEl = document.getElementById('ed-venue');
+    if (homeEl)  m.home  = homeEl.value || null;
+    if (awayEl)  m.away  = awayEl.value || null;
+    if (dateEl  && dateEl.value)  m.date  = dateEl.value;
+    if (timeEl  && timeEl.value)  m.time  = timeEl.value;
+    if (venueEl && venueEl.value) m.venue = venueEl.value;
+
     const hs = parseInt(document.getElementById('sc-home').value, 10);
     const as = parseInt(document.getElementById('sc-away').value, 10);
     if (isNaN(hs) || isNaN(as)) {
-      // clearing
       m.result = null;
     } else {
       const pkEl = document.getElementById('pk-winner');
@@ -1790,8 +1817,7 @@
     }
     save();
     closeModal();
-    toast('Result saved');
-    // refresh current screen
+    toast('Match saved');
     const cur = document.querySelector('.tab.active')?.dataset.tab;
     if (cur) activateTab(cur);
   }
