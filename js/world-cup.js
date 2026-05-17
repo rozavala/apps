@@ -3503,39 +3503,120 @@
   }
   function _pickN(arr, n) { return _shuffle(arr).slice(0, n); }
 
-  function generateQuestion() {
-    const types = ['flag', 'capital', 'player', 'group'];
-    const t = types[Math.floor(Math.random() * types.length)];
-    if (t === 'flag') {
-      const correct = _pickN(COUNTRIES, 1)[0];
-      const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code), 3);
-      const opts = _shuffle([correct, ...distractors]);
-      return {
-        q: `Whose flag is this? <span style="font-size:3rem;display:block;margin-top:8px;">${correct.flag}</span>`,
-        options: opts.map(o => ({ label: o.name, correct: o.code === correct.code })),
-      };
+  /* ----------------------------------------------------------------
+     Quiz generators. Each returns { q, options:[{label, correct}] }
+     or null when the data doesn't support a good question. The
+     dispatcher (startQuiz) shuffles the generator list and picks 10
+     distinct types per round so every round feels different.
+     ---------------------------------------------------------------- */
+
+  // 1. Flag → Country: name the country whose flag is shown.
+  function _qFlag() {
+    const correct = _pickN(COUNTRIES, 1)[0];
+    const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code), 3);
+    const opts = _shuffle([correct, ...distractors]);
+    return {
+      q: `Whose flag is this? <span style="font-size:3rem;display:block;margin-top:8px;">${correct.flag}</span>`,
+      options: opts.map(o => ({ label: o.name, correct: o.code === correct.code })),
+    };
+  }
+  // 2. Country → Capital
+  function _qCapital() {
+    const correct = _pickN(COUNTRIES, 1)[0];
+    const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code && c.capital !== correct.capital), 3);
+    const opts = _shuffle([correct, ...distractors]);
+    return {
+      q: `What is the capital of <b>${escapeHTML(correct.name)}</b> ${correct.flag}?`,
+      options: opts.map(o => ({ label: o.capital, correct: o.code === correct.code })),
+    };
+  }
+  // 3. Capital → Country (reverse direction)
+  function _qCapitalReverse() {
+    const correct = _pickN(COUNTRIES, 1)[0];
+    const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code), 3);
+    const opts = _shuffle([correct, ...distractors]);
+    return {
+      q: `Which country's capital is <b>${escapeHTML(correct.capital.split('/')[0].split('(')[0].trim())}</b>?`,
+      options: opts.map(o => ({ label: o.flag + ' ' + o.name, correct: o.code === correct.code })),
+    };
+  }
+  // 4. Star player → Country (which national team)
+  function _qPlayer() {
+    const pool = COUNTRIES.filter(c => c.stars && c.stars.length);
+    if (pool.length < 4) return null;
+    const country = _pickN(pool, 1)[0];
+    const star = country.stars[Math.floor(Math.random() * country.stars.length)];
+    const distractors = _pickN(COUNTRIES.filter(c => c.code !== country.code), 3);
+    const opts = _shuffle([country, ...distractors]);
+    return {
+      q: `Which country does <b>${escapeHTML(star.name)}</b> play for?`,
+      options: opts.map(o => ({ label: o.flag + ' ' + o.name, correct: o.code === country.code })),
+    };
+  }
+  // 5. Country → Star player (who plays for X — pick the right player among 4 names)
+  function _qPlayerFor() {
+    const pool = COUNTRIES.filter(c => c.stars && c.stars.length);
+    if (pool.length < 4) return null;
+    const country = _pickN(pool, 1)[0];
+    const star = country.stars[Math.floor(Math.random() * country.stars.length)];
+    // Distractor stars from OTHER countries
+    const others = _shuffle(pool.filter(c => c.code !== country.code))
+      .map(c => c.stars[Math.floor(Math.random() * c.stars.length)])
+      .filter(s => s.name !== star.name)
+      .slice(0, 3);
+    if (others.length < 3) return null;
+    const all = _shuffle([star, ...others]);
+    return {
+      q: `Which of these players plays for <b>${country.flag} ${escapeHTML(country.name)}</b>?`,
+      options: all.map(s => ({ label: s.name, correct: s.name === star.name })),
+    };
+  }
+  // 6. Star player → Position
+  function _qPosition() {
+    const pool = COUNTRIES.filter(c => c.stars && c.stars.length);
+    if (pool.length === 0) return null;
+    const country = _pickN(pool, 1)[0];
+    const star = country.stars[Math.floor(Math.random() * country.stars.length)];
+    const positionMap = {
+      'GK':'Goalkeeper','CB':'Centre-back','LB':'Left-back','RB':'Right-back',
+      'CDM':'Defensive midfielder','CM':'Midfielder','AM':'Attacking midfielder',
+      'LW':'Left winger','RW':'Right winger','ST':'Striker',
+    };
+    // Find canonical position
+    const posKey = (star.pos || '').split('/')[0].trim();
+    const correctLabel = positionMap[posKey] || star.pos;
+    const allLabels = Object.values(positionMap);
+    const distractors = _shuffle(allLabels.filter(l => l !== correctLabel)).slice(0, 3);
+    const opts = _shuffle([correctLabel, ...distractors]);
+    return {
+      q: `What position does <b>${escapeHTML(star.name)}</b> (${country.flag} ${escapeHTML(country.name)}) play?`,
+      options: opts.map(l => ({ label: l, correct: l === correctLabel })),
+    };
+  }
+  // 7. Star player → Club (which club does this player play for professionally?)
+  function _qClub() {
+    const pool = COUNTRIES.filter(c => c.stars && c.stars.length);
+    if (pool.length === 0) return null;
+    const country = _pickN(pool, 1)[0];
+    const star = country.stars[Math.floor(Math.random() * country.stars.length)];
+    // Collect distinct clubs across all stars
+    const allClubs = [];
+    for (const c of COUNTRIES) for (const s of (c.stars || [])) {
+      const club = (s.club || '').split('(')[0].trim();
+      if (club && !allClubs.includes(club)) allClubs.push(club);
     }
-    if (t === 'capital') {
-      const correct = _pickN(COUNTRIES, 1)[0];
-      const distractors = _pickN(COUNTRIES.filter(c => c.code !== correct.code), 3);
-      const opts = _shuffle([correct, ...distractors]);
-      return {
-        q: `What is the capital of <b>${escapeHTML(correct.name)}</b> ${correct.flag}?`,
-        options: opts.map(o => ({ label: o.capital, correct: o.code === correct.code })),
-      };
-    }
-    if (t === 'player') {
-      // Pick a country with stars, ask which country a star plays for
-      const country = _pickN(COUNTRIES.filter(c => c.stars && c.stars.length), 1)[0];
-      const star = country.stars[Math.floor(Math.random() * country.stars.length)];
-      const distractors = _pickN(COUNTRIES.filter(c => c.code !== country.code), 3);
-      const opts = _shuffle([country, ...distractors]);
-      return {
-        q: `Which country does <b>${escapeHTML(star.name)}</b> play for?`,
-        options: opts.map(o => ({ label: o.flag + ' ' + o.name, correct: o.code === country.code })),
-      };
-    }
-    // group
+    const correctClub = (star.club || '').split('(')[0].trim();
+    if (!correctClub) return null;
+    const distractors = _shuffle(allClubs.filter(c => c !== correctClub)).slice(0, 3);
+    if (distractors.length < 3) return null;
+    const opts = _shuffle([correctClub, ...distractors]);
+    return {
+      q: `Which club does <b>${escapeHTML(star.name)}</b> (${country.flag} ${escapeHTML(country.name)}) play for?`,
+      options: opts.map(c => ({ label: c, correct: c === correctClub })),
+    };
+  }
+  // 8. Country → Group
+  function _qGroup() {
     const country = _pickN(COUNTRIES, 1)[0];
     const groups = _shuffle(GROUP_LETTERS).slice(0, 4);
     if (!groups.includes(country.group)) groups[0] = country.group;
@@ -3545,11 +3626,123 @@
       options: opts,
     };
   }
+  // 9. Group → which team is NOT in this group (odd one out)
+  function _qNotInGroup() {
+    const letter = GROUP_LETTERS[Math.floor(Math.random() * GROUP_LETTERS.length)];
+    const inGroup = (state.groups[letter] || []).map(code => countryByCode(code)).filter(Boolean);
+    if (inGroup.length < 3) return null;
+    const three = _shuffle(inGroup).slice(0, 3);
+    const outsider = _pickN(COUNTRIES.filter(c => c.group !== letter), 1)[0];
+    const opts = _shuffle([...three, outsider]);
+    return {
+      q: `Which of these teams is <b>NOT</b> in Group ${letter}?`,
+      options: opts.map(o => ({ label: o.flag + ' ' + o.name, correct: o.code === outsider.code })),
+    };
+  }
+  // 10. Country → World Cup titles count
+  function _qTitles() {
+    const pool = COUNTRIES.filter(c => c.wc);
+    if (pool.length === 0) return null;
+    const country = _pickN(pool, 1)[0];
+    const correct = country.wc.titles | 0;
+    const candidates = [0, 1, 2, 3, 4, 5].filter(n => n !== correct);
+    const distractors = _shuffle(candidates).slice(0, 3);
+    const opts = _shuffle([correct, ...distractors]);
+    return {
+      q: `How many World Cup titles has <b>${country.flag} ${escapeHTML(country.name)}</b> won?`,
+      options: opts.map(n => ({ label: n === 0 ? 'Zero' : String(n), correct: n === correct })),
+    };
+  }
+  // 11. Venue → City (which city hosts this stadium?)
+  function _qVenue() {
+    if (!VENUES || VENUES.length < 4) return null;
+    const venue = VENUES[Math.floor(Math.random() * VENUES.length)];
+    const distractors = _shuffle(VENUES.filter(v => v.city !== venue.city)).slice(0, 3);
+    const opts = _shuffle([venue, ...distractors]);
+    return {
+      q: `Which city hosts <b>${escapeHTML(venue.name)}</b>?`,
+      options: opts.map(v => ({ label: v.city, correct: v.city === venue.city })),
+    };
+  }
+  // 12. Country → Currency
+  function _qCurrency() {
+    const country = _pickN(COUNTRIES.filter(c => c.currency), 1)[0];
+    if (!country) return null;
+    // Collect distinct currencies
+    const allCurrencies = [];
+    for (const c of COUNTRIES) {
+      const cur = c.currency || '';
+      if (cur && !allCurrencies.includes(cur)) allCurrencies.push(cur);
+    }
+    const distractors = _shuffle(allCurrencies.filter(c => c !== country.currency)).slice(0, 3);
+    if (distractors.length < 3) return null;
+    const opts = _shuffle([country.currency, ...distractors]);
+    return {
+      q: `Which currency does <b>${country.flag} ${escapeHTML(country.name)}</b> use?`,
+      options: opts.map(c => ({ label: c, correct: c === country.currency })),
+    };
+  }
+  // 13. Pot — given a country, which pot was it seeded in?
+  function _qPot() {
+    const pool = COUNTRIES.filter(c => typeof c.pot === 'number');
+    if (pool.length === 0) return null;
+    const country = _pickN(pool, 1)[0];
+    const correct = country.pot;
+    const distractors = [1, 2, 3, 4].filter(n => n !== correct);
+    const opts = _shuffle([correct, ...distractors]);
+    return {
+      q: `Which seeding <b>pot</b> was ${country.flag} ${escapeHTML(country.name)} in for the 2026 draw? <span class="muted" style="font-size:0.78rem;display:block;margin-top:4px;">(Pot 1 = top seeds, Pot 4 = lowest.)</span>`,
+      options: opts.map(n => ({ label: 'Pot ' + n, correct: n === correct })),
+    };
+  }
+  // 14. Player age — among 4 listed players, which is the oldest?
+  function _qOldest() {
+    const allStars = [];
+    for (const c of COUNTRIES) for (const s of (c.stars || [])) {
+      if (typeof s.age === 'number') allStars.push({ ...s, country: c });
+    }
+    if (allStars.length < 4) return null;
+    const picks = _shuffle(allStars).slice(0, 4);
+    const oldest = picks.slice().sort((a,b) => b.age - a.age)[0];
+    return {
+      q: `Which of these players is the <b>oldest</b>?`,
+      options: picks.map(p => ({ label: p.country.flag + ' ' + p.name, correct: p === oldest })),
+    };
+  }
+
+  const QUIZ_GENERATORS = [
+    _qFlag, _qCapital, _qCapitalReverse, _qPlayer, _qPlayerFor,
+    _qPosition, _qClub, _qGroup, _qNotInGroup, _qTitles,
+    _qVenue, _qCurrency, _qPot, _qOldest,
+  ];
+
+  function generateQuestion() {
+    // Try generators in random order; return the first that succeeds.
+    for (const g of _shuffle(QUIZ_GENERATORS)) {
+      const q = g();
+      if (q) return q;
+    }
+    return null;
+  }
 
   const quizState = { questions: [], current: 0, score: 0, answered: false };
 
   function startQuiz() {
-    quizState.questions = Array.from({ length: 10 }, generateQuestion);
+    // Pick 10 DIFFERENT question types per round so two rounds rarely look
+    // the same. We shuffle the generator list, take the first 10, and run
+    // each one; if any fail (data not suitable) we substitute another type.
+    const order = _shuffle(QUIZ_GENERATORS).slice(0, 10);
+    const questions = [];
+    for (const gen of order) {
+      const q = gen();
+      if (q) questions.push(q);
+    }
+    // Top up if any generators returned null
+    while (questions.length < 10) {
+      const q = generateQuestion();
+      if (q) questions.push(q); else break;
+    }
+    quizState.questions = questions;
     quizState.current = 0;
     quizState.score = 0;
     quizState.answered = false;
@@ -3599,12 +3792,16 @@
           <button class="btn gold" style="margin-top:14px;font-size:1rem;padding:12px 24px;" onclick="WC.startQuiz()">▶ Start a quiz</button>
         </div>
         <div class="card">
-          <h3 style="color:var(--wc-gold);">Question types</h3>
-          <ul style="padding-left:18px;line-height:1.6;font-size:0.9rem;">
-            <li>🏳 <b>Flag → Country</b> — which nation does this flag belong to?</li>
-            <li>🏛 <b>Capital city</b> — what's the capital of this country?</li>
-            <li>⭐ <b>Star player → Country</b> — which national team does this player represent?</li>
-            <li>📋 <b>Group draw</b> — which group is this team in?</li>
+          <h3 style="color:var(--wc-gold);">Question types — 14 in total</h3>
+          <p class="muted" style="font-size:0.82rem;">Each round picks 10 different categories, so two rounds rarely look the same.</p>
+          <ul style="padding-left:18px;line-height:1.6;font-size:0.88rem;margin-top:6px;">
+            <li>🏳 <b>Flag → Country</b> &nbsp;|&nbsp; 🏛 <b>Country → Capital</b> &nbsp;|&nbsp; ↩ <b>Capital → Country</b></li>
+            <li>⭐ <b>Star player → Country</b> &nbsp;|&nbsp; 🎯 <b>Country → Star player</b></li>
+            <li>📐 <b>Player → Position</b> &nbsp;|&nbsp; 🏟 <b>Player → Club</b></li>
+            <li>📋 <b>Country → Group</b> &nbsp;|&nbsp; ❌ <b>Odd one out</b> (which team is NOT in this group)</li>
+            <li>🏆 <b>World Cup titles count</b> &nbsp;|&nbsp; 🌱 <b>Pot seeding</b> (1–4)</li>
+            <li>🏟 <b>Venue → City</b> &nbsp;|&nbsp; 💱 <b>Country → Currency</b></li>
+            <li>👴 <b>Player age</b> — who's the oldest of these four?</li>
           </ul>
         </div>
       `;
