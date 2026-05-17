@@ -8577,7 +8577,7 @@ const SONGS = [
       { note: 'C#5',duration: 'whole',   hand: 'right', finger: 3 },
       { note: 'C#2',duration: 'whole',   hand: 'left',  finger: 5 },
       { note: 'C#2',duration: 'whole',   hand: 'left',  finger: 5 },
-      { note: 'B1', duration: 'whole',   hand: 'left',  finger: 5 },
+      { note: 'B2', duration: 'whole',   hand: 'left',  finger: 5 },
       { note: 'F#2',duration: 'whole',   hand: 'left',  finger: 5 }
     ]
   },
@@ -10417,14 +10417,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const FallingNotes = (() => {
 
     // ── Layout mirrors PianoKeyboard constants ──────────────────
-    const NUM_WHITE  = 15;
-    const WHITE_NOTES = ['C3','D3','E3','F3','G3','A3','B3',
-                         'C4','D4','E4','F4','G4','A4','B4','C5'];
+    // Range: C2 → C6 (4 octaves, 29 white keys) so advanced two-hand
+    // songs that dip below C3 or rise above C5 still render on-key
+    // instead of snapping to centre via the _xFrac fallback.
+    const NUM_WHITE  = 29;
+    const WHITE_NOTES = ['C2','D2','E2','F2','G2','A2','B2',
+                         'C3','D3','E3','F3','G3','A3','B3',
+                         'C4','D4','E4','F4','G4','A4','B4',
+                         'C5','D5','E5','F5','G5','A5','B5','C6'];
     const BLACK_KEYS  = [
-      {note:'C#3',offset:0.65},{note:'D#3',offset:1.65},
-      {note:'F#3',offset:3.65},{note:'G#3',offset:4.65},{note:'A#3',offset:5.65},
-      {note:'C#4',offset:7.65},{note:'D#4',offset:8.65},
-      {note:'F#4',offset:10.65},{note:'G#4',offset:11.65},{note:'A#4',offset:12.65},
+      {note:'C#2',offset:0.65},{note:'D#2',offset:1.65},
+      {note:'F#2',offset:3.65},{note:'G#2',offset:4.65},{note:'A#2',offset:5.65},
+      {note:'C#3',offset:7.65},{note:'D#3',offset:8.65},
+      {note:'F#3',offset:10.65},{note:'G#3',offset:11.65},{note:'A#3',offset:12.65},
+      {note:'C#4',offset:14.65},{note:'D#4',offset:15.65},
+      {note:'F#4',offset:17.65},{note:'G#4',offset:18.65},{note:'A#4',offset:19.65},
+      {note:'C#5',offset:21.65},{note:'D#5',offset:22.65},
+      {note:'F#5',offset:24.65},{note:'G#5',offset:25.65},{note:'A#5',offset:26.65},
     ];
     const ENHARMONIC = {Db:'C#',Eb:'D#',Fb:'E',Gb:'F#',Ab:'G#',Bb:'A#',Cb:'B'};
     const NOTE_COLORS = {
@@ -10878,27 +10887,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const PianoKeyboard = (() => {
 
       // ── Layout constants ─────────────────────────────────────────
-      const NUM_WHITE = 15;  // C3 to C5 inclusive
+      // Range: C2 → C6 (4 octaves, 29 white keys) so advanced two-hand
+      // songs that dip into the bass register or climb into the treble
+      // still light up real keys instead of falling through to the
+      // _xFrac centre fallback.
+      const NUM_WHITE = 29;
 
       // White keys in order (left → right)
       const WHITE_NOTES = [
+        'C2','D2','E2','F2','G2','A2','B2',
         'C3','D3','E3','F3','G3','A3','B3',
-        'C4','D4','E4','F4','G4','A4','B4','C5',
+        'C4','D4','E4','F4','G4','A4','B4',
+        'C5','D5','E5','F5','G5','A5','B5','C6',
       ];
 
       // Black keys: note name + offset (in white-key units from left edge of container)
       // Offset = whiteKeyIndex + 0.65 → positions black key 65% across the preceding white key
       const BLACK_KEYS = [
-        { note: 'C#3', offset: 0.65 },
-        { note: 'D#3', offset: 1.65 },
-        { note: 'F#3', offset: 3.65 },
-        { note: 'G#3', offset: 4.65 },
-        { note: 'A#3', offset: 5.65 },
-        { note: 'C#4', offset: 7.65 },
-        { note: 'D#4', offset: 8.65 },
-        { note: 'F#4', offset: 10.65 },
-        { note: 'G#4', offset: 11.65 },
-        { note: 'A#4', offset: 12.65 },
+        { note: 'C#2', offset: 0.65 },
+        { note: 'D#2', offset: 1.65 },
+        { note: 'F#2', offset: 3.65 },
+        { note: 'G#2', offset: 4.65 },
+        { note: 'A#2', offset: 5.65 },
+        { note: 'C#3', offset: 7.65 },
+        { note: 'D#3', offset: 8.65 },
+        { note: 'F#3', offset: 10.65 },
+        { note: 'G#3', offset: 11.65 },
+        { note: 'A#3', offset: 12.65 },
+        { note: 'C#4', offset: 14.65 },
+        { note: 'D#4', offset: 15.65 },
+        { note: 'F#4', offset: 17.65 },
+        { note: 'G#4', offset: 18.65 },
+        { note: 'A#4', offset: 19.65 },
+        { note: 'C#5', offset: 21.65 },
+        { note: 'D#5', offset: 22.65 },
+        { note: 'F#5', offset: 24.65 },
+        { note: 'G#5', offset: 25.65 },
+        { note: 'A#5', offset: 26.65 },
       ];
 
       // Enharmonic normalization (flat → sharp)
@@ -10956,7 +10981,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const wrap = document.createElement('div');
         wrap.className = 'pk-wrap' + (isLarge ? ' pk-wrap--large' : '');
         wrap.setAttribute('role', 'group');
-        wrap.setAttribute('aria-label', 'On-screen piano keyboard C3 to C5');
+        wrap.setAttribute('aria-label', 'On-screen piano keyboard C2 to C6');
 
         const keyMap = {};
         const whiteKeyWidthPct  = 100 / NUM_WHITE;  // 6.6667%
