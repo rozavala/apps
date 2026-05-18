@@ -395,6 +395,23 @@ const WorldExplorer = (() => {
           { q: 'Which animal is native to Australia?', qEs: '¿Qué animal es nativo de Australia?', options: ['Lion', 'Penguin', 'Kangaroo', 'Bear'], optionsEs: ['León', 'Pingüino', 'Canguro', 'Oso'], answer: 2 },
           { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0 }
         ]
+      },
+      {
+        id: 'new_zealand', name: 'New Zealand', nameEs: 'Nueva Zelanda', flag: '🇳🇿',
+        capital: 'Wellington', capitalEs: 'Wellington',
+        facts: [
+          { en: 'New Zealand consists of two main landmasses: the North Island and South Island.', es: 'Nueva Zelanda consta de dos islas principales: la Isla Norte y la Isla Sur.' },
+          { en: 'It was the first country in the world to give women the right to vote in 1893.', es: 'Fue el primer país del mundo en dar a las mujeres el derecho al voto en 1893.' },
+          { en: 'The kiwi is a flightless bird and a national symbol of New Zealand.', es: 'El kiwi es un ave no voladora y un símbolo nacional de Nueva Zelanda.' },
+          { en: 'It is famous for its beautiful mountains and fjords.', es: 'Es famoso por sus hermosas montañas y fiordos.' }
+        ],
+        landmark: { name: 'Milford Sound', nameEs: 'Milford Sound', emoji: '🏔️' },
+        animal: { name: 'Kiwi Bird', nameEs: 'Pájaro Kiwi', emoji: '🥝' },
+        quiz: [
+          { q: 'What is the capital of New Zealand?', qEs: '¿Cuál es la capital de Nueva Zelanda?', options: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton'], optionsEs: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton'], answer: 1 },
+          { q: 'What is the national bird of New Zealand?', qEs: '¿Cuál es el ave nacional de Nueva Zelanda?', options: ['Eagle', 'Penguin', 'Kiwi', 'Ostrich'], optionsEs: ['Águila', 'Pingüino', 'Kiwi', 'Avestruz'], answer: 2 },
+          { q: 'How many main islands does New Zealand have?', qEs: '¿Cuántas islas principales tiene Nueva Zelanda?', options: ['One', 'Two', 'Three', 'Four'], optionsEs: ['Una', 'Dos', 'Tres', 'Cuatro'], answer: 1 }
+        ]
       }
     ] }
   ];

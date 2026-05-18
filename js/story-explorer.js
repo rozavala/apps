@@ -347,6 +347,42 @@ const StoryExplorer = (() => {
         { q: 'What is the desert like?', qEs: '¿Cómo es el desierto?', options: ['Wet', 'Cold', 'Dry', 'Green'], optionsEs: ['Húmedo', 'Frío', 'Seco', 'Verde'], answer: 2 },
         { q: 'What can you see at night?', qEs: '¿Qué puedes ver de noche?', options: ['Birds', 'Stars', 'Clouds', 'Sun'], optionsEs: ['Pájaros', 'Estrellas', 'Nubes', 'Sol'], answer: 1 }
       ]
+    },
+    {
+      id: 'moon_landing',
+      title: 'The Great Moon Landing',
+      titleEs: 'El Gran Alunizaje',
+      tier: 'commander', ageMin: 10, region: 'space', icon: '🌕',
+      pages: [
+        {
+          en: 'The rocket roared as it lifted off the ground, heading toward the moon.',
+          es: 'El cohete rugió mientras despegaba del suelo, dirigiéndose hacia la luna.',
+          vocab: [
+            { word: 'rocket', wordEs: 'cohete', def: 'A vehicle used for space travel.', defEs: 'Un vehículo usado para viajar al espacio.' },
+            { word: 'roared', wordEs: 'rugió', def: 'Made a loud, deep sound.', defEs: 'Hizo un sonido fuerte y profundo.' }
+          ]
+        },
+        {
+          en: 'Astronauts looked out the small window. Earth looked like a blue marble.',
+          es: 'Los astronautas miraban por la pequeña ventana. La Tierra parecía una canica azul.',
+          vocab: [
+            { word: 'astronauts', wordEs: 'astronautas', def: 'People who travel in space.', defEs: 'Personas que viajan en el espacio.' },
+            { word: 'marble', wordEs: 'canica', def: 'A small glass ball.', defEs: 'Una pequeña bola de cristal.' }
+          ]
+        },
+        {
+          en: 'Finally, they landed. They carefully stepped out and walked on the dusty surface.',
+          es: 'Finalmente, aterrizaron. Con cuidado salieron y caminaron sobre la superficie polvorienta.',
+          vocab: [
+            { word: 'dusty', wordEs: 'polvorienta', def: 'Covered with fine dirt.', defEs: 'Cubierta con tierra fina.' },
+            { word: 'surface', wordEs: 'superficie', def: 'The outside layer.', defEs: 'La capa exterior.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Where was the rocket going?', qEs: '¿A dónde iba el cohete?', options: ['The Sun', 'Mars', 'The Moon', 'Jupiter'], optionsEs: ['Al Sol', 'A Marte', 'A la Luna', 'A Júpiter'], answer: 2 },
+        { q: 'What did Earth look like from space?', qEs: '¿Cómo se veía la Tierra desde el espacio?', options: ['A red square', 'A blue marble', 'A white cloud', 'A green leaf'], optionsEs: ['Un cuadrado rojo', 'Una canica azul', 'Una nube blanca', 'Una hoja verde'], answer: 1 }
+      ]
     }
   ];
 

@@ -258,27 +258,19 @@ const FeManager = (() => {
   ];
 
   const HERITAGE = [
+    // PRUNED [2026-06-15]: Removed duplicate 'tirana' object (different structure) to respect MAX 8 limit
+    // PRUNED [2026-06-15]: Removed 'vasquez' to make room for 'fiesta_san_pedro' and stay within MAX 8 limit
     {
-      id: 'tirana',
-      name: 'Fiesta de La Tirana',
-      location: 'Región de Tarapacá',
-      desc: 'Es una fiesta religiosa popular que se celebra en julio en honor a la Virgen del Carmen.',
-      icon: '🎭',
-      q: '¿A quién se honra en la Fiesta de La Tirana?',
-      a: ['A la Virgen del Carmen', 'A San Pedro', 'A San José'],
-      correct: 0
+      id: 'fiesta_san_pedro',
+      title: 'Fiesta de San Pedro',
+      info: 'Se celebra el 29 de junio. Los pescadores de la costa chilena adornan sus botes para pedir buena pesca y protección a su patrono.',
+      q: '¿Qué grupo de trabajadores celebra a San Pedro?', a: ['Los pescadores', 'Los mineros', 'Los agricultores'], correct: 0
     },
     {
       id: 'carmen',
       title: 'Virgen del Carmen',
       info: 'Es la Patrona de Chile. Fue declarada así en 1923. Cada 16 de julio se celebra su fiesta con procesiones y bailes religiosos.',
       q: '¿Qué día es la fiesta de la Virgen del Carmen?', a: ['18 de septiembre', '16 de julio', '25 de diciembre'], correct: 1
-    },
-    {
-      id: 'vasquez',
-      title: 'Santuario de Lo Vásquez',
-      info: 'Ubicado cerca de Casablanca, es el lugar de peregrinación más grande de Chile. Cada 8 de diciembre miles de personas caminan hacia allá.',
-      q: '¿En qué fecha es la gran peregrinación?', a: ['1 de enero', '8 de diciembre', '12 de octubre'], correct: 1
     },
     {
       id: 'sanfrancisco_stgo',

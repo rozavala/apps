@@ -331,6 +331,9 @@ const QB={
     {q:'¿En qué región se encuentra el desierto de Atacama?',a:'Norte Grande',o:['Norte Grande','Zona Central','Patagonia','Sur'], tier:'beginner'}
   ],
   antartica:[
+    {q:'¿En qué mes es más cálido en la Antártica chilena?',a:'Enero',o:['Enero','Julio','Agosto','Septiembre'], tier:'beginner'},
+    {q:'¿Cómo se llama la base militar chilena más antigua en la Antártica?',a:'Base Prat',o:['Base Prat','Base O\'Higgins','Base Frei','Base Escudero'], tier:'advanced'},
+    {q:'¿Qué continente está más cerca de la Antártica?',a:'América del Sur',o:['América del Sur','África','Oceanía','Europa'], tier:'intermediate'},
     {q:'¿Cuál es la temperatura media en el interior de la Antártica?',a:'Bajo cero',o:['Bajo cero','10 grados','20 grados','30 grados'], tier:'intermediate'},
     {q:'¿Qué océano rodea la Antártica?',a:'Océano Antártico',o:['Océano Antártico','Océano Atlántico','Océano Pacífico','Océano Índico'], tier:'beginner'},
     {q:'¿Cuál es la base civil más conocida de Chile en la Antártica?',a:'Villa Las Estrellas',o:['Villa Las Estrellas','Punta Arenas','Puerto Williams','Base Prat'], tier:'advanced'},
@@ -344,6 +347,9 @@ const QB={
     {q:'¿Qué porcentaje de agua dulce del mundo está en la Antártica?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'expert'}
   ],
   indigenous:[
+    {q:'¿Qué idioma habla el pueblo mapuche?',a:'Mapudungun',o:['Mapudungun','Aymara','Quechua','Rapa Nui'], tier:'beginner'},
+    {q:'¿Quiénes construyeron canoas o "dalcas" en los canales del sur?',a:'Los Chonos',o:['Los Chonos','Los Diaguitas','Los Atacameños','Los Aimaras'], tier:'advanced'},
+    {q:'¿En qué zona de Chile habitaban los Selknam?',a:'Tierra del Fuego',o:['Tierra del Fuego','Desierto de Atacama','Isla de Pascua','Valles Centrales'], tier:'intermediate'},
     {q:'¿Qué pueblo originario desarrolló la cerámica con diseños geométricos?',a:'Los Diaguitas',o:['Los Diaguitas','Los Mapuches','Los Chonos','Los Selknam'], tier:'advanced'},
     {q:'¿Cuándo celebran el Año Nuevo los Aymaras?',a:'Solsticio de invierno',o:['Solsticio de invierno','En Navidad','El 18 de septiembre','El 1 de enero'], tier:'intermediate'},
     {q:'¿Dónde habitan principalmente los Aymaras?',a:'En el altiplano',o:['En el altiplano','En los canales del sur','En Isla de Pascua','En Valparaíso'], tier:'intermediate'},
