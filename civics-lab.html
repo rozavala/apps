@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Civics Lab 🏛️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/civics-lab.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FBBF24">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(251,191,36,0.08);top:-100px;left:-100px;"></div>
+  <div class="atmo" style="width:350px;height:350px;background:rgba(30,58,138,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <!-- SCREEN: Home -->
+    <div class="cv-screen active" id="cv-screen-home">
+      <div class="cv-header">
+        <button class="cv-lang-toggle" id="cv-lang-toggle">
+          <span id="cv-lang-label">EN / ES</span> 🌐
+        </button>
+        <span class="icon">🏛️</span>
+        <h1>Civics Lab</h1>
+        <p>Cómo funciona el gobierno de Chile y otros sistemas del mundo.</p>
+      </div>
+      <div class="cv-tiles">
+        <button class="cv-tile" id="cv-tile-branches">
+          <span class="cv-tile-icon">🏛️</span>
+          <div class="cv-tile-title">Las Tres Ramas</div>
+          <div class="cv-tile-desc">The three branches of Chilean government</div>
+          <div class="cv-tile-stat" id="cv-branches-stat">0/0</div>
+        </button>
+        <button class="cv-tile" id="cv-tile-institutions">
+          <span class="cv-tile-icon">🏢</span>
+          <div class="cv-tile-title">Instituciones</div>
+          <div class="cv-tile-desc">Key institutions of Chile</div>
+          <div class="cv-tile-stat" id="cv-institutions-stat">0/0</div>
+        </button>
+        <button class="cv-tile" id="cv-tile-law">
+          <span class="cv-tile-icon">📜</span>
+          <div class="cv-tile-title">¿Cómo se hace una ley?</div>
+          <div class="cv-tile-desc">How a Chilean law is made — step by step</div>
+          <div class="cv-tile-stat" id="cv-law-stat">–</div>
+        </button>
+        <button class="cv-tile" id="cv-tile-comparative">
+          <span class="cv-tile-icon">🌍</span>
+          <div class="cv-tile-title">Compara</div>
+          <div class="cv-tile-desc">Compare Chile with other government systems</div>
+          <div class="cv-tile-stat" id="cv-comp-stat">0 best</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: Branch list -->
+    <div class="cv-screen" id="cv-screen-branches">
+      <button class="cv-back-btn cv-home-btn" aria-label="Back to home">←</button>
+      <h2 class="cv-section-title">🏛️ Las Tres Ramas / Three Branches</h2>
+      <div class="cv-grid" id="cv-branch-grid"></div>
+    </div>
+
+    <!-- SCREEN: Branch detail -->
+    <div class="cv-screen" id="cv-screen-branch-detail">
+      <div id="cv-branch-detail"></div>
+    </div>
+
+    <!-- SCREEN: Institution list -->
+    <div class="cv-screen" id="cv-screen-institutions">
+      <button class="cv-back-btn cv-home-btn" aria-label="Back to home">←</button>
+      <h2 class="cv-section-title">🏢 Instituciones / Institutions</h2>
+      <div class="cv-grid" id="cv-institution-grid"></div>
+    </div>
+
+    <!-- SCREEN: Institution detail -->
+    <div class="cv-screen" id="cv-screen-inst-detail">
+      <div id="cv-inst-detail"></div>
+    </div>
+
+    <!-- SCREEN: Law-making walkthrough -->
+    <div class="cv-screen" id="cv-screen-law">
+      <div id="cv-law-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Quiz -->
+    <div class="cv-screen" id="cv-screen-quiz">
+      <div id="cv-quiz-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Quiz result -->
+    <div class="cv-screen" id="cv-screen-quiz-result">
+      <div id="cv-quiz-result"></div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/zs-diag.js?v=3"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/civics-lab.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
