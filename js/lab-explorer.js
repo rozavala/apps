@@ -86,6 +86,39 @@ const LabExplorer = (() => {
       experiments: [
         { id: 'space',     title: 'Space Explorer',     instruction: 'Tap the glowing stars to connect the constellations!' },
       ]
+    },
+    {
+      id: 'sound',
+      title: 'Sound Waves',
+      icon: '🔊',
+      desc: 'Hear pitch and see the wave it makes.',
+      category: 'physics',
+      ageMin: 6,
+      experiments: [
+        { id: 'oscilloscope', title: 'Oscilloscope', instruction: 'Tap the notes to hear them and watch their waves on the screen!' },
+      ]
+    },
+    {
+      id: 'crystals',
+      title: 'Crystal Growing',
+      icon: '💎',
+      desc: 'Watch crystals form in different solutions.',
+      category: 'chemistry',
+      ageMin: 7,
+      experiments: [
+        { id: 'grow', title: 'Crystal Lab', instruction: 'Pick a solution, then tap to seed crystals and watch them grow!' },
+      ]
+    },
+    {
+      id: 'static',
+      title: 'Static Electricity',
+      icon: '⚡',
+      desc: 'Charge a balloon and watch what sticks.',
+      category: 'physics',
+      ageMin: 6,
+      experiments: [
+        { id: 'balloon', title: 'Balloon Lab', instruction: 'Rub the balloon back and forth, then move it near the paper bits!' },
+      ]
     }
   ];
 
@@ -230,6 +263,12 @@ const LabExplorer = (() => {
       _initWeatherLab();
     } else if (labId === 'astronomy' && expId === 'space') {
       _initAstronomyLab();
+    } else if (labId === 'sound' && expId === 'oscilloscope') {
+      _initSoundLab();
+    } else if (labId === 'crystals' && expId === 'grow') {
+      _initCrystalLab();
+    } else if (labId === 'static' && expId === 'balloon') {
+      _initStaticLab();
     } else {
       _renderPlaceholder(currentLab.icon + ' ' + currentLab.title);
     }
@@ -1614,6 +1653,516 @@ const LabExplorer = (() => {
         astronomyState.animFrame = null;
       }
     }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // SOUND WAVES LAB — tap notes, see the wave on an oscilloscope
+  // ════════════════════════════════════════════════════════════════
+  // Each note is a sine wave at its real frequency. Multiple notes
+  // sum (additive synthesis) so a kid pressing two notes sees a
+  // visibly different combined waveform. Volume envelope (ADSR-ish)
+  // decays so the screen quietens between taps.
+  let soundState = { voices: [], animFrame: null, audioCtx: null };
+
+  const _SOUND_NOTES = [
+    { name: 'C4', freq: 261.63, color: '#FF6B6B' },
+    { name: 'D4', freq: 293.66, color: '#FF9F43' },
+    { name: 'E4', freq: 329.63, color: '#FECA57' },
+    { name: 'F4', freq: 349.23, color: '#1dd1a1' },
+    { name: 'G4', freq: 392.00, color: '#48dbfb' },
+    { name: 'A4', freq: 440.00, color: '#5f27cd' },
+    { name: 'B4', freq: 493.88, color: '#a29bfe' },
+    { name: 'C5', freq: 523.25, color: '#fd79a8' }
+  ];
+
+  function _initSoundLab() {
+    soundState.voices = [];
+    soundState.animFrame = null;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC && !soundState.audioCtx) soundState.audioCtx = new AC();
+    } catch (e) { /* audio optional */ }
+
+    const ctrls = document.getElementById('exp-controls');
+    if (ctrls) {
+      ctrls.innerHTML = '<div class="sound-pad" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:8px;">' +
+        _SOUND_NOTES.map((n, i) =>
+          '<button class="sound-key" data-i="' + i + '" style="' +
+            'padding:14px 16px;border-radius:10px;border:2px solid ' + n.color + ';' +
+            'background:rgba(255,255,255,0.06);color:#fff;font-weight:700;cursor:pointer;' +
+            'font-size:0.95rem;min-width:54px;">' + n.name + '</button>'
+        ).join('') +
+        '</div>';
+      ctrls.querySelectorAll('.sound-key').forEach(btn => {
+        btn.onpointerdown = (e) => { e.preventDefault(); _playSoundNote(parseInt(btn.dataset.i, 10)); };
+      });
+    }
+    _drawSoundLab();
+  }
+
+  function _playSoundNote(idx) {
+    const note = _SOUND_NOTES[idx];
+    if (!note) return;
+    // Visual voice — sums into the oscilloscope render
+    soundState.voices.push({ idx, freq: note.freq, color: note.color, born: performance.now(), gain: 1 });
+    if (soundState.voices.length > 8) soundState.voices.shift(); // cap stack
+    // Audio: a quick ADSR sine via WebAudio (no-op if context unavailable)
+    const ac = soundState.audioCtx;
+    if (ac) {
+      try {
+        const osc = ac.createOscillator();
+        const g   = ac.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = note.freq;
+        const now = ac.currentTime;
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.18, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
+        osc.connect(g).connect(ac.destination);
+        osc.start(now);
+        osc.stop(now + 1.0);
+      } catch (e) { /* swallow */ }
+    }
+    if (typeof SFX === 'undefined' && typeof playSound === 'function') playSound('click');
+  }
+
+  function _drawSoundLab() {
+    if (!currentLab || currentLab.id !== 'sound') {
+      if (soundState.animFrame) cancelAnimationFrame(soundState.animFrame);
+      return;
+    }
+    const cw = canvas.width  = canvas.clientWidth  || canvas.width;
+    const ch = canvas.height = canvas.clientHeight || canvas.height;
+
+    // Dark grid background
+    ctx.fillStyle = '#0E1A2E';
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < cw; x += 32) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ch); ctx.stroke();
+    }
+    for (let y = 0; y < ch; y += 32) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke();
+    }
+    // Centre line
+    ctx.strokeStyle = 'rgba(255,255,255,0.20)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, ch/2); ctx.lineTo(cw, ch/2); ctx.stroke();
+
+    // Decay voices by age
+    const now = performance.now();
+    soundState.voices = soundState.voices.filter(v => {
+      v.gain = Math.max(0, 1 - (now - v.born) / 1000);
+      return v.gain > 0.02;
+    });
+
+    // Draw the summed waveform (additive synthesis preview)
+    if (soundState.voices.length > 0) {
+      ctx.strokeStyle = '#22D3EE';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const t = now / 1000;
+      for (let x = 0; x < cw; x++) {
+        const phase = (x / cw) * Math.PI * 8;  // ~4 wavelengths visible
+        let y = 0;
+        for (const v of soundState.voices) {
+          // Use freq ratios so the differences are visible at screen scale
+          const freqK = v.freq / 261.63;
+          y += Math.sin(phase * freqK + t * v.freq * 0.005) * (ch * 0.18) * v.gain;
+        }
+        if (x === 0) ctx.moveTo(x, ch/2 + y);
+        else ctx.lineTo(x, ch/2 + y);
+      }
+      ctx.stroke();
+
+      // Per-voice colour traces, fainter
+      soundState.voices.forEach(v => {
+        ctx.strokeStyle = v.color + 'AA';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (let x = 0; x < cw; x++) {
+          const phase = (x / cw) * Math.PI * 8;
+          const freqK = v.freq / 261.63;
+          const y = Math.sin(phase * freqK + t * v.freq * 0.005) * (ch * 0.12) * v.gain;
+          if (x === 0) ctx.moveTo(x, ch/2 + y);
+          else ctx.lineTo(x, ch/2 + y);
+        }
+        ctx.stroke();
+      });
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = 'bold 16px Nunito';
+      ctx.textAlign = 'center';
+      ctx.fillText('Tap a note below to see its wave', cw/2, ch/2 - 8);
+    }
+
+    soundState.animFrame = requestAnimationFrame(_drawSoundLab);
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // CRYSTAL GROWING LAB — pick a solution, seed crystals, watch them grow
+  // ════════════════════════════════════════════════════════════════
+  // Each solution grows crystals with a different geometric habit:
+  //   salt        → cubic
+  //   sugar       → monoclinic (rhombic)
+  //   copper      → triclinic / star-like
+  let crystalState = { solution: 'salt', seeds: [], animFrame: null };
+
+  const _CRYSTAL_SOLUTIONS = [
+    { id: 'salt',   label: 'Salt',   color: '#E0E7FF', habit: 'cubic',  emoji: '🧂' },
+    { id: 'sugar',  label: 'Sugar',  color: '#FBBF24', habit: 'rhombic', emoji: '🍯' },
+    { id: 'copper', label: 'Copper', color: '#22D3EE', habit: 'star',   emoji: '🟦' }
+  ];
+
+  function _initCrystalLab() {
+    crystalState.solution = 'salt';
+    crystalState.seeds = [];
+    crystalState.animFrame = null;
+
+    const ctrls = document.getElementById('exp-controls');
+    if (ctrls) {
+      ctrls.innerHTML =
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:8px;">' +
+          _CRYSTAL_SOLUTIONS.map(s =>
+            '<button class="crystal-pick" data-id="' + s.id + '" style="' +
+              'padding:10px 14px;border-radius:10px;border:2px solid ' + s.color + ';' +
+              'background:rgba(255,255,255,0.06);color:#fff;font-weight:700;cursor:pointer;' +
+              'font-size:0.95rem;">' + s.emoji + ' ' + s.label + '</button>'
+          ).join('') +
+        '</div>' +
+        '<div style="text-align:center;font-size:0.85rem;color:#AAA;padding:4px;">' +
+          'Tap the beaker to seed a crystal.' +
+        '</div>';
+      ctrls.querySelectorAll('.crystal-pick').forEach(btn => {
+        btn.onclick = () => {
+          crystalState.solution = btn.dataset.id;
+          // Highlight selected
+          ctrls.querySelectorAll('.crystal-pick').forEach(b => {
+            b.style.background = b === btn ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)';
+          });
+          _drawCrystalLab();
+        };
+      });
+      // Default-highlight salt
+      const first = ctrls.querySelector('.crystal-pick');
+      if (first) first.style.background = 'rgba(255,255,255,0.18)';
+    }
+
+    canvas.onpointerdown = (e) => {
+      const { mx, my } = _getMousePos(e);
+      // Only allow seeds inside the beaker rectangle
+      if (!_insideBeaker(mx, my)) return;
+      const sol = _CRYSTAL_SOLUTIONS.find(s => s.id === crystalState.solution);
+      crystalState.seeds.push({
+        x: mx, y: my,
+        size: 0,
+        targetSize: 8 + Math.random() * 14,
+        color: sol.color,
+        habit: sol.habit,
+        rot: Math.random() * Math.PI,
+        born: performance.now()
+      });
+      if (typeof SFX !== 'undefined' && SFX.click) SFX.click();
+      else if (typeof playSound === 'function') playSound('click');
+      // Achievement when 8 crystals are grown
+      if (crystalState.seeds.length === 8) {
+        _addJournalEntry('Grew 8 crystals of ' + sol.label);
+        stars++;
+        document.getElementById('exp-stars').textContent = '⭐ ' + stars;
+        _saveProgress();
+      }
+    };
+
+    _drawCrystalLab();
+  }
+
+  function _insideBeaker(x, y) {
+    const cw = canvas.width, ch = canvas.height;
+    const bx = cw * 0.18, by = ch * 0.20;
+    const bw = cw * 0.64, bh = ch * 0.62;
+    return x >= bx && x <= bx + bw && y >= by && y <= by + bh;
+  }
+
+  function _drawCrystalLab() {
+    if (!currentLab || currentLab.id !== 'crystals') {
+      if (crystalState.animFrame) cancelAnimationFrame(crystalState.animFrame);
+      return;
+    }
+    const cw = canvas.width, ch = canvas.height;
+
+    // Background
+    ctx.fillStyle = '#0B0F1E';
+    ctx.fillRect(0, 0, cw, ch);
+
+    // Beaker
+    const bx = cw * 0.18, by = ch * 0.20, bw = cw * 0.64, bh = ch * 0.62;
+    const sol = _CRYSTAL_SOLUTIONS.find(s => s.id === crystalState.solution);
+    // Solution fill
+    const grd = ctx.createLinearGradient(0, by, 0, by + bh);
+    grd.addColorStop(0, sol.color + '44');
+    grd.addColorStop(1, sol.color + '88');
+    ctx.fillStyle = grd;
+    ctx.fillRect(bx, by, bw, bh);
+    // Beaker outline + spout
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bx - 6, by);
+    ctx.lineTo(bx, by);
+    ctx.lineTo(bx, by + bh);
+    ctx.lineTo(bx + bw, by + bh);
+    ctx.lineTo(bx + bw, by);
+    ctx.lineTo(bx + bw + 6, by);
+    ctx.stroke();
+    // Solution label
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = 'bold 14px Nunito';
+    ctx.textAlign = 'center';
+    ctx.fillText(sol.emoji + ' ' + sol.label, cw/2, by - 12);
+
+    // Grow each seed toward its target size
+    crystalState.seeds.forEach(s => {
+      s.size += Math.min(0.4, (s.targetSize - s.size) * 0.04);
+      _drawCrystal(s);
+    });
+
+    // Hint if no seeds
+    if (crystalState.seeds.length === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '14px Nunito';
+      ctx.fillText('Tap inside the beaker to seed a crystal', cw/2, ch/2);
+    }
+
+    crystalState.animFrame = requestAnimationFrame(_drawCrystalLab);
+  }
+
+  function _drawCrystal(s) {
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rot);
+    ctx.fillStyle = s.color;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = s.color;
+    ctx.shadowBlur = 8;
+    if (s.habit === 'cubic') {
+      // Square diamond
+      const r = s.size;
+      ctx.beginPath();
+      ctx.moveTo(0, -r); ctx.lineTo(r, 0); ctx.lineTo(0, r); ctx.lineTo(-r, 0);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (s.habit === 'rhombic') {
+      // Tall hexagonal rhomb
+      const r = s.size, w = s.size * 0.6;
+      ctx.beginPath();
+      ctx.moveTo(0, -r); ctx.lineTo(w, -r * 0.3);
+      ctx.lineTo(w, r * 0.3); ctx.lineTo(0, r);
+      ctx.lineTo(-w, r * 0.3); ctx.lineTo(-w, -r * 0.3);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else {
+      // Star / triclinic
+      const r = s.size;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const rr = i % 2 === 0 ? r : r * 0.4;
+        const px = Math.cos(a) * rr, py = Math.sin(a) * rr;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // STATIC ELECTRICITY LAB — rub a balloon, watch paper bits jump
+  // ════════════════════════════════════════════════════════════════
+  // Rubbing builds a charge on the balloon. Paper bits feel an
+  // attractive force inversely proportional to distance (toy model).
+  let staticState = {
+    balloon: { x: 0, y: 0, charge: 0, rubLastX: null, dragging: false },
+    bits: [],
+    animFrame: null
+  };
+
+  function _initStaticLab() {
+    const cw = canvas.width || 400, ch = canvas.height || 300;
+    staticState.balloon = { x: cw * 0.30, y: ch * 0.45, charge: 0, rubLastX: null, dragging: false };
+    staticState.bits = [];
+    // Scatter 24 paper bits on the right half "table"
+    for (let i = 0; i < 24; i++) {
+      staticState.bits.push({
+        x: cw * 0.55 + Math.random() * (cw * 0.40),
+        y: ch * 0.72 + Math.random() * (ch * 0.20),
+        vx: 0, vy: 0,
+        size: 4 + Math.random() * 3,
+        stuck: false
+      });
+    }
+    staticState.animFrame = null;
+
+    const ctrls = document.getElementById('exp-controls');
+    if (ctrls) {
+      ctrls.innerHTML =
+        '<div style="text-align:center;padding:6px;font-size:0.85rem;color:#AAA;">' +
+          'Drag the balloon left-and-right over the hair to charge it. ' +
+          'Then move it near the paper bits.' +
+        '</div>' +
+        '<div style="text-align:center;padding:4px;">' +
+          '<button id="static-reset" style="padding:8px 14px;border-radius:8px;border:none;' +
+            'background:#7C3AED;color:#fff;font-weight:700;cursor:pointer;">Reset</button>' +
+        '</div>';
+      const reset = document.getElementById('static-reset');
+      if (reset) reset.onclick = () => _initStaticLab();
+    }
+
+    canvas.onpointerdown = (e) => {
+      const { mx, my } = _getMousePos(e);
+      const b = staticState.balloon;
+      if (Math.hypot(mx - b.x, my - b.y) < 50) {
+        b.dragging = true;
+        b.rubLastX = mx;
+      }
+    };
+    canvas.onpointermove = (e) => {
+      if (!staticState.balloon.dragging) return;
+      const { mx, my } = _getMousePos(e);
+      const b = staticState.balloon;
+      // Charge accumulates when moving over the "hair" zone (left third)
+      const cw = canvas.width;
+      const overHair = b.x < cw * 0.40 && mx < cw * 0.40;
+      if (overHair && b.rubLastX != null) {
+        const dx = Math.abs(mx - b.rubLastX);
+        b.charge = Math.min(1, b.charge + dx * 0.004);
+      }
+      b.rubLastX = mx;
+      b.x = mx;
+      b.y = my;
+    };
+    canvas.onpointerup = () => {
+      staticState.balloon.dragging = false;
+      staticState.balloon.rubLastX = null;
+    };
+
+    _drawStaticLab();
+  }
+
+  function _drawStaticLab() {
+    if (!currentLab || currentLab.id !== 'static') {
+      if (staticState.animFrame) cancelAnimationFrame(staticState.animFrame);
+      return;
+    }
+    const cw = canvas.width, ch = canvas.height;
+
+    // Background
+    ctx.fillStyle = '#1A1030';
+    ctx.fillRect(0, 0, cw, ch);
+
+    // "Hair" zone label
+    ctx.fillStyle = 'rgba(255,255,255,0.10)';
+    ctx.fillRect(0, 0, cw * 0.40, ch);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = 'bold 14px Nunito';
+    ctx.textAlign = 'center';
+    ctx.fillText('🧑 Hair / Pelo', cw * 0.20, 24);
+
+    // Table line under bits
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cw * 0.50, ch * 0.85);
+    ctx.lineTo(cw, ch * 0.85);
+    ctx.stroke();
+    ctx.fillText('📄 Paper bits', cw * 0.75, 24);
+
+    // Update + draw paper bits
+    const b = staticState.balloon;
+    staticState.bits.forEach(p => {
+      const dx = b.x - p.x, dy = b.y - p.y;
+      const dist = Math.hypot(dx, dy);
+      // Attractive force ~ charge / dist^2, capped
+      if (b.charge > 0.15 && dist < 180) {
+        const f = (b.charge * 12) / Math.max(dist * dist, 200);
+        p.vx += dx * f;
+        p.vy += dy * f;
+        p.stuck = dist < 36;
+      } else {
+        p.stuck = false;
+      }
+      // Gravity if not stuck and above table
+      if (!p.stuck && p.y < ch * 0.85) p.vy += 0.18;
+      // Drag
+      p.vx *= 0.86; p.vy *= 0.86;
+      p.x += p.vx; p.y += p.vy;
+      // Floor
+      if (!p.stuck && p.y > ch * 0.85) { p.y = ch * 0.85; p.vy = 0; }
+      // Draw paper bit
+      ctx.fillStyle = '#F5F5DC';
+      ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size * 1.4);
+    });
+
+    // Balloon
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    // Body
+    ctx.fillStyle = '#EF4444';
+    ctx.strokeStyle = '#7F1D1D';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 42, 48, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(-12, -16, 10, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Tie + string
+    ctx.fillStyle = '#7F1D1D';
+    ctx.beginPath();
+    ctx.moveTo(-4, 46); ctx.lineTo(4, 46); ctx.lineTo(0, 56); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, 56); ctx.lineTo(8, 90);
+    ctx.stroke();
+    // Charge sparkles
+    if (b.charge > 0.10) {
+      ctx.strokeStyle = 'rgba(251,191,36,' + b.charge + ')';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < Math.floor(b.charge * 14); i++) {
+        const a = (Math.random() * Math.PI * 2);
+        const r1 = 48, r2 = 48 + 6 + Math.random() * 6;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r1, Math.sin(a) * r1);
+        ctx.lineTo(Math.cos(a) * r2, Math.sin(a) * r2);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    // Charge meter
+    ctx.fillStyle = 'rgba(255,255,255,0.10)';
+    ctx.fillRect(cw - 90, ch - 32, 80, 14);
+    ctx.fillStyle = '#FBBF24';
+    ctx.fillRect(cw - 88, ch - 30, 76 * b.charge, 10);
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 11px Nunito';
+    ctx.textAlign = 'right';
+    ctx.fillText('⚡ Charge', cw - 12, ch - 38);
+
+    // Award a star when charged enough and a bit stuck
+    if (!staticState._awarded && b.charge > 0.6 && staticState.bits.some(p => p.stuck)) {
+      staticState._awarded = true;
+      _addJournalEntry('Charged the balloon and stuck a paper bit!');
+      stars++;
+      document.getElementById('exp-stars').textContent = '⭐ ' + stars;
+      _saveProgress();
+    }
+
+    staticState.animFrame = requestAnimationFrame(_drawStaticLab);
   }
 
   // ── Journal & UI ──
