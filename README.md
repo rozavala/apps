@@ -37,6 +37,8 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **⏱️ Home Timer** | Temporizador familiar para tareas y actividades. (Family timer for tasks and activities.) | [home-timer.html](home-timer.html) |
 | **👨‍👩‍👧‍👦 Sunday Report** | Resumen semanal de actividades familiares. (Weekly summary of family activities.) | [sunday-report.html](sunday-report.html) |
 | **✈️ Vacation Planner** | Planifica las próximas aventuras y vacaciones familiares. (Plan upcoming family adventures and vacations.) | [vacation.html](vacation.html) |
+| **🏛️ Civics Lab** | Cómo funciona el gobierno de Chile y otros sistemas del mundo. (How the government of Chile and other world systems work.) | [civics-lab.html](civics-lab.html) |
+| **🏆 World Cup 2026** | Sigue los equipos, partidos y ciudades sede del torneo de la Copa del Mundo. (Follow the teams, matches and host cities of the World Cup tournament.) | [world-cup.html](world-cup.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -66,6 +68,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Nuevas Apps**: ¡Agregamos Civics Lab y World Cup 2026! (Added Civics Lab and World Cup 2026!)
 - **Nuevas Utilidades Familiares**: ¡Agregamos Menú Semanal, Home Timer, Sunday Report y Vacation Planner! (Added Menu Planner, Home Timer, Sunday Report and Vacation Planner!)
 - **¡Nueva App "Code Cadet"!**: Aprende lógica de programación moviendo un rover con bloques. (Learn programming logic by moving a rover with blocks).
 - **¡Nueva App "Money Master"!**: Aprende sobre el valor del dinero, monedas y billetes. (Learn about money value, coins and bills).
