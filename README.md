@@ -68,6 +68,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **World Cup Update**: ¡Agregamos el álbum de figuritas, filtros de partidos y la integración a la Trophy Room! (Added the sticker album, match filters, and Trophy Room integration!)
 - **Nuevas Apps**: ¡Agregamos Civics Lab y World Cup 2026! (Added Civics Lab and World Cup 2026!)
 - **Nuevas Utilidades Familiares**: ¡Agregamos Menú Semanal, Home Timer, Sunday Report y Vacation Planner! (Added Menu Planner, Home Timer, Sunday Report and Vacation Planner!)
 - **¡Nueva App "Code Cadet"!**: Aprende lógica de programación moviendo un rover con bloques. (Learn programming logic by moving a rover with blocks).
