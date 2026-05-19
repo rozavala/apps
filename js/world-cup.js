@@ -2578,23 +2578,123 @@
   function checkUrlForImport() {
     try {
       const params = new URLSearchParams(window.location.search);
-      const enc = params.get('wc_share');
-      if (!enc) return;
-      const payload = decodeBracket(enc);
-      if (!payload) return;
-      // Clear the URL so a reload doesn't re-prompt
       const url = new URL(window.location.href);
-      url.searchParams.delete('wc_share');
-      history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?'+url.searchParams.toString() : ''));
-      // Defer prompt so init() has time to mount
-      setTimeout(() => promptImportBracket(payload), 600);
+
+      // Single-bracket share (?wc_share=...)
+      const shareEnc = params.get('wc_share');
+      if (shareEnc) {
+        const payload = decodeBracket(shareEnc);
+        url.searchParams.delete('wc_share');
+        history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?'+url.searchParams.toString() : ''));
+        if (payload) setTimeout(() => promptImportBracket(payload), 600);
+      }
+
+      // Full-family-pool snapshot (?wc_pool=...)
+      const poolEnc = params.get('wc_pool');
+      if (poolEnc) {
+        const payload = decodePool(poolEnc);
+        url.searchParams.delete('wc_pool');
+        history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?'+url.searchParams.toString() : ''));
+        if (payload) setTimeout(() => promptImportPool(payload), 700);
+      }
     } catch (e) {}
+  }
+
+  /* ----------------------------------------------------------------
+     Full-family-pool snapshot — host can share a single URL bundling
+     every member's bracket plus all recorded results. Guests open
+     the URL and import to see the family leaderboard locally
+     (read-only-ish — they can still edit their own bracket).
+     ---------------------------------------------------------------- */
+  function encodePool() {
+    const members = state.members
+      .filter(m => m.name && m.name.trim())
+      .map(m => ({
+        n: m.name,
+        a: m.avatar || '',
+        p: state.picks[m.id] || null,
+      }));
+    const results = {};
+    for (const m of state.matches) if (m.result) results[m.id] = m.result;
+    const payload = { v: 1, type: 'pool', members, results };
+    return _b64urlEncode(JSON.stringify(payload));
+  }
+  function decodePool(encoded) {
+    try {
+      const json = _b64urlDecode(encoded);
+      const p = JSON.parse(json);
+      if (p && p.v === 1 && p.type === 'pool' && Array.isArray(p.members)) return p;
+    } catch (e) {}
+    return null;
+  }
+  function importPool(payload) {
+    if (!payload) return { added:0, updated:0, results:0 };
+    let added = 0, updated = 0;
+    for (const sm of payload.members || []) {
+      const lower = (sm.n || '').toLowerCase();
+      if (!lower) continue;
+      let entry = state.members.find(m => m.name && m.name.toLowerCase() === lower);
+      if (!entry) {
+        const id = 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,5);
+        entry = { id, name: sm.n, avatar: sm.a || null };
+        state.members.push(entry);
+        added++;
+      } else {
+        if (sm.a && !entry.avatar) entry.avatar = sm.a;
+        updated++;
+      }
+      if (sm.p) state.picks[entry.id] = sm.p;
+    }
+    let resultsApplied = 0;
+    for (const id of Object.keys(payload.results || {})) {
+      const m = state.matches.find(x => x.id === id);
+      if (m) { m.result = payload.results[id]; resultsApplied++; }
+    }
+    save();
+    return { added, updated, results: resultsApplied };
+  }
+  function promptImportPool(payload) {
+    const modal = document.getElementById('match-modal');
+    if (!modal) return;
+    _pendingImport = { type:'pool', payload };
+    const memberCount = (payload.members || []).filter(m => m.n).length;
+    const resultCount = Object.keys(payload.results || {}).length;
+    const memberList = (payload.members || [])
+      .filter(m => m.n)
+      .map(m => `${m.a ? escapeHTML(m.a)+' ' : ''}${escapeHTML(m.n)}`)
+      .slice(0, 8)
+      .join(', ');
+    modal.querySelector('.modal-inner').innerHTML = `
+      <h3>📨 Family pool snapshot received</h3>
+      <div class="sub">${memberCount} bracket${memberCount===1?'':'s'} · ${resultCount} match result${resultCount===1?'':'s'}</div>
+      <p style="margin:10px 0;font-size:0.9rem;line-height:1.5;">${escapeHTML(memberList)}${memberCount > 8 ? ' …' : ''}</p>
+      <p style="font-size:0.82rem;color:var(--text-muted);">Existing brackets with the same name will be updated. Your own bracket is preserved unless someone with your name is in the snapshot.</p>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="WC.closeModal()">Not now</button>
+        <button class="btn" onclick="WC.confirmImportPool()">✓ Import snapshot</button>
+      </div>
+    `;
+    modal.classList.add('open');
+  }
+  function confirmImportPool() {
+    const p = _pendingImport && _pendingImport.payload;
+    const isPool = _pendingImport && _pendingImport.type === 'pool';
+    _pendingImport = null;
+    closeModal();
+    if (!p || !isPool) return;
+    const { added, updated, results } = importPool(p);
+    const parts = [];
+    if (added) parts.push(`${added} new bracket${added===1?'':'s'}`);
+    if (updated) parts.push(`${updated} updated`);
+    if (results) parts.push(`${results} result${results===1?'':'s'}`);
+    toast('Imported — ' + (parts.join(' · ') || 'no changes'));
+    activateTab('pool');
   }
   let _pendingImport = null;
   function promptImportBracket(payload) {
     const modal = document.getElementById('match-modal');
     if (!modal) return;
-    _pendingImport = payload;
+    _pendingImport = { type: 'bracket', payload };
     const guess = payload.gb ? `Golden Boot guess: <b>${escapeHTML(payload.gb)}</b>` : '';
     modal.querySelector('.modal-inner').innerHTML = `
       <h3>📨 Bracket received</h3>
@@ -2609,11 +2709,11 @@
     modal.classList.add('open');
   }
   function confirmImportBracket() {
-    const p = _pendingImport;
+    const wrap = _pendingImport;
     _pendingImport = null;
     closeModal();
-    if (!p) return;
-    const entry = importSharedBracket(p);
+    if (!wrap || wrap.type !== 'bracket' || !wrap.payload) return;
+    const entry = importSharedBracket(wrap.payload);
     if (entry) {
       toast('Added ' + entry.name + ' to the pool');
       activateTab('pool');
@@ -3505,6 +3605,7 @@
         ${selectedId ? '' : `
           <div style="text-align:center;margin-top:14px;display:flex;flex-direction:column;gap:8px;align-items:center;">
             <button class="btn gold" style="font-size:1rem;padding:12px 24px;" onclick="WC.startEntry()">${ctaLabel}</button>
+            ${board.length > 0 ? `<button class="btn ghost" style="font-size:0.82rem;" onclick="WC.openShareFamilyPool()">📤 Share family pool (snapshot link)</button>` : ''}
             <button class="btn ghost" style="font-size:0.82rem;" onclick="WC.openInviteGuest()">📨 Invite extended family (no app/VPN needed)</button>
           </div>
         `}
@@ -4477,6 +4578,32 @@
       try { document.execCommand('copy'); toast('Link copied!'); } catch (e2) { toast('Copy failed — long-press the link to select.'); }
     }
   }
+  function openShareFamilyPool() {
+    const named = state.members.filter(m => m.name && m.name.trim());
+    if (named.length === 0) {
+      toast('No brackets to share yet — submit one first.');
+      return;
+    }
+    const enc = encodePool();
+    const url = _publicAppBase() + '?wc_pool=' + enc;
+    const resultCount = state.matches.filter(m => m.result).length;
+    const sizeKB = (url.length / 1024).toFixed(1);
+    const modal = document.getElementById('match-modal');
+    modal.querySelector('.modal-inner').innerHTML = `
+      <h3>📤 Share the family pool</h3>
+      <div class="sub">${named.length} bracket${named.length===1?'':'s'} · ${resultCount} result${resultCount===1?'':'s'} · ${sizeKB} KB URL</div>
+      <p style="margin:10px 0;font-size:0.85rem;line-height:1.5;">Send this link to extended family — opening it adds the whole pool to their device so they can see the leaderboard. Re-share after every round to keep them in sync.</p>
+      <textarea readonly id="share-url-area"
+                style="width:100%;background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:10px;font-size:0.78rem;font-family:monospace;margin:6px 0;min-height:90px;word-break:break-all;"
+                onclick="this.select()">${escapeHTML(url)}</textarea>
+      <p class="muted" style="font-size:0.72rem;">URLs above ~4 KB may get truncated by SMS — WhatsApp / email / Slack are safe.</p>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="WC.closeModal()">Close</button>
+        <button class="btn" onclick="WC.copyShareUrl()">📋 Copy link</button>
+      </div>
+    `;
+    modal.classList.add('open');
+  }
   function openInviteGuest() {
     const link = _publicAppBase();
     const modal = document.getElementById('match-modal');
@@ -4775,6 +4902,7 @@
     quickFill,
     startQuiz, answerQuiz, nextQuestion, resetQuiz,
     openShareBracket, copyShareUrl, openInviteGuest, confirmImportBracket,
+    openShareFamilyPool, confirmImportPool,
     resetAll,
     syncScores,
   };
