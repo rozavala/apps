@@ -27,6 +27,7 @@ var CloudSync = (function() {
     'zs_activity_': 'activity',
     'zs_routines_': 'routines',
     'zs_money_': 'money',
+    'zs_worldcup_': 'worldcup',
     'littlemaestro_': 'littlemaestro',
   };
 
