@@ -86,7 +86,9 @@ var LearningCheck = (function() {
       { q: 'What part of the plant conducts photosynthesis?', options: ['Root', 'Stem', 'Flower', 'Leaf'], answer: 3 },
       { q: 'What type of animal is a frog?', options: ['Reptile', 'Amphibian', 'Mammal', 'Fish'], answer: 1 },
       { q: 'At what temperature does water boil?', options: ['50°C', '90°C', '100°C', '120°C'], answer: 2 },
-      { q: 'Which planet is closest to the Sun?', options: ['Venus', 'Earth', 'Mercury', 'Mars'], answer: 2 }
+      { q: 'Which planet is closest to the Sun?', options: ['Venus', 'Earth', 'Mercury', 'Mars'], answer: 2 },
+      { q: 'What is the closest star to Earth?', options: ['Sirius', 'Alpha Centauri', 'The Sun', 'Polaris'], answer: 2 },
+      { q: 'What force pulls objects toward the center of the Earth?', options: ['Magnetism', 'Friction', 'Gravity', 'Electricity'], answer: 2 }
     ]
   };
 
