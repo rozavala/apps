@@ -2447,6 +2447,180 @@
   function escapeHTML(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
   /* ----------------------------------------------------------------
+     Per-user star bank — flows into the suite-wide Trophy Room. Each
+     achievement awards stars to a `zs_worldcup_<userKey>` storage
+     entry that trophy-room.js can read like any other app.
+     ---------------------------------------------------------------- */
+  function _userKey(name) {
+    if (!name) return null;
+    return name.toLowerCase().replace(/\s+/g, '_');
+  }
+  function _wcStarsKey(name) {
+    const k = _userKey(name);
+    return k ? 'zs_worldcup_' + k : null;
+  }
+  function _readWcStars(name) {
+    const key = _wcStarsKey(name);
+    if (!key) return { totalStars:0, awards:[] };
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return { totalStars:0, awards:[] };
+      const v = JSON.parse(raw);
+      return { totalStars: v.totalStars|0, awards: Array.isArray(v.awards) ? v.awards : [] };
+    } catch (e) { return { totalStars:0, awards:[] }; }
+  }
+  function awardStars(name, n, source) {
+    const key = _wcStarsKey(name);
+    if (!key || !n) return;
+    try {
+      const cur = _readWcStars(name);
+      cur.totalStars += n;
+      cur.awards.unshift({ ts: Date.now(), n, source });
+      cur.awards = cur.awards.slice(0, 50); // keep last 50 awards
+      localStorage.setItem(key, JSON.stringify(cur));
+      if (window.CloudSync && CloudSync.online && CloudSync.push) {
+        try { CloudSync.push(key); } catch (e) {}
+      }
+    } catch (e) { /* quota etc. — fail silent */ }
+  }
+
+  /* ----------------------------------------------------------------
+     Sticker album — Panini-style 48-country collection. Persisted in
+     the same wc2026.v2 bucket under state.stickers, keyed by country
+     code. status: 'locked' | 'earned' | 'starred'.
+     ---------------------------------------------------------------- */
+  function _stickerStatus(code) {
+    const s = (state.stickers || {})[code];
+    if (!s) return 'locked';
+    return s.starred ? 'starred' : 'earned';
+  }
+  function earnSticker(code, source, starred) {
+    if (!code) return;
+    state.stickers = state.stickers || {};
+    const prev = state.stickers[code];
+    const wasStarred = !!(prev && prev.starred);
+    if (prev && (starred ? wasStarred : true)) return; // already at this tier
+    state.stickers[code] = {
+      earnedAt: (prev && prev.earnedAt) || new Date().toISOString(),
+      source,
+      starred: !!(starred || wasStarred),
+    };
+    save();
+    // Award stars to the active user's bank
+    const user = currentActiveUser();
+    if (user && !prev) awardStars(user.name, 2, 'sticker:' + code);
+    if (user && starred && !wasStarred) awardStars(user.name, 3, 'sticker_starred:' + code);
+  }
+
+  /* ----------------------------------------------------------------
+     Share bracket — encode/decode a member's picks as a URL-safe
+     base64 JSON payload. Works on the public GitHub-Pages app URL so
+     extended family without VPN access can play.
+     ---------------------------------------------------------------- */
+  function _b64urlEncode(str) {
+    const utf8 = unescape(encodeURIComponent(str));
+    return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function _b64urlDecode(s) {
+    s = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    return decodeURIComponent(escape(atob(s)));
+  }
+  function encodeBracket(member) {
+    const picks = state.picks[member.id] || {};
+    const payload = {
+      v: 1,
+      name: member.name || '',
+      avatar: member.avatar || '',
+      gw: picks.groupWinners || {},
+      gr: picks.groupRunnersUp || {},
+      ko: picks.ko || {},
+      ch: picks.champion || null,
+      ru: picks.runnerUp || null,
+      gb: picks.goldenBoot || '',
+    };
+    if (picks.scores && Object.keys(picks.scores).length > 0) payload.sc = picks.scores;
+    return _b64urlEncode(JSON.stringify(payload));
+  }
+  function decodeBracket(encoded) {
+    try {
+      const json = _b64urlDecode(encoded);
+      const p = JSON.parse(json);
+      if (p && p.v === 1 && typeof p.name === 'string') return p;
+    } catch (e) {}
+    return null;
+  }
+  function importSharedBracket(payload) {
+    if (!payload || !payload.name) return null;
+    // Match by lowercase name; otherwise create a new entry
+    const lower = payload.name.toLowerCase();
+    let entry = state.members.find(m => m.name && m.name.toLowerCase() === lower);
+    if (!entry) {
+      const id = 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,5);
+      entry = { id, name: payload.name, avatar: payload.avatar || null };
+      state.members.push(entry);
+    } else if (payload.avatar && !entry.avatar) {
+      entry.avatar = payload.avatar;
+    }
+    state.picks[entry.id] = {
+      groupWinners: payload.gw || {},
+      groupRunnersUp: payload.gr || {},
+      ko: payload.ko || {},
+      champion: payload.ch || null,
+      runnerUp: payload.ru || null,
+      goldenBoot: payload.gb || '',
+      goldenBootCorrect: false,
+      scores: payload.sc || {},
+    };
+    save();
+    return entry;
+  }
+  function checkUrlForImport() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const enc = params.get('wc_share');
+      if (!enc) return;
+      const payload = decodeBracket(enc);
+      if (!payload) return;
+      // Clear the URL so a reload doesn't re-prompt
+      const url = new URL(window.location.href);
+      url.searchParams.delete('wc_share');
+      history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?'+url.searchParams.toString() : ''));
+      // Defer prompt so init() has time to mount
+      setTimeout(() => promptImportBracket(payload), 600);
+    } catch (e) {}
+  }
+  let _pendingImport = null;
+  function promptImportBracket(payload) {
+    const modal = document.getElementById('match-modal');
+    if (!modal) return;
+    _pendingImport = payload;
+    const guess = payload.gb ? `Golden Boot guess: <b>${escapeHTML(payload.gb)}</b>` : '';
+    modal.querySelector('.modal-inner').innerHTML = `
+      <h3>📨 Bracket received</h3>
+      <div class="sub">From <b>${payload.avatar ? escapeHTML(payload.avatar)+' ' : ''}${escapeHTML(payload.name)}</b></div>
+      <p style="margin:10px 0;font-size:0.9rem;">Add this bracket to the family pool? Picks will start scoring as results come in.</p>
+      ${guess ? `<p style="font-size:0.82rem;color:var(--text-muted);">${guess}</p>` : ''}
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="WC.closeModal()">Not now</button>
+        <button class="btn" onclick="WC.confirmImportBracket()">✓ Add to pool</button>
+      </div>
+    `;
+    modal.classList.add('open');
+  }
+  function confirmImportBracket() {
+    const p = _pendingImport;
+    _pendingImport = null;
+    closeModal();
+    if (!p) return;
+    const entry = importSharedBracket(p);
+    if (entry) {
+      toast('Added ' + entry.name + ' to the pool');
+      activateTab('pool');
+    }
+  }
+
+  /* ----------------------------------------------------------------
      Bracket candidate resolver — given a placeholder label like
      "1A", "2B", "3A/B/C/D/F", "W73", "L101", return the set of team
      codes that could fill that slot. Cascades recursively so R16+
@@ -2674,6 +2848,7 @@
     if (name === 'standings')   renderStandings();
     if (name === 'pool')        renderPool();
     if (name === 'quiz')        renderQuiz();
+    if (name === 'stickers')    renderStickers();
     if (name === 'about')       renderAbout();
     window.scrollTo({ top:0, behavior:'instant' });
   }
@@ -3014,6 +3189,8 @@
   function openCountry(code) {
     const c = countryByCode(code);
     if (!c) return;
+    // Earn a sticker just for visiting (only the first time)
+    earnSticker(code, 'visit', false);
     const root = document.getElementById('screen-country');
     root.innerHTML = `
       <button class="btn ghost" style="margin-bottom:12px;" onclick="WC.tab('teams')">← Back to teams</button>
@@ -3077,17 +3254,56 @@
     const root = document.getElementById('screen-matches');
     const stageFilter = document.getElementById('flt-stage')?.value || 'all';
     const groupFilter = document.getElementById('flt-group')?.value || 'all';
+    const chip = state.matchChip || 'all';
 
     let list = state.matches.slice();
     if (stageFilter !== 'all') list = list.filter(m => m.stage === stageFilter);
     if (groupFilter !== 'all') list = list.filter(m => m.group === groupFilter);
+
+    // Quick chips: today / knockouts / my picks / Levi's
+    if (chip === 'today') {
+      const t = todayKey();
+      list = list.filter(m => m.date === t);
+    } else if (chip === 'ko') {
+      list = list.filter(m => m.stage !== 'group');
+    } else if (chip === 'lev') {
+      list = list.filter(m => m.venue === 'lev');
+    } else if (chip === 'mine') {
+      const user = currentActiveUser();
+      const myEntry = user ? state.members.find(m => m.name && m.name.toLowerCase() === user.name.toLowerCase()) : null;
+      const picks = myEntry ? state.picks[myEntry.id] : null;
+      const picked = new Set();
+      if (picks) {
+        for (const g of GROUP_LETTERS) {
+          if (picks.groupWinners && picks.groupWinners[g]) picked.add(picks.groupWinners[g]);
+          if (picks.groupRunnersUp && picks.groupRunnersUp[g]) picked.add(picks.groupRunnersUp[g]);
+        }
+        for (const stage of ['R32','R16','QF','SF','Final']) {
+          const s = picks.ko && picks.ko[stage] ? picks.ko[stage] : {};
+          for (const id of Object.keys(s)) if (s[id]) picked.add(s[id]);
+        }
+        if (picks.champion) picked.add(picks.champion);
+        if (picks.runnerUp) picked.add(picks.runnerUp);
+      }
+      list = list.filter(m => (m.home && picked.has(m.home)) || (m.away && picked.has(m.away)));
+    }
+
     list.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
 
     // group by date
     const byDate = {};
     list.forEach(m => { (byDate[m.date] = byDate[m.date] || []).push(m); });
 
+    const chipBtn = (val, label) => `<button class="tab ${chip===val?'active':''}" style="font-size:0.78rem;padding:6px 12px;" onclick="WC.setMatchChip('${val}')">${label}</button>`;
+
     const filterHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+        ${chipBtn('all',   'All')}
+        ${chipBtn('today', '📅 Today')}
+        ${chipBtn('ko',    '⚔ Knockouts')}
+        ${chipBtn('mine',  '🎯 My picks')}
+        ${chipBtn('lev',   '🌉 Levi&#39;s')}
+      </div>
       <div class="match-filters">
         <select id="flt-stage" onchange="WC.renderMatches()">
           <option value="all">All stages</option>
@@ -3103,7 +3319,7 @@
           <option value="all">All groups</option>
           ${GROUP_LETTERS.map(g => `<option value="${g}" ${groupFilter===g?'selected':''}>Group ${g}</option>`).join('')}
         </select>
-        <span class="muted" style="font-size:0.8rem; align-self:center;">${list.length} matches</span>
+        <span class="muted" style="font-size:0.8rem; align-self:center;">${list.length} match${list.length===1?'':'es'}</span>
       </div>
     `;
 
@@ -3281,13 +3497,15 @@
                 <div class="pts">${m.total}</div>
                 <div class="actions">
                   <button title="Edit picks" onclick="WC.editEntry('${m.id}')">✎</button>
+                  <button title="Share bracket" onclick="WC.openShareBracket('${m.id}')">🔗</button>
                   <button title="Remove from pool" onclick="WC.removeMember('${m.id}')">✕</button>
                 </div>
               </div>`).join('')}
 
         ${selectedId ? '' : `
-          <div style="text-align:center;margin-top:14px;">
+          <div style="text-align:center;margin-top:14px;display:flex;flex-direction:column;gap:8px;align-items:center;">
             <button class="btn gold" style="font-size:1rem;padding:12px 24px;" onclick="WC.startEntry()">${ctaLabel}</button>
+            <button class="btn ghost" style="font-size:0.82rem;" onclick="WC.openInviteGuest()">📨 Invite extended family (no app/VPN needed)</button>
           </div>
         `}
 
@@ -3753,7 +3971,20 @@
     quizState.answered = true;
     const q = quizState.questions[quizState.current];
     const opt = q.options[idx];
-    if (opt && opt.correct) quizState.score++;
+    if (opt && opt.correct) {
+      quizState.score++;
+      const user = currentActiveUser();
+      if (user) awardStars(user.name, 1, 'quiz_correct');
+      // Earn a sticker for any country referenced in the question
+      const countryMention = (q.q + ' ' + (q.options || []).map(o => o.label).join(' '))
+        .toUpperCase();
+      for (const c of COUNTRIES) {
+        if (countryMention.indexOf(c.flag) !== -1) {
+          earnSticker(c.code, 'quiz', false);
+          break; // one per question
+        }
+      }
+    }
     renderQuiz();
   }
   function nextQuestion() {
@@ -3856,6 +4087,57 @@
     quizState.score = 0;
     quizState.answered = false;
     renderQuiz();
+  }
+
+  /* ---- STICKERS — Panini-style 48-country album ---- */
+  function renderStickers() {
+    const root = document.getElementById('screen-stickers');
+    state.stickers = state.stickers || {};
+    const total = COUNTRIES.length;
+    const earned = COUNTRIES.filter(c => _stickerStatus(c.code) !== 'locked').length;
+    const starred = COUNTRIES.filter(c => _stickerStatus(c.code) === 'starred').length;
+    const pct = Math.round((earned / total) * 100);
+
+    let html = `
+      <div class="card sc-hero">
+        <div class="city">Panini-style album</div>
+        <h2 style="margin:4px 0;">📒 Sticker Collection</h2>
+        <div style="display:flex;gap:8px;align-items:center;margin:8px 0;">
+          <div style="flex:1;height:10px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--wc-green),var(--wc-gold));"></div>
+          </div>
+          <b style="color:var(--wc-gold);">${earned} / ${total}</b>
+        </div>
+        <p class="muted" style="font-size:0.85rem;">⭐ ${starred} winner stickers · 🏷 ${earned - starred} earned · 🔒 ${total - earned} locked</p>
+        <p class="muted" style="font-size:0.78rem;margin-top:8px;">Earn stickers by visiting country pages, answering quiz questions about them, or entering their match results. A team's <b>⭐ winner sticker</b> unlocks when you record a match they win.</p>
+      </div>
+    `;
+
+    // Render by group
+    for (const g of GROUP_LETTERS) {
+      const codes = state.groups[g] || [];
+      html += `<div class="card" style="padding:14px;">
+        <h3 style="margin-bottom:8px;color:var(--wc-gold);">Group ${g}</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+          ${codes.map(code => {
+            const c = countryByCode(code);
+            if (!c) return '';
+            const status = _stickerStatus(code);
+            const isLocked = status === 'locked';
+            const isStarred = status === 'starred';
+            return `
+              <div onclick="WC.openCountry('${code}')" style="cursor:pointer;background:${isLocked?'rgba(255,255,255,0.03)':'var(--wc-card-strong)'};border:2px solid ${isStarred?'var(--wc-gold)':(isLocked?'var(--wc-line)':'rgba(22,163,74,0.35)')};border-radius:12px;padding:10px 8px;text-align:center;position:relative;${isLocked?'opacity:0.4;':''}">
+                <div style="font-size:2rem;line-height:1;filter:${isLocked?'grayscale(1)':'none'};">${c.flag}</div>
+                <div style="font-size:0.7rem;font-weight:800;margin-top:4px;line-height:1.15;">${escapeHTML(c.name)}</div>
+                ${isStarred ? '<div style="position:absolute;top:-6px;right:-6px;background:var(--wc-gold);color:#1a1a1a;border-radius:99px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;">⭐</div>' : ''}
+                ${isLocked ? '<div style="position:absolute;top:6px;right:6px;font-size:0.8rem;opacity:0.7;">🔒</div>' : ''}
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }
+
+    root.innerHTML = html;
   }
 
   /* ---- ABOUT ---- */
@@ -3981,6 +4263,13 @@
       const pkEl = document.getElementById('pk-winner');
       const pkWinner = pkEl ? (pkEl.value || null) : null;
       m.result = { home: hs, away: as, pkWinner };
+      // Sticker for each team that played, starred for the winner
+      const winnerCode = hs > as ? m.home : (as > hs ? m.away : pkWinner);
+      if (m.home) earnSticker(m.home, 'result', winnerCode === m.home);
+      if (m.away) earnSticker(m.away, 'result', winnerCode === m.away);
+      // Award stars to the active user (rewards engagement with results)
+      const user = currentActiveUser();
+      if (user) awardStars(user.name, 2, 'result:' + m.id);
     }
     save();
     closeModal();
@@ -4143,6 +4432,76 @@
     save();
     renderPool();
   }
+  function setMatchChip(value) {
+    state.matchChip = value;
+    renderMatches();
+  }
+
+  /* ----------------------------------------------------------------
+     Share bracket + invite extended family — uses URL parameter
+     payload so guests can play from the public app URL without VPN.
+     ---------------------------------------------------------------- */
+  function _publicAppBase() {
+    // Strip any existing query string, keep the directory + filename.
+    return window.location.origin + window.location.pathname;
+  }
+  function openShareBracket(memberId) {
+    const member = state.members.find(m => m.id === memberId);
+    if (!member) return;
+    const enc = encodeBracket(member);
+    const url = _publicAppBase() + '?wc_share=' + enc;
+    const modal = document.getElementById('match-modal');
+    modal.querySelector('.modal-inner').innerHTML = `
+      <h3>🔗 Share ${escapeHTML(member.name)}'s bracket</h3>
+      <div class="sub">Send this link to anyone in the family pool. They'll see the picks and can add the bracket.</div>
+      <textarea readonly id="share-url-area"
+                style="width:100%;background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:10px;font-size:0.78rem;font-family:monospace;margin:10px 0;min-height:90px;word-break:break-all;"
+                onclick="this.select()">${escapeHTML(url)}</textarea>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="WC.closeModal()">Close</button>
+        <button class="btn" onclick="WC.copyShareUrl()">📋 Copy link</button>
+      </div>
+    `;
+    modal.classList.add('open');
+  }
+  function copyShareUrl() {
+    const area = document.getElementById('share-url-area');
+    if (!area) return;
+    area.select();
+    try {
+      navigator.clipboard.writeText(area.value).then(() => toast('Link copied!')).catch(() => {
+        document.execCommand && document.execCommand('copy');
+        toast('Link copied!');
+      });
+    } catch (e) {
+      try { document.execCommand('copy'); toast('Link copied!'); } catch (e2) { toast('Copy failed — long-press the link to select.'); }
+    }
+  }
+  function openInviteGuest() {
+    const link = _publicAppBase();
+    const modal = document.getElementById('match-modal');
+    modal.querySelector('.modal-inner').innerHTML = `
+      <h3>📨 Invite extended family</h3>
+      <div class="sub">No app install, no VPN needed.</div>
+      <ol style="padding-left:20px;line-height:1.6;font-size:0.88rem;margin:10px 0;">
+        <li>Send the family member this public app link:</li>
+      </ol>
+      <textarea readonly id="share-url-area"
+                style="width:100%;background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:10px;font-size:0.78rem;font-family:monospace;margin:6px 0 10px;min-height:60px;word-break:break-all;"
+                onclick="this.select()">${escapeHTML(link)}</textarea>
+      <ol start="2" style="padding-left:20px;line-height:1.6;font-size:0.88rem;">
+        <li>They open it, fill out their bracket, and tap the <b>🔗 share</b> button next to their name.</li>
+        <li>They text/email/WhatsApp <b>that link</b> back to you.</li>
+        <li>You open <b>their link</b> here — the app prompts you to add their bracket to the pool. Done.</li>
+      </ol>
+      <p class="muted" style="font-size:0.78rem;margin-top:10px;">Their bracket then syncs to the rest of the family devices via the regular pool sync.</p>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="WC.closeModal()">Close</button>
+        <button class="btn" onclick="WC.copyShareUrl()">📋 Copy invite link</button>
+      </div>
+    `;
+    modal.classList.add('open');
+  }
   function setScorePred(memberId, matchId, side, raw) {
     const p = state.picks[memberId];
     if (!p) return;
@@ -4289,6 +4648,9 @@
       hiddenSince = null;
     });
 
+    // Honor ?wc_share=... in the URL — guest brought us a bracket to import
+    checkUrlForImport();
+
     // Initial cross-device pull so a new device picks up family picks
     if (window.CloudSync && CloudSync.pull) {
       setTimeout(() => {
@@ -4409,8 +4771,10 @@
     openGroupEditor, saveGroups,
     startEntry, editEntry, doneEntry, setEntrantName, removeMember,
     setGroupPick, setKoPick, setOutcomePick, setScorePred,
+    setMatchChip,
     quickFill,
     startQuiz, answerQuiz, nextQuestion, resetQuiz,
+    openShareBracket, copyShareUrl, openInviteGuest, confirmImportBracket,
     resetAll,
     syncScores,
   };

@@ -22,7 +22,8 @@ var TrophyRoom = (function() {
     { id: 'lab',     name: 'Lab Explorer',    emoji: '🔬', color: '#6EE7B7', threshold: 1 },
     { id: 'world',   name: 'World Explorer',  emoji: '🌍', color: '#3B82F6', threshold: 1 },
     { id: 'story',   name: 'Story Explorer',  emoji: '📚', color: '#8B5CF6', threshold: 1 },
-    { id: 'guess',   name: 'Guess Quest',     emoji: '🎯', color: '#FBBF24', threshold: 1 }
+    { id: 'guess',   name: 'Guess Quest',     emoji: '🎯', color: '#FBBF24', threshold: 1 },
+    { id: 'worldcup', name: 'World Cup 2026', emoji: '🏆', color: '#16A34A', threshold: 1 }
   ];
 
   // Mirror of RANKS in auth.js so we can show the progression strip.
