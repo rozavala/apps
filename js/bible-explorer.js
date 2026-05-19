@@ -209,6 +209,205 @@ const BibleExplorer = (() => {
         { q: { en: 'How many days after Easter is Pentecost?', es: '¿Cuántos días después de Pascua es Pentecostés?' },
           options: { en: ['Forty','Fifty','Seven','Three'], es: ['Cuarenta','Cincuenta','Siete','Tres'] }, answer: 1 }
       ]
+    },
+
+    // ── v2 expansion: 15 more stories ────────────────────────────────
+    // 8 OT + 7 NT, keeping a balance across testaments and difficulty.
+
+    { id: 'joseph', testament: 'OT', icon: '🎨', ageMin: 7,
+      title: { en: 'Joseph and the Coat', es: 'José y la Túnica' },
+      summary: {
+        en: 'Jacob loved his son Joseph and gave him a coat of many colours. His brothers grew jealous and sold him into Egypt, but God turned the evil for good — Joseph became a great ruler and saved his family from famine.',
+        es: 'Jacob amaba a su hijo José y le regaló una túnica de muchos colores. Sus hermanos sintieron celos y lo vendieron a Egipto, pero Dios convirtió el mal en bien — José llegó a ser un gran gobernante y salvó a su familia del hambre.'
+      },
+      quiz: [
+        { q: { en: 'What kind of coat did Joseph receive?', es: '¿Qué tipo de túnica recibió José?' },
+          options: { en: ['Plain white','Many colours','Royal blue','Made of fur'], es: ['Blanca lisa','De muchos colores','Azul real','De piel'] }, answer: 1 },
+        { q: { en: 'To which country was Joseph sold?', es: '¿A qué país fue vendido José?' },
+          options: { en: ['Egypt','Babylon','Persia','Rome'], es: ['Egipto','Babilonia','Persia','Roma'] }, answer: 0 }
+      ]
+    },
+    { id: 'joshua', testament: 'OT', icon: '📯', ageMin: 7,
+      title: { en: 'Joshua at Jericho', es: 'Josué en Jericó' },
+      summary: {
+        en: 'God told Joshua that the people should march around the walls of Jericho once a day for six days, and seven times on the seventh day, blowing trumpets. On the seventh day they shouted and the walls came tumbling down.',
+        es: 'Dios le dijo a Josué que el pueblo marchara alrededor de los muros de Jericó una vez al día durante seis días, y siete veces el séptimo día, tocando trompetas. Al séptimo día gritaron y los muros se derrumbaron.'
+      },
+      quiz: [
+        { q: { en: 'How many times did they march on the seventh day?', es: '¿Cuántas veces marcharon el séptimo día?' },
+          options: { en: ['Three','Five','Seven','Twelve'], es: ['Tres','Cinco','Siete','Doce'] }, answer: 2 },
+        { q: { en: 'What instrument did they blow?', es: '¿Qué instrumento tocaron?' },
+          options: { en: ['Drums','Trumpets','Flutes','Harps'], es: ['Tambores','Trompetas','Flautas','Arpas'] }, answer: 1 }
+      ]
+    },
+    { id: 'ruth', testament: 'OT', icon: '🌾', ageMin: 7,
+      title: { en: 'Ruth\'s Loyalty', es: 'La Lealtad de Rut' },
+      summary: {
+        en: 'After her husband died, Ruth refused to leave her mother-in-law Naomi and said: "Wherever you go, I will go." She gleaned grain in the fields of Boaz, who later married her. Ruth became the great-grandmother of King David.',
+        es: 'Después de la muerte de su marido, Rut se negó a dejar a su suegra Noemí y le dijo: "A dondequiera que tú vayas, iré yo." Recogió espigas en los campos de Booz, quien luego se casó con ella. Rut llegó a ser bisabuela del rey David.'
+      },
+      quiz: [
+        { q: { en: 'Whom did Ruth refuse to leave?', es: '¿A quién se negó Rut a dejar?' },
+          options: { en: ['Her sister','Her mother-in-law','Her father','Her cousin'], es: ['Su hermana','Su suegra','Su padre','Su primo'] }, answer: 1 },
+        { q: { en: 'Whom did Ruth eventually marry?', es: '¿Con quién se casó Rut finalmente?' },
+          options: { en: ['Boaz','Samuel','David','Job'], es: ['Booz','Samuel','David','Job'] }, answer: 0 }
+      ]
+    },
+    { id: 'esther', testament: 'OT', icon: '👑', ageMin: 8,
+      title: { en: 'Esther the Brave Queen', es: 'Ester la Reina Valiente' },
+      summary: {
+        en: 'When Queen Esther learned that her people were in danger, she risked her life going before the king without being called. Her courage saved the Jewish people from destruction. The book of Esther never names God directly, yet shows His care.',
+        es: 'Cuando la reina Ester supo que su pueblo estaba en peligro, arriesgó su vida al presentarse ante el rey sin ser llamada. Su valentía salvó al pueblo judío de la destrucción. El libro de Ester nunca nombra a Dios directamente, pero muestra Su cuidado.'
+      },
+      quiz: [
+        { q: { en: 'What was Esther\'s title?', es: '¿Cuál era el título de Ester?' },
+          options: { en: ['Princess','Queen','Prophetess','Judge'], es: ['Princesa','Reina','Profetisa','Jueza'] }, answer: 1 },
+        { q: { en: 'Whom did Esther save?', es: '¿A quién salvó Ester?' },
+          options: { en: ['Her family only','The Jewish people','The king\'s soldiers','The priests'], es: ['Sólo a su familia','Al pueblo judío','A los soldados del rey','A los sacerdotes'] }, answer: 1 }
+      ]
+    },
+    { id: 'samuel', testament: 'OT', icon: '🕯️', ageMin: 6,
+      title: { en: 'Samuel Hears God', es: 'Samuel Escucha a Dios' },
+      summary: {
+        en: 'When Samuel was a boy serving in the temple, God called his name in the night. Three times Samuel ran to the priest Eli, until Eli understood it was God calling. Samuel answered: "Speak, Lord, for your servant is listening."',
+        es: 'Cuando Samuel era niño y servía en el templo, Dios lo llamó por su nombre en la noche. Tres veces corrió Samuel hacia el sacerdote Elí, hasta que Elí comprendió que era Dios quien llamaba. Samuel respondió: "Habla, Señor, que tu siervo escucha."'
+      },
+      quiz: [
+        { q: { en: 'Who was the priest Samuel served under?', es: '¿Bajo qué sacerdote servía Samuel?' },
+          options: { en: ['Aaron','Eli','Zechariah','Caiaphas'], es: ['Aarón','Elí','Zacarías','Caifás'] }, answer: 1 },
+        { q: { en: 'How many times did Samuel run to Eli?', es: '¿Cuántas veces corrió Samuel hacia Elí?' },
+          options: { en: ['Once','Twice','Three times','Seven times'], es: ['Una vez','Dos veces','Tres veces','Siete veces'] }, answer: 2 }
+      ]
+    },
+    { id: 'elijah', testament: 'OT', icon: '🔥', ageMin: 8,
+      title: { en: 'Elijah and the Fire', es: 'Elías y el Fuego' },
+      summary: {
+        en: 'Elijah challenged the prophets of Baal: each side would build an altar and ask their god to send fire. The prophets of Baal cried out all day to nothing. Then Elijah prayed once and fire fell from heaven, showing that the Lord is the true God.',
+        es: 'Elías desafió a los profetas de Baal: cada lado construiría un altar y pediría a su dios que enviara fuego. Los profetas de Baal clamaron todo el día sin respuesta. Entonces Elías oró una vez y el fuego cayó del cielo, mostrando que el Señor es el Dios verdadero.'
+      },
+      quiz: [
+        { q: { en: 'Whom did Elijah challenge?', es: '¿A quién desafió Elías?' },
+          options: { en: ['The Pharisees','The prophets of Baal','The kings of Egypt','The Romans'], es: ['Los fariseos','Los profetas de Baal','Los reyes de Egipto','Los romanos'] }, answer: 1 },
+        { q: { en: 'What fell from heaven for Elijah?', es: '¿Qué cayó del cielo para Elías?' },
+          options: { en: ['Manna','Rain','Fire','Stars'], es: ['Maná','Lluvia','Fuego','Estrellas'] }, answer: 2 }
+      ]
+    },
+    { id: 'job', testament: 'OT', icon: '🪨', ageMin: 9,
+      title: { en: 'Job\'s Patience', es: 'La Paciencia de Job' },
+      summary: {
+        en: 'Job lost his children, his wealth, and his health, yet still trusted God: "The Lord gave, and the Lord has taken away; blessed be the name of the Lord." After his trial God restored everything to him double.',
+        es: 'Job perdió a sus hijos, sus riquezas y su salud, pero siguió confiando en Dios: "El Señor me lo dio, el Señor me lo quitó; bendito sea el nombre del Señor." Tras su prueba, Dios le restauró todo el doble.'
+      },
+      quiz: [
+        { q: { en: 'What did Job say when he lost everything?', es: '¿Qué dijo Job cuando lo perdió todo?' },
+          options: { en: ['Blessed be the name of the Lord','It is unfair','I will never trust again','I quit'], es: ['Bendito sea el nombre del Señor','Es injusto','Nunca volveré a confiar','Renuncio'] }, answer: 0 }
+      ]
+    },
+    { id: 'maccabees', testament: 'OT', icon: '🛡️', ageMin: 10,
+      title: { en: 'The Maccabees', es: 'Los Macabeos' },
+      summary: {
+        en: 'When the Greek king Antiochus tried to outlaw the Jewish faith, the family of Mattathias rose up. His son Judas Maccabeus led a small army that defeated mighty empires and re-dedicated the Temple in Jerusalem. The books of Maccabees are part of the Catholic Old Testament.',
+        es: 'Cuando el rey griego Antíoco intentó prohibir la fe judía, la familia de Matatías se levantó. Su hijo Judas Macabeo lideró un pequeño ejército que derrotó a poderosos imperios y volvió a consagrar el Templo de Jerusalén. Los libros de los Macabeos forman parte del Antiguo Testamento católico.'
+      },
+      quiz: [
+        { q: { en: 'Who led the Maccabean revolt?', es: '¿Quién lideró la revuelta macabea?' },
+          options: { en: ['Mattathias','Judas Maccabeus','Solomon','Daniel'], es: ['Matatías','Judas Macabeo','Salomón','Daniel'] }, answer: 1 },
+        { q: { en: 'What did the Maccabees re-dedicate?', es: '¿Qué volvieron a consagrar los Macabeos?' },
+          options: { en: ['A palace','The Temple in Jerusalem','A new city','A boat'], es: ['Un palacio','El Templo de Jerusalén','Una ciudad nueva','Un barco'] }, answer: 1 }
+      ]
+    },
+
+    // ── NT additions ──
+    { id: 'cana', testament: 'NT', icon: '🍷', ageMin: 7,
+      title: { en: 'The Wedding at Cana', es: 'Las Bodas de Caná' },
+      summary: {
+        en: 'At a wedding in Cana the wine ran out. Mary said to her son Jesus, "They have no wine." Jesus had the servants fill six stone jars with water — and turned the water into wine. This was the first of His miracles.',
+        es: 'En una boda en Caná se acabó el vino. María dijo a su hijo Jesús: "No tienen vino." Jesús hizo que los sirvientes llenaran seis tinajas de piedra con agua — y convirtió el agua en vino. Fue el primero de Sus milagros.'
+      },
+      quiz: [
+        { q: { en: 'What did Jesus turn the water into?', es: '¿En qué convirtió Jesús el agua?' },
+          options: { en: ['Oil','Wine','Honey','Milk'], es: ['Aceite','Vino','Miel','Leche'] }, answer: 1 },
+        { q: { en: 'How many jars did the servants fill?', es: '¿Cuántas tinajas llenaron los sirvientes?' },
+          options: { en: ['Three','Six','Seven','Twelve'], es: ['Tres','Seis','Siete','Doce'] }, answer: 1 }
+      ]
+    },
+    { id: 'walking_water', testament: 'NT', icon: '🌊', ageMin: 7,
+      title: { en: 'Walking on Water', es: 'Caminando Sobre el Agua' },
+      summary: {
+        en: 'The disciples were rowing through a storm when Jesus came walking on the water. Peter asked to come too. He walked toward Jesus on the waves until he looked at the storm and began to sink — but Jesus reached out His hand and caught him.',
+        es: 'Los discípulos remaban en medio de una tormenta cuando Jesús vino caminando sobre el agua. Pedro pidió ir también. Caminó hacia Jesús sobre las olas hasta que miró la tormenta y comenzó a hundirse — pero Jesús extendió Su mano y lo sostuvo.'
+      },
+      quiz: [
+        { q: { en: 'Which apostle walked on the water with Jesus?', es: '¿Qué apóstol caminó sobre el agua con Jesús?' },
+          options: { en: ['John','Peter','Andrew','James'], es: ['Juan','Pedro','Andrés','Santiago'] }, answer: 1 },
+        { q: { en: 'Why did Peter begin to sink?', es: '¿Por qué Pedro comenzó a hundirse?' },
+          options: { en: ['Boat hit him','He looked at the storm','It got dark','He fell asleep'], es: ['Un barco lo golpeó','Miró la tormenta','Se hizo de noche','Se durmió'] }, answer: 1 }
+      ]
+    },
+    { id: 'good_samaritan', testament: 'NT', icon: '🤝', ageMin: 7,
+      title: { en: 'The Good Samaritan', es: 'El Buen Samaritano' },
+      summary: {
+        en: 'A traveller was beaten and left by the road. A priest and a Levite walked past, but a Samaritan stopped, cleaned his wounds, and paid for his stay at an inn. Jesus told this parable to teach who our neighbour is.',
+        es: 'Un viajero fue golpeado y dejado en el camino. Un sacerdote y un levita pasaron de largo, pero un samaritano se detuvo, le curó las heridas y pagó por su estancia en una posada. Jesús contó esta parábola para enseñar quién es nuestro prójimo.'
+      },
+      quiz: [
+        { q: { en: 'Who helped the wounded man?', es: '¿Quién ayudó al herido?' },
+          options: { en: ['The priest','The Levite','The Samaritan','The soldier'], es: ['El sacerdote','El levita','El samaritano','El soldado'] }, answer: 2 },
+        { q: { en: 'What did the Samaritan pay for?', es: '¿Por qué pagó el samaritano?' },
+          options: { en: ['A new horse','The man\'s stay at an inn','New clothes','A meal'], es: ['Un caballo nuevo','La estancia del hombre en una posada','Ropa nueva','Una comida'] }, answer: 1 }
+      ]
+    },
+    { id: 'prodigal_son', testament: 'NT', icon: '🐷', ageMin: 8,
+      title: { en: 'The Prodigal Son', es: 'El Hijo Pródigo' },
+      summary: {
+        en: 'A younger son took his inheritance, wasted it on wild living, and ended up feeding pigs and starving. When he returned home expecting to be a servant, his father ran out to embrace him and threw a great feast — for "this son of mine was lost and is found".',
+        es: 'Un hijo menor tomó su herencia, la malgastó en vida desenfrenada y terminó alimentando cerdos y muriendo de hambre. Cuando regresó a casa esperando ser un sirviente, su padre corrió a abrazarlo y organizó un gran banquete — porque "este hijo mío estaba perdido y ha sido hallado".'
+      },
+      quiz: [
+        { q: { en: 'What did the prodigal son end up doing?', es: '¿Qué terminó haciendo el hijo pródigo?' },
+          options: { en: ['Teaching','Feeding pigs','Building boats','Selling spices'], es: ['Enseñando','Alimentando cerdos','Construyendo barcos','Vendiendo especias'] }, answer: 1 },
+        { q: { en: 'How did the father greet his returning son?', es: '¿Cómo recibió el padre a su hijo que volvía?' },
+          options: { en: ['With anger','With silence','With a feast','With a punishment'], es: ['Con enojo','Con silencio','Con un banquete','Con un castigo'] }, answer: 2 }
+      ]
+    },
+    { id: 'loaves_fishes', testament: 'NT', icon: '🐟', ageMin: 6,
+      title: { en: 'The Loaves and the Fishes', es: 'Los Panes y los Peces' },
+      summary: {
+        en: 'Five thousand people had come to hear Jesus, with no food. A boy had five loaves and two fish. Jesus blessed them, broke them, and gave to everyone — and when they finished, twelve baskets of leftovers were collected.',
+        es: 'Cinco mil personas habían ido a escuchar a Jesús, sin comida. Un muchacho tenía cinco panes y dos peces. Jesús los bendijo, los partió y los repartió a todos — y al terminar, recogieron doce canastas de sobras.'
+      },
+      quiz: [
+        { q: { en: 'How many loaves did the boy have?', es: '¿Cuántos panes tenía el muchacho?' },
+          options: { en: ['Two','Five','Seven','Twelve'], es: ['Dos','Cinco','Siete','Doce'] }, answer: 1 },
+        { q: { en: 'How many people were fed?', es: '¿Cuántas personas fueron alimentadas?' },
+          options: { en: ['500','1,000','5,000','10,000'], es: ['500','1.000','5.000','10.000'] }, answer: 2 }
+      ]
+    },
+    { id: 'zacchaeus', testament: 'NT', icon: '🌳', ageMin: 6,
+      title: { en: 'Zacchaeus the Tax Collector', es: 'Zaqueo el Recaudador' },
+      summary: {
+        en: 'Zacchaeus was a short, rich tax collector that everyone disliked. To see Jesus over the crowd he climbed a sycamore tree. Jesus looked up and said, "Zacchaeus, come down, today I must stay at your house." Zacchaeus repented and gave back four times what he had wronged.',
+        es: 'Zaqueo era un recaudador de impuestos bajo, rico y odiado por todos. Para ver a Jesús por encima de la multitud, subió a un sicómoro. Jesús miró hacia arriba y dijo: "Zaqueo, baja, hoy debo quedarme en tu casa." Zaqueo se arrepintió y devolvió cuatro veces lo que había estafado.'
+      },
+      quiz: [
+        { q: { en: 'What did Zacchaeus climb?', es: '¿A qué se subió Zaqueo?' },
+          options: { en: ['A house','A sycamore tree','A wall','A ladder'], es: ['Una casa','Un sicómoro','Un muro','Una escalera'] }, answer: 1 },
+        { q: { en: 'How many times over did Zacchaeus give back?', es: '¿Cuántas veces devolvió Zaqueo?' },
+          options: { en: ['One','Two','Three','Four'], es: ['Una','Dos','Tres','Cuatro'] }, answer: 3 }
+      ]
+    },
+    { id: 'damascus', testament: 'NT', icon: '⚡', ageMin: 9,
+      title: { en: 'Paul on the Damascus Road', es: 'Pablo en el Camino a Damasco' },
+      summary: {
+        en: 'Saul of Tarsus was travelling to Damascus to arrest Christians when a bright light flashed from heaven. He fell to the ground and heard a voice: "Saul, Saul, why do you persecute me?" Saul was struck blind for three days, then was healed and became the apostle Paul.',
+        es: 'Saulo de Tarso iba camino a Damasco para arrestar a cristianos cuando una luz resplandeciente brilló desde el cielo. Cayó a tierra y escuchó una voz: "Saulo, Saulo, ¿por qué me persigues?" Saulo quedó ciego tres días, luego fue sanado y se convirtió en el apóstol Pablo.'
+      },
+      quiz: [
+        { q: { en: 'What was Paul\'s name before his conversion?', es: '¿Cuál era el nombre de Pablo antes de su conversión?' },
+          options: { en: ['Peter','Saul','John','Andrew'], es: ['Pedro','Saulo','Juan','Andrés'] }, answer: 1 },
+        { q: { en: 'For how long was he blind?', es: '¿Cuánto tiempo quedó ciego?' },
+          options: { en: ['1 day','3 days','7 days','40 days'], es: ['1 día','3 días','7 días','40 días'] }, answer: 1 }
+      ]
     }
   ];
 
@@ -306,7 +505,103 @@ const BibleExplorer = (() => {
       es: 'Todo lo puedo en Cristo que me [fortalece].' },
     { ref: '1 Jn 4:8', tier: 1,
       en: 'God is [love].',
-      es: 'Dios es [amor].' }
+      es: 'Dios es [amor].' },
+
+    // ── v2 expansion: 30 more verses ─────────────────────────────────
+    // Same public-domain translations (Reina-Valera 1909 / Douay-Rheims).
+    // Mix of Psalms, Proverbs, Prophets, Gospels, Epistles. Distribution:
+    // tier 1 = 18 · tier 2 = 9 · tier 3 = 3 (full catalog: 60 verses)
+
+    { ref: 'Gen 1:27', tier: 1,
+      en: 'God created man to his own [image].',
+      es: 'Creó Dios al hombre a su [imagen].' },
+    { ref: 'Ex 20:3', tier: 1,
+      en: 'Thou shalt not have strange [gods] before me.',
+      es: 'No tendrás [dioses] ajenos delante de mí.' },
+    { ref: 'Dt 6:5', tier: 2,
+      en: 'Thou shalt love the Lord thy God with thy whole [heart], and with thy whole [soul].',
+      es: 'Amarás a Jehová tu Dios de todo tu [corazón], y de toda tu [alma].' },
+    { ref: 'Jos 1:9', tier: 1,
+      en: 'Take courage, and be strong. Fear not, and be not [dismayed].',
+      es: 'Esfuérzate y sé valiente; no temas, ni desmayes ante [ningún temor].' },
+    { ref: 'Ps 19:1', tier: 1,
+      en: 'The heavens shew forth the [glory] of God.',
+      es: 'Los cielos cuentan la [gloria] de Dios.' },
+    { ref: 'Ps 23:4', tier: 1,
+      en: 'I will fear no [evils], for thou art with me.',
+      es: 'No temeré [mal] alguno, porque tú estarás conmigo.' },
+    { ref: 'Ps 34:8', tier: 1,
+      en: 'O taste, and see that the Lord is [sweet].',
+      es: 'Gustad y ved cuán [bueno] es Jehová.' },
+    { ref: 'Ps 46:10', tier: 1,
+      en: 'Be still, and see that I am [God].',
+      es: 'Estad quietos, y conoced que yo soy [Dios].' },
+    { ref: 'Ps 51:10', tier: 1,
+      en: 'Create a clean [heart] in me, O God.',
+      es: 'Crea en mí, oh Dios, un [corazón] limpio.' },
+    { ref: 'Ps 121:1', tier: 1,
+      en: 'I have lifted up my eyes to the [mountains], from whence help shall come to me.',
+      es: 'Alzaré mis ojos a los [montes], de donde vendrá mi socorro.' },
+    { ref: 'Ps 139:14', tier: 1,
+      en: 'I will praise thee, for thou art fearfully [magnified].',
+      es: 'Te alabaré; porque formidables, [maravillosas] son tus obras.' },
+    { ref: 'Prov 3:6', tier: 1,
+      en: 'In all thy ways think on him, and he will direct thy [steps].',
+      es: 'Reconócelo en todos tus caminos, y él enderezará tus [veredas].' },
+    { ref: 'Prov 15:1', tier: 1,
+      en: 'A mild answer breaketh [wrath].',
+      es: 'La blanda respuesta quita la [ira].' },
+    { ref: 'Prov 17:17', tier: 1,
+      en: 'He that is a [friend] loveth at all times.',
+      es: 'En todo tiempo ama el [amigo].' },
+    { ref: 'Eccl 3:1', tier: 1,
+      en: 'There is a time for every [purpose] under heaven.',
+      es: 'Todo tiene su [tiempo] bajo el cielo.' },
+    { ref: 'Isa 41:10', tier: 2,
+      en: 'Fear not, for I am with thee. Be not [dismayed], for I am thy [God].',
+      es: 'No temas, porque yo estoy contigo; no [desmayes], porque yo soy tu [Dios].' },
+    { ref: 'Isa 53:5', tier: 2,
+      en: 'He was [wounded] for our iniquities, and by his [bruises] we are healed.',
+      es: 'Mas él herido fue por nuestras [rebeliones], y por su [llaga] fuimos nosotros curados.' },
+    { ref: 'Jer 29:11', tier: 2,
+      en: 'I know the thoughts I think over you, thoughts of [peace], and not of [affliction].',
+      es: 'Yo sé los pensamientos que tengo acerca de vosotros, pensamientos de [paz], y no de [mal].' },
+    { ref: 'Lam 3:22', tier: 1,
+      en: 'The mercies of the Lord are [new] every morning.',
+      es: 'Nuevas son cada [mañana] las misericordias del Señor.' },
+    { ref: 'Mt 4:4', tier: 1,
+      en: 'Not in bread alone doth man [live], but in every word that proceedeth from the mouth of God.',
+      es: 'No sólo de pan [vivirá] el hombre, sino de toda palabra que sale de la boca de Dios.' },
+    { ref: 'Mt 5:16', tier: 1,
+      en: 'So let your light [shine] before men.',
+      es: 'Así alumbre vuestra [luz] delante de los hombres.' },
+    { ref: 'Mt 6:21', tier: 1,
+      en: 'Where thy [treasure] is, there is thy heart also.',
+      es: 'Donde está tu [tesoro], allí estará también tu corazón.' },
+    { ref: 'Mt 7:12', tier: 1,
+      en: 'All things therefore whatsoever you would that men should do to you, do you also to [them].',
+      es: 'Así que, todas las cosas que queráis que los hombres hagan con vosotros, hacedlas vosotros con [ellos].' },
+    { ref: 'Mk 12:31', tier: 1,
+      en: 'Thou shalt love thy [neighbour] as thyself.',
+      es: 'Amarás a tu [prójimo] como a ti mismo.' },
+    { ref: 'Lk 6:31', tier: 1,
+      en: 'As you would that men should do to you, do you also to them in like [manner].',
+      es: 'Como queréis que hagan los hombres con vosotros, así también haced vosotros con [ellos].' },
+    { ref: 'Jn 10:11', tier: 1,
+      en: 'I am the good [shepherd].',
+      es: 'Yo soy el buen [pastor].' },
+    { ref: 'Acts 20:35', tier: 1,
+      en: 'It is a more [blessed] thing to give, rather than to receive.',
+      es: 'Más [bienaventurada] cosa es dar que recibir.' },
+    { ref: 'Rom 12:21', tier: 1,
+      en: 'Be not overcome by evil, but overcome evil by [good].',
+      es: 'No seas vencido de lo malo, sino vence con el [bien] al mal.' },
+    { ref: '1 Cor 13:13', tier: 3,
+      en: 'Now there remain [faith], [hope], and [charity].',
+      es: 'Ahora permanecen la [fe], la [esperanza], y la [caridad].' },
+    { ref: 'Gal 5:22', tier: 2,
+      en: 'The fruit of the Spirit is [charity], [joy], peace, patience.',
+      es: 'El fruto del Espíritu es [caridad], [gozo], paz, paciencia.' }
   ];
 
   // ── 73 books of the Catholic canon, grouped ─────────────────────
