@@ -50,6 +50,12 @@
           <div class="vv-tile-desc">Build a word</div>
           <div class="vv-tile-stat" id="vv-build-stat">0/0</div>
         </button>
+        <button class="vv-tile" id="vv-tile-dictation">
+          <span class="vv-tile-icon">📝</span>
+          <div class="vv-tile-title">Dictado</div>
+          <div class="vv-tile-desc">Definition → type the word</div>
+          <div class="vv-tile-stat" id="vv-dictation-stat">0 best</div>
+        </button>
       </div>
     </div>
 
@@ -86,6 +92,17 @@
     <div class="vv-screen" id="vv-screen-build">
       <button class="vv-back-btn vv-home-btn" aria-label="Back to home">←</button>
       <div id="vv-build-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Dictation -->
+    <div class="vv-screen" id="vv-screen-dictation">
+      <button class="vv-back-btn vv-home-btn" aria-label="Back to home">←</button>
+      <div id="vv-dictation-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Dictation result -->
+    <div class="vv-screen" id="vv-screen-dictation-result">
+      <div id="vv-dictation-result"></div>
     </div>
   </div>
 

@@ -256,6 +256,171 @@ const VocabularioVivo = (() => {
         { en: 'autograph', es: 'autógrafo' },
         { en: 'paragraph', es: 'párrafo' },
         { en: 'biography', es: 'biografía' }
+      ] },
+
+    // ── v2 additions: 20 more roots (15 Latin, 5 Greek) ──────────────
+    // ── Latin ──
+    { id: 'flect', origin: 'L', tier: 2,
+      meaning: { en: 'bend', es: 'doblar' },
+      words: [
+        { en: 'reflect',  es: 'reflejar' },
+        { en: 'flexible', es: 'flexible' },
+        { en: 'deflect',  es: 'desviar' },
+        { en: 'inflexible', es: 'inflexible' }
+      ] },
+    { id: 'rupt', origin: 'L', tier: 2,
+      meaning: { en: 'break', es: 'romper' },
+      words: [
+        { en: 'interrupt', es: 'interrumpir' },
+        { en: 'rupture',   es: 'ruptura' },
+        { en: 'disrupt',   es: 'interrumpir' },
+        { en: 'abrupt',    es: 'abrupto' }
+      ] },
+    { id: 'struct', origin: 'L', tier: 2,
+      meaning: { en: 'build', es: 'construir' },
+      words: [
+        { en: 'construct',   es: 'construir' },
+        { en: 'structure',   es: 'estructura' },
+        { en: 'destruction', es: 'destrucción' },
+        { en: 'instruction', es: 'instrucción' }
+      ] },
+    { id: 'tract', origin: 'L', tier: 2,
+      meaning: { en: 'pull, drag', es: 'tirar, arrastrar' },
+      words: [
+        { en: 'attract', es: 'atraer' },
+        { en: 'tractor', es: 'tractor' },
+        { en: 'extract', es: 'extraer' },
+        { en: 'subtract',es: 'sustraer' }
+      ] },
+    { id: 'vent', origin: 'L', tier: 2,
+      meaning: { en: 'come', es: 'venir' },
+      words: [
+        { en: 'invent',     es: 'inventar' },
+        { en: 'prevent',    es: 'prevenir' },
+        { en: 'convention', es: 'convención' },
+        { en: 'adventure',  es: 'aventura' }
+      ] },
+    { id: 'miss', origin: 'L', tier: 3,
+      meaning: { en: 'send', es: 'enviar' },
+      words: [
+        { en: 'submit',   es: 'someter' },
+        { en: 'mission',  es: 'misión' },
+        { en: 'transmit', es: 'transmitir' },
+        { en: 'emit',     es: 'emitir' }
+      ] },
+    { id: 'sent', origin: 'L', tier: 2,
+      meaning: { en: 'feel', es: 'sentir' },
+      words: [
+        { en: 'sentiment', es: 'sentimiento' },
+        { en: 'consent',   es: 'consentir' },
+        { en: 'sensitive', es: 'sensible' },
+        { en: 'sensation', es: 'sensación' }
+      ] },
+    { id: 'pos', origin: 'L', tier: 2,
+      meaning: { en: 'place, put', es: 'colocar, poner' },
+      words: [
+        { en: 'position', es: 'posición' },
+        { en: 'postpone', es: 'posponer' },
+        { en: 'compose',  es: 'componer' },
+        { en: 'deposit',  es: 'depósito' }
+      ] },
+    { id: 'jur', origin: 'L', tier: 3,
+      meaning: { en: 'law, oath', es: 'ley, juramento' },
+      words: [
+        { en: 'jury',     es: 'jurado' },
+        { en: 'justice',  es: 'justicia' },
+        { en: 'perjury',  es: 'perjurio' },
+        { en: 'jurist',   es: 'jurista' }
+      ] },
+    { id: 'urb', origin: 'L', tier: 2,
+      meaning: { en: 'city', es: 'ciudad' },
+      words: [
+        { en: 'urban',    es: 'urbano' },
+        { en: 'suburb',   es: 'suburbio' },
+        { en: 'urbanize', es: 'urbanizar' },
+        { en: 'urbane',   es: 'urbano (cortés)' }
+      ] },
+    { id: 'nav', origin: 'L', tier: 1,
+      meaning: { en: 'ship', es: 'barco, nave' },
+      words: [
+        { en: 'naval',    es: 'naval' },
+        { en: 'navigate', es: 'navegar' },
+        { en: 'navy',     es: 'marina' },
+        { en: 'navigator',es: 'navegante' }
+      ] },
+    { id: 'dom', origin: 'L', tier: 2,
+      meaning: { en: 'house, master', es: 'casa, dueño' },
+      words: [
+        { en: 'domestic', es: 'doméstico' },
+        { en: 'domain',   es: 'dominio' },
+        { en: 'dominate', es: 'dominar' },
+        { en: 'dome',     es: 'cúpula' }
+      ] },
+    { id: 'reg', origin: 'L', tier: 2,
+      meaning: { en: 'rule, king', es: 'gobernar, rey' },
+      words: [
+        { en: 'regal',    es: 'real' },
+        { en: 'region',   es: 'región' },
+        { en: 'regulate', es: 'regular' },
+        { en: 'regiment', es: 'regimiento' }
+      ] },
+    { id: 'sol_alone', origin: 'L', tier: 3,
+      meaning: { en: 'alone', es: 'solo' },
+      words: [
+        { en: 'solo',     es: 'solo' },
+        { en: 'solitude', es: 'soledad' },
+        { en: 'solitary', es: 'solitario' },
+        { en: 'desolate', es: 'desolado' }
+      ] },
+    { id: 'cap', origin: 'L', tier: 2,
+      meaning: { en: 'take, seize', es: 'tomar, capturar' },
+      words: [
+        { en: 'capture',  es: 'capturar' },
+        { en: 'accept',   es: 'aceptar' },
+        { en: 'capable',  es: 'capaz' },
+        { en: 'reception',es: 'recepción' }
+      ] },
+
+    // ── Greek ──
+    { id: 'phon', origin: 'G', tier: 1,
+      meaning: { en: 'sound', es: 'sonido' },
+      words: [
+        { en: 'telephone',es: 'teléfono' },
+        { en: 'symphony', es: 'sinfonía' },
+        { en: 'megaphone',es: 'megáfono' },
+        { en: 'phonetic', es: 'fonético' }
+      ] },
+    { id: 'therm', origin: 'G', tier: 2,
+      meaning: { en: 'heat', es: 'calor' },
+      words: [
+        { en: 'thermometer',es: 'termómetro' },
+        { en: 'thermal',    es: 'térmico' },
+        { en: 'thermos',    es: 'termo' },
+        { en: 'isotherm',   es: 'isoterma' }
+      ] },
+    { id: 'psych', origin: 'G', tier: 3,
+      meaning: { en: 'mind, soul', es: 'mente, alma' },
+      words: [
+        { en: 'psychology',es: 'psicología' },
+        { en: 'psychic',   es: 'psíquico' },
+        { en: 'psyche',    es: 'psique' },
+        { en: 'psychiatry',es: 'psiquiatría' }
+      ] },
+    { id: 'philo', origin: 'G', tier: 3,
+      meaning: { en: 'love of', es: 'amor por' },
+      words: [
+        { en: 'philosophy',  es: 'filosofía' },
+        { en: 'philanthropy',es: 'filantropía' },
+        { en: 'bibliophile', es: 'bibliófilo' },
+        { en: 'philharmonic',es: 'filarmónico' }
+      ] },
+    { id: 'poly', origin: 'G', tier: 2,
+      meaning: { en: 'many', es: 'muchos' },
+      words: [
+        { en: 'polygon',  es: 'polígono' },
+        { en: 'polyglot', es: 'políglota' },
+        { en: 'polyhedron',es: 'poliedro' },
+        { en: 'polygamy', es: 'poligamia' }
       ] }
   ];
 
@@ -325,13 +490,81 @@ const VocabularioVivo = (() => {
       es: { meaning: 'quitarle el agua a algo', word: 'deshidratar' } }
   ];
 
+  // ── 30 dictation pairs: definition → word ────────────────────────
+  // Bilingual: each entry has en/es defintion + word. The accent-
+  // insensitive _normaliseWord helper means a kid typing "biologia"
+  // is marked correct even without the í.
+  const DICTATIONS = [
+    { tier: 1, en: { def: 'study of life',                     word: 'biology' },
+                es: { def: 'el estudio de la vida',            word: 'biología' } },
+    { tier: 1, en: { def: 'writing about the earth',           word: 'geography' },
+                es: { def: 'descripción de la tierra',         word: 'geografía' } },
+    { tier: 1, en: { def: 'a far-sound device',                word: 'telephone' },
+                es: { def: 'un aparato de sonido a distancia', word: 'teléfono' } },
+    { tier: 1, en: { def: 'a tool to look at small things',    word: 'microscope' },
+                es: { def: 'instrumento para mirar cosas pequeñas', word: 'microscopio' } },
+    { tier: 1, en: { def: 'a star-sailor (space traveller)',   word: 'astronaut' },
+                es: { def: 'navegante de las estrellas',       word: 'astronauta' } },
+    { tier: 1, en: { def: 'a tank where water creatures live', word: 'aquarium' },
+                es: { def: 'tanque donde viven criaturas de agua', word: 'acuario' } },
+    { tier: 1, en: { def: 'a channel that carries water',      word: 'aqueduct' },
+                es: { def: 'canal que lleva agua',             word: 'acueducto' } },
+    { tier: 1, en: { def: 'to carry across places',            word: 'transport' },
+                es: { def: 'llevar de un lugar a otro',        word: 'transporte' } },
+    { tier: 1, en: { def: 'an instrument that measures heat',  word: 'thermometer' },
+                es: { def: 'instrumento que mide el calor',    word: 'termómetro' } },
+    { tier: 1, en: { def: 'to move a ship across water',       word: 'navigate' },
+                es: { def: 'mover un barco por el agua',       word: 'navegar' } },
+    { tier: 2, en: { def: 'a picture written with light',      word: 'photograph' },
+                es: { def: 'imagen escrita con luz',           word: 'fotografía' } },
+    { tier: 2, en: { def: 'a self-written signature',          word: 'autograph' },
+                es: { def: 'firma escrita por uno mismo',      word: 'autógrafo' } },
+    { tier: 2, en: { def: 'to say something before it happens',word: 'predict' },
+                es: { def: 'decir algo antes de que ocurra',   word: 'predecir' } },
+    { tier: 2, en: { def: 'someone who looks into things',     word: 'inspector' },
+                es: { def: 'alguien que mira con atención',    word: 'inspector' } },
+    { tier: 2, en: { def: 'done by hand or an instruction book', word: 'manual' },
+                es: { def: 'hecho a mano o libro de instrucciones', word: 'manual' } },
+    { tier: 2, en: { def: 'something that has not been done before', word: 'invent' },
+                es: { def: 'crear algo que no se había hecho antes', word: 'inventar' } },
+    { tier: 2, en: { def: 'to stop something from happening',  word: 'prevent' },
+                es: { def: 'evitar que algo ocurra',           word: 'prevenir' } },
+    { tier: 2, en: { def: 'a many-sided flat shape',           word: 'polygon' },
+                es: { def: 'figura plana de muchos lados',     word: 'polígono' } },
+    { tier: 2, en: { def: 'a person who speaks many languages',word: 'polyglot' },
+                es: { def: 'persona que habla muchos idiomas', word: 'políglota' } },
+    { tier: 2, en: { def: 'shape, framework, way something is built', word: 'structure' },
+                es: { def: 'forma, armazón o modo en que algo se construye', word: 'estructura' } },
+    { tier: 3, en: { def: 'to continue living through hardship', word: 'survive' },
+                es: { def: 'seguir viviendo a pesar de dificultades', word: 'sobrevivir' } },
+    { tier: 3, en: { def: 'not believable; amazing',           word: 'incredible' },
+                es: { def: 'que no se puede creer; asombroso', word: 'increíble' } },
+    { tier: 3, en: { def: 'never dying',                       word: 'immortal' },
+                es: { def: 'que nunca muere',                  word: 'inmortal' } },
+    { tier: 3, en: { def: 'letting light through partially',   word: 'translucent' },
+                es: { def: 'que deja pasar la luz parcialmente', word: 'translúcido' } },
+    { tier: 3, en: { def: 'to remove water from',              word: 'dehydrate' },
+                es: { def: 'quitarle el agua a algo',          word: 'deshidratar' } },
+    { tier: 3, en: { def: 'happening at the same time',        word: 'synchronous' },
+                es: { def: 'que ocurre al mismo tiempo',       word: 'sincrónico' } },
+    { tier: 3, en: { def: 'the love of wisdom (study of)',     word: 'philosophy' },
+                es: { def: 'el amor por la sabiduría (estudio de)', word: 'filosofía' } },
+    { tier: 3, en: { def: 'the study of the mind',             word: 'psychology' },
+                es: { def: 'el estudio de la mente',           word: 'psicología' } },
+    { tier: 3, en: { def: 'sudden, without warning',           word: 'abrupt' },
+                es: { def: 'repentino, sin aviso',             word: 'abrupto' } },
+    { tier: 3, en: { def: 'something out of its time',         word: 'anachronism' },
+                es: { def: 'algo fuera de su tiempo',          word: 'anacronismo' } }
+  ];
+
   // ── State ──
   const state = {
     lang: 'en',
     mode: null,
     rootList: 'all',  // 'all' | tier number
     matchSession: null,
-    buildIdx: 0
+    buildIdx: 0,
+    dictation: null   // { idx, correct, queue }
   };
 
   // ── Storage ──
@@ -378,9 +611,12 @@ const VocabularioVivo = (() => {
     const seenRoots = (prog.seenRoots || []).length;
     const matchScore = prog.matchBest || 0;
     const buildsDone = (prog.builds || []).length;
-    document.getElementById('vv-roots-stat').textContent = seenRoots + '/' + ROOTS.length;
-    document.getElementById('vv-match-stat').textContent = matchScore + ' ' + (state.lang === 'es' ? 'mejor' : 'best');
-    document.getElementById('vv-build-stat').textContent = buildsDone + '/' + BUILDS.length;
+    const dictBest   = prog.dictationBest || 0;
+    const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    setText('vv-roots-stat', seenRoots + '/' + ROOTS.length);
+    setText('vv-match-stat', matchScore + ' ' + (state.lang === 'es' ? 'mejor' : 'best'));
+    setText('vv-build-stat', buildsDone + '/' + BUILDS.length);
+    setText('vv-dictation-stat', dictBest + ' ' + (state.lang === 'es' ? 'mejor' : 'best'));
     _showScreen('vv-screen-home');
   }
 
@@ -725,6 +961,130 @@ const VocabularioVivo = (() => {
     }
   }
 
+  // ── Dictation mode: definition → type the word ───────────────────
+  // 10 random items per session from the DICTATIONS pool. Accent-
+  // insensitive comparison so kids aren't dinged for missing an í.
+  const DICTATION_SESSION = 10;
+
+  function openDictation() {
+    state.mode = 'dictation';
+    state.dictation = {
+      idx: 0,
+      correct: 0,
+      total: DICTATION_SESSION,
+      queue: _shuffle(DICTATIONS).slice(0, DICTATION_SESSION)
+    };
+    _renderDictationQuestion();
+    _showScreen('vv-screen-dictation');
+  }
+
+  function _renderDictationQuestion() {
+    const s = state.dictation;
+    const item = s.queue[s.idx];
+    if (!item) return _finishDictation();
+    const langPair = state.lang === 'es' ? item.es : item.en;
+    const wrap = document.getElementById('vv-dictation-wrap');
+    wrap.innerHTML =
+      '<div class="vv-dict-meta">' +
+        '<span>' + (s.idx + 1) + ' / ' + s.total + '</span>' +
+        '<span>✓ ' + s.correct + '</span>' +
+      '</div>' +
+      '<h2 class="vv-dict-prompt">' +
+        (state.lang === 'es' ? 'Definición:' : 'Definition:') +
+      '</h2>' +
+      '<p class="vv-dict-def">' + langPair.def + '</p>' +
+      '<div class="vv-dict-input-row">' +
+        '<input class="vv-dict-input" id="vv-dict-input" type="text" ' +
+          'autocomplete="off" autocorrect="off" spellcheck="false" ' +
+          'placeholder="' + (state.lang === 'es' ? 'escribe la palabra…' : 'type the word…') + '">' +
+        '<button class="vv-primary-btn" id="vv-dict-check">' +
+          (state.lang === 'es' ? '✓ Comprobar' : '✓ Check') +
+        '</button>' +
+      '</div>' +
+      '<div class="vv-dict-actions">' +
+        '<button class="vv-secondary-btn" id="vv-dict-skip">' +
+          (state.lang === 'es' ? '↷ Saltar' : '↷ Skip') +
+        '</button>' +
+      '</div>' +
+      '<div class="vv-dict-feedback" id="vv-dict-feedback"></div>';
+
+    const inp = document.getElementById('vv-dict-input');
+    const check = () => _checkDictation(item);
+    document.getElementById('vv-dict-check').onclick = check;
+    document.getElementById('vv-dict-skip').onclick = () => _skipDictation(item);
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') check(); });
+    setTimeout(() => inp.focus(), 50);
+  }
+
+  function _checkDictation(item) {
+    const inp = document.getElementById('vv-dict-input');
+    const fb  = document.getElementById('vv-dict-feedback');
+    const expected = state.lang === 'es' ? item.es.word : item.en.word;
+    const got = inp.value.trim();
+    const ok = _normaliseWord(got) === _normaliseWord(expected);
+    if (ok) {
+      state.dictation.correct++;
+      inp.classList.add('vv-dict-correct');
+      fb.className = 'vv-dict-feedback vv-feedback-good';
+      fb.textContent = '✨ ' + (state.lang === 'es' ? '¡Bien hecho!' : 'Well done!');
+      if (typeof SFX !== 'undefined' && SFX.correct) SFX.correct();
+    } else {
+      inp.classList.add('vv-dict-wrong');
+      fb.className = 'vv-dict-feedback vv-feedback-bad';
+      fb.innerHTML = (state.lang === 'es' ? 'Era: ' : 'It was: ') + '<strong>' + expected + '</strong>';
+      if (typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
+    }
+    document.getElementById('vv-dict-check').disabled = true;
+    setTimeout(() => {
+      state.dictation.idx++;
+      _renderDictationQuestion();
+    }, 1200);
+  }
+
+  function _skipDictation(item) {
+    const fb = document.getElementById('vv-dict-feedback');
+    const expected = state.lang === 'es' ? item.es.word : item.en.word;
+    fb.className = 'vv-dict-feedback vv-feedback-bad';
+    fb.innerHTML = (state.lang === 'es' ? 'Era: ' : 'It was: ') + '<strong>' + expected + '</strong>';
+    if (typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
+    setTimeout(() => {
+      state.dictation.idx++;
+      _renderDictationQuestion();
+    }, 1000);
+  }
+
+  function _normaliseWord(s) {
+    return (s || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')   // strip combining diacritics
+      .replace(/[^a-z0-9]/gi, '');
+  }
+
+  function _finishDictation() {
+    const s = state.dictation;
+    const acc = s.total > 0 ? s.correct / s.total : 0;
+    const stars = acc >= 0.95 ? 3 : acc >= 0.80 ? 2 : 1;
+    const prog = _loadProgress();
+    prog.dictationBest = Math.max(prog.dictationBest || 0, s.correct);
+    prog.dictationStars = Math.max(prog.dictationStars || 0, stars);
+    _saveProgress(prog);
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      ActivityLog.log('Vocabulario Vivo', '📝',
+        (state.lang === 'es' ? 'Dictado: ' : 'Dictation: ') +
+        s.correct + '/' + s.total + ' ⭐'.repeat(stars));
+    }
+    document.getElementById('vv-dictation-result').innerHTML =
+      '<div class="vv-stars">' + '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '</div>' +
+      '<p>' + s.correct + ' / ' + s.total + ' ' + (state.lang === 'es' ? 'correctas' : 'correct') + '</p>' +
+      '<button class="vv-primary-btn" onclick="VocabularioVivo.openDictation()">' +
+        (state.lang === 'es' ? '↺ Otra vez' : '↺ Play again') +
+      '</button> ' +
+      '<button class="vv-secondary-btn" onclick="VocabularioVivo.goHome()">' +
+        (state.lang === 'es' ? '← Inicio' : '← Home') +
+      '</button>';
+    _showScreen('vv-screen-dictation-result');
+  }
+
   // ── Language toggle + nav ──
   function toggleLanguage() {
     state.lang = state.lang === 'en' ? 'es' : 'en';
@@ -733,6 +1093,7 @@ const VocabularioVivo = (() => {
     if (state.mode === 'roots') _renderRootList();
     else if (state.mode === 'match' && state.matchSession) _renderMatchQuestion();
     else if (state.mode === 'build') _renderBuild();
+    else if (state.mode === 'dictation' && state.dictation) _renderDictationQuestion();
     _renderHome();
   }
 
@@ -746,6 +1107,8 @@ const VocabularioVivo = (() => {
     document.getElementById('vv-tile-roots').onclick = openRoots;
     document.getElementById('vv-tile-match').onclick = openMatch;
     document.getElementById('vv-tile-build').onclick = openBuild;
+    const dictBtn = document.getElementById('vv-tile-dictation');
+    if (dictBtn) dictBtn.onclick = openDictation;
     document.getElementById('vv-lang-toggle').onclick = toggleLanguage;
     document.querySelectorAll('.vv-home-btn').forEach(b => { b.onclick = goHome; });
     document.querySelectorAll('.vv-tier-filter').forEach(b => {
@@ -756,7 +1119,7 @@ const VocabularioVivo = (() => {
 
   return {
     init, goHome,
-    openRoots, openMatch, openBuild,
+    openRoots, openMatch, openBuild, openDictation,
     backToRootList, filterRoots,
     toggleLanguage
   };
