@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-20T13:41:45.960Z",
+  "generatedAt": "2026-05-20T13:57:13.569Z",
   "windowHours": 72,
   "totalGroups": 2,
-  "totalEvents": 91,
+  "totalEvents": 25,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -12,10 +12,10 @@
       "filename": "https://rozavala.github.io/apps/little-maestro.html",
       "lineno": 9549,
       "colno": 9,
-      "count": 12,
-      "firstTs": 1779025640637,
+      "count": 11,
+      "firstTs": 1779032025183,
       "lastTs": 1779037526769,
-      "users": 2
+      "users": 1
     },
     {
       "app": "world-cup",
@@ -25,10 +25,10 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 79,
-      "firstTs": 1779025306267,
+      "count": 14,
+      "firstTs": 1779026238595,
       "lastTs": 1779026412408,
-      "users": 2
+      "users": 1
     }
   ]
 }

@@ -3,9 +3,9 @@
   "groups": [
     {
       "entry": {
-        "id": "e_mp9tqfmj_9iash2",
-        "ts": 1779025306267,
-        "clientTs": 1779025306267,
+        "id": "e_mp9uaf0j_v9qtq0",
+        "ts": 1779026238595,
+        "clientTs": 1779026238595,
         "kind": "console.warn",
         "app": "world-cup",
         "page": "world-cup.html",
@@ -14,25 +14,24 @@
         "lineno": null,
         "colno": null,
         "stack": null,
-        "user": "u-3bda7c",
-        "age": 11,
+        "user": "u-8620c5",
+        "age": 5,
         "guest": false,
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 79,
-      "firstTs": 1779025306267,
+      "count": 14,
+      "firstTs": 1779026238595,
       "lastTs": 1779026412408,
       "users": [
-        "u-3bda7c",
         "u-8620c5"
       ]
     },
     {
       "entry": {
-        "id": "e_mp9txlml_eu6qa8",
-        "ts": 1779025640637,
-        "clientTs": 1779025640637,
+        "id": "e_mp9xqfz3_jjzkc3",
+        "ts": 1779032025183,
+        "clientTs": 1779032025183,
         "kind": "error",
         "app": "little-maestro",
         "page": "little-maestro.html",
@@ -41,17 +40,16 @@
         "lineno": 9549,
         "colno": 9,
         "stack": "init@https://rozavala.github.io/apps/little-maestro.html:9549:9\n@https://rozavala.github.io/apps/little-maestro.html:9773:19",
-        "user": "u-3bda7c",
-        "age": 11,
+        "user": "u-9b4aef",
+        "age": 9,
         "guest": false,
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_15 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 12,
-      "firstTs": 1779025640637,
+      "count": 11,
+      "firstTs": 1779032025183,
       "lastTs": 1779037526769,
       "users": [
-        "u-3bda7c",
         "u-9b4aef"
       ]
     }
