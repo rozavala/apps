@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-20T13:57:13.569Z",
+  "generatedAt": "2026-05-20T14:12:15.889Z",
   "windowHours": 72,
-  "totalGroups": 2,
-  "totalEvents": 25,
+  "totalGroups": 1,
+  "totalEvents": 11,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -15,19 +15,6 @@
       "count": 11,
       "firstTs": 1779032025183,
       "lastTs": 1779037526769,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "wc save failed The quota has been exceeded.",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 14,
-      "firstTs": 1779026238595,
-      "lastTs": 1779026412408,
       "users": 1
     }
   ]
