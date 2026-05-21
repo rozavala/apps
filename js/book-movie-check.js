@@ -10,7 +10,7 @@ var BMC = (function() {
 
   var VPS = 'https://real-options-dev.tail57521e.ts.net';
   var STORAGE_PREFIX = 'zs_bmcheck_';
-  var FETCH_TIMEOUT = 20000;  // 20s — AI evaluations can take 5-10s
+  var FETCH_TIMEOUT = 60000;  // 60s — Gemini calls with google_search grounding routinely take 15-30s, plus Wikipedia enrichment adds ~1s
 
   // In-memory caches
   var _familyLibrary = {};   // canonical_id -> full evaluation (synced across family via VPS cache)
