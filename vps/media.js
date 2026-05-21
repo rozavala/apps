@@ -452,9 +452,10 @@ async function _trailerForTmdbId(tmdbId) {
 // English Wikipedia article and appending it to the metadata gives the
 // LLM long-form plot context to evaluate against.
 async function _fetchWikipediaPlot(metadata) {
+  const debug = { fetched: false };
   try {
     const title = metadata.title;
-    if (!title) return null;
+    if (!title) { debug.reason = 'no title'; return { extract: null, debug: debug }; }
     const author = metadata.author_or_director || '';
     const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (rozavala@gmail.com)' };
 
@@ -463,21 +464,22 @@ async function _fetchWikipediaPlot(metadata) {
       + '&limit=3&namespace=0&format=json'
       + '&search=' + encodeURIComponent(searchTerms);
     const sr = await fetch(searchUrl, { headers: ua });
-    if (!sr.ok) return null;
+    if (!sr.ok) { debug.reason = 'opensearch http ' + sr.status; return { extract: null, debug: debug }; }
     const sj = await sr.json();
     const pageTitles = sj[1] || [];
-    if (!pageTitles.length) return null;
+    if (!pageTitles.length) { debug.reason = 'no search match'; return { extract: null, debug: debug }; }
     const pageTitle = pageTitles[0];
+    debug.page_title = pageTitle;
 
     const extractUrl = 'https://en.wikipedia.org/w/api.php?action=query'
       + '&format=json&prop=extracts&explaintext=1&redirects=1'
       + '&titles=' + encodeURIComponent(pageTitle);
     const er = await fetch(extractUrl, { headers: ua });
-    if (!er.ok) return null;
+    if (!er.ok) { debug.reason = 'extracts http ' + er.status; return { extract: null, debug: debug }; }
     const ej = await er.json();
     const pages = (ej.query && ej.query.pages) || {};
     const firstPage = Object.values(pages)[0];
-    if (!firstPage || !firstPage.extract) return null;
+    if (!firstPage || !firstPage.extract) { debug.reason = 'no extract on page'; return { extract: null, debug: debug }; }
 
     let extract = firstPage.extract;
 
@@ -488,16 +490,22 @@ async function _fetchWikipediaPlot(metadata) {
     if (author) {
       const haystack = extract.toLowerCase();
       const tokens = author.split(/[\s,]+/).filter(t => t.length >= 3).map(t => t.toLowerCase());
-      if (tokens.length && !tokens.some(t => haystack.includes(t))) return null;
+      if (tokens.length && !tokens.some(t => haystack.includes(t))) {
+        debug.reason = 'author token mismatch (' + tokens.join('/') + ' not in extract)';
+        return { extract: null, debug: debug };
+      }
     }
 
     // Cap length — keep the lede + early plot section, drop release
     // history / awards lists at the tail.
     if (extract.length > 4000) extract = extract.slice(0, 4000) + '...';
-    return extract;
+    debug.fetched = true;
+    debug.length = extract.length;
+    return { extract: extract, debug: debug };
   } catch (e) {
     console.warn('[media] Wikipedia plot lookup failed:', e.message);
-    return null;
+    debug.reason = 'exception: ' + e.message;
+    return { extract: null, debug: debug };
   }
 }
 
@@ -552,10 +560,22 @@ async function _evaluateGemini(metadata, imageB64) {
     throw new Error('Gemini ' + r.status + ': ' + errText.slice(0, 200));
   }
   const j = await r.json();
-  const text = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts &&
-               j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text;
+  const candidate = j.candidates && j.candidates[0];
+  const text = candidate && candidate.content && candidate.content.parts &&
+               candidate.content.parts[0] && candidate.content.parts[0].text;
   if (!text) throw new Error('Gemini returned empty response');
-  return _extractJson(text);
+  const evaluation = _extractJson(text);
+  const gm = candidate.groundingMetadata;
+  const grounding = gm ? {
+    queries: gm.webSearchQueries || [],
+    sources: (gm.groundingChunks || [])
+      .map(c => ({
+        title: (c.web && c.web.title) || '',
+        uri: (c.web && c.web.uri) || ''
+      }))
+      .filter(s => s.uri)
+  } : null;
+  return { evaluation: evaluation, grounding: grounding, model: model };
 }
 
 async function _evaluateGrok(metadata, imageB64) {
@@ -586,23 +606,39 @@ async function _evaluateGrok(metadata, imageB64) {
   const j = await r.json();
   const text = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
   if (!text) throw new Error('Grok returned empty response');
-  return _extractJson(text);
+  return { evaluation: _extractJson(text), grounding: null, model: model };
 }
 
 async function _evaluate(metadata, imageB64) {
   let augmented = metadata;
-  const wikiPlot = await _fetchWikipediaPlot(metadata);
-  if (wikiPlot) {
+  const wiki = await _fetchWikipediaPlot(metadata);
+  if (wiki.extract) {
     augmented = Object.assign({}, metadata, {
       synopsis: (metadata.synopsis || '').trim()
         + (metadata.synopsis ? '\n\n' : '')
         + '--- Wikipedia article (excerpt) ---\n'
-        + wikiPlot
+        + wiki.extract
     });
-    console.log('[media] Augmented synopsis for "' + metadata.title + '" with Wikipedia extract (' + wikiPlot.length + ' chars)');
+    console.log('[media] Augmented synopsis for "' + metadata.title + '" with Wikipedia extract (' + wiki.extract.length + ' chars, page: ' + wiki.debug.page_title + ')');
+  } else {
+    console.log('[media] No Wikipedia augmentation for "' + metadata.title + '": ' + wiki.debug.reason);
   }
-  if (PROVIDER === 'grok') return _evaluateGrok(augmented, imageB64);
-  return _evaluateGemini(augmented, imageB64);
+  const result = (PROVIDER === 'grok')
+    ? await _evaluateGrok(augmented, imageB64)
+    : await _evaluateGemini(augmented, imageB64);
+  // Attach diagnostic trail so each cache entry is self-explanatory:
+  // GET /api/media/cache/:id will reveal exactly what the LLM saw and
+  // which sources it pulled. Kept under _debug to make it easy to strip
+  // from any client-facing payload later if desired.
+  result.evaluation._debug = {
+    model: result.model,
+    provider: PROVIDER,
+    prompt_version: PROMPT_VERSION,
+    synopsis_used: (augmented.synopsis || '').slice(0, 4000),
+    wikipedia: wiki.debug,
+    grounding: result.grounding
+  };
+  return result.evaluation;
 }
 
 // ── Photo identification (vision call) ───────────────────────────
