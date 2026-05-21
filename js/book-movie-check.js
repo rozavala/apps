@@ -12,6 +12,13 @@ var BMC = (function() {
   var STORAGE_PREFIX = 'zs_bmcheck_';
   var FETCH_TIMEOUT = 60000;  // 60s — Gemini calls with google_search grounding routinely take 15-30s, plus Wikipedia enrichment adds ~1s
 
+  // In kid mode, the LGBTQ chip and any concerns text touching the topic
+  // are redacted entirely. Verdict is still "not_recommended" so the kid
+  // sees "Not for our family" — they just don't read about what specifically.
+  // Patterns are intentionally broad; false positives only redact non-parent
+  // text, which is acceptable.
+  var LGBTQ_KEYWORD_RE = /\b(lgbtq?\+?|gay|lesbian|queer|same[\s-]?sex|transgender|non[\s-]?binary|gender\s+identity|pride\s+flag|drag\s+queen|she\/her\/they|pronouns?)\b/i;
+
   // In-memory caches
   var _familyLibrary = {};   // canonical_id -> full evaluation (synced across family via VPS cache)
   var _currentResult = null; // last shown evaluation
@@ -870,6 +877,9 @@ var BMC = (function() {
       chipHtml = flagOrder.map(function(k) {
         var sev = (e.content_flags || {})[k];
         if (!sev || sev === 'none') return '';
+        // Kid mode: the LGBTQ chip is never shown — kids don't read the
+        // label even at "mild". Parents still see it on unlock.
+        if (!isParent && k === 'lgbtq_content') return '';
         return '<span class="bmc-chip bmc-chip-' + sev + '">' + flagLabels[k] + ' · ' + sev + '</span>';
       }).join('');
       var posLabels = {
@@ -891,9 +901,18 @@ var BMC = (function() {
 
     var concernsHtml = '';
     if (showConcerns && e.specific_concerns && e.specific_concerns.length) {
-      concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
-        e.specific_concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
-        '</ul></div>';
+      // Kid mode: drop any concern line that names LGBTQ topics, so the
+      // child never reads a phrase like "casual mention of a side
+      // character with same-sex parents". If nothing remains after
+      // filtering, the card is omitted entirely.
+      var concerns = !isParent
+        ? e.specific_concerns.filter(function(c) { return !LGBTQ_KEYWORD_RE.test(String(c)); })
+        : e.specific_concerns;
+      if (concerns.length) {
+        concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
+          concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
+          '</ul></div>';
+      }
     } else if (isCaution && !isParent && e.confidence !== 'low') {
       var nFlags = 0;
       if (e.content_flags) {

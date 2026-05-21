@@ -14,7 +14,7 @@ const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GROK_KEY = process.env.GROK_API_KEY;
 const CACHE_TTL_DAYS = 90;
-const PROMPT_VERSION = 4;  // bump whenever media-prompt.txt is edited or eval inputs change
+const PROMPT_VERSION = 5;  // bump whenever media-prompt.txt is edited or eval inputs change
 const RATE_LIMIT_PER_HOUR = 60;  // per source IP, total evaluate calls
 
 let DATA_DIR = null;
