@@ -2,7 +2,7 @@
    MEDIA — Book & Movie Check backend
    Endpoints: /api/media/lookup, /api/media/evaluate,
               /api/media/cache/:id, /api/media/library
-   Provider: Gemini 2.5 Flash via REST (AI_PROVIDER=gemini)
+   Provider: Gemini 3.5 Flash via REST (AI_PROVIDER=gemini)
    Cache: <DATA_DIR>/media-cache.json (family-wide, no per-kid)
    ================================================================ */
 'use strict';
@@ -14,7 +14,7 @@ const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GROK_KEY = process.env.GROK_API_KEY;
 const CACHE_TTL_DAYS = 90;
-const PROMPT_VERSION = 2;  // bump whenever media-prompt.txt is edited
+const PROMPT_VERSION = 3;  // bump whenever media-prompt.txt is edited
 const RATE_LIMIT_PER_HOUR = 60;  // per source IP, total evaluate calls
 
 let DATA_DIR = null;
@@ -126,7 +126,7 @@ async function _lookupFromAI({ isbn, query }) {
     }
     // Gemini path
     if (!GEMINI_KEY) return null;
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY;
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=' + GEMINI_KEY;
     const r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -470,7 +470,7 @@ function _extractJson(text) {
 
 async function _evaluateGemini(metadata, imageB64) {
   if (!GEMINI_KEY) throw new Error('GEMINI_API_KEY not set');
-  const model = 'gemini-2.5-flash';
+  const model = 'gemini-3.5-flash';
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + GEMINI_KEY;
   const prompt = _fillPrompt(metadata);
   const parts = [{ text: prompt }];
@@ -558,7 +558,7 @@ async function _identifyFromPhoto(imageB64) {
     return _extractJson(j.choices[0].message.content);
   }
   // Gemini path
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_KEY;
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=' + GEMINI_KEY;
   const body = {
     contents: [{ parts: [
       { text: prompt },
