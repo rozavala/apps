@@ -14,7 +14,7 @@ const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GROK_KEY = process.env.GROK_API_KEY;
 const CACHE_TTL_DAYS = 90;
-const PROMPT_VERSION = 3;  // bump whenever media-prompt.txt is edited
+const PROMPT_VERSION = 4;  // bump whenever media-prompt.txt is edited or eval inputs change
 const RATE_LIMIT_PER_HOUR = 60;  // per source IP, total evaluate calls
 
 let DATA_DIR = null;
@@ -444,6 +444,63 @@ async function _trailerForTmdbId(tmdbId) {
   } catch (e) { return null; }
 }
 
+// ── Wikipedia plot enrichment ────────────────────────────────────
+// Publisher blurbs from Google Books / OpenLibrary are marketing copy
+// and routinely omit content that matters for this family's evaluation
+// (e.g. The Last Cuentista's same-sex side couple is absent from every
+// jacket synopsis but discussed in detail on Wikipedia). Fetching the
+// English Wikipedia article and appending it to the metadata gives the
+// LLM long-form plot context to evaluate against.
+async function _fetchWikipediaPlot(metadata) {
+  try {
+    const title = metadata.title;
+    if (!title) return null;
+    const author = metadata.author_or_director || '';
+    const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (rozavala@gmail.com)' };
+
+    const searchTerms = author ? (title + ' ' + author) : title;
+    const searchUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch'
+      + '&limit=3&namespace=0&format=json'
+      + '&search=' + encodeURIComponent(searchTerms);
+    const sr = await fetch(searchUrl, { headers: ua });
+    if (!sr.ok) return null;
+    const sj = await sr.json();
+    const pageTitles = sj[1] || [];
+    if (!pageTitles.length) return null;
+    const pageTitle = pageTitles[0];
+
+    const extractUrl = 'https://en.wikipedia.org/w/api.php?action=query'
+      + '&format=json&prop=extracts&explaintext=1&redirects=1'
+      + '&titles=' + encodeURIComponent(pageTitle);
+    const er = await fetch(extractUrl, { headers: ua });
+    if (!er.ok) return null;
+    const ej = await er.json();
+    const pages = (ej.query && ej.query.pages) || {};
+    const firstPage = Object.values(pages)[0];
+    if (!firstPage || !firstPage.extract) return null;
+
+    let extract = firstPage.extract;
+
+    // Sanity check: confirm this article is about the same work. If the
+    // author was provided, at least one significant author token must
+    // appear in the extract; otherwise we may have grabbed a different
+    // work with the same title.
+    if (author) {
+      const haystack = extract.toLowerCase();
+      const tokens = author.split(/[\s,]+/).filter(t => t.length >= 3).map(t => t.toLowerCase());
+      if (tokens.length && !tokens.some(t => haystack.includes(t))) return null;
+    }
+
+    // Cap length — keep the lede + early plot section, drop release
+    // history / awards lists at the tail.
+    if (extract.length > 4000) extract = extract.slice(0, 4000) + '...';
+    return extract;
+  } catch (e) {
+    console.warn('[media] Wikipedia plot lookup failed:', e.message);
+    return null;
+  }
+}
+
 // ── AI providers ─────────────────────────────────────────────────
 
 function _fillPrompt(metadata) {
@@ -475,12 +532,15 @@ async function _evaluateGemini(metadata, imageB64) {
   const prompt = _fillPrompt(metadata);
   const parts = [{ text: prompt }];
   if (imageB64) parts.push({ inlineData: { mimeType: 'image/jpeg', data: imageB64 } });
+  // Google Search grounding lets the model pull parent reviews, Common
+  // Sense Media notes, Wikipedia plot details etc. during evaluation
+  // rather than relying solely on the publisher synopsis. Incompatible
+  // with responseMimeType: 'application/json' — _extractJson handles any
+  // markdown fences or preamble the model emits.
   const body = {
     contents: [{ parts: parts }],
-    generationConfig: {
-      temperature: 0.2,
-      responseMimeType: 'application/json'
-    }
+    tools: [{ google_search: {} }],
+    generationConfig: { temperature: 0.2 }
   };
   const r = await fetch(url, {
     method: 'POST',
@@ -530,8 +590,19 @@ async function _evaluateGrok(metadata, imageB64) {
 }
 
 async function _evaluate(metadata, imageB64) {
-  if (PROVIDER === 'grok') return _evaluateGrok(metadata, imageB64);
-  return _evaluateGemini(metadata, imageB64);
+  let augmented = metadata;
+  const wikiPlot = await _fetchWikipediaPlot(metadata);
+  if (wikiPlot) {
+    augmented = Object.assign({}, metadata, {
+      synopsis: (metadata.synopsis || '').trim()
+        + (metadata.synopsis ? '\n\n' : '')
+        + '--- Wikipedia article (excerpt) ---\n'
+        + wikiPlot
+    });
+    console.log('[media] Augmented synopsis for "' + metadata.title + '" with Wikipedia extract (' + wikiPlot.length + ' chars)');
+  }
+  if (PROVIDER === 'grok') return _evaluateGrok(augmented, imageB64);
+  return _evaluateGemini(augmented, imageB64);
 }
 
 // ── Photo identification (vision call) ───────────────────────────
