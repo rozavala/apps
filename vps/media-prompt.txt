@@ -111,7 +111,8 @@ Return ONE JSON object. No markdown. No preamble. No code fences. Just the JSON.
 
 ## VERDICT RULES (apply deterministically)
 
-- "not_recommended" if ANY of these flags is "significant": lgbtq_content, crt_ideology, sexual_content, occult_aspirational, anti_religious.
+- "not_recommended" if lgbtq_content is "moderate" or "significant".
+- "not_recommended" if ANY of these flags is "significant": crt_ideology, sexual_content, occult_aspirational, anti_religious.
 - "not_recommended" if the central theme of the work actively promotes a rejected value.
 - "caution" if any of the above flags are "moderate", OR if confidence is "low", OR if violence/scary_content is "significant" even without other issues.
 - "approved" otherwise.
