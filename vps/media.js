@@ -14,7 +14,7 @@ const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GROK_KEY = process.env.GROK_API_KEY;
 const CACHE_TTL_DAYS = 90;
-const PROMPT_VERSION = 3;  // bump whenever media-prompt.txt is edited
+const PROMPT_VERSION = 4;  // bump whenever media-prompt.txt is edited or eval inputs change
 const RATE_LIMIT_PER_HOUR = 60;  // per source IP, total evaluate calls
 
 let DATA_DIR = null;
@@ -444,6 +444,71 @@ async function _trailerForTmdbId(tmdbId) {
   } catch (e) { return null; }
 }
 
+// ── Wikipedia plot enrichment ────────────────────────────────────
+// Publisher blurbs from Google Books / OpenLibrary are marketing copy
+// and routinely omit content that matters for this family's evaluation
+// (e.g. The Last Cuentista's same-sex side couple is absent from every
+// jacket synopsis but discussed in detail on Wikipedia). Fetching the
+// English Wikipedia article and appending it to the metadata gives the
+// LLM long-form plot context to evaluate against.
+async function _fetchWikipediaPlot(metadata) {
+  const debug = { fetched: false };
+  try {
+    const title = metadata.title;
+    if (!title) { debug.reason = 'no title'; return { extract: null, debug: debug }; }
+    const author = metadata.author_or_director || '';
+    const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (rozavala@gmail.com)' };
+
+    const searchTerms = author ? (title + ' ' + author) : title;
+    const searchUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch'
+      + '&limit=3&namespace=0&format=json'
+      + '&search=' + encodeURIComponent(searchTerms);
+    const sr = await fetch(searchUrl, { headers: ua });
+    if (!sr.ok) { debug.reason = 'opensearch http ' + sr.status; return { extract: null, debug: debug }; }
+    const sj = await sr.json();
+    const pageTitles = sj[1] || [];
+    if (!pageTitles.length) { debug.reason = 'no search match'; return { extract: null, debug: debug }; }
+    const pageTitle = pageTitles[0];
+    debug.page_title = pageTitle;
+
+    const extractUrl = 'https://en.wikipedia.org/w/api.php?action=query'
+      + '&format=json&prop=extracts&explaintext=1&redirects=1'
+      + '&titles=' + encodeURIComponent(pageTitle);
+    const er = await fetch(extractUrl, { headers: ua });
+    if (!er.ok) { debug.reason = 'extracts http ' + er.status; return { extract: null, debug: debug }; }
+    const ej = await er.json();
+    const pages = (ej.query && ej.query.pages) || {};
+    const firstPage = Object.values(pages)[0];
+    if (!firstPage || !firstPage.extract) { debug.reason = 'no extract on page'; return { extract: null, debug: debug }; }
+
+    let extract = firstPage.extract;
+
+    // Sanity check: confirm this article is about the same work. If the
+    // author was provided, at least one significant author token must
+    // appear in the extract; otherwise we may have grabbed a different
+    // work with the same title.
+    if (author) {
+      const haystack = extract.toLowerCase();
+      const tokens = author.split(/[\s,]+/).filter(t => t.length >= 3).map(t => t.toLowerCase());
+      if (tokens.length && !tokens.some(t => haystack.includes(t))) {
+        debug.reason = 'author token mismatch (' + tokens.join('/') + ' not in extract)';
+        return { extract: null, debug: debug };
+      }
+    }
+
+    // Cap length — keep the lede + early plot section, drop release
+    // history / awards lists at the tail.
+    if (extract.length > 4000) extract = extract.slice(0, 4000) + '...';
+    debug.fetched = true;
+    debug.length = extract.length;
+    return { extract: extract, debug: debug };
+  } catch (e) {
+    console.warn('[media] Wikipedia plot lookup failed:', e.message);
+    debug.reason = 'exception: ' + e.message;
+    return { extract: null, debug: debug };
+  }
+}
+
 // ── AI providers ─────────────────────────────────────────────────
 
 function _fillPrompt(metadata) {
@@ -475,12 +540,15 @@ async function _evaluateGemini(metadata, imageB64) {
   const prompt = _fillPrompt(metadata);
   const parts = [{ text: prompt }];
   if (imageB64) parts.push({ inlineData: { mimeType: 'image/jpeg', data: imageB64 } });
+  // Google Search grounding lets the model pull parent reviews, Common
+  // Sense Media notes, Wikipedia plot details etc. during evaluation
+  // rather than relying solely on the publisher synopsis. Incompatible
+  // with responseMimeType: 'application/json' — _extractJson handles any
+  // markdown fences or preamble the model emits.
   const body = {
     contents: [{ parts: parts }],
-    generationConfig: {
-      temperature: 0.2,
-      responseMimeType: 'application/json'
-    }
+    tools: [{ google_search: {} }],
+    generationConfig: { temperature: 0.2 }
   };
   const r = await fetch(url, {
     method: 'POST',
@@ -492,10 +560,22 @@ async function _evaluateGemini(metadata, imageB64) {
     throw new Error('Gemini ' + r.status + ': ' + errText.slice(0, 200));
   }
   const j = await r.json();
-  const text = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts &&
-               j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text;
+  const candidate = j.candidates && j.candidates[0];
+  const text = candidate && candidate.content && candidate.content.parts &&
+               candidate.content.parts[0] && candidate.content.parts[0].text;
   if (!text) throw new Error('Gemini returned empty response');
-  return _extractJson(text);
+  const evaluation = _extractJson(text);
+  const gm = candidate.groundingMetadata;
+  const grounding = gm ? {
+    queries: gm.webSearchQueries || [],
+    sources: (gm.groundingChunks || [])
+      .map(c => ({
+        title: (c.web && c.web.title) || '',
+        uri: (c.web && c.web.uri) || ''
+      }))
+      .filter(s => s.uri)
+  } : null;
+  return { evaluation: evaluation, grounding: grounding, model: model };
 }
 
 async function _evaluateGrok(metadata, imageB64) {
@@ -526,12 +606,39 @@ async function _evaluateGrok(metadata, imageB64) {
   const j = await r.json();
   const text = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
   if (!text) throw new Error('Grok returned empty response');
-  return _extractJson(text);
+  return { evaluation: _extractJson(text), grounding: null, model: model };
 }
 
 async function _evaluate(metadata, imageB64) {
-  if (PROVIDER === 'grok') return _evaluateGrok(metadata, imageB64);
-  return _evaluateGemini(metadata, imageB64);
+  let augmented = metadata;
+  const wiki = await _fetchWikipediaPlot(metadata);
+  if (wiki.extract) {
+    augmented = Object.assign({}, metadata, {
+      synopsis: (metadata.synopsis || '').trim()
+        + (metadata.synopsis ? '\n\n' : '')
+        + '--- Wikipedia article (excerpt) ---\n'
+        + wiki.extract
+    });
+    console.log('[media] Augmented synopsis for "' + metadata.title + '" with Wikipedia extract (' + wiki.extract.length + ' chars, page: ' + wiki.debug.page_title + ')');
+  } else {
+    console.log('[media] No Wikipedia augmentation for "' + metadata.title + '": ' + wiki.debug.reason);
+  }
+  const result = (PROVIDER === 'grok')
+    ? await _evaluateGrok(augmented, imageB64)
+    : await _evaluateGemini(augmented, imageB64);
+  // Attach diagnostic trail so each cache entry is self-explanatory:
+  // GET /api/media/cache/:id will reveal exactly what the LLM saw and
+  // which sources it pulled. Kept under _debug to make it easy to strip
+  // from any client-facing payload later if desired.
+  result.evaluation._debug = {
+    model: result.model,
+    provider: PROVIDER,
+    prompt_version: PROMPT_VERSION,
+    synopsis_used: (augmented.synopsis || '').slice(0, 4000),
+    wikipedia: wiki.debug,
+    grounding: result.grounding
+  };
+  return result.evaluation;
 }
 
 // ── Photo identification (vision call) ───────────────────────────
