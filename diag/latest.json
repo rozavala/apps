@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-21T04:33:21.207Z",
+  "generatedAt": "2026-05-21T04:48:21.482Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 2,
+  "totalGroups": 2,
+  "totalEvents": 5,
   "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Re-review failed: Failed to fetch",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1779338595402,
+      "lastTs": 1779338595402,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
@@ -12,9 +25,9 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 2,
+      "count": 3,
       "firstTs": 1779337187998,
-      "lastTs": 1779337583805,
+      "lastTs": 1779338395118,
       "users": 1
     }
   ]
