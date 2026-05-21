@@ -1,7 +1,21 @@
 {
-  "generatedAt": "2026-05-20T17:13:50.208Z",
+  "generatedAt": "2026-05-21T04:33:21.207Z",
   "windowHours": 72,
-  "totalGroups": 0,
-  "totalEvents": 0,
-  "topGroups": []
+  "totalGroups": 1,
+  "totalEvents": 2,
+  "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Re-review failed: signal is aborted without reason",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1779337187998,
+      "lastTs": 1779337583805,
+      "users": 1
+    }
+  ]
 }
