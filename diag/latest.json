@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-21T04:48:21.482Z",
+  "generatedAt": "2026-05-22T00:56:02.956Z",
   "windowHours": 72,
-  "totalGroups": 2,
-  "totalEvents": 5,
+  "totalGroups": 3,
+  "totalEvents": 6,
   "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Evaluate failed: HTTP 500",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1779410835436,
+      "lastTs": 1779410835436,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",

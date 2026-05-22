@@ -1,0 +1,31 @@
+{
+  "day": "2026-05-22",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mpg79nu4_frv64l",
+        "ts": 1779410835436,
+        "clientTs": 1779410835436,
+        "kind": "console.warn",
+        "app": "book-movie-check",
+        "page": "book-movie-check.html",
+        "message": "[BMC] Evaluate failed: HTTP 500",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1779410835436,
+      "lastTs": 1779410835436,
+      "users": [
+        "u-34d354"
+      ]
+    }
+  ]
+}
