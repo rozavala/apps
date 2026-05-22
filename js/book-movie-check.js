@@ -1103,7 +1103,7 @@ var BMC = (function() {
       })
       .catch(function(err) {
         console.warn('[BMC] Re-review failed:', err);
-        _setStatus('Re-review failed: ' + (err && err.message ? err.message : 'unknown'), 'error');
+        _setStatus(_userMsgForFetchErr(err, 're-review'), 'error');
       });
   }
 
