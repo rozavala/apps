@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-22T00:56:02.956Z",
+  "generatedAt": "2026-05-23T13:42:20.235Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 6,
+  "totalGroups": 4,
+  "totalEvents": 10,
   "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "Trying to play video that is already playing.",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 4,
+      "firstTs": 1779543081576,
+      "lastTs": 1779543156043,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
