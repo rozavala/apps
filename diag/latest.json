@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-24T04:50:16.058Z",
+  "generatedAt": "2026-05-24T23:26:54.660Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 8,
+  "totalGroups": 4,
+  "totalEvents": 10,
   "topGroups": [
+    {
+      "app": "sports-arena",
+      "kind": "error",
+      "page": "sports-arena.html",
+      "message": "Uncaught ReferenceError: renderHistory is not defined",
+      "filename": "https://rozavala.github.io/apps/sports-arena.html",
+      "lineno": 760,
+      "colno": 5,
+      "count": 2,
+      "firstTs": 1779664308056,
+      "lastTs": 1779664312657,
+      "users": 1
+    },
     {
       "app": "little-maestro",
       "kind": "error",
