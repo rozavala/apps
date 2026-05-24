@@ -3,32 +3,6 @@
   "groups": [
     {
       "entry": {
-        "id": "e_mpezf53y_rraial",
-        "ts": 1779337187998,
-        "clientTs": 1779337187998,
-        "kind": "console.warn",
-        "app": "book-movie-check",
-        "page": "book-movie-check.html",
-        "message": "[BMC] Re-review failed: signal is aborted without reason",
-        "filename": null,
-        "lineno": null,
-        "colno": null,
-        "stack": null,
-        "user": "u-34d354",
-        "age": 12,
-        "guest": false,
-        "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
-        "trail": []
-      },
-      "count": 3,
-      "firstTs": 1779337187998,
-      "lastTs": 1779338395118,
-      "users": [
-        "u-34d354"
-      ]
-    },
-    {
-      "entry": {
         "id": "e_mpf09b2i_jcremm",
         "ts": 1779338595402,
         "clientTs": 1779338595402,
@@ -49,6 +23,32 @@
       "count": 2,
       "firstTs": 1779338595402,
       "lastTs": 1779338595402,
+      "users": [
+        "u-34d354"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mpeznmil_bhs0y1",
+        "ts": 1779337583805,
+        "clientTs": 1779337583805,
+        "kind": "console.warn",
+        "app": "book-movie-check",
+        "page": "book-movie-check.html",
+        "message": "[BMC] Re-review failed: signal is aborted without reason",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1779337583805,
+      "lastTs": 1779338395118,
       "users": [
         "u-34d354"
       ]

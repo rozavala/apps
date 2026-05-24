@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-24T01:03:21.188Z",
+  "generatedAt": "2026-05-24T04:19:53.554Z",
   "windowHours": 72,
   "totalGroups": 5,
-  "totalEvents": 13,
+  "totalEvents": 12,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -64,8 +64,8 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 3,
-      "firstTs": 1779337187998,
+      "count": 2,
+      "firstTs": 1779337583805,
       "lastTs": 1779338395118,
       "users": 1
     }
