@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-23T13:42:20.235Z",
+  "generatedAt": "2026-05-24T01:03:21.188Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 10,
+  "totalGroups": 5,
+  "totalEvents": 13,
   "topGroups": [
+    {
+      "app": "little-maestro",
+      "kind": "error",
+      "page": "little-maestro.html",
+      "message": "TypeError: undefined is not an object (near '...})...')",
+      "filename": "https://rozavala.github.io/apps/little-maestro.html",
+      "lineno": 9549,
+      "colno": 9,
+      "count": 3,
+      "firstTs": 1779584362132,
+      "lastTs": 1779584593767,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
