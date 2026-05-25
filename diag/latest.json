@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-24T23:26:54.660Z",
+  "generatedAt": "2026-05-25T00:57:45.989Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 10,
+  "totalGroups": 3,
+  "totalEvents": 9,
   "topGroups": [
     {
       "app": "sports-arena",
@@ -41,19 +41,6 @@
       "count": 4,
       "firstTs": 1779543081576,
       "lastTs": 1779543156043,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Evaluate failed: HTTP 500",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1779410835436,
-      "lastTs": 1779410835436,
       "users": 1
     }
   ]
