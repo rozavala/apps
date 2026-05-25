@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-25T21:50:41.279Z",
+  "generatedAt": "2026-05-25T21:52:45.996Z",
   "windowHours": 72,
   "totalGroups": 4,
-  "totalEvents": 17,
+  "totalEvents": 18,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -12,9 +12,9 @@
       "filename": "https://rozavala.github.io/apps/little-maestro.html",
       "lineno": 9549,
       "colno": 9,
-      "count": 8,
+      "count": 9,
       "firstTs": 1779745152513,
-      "lastTs": 1779745707777,
+      "lastTs": 1779745863719,
       "users": 1
     },
     {
