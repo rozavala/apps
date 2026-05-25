@@ -53,7 +53,7 @@ A core feature of the Zavala Serra Apps suite is helping kids develop healthy di
 ## 🛠️ Características Principales (Key Features)
 
 - **Perfiles Personalizados (Personalized Profiles)**: Los niños pueden crear sus propios exploradores con avatares y colores personalizados. (Kids can create their own explorers with custom avatars and colors).
-- **Rango de Explorador Unificado (Unified Explorer Rank)**: Gana rangos en toda la suite (Cadete → Leyenda) al dominar diferentes materias. (Earn ranks across the entire app suite (Cadet → Legend) by mastering different subjects).
+- **Rango de Explorador Unificado (Unified Explorer Rank)**: Gana rangos en toda la suite (Cadete → Gran Maestro) al dominar diferentes materias. (Earn ranks across the entire app suite (Cadet → Grand Master) by mastering different subjects).
 - **Dificultad Adaptativa (Age-Adaptive Difficulty)**: El contenido se ajusta automáticamente a la edad de cada niño para un desafío adecuado. (Content automatically adjusts to each child's age for an appropriate challenge level).
 - **Seguimiento de Progreso (Progress Tracking)**: Todas las estrellas, niveles y puntuaciones se guardan localmente usando `localStorage`. (All stars, levels, and scores are saved locally using `localStorage`).
 - **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso y balance con insights para cada niño. (A secure area to monitor progress and balance with insights for each child).
@@ -93,7 +93,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
   |____|
   /    \
 ```
-¡Bienvenidos, exploradores! Tu misión es aprender nuevas habilidades, descubrir hechos asombrosos y completar desafíos para subir de rango, de Cadete a Leyenda. ¡Aprende jugando! (Welcome, explorers! Your mission is to learn new skills, discover amazing facts, and complete challenges to rank up from Cadet to Legend. Learn by playing!)
+¡Bienvenidos, exploradores! Tu misión es aprender nuevas habilidades, descubrir hechos asombrosos y completar desafíos para subir de rango, de Cadete a Gran Maestro. ¡Aprende jugando! (Welcome, explorers! Your mission is to learn new skills, discover amazing facts, and complete challenges to rank up from Cadet to Grand Master. Learn by playing!)
 
 ## 🚀 Instalación y Uso (Getting Started)
 
