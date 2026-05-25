@@ -230,56 +230,19 @@ const SportsArena = (() => {
       .reverse();
   }
 
-  // Iterate every profile's zs_sports_<kid> blob and merge match
-  // arrays. Deduplicates when the same match was logged twice (once
-  // by each kid) using a fingerprint of date + sport + ordered
-  // player/score pair, so "Leo vs Ana 3-1" and "Ana vs Leo 1-3"
-  // collapse into one row.
+  // Read from the single shared match bucket — the same store that
+  // logMatch/editMatch/deleteMatch mutate. Earlier this scanned each
+  // per-kid zs_sports_<kid>.matches blob, but the migration copies
+  // those into the shared bucket without clearing them, so a deleted
+  // match kept reappearing from the stale per-kid copies (on every
+  // device, since each holds its own stale blobs).
   function _getAllFamilyMatches(sportId) {
-    if (typeof getProfiles !== 'function') {
-      // Fallback to current-user behaviour if profiles API isn't loaded.
-      return getMatches(sportId);
-    }
-    const profiles = getProfiles();
-    const seen = {};
-    const merged = [];
-
-    profiles.forEach(p => {
-      const key = 'zs_sports_' + p.name.toLowerCase().replace(/\s+/g, '_');
-      let data;
-      try { data = JSON.parse(localStorage.getItem(key)) || {}; }
-      catch (e) { data = {}; }
-      const list = Array.isArray(data.matches) ? data.matches : [];
-
-      list.forEach(m => {
-        if (sportId && m.sportId !== sportId) return;
-        // Fingerprint ignores player-order and score-order.
-        const names = [String(m.player1 || ''), String(m.player2 || '')].sort();
-        const scores = [Number(m.score1) || 0, Number(m.score2) || 0];
-        // Pair names with their original scores, then sort by name so
-        // the fingerprint is order-insensitive.
-        const pairs = [
-          [String(m.player1 || ''), Number(m.score1) || 0],
-          [String(m.player2 || ''), Number(m.score2) || 0]
-        ].sort((a, b) => a[0].localeCompare(b[0]));
-        const day = (m.date || '').slice(0, 10); // YYYY-MM-DD
-        const fp = [
-          day,
-          String(m.sportId || ''),
-          pairs[0][0] + ':' + pairs[0][1],
-          pairs[1][0] + ':' + pairs[1][1]
-        ].join('|');
-
-        if (seen[fp]) return;
-        seen[fp] = true;
-        merged.push(m);
-      });
-    });
-
+    const matches = _getSharedMatches().slice();
     // Sort ascending by date so .slice(-N).reverse() still means
     // "N most recent, newest first" — matches the prior contract.
-    merged.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
-    return merged;
+    matches.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+    if (!sportId) return matches;
+    return matches.filter(m => m.sportId === sportId);
   }
 
   // ── Round Robin Tournament ──
