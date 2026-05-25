@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-05-25T00:57:45.989Z",
+  "generatedAt": "2026-05-25T21:50:41.279Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 9,
+  "totalGroups": 4,
+  "totalEvents": 17,
   "topGroups": [
+    {
+      "app": "little-maestro",
+      "kind": "error",
+      "page": "little-maestro.html",
+      "message": "TypeError: undefined is not an object (near '...})...')",
+      "filename": "https://rozavala.github.io/apps/little-maestro.html",
+      "lineno": 9549,
+      "colno": 9,
+      "count": 8,
+      "firstTs": 1779745152513,
+      "lastTs": 1779745707777,
+      "users": 1
+    },
     {
       "app": "sports-arena",
       "kind": "error",
