@@ -9498,7 +9498,15 @@ const MIDIManager = (() => {
       return Promise.resolve(false);
     }
 
-    return _accessPromise
+    // Some iOS MIDI shims (WebMIDIBrowser 1.0.6) return a thenable whose
+    // .then() does NOT return a chainable promise — so `_accessPromise
+    // .then(...).catch(...)` evaluates `.catch` on undefined and throws
+    // "undefined is not an object", crashing init() on every retry and
+    // making the connection look very unstable. Promise.resolve() adopts
+    // the thenable into a genuine native Promise, so the .then().catch()
+    // chain below is always valid and any shim misbehaviour surfaces as a
+    // rejection through our .catch instead of an uncaught throw.
+    return Promise.resolve(_accessPromise)
       .then(access => {
         try {
           if (typeof Debug !== 'undefined') Debug.log('[MIDI] Access granted');
