@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/world-cup.css?v=12">
+  <link rel="stylesheet" href="css/world-cup.css?v=13">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#16A34A">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
@@ -30,17 +30,28 @@
       <div class="sub">USA · CANADA · MEXICO &nbsp;·&nbsp; Jun 11 – Jul 19</div>
     </header>
 
+    <div class="wc-search">
+      <input id="wc-search-input" type="search" placeholder="🔍 Search teams, venues, matches…"
+             autocomplete="off" oninput="WC.search(this.value)" onfocus="WC.search(this.value)" />
+      <div class="wc-search-results" id="wc-search-results"></div>
+    </div>
+
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="home"      role="tab">🏠 Home</button>
-      <button class="tab"        data-tab="santaclara" role="tab">🌉 Santa Clara</button>
-      <button class="tab"        data-tab="teams"     role="tab">🌍 Teams</button>
       <button class="tab"        data-tab="matches"   role="tab">⚽ Matches</button>
-      <button class="tab"        data-tab="venues"    role="tab">🏟 Venues</button>
-      <button class="tab"        data-tab="standings" role="tab">📊 Standings</button>
-      <button class="tab"        data-tab="pool"      role="tab">👨‍👩‍👧‍👦 Bracket Pool</button>
-      <button class="tab"        data-tab="quiz"      role="tab">🧠 Quiz</button>
-      <button class="tab"        data-tab="stickers"  role="tab">📒 Stickers</button>
-      <button class="tab"        data-tab="about"     role="tab">ℹ About</button>
+      <button class="tab"        data-tab="pool"      role="tab">👨‍👩‍👧‍👦 Pool</button>
+      <button class="tab"        data-tab="teams"     role="tab">🌍 Teams</button>
+      <div class="tab-more" id="tab-more">
+        <button class="tab" id="more-btn" onclick="WC.toggleMore(event)">⋯ More</button>
+        <div class="more-menu" id="more-menu">
+          <button class="tab" data-tab="santaclara" role="tab">🌉 Santa Clara</button>
+          <button class="tab" data-tab="standings" role="tab">📊 Standings</button>
+          <button class="tab" data-tab="venues"    role="tab">🏟 Venues</button>
+          <button class="tab" data-tab="quiz"      role="tab">🧠 Quiz</button>
+          <button class="tab" data-tab="stickers"  role="tab">📒 Stickers</button>
+          <button class="tab" data-tab="about"     role="tab">ℹ About</button>
+        </div>
+      </div>
     </nav>
 
     <main>
@@ -66,6 +77,6 @@
   <script src="js/auth.js"></script>
   <script src="js/sync.js"></script>
   <script src="js/zs-diag.js?v=3"></script>
-  <script src="js/world-cup.js?v=12"></script>
+  <script src="js/world-cup.js?v=13"></script>
 </body>
 </html>

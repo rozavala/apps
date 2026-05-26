@@ -2513,6 +2513,52 @@
   }
 
   /* ----------------------------------------------------------------
+     Activity feed — a shared family log (pick entered, result entered,
+     sticker earned, bracket imported). Capped, persisted in the
+     wc2026.v2 bucket so it rides the same CloudSync as everything else.
+     ---------------------------------------------------------------- */
+  function logActivity(icon, text) {
+    state.activity = state.activity || [];
+    const last = state.activity[0];
+    // Dedupe identical consecutive entries within 3s (avoids spam from rapid edits)
+    if (last && last.text === text && (Date.now() - last.ts) < 3000) return;
+    state.activity.unshift({ ts: Date.now(), icon, text });
+    state.activity = state.activity.slice(0, 60);
+    // Note: caller is responsible for save() (usually already saving state)
+  }
+  function fmtAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return 'just now';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + 'h ago';
+    const d = Math.floor(h / 24);
+    return d + 'd ago';
+  }
+
+  /* ----------------------------------------------------------------
+     Favorite team — per-profile, stored in state.favorites[userKey].
+     Drives the "My Tournament" personalized card on the Home tab.
+     ---------------------------------------------------------------- */
+  function getFavoriteTeam() {
+    const user = currentActiveUser();
+    const key = user ? _userKey(user.name) : '_guest';
+    return (state.favorites || {})[key] || null;
+  }
+  function setFavoriteTeam(code) {
+    const user = currentActiveUser();
+    const key = user ? _userKey(user.name) : '_guest';
+    state.favorites = state.favorites || {};
+    if (code) state.favorites[key] = code;
+    else delete state.favorites[key];
+    const c = code ? countryByCode(code) : null;
+    if (c) logActivity('⭐', `${user ? escapeHTML(user.name) : 'Someone'} is cheering for ${c.flag} ${c.name}`);
+    save();
+    activateTab('home');
+  }
+
+  /* ----------------------------------------------------------------
      Share bracket — encode/decode a member's picks as a URL-safe
      base64 JSON payload. Works on the public GitHub-Pages app URL so
      extended family without VPN access can play.
@@ -2572,6 +2618,7 @@
       goldenBootCorrect: false,
       scores: payload.sc || {},
     };
+    logActivity('📨', `${escapeHTML(entry.name)}'s bracket joined the pool`);
     save();
     return entry;
   }
@@ -2813,6 +2860,25 @@
     return null;
   }
 
+  // Live qualification scenarios for a mid-stage group. Points-based
+  // (ignores GD / head-to-head tiebreakers — labelled as such in the UI).
+  function groupScenarios(table) {
+    const out = {};
+    if (!table || table.length === 0) return out;
+    const anyPlayed = table.some(t => t.p > 0);
+    const allDone = table.every(t => t.p >= 3);
+    if (!anyPlayed || allDone) return out; // only show mid-group
+    for (const t of table) {
+      const maxPts = t.pts + Math.max(0, 3 - t.p) * 3;
+      const alreadyAbove = table.filter(o => o.code !== t.code && o.pts > maxPts).length;
+      const couldPass = table.filter(o => o.code !== t.code && (o.pts + Math.max(0, 3 - o.p) * 3) > t.pts).length;
+      if (alreadyAbove >= 2) out[t.code] = { kind: 'out', label: '❌ Out' };
+      else if (couldPass <= 1) out[t.code] = { kind: 'in', label: '✅ Through' };
+      else out[t.code] = { kind: 'alive', label: '⏳ Alive' };
+    }
+    return out;
+  }
+
   /* ----------------------------------------------------------------
      SCORING — bracket pool
      ---------------------------------------------------------------- */
@@ -2937,9 +3003,15 @@
   /* ----------------------------------------------------------------
      RENDER — tabs
      ---------------------------------------------------------------- */
+  const PRIMARY_TABS = ['home', 'matches', 'pool', 'teams'];
   function activateTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-'+name));
+    // Reflect active state on the "More" button when a secondary tab is open
+    const moreBtn = document.getElementById('more-btn');
+    if (moreBtn) moreBtn.classList.toggle('active', name && !PRIMARY_TABS.includes(name));
+    const more = document.getElementById('tab-more');
+    if (more) more.classList.remove('open');
     if (name === 'home')        renderHome();
     if (name === 'santaclara')  renderSantaClara();
     if (name === 'teams')       renderTeams();
@@ -3179,6 +3251,48 @@
     const preTournament = days > 0;
     const tourneyOver = !next && todays.length === 0;
 
+    // ---- My Tournament: favorite team + personalized feed ----
+    const favCode = getFavoriteTeam();
+    const fav = favCode ? countryByCode(favCode) : null;
+    const teamOptionsHtml = COUNTRIES.slice()
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .map(c => `<option value="${c.code}" ${favCode===c.code?'selected':''}>${c.flag} ${escapeHTML(c.name)}</option>`)
+      .join('');
+    let myTournamentHTML = `
+      <div class="pick-row" style="grid-template-columns:auto 1fr;gap:8px;align-items:center;">
+        <div class="lbl">Favourite</div>
+        <select onchange="WC.setFavoriteTeam(this.value)" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:8px 10px;font-size:0.9rem;width:100%;">
+          <option value="">— pick a team to follow —</option>
+          ${teamOptionsHtml}
+        </select>
+      </div>`;
+    if (fav) {
+      const favNext = state.matches
+        .filter(m => !m.result && (m.home === favCode || m.away === favCode))
+        .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
+      const favLast = state.matches
+        .filter(m => m.result && (m.home === favCode || m.away === favCode))
+        .sort((a,b) => (b.date+b.time).localeCompare(a.date+a.time))[0];
+      myTournamentHTML += `<div style="margin-top:10px;">`;
+      if (favLast) myTournamentHTML += `<div style="font-size:0.85rem;margin-bottom:6px;">Last result:</div>${renderTodayRow(favLast)}`;
+      if (favNext) {
+        myTournamentHTML += `<div style="font-size:0.85rem;margin:8px 0 6px;">Next up:</div>${renderTodayRow(favNext)}`;
+      } else if (!favLast) {
+        myTournamentHTML += `<p class="muted" style="font-size:0.85rem;">${fav.flag} ${escapeHTML(fav.name)} are in <b>Group ${fav.group}</b>. Their fixtures will appear here.</p>`;
+      }
+      myTournamentHTML += `<button class="btn ghost" style="margin-top:10px;font-size:0.8rem;" onclick="WC.openCountry('${favCode}')">${fav.flag} View ${escapeHTML(fav.name)} profile →</button></div>`;
+    }
+
+    // ---- Activity feed ----
+    const acts = (state.activity || []).slice(0, 12);
+    const activityHTML = acts.length === 0
+      ? '<div class="empty" style="padding:14px;">No activity yet — submit a bracket or record a result to get things going.</div>'
+      : acts.map(a => `
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--wc-line);">
+            <span style="font-size:1.1rem;">${escapeHTML(a.icon||'•')}</span>
+            <div style="flex:1;font-size:0.86rem;line-height:1.4;">${a.text}<div class="muted" style="font-size:0.72rem;">${fmtAgo(a.ts)}</div></div>
+          </div>`).join('');
+
     root.innerHTML = `
       ${preTournament ? `
       <div class="card">
@@ -3195,6 +3309,16 @@
       <div class="card">
         <h2>${todayCardTitle}</h2>
         <div id="today-list">${todayHTML}</div>
+      </div>
+
+      <div class="card" style="${fav ? 'border-left:3px solid var(--wc-gold);' : ''}">
+        <h2>⭐ My Tournament</h2>
+        ${myTournamentHTML}
+      </div>
+
+      <div class="card">
+        <h2>📣 Family activity</h2>
+        <div>${activityHTML}</div>
       </div>
 
       <div class="card fact-card">
@@ -3497,23 +3621,29 @@
 
     for (const g of GROUP_LETTERS) {
       const rows = tables[g] || [];
+      const scen = groupScenarios(rows);
+      const hasScen = Object.keys(scen).length > 0;
       html += `<div class="card" style="padding:14px;">
         <h2>Group ${g}</h2>
         <table class="standings-table">
-          <thead><tr><th style="text-align:left;">Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
+          <thead><tr><th style="text-align:left;">Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>${hasScen?'<th></th>':''}</tr></thead>
           <tbody>
             ${rows.map((r, i) => {
               const c = countryByCode(r.code);
               const cls = i < 2 ? 'advancing' : (i === 2 ? 'qualified-3rd' : '');
+              const s = scen[r.code];
+              const scenColor = s ? (s.kind==='in'?'var(--wc-green)':(s.kind==='out'?'var(--wc-red)':'var(--text-muted)')) : '';
               return `<tr class="${cls}">
                 <td class="team">${c ? c.flag : ''} ${c ? escapeHTML(c.name) : r.code}</td>
                 <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
                 <td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga}</td>
                 <td><b>${r.pts}</b></td>
+                ${hasScen?`<td style="font-size:0.7rem;font-weight:700;color:${scenColor};white-space:nowrap;">${s?s.label:''}</td>`:''}
               </tr>`;
             }).join('')}
           </tbody>
         </table>
+        ${hasScen?'<p class="muted" style="font-size:0.72rem;margin-top:6px;">Live scenarios are points-based — goal difference & head-to-head tiebreakers may still shuffle things.</p>':''}
       </div>`;
     }
 
@@ -3605,6 +3735,7 @@
         ${selectedId ? '' : `
           <div style="text-align:center;margin-top:14px;display:flex;flex-direction:column;gap:8px;align-items:center;">
             <button class="btn gold" style="font-size:1rem;padding:12px 24px;" onclick="WC.startEntry()">${ctaLabel}</button>
+            ${board.length >= 2 ? `<button class="btn ghost" style="font-size:0.82rem;" onclick="WC.openCompare()">⚖ Compare two brackets</button>` : ''}
             ${board.length > 0 ? `<button class="btn ghost" style="font-size:0.82rem;" onclick="WC.openShareFamilyPool()">📤 Share family pool (snapshot link)</button>` : ''}
             <button class="btn ghost" style="font-size:0.82rem;" onclick="WC.openInviteGuest()">📨 Invite extended family (no app/VPN needed)</button>
           </div>
@@ -4371,6 +4502,12 @@
       // Award stars to the active user (rewards engagement with results)
       const user = currentActiveUser();
       if (user) awardStars(user.name, 2, 'result:' + m.id);
+      // Activity feed
+      const hC = m.home ? countryByCode(m.home) : null;
+      const aC = m.away ? countryByCode(m.away) : null;
+      if (hC && aC) {
+        logActivity('⚽', `${user ? escapeHTML(user.name) : 'Someone'} recorded ${hC.flag} ${hC.name} ${hs}–${as} ${aC.name} ${aC.flag}`);
+      }
     }
     save();
     closeModal();
@@ -4488,6 +4625,9 @@
       if (m && !(m.name && m.name.trim())) {
         state.members = state.members.filter(x => x.id !== id);
         delete state.picks[id];
+      } else if (m) {
+        logActivity('📝', `${escapeHTML(m.name)} ${m._loggedBracket ? 'updated' : 'submitted'} their bracket`);
+        m._loggedBracket = true;
       }
     }
     state.uiSelectedMember = null;
@@ -4509,14 +4649,17 @@
     save();
     renderPool();
   }
+  // Pick setters persist state but DON'T rebuild the whole pool form — the
+  // <select> already holds the new value, so a full re-render only caused
+  // scroll-jumps and focus loss. Picks are locked once a result can exist,
+  // so there is never a live ✓/✗ mark or leaderboard delta to refresh while
+  // editing. The leaderboard recomputes when the user taps Done.
   function setGroupPick(memberId, group, slot, value) {
     const p = state.picks[memberId];
     if (!p) return;
     if (slot === 'winner')   p.groupWinners[group]   = value || null;
     if (slot === 'runnerUp') p.groupRunnersUp[group] = value || null;
     save();
-    // light refresh only of leaderboard
-    renderPool();
   }
   function setKoPick(memberId, stage, matchId, value) {
     const p = state.picks[memberId];
@@ -4524,18 +4667,135 @@
     p.ko[stage] = p.ko[stage] || {};
     p.ko[stage][matchId] = value || null;
     save();
-    renderPool();
   }
   function setOutcomePick(memberId, field, value) {
     const p = state.picks[memberId];
     if (!p) return;
     p[field] = value;
     save();
-    renderPool();
   }
   function setMatchChip(value) {
     state.matchChip = value;
     renderMatches();
+  }
+
+  /* ---- Navigation: More overflow menu ---- */
+  function toggleMore(ev) {
+    if (ev) ev.stopPropagation();
+    const more = document.getElementById('tab-more');
+    if (more) more.classList.toggle('open');
+  }
+
+  /* ---- Global search across teams, venues, matches ---- */
+  function search(q) {
+    const box = document.getElementById('wc-search-results');
+    if (!box) return;
+    const query = (q || '').trim().toLowerCase();
+    if (query.length < 2) { box.classList.remove('open'); box.innerHTML = ''; return; }
+
+    const rows = [];
+    // Teams
+    for (const c of COUNTRIES) {
+      if (c.name.toLowerCase().includes(query) || (c.capital||'').toLowerCase().includes(query) || c.code.toLowerCase() === query) {
+        rows.push({ kind:'Team', icon:c.flag, label:c.name, sub:'Group '+c.group, action:`WC.searchGo('country','${c.code}')` });
+      }
+    }
+    // Venues
+    for (const v of VENUES) {
+      if (v.name.toLowerCase().includes(query) || v.city.toLowerCase().includes(query)) {
+        rows.push({ kind:'Venue', icon:'🏟', label:v.name, sub:v.city, action:`WC.searchGo('venues','')` });
+      }
+    }
+    // Matches (by team names)
+    for (const m of state.matches) {
+      const h = m.home ? countryByCode(m.home) : null;
+      const a = m.away ? countryByCode(m.away) : null;
+      const hn = h ? h.name.toLowerCase() : (m.home_label||'').toLowerCase();
+      const an = a ? a.name.toLowerCase() : (m.away_label||'').toLowerCase();
+      if (hn.includes(query) || an.includes(query)) {
+        const label = `${h?h.flag+' '+h.name:(m.home_label||'TBD')} vs ${a?a.flag+' '+a.name:(m.away_label||'TBD')}`;
+        rows.push({ kind:'Match', icon:'⚽', label, sub:`${m.date.slice(5)} · ${m.stage==='group'?'Group '+m.group:m.round}`, action:`WC.editResult('${m.id}')` });
+      }
+      if (rows.length > 40) break;
+    }
+
+    if (rows.length === 0) {
+      box.innerHTML = `<div class="wc-search-row muted">No matches for "${escapeHTML(q)}"</div>`;
+    } else {
+      box.innerHTML = rows.slice(0, 30).map(r => `
+        <div class="wc-search-row" onclick="${r.action}">
+          <span style="font-size:1.2rem;">${r.icon}</span>
+          <span>${escapeHTML(r.label)}<div class="muted" style="font-size:0.72rem;">${escapeHTML(r.sub)}</div></span>
+          <span class="sr-kind">${r.kind}</span>
+        </div>`).join('');
+    }
+    box.classList.add('open');
+  }
+  function searchGo(kind, code) {
+    const box = document.getElementById('wc-search-results');
+    const input = document.getElementById('wc-search-input');
+    if (box) { box.classList.remove('open'); box.innerHTML = ''; }
+    if (input) input.value = '';
+    if (kind === 'country') openCountry(code);
+    else activateTab(kind);
+  }
+
+  /* ---- Bracket divergence — compare two members side by side ---- */
+  function openCompare() {
+    const named = state.members.filter(m => m.name && m.name.trim());
+    if (named.length < 2) { toast('Need at least two brackets to compare.'); return; }
+    if (!state._cmpA || !named.find(m=>m.id===state._cmpA)) state._cmpA = named[0].id;
+    if (!state._cmpB || !named.find(m=>m.id===state._cmpB)) state._cmpB = named[1].id;
+    renderCompare();
+  }
+  function setCompare(slot, id) { state['_cmp'+slot] = id; renderCompare(); }
+  function renderCompare() {
+    const named = state.members.filter(m => m.name && m.name.trim());
+    const a = state.members.find(m => m.id === state._cmpA) || named[0];
+    const b = state.members.find(m => m.id === state._cmpB) || named[1];
+    const pa = state.picks[a.id] || {}, pb = state.picks[b.id] || {};
+    const tl = (code) => { const c = code ? countryByCode(code) : null; return c ? c.flag+' '+escapeHTML(c.name) : '<span class="muted">—</span>'; };
+    const sel = (slot, cur) => `<select onchange="WC.setCompare('${slot}',this.value)" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.82rem;max-width:46%;">
+      ${named.map(m => `<option value="${m.id}" ${cur===m.id?'selected':''}>${escapeHTML(m.name)}</option>`).join('')}</select>`;
+
+    const row = (label, av, bv) => {
+      const same = av && bv && av === bv;
+      return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--wc-line);${same?'background:rgba(22,163,74,0.06);':''}">
+        <div style="font-size:0.82rem;">${tl(av)}</div>
+        <div style="font-size:0.82rem;text-align:right;">${tl(bv)}</div>
+        <div style="grid-column:1/3;font-size:0.68rem;color:${same?'var(--wc-green)':'var(--text-muted)'};text-transform:uppercase;letter-spacing:0.05em;">${label}${same?' · agree ✓':''}</div>
+      </div>`;
+    };
+
+    let body = `<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;">
+      ${sel('A', a.id)}${sel('B', b.id)}
+    </div>`;
+    body += row('Champion', pa.champion, pb.champion);
+    body += row('Runner-up', pa.runnerUp, pb.runnerUp);
+    // Golden boot (text)
+    const gbSame = pa.goldenBoot && pb.goldenBoot && pa.goldenBoot.toLowerCase() === pb.goldenBoot.toLowerCase();
+    body += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--wc-line);${gbSame?'background:rgba(22,163,74,0.06);':''}">
+      <div style="font-size:0.82rem;">👟 ${escapeHTML(pa.goldenBoot||'—')}</div>
+      <div style="font-size:0.82rem;text-align:right;">👟 ${escapeHTML(pb.goldenBoot||'—')}</div>
+      <div style="grid-column:1/3;font-size:0.68rem;color:${gbSame?'var(--wc-green)':'var(--text-muted)'};text-transform:uppercase;">Golden Boot${gbSame?' · agree ✓':''}</div>
+    </div>`;
+    // Group winners
+    body += `<div style="font-weight:800;color:var(--wc-gold);margin:10px 0 4px;font-size:0.85rem;">Group winners</div>`;
+    let agreements = 0, comparable = 0;
+    for (const g of GROUP_LETTERS) {
+      const av = (pa.groupWinners||{})[g], bv = (pb.groupWinners||{})[g];
+      if (av && bv) { comparable++; if (av===bv) agreements++; }
+      body += row('Group '+g, av, bv);
+    }
+
+    const modal = document.getElementById('match-modal');
+    modal.querySelector('.modal-inner').innerHTML = `
+      <h3>⚖ Compare brackets</h3>
+      <div class="sub">${comparable>0?`Agree on ${agreements} of ${comparable} group winners`:'Pick two brackets to compare'}</div>
+      <div style="max-height:60vh;overflow-y:auto;margin-top:10px;">${body}</div>
+      <div class="modal-actions"><button class="btn" onclick="WC.closeModal()">Close</button></div>
+    `;
+    modal.classList.add('open');
   }
 
   /* ----------------------------------------------------------------
@@ -4726,8 +4986,13 @@
      ---------------------------------------------------------------- */
   function init() {
     load();
-    document.querySelectorAll('.tab').forEach(t => {
+    document.querySelectorAll('.tab[data-tab]').forEach(t => {
       t.addEventListener('click', () => activateTab(t.dataset.tab));
+    });
+    // Close the "More" overflow menu when tapping elsewhere
+    document.addEventListener('click', (e) => {
+      const more = document.getElementById('tab-more');
+      if (more && !more.contains(e.target)) more.classList.remove('open');
     });
     // refresh countdown every second on home
     setInterval(() => {
@@ -4903,6 +5168,9 @@
     startQuiz, answerQuiz, nextQuestion, resetQuiz,
     openShareBracket, copyShareUrl, openInviteGuest, confirmImportBracket,
     openShareFamilyPool, confirmImportPool,
+    toggleMore, search, searchGo,
+    openCompare, setCompare,
+    setFavoriteTeam,
     resetAll,
     syncScores,
   };
