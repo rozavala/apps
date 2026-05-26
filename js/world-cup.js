@@ -2809,6 +2809,117 @@
     return out;
   }
 
+  /* ----------------------------------------------------------------
+     Member-aware bracket cascade (build-up mode). Resolves each KO
+     match's two sides from a SINGLE member's own group + KO picks,
+     so the bracket flows: group placements → R32 → R16 → … → champion.
+     ---------------------------------------------------------------- */
+  function _memberPickedWinner(picks, matchId) {
+    const m = state.matches.find(x => x.id === matchId);
+    if (!m) return null;
+    return (picks.ko && picks.ko[m.stage] && picks.ko[m.stage][matchId]) || null;
+  }
+  // Resolve one side's label to a single team code via the member's picks
+  // (null if not yet determined). 3rd-place slots return null — they expand
+  // to a candidate pool instead (see memberCandidatesForMatch).
+  function resolveSideForMember(label, picks, _seen) {
+    if (!label) return null;
+    _seen = _seen || new Set();
+    if (_seen.has(label)) return null;
+    _seen.add(label);
+    let mm;
+    if ((mm = /^1([A-L])$/.exec(label))) return (picks.groupWinners || {})[mm[1]] || null;
+    if ((mm = /^2([A-L])$/.exec(label))) return (picks.groupRunnersUp || {})[mm[1]] || null;
+    if (/^3[A-L/]+$/.test(label)) return null; // ambiguous 3rd-place slot
+    if ((mm = /^([WL])(\d+)$/.exec(label))) {
+      const refId = 'm' + String(parseInt(mm[2])).padStart(3, '0');
+      const winner = _memberPickedWinner(picks, refId);
+      if (mm[1] === 'W') return winner || null;
+      // Loser: the side of refId that isn't the winner
+      if (!winner) return null;
+      const sides = memberSides(refId, picks, _seen);
+      if (sides[0] && sides[1]) return winner === sides[0] ? sides[1] : sides[0];
+      return null;
+    }
+    return null;
+  }
+  function memberSides(matchId, picks, _seen) {
+    const m = state.matches.find(x => x.id === matchId);
+    if (!m) return [null, null];
+    const h = m.home || resolveSideForMember(m.home_label, picks, _seen);
+    const a = m.away || resolveSideForMember(m.away_label, picks, _seen);
+    return [h, a];
+  }
+  // 3rd-place candidates for a "3X/Y/Z" slot, per the member's group picks.
+  function memberThirdCandidates(label, picks) {
+    const mm = /^3([A-L/]+)$/.exec(label);
+    if (!mm) return [];
+    const letters = mm[1].split('/');
+    const out = [];
+    for (const g of letters) {
+      const third = (picks.groupThird || {})[g];
+      if (third) { if (!out.includes(third)) out.push(third); continue; }
+      // Fall back to the group teams not picked 1st/2nd
+      const gw = (picks.groupWinners || {})[g], gr = (picks.groupRunnersUp || {})[g];
+      for (const code of (state.groups[g] || [])) {
+        if (code !== gw && code !== gr && !out.includes(code)) out.push(code);
+      }
+    }
+    return out;
+  }
+  // The teams a member could pick as WINNER of a match (build-up mode).
+  function memberCandidatesForMatch(m, picks) {
+    const collect = (real, label) => {
+      if (real) return [real];
+      const single = resolveSideForMember(label, picks);
+      if (single) return [single];
+      if (label && /^3[A-L/]+$/.test(label)) return memberThirdCandidates(label, picks);
+      return [];
+    };
+    const out = [];
+    for (const c of [...collect(m.home, m.home_label), ...collect(m.away, m.away_label)]) {
+      if (c && !out.includes(c)) out.push(c);
+    }
+    return out;
+  }
+  // Human label for a side in build-up (resolved team, or a hint).
+  function memberSideLabel(real, label, picks) {
+    const code = real || resolveSideForMember(label, picks);
+    if (code) { const c = countryByCode(code); return c ? c.flag + ' ' + c.name : code; }
+    if (label && /^3[A-L/]+$/.test(label)) return '3rd place (' + label.slice(1) + ')';
+    return label || 'TBD';
+  }
+  // Keep champion/runner-up in sync with the member's Final pick (build-up).
+  function syncOutcomeFromFinal(picks) {
+    const finalM = state.matches.find(x => x.stage === 'Final');
+    if (!finalM) return;
+    const winner = (picks.ko && picks.ko.Final && picks.ko.Final[finalM.id]) || null;
+    if (!winner) return;
+    const sides = memberSides(finalM.id, picks);
+    picks.champion = winner;
+    picks.runnerUp = sides[0] && sides[1] ? (winner === sides[0] ? sides[1] : sides[0]) : picks.runnerUp;
+  }
+  // Compute 1st/2nd/3rd for a group from a member's predicted scorelines.
+  function computeGroupOrderFromScores(group, picks) {
+    const codes = state.groups[group] || [];
+    const tbl = codes.map(code => ({ code, pts:0, gf:0, ga:0 }));
+    const find = c => tbl.find(t => t.code === c);
+    const gms = state.matches.filter(x => x.stage === 'group' && x.group === group);
+    let any = false;
+    for (const m of gms) {
+      const sp = (picks.scores || {})[m.id];
+      if (!sp || typeof sp.home !== 'number' || typeof sp.away !== 'number') continue;
+      any = true;
+      const h = find(m.home), a = find(m.away);
+      if (!h || !a) continue;
+      h.gf += sp.home; h.ga += sp.away; a.gf += sp.away; a.ga += sp.home;
+      if (sp.home > sp.away) h.pts += 3; else if (sp.away > sp.home) a.pts += 3; else { h.pts++; a.pts++; }
+    }
+    if (!any) return null;
+    tbl.sort((x,y) => y.pts-x.pts || (y.gf-y.ga)-(x.gf-x.ga) || y.gf-x.gf);
+    return tbl.map(t => t.code);
+  }
+
   function toast(msg) {
     let t = document.getElementById('wc-toast');
     if (!t) {
@@ -3757,6 +3868,12 @@
 
   function renderMemberPicks(member) {
     const picks = state.picks[member.id] || (state.picks[member.id] = { groupWinners:{}, groupRunnersUp:{}, ko:{}, champion:null, runnerUp:null, goldenBoot:'', goldenBootCorrect:false });
+    picks.mode = picks.mode || 'buildup';
+    picks.groupThird = picks.groupThird || {};
+    picks.scores = picks.scores || {};
+    const buildup = picks.mode === 'buildup';
+    if (buildup) syncOutcomeFromFinal(picks);
+
     const actualTop2 = getActualGroupTop2();
     const koActual = getKnockoutWinners();
     const champRu = getChampionAndRunnerUp();
@@ -3774,25 +3891,57 @@
     const allTeamCodes = COUNTRIES.map(c => c.code);
     const outcomesLocked = areOutcomesLocked();
 
-    // Group picks (per-group locks)
+    // ---- Group section ----
+    // build-up: scoreline inputs + "apply" + 1st/2nd/3rd selects.
+    // top-down: 1st/2nd selects only (scorelines live in the collapsible below).
     let groupsHTML = '';
     for (const g of GROUP_LETTERS) {
       const codes = state.groups[g] || [];
       const winPick = picks.groupWinners[g] || '';
       const ruPick  = picks.groupRunnersUp[g] || '';
+      const thirdPick = picks.groupThird[g] || '';
       const actual = actualTop2[g];
       const winMark = actual ? (winPick === actual.winner ? `<span class="correct">✓ ${SCORING.groupWinner}</span>` : (winPick ? '<span class="miss">✗</span>' : '')) : '';
       const ruMark  = actual ? (ruPick  === actual.runnerUp ? `<span class="correct">✓ ${SCORING.groupRunnerUp}</span>` : (ruPick ? '<span class="miss">✗</span>' : '')) : '';
       const locked = isGroupLocked(g);
       const lockChip = locked ? ' <span class="chip" style="background:rgba(239,68,68,0.12);color:#FCA5A5;font-size:0.65rem;padding:2px 6px;">🔒 locked</span>' : '';
-      groupsHTML += `<div style="margin-bottom:10px;">
+
+      let scoreRows = '';
+      if (buildup) {
+        const gms = state.matches.filter(x => x.stage === 'group' && x.group === g)
+          .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+        scoreRows = gms.map(m => {
+          const sp = picks.scores[m.id] || {};
+          const h = m.home ? countryByCode(m.home) : null;
+          const a = m.away ? countryByCode(m.away) : null;
+          const ml = locked || _matchStarted(m);
+          return `<div style="display:grid;grid-template-columns:1fr 42px 10px 42px;gap:5px;align-items:center;font-size:0.78rem;padding:2px 0;">
+            <span>${h?h.flag+' '+escapeHTML(h.name):'TBD'} <span style="opacity:0.4;">v</span> ${a?a.flag+' '+escapeHTML(a.name):'TBD'}</span>
+            <input type="number" min="0" max="20" ${ml?'disabled':''} value="${typeof sp.home==='number'?sp.home:''}" oninput="WC.setScorePred('${member.id}','${m.id}','home',this.value)" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:6px;padding:3px;text-align:center;font-weight:700;" />
+            <span style="text-align:center;opacity:0.5;">–</span>
+            <input type="number" min="0" max="20" ${ml?'disabled':''} value="${typeof sp.away==='number'?sp.away:''}" oninput="WC.setScorePred('${member.id}','${m.id}','away',this.value)" style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:6px;padding:3px;text-align:center;font-weight:700;" />
+          </div>`;
+        }).join('');
+        scoreRows = `<div style="margin:4px 0;">${scoreRows}<button class="btn ghost" style="font-size:0.72rem;padding:4px 8px;margin-top:4px;" onclick="WC.applyGroupScores('${member.id}','${g}')" ${locked?'disabled':''}>↻ Standings from scores</button></div>`;
+      }
+
+      const thirdRow = buildup
+        ? `<div class="pick-row"><div class="lbl">3rd place</div><div>${teamSelect(thirdPick, codes, `WC.setGroupPick('${member.id}','${g}','third',this.value)`, locked)}</div></div>`
+        : '';
+
+      groupsHTML += `<div style="margin-bottom:14px;">
         <div style="font-weight:800;color:var(--wc-gold);margin-bottom:4px;">Group ${g}${lockChip}</div>
+        ${scoreRows}
         <div class="pick-row"><div class="lbl">Winner</div><div>${teamSelect(winPick, codes, `WC.setGroupPick('${member.id}','${g}','winner',this.value)`, locked)}${winMark}</div></div>
         <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(ruPick, codes, `WC.setGroupPick('${member.id}','${g}','runnerUp',this.value)`, locked)}${ruMark}</div></div>
+        ${thirdRow}
       </div>`;
     }
 
-    // Knockouts — candidates come from the bracket structure; lock per stage
+    // ---- Knockouts ----
+    // build-up: candidates cascade from THIS member's picks (their group
+    // placements feed R32; each round's winners feed the next).
+    // top-down: candidates come from the full bracket structure.
     function koPicksFor(stage) {
       const matches = state.matches.filter(m => m.stage === stage);
       if (matches.length === 0) return '';
@@ -3801,19 +3950,22 @@
       const stageLocked = isStageLocked(stage);
       const lockChip = stageLocked ? ' <span class="chip" style="background:rgba(239,68,68,0.12);color:#FCA5A5;font-size:0.65rem;padding:2px 6px;">🔒 locked</span>' : '';
       const items = matches.map(m => {
-        const optionsList = candidatesForMatch(m);
+        const optionsList = buildup ? memberCandidatesForMatch(m, picks) : candidatesForMatch(m);
         const pickStage = picks.ko[stage] || (picks.ko[stage] = {});
         const cur = pickStage[m.id] || '';
         const actual = koActual[stage][m.id];
         const mark = actual ? (cur === actual ? `<span class="correct">✓ ${ptsLabel}</span>` : (cur ? '<span class="miss">✗</span>' : '')) : '';
-        const homeName = m.home ? countryByCode(m.home).flag+' '+countryByCode(m.home).name : (m.home_label || 'TBD');
-        const awayName = m.away ? countryByCode(m.away).flag+' '+countryByCode(m.away).name : (m.away_label || 'TBD');
+        const homeName = buildup ? memberSideLabel(m.home, m.home_label, picks)
+                                 : (m.home ? countryByCode(m.home).flag+' '+countryByCode(m.home).name : (m.home_label || 'TBD'));
+        const awayName = buildup ? memberSideLabel(m.away, m.away_label, picks)
+                                 : (m.away ? countryByCode(m.away).flag+' '+countryByCode(m.away).name : (m.away_label || 'TBD'));
         return `<div class="pick-row">
           <div class="lbl" style="font-size:0.7rem;">${escapeHTML(homeName)} vs ${escapeHTML(awayName)}</div>
           <div>${teamSelect(cur, optionsList, `WC.setKoPick('${member.id}','${stage}','${m.id}',this.value)`, stageLocked)}${mark}</div>
         </div>`;
       }).join('');
-      return `<h3>${label}${lockChip} <span class="muted" style="font-size:0.75rem;font-weight:600;">(${ptsLabel} pt${ptsLabel>1?'s':''} per correct pick)</span></h3>${items}`;
+      const hint = buildup && stage === 'R32' ? ' <span class="muted" style="font-size:0.7rem;font-weight:600;">— teams come from your group picks above</span>' : '';
+      return `<h3>${label}${lockChip} <span class="muted" style="font-size:0.75rem;font-weight:600;">(${ptsLabel} pt${ptsLabel>1?'s':''} per correct pick)</span>${hint}</h3>${items}`;
     }
 
     // Score predictions per group match (collapsed by default)
@@ -3865,6 +4017,50 @@
     const champMark = champRu.champion ? (picks.champion === champRu.champion ? `<span class="correct">✓ ${SCORING.champion}</span>` : '<span class="miss">✗</span>') : '';
     const ruMark    = champRu.runnerUp ? (picks.runnerUp === champRu.runnerUp ? `<span class="correct">✓ ${SCORING.runnerUp}</span>` : '<span class="miss">✗</span>') : '';
 
+    // Outcome block differs by mode
+    const goldenBootRow = `<div class="pick-row"><div class="lbl">Golden Boot</div><div>
+          <input style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;"
+                 placeholder="Player name" value="${escapeHTML(picks.goldenBoot || '')}"
+                 ${outcomesLocked ? 'disabled' : ''}
+                 onchange="WC.setOutcomePick('${member.id}','goldenBoot',this.value)" />
+          <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:0.78rem;color:var(--text-muted);">
+            <input type="checkbox" ${picks.goldenBootCorrect ? 'checked' : ''}
+                   onchange="WC.setOutcomePick('${member.id}','goldenBootCorrect',this.checked)" />
+            Mark as correct (10 pts) — toggle on after the tournament ends
+          </label>
+        </div></div>`;
+
+    let outcomeBlock;
+    if (buildup) {
+      // Champion / runner-up are derived from the Final pick (read-only)
+      const champC = picks.champion ? countryByCode(picks.champion) : null;
+      const ruC = picks.runnerUp ? countryByCode(picks.runnerUp) : null;
+      outcomeBlock = `<h3>🏆 Tournament outcome <span class="muted" style="font-size:0.72rem;font-weight:600;">— set by your Final pick</span></h3>
+        <div class="pick-row"><div class="lbl">Champion</div><div><b>${champC ? champC.flag+' '+escapeHTML(champC.name) : '<span class="muted">pick your Final winner below</span>'}</b> ${champMark}</div></div>
+        <div class="pick-row"><div class="lbl">Runner-up</div><div>${ruC ? ruC.flag+' '+escapeHTML(ruC.name) : '<span class="muted">—</span>'} ${ruMark}</div></div>
+        ${goldenBootRow}`;
+    } else {
+      outcomeBlock = `<h3>🏆 Tournament outcome</h3>
+        <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', finalistCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`, outcomesLocked)}${champMark}</div></div>
+        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(picks.runnerUp || '', finalistCodes, `WC.setOutcomePick('${member.id}','runnerUp',this.value)`, outcomesLocked)}${ruMark}</div></div>
+        ${goldenBootRow}`;
+    }
+
+    const groupsBlock = `<h3>🎯 Group stage</h3>${buildup ? '<p class="muted" style="font-size:0.75rem;margin-bottom:6px;">Enter scorelines and tap “Standings from scores”, or just pick 1st/2nd/3rd directly. These feed your knockout bracket.</p>' : ''}${groupsHTML}`;
+    const koBlock = `<h3>⚔️ Knockout bracket</h3>${koPicksFor('R32')}${koPicksFor('R16')}${koPicksFor('QF')}${koPicksFor('SF')}${koPicksFor('Final')}`;
+
+    // Order: build-up flows groups → knockouts → outcome.
+    // Top-down leads with the outcome, then groups, then knockouts.
+    const body = buildup
+      ? `${groupsBlock}${koBlock}${outcomeBlock}`
+      : `${outcomeBlock}${groupsBlock}${scorePredictionsHTML()}${koBlock}`;
+
+    const modeToggle = `
+      <div style="display:flex;gap:6px;margin:10px 0;background:var(--wc-card);border:1px solid var(--wc-line);border-radius:99px;padding:4px;">
+        <button class="btn ${buildup?'':'ghost'}" style="flex:1;font-size:0.78rem;padding:7px 8px;${buildup?'':'background:transparent;'}" onclick="WC.setBracketMode('${member.id}','buildup')">🔼 Build-up (groups → final)</button>
+        <button class="btn ${buildup?'ghost':''}" style="flex:1;font-size:0.78rem;padding:7px 8px;${buildup?'background:transparent;':''}" onclick="WC.setBracketMode('${member.id}','topdown')">🔽 Top-down (champion first)</button>
+      </div>`;
+
     const hasName = !!(member.name && member.name.trim());
     const activeUser = currentActiveUser();
     const isActiveUserEntry = !!(activeUser && hasName && member.name.toLowerCase() === activeUser.name.toLowerCase());
@@ -3892,6 +4088,8 @@
           </div>
         </div>`}
 
+        ${modeToggle}
+
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;">
           <button class="btn ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="WC.quickFill('${member.id}','favorites')">⭐ Pick all favorites</button>
           <button class="btn ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="WC.quickFill('${member.id}','underdogs')">🌶 Pick all underdogs</button>
@@ -3899,32 +4097,7 @@
         </div>
         <p class="muted" style="font-size:0.72rem;margin-bottom:8px;">Quick-fill only overwrites unlocked picks.</p>
 
-        <h3>🏆 Tournament outcome</h3>
-        <div class="pick-row"><div class="lbl">Champion</div><div>${teamSelect(picks.champion || '', finalistCodes, `WC.setOutcomePick('${member.id}','champion',this.value)`, outcomesLocked)}${champMark}</div></div>
-        <div class="pick-row"><div class="lbl">Runner-up</div><div>${teamSelect(picks.runnerUp || '', finalistCodes, `WC.setOutcomePick('${member.id}','runnerUp',this.value)`, outcomesLocked)}${ruMark}</div></div>
-        <div class="pick-row"><div class="lbl">Golden Boot</div><div>
-          <input style="background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;"
-                 placeholder="Player name" value="${escapeHTML(picks.goldenBoot || '')}"
-                 ${outcomesLocked ? 'disabled' : ''}
-                 onchange="WC.setOutcomePick('${member.id}','goldenBoot',this.value)" />
-          <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:0.78rem;color:var(--text-muted);">
-            <input type="checkbox" ${picks.goldenBootCorrect ? 'checked' : ''}
-                   onchange="WC.setOutcomePick('${member.id}','goldenBootCorrect',this.checked)" />
-            Mark as correct (10 pts) — toggle on after the tournament ends
-          </label>
-        </div></div>
-
-        <h3>🎯 Group winners & runners-up</h3>
-        ${groupsHTML}
-
-        ${scorePredictionsHTML()}
-
-        <h3>⚔️ Knockout winners</h3>
-        ${koPicksFor('R32')}
-        ${koPicksFor('R16')}
-        ${koPicksFor('QF')}
-        ${koPicksFor('SF')}
-        ${koPicksFor('Final')}
+        ${body}
 
         <div style="text-align:center;margin-top:18px;">
           <button class="btn" onclick="WC.doneEntry()">${hasName ? '✓ Done' : 'Save & enter the pool'}</button>
@@ -4648,25 +4821,64 @@
   // scroll-jumps and focus loss. Picks are locked once a result can exist,
   // so there is never a live ✓/✗ mark or leaderboard delta to refresh while
   // editing. The leaderboard recomputes when the user taps Done.
+  // In build-up mode a pick cascades into later rounds, so the form must
+  // re-render — but we preserve scroll position so it doesn't jump.
+  function _afterPick(p) {
+    if (p && p.mode === 'buildup') {
+      const y = window.scrollY;
+      renderPool();
+      window.scrollTo({ top: y, behavior: 'instant' });
+    }
+  }
   function setGroupPick(memberId, group, slot, value) {
     const p = state.picks[memberId];
     if (!p) return;
+    p.groupThird = p.groupThird || {};
     if (slot === 'winner')   p.groupWinners[group]   = value || null;
     if (slot === 'runnerUp') p.groupRunnersUp[group] = value || null;
+    if (slot === 'third')    p.groupThird[group]     = value || null;
     save();
+    _afterPick(p);
   }
   function setKoPick(memberId, stage, matchId, value) {
     const p = state.picks[memberId];
     if (!p) return;
     p.ko[stage] = p.ko[stage] || {};
     p.ko[stage][matchId] = value || null;
+    if (p.mode === 'buildup' && stage === 'Final') syncOutcomeFromFinal(p);
     save();
+    _afterPick(p);
   }
   function setOutcomePick(memberId, field, value) {
     const p = state.picks[memberId];
     if (!p) return;
     p[field] = value;
     save();
+  }
+  function setBracketMode(memberId, mode) {
+    const p = state.picks[memberId];
+    if (!p) return;
+    p.mode = mode === 'topdown' ? 'topdown' : 'buildup';
+    if (p.mode === 'buildup') syncOutcomeFromFinal(p);
+    save();
+    renderPool();
+  }
+  function applyGroupScores(memberId, group) {
+    const p = state.picks[memberId];
+    if (!p) return;
+    const order = computeGroupOrderFromScores(group, p);
+    if (!order) { toast('Enter all three group scores first'); return; }
+    p.groupWinners = p.groupWinners || {};
+    p.groupRunnersUp = p.groupRunnersUp || {};
+    p.groupThird = p.groupThird || {};
+    p.groupWinners[group]   = order[0] || null;
+    p.groupRunnersUp[group] = order[1] || null;
+    p.groupThird[group]     = order[2] || null;
+    save();
+    toast('Group ' + group + ' standings set from your scores');
+    const y = window.scrollY;
+    renderPool();
+    window.scrollTo({ top: y, behavior: 'instant' });
   }
   function setMatchChip(value) {
     state.matchChip = value;
@@ -5145,6 +5357,7 @@
     openGroupEditor, saveGroups,
     startEntry, editEntry, doneEntry, setEntrantName, removeMember,
     setGroupPick, setKoPick, setOutcomePick, setScorePred,
+    setBracketMode, applyGroupScores,
     setMatchChip,
     quickFill,
     startQuiz, answerQuiz, nextQuestion, resetQuiz,
