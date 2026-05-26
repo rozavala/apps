@@ -86,13 +86,12 @@ body {
 /* ---- Tabs ---- */
 .tabs {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
-  overflow-x: auto;
   padding: 14px 4px 8px;
   margin-bottom: 14px;
-  scrollbar-width: none;
 }
-.tabs::-webkit-scrollbar { display: none; }
 .tab {
   flex: 0 0 auto;
   background: var(--wc-card);
@@ -112,30 +111,6 @@ body {
   background: linear-gradient(120deg, var(--wc-green), var(--wc-blue));
   color: white;
   border-color: transparent;
-}
-
-/* ---- "More" overflow menu ---- */
-.tab-more { position: relative; flex: 0 0 auto; }
-.more-menu {
-  display: none;
-  position: absolute;
-  top: 110%;
-  right: 0;
-  z-index: 60;
-  background: var(--bg-card);
-  border: 1px solid var(--wc-line);
-  border-radius: 14px;
-  padding: 8px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-  min-width: 180px;
-  flex-direction: column;
-  gap: 4px;
-}
-.tab-more.open .more-menu { display: flex; }
-.more-menu .tab {
-  width: 100%;
-  text-align: left;
-  border-radius: 10px;
 }
 
 /* ---- Global search ---- */
