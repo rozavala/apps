@@ -9298,11 +9298,28 @@ const MIDIManager = (() => {
   // ── internal: choose best input from MIDI access ──
   function _findBestInput(inputs) {
     const inputArr = [];
-    // Use forEach instead of .values().next() for wider browser compat.
-    // Some 3rd-party iOS MIDI hosts (eg. WebMIDIBrowser) expose a
-    // non-iterable inputs object — guard so init doesn't blow up.
-    if (inputs && typeof inputs.forEach === 'function') {
-      inputs.forEach(input => { if (input) inputArr.push(input); });
+    // Collect inputs across the several shapes MIDI hosts use:
+    //   • spec MIDIInputMap → has forEach
+    //   • iterable map → has values()
+    //   • plain object keyed by id → some iOS shims (WebMIDIBrowser)
+    // expose inputs this way, with no forEach, so the old guard found
+    // zero devices and the piano never connected even though access
+    // was granted.
+    if (inputs) {
+      if (typeof inputs.forEach === 'function') {
+        inputs.forEach(input => { if (input) inputArr.push(input); });
+      } else if (typeof inputs.values === 'function') {
+        try { for (const input of inputs.values()) { if (input) inputArr.push(input); } } catch (e) {}
+      } else if (typeof inputs === 'object') {
+        Object.keys(inputs).forEach(k => {
+          const input = inputs[k];
+          if (input && typeof input === 'object') inputArr.push(input);
+        });
+      }
+    }
+    if (typeof Debug !== 'undefined') {
+      Debug.log('[MIDI] inputs found: ' + inputArr.length +
+        (inputArr.length ? ' (' + inputArr.map(i => (i && i.name) || '?').join(', ') + ')' : ''));
     }
     if (inputArr.length === 0) return null;
 
