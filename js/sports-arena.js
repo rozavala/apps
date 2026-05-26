@@ -443,6 +443,21 @@ const SportsArena = (() => {
 
   // ── Players list (from profiles + any extras logged) ──
 
+  // Remove a player entirely: delete every shared match they played in.
+  // Standings and the known-players list both derive from matches, so
+  // purging the matches drops the player from both. Does NOT touch the
+  // auth profile (that's managed in Parents Corner). Returns the number
+  // of matches removed.
+  function deletePlayer(name) {
+    if (!name) return 0;
+    const target = String(name);
+    const matches = _getSharedMatches();
+    const filtered = matches.filter(m => m.player1 !== target && m.player2 !== target);
+    const removed = matches.length - filtered.length;
+    if (removed > 0) _saveSharedMatches(filtered);
+    return removed;
+  }
+
   function getKnownPlayers() {
     const profiles = typeof getProfiles === 'function' ? getProfiles() : [];
     const profileNames = profiles.map(p => p.name);
@@ -489,6 +504,7 @@ const SportsArena = (() => {
     logMatch,
     editMatch,
     deleteMatch,
+    deletePlayer,
     getMatches,
     getRecentMatches,
     createTournament,
