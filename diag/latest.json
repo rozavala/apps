@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-25T21:52:45.996Z",
+  "generatedAt": "2026-05-26T13:44:12.938Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 18,
+  "totalGroups": 3,
+  "totalEvents": 14,
   "topGroups": [
     {
       "app": "little-maestro",
@@ -41,19 +41,6 @@
       "count": 3,
       "firstTs": 1779584362132,
       "lastTs": 1779584593767,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "Trying to play video that is already playing.",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 4,
-      "firstTs": 1779543081576,
-      "lastTs": 1779543156043,
       "users": 1
     }
   ]
