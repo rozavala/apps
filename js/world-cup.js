@@ -3003,15 +3003,9 @@
   /* ----------------------------------------------------------------
      RENDER — tabs
      ---------------------------------------------------------------- */
-  const PRIMARY_TABS = ['home', 'matches', 'pool', 'teams'];
   function activateTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-'+name));
-    // Reflect active state on the "More" button when a secondary tab is open
-    const moreBtn = document.getElementById('more-btn');
-    if (moreBtn) moreBtn.classList.toggle('active', name && !PRIMARY_TABS.includes(name));
-    const more = document.getElementById('tab-more');
-    if (more) more.classList.remove('open');
     if (name === 'home')        renderHome();
     if (name === 'santaclara')  renderSantaClara();
     if (name === 'teams')       renderTeams();
@@ -4679,13 +4673,6 @@
     renderMatches();
   }
 
-  /* ---- Navigation: More overflow menu ---- */
-  function toggleMore(ev) {
-    if (ev) ev.stopPropagation();
-    const more = document.getElementById('tab-more');
-    if (more) more.classList.toggle('open');
-  }
-
   /* ---- Global search across teams, venues, matches ---- */
   function search(q) {
     const box = document.getElementById('wc-search-results');
@@ -4989,11 +4976,6 @@
     document.querySelectorAll('.tab[data-tab]').forEach(t => {
       t.addEventListener('click', () => activateTab(t.dataset.tab));
     });
-    // Close the "More" overflow menu when tapping elsewhere
-    document.addEventListener('click', (e) => {
-      const more = document.getElementById('tab-more');
-      if (more && !more.contains(e.target)) more.classList.remove('open');
-    });
     // refresh countdown every second on home
     setInterval(() => {
       if (document.querySelector('.tab.active')?.dataset.tab === 'home') {
@@ -5168,7 +5150,7 @@
     startQuiz, answerQuiz, nextQuestion, resetQuiz,
     openShareBracket, copyShareUrl, openInviteGuest, confirmImportBracket,
     openShareFamilyPool, confirmImportPool,
-    toggleMore, search, searchGo,
+    search, searchGo,
     openCompare, setCompare,
     setFavoriteTeam,
     resetAll,
