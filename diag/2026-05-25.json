@@ -3,9 +3,9 @@
   "groups": [
     {
       "entry": {
-        "id": "e_mplqb8jl_dfr2d9",
-        "ts": 1779745152513,
-        "clientTs": 1779745152513,
+        "id": "e_mplqqhbb_buvktt",
+        "ts": 1779745863719,
+        "clientTs": 1779745863719,
         "kind": "error",
         "app": "little-maestro",
         "page": "little-maestro.html",
@@ -20,8 +20,8 @@
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 9,
-      "firstTs": 1779745152513,
+      "count": 1,
+      "firstTs": 1779745863719,
       "lastTs": 1779745863719,
       "users": [
         "u-34d354"
