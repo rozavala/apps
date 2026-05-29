@@ -1,7 +1,21 @@
 {
-  "generatedAt": "2026-05-28T22:04:50.178Z",
+  "generatedAt": "2026-05-29T01:36:05.994Z",
   "windowHours": 72,
-  "totalGroups": 0,
-  "totalEvents": 0,
-  "topGroups": []
+  "totalGroups": 1,
+  "totalEvents": 2,
+  "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Lookup failed: Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1780010981092,
+      "lastTs": 1780010981092,
+      "users": 1
+    }
+  ]
 }

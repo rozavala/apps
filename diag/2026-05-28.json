@@ -1,0 +1,31 @@
+{
+  "day": "2026-05-28",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mpq4kv6s_5hqg03",
+        "ts": 1780010981092,
+        "clientTs": 1780010981092,
+        "kind": "console.warn",
+        "app": "book-movie-check",
+        "page": "book-movie-check.html",
+        "message": "[BMC] Lookup failed: Load failed",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-46a6e4",
+        "age": 7,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1780010981092,
+      "lastTs": 1780010981092,
+      "users": [
+        "u-46a6e4"
+      ]
+    }
+  ]
+}
