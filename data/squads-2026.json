@@ -1,0 +1,5 @@
+{
+  "version": "2026-05-31-stub",
+  "notes": "Nominated-squad data for the FIFA World Cup 2026. Populated as squads are announced (FIFA submission deadline: 2026-06-01; official 2026-06-02). Source: Wikipedia (CC BY-SA) — https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads. Per-player schema: name (required), pos, club, age, num (shirt), note (all optional). Country keys are 3-letter FIFA codes (e.g. MEX, USA, BRA). While 'squads' is empty or a country is missing, the app falls back to its curated star-player snapshot.",
+  "squads": {}
+}
