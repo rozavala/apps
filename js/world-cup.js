@@ -3568,8 +3568,11 @@
             ? 'Official nominated squad. ⭐ marks the key players we\'d flagged to watch.'
             : 'Player snapshot — clubs, ages, and squad selections may have changed since mid-2025. The full nominated squad loads here once published.';
           return `
-        <h2>${heading}</h2>
-        <div class="player-list">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h2 style="margin:0;">${heading}</h2>
+          <button class="btn gold" style="padding:6px 12px;font-size:0.78rem;flex-shrink:0;" onclick="WC.syncNominations()" title="Pull the latest nominated squads">⟳ Refresh squads</button>
+        </div>
+        <div class="player-list" style="margin-top:10px;">
           ${roster.players.map(p => `
             <div class="player${p.key ? ' player-key' : ''}">
               <div class="top"><div class="name">${p.num != null && p.num !== '' ? `<span class="shirt">${escapeHTML(String(p.num))}</span> ` : ''}${escapeHTML(p.name)}${p.key ? ' <span class="key-badge" title="Key player to watch">⭐</span>' : ''}</div><div class="pos">${escapeHTML(p.pos || '')}</div></div>
