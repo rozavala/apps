@@ -68,6 +68,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Actualización World Cup 2026**: ¡Nuevo modo cascada para predecir llaves desde la fase de grupos hasta la final! (New build-up cascade mode to predict brackets from the group stage to the final!)
 - **Actualización Book & Movie Check**: Mensajes de error de red más claros. (Clearer network error messages.)
 - **Actualización World Cup 2026**: ¡Agregamos álbum de figuritas, Trophy Room, filtros de partidos y snapshot de la quiniela familiar! (Added sticker album, Trophy Room, match filters, and family-pool snapshot!)
 - **Nuevas Apps**: ¡Agregamos Civics Lab y World Cup 2026! (Added Civics Lab and World Cup 2026!)
