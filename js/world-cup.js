@@ -5284,9 +5284,10 @@
            … } }
      A bare { "MEX": [ … ] } object (no wrapper) is also accepted.
      ---------------------------------------------------------------- */
-  // TODO(Tuesday): set this to the published nominated-squads JSON URL.
-  // Until it's non-empty, the app simply keeps showing the curated stars.
-  const NOMINATIONS_URL = '';
+  // Self-hosted nominated-squad feed, committed to this repo at
+  // data/squads-2026.json. Empty squads -> app falls back to curated stars,
+  // so this is safe to point live before the file is populated.
+  const NOMINATIONS_URL = 'https://raw.githubusercontent.com/rozavala/apps/main/data/squads-2026.json';
   const NOMINATIONS_KEY = 'wc2026.nominations';
   let NOMINATIONS = {};          // { CODE: [ {name,pos,club,age,num,note}, … ] }
 
@@ -5343,7 +5344,9 @@
       const n = Object.keys(NOMINATIONS).length;
       const cur = document.querySelector('.tab.active')?.dataset.tab;
       if (cur) activateTab(cur);
-      if (!quiet) toast(`Squads loaded — ${n} team${n === 1 ? '' : 's'} updated`);
+      if (!quiet) toast(n
+        ? `Squads loaded — ${n} team${n === 1 ? '' : 's'} updated`
+        : 'No nominated squads published yet');
     } catch (e) {
       console.error('Nominations sync failed', e);
       if (!quiet) toast('Squad fetch failed: ' + (e.message || 'network error'));
