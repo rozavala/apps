@@ -3559,18 +3559,31 @@
         </dl>
       </div>
       <div class="card">
-        <h2>⭐ Star players</h2>
-        <div class="player-list">
-          ${c.stars.map(p => `
-            <div class="player">
-              <div class="top"><div class="name">${escapeHTML(p.name)}</div><div class="pos">${escapeHTML(p.pos)}</div></div>
-              <div class="meta">${escapeHTML(p.club)} · age ${p.age}</div>
-              <div class="note">${escapeHTML(p.note)}</div>
+        ${(() => {
+          const roster = rosterFor(c);
+          const heading = roster.nominated
+            ? `👕 Nominated squad <span class="muted" style="font-size:0.8rem;font-weight:400;">(${roster.players.length})</span>`
+            : '⭐ Star players';
+          const footnote = roster.nominated
+            ? 'Official nominated squad. ⭐ marks the key players we\'d flagged to watch.'
+            : 'Player snapshot — clubs, ages, and squad selections may have changed since mid-2025. The full nominated squad loads here once published.';
+          return `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h2 style="margin:0;">${heading}</h2>
+          <button class="btn gold" style="padding:6px 12px;font-size:0.78rem;flex-shrink:0;" onclick="WC.syncNominations()" title="Pull the latest nominated squads">⟳ Refresh squads</button>
+        </div>
+        <div class="player-list" style="margin-top:10px;">
+          ${roster.players.map(p => `
+            <div class="player${p.key ? ' player-key' : ''}">
+              <div class="top"><div class="name">${p.num != null && p.num !== '' ? `<span class="shirt">${escapeHTML(String(p.num))}</span> ` : ''}${escapeHTML(p.name)}${p.key ? ' <span class="key-badge" title="Key player to watch">⭐</span>' : ''}</div><div class="pos">${escapeHTML(p.pos || '')}</div></div>
+              <div class="meta">${escapeHTML(p.club || '')}${p.age != null && p.age !== '' ? ` · age ${escapeHTML(String(p.age))}` : ''}</div>
+              ${p.note ? `<div class="note">${escapeHTML(p.note)}</div>` : ''}
             </div>`).join('')}
         </div>
         <p class="muted" style="font-size:0.78rem;margin-top:10px;line-height:1.5;">
-          Player snapshot — clubs, ages, and squad selections may have changed since mid-2025.
-        </p>
+          ${footnote}
+        </p>`;
+        })()}
       </div>
     `;
     // hide all screens, show country
@@ -5185,6 +5198,8 @@
      ---------------------------------------------------------------- */
   function init() {
     load();
+    loadNominations();                 // show any cached squads immediately
+    syncNominations({ quiet: true });  // refresh in the background (no-op until URL is set)
     document.querySelectorAll('.tab[data-tab]').forEach(t => {
       t.addEventListener('click', () => activateTab(t.dataset.tab));
     });
@@ -5251,6 +5266,88 @@
     }
 
     activateTab('home');
+  }
+
+  /* ----------------------------------------------------------------
+     NOMINATIONS — official nominated squads, fetched from a remote
+     JSON feed once published. Replaces the curated `stars` snapshot
+     for any country with a nominated squad, while flagging the names
+     we'd pre-tagged as "key players" with a ⭐. Falls back to `stars`
+     for any country not yet in the feed.
+
+     Expected feed shape (all per-player fields optional except name):
+       { "version": "2026-06-02",
+         "squads": {
+           "MEX": [ { "name":"Santiago Giménez", "pos":"ST",
+                      "club":"AC Milan", "age":25, "num":9,
+                      "note":"…" }, … ],
+           … } }
+     A bare { "MEX": [ … ] } object (no wrapper) is also accepted.
+     ---------------------------------------------------------------- */
+  // TODO(Tuesday): set this to the published nominated-squads JSON URL.
+  // Until it's non-empty, the app simply keeps showing the curated stars.
+  const NOMINATIONS_URL = '';
+  const NOMINATIONS_KEY = 'wc2026.nominations';
+  let NOMINATIONS = {};          // { CODE: [ {name,pos,club,age,num,note}, … ] }
+
+  // Normalize a name for matching feed players against curated stars
+  // (case/accent/punctuation-insensitive so "Giménez" === "gimenez").
+  function normName(s) {
+    return (s || '').toString().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/["'.]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  // Resolve the roster to render for a country: the nominated squad if we
+  // have one (with key players flagged), otherwise the curated stars.
+  function rosterFor(c) {
+    const squad = NOMINATIONS[c.code];
+    if (Array.isArray(squad) && squad.length) {
+      const starNames = new Set((c.stars || []).map(p => normName(p.name)));
+      return {
+        nominated: true,
+        players: squad.map(p => ({ ...p, key: starNames.has(normName(p.name)) })),
+      };
+    }
+    return { nominated: false, players: (c.stars || []).map(p => ({ ...p, key: false })) };
+  }
+
+  // Load any cached squads from a previous fetch (so they show offline /
+  // before the background refresh completes).
+  function loadNominations() {
+    try {
+      const raw = localStorage.getItem(NOMINATIONS_KEY);
+      if (raw) NOMINATIONS = JSON.parse(raw).squads || {};
+    } catch (e) { NOMINATIONS = {}; }
+  }
+
+  // Fetch nominated squads from the remote feed and cache them. Safe to
+  // call with no URL set (no-op with a gentle toast). Re-renders the
+  // active tab so an open country page updates in place.
+  async function syncNominations(opts = {}) {
+    const quiet = opts.quiet;
+    if (!NOMINATIONS_URL) {
+      if (!quiet) toast('Nominated squads not published yet');
+      return;
+    }
+    if (!quiet) toast('Fetching nominated squads…');
+    try {
+      const res = await fetch(NOMINATIONS_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const squads = data.squads || data;       // accept wrapped or bare
+      if (!squads || typeof squads !== 'object') throw new Error('bad feed shape');
+      NOMINATIONS = squads;
+      localStorage.setItem(NOMINATIONS_KEY,
+        JSON.stringify({ version: data.version || null, squads: NOMINATIONS }));
+      const n = Object.keys(NOMINATIONS).length;
+      const cur = document.querySelector('.tab.active')?.dataset.tab;
+      if (cur) activateTab(cur);
+      if (!quiet) toast(`Squads loaded — ${n} team${n === 1 ? '' : 's'} updated`);
+    } catch (e) {
+      console.error('Nominations sync failed', e);
+      if (!quiet) toast('Squad fetch failed: ' + (e.message || 'network error'));
+    }
   }
 
   /* ----------------------------------------------------------------
@@ -5368,6 +5465,7 @@
     setFavoriteTeam,
     resetAll,
     syncScores,
+    syncNominations,
   };
 
   document.addEventListener('DOMContentLoaded', init);

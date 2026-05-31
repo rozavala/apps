@@ -323,6 +323,25 @@ body {
 }
 .player .meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
 .player .note { font-size: 0.85rem; color: var(--text-primary); margin-top: 4px; line-height: 1.4; }
+/* nominated-squad shirt number + key-player flag */
+.player .name .shirt {
+  display: inline-block;
+  min-width: 1.4em;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--wc-card);
+  border: 1px solid var(--wc-line);
+  border-radius: 6px;
+  padding: 1px 4px;
+  margin-right: 4px;
+}
+.player .key-badge { font-size: 0.85em; }
+.player-key {
+  border-color: var(--wc-gold, #F5C518);
+  box-shadow: inset 3px 0 0 0 var(--wc-gold, #F5C518);
+}
 
 /* ---- Matches ---- */
 .match-filters {
