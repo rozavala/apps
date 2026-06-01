@@ -123,6 +123,16 @@ git clone <repository-url>
 open index.html
 ```
 
+Para compartir en la red local (ej. para iPads en casa), puedes iniciar un servidor local: (To share on the local network, e.g. for iPads at home, you can start a local server:)
+
+```bash
+# Usando Node.js (Using Node.js)
+npx http-server . -p 8080
+
+# O usando Python (Or using Python)
+python3 -m http.server 8080
+```
+
 ### Opción 2: Teléfonos y Tablets (Phones & Tablets)
 
 Para la mejor experiencia en dispositivos móviles:
