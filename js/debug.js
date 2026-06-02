@@ -8,7 +8,7 @@ var Debug = (function() {
 
   var logs = [];
   var MAX_LOGS = 100;
-  var SYNC_SERVER = 'https://real-options-dev.tail57521e.ts.net';
+  var SYNC_SERVER = 'https://all-options-dev.tail57521e.ts.net';
 
   // ── Device Identification ──
   function _getDeviceId() {

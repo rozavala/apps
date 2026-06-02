@@ -8,7 +8,7 @@
 var BMC = (function() {
   'use strict';
 
-  var VPS = 'https://real-options-dev.tail57521e.ts.net';
+  var VPS = 'https://all-options-dev.tail57521e.ts.net';
   var STORAGE_PREFIX = 'zs_bmcheck_';
   var FETCH_TIMEOUT = 60000;  // 60s — Gemini calls with google_search grounding routinely take 15-30s, plus Wikipedia enrichment adds ~1s
 

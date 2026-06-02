@@ -183,12 +183,12 @@ From any device on Tailscale:
 
 ```bash
 # Post one synthetic entry
-curl -X POST https://real-options-dev.tail57521e.ts.net/api/diag \
+curl -X POST https://all-options-dev.tail57521e.ts.net/api/diag \
   -H 'Content-Type: application/json' \
   -d '{"schema":1,"entries":[{"kind":"test","message":"hello from setup","ts":'$(date +%s%3N)'}]}'
 
 # Trigger a push now (equivalent to the dashboard button)
-curl -X POST https://real-options-dev.tail57521e.ts.net/api/diag/flush
+curl -X POST https://all-options-dev.tail57521e.ts.net/api/diag/flush
 ```
 
 Then check the `diag` branch on GitHub — there should be a commit with
@@ -278,7 +278,7 @@ key with very narrow repo scope, not a shell login key.)
 Check `/api/diag/health`:
 
 ```bash
-curl -sS https://real-options-dev.tail57521e.ts.net/api/diag/health
+curl -sS https://all-options-dev.tail57521e.ts.net/api/diag/health
 ```
 
 If `entries_last_24h` is 0, the browser isn't posting. Possible reasons:
