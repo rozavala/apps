@@ -20,7 +20,7 @@ function argVal(name, def) {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : def;
 }
-const VPS = argVal('--vps', 'https://real-options-dev.tail57521e.ts.net');
+const VPS = argVal('--vps', 'https://all-options-dev.tail57521e.ts.net');
 const BAIL = args.includes('--bail');
 const ONLY = argVal('--only', null);
 

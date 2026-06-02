@@ -7,7 +7,7 @@ var CloudSync = (function() {
   'use strict';
 
   // ── Set this to your VPS Tailscale IP ──────────────────────
-  var SYNC_SERVER = 'https://real-options-dev.tail57521e.ts.net';
+  var SYNC_SERVER = 'https://all-options-dev.tail57521e.ts.net';
   // ──────────────────────────────────────────────────────────
 
   var KEY_MAP = {
