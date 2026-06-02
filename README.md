@@ -108,6 +108,8 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 | Elite | 250 | 💎 |
 | Grand Master | 500 | 👑 |
 
+**💡 Pro Tip:** ¿Sabías que puedes ganar Tokens de Aventura completando tareas en el mundo real? ¡Úsalos para obtener más tiempo de pantalla! (Did you know you can earn Adventure Tokens by completing real-world chores? Use them to get more screen time!)
+
 ## 🚀 Instalación y Uso (Getting Started)
 
 Zavala Serra Apps no requiere servidores ni instalaciones complejas. (No build steps or server setup required).
