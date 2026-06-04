@@ -50,6 +50,14 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Horario Inteligente (Smart Schedule)**: Rotación automática diaria de aplicaciones sugeridas para fomentar una dieta equilibrada de aprendizaje y evitar la fatiga de decisiones. (Automatic daily rotation of suggested apps to encourage a balanced learning diet).
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
 
+## ⛪ Fe Explorador (Faith Explorer)
+
+Fe Explorador es una parte integral de la suite Zavala Serra Apps, diseñada para enseñar sobre el patrimonio católico chileno a través de hechos históricos. (Fe Explorador is an integral part of the Zavala Serra Apps suite, designed to teach about Chilean Catholic heritage through historical facts).
+
+- **Oraciones (Prayers)**: Aprende las oraciones tradicionales (Padre Nuestro, Ave María, Gloria) y el Santo Rosario como prácticas culturales e históricas. (Learn traditional prayers and the Holy Rosary as cultural and historical practices).
+- **Vidas de Santos (Lives of Saints)**: Descubre biografías fácticas de santos importantes, con fechas, ubicaciones y eventos históricos clave. (Discover factual biographies of important saints, with dates, locations, and key historical events).
+- **Patrimonio Chileno (Chilean Heritage)**: Explora la historia de iglesias locales, fiestas religiosas y los santos patronos que han moldeado la cultura de Chile. (Explore the history of local churches, religious festivals, and the patron saints that have shaped Chile's culture).
+
 ## 🛠️ Características Principales (Key Features)
 
 - **Perfiles Personalizados (Personalized Profiles)**: Los niños pueden crear sus propios exploradores con avatares y colores personalizados. (Kids can create their own explorers with custom avatars and colors).
