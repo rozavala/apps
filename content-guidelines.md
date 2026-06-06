@@ -67,8 +67,10 @@ The following topics must **never** appear in any app, quiz, story, image captio
 Run this before each push to catch accidental keyword drift:
 
 ```bash
-grep -r -i -E "genero|género|identidad|diversidad|inclusi[oó]n|pronombre|trans |gay|lesbiana|queer|pride|diverso|equidad|justicia social|colonialismo|opres|patriarcado|feminis|woke|diversity|equity|inclusion|gender |lgbt|transgender" --include="*.html" --include="*.js" --include="*.md" .
+grep -r -i -E "genero|género|identidad|diversidad|inclusi[oó]n|pronombre|trans |gay|lesbiana|queer|pride|diverso|equidad|justicia social|colonialismo|opres|patriarcado|feminis|woke|diversity|equity|inclusion|gender |lgbt|transgender" --include="*.html" --include="*.js" --include="*.md" --exclude-dir="node_modules" --exclude-dir=".git" .
 ```
+
+*Note: Matches in rule documentation (`content-guidelines.md`, `CONTRIBUTING.md`) or test logic are expected and do not constitute a violation.*
 
 ## Review Checklist (Per Feature)
 
