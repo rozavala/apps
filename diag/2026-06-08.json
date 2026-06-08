@@ -1,0 +1,57 @@
+{
+  "day": "2026-06-08",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mq57waxw_1q3n9v",
+        "ts": 1780923546212,
+        "clientTs": 1780923546212,
+        "kind": "console.error",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "Nominations sync failed The quota has been exceeded.",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 5,
+      "firstTs": 1780923546212,
+      "lastTs": 1780923874354,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mq58btbk_1hwnvg",
+        "ts": 1780924269872,
+        "clientTs": 1780924269872,
+        "kind": "console.warn",
+        "app": "book-movie-check",
+        "page": "book-movie-check.html",
+        "message": "Trying to play video that is already playing.",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 3,
+      "firstTs": 1780924269872,
+      "lastTs": 1780924307009,
+      "users": [
+        "u-3bda7c"
+      ]
+    }
+  ]
+}
