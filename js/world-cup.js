@@ -15,52 +15,52 @@
      ---------------------------------------------------------------- */
   const VENUES = [
     { id:'azt', name:'Estadio Azteca (Banorte)', city:'Mexico City', country:'Mexico',
-      cap:87000, opened:1966,
+      utc:-6, cap:87000, opened:1966,
       notes:'Hosts the tournament opener on June 11. The only stadium ever to host two World Cup finals (1970, 1986). At 2,200m altitude, the air is thin.' },
     { id:'akr', name:'Estadio Akron',           city:'Guadalajara',  country:'Mexico',
-      cap:49000, opened:2010,
+      utc:-6, cap:49000, opened:2010,
       notes:'Home of Chivas. Its volcano-shaped exterior is wrapped in a green mesh that lights up at night.' },
     { id:'bbva', name:'Estadio BBVA',           city:'Monterrey',    country:'Mexico',
-      cap:53500, opened:2015,
+      utc:-6, cap:53500, opened:2015,
       notes:'Nicknamed "El Gigante de Acero" (the Steel Giant). Backed by views of the Cerro de la Silla mountain.' },
     { id:'met', name:'MetLife Stadium',          city:'East Rutherford, NJ', country:'United States',
-      cap:82500, opened:2010,
+      utc:-4, cap:82500, opened:2010,
       notes:'Hosts the World Cup Final on July 19. Shared by the NY Giants and NY Jets.' },
     { id:'sofi',name:'SoFi Stadium',             city:'Inglewood, CA',       country:'United States',
-      cap:70000, opened:2020,
+      utc:-7, cap:70000, opened:2020,
       notes:'A translucent canopy of ETFE plastic covers the field. Home of the LA Rams and Chargers.' },
     { id:'lev', name:'Levi\'s Stadium',          city:'Santa Clara, CA',     country:'United States',
-      cap:68500, opened:2014,
+      utc:-7, cap:68500, opened:2014,
       notes:'Silicon Valley\'s 49ers stadium, packed with tech. A green-roof terrace overlooks the field.' },
     { id:'lum', name:'Lumen Field',              city:'Seattle, WA',         country:'United States',
-      cap:69000, opened:2002,
+      utc:-7, cap:69000, opened:2002,
       notes:'Home of the Seahawks and Sounders. Famously the loudest stadium in the NFL.' },
     { id:'mer', name:'Mercedes-Benz Stadium',    city:'Atlanta, GA',         country:'United States',
-      cap:71000, opened:2017,
+      utc:-4, cap:71000, opened:2017,
       notes:'A retractable "pinwheel" roof petals open in 8 segments. Home of Atlanta United.' },
     { id:'hrs', name:'Hard Rock Stadium',        city:'Miami Gardens, FL',   country:'United States',
-      cap:65000, opened:1987,
+      utc:-4, cap:65000, opened:1987,
       notes:'Home of the Miami Dolphins and the Miami Open tennis. Hosts the 3rd-place match.' },
     { id:'nrg', name:'NRG Stadium',              city:'Houston, TX',         country:'United States',
-      cap:72000, opened:2002,
+      utc:-5, cap:72000, opened:2002,
       notes:'NFL\'s first retractable-roof stadium. Home of the Houston Texans.' },
     { id:'att', name:'AT&T Stadium',             city:'Arlington, TX',       country:'United States',
-      cap:80000, opened:2009,
+      utc:-5, cap:80000, opened:2009,
       notes:'"Jerry World" — Dallas Cowboys home with a colossal center-hung video board.' },
     { id:'arr', name:'Arrowhead Stadium',        city:'Kansas City, MO',     country:'United States',
-      cap:76000, opened:1972,
+      utc:-5, cap:76000, opened:1972,
       notes:'Kansas City Chiefs. NFL record for crowd noise — 142.2 dB.' },
     { id:'gil', name:'Gillette Stadium',         city:'Foxborough, MA',      country:'United States',
-      cap:65000, opened:2002,
+      utc:-4, cap:65000, opened:2002,
       notes:'Home of the New England Patriots and Revolution.' },
     { id:'lin', name:'Lincoln Financial Field',  city:'Philadelphia, PA',    country:'United States',
-      cap:69000, opened:2003,
+      utc:-4, cap:69000, opened:2003,
       notes:'"The Linc" — Philadelphia Eagles home with a notorious home crowd.' },
     { id:'bmo', name:'BMO Field',                city:'Toronto, ON',         country:'Canada',
-      cap:45000, opened:2007,
+      utc:-4, cap:45000, opened:2007,
       notes:'Home of Toronto FC, expanded with temporary seating for 2026.' },
     { id:'bc',  name:'BC Place',                 city:'Vancouver, BC',       country:'Canada',
-      cap:54500, opened:1983,
+      utc:-7, cap:54500, opened:1983,
       notes:'A retractable-roof stadium on the Vancouver waterfront, home of the Whitecaps.' },
   ];
 
@@ -2343,12 +2343,43 @@
   }
 
   /* ----------------------------------------------------------------
+     Kickoff times — schedule times are venue-local, so build real Dates
+     from each venue's UTC offset (fixed across June–July: US/Canada on
+     DST, Mexico abolished DST in 2022). Falls back to -05:00 (central).
+     ---------------------------------------------------------------- */
+  function kickoffDate(m) {
+    const v = venueById(m.venue);
+    const off = v && typeof v.utc === 'number' ? v.utc : -5;
+    const sign = off < 0 ? '-' : '+';
+    return new Date(m.date + 'T' + (m.time || '12:00') + ':00' + sign + pad(Math.abs(off)) + ':00');
+  }
+  // Kickoff rendered in the viewer's own timezone, e.g. "11:00 AM".
+  function fmtKickoffLocal(m) {
+    return kickoffDate(m).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+
+  /* ----------------------------------------------------------------
      Lock deadlines — each group/stage locks once its first match starts.
      ---------------------------------------------------------------- */
   function _matchStarted(m) {
     if (!m) return false;
-    const dt = new Date(m.date + 'T' + (m.time || '12:00') + ':00');
-    return dt.getTime() <= Date.now();
+    return kickoffDate(m).getTime() <= Date.now();
+  }
+  // Earliest still-unstarted lock deadline across groups and KO stages —
+  // powers the "picks lock in…" banner on the pool tab.
+  function nextLockInfo() {
+    const firstOf = list => list.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
+    const cands = [];
+    for (const g of GROUP_LETTERS) {
+      const first = firstOf(state.matches.filter(m => m.stage === 'group' && m.group === g));
+      if (first && !_matchStarted(first)) cands.push({ label: 'Group ' + g, at: kickoffDate(first) });
+    }
+    for (const s of ['R32','R16','QF','SF','Final']) {
+      const first = firstOf(state.matches.filter(m => m.stage === s));
+      if (first && !_matchStarted(first)) cands.push({ label: s === 'Final' ? 'Final' : s + ' round', at: kickoffDate(first) });
+    }
+    cands.sort((a,b) => a.at - b.at);
+    return cands[0] || null;
   }
   function isGroupLocked(letter) {
     const first = state.matches
@@ -3318,7 +3349,10 @@
   function renderHome() {
     const root = document.getElementById('screen-home');
     const now = new Date();
-    const startD = new Date(TOURNAMENT_START);
+    // Count down to the real opener's kickoff (venue-tz aware), falling
+    // back to TOURNAMENT_START if the schedule is somehow empty.
+    const opener = state.matches.slice().sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
+    const startD = opener ? kickoffDate(opener) : new Date(TOURNAMENT_START);
     const diff = Math.max(0, startD - now);
     const days = Math.floor(diff / 86400000);
     const hrs  = Math.floor(diff / 3600000) % 24;
@@ -3343,7 +3377,7 @@
       const dayLabel = dayDiff === 1 ? 'Tomorrow' : (dayDiff <= 0 ? 'Coming up' : 'Coming up — in ' + dayDiff + ' days');
       todayCardTitle = `⚽ Next match — ${dayLabel}`;
       todayHTML = `
-        <p class="muted" style="font-size:0.85rem;margin-bottom:8px;">${fmtDate(next.date)} · ${next.time} local</p>
+        <p class="muted" style="font-size:0.85rem;margin-bottom:8px;">${fmtDate(next.date)} · ${fmtKickoffLocal(next)} your time (${next.time} at the venue)</p>
         ${renderTodayRow(next)}
         ${matchesOnAfter(next.date).slice(0, 4).map(m => renderTodayRow(m)).join('')}
         <p class="muted" style="font-size:0.78rem;margin-top:10px;text-align:center;">No fixtures today — these are the next up.</p>
@@ -3402,7 +3436,7 @@
       ${preTournament ? `
       <div class="card">
         <h2>⏱ Kick-off countdown</h2>
-        <p class="muted">First match: <b>${fmtDate('2026-06-11')}</b> · Estadio Azteca · Mexico City</p>
+        <p class="muted">First match: <b>${fmtDate('2026-06-11')}</b> · Estadio Azteca · Mexico City${opener ? ` · <b>${fmtKickoffLocal(opener)}</b> your time` : ''}</p>
         <div class="countdown" id="cd">
           <div class="cd-cell"><div class="n">${days}</div><div class="l">days</div></div>
           <div class="cd-cell"><div class="n">${pad(hrs)}</div><div class="l">hours</div></div>
@@ -3450,13 +3484,25 @@
     `;
   }
 
+  // One headline star per side for upcoming fixtures — "⭐ Messi · Mahrez".
+  // Uses the curated stars list (short, always present) rather than the
+  // 26-man nominated squad.
+  function matchStarsHTML(m) {
+    if (m.result) return '';
+    const home = m.home ? countryByCode(m.home) : null;
+    const away = m.away ? countryByCode(m.away) : null;
+    const h = home && home.stars && home.stars[0] ? home.stars[0].name : null;
+    const a = away && away.stars && away.stars[0] ? away.stars[0].name : null;
+    if (!h || !a) return '';
+    return `<div class="stars">⭐ ${escapeHTML(h)} · ${escapeHTML(a)}</div>`;
+  }
+
   function renderTodayRow(m) {
     const home = m.home ? countryByCode(m.home) : null;
     const away = m.away ? countryByCode(m.away) : null;
     const venue = venueById(m.venue);
     const played = !!m.result;
-    const kickoff = new Date(m.date+'T'+m.time+':00');
-    const diffMs = kickoff.getTime() - Date.now();
+    const diffMs = kickoffDate(m).getTime() - Date.now();
     let when;
     if (played) {
       when = '<span style="color:var(--wc-green);font-weight:800;">FT</span>';
@@ -3465,13 +3511,13 @@
     } else if (diffMs > 0) {
       const hrs = Math.floor(diffMs / 3600000);
       const mins = Math.floor(diffMs / 60000) % 60;
-      when = hrs > 0 ? `in ${hrs}h ${mins}m` : `in ${mins}m`;
+      when = hrs >= 48 ? `in ${Math.floor(hrs/24)}d ${hrs%24}h` : (hrs > 0 ? `in ${hrs}h ${mins}m` : `in ${mins}m`);
     } else {
       when = '<span class="muted">finished</span>';
     }
     const hLabel = home ? `${home.flag} ${escapeHTML(home.name)}` : (m.home_label ? `<span class="muted">${escapeHTML(m.home_label)}</span>` : 'TBD');
     const aLabel = away ? `${away.flag} ${escapeHTML(away.name)}` : (m.away_label ? `<span class="muted">${escapeHTML(m.away_label)}</span>` : 'TBD');
-    const score = played ? `<span class="score">${m.result.home}–${m.result.away}</span>` : `<span class="vs">${m.time}</span>`;
+    const score = played ? `<span class="score">${m.result.home}–${m.result.away}</span>` : `<span class="vs">${fmtKickoffLocal(m)}</span>`;
     return `
       <div class="match" onclick="WC.editResult('${m.id}')" style="grid-template-columns: 60px 1fr auto;">
         <div class="when"><div class="time">${when}</div><div>${venue ? escapeHTML(venue.city.split(',')[0]) : ''}</div></div>
@@ -3479,6 +3525,7 @@
           <div class="side left"><span class="name">${hLabel}</span></div>
           ${score}
           <div class="side"><span class="name">${aLabel}</span></div>
+          ${matchStarsHTML(m)}
         </div>
         <div class="badge">${m.stage === 'group' ? 'Group '+m.group : m.round}</div>
       </div>`;
@@ -3689,16 +3736,19 @@
     const homeLabel = home ? `${home.flag} ${escapeHTML(home.name)}` : (m.home_label ? `<span class="muted">${escapeHTML(m.home_label)}</span>` : '<span class="muted">TBD</span>');
     const awayLabel = away ? `${away.flag} ${escapeHTML(away.name)}` : (m.away_label ? `<span class="muted">${escapeHTML(m.away_label)}</span>` : '<span class="muted">TBD</span>');
     const score = played ? `<span class="score">${m.result.home}–${m.result.away}</span>` : `<span class="vs">vs</span>`;
+    const localKick = fmtKickoffLocal(m);
     return `
       <div class="match${played?' played':''}${koClass}" onclick="WC.editResult('${m.id}')">
         <div class="when">
           <div>${m.date.slice(5)}</div>
           <div class="time">${m.time}</div>
+          ${played ? '' : `<div style="font-size:0.66rem;color:var(--text-muted);">${localKick} you</div>`}
         </div>
         <div class="teams">
           <div class="side left"><span class="name">${homeLabel}</span></div>
           ${score}
           <div class="side"><span class="name">${awayLabel}</span></div>
+          ${matchStarsHTML(m)}
         </div>
         <div class="badge">${stage}<br>${venue ? escapeHTML(venue.city) : ''}</div>
       </div>
@@ -3736,6 +3786,31 @@
     let html = `<div class="muted" style="font-size:0.86rem;margin-bottom:8px;">
       Tables update automatically as you enter results in the Matches tab.
       The top two per group advance; the 8 best 3rd-placed teams also qualify.</div>`;
+
+    // ---- Golden Boot race (fed by syncScores when OpenFootball has scorers) ----
+    const scorers = (state.scorers || []).slice(0, 10);
+    html += `<div class="card" style="padding:14px;border-left:3px solid var(--wc-gold);">
+      <h2>👟 Golden Boot race</h2>
+      ${scorers.length === 0
+        ? `<div class="empty" style="padding:12px;">No goals recorded yet — once matches kick off, hit
+             <button class="btn gold" style="padding:4px 10px;font-size:0.78rem;" onclick="WC.syncScores()">⟳ Sync scores</button>
+             to pull the live scorer list.</div>`
+        : `<table class="standings-table">
+            <thead><tr><th></th><th style="text-align:left;">Player</th><th style="text-align:left;">Team</th><th>⚽</th></tr></thead>
+            <tbody>
+              ${scorers.map((s, i) => {
+                const c = countryByCode(s.team);
+                return `<tr${i === 0 ? ' class="advancing"' : ''}>
+                  <td>${i + 1}</td>
+                  <td style="text-align:left;font-weight:700;">${escapeHTML(s.name)}</td>
+                  <td style="text-align:left;">${c ? c.flag + ' ' + escapeHTML(c.name) : escapeHTML(s.team)}</td>
+                  <td><b>${s.goals}</b></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+          <p class="muted" style="font-size:0.72rem;margin-top:6px;">Top 10 · own goals excluded · updates with each score sync. Ties shown alphabetically — FIFA breaks ties on assists, then minutes played.</p>`}
+    </div>`;
 
     for (const g of GROUP_LETTERS) {
       const rows = tables[g] || [];
@@ -3828,12 +3903,33 @@
       ? (myEntry ? `✎ Edit ${escapeHTML(activeUser.name)}'s bracket` : `🎯 Submit your bracket, ${escapeHTML(activeUser.name)}`)
       : '🎯 Submit your bracket';
 
+    // Lock-deadline banner: countdown to the next group/round freeze.
+    const nextLock = nextLockInfo();
+    let lockBannerHTML = '';
+    if (nextLock) {
+      const ms = nextLock.at - Date.now();
+      const d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24, mi = Math.floor(ms / 60000) % 60;
+      const inStr = d > 0 ? `${d}d ${h}h` : (h > 0 ? `${h}h ${mi}m` : `${mi}m`);
+      const atStr = nextLock.at.toLocaleString([], { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      lockBannerHTML = `
+        <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:0.85rem;line-height:1.45;">
+          ⏳ <b>${escapeHTML(nextLock.label)} picks lock in ${inStr}</b> — at kickoff, ${atStr} your time.
+          Each group freezes when its first match starts; knockout rounds freeze as each round begins.
+        </div>`;
+    } else {
+      lockBannerHTML = `
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:0.85rem;">
+          🔒 <b>All picks are locked</b> — every round has kicked off. Watch the leaderboard!
+        </div>`;
+    }
+
     let html = `
       <div class="card">
         <h2>👨‍👩‍👧‍👦 Family Bracket Pool</h2>
         <p class="muted" style="font-size:0.85rem;">${activeUser
           ? 'Each profile gets one bracket — your picks are saved against your name automatically. Scores update as real results come in.'
           : 'Enter your name and your picks — once you\'ve saved at least your name, you\'re in the pool. Scores update automatically as real results land on the Matches tab.'}</p>
+        ${lockBannerHTML}
 
         <h3 style="margin-top:14px;">🏅 Leaderboard</h3>
         ${board.length === 0
@@ -4846,6 +4942,7 @@
   function setGroupPick(memberId, group, slot, value) {
     const p = state.picks[memberId];
     if (!p) return;
+    if (isGroupLocked(group)) { toast('🔒 Group ' + group + ' picks are locked — its first match has kicked off'); renderPool(); return; }
     p.groupThird = p.groupThird || {};
     if (slot === 'winner')   p.groupWinners[group]   = value || null;
     if (slot === 'runnerUp') p.groupRunnersUp[group] = value || null;
@@ -4856,6 +4953,7 @@
   function setKoPick(memberId, stage, matchId, value) {
     const p = state.picks[memberId];
     if (!p) return;
+    if (isStageLocked(stage)) { toast('🔒 ' + stage + ' picks are locked — that round has started'); renderPool(); return; }
     p.ko[stage] = p.ko[stage] || {};
     p.ko[stage][matchId] = value || null;
     if (p.mode === 'buildup' && stage === 'Final') syncOutcomeFromFinal(p);
@@ -4865,6 +4963,8 @@
   function setOutcomePick(memberId, field, value) {
     const p = state.picks[memberId];
     if (!p) return;
+    // goldenBootCorrect is the scoring-admin toggle, never locked
+    if (field !== 'goldenBootCorrect' && areOutcomesLocked()) { toast('🔒 Outcome picks are locked — the Final has kicked off'); renderPool(); return; }
     p[field] = value;
     save();
   }
@@ -4879,6 +4979,7 @@
   function applyGroupScores(memberId, group) {
     const p = state.picks[memberId];
     if (!p) return;
+    if (isGroupLocked(group)) { toast('🔒 Group ' + group + ' picks are locked — its first match has kicked off'); renderPool(); return; }
     const order = computeGroupOrderFromScores(group, p);
     if (!order) { toast('Enter all three group scores first'); return; }
     p.groupWinners = p.groupWinners || {};
@@ -5104,6 +5205,8 @@
   function setScorePred(memberId, matchId, side, raw) {
     const p = state.picks[memberId];
     if (!p) return;
+    const match = state.matches.find(m => m.id === matchId);
+    if (match && _matchStarted(match)) { toast('🔒 That match has kicked off — score prediction locked'); return; }
     p.scores = p.scores || {};
     p.scores[matchId] = p.scores[matchId] || {};
     const n = raw === '' ? null : parseInt(raw, 10);
@@ -5209,7 +5312,8 @@
         const cd = document.getElementById('cd');
         if (!cd) return;
         const now = new Date();
-        const startD = new Date(TOURNAMENT_START);
+        const opener = state.matches.slice().sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time))[0];
+        const startD = opener ? kickoffDate(opener) : new Date(TOURNAMENT_START);
         const diff = Math.max(0, startD - now);
         const days = Math.floor(diff / 86400000);
         const hrs  = Math.floor(diff / 3600000) % 24;
@@ -5438,10 +5542,31 @@
         }
       }
 
+      // Golden Boot: harvest goal scorers when OpenFootball includes them
+      // (goals1/goals2 arrays of {name, minute, owngoal?, penalty?}).
+      // Full recompute each sync — remote is the source of truth.
+      const tally = {};
+      for (const rm of remote) {
+        const sides = [[rm.goals1, rm.team1], [rm.goals2, rm.team2]];
+        for (const [goals, teamName] of sides) {
+          if (!Array.isArray(goals)) continue;
+          for (const g of goals) {
+            if (!g || !g.name || g.owngoal) continue;
+            const code = nameToCode[teamName] || null;
+            const key = g.name + '|' + (code || teamName || '?');
+            tally[key] = (tally[key] || 0) + 1;
+          }
+        }
+      }
+      state.scorers = Object.entries(tally)
+        .map(([k, n]) => { const i = k.lastIndexOf('|'); return { name: k.slice(0, i), team: k.slice(i + 1), goals: n }; })
+        .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+
       save();
       const cur = document.querySelector('.tab.active')?.dataset.tab;
       if (cur) activateTab(cur);
-      toast(`Synced — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}`);
+      const scorersNote = state.scorers.length ? `, ${state.scorers.length} scorer${state.scorers.length===1?'':'s'} tracked` : '';
+      toast(`Synced — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
     } catch (e) {
       console.error('Sync failed', e);
       toast('Sync failed: ' + (e.message || 'network error'));
