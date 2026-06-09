@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-09T02:18:21.598Z",
+  "generatedAt": "2026-06-09T13:36:29.501Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 26,
+  "totalGroups": 5,
+  "totalEvents": 28,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Nominations sync failed The quota has been exceeded.",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1781011886318,
+      "lastTs": 1781012103233,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
