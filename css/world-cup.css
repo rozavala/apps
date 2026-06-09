@@ -400,6 +400,15 @@ body {
   letter-spacing: 0.1em;
   font-weight: 800;
 }
+.match .teams .stars {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .match .teams .score {
   font-family: var(--font-display);
   font-size: 1rem;
