@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-08T17:29:31.592Z",
+  "generatedAt": "2026-06-09T02:18:21.598Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 25,
+  "totalGroups": 4,
+  "totalEvents": 26,
   "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Photo lookup failed: Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1780970761896,
+      "lastTs": 1780970761896,
+      "users": 1
+    },
     {
       "app": "book-movie-check",
       "kind": "console.warn",
