@@ -233,6 +233,25 @@ const WorldExplorer = (() => {
     },
     { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [
       {
+        id: 'united_states', name: 'United States', nameEs: 'Estados Unidos', flag: '🇺🇸',
+        capital: 'Washington D.C.', capitalEs: 'Washington D.C.',
+        facts: [
+          { en: 'The United States has 50 states.', es: 'Los Estados Unidos tienen 50 estados.' },
+          { en: 'The Grand Canyon is in Arizona.', es: 'El Gran Cañón está en Arizona.' },
+          { en: 'The Statue of Liberty is in New York.', es: 'La Estatua de la Libertad está en Nueva York.' },
+          { en: 'The Apollo 11 mission landed on the moon.', es: 'La misión Apolo 11 aterrizó en la luna.' }
+        ],
+        landmark: { name: 'Statue of Liberty', nameEs: 'Estatua de la Libertad', emoji: '🗽' },
+        animal: { name: 'Bald Eagle', nameEs: 'Águila Calva', emoji: '🦅' },
+        quiz: [
+          { q: 'What is the capital of the US?', qEs: '¿Cuál es la capital de los EE.UU.?', options: ['New York', 'Washington D.C.', 'Los Angeles', 'Chicago'], optionsEs: ['Nueva York', 'Washington D.C.', 'Los Ángeles', 'Chicago'], answer: 1 },
+          { q: 'How many states are there?', qEs: '¿Cuántos estados hay?', options: ['48', '50', '52', '45'], optionsEs: ['48', '50', '52', '45'], answer: 1 },
+          { q: 'Where is the Statue of Liberty?', qEs: '¿Dónde está la Estatua de la Libertad?', options: ['Miami', 'Boston', 'New York', 'Seattle'], optionsEs: ['Miami', 'Boston', 'Nueva York', 'Seattle'], answer: 2 },
+          { q: 'What is the national bird?', qEs: '¿Cuál es el ave nacional?', options: ['Bald Eagle', 'Hawk', 'Falcon', 'Owl'], optionsEs: ['Águila Calva', 'Halcón', 'Falcón', 'Búho'], answer: 0 },
+          { q: 'Which famous canyon is in Arizona?', qEs: '¿Qué famoso cañón está en Arizona?', options: ['Grand Canyon', 'Bryce Canyon', 'Zion Canyon', 'Copper Canyon'], optionsEs: ['Gran Cañón', 'Cañón Bryce', 'Cañón Zion', 'Cañón del Cobre'], answer: 0 }
+        ]
+      },
+      {
         id: 'canada', name: 'Canada', nameEs: 'Canadá', flag: '🇨🇦',
         capital: 'Ottawa', capitalEs: 'Ottawa',
         facts: [
@@ -286,7 +305,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Spain?', qEs: '¿Cuál es la capital de España?', options: ['Barcelona', 'Seville', 'Madrid', 'Valencia'], optionsEs: ['Barcelona', 'Sevilla', 'Madrid', 'Valencia'], answer: 2 },
           { q: 'What famous church is in Barcelona?', qEs: '¿Qué famosa iglesia está en Barcelona?', options: ['Notre Dame', 'Sagrada Familia', 'St. Peter\'s', 'Westminster'], optionsEs: ['Notre Dame', 'Sagrada Familia', 'San Pedro', 'Westminster'], answer: 1 },
-          { q: 'Which dance is a famous Spanish art form?', qEs: '¿Qué baile es un famoso arte español?', options: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], answer: 2 }
+          { q: 'Which dance is a famous Spanish art form?', qEs: '¿Qué baile es un famoso arte español?', options: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], answer: 2 },
+          { q: 'What peninsula is Spain located on?', qEs: '¿En qué península está España?', options: ['Italian', 'Iberian', 'Balkan', 'Scandinavian'], optionsEs: ['Italiana', 'Ibérica', 'Balcánica', 'Escandinava'], answer: 1 },
+          { q: 'What is a famous animal from Spain?', qEs: '¿Cuál es un animal famoso de España?', options: ['Iberian Lynx', 'Panda', 'Kangaroo', 'Tiger'], optionsEs: ['Lince Ibérico', 'Panda', 'Canguro', 'Tigre'], answer: 0 }
         ]
       },
       {
@@ -303,7 +324,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of France?', qEs: '¿Cuál es la capital de Francia?', options: ['London', 'Berlin', 'Madrid', 'Paris'], optionsEs: ['Londres', 'Berlín', 'Madrid', 'París'], answer: 3 },
           { q: 'Which famous monument is in France?', qEs: '¿Qué famoso monumento está en Francia?', options: ['Colosseum', 'Eiffel Tower', 'Big Ben', 'Parthenon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Big Ben', 'Partenón'], answer: 1 },
-          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 }
+          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 },
+          { q: 'What food is France famous for?', qEs: '¿Por qué comida es famosa Francia?', options: ['Sushi', 'Tacos', 'Bread and cheese', 'Curry'], optionsEs: ['Sushi', 'Tacos', 'Pan y queso', 'Curry'], answer: 2 },
+          { q: 'What bird is a symbol of France?', qEs: '¿Qué ave es un símbolo de Francia?', options: ['Eagle', 'Rooster', 'Swan', 'Owl'], optionsEs: ['Águila', 'Gallo', 'Cisne', 'Búho'], answer: 1 }
         ]
       }
     ] },
@@ -322,7 +345,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Kenya?', qEs: '¿Cuál es la capital de Kenia?', options: ['Cairo', 'Nairobi', 'Lagos', 'Pretoria'], optionsEs: ['El Cairo', 'Nairobi', 'Lagos', 'Pretoria'], answer: 1 },
           { q: 'What landscape is Kenya famous for?', qEs: '¿Por qué paisaje es famosa Kenia?', options: ['Deserts', 'Rainforests', 'Tundras', 'Savannas'], optionsEs: ['Desiertos', 'Selvas', 'Tundras', 'Sabanas'], answer: 3 },
-          { q: 'What is the second highest mountain in Africa?', qEs: '¿Cuál es la segunda montaña más alta de África?', options: ['Kilimanjaro', 'Mount Kenya', 'Atlas', 'Ruwenzori'], optionsEs: ['Kilimanjaro', 'Monte Kenia', 'Atlas', 'Ruwenzori'], answer: 1 }
+          { q: 'What is the second highest mountain in Africa?', qEs: '¿Cuál es la segunda montaña más alta de África?', options: ['Kilimanjaro', 'Mount Kenya', 'Atlas', 'Ruwenzori'], optionsEs: ['Kilimanjaro', 'Monte Kenia', 'Atlas', 'Ruwenzori'], answer: 1 },
+          { q: 'Which is an official language of Kenya?', qEs: '¿Cuál es un idioma oficial de Kenia?', options: ['French', 'Spanish', 'Swahili', 'Portuguese'], optionsEs: ['Francés', 'Español', 'Suajili', 'Portugués'], answer: 2 },
+          { q: 'Which animal is famously found in Kenya?', qEs: '¿Qué animal se encuentra en Kenia?', options: ['Polar Bear', 'Lion', 'Kangaroo', 'Tiger'], optionsEs: ['Oso Polar', 'León', 'Canguro', 'Tigre'], answer: 1 }
         ]
       },
       {
@@ -338,7 +363,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What river flows through Egypt?', qEs: '¿Qué río fluye por Egipto?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], optionsEs: ['Amazonas', 'Nilo', 'Yangtsé', 'Misisipi'], answer: 1 },
           { q: 'What famous monument is in Egypt?', qEs: '¿Qué monumento famoso está en Egipto?', options: ['Colosseum', 'Eiffel Tower', 'Pyramids', 'Taj Mahal'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Pirámides', 'Taj Mahal'], answer: 2 },
-          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0 }
+          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0 },
+          { q: 'Which ancient rulers built the pyramids?', qEs: '¿Qué antiguos gobernantes construyeron las pirámides?', options: ['Kings', 'Pharaohs', 'Emperors', 'Tsars'], optionsEs: ['Reyes', 'Faraones', 'Emperadores', 'Zares'], answer: 1 },
+          { q: 'What desert covers most of Egypt?', qEs: '¿Qué desierto cubre la mayor parte de Egipto?', options: ['Gobi', 'Kalahari', 'Sahara', 'Atacama'], optionsEs: ['Gobi', 'Kalahari', 'Sahara', 'Atacama'], answer: 2 }
         ]
       }
     ] },
@@ -357,7 +384,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Japan?', qEs: '¿Cuál es la capital de Japón?', options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'], optionsEs: ['Kioto', 'Osaka', 'Tokio', 'Hiroshima'], answer: 2 },
           { q: 'What is the highest mountain in Japan?', qEs: '¿Cuál es la montaña más alta de Japón?', options: ['Mount Everest', 'Mount Fuji', 'Mount Kilimanjaro', 'Mount Blanc'], optionsEs: ['Monte Everest', 'Monte Fuji', 'Monte Kilimanjaro', 'Mont Blanc'], answer: 1 },
-          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2 }
+          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2 },
+          { q: 'What are the fast trains in Japan called?', qEs: '¿Cómo se llaman los trenes rápidos en Japón?', options: ['Metro', 'Subway', 'Bullet trains', 'Trams'], optionsEs: ['Metro', 'Subterráneo', 'Trenes bala', 'Tranvías'], answer: 2 },
+          { q: 'Japan is located in which region?', qEs: '¿Japón está ubicado en qué región?', options: ['Europe', 'East Asia', 'South America', 'Africa'], optionsEs: ['Europa', 'Este de Asia', 'América del Sur', 'África'], answer: 1 }
         ]
       },
       {
@@ -374,7 +403,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of China?', qEs: '¿Cuál es la capital de China?', options: ['Shanghai', 'Beijing', 'Hong Kong', 'Shenzhen'], optionsEs: ['Shanghái', 'Pekín', 'Hong Kong', 'Shenzhen'], answer: 1 },
           { q: 'Which famous wall is located in China?', qEs: '¿Qué famosa muralla se encuentra en China?', options: ['Berlin Wall', 'Hadrian\'s Wall', 'Great Wall', 'Western Wall'], optionsEs: ['Muro de Berlín', 'Muro de Adriano', 'Gran Muralla', 'Muro de los Lamentos'], answer: 2 },
-          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2 }
+          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2 },
+          { q: 'What is the longest river in Asia?', qEs: '¿Cuál es el río más largo de Asia?', options: ['Nile', 'Amazon', 'Yangtze', 'Mississippi'], optionsEs: ['Nilo', 'Amazonas', 'Yangtsé', 'Misisipi'], answer: 2 },
+          { q: 'Which country has the largest population?', qEs: '¿Qué país tiene la mayor población?', options: ['USA', 'Russia', 'Brazil', 'China'], optionsEs: ['EE.UU.', 'Rusia', 'Brasil', 'China'], answer: 3 }
         ]
       }
     ] },
@@ -393,7 +424,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Australia?', qEs: '¿Cuál es la capital de Australia?', options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'], optionsEs: ['Sídney', 'Melbourne', 'Canberra', 'Perth'], answer: 2 },
           { q: 'Which animal is native to Australia?', qEs: '¿Qué animal es nativo de Australia?', options: ['Lion', 'Penguin', 'Kangaroo', 'Bear'], optionsEs: ['León', 'Pingüino', 'Canguro', 'Oso'], answer: 2 },
-          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0 }
+          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0 },
+          { q: 'What famous building is in Sydney?', qEs: '¿Qué edificio famoso está en Sídney?', options: ['Eiffel Tower', 'Colosseum', 'Opera House', 'Big Ben'], optionsEs: ['Torre Eiffel', 'Coliseo', 'Ópera', 'Big Ben'], answer: 2 },
+          { q: 'Australia is considered both a country and a...?', qEs: '¿Australia es considerada tanto un país como un...?', options: ['State', 'City', 'Continent', 'County'], optionsEs: ['Estado', 'Ciudad', 'Continente', 'Condado'], answer: 2 }
         ]
       },
       {
@@ -410,7 +443,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of New Zealand?', qEs: '¿Cuál es la capital de Nueva Zelanda?', options: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton'], optionsEs: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton'], answer: 1 },
           { q: 'What is the national bird of New Zealand?', qEs: '¿Cuál es el ave nacional de Nueva Zelanda?', options: ['Eagle', 'Penguin', 'Kiwi', 'Ostrich'], optionsEs: ['Águila', 'Pingüino', 'Kiwi', 'Avestruz'], answer: 2 },
-          { q: 'How many main islands does New Zealand have?', qEs: '¿Cuántas islas principales tiene Nueva Zelanda?', options: ['One', 'Two', 'Three', 'Four'], optionsEs: ['Una', 'Dos', 'Tres', 'Cuatro'], answer: 1 }
+          { q: 'How many main islands does New Zealand have?', qEs: '¿Cuántas islas principales tiene Nueva Zelanda?', options: ['One', 'Two', 'Three', 'Four'], optionsEs: ['Una', 'Dos', 'Tres', 'Cuatro'], answer: 1 },
+          { q: 'What beautiful landscapes is it famous for?', qEs: '¿Por qué hermosos paisajes es famosa?', options: ['Deserts', 'Fjords', 'Jungles', 'Swamps'], optionsEs: ['Desiertos', 'Fiordos', 'Selvas', 'Pantanos'], answer: 1 },
+          { q: 'When did women first get the right to vote here?', qEs: '¿Cuándo obtuvieron por primera vez las mujeres el derecho a votar aquí?', options: ['1893', '1920', '1950', '2000'], optionsEs: ['1893', '1920', '1950', '2000'], answer: 0 }
         ]
       }
     ] }

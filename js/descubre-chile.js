@@ -395,7 +395,9 @@ const QB={
     {q:'¿Qué es un "completo"?',a:'Hot dog con palta',o:['Hot dog con palta','Desayuno completo','Torta','Torneo de fútbol'], tier:'beginner'},
     {q:'¿Cuándo se comen más empanadas?',a:'Fiestas Patrias',o:['Fiestas Patrias','Navidad','Semana Santa','Año Nuevo'], tier:'beginner'},
     {q:'¿Qué famoso sándwich lleva carne, porotos verdes, tomate y ají verde?',a:'Chacarero',o:['Chacarero','Barros Luco','Italiano','Chemilico'], tier:'intermediate'},
-    {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Octubre'], tier:'beginner'}
+    {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Octubre'], tier:'beginner'},
+    {q:'¿En qué mes se celebra el Carnaval de Invierno en Punta Arenas?',a:'Julio',o:['Julio','Enero','Diciembre','Marzo'], tier:'advanced'},
+    {q:'¿Qué pueblo originario usaba las famosas embarcaciones llamadas dalcas?',a:'Los Chonos',o:['Los Chonos','Los Diaguitas','Los Aymaras','Los Mapuches'], tier:'advanced'}
   ],
   nature:[
     {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble',
@@ -411,7 +413,9 @@ const QB={
     {q:'¿Qué corriente trae agua fría?',a:'Corriente de Humboldt',o:['Corriente de Humboldt','Corriente del Golfo','Anillo del Pacífico','Flujo chileno'], tier:'advanced'},
     {q:'¿Qué animal del sur es un ciervo pequeño?',a:'Pudú',o:['Pudú','Huemul','Guanaco','Zorro'], tier:'beginner'},
     {q:'¿En qué parte viven los pingüinos en Chile?',a:'En el sur',o:['En el sur','En el desierto','En Santiago','En Isla de Pascua'], tier:'intermediate'},
-    {q:'¿Qué pájaro habita en los salares del norte?',a:'Flamenco',o:['Flamenco','Cóndor','Gaviota','Pelícano'], tier:'beginner'}
+    {q:'¿Qué pájaro habita en los salares del norte?',a:'Flamenco',o:['Flamenco','Cóndor','Gaviota','Pelícano'], tier:'beginner'},
+    {q:'¿Qué ave corredora gigante habita en la Patagonia y el norte de Chile?',a:'Ñandú',o:['Ñandú','Avestruz','Emú','Kiwi'], tier:'intermediate'},
+    {q:'¿Cuál es el árbol nativo de tronco rojizo que crece muy lento en el sur?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Araucaria'], tier:'advanced'}
   ],
   famous:[
     {q:'¿Quién escribió "Altazor"?',a:'Vicente Huidobro',o:['Vicente Huidobro','Pablo Neruda','Gabriela Mistral','Nicanor Parra'], tier:'expert'},
@@ -422,7 +426,9 @@ const QB={
     {q:'¿Cuándo ganó Chile la Copa América?',a:'2015',o:['2015','2000','1990','1970'], tier:'intermediate'},
     {q:'¿En qué billete está Gabriela Mistral?',a:'5.000 pesos',o:['5.000 pesos','1.000 pesos','10.000 pesos','20.000 pesos'], tier:'expert'},
     {q:'¿Qué deporte practicaba Marcelo Ríos?',a:'Tenis',o:['Tenis','Fútbol','Gimnasia','Natación'], tier:'beginner'},
-    {q:'¿En qué año fue Marcelo Ríos número 1 del mundo?',a:'1998',o:['1998','2000','1995','2005'], tier:'advanced'}
+    {q:'¿En qué año fue Marcelo Ríos número 1 del mundo?',a:'1998',o:['1998','2000','1995','2005'], tier:'advanced'},
+    {q:'¿Qué explorador descubrió el estrecho que une el Atlántico y el Pacífico en 1520?',a:'Hernando de Magallanes',o:['Hernando de Magallanes','Cristóbal Colón','Américo Vespucio','Pedro de Valdivia'], tier:'expert'},
+    {q:'¿Quién compuso la famosa canción "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Gabriela Mistral','Víctor Jara','Los Jaivas'], tier:'intermediate'}
   ],
   inventors:[
     {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
