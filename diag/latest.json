@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-09T19:22:35.994Z",
+  "generatedAt": "2026-06-09T23:09:45.880Z",
   "windowHours": 72,
   "totalGroups": 5,
-  "totalEvents": 30,
+  "totalEvents": 31,
   "topGroups": [
     {
       "app": "world-cup",
@@ -12,10 +12,10 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 4,
+      "count": 5,
       "firstTs": 1781011886318,
-      "lastTs": 1781032531286,
-      "users": 1
+      "lastTs": 1781046305018,
+      "users": 2
     },
     {
       "app": "book-movie-check",
