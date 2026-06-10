@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-10T14:32:47.039Z",
+  "generatedAt": "2026-06-10T18:50:00.075Z",
   "windowHours": 72,
   "totalGroups": 8,
-  "totalEvents": 35,
+  "totalEvents": 36,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "Nominations cache skipped (storage full) — squads still loaded for this session",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 3,
+      "firstTs": 1781100169217,
+      "lastTs": 1781117077662,
+      "users": 1
+    },
     {
       "app": "little-maestro",
       "kind": "console.error",
@@ -28,19 +41,6 @@
       "count": 1,
       "firstTs": 1781101340148,
       "lastTs": 1781101340148,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "Nominations cache skipped (storage full) — squads still loaded for this session",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1781100169217,
-      "lastTs": 1781100324233,
       "users": 1
     },
     {
