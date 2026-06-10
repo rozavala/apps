@@ -48,6 +48,7 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Límites Diarios (Daily Limits)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres. (Parents can set specific limits per app or child from the Parent Dashboard).
 - **Sistema de Tareas (Chores System)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra (1 token = 5 minutos extra). (When time runs out, kids can earn extra time (tokens) by completing real-world chores (e.g. "Make the bed", "Read 20 minutes"). A parent PIN is required to approve extra time (1 token = 5 extra minutes)).
 - **Horario Inteligente (Smart Schedule)**: Rotación automática diaria de aplicaciones sugeridas para fomentar una dieta equilibrada de aprendizaje y evitar la fatiga de decisiones. (Automatic daily rotation of suggested apps to encourage a balanced learning diet).
+- **Insights para Padres (Parent Insights)**: Monitorea el balance de actividades y recibe sugerencias para cada perfil desde el Panel de Padres. (Monitor activity balance and receive nudges for each profile from the Parent Dashboard).
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
 
 ## 🛠️ Características Principales (Key Features)
