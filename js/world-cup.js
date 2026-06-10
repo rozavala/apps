@@ -5443,8 +5443,7 @@
       const squads = data.squads || data;       // accept wrapped or bare
       if (!squads || typeof squads !== 'object') throw new Error('bad feed shape');
       NOMINATIONS = squads;
-      localStorage.setItem(NOMINATIONS_KEY,
-        JSON.stringify({ version: data.version || null, squads: NOMINATIONS }));
+      _cacheNominations(data.version || null);
       const n = Object.keys(NOMINATIONS).length;
       const cur = document.querySelector('.tab.active')?.dataset.tab;
       if (cur) activateTab(cur);
@@ -5454,6 +5453,32 @@
     } catch (e) {
       console.error('Nominations sync failed', e);
       if (!quiet) toast('Squad fetch failed: ' + (e.message || 'network error'));
+    }
+  }
+
+  // Persist the fetched squads for offline use. The feed is ~170KB and
+  // every page on this origin shares one localStorage quota, so on full
+  // devices the blind setItem on each load threw QuotaExceededError 26+
+  // times across the family (#diag). Quota failure is non-fatal — the
+  // in-memory copy serves the whole session — so: skip the write when
+  // the cached version already matches (the common case), and on quota
+  // failure evict our own stale copy, retry once, then degrade to a
+  // single console.warn instead of an error.
+  function _cacheNominations(version) {
+    try {
+      const raw = localStorage.getItem(NOMINATIONS_KEY);
+      if (raw && version && JSON.parse(raw).version === version) return;
+    } catch (e) { /* unreadable cache — fall through and rewrite */ }
+    const payload = JSON.stringify({ version: version, squads: NOMINATIONS });
+    try {
+      localStorage.setItem(NOMINATIONS_KEY, payload);
+    } catch (e1) {
+      try {
+        localStorage.removeItem(NOMINATIONS_KEY);
+        localStorage.setItem(NOMINATIONS_KEY, payload);
+      } catch (e2) {
+        console.warn('Nominations cache skipped (storage full) — squads still loaded for this session');
+      }
     }
   }
 
