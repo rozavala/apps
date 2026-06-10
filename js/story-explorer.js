@@ -10,6 +10,42 @@ const StoryExplorer = (() => {
   // ── Story Library ──
   const STORIES = [
     {
+      id: 'ocean_dive',
+      title: 'The Ocean Dive',
+      titleEs: 'El Buceo en el Océano',
+      tier: 'intermediate', ageMin: 7, region: 'ocean', icon: '🤿',
+      pages: [
+        {
+          en: 'The divers jumped into the deep blue water.',
+          es: 'Los buzos saltaron al agua azul profunda.',
+          vocab: [
+            { word: 'divers', wordEs: 'buzos', def: 'People who swim underwater.', defEs: 'Personas que nadan bajo el agua.' },
+            { word: 'deep', wordEs: 'profunda', def: 'Going far down.', defEs: 'Que va muy abajo.' }
+          ]
+        },
+        {
+          en: 'They saw colorful fish and a large sea turtle.',
+          es: 'Vieron peces coloridos y una gran tortuga marina.',
+          vocab: [
+            { word: 'colorful', wordEs: 'coloridos', def: 'Having many bright colors.', defEs: 'Que tiene muchos colores brillantes.' },
+            { word: 'turtle', wordEs: 'tortuga', def: 'An animal with a hard shell.', defEs: 'Un animal con un caparazón duro.' }
+          ]
+        },
+        {
+          en: 'It was a beautiful day exploring the coral reef.',
+          es: 'Fue un hermoso día explorando el arrecife de coral.',
+          vocab: [
+            { word: 'reef', wordEs: 'arrecife', def: 'A ridge of coral or rock under the sea.', defEs: 'Una cresta de coral o roca bajo el mar.' },
+            { word: 'coral', wordEs: 'coral', def: 'A hard structure built by tiny sea animals.', defEs: 'Una estructura dura construida por pequeños animales marinos.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Who jumped into the water?', qEs: '¿Quiénes saltaron al agua?', options: ['Pilots', 'Drivers', 'Divers', 'Runners'], optionsEs: ['Pilotos', 'Conductores', 'Buzos', 'Corredores'], answer: 2 },
+        { q: 'What animal did they see?', qEs: '¿Qué animal vieron?', options: ['Shark', 'Turtle', 'Whale', 'Dolphin'], optionsEs: ['Tiburón', 'Tortuga', 'Ballena', 'Delfín'], answer: 1 }
+      ]
+    },
+    {
       id: 'andes_rescue',
       title: 'The Andes Rescue',
       titleEs: 'El Rescate en los Andes',
