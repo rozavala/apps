@@ -43,8 +43,10 @@ Antes de hacer commit, debes verificar tu código:
 Antes de cada push, ejecuta el siguiente comando obligatorio para asegurarte de que no se hayan introducido palabras prohibidas:
 
 ```bash
-grep -r -i -E "genero|género|identidad|diversidad|inclusi[oó]n|pronombre|trans |gay|lesbiana|queer|pride|diverso|equidad|justicia social|colonialismo|opres|patriarcado|feminis|woke|diversity|equity|inclusion|gender |lgbt|transgender" --include="*.html" --include="*.js" --include="*.md" .
+grep -r -i -E "genero|género|identidad|diversidad|inclusi[oó]n|pronombre|trans |gay|lesbiana|queer|pride|diverso|equidad|justicia social|colonialismo|opres|patriarcado|feminis|woke|diversity|equity|inclusion|gender |lgbt|transgender" --include="*.html" --include="*.js" --include="*.md" --exclude-dir="node_modules" --exclude-dir=".git" .
 ```
+
+*Nota: Las coincidencias en la documentación de reglas (content-guidelines.md, CONTRIBUTING.md) o en la lógica de pruebas se esperan y no constituyen una violación.* (Note: Matches in rule documentation or test logic are expected and do not constitute a violation.)
 
 ## 🤖 Reglas para Agentes de IA (AI Agent Rules)
 
