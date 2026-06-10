@@ -18,7 +18,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **💰 Money Master** | Aprende sobre monedas, billetes y a dar vuelto — practica con CLP y USD. (Coins, bills, and change-making — practice with CLP & USD.) | [money-master.html](money-master.html) |
 | **🇨🇱 Descubre Chile** | Explora la increíble historia de Chile—desde el pueblo Mapuche hasta los Andes, a través de historias y cuestionarios. (Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.) | [descubre-chile.html](descubre-chile.html) |
 | **♟️ Chess Quest** | Domina el ajedrez desde lo básico—aprende cómo se mueve cada pieza, tácticas y juega contra una IA amigable. (Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI.) | [chess-quest.html](chess-quest.html) |
-| **⛪ Fe Explorador** | Descubre oraciones, vidas de santos y patrimonio religioso chileno. (Discover Catholic prayers, lives of saints, and Chilean religious heritage through factual stories and quizzes.) | [fe-explorador.html](fe-explorador.html) |
+| **⛪ Fe Explorador** | Descubre oraciones clásicas, biografías históricas de santos y el rico patrimonio católico de Chile. (Discover classic prayers, factual biographies of historical saints, and the rich Chilean Catholic heritage through interactive stories.) | [fe-explorador.html](fe-explorador.html) |
 | **🎸 Guitar Jam** | Aprende acordes de guitarra, toca canciones y entrena tu oído. (Learn guitar chords, strum along with songs, and train your ear.) | [guitar-jam.html](guitar-jam.html) |
 | **🎨 Art Studio** | Dibuja, pinta y aprende estilos de arte famosos con actividades guiadas. (Draw, paint, and learn famous art styles with guided activities.) | [art-studio.html](art-studio.html) |
 | **🏓 Sports Arena** | Registra partidos, organiza torneos y anota actividades al aire libre para equilibrar el tiempo de pantalla. (Track matches, run tournaments, and log outdoor activities to balance screen time.) | [sports-arena.html](sports-arena.html) |
@@ -59,6 +59,7 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Seguimiento de Progreso (Progress Tracking)**: Todas las estrellas, niveles y puntuaciones se guardan localmente usando `localStorage`. (All stars, levels, and scores are saved locally using `localStorage`).
 - **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso y balance con insights para cada niño. (A secure area to monitor progress and balance with insights for each child).
 - **Diseño Seguro (Safe by Design)**: Sin llamadas API externas, sin contenido dinámico de terceros y sin funciones generadas por el usuario. (No external API calls, no dynamic third-party content, and no user-generated features).
+- **Enfoque Histórico y Factual (Historical & Factual Focus)**: Contenido enfocado en hechos demostrables, patrimonio cultural y habilidades clásicas, manteniendo la estricta neutralidad. (Content focuses on demonstrable facts, cultural heritage, and classical skills, maintaining strict neutrality.)
 
 ## 📜 Filosofía de Contenido (Content Philosophy)
 
