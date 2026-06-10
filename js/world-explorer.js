@@ -233,6 +233,25 @@ const WorldExplorer = (() => {
     },
     { id: 'north_america', name: 'North America', nameEs: 'América del Norte', icon: '🌎', color: '#8B5CF6', countries: [
       {
+        id: 'united_states', name: 'United States', nameEs: 'Estados Unidos', flag: '🇺🇸',
+        capital: 'Washington, D.C.', capitalEs: 'Washington, D.C.',
+        facts: [
+          { en: 'The United States is made up of 50 states.', es: 'Estados Unidos está formado por 50 estados.' },
+          { en: 'The Grand Canyon in Arizona is over a mile deep.', es: 'El Gran Cañón en Arizona tiene más de un kilómetro y medio de profundidad.' },
+          { en: 'The Statue of Liberty was a gift from France in 1886.', es: 'La Estatua de la Libertad fue un regalo de Francia en 1886.' },
+          { en: 'The Apollo 11 mission landed astronauts on the Moon in 1969.', es: 'La misión Apolo 11 llevó astronautas a la Luna en 1969.' }
+        ],
+        landmark: { name: 'Statue of Liberty', nameEs: 'Estatua de la Libertad', emoji: '🗽' },
+        animal: { name: 'Bald Eagle', nameEs: 'Águila Calva', emoji: '🦅' },
+        quiz: [
+          { q: 'What is the capital of the United States?', qEs: '¿Cuál es la capital de Estados Unidos?', options: ['New York', 'Washington, D.C.', 'Los Angeles', 'Chicago'], optionsEs: ['Nueva York', 'Washington, D.C.', 'Los Ángeles', 'Chicago'], answer: 1 },
+          { q: 'How many states make up the U.S.?', qEs: '¿Cuántos estados forman EE.UU.?', options: ['48', '50', '52', '45'], optionsEs: ['48', '50', '52', '45'], answer: 1 },
+          { q: 'In which state is the Grand Canyon?', qEs: '¿En qué estado está el Gran Cañón?', options: ['Arizona', 'Texas', 'Florida', 'Nevada'], optionsEs: ['Arizona', 'Texas', 'Florida', 'Nevada'], answer: 0 },
+          { q: 'Where is the Statue of Liberty?', qEs: '¿Dónde está la Estatua de la Libertad?', options: ['Miami', 'Boston', 'New York', 'Seattle'], optionsEs: ['Miami', 'Boston', 'Nueva York', 'Seattle'], answer: 2 },
+          { q: 'What is the U.S. national bird?', qEs: '¿Cuál es el ave nacional de EE.UU.?', options: ['Bald Eagle', 'Hawk', 'Falcon', 'Owl'], optionsEs: ['Águila Calva', 'Halcón', 'Falcón', 'Búho'], answer: 0 }
+        ]
+      },
+      {
         id: 'canada', name: 'Canada', nameEs: 'Canadá', flag: '🇨🇦',
         capital: 'Ottawa', capitalEs: 'Ottawa',
         facts: [
