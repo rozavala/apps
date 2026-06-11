@@ -38,10 +38,16 @@
       return;
     }
 
-    var name   = sharedUser.name;
+    var name   = (sharedUser.name || '').trim();
     var avatar = sharedUser.avatar || '🐱';
     var color  = sharedUser.color || '#7C3AED';
     if (typeof Debug !== 'undefined') Debug.log('[LM-Bridge] Bridging user: ' + name);
+
+    // Collapse any duplicate profile entries first (whitespace or
+    // casing drift from the hub used to land "Diego" and "Diego " as
+    // separate students). Safe no-op when there are no collisions.
+    try { UserManager.cleanupDuplicates && UserManager.cleanupDuplicates(); }
+    catch (e) { if (typeof Debug !== 'undefined') Debug.warn('[LM-Bridge] cleanupDuplicates failed: ' + e.message); }
 
     // Find or create a matching Little Maestro profile
     var allUsers = UserManager.getAllUsers();

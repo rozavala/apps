@@ -9910,13 +9910,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       function createUser(name, avatar, color) {
+        name = (name || '').trim();
         const idx = _getIndex();
         // Cap was 6, which the family actually hit (#diag: "Maximum 6
         // profiles reached" left Isabel unable to use the app at all).
         // The synced index can also carry ghost names from other
         // devices, so the cap needs headroom beyond the family size.
         if (idx.length >= 10) throw new Error('Maximum 10 profiles reached');
-        if (idx.some(n => n.toLowerCase() === name.toLowerCase())) {
+        // Match on the storage key, not just the lowercased display name.
+        // "Diego", "Diego " and "DIEGO" all hash to the same _key — the
+        // old lowercased-name check let "Diego " sit alongside "Diego"
+        // as separate students with separate storage blobs (one of the
+        // duplicate-profile paths the family hit on the home screen).
+        const targetKey = _key(name);
+        if (idx.some(n => _key(n) === targetKey)) {
           throw new Error('A student named "' + name + '" already exists');
         }
         const profile = _defaultProfile(name, avatar, color);
@@ -9927,6 +9934,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       function loadUser(name) {
+        name = (name || '').trim();
         if (typeof Debug !== 'undefined') Debug.log('[User] Loading: ' + name);
         // Auto-pull sync
         if (typeof CloudSync !== 'undefined' && CloudSync.online) {
@@ -9935,7 +9943,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const idx = _getIndex();
-        const found = idx.find(n => n.toLowerCase() === name.toLowerCase());
+        // Match by storage key so a hub name with a stray trailing
+        // space still finds the existing student (otherwise the bridge
+        // assumed they were missing and called createUser, ending up
+        // with a duplicate profile).
+        const targetKey = _key(name);
+        const found = idx.find(n => _key(n) === targetKey);
         if (!found) {
           if (typeof Debug !== 'undefined') Debug.error('[User] Student not found: ' + name);
           throw new Error('Student "' + name + '" not found');
@@ -10003,9 +10016,11 @@ document.addEventListener('DOMContentLoaded', () => {
       function importUser(jsonString) {
         const data = JSON.parse(jsonString);
         if (!data.profile || !data.profile.name) throw new Error('Invalid profile data');
-        const name = data.profile.name;
+        const name = (data.profile.name || '').trim();
+        data.profile.name = name;
         const idx  = _getIndex();
-        if (!idx.some(n => n.toLowerCase() === name.toLowerCase())) {
+        const targetKey = _key(name);
+        if (!idx.some(n => _key(n) === targetKey)) {
           if (idx.length >= 10) throw new Error('Maximum 10 profiles reached');
           idx.push(name);
           _saveIndex(idx);
@@ -10026,9 +10041,71 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
       }
 
+      // Heuristic "how much progress is on this profile" score, so the
+      // dedup pass can pick the survivor when two index entries point
+      // at the same kid (the empty/fresh copy should lose to the one
+      // with actual practice history).
+      function _profileScore(data) {
+        const s = (data && data.stats) || {};
+        return (s.lessonsCompleted || 0) * 1000
+             + (s.songsLearned     || 0) * 100
+             + (s.totalStars       || 0)
+             + (s.totalPracticeMin || 0);
+      }
+
+      // One-shot cleanup that collapses duplicate index entries which
+      // hash to the same storage key (e.g. "Diego" and "Diego "). The
+      // entry with the most practice history wins; the others get
+      // their stray blobs removed and dropped from the index. Safe to
+      // call on every page load — no-op when there are no collisions.
+      function cleanupDuplicates() {
+        const idx = _getIndex();
+        const groups = {};
+        idx.forEach(name => {
+          const k = _key(name);
+          (groups[k] = groups[k] || []).push(name);
+        });
+        const keys = Object.keys(groups);
+        const hasDups = keys.some(k => groups[k].length > 1);
+        if (!hasDups) return 0;
+
+        let merged = 0;
+        const keepIdx = [];
+        keys.forEach(k => {
+          const names = groups[k];
+          if (names.length === 1) { keepIdx.push(names[0]); return; }
+          // Pick the survivor by progress score
+          let bestName = names[0], bestBlob = null, bestScore = -1;
+          names.forEach(n => {
+            let blob = null;
+            try { blob = JSON.parse(localStorage.getItem(PREFIX + n.toLowerCase().replace(/\s+/g, '_'))); } catch (e) {}
+            const score = _profileScore(blob);
+            if (score > bestScore) { bestScore = score; bestName = n; bestBlob = blob; }
+          });
+          const canonName = bestName.trim();
+          if (bestBlob && bestBlob.profile) bestBlob.profile.name = canonName;
+          try {
+            if (bestBlob) localStorage.setItem(_key(canonName), JSON.stringify(bestBlob));
+          } catch (e) {}
+          // Remove the loser blobs (any key shape that isn't the canonical one)
+          names.forEach(n => {
+            const k2 = PREFIX + n.toLowerCase().replace(/\s+/g, '_');
+            if (k2 !== _key(canonName)) {
+              try { localStorage.removeItem(k2); } catch (e) {}
+            }
+          });
+          keepIdx.push(canonName);
+          merged += names.length - 1;
+        });
+        _saveIndex(keepIdx);
+        if (typeof Debug !== 'undefined') Debug.warn('[User] Merged ' + merged + ' duplicate profile entr' + (merged === 1 ? 'y' : 'ies'));
+        return merged;
+      }
+
       return {
         getAllUsers, createUser, loadUser, saveUser,
         deleteUser, exportUser, importUser, getCurrentUser,
+        cleanupDuplicates,
       };
     })();
 
