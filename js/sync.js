@@ -364,13 +364,16 @@ var CloudSync = (function() {
         // Read tombstones (zs_deleted_profiles) so a profile that was
         // deleted on any device stays gone on this one. Tombstones are
         // synced as part of HOUSEHOLD_KEYS so they reach every device.
+        // Trim+lowercase both sides of the tombstone match so a name with
+        // stray whitespace (e.g. legacy "Diego " on one device) can't
+        // bypass the skip and resurrect a deleted profile.
         var tombstones = {};
         try {
           var rawTomb = localStorage.getItem('zs_deleted_profiles');
           var tombArr = rawTomb ? JSON.parse(rawTomb) : [];
           if (Array.isArray(tombArr)) {
             tombArr.forEach(function(t) {
-              if (t && t.name) tombstones[t.name.toLowerCase()] = Number(t.ts) || 0;
+              if (t && t.name) tombstones[(t.name || '').trim().toLowerCase()] = Number(t.ts) || 0;
             });
           }
         } catch (e) {}
@@ -382,7 +385,7 @@ var CloudSync = (function() {
         for (var i = 0; i < merged.length; i++) {
           var p = merged[i];
           if (!p || !p.name) continue;
-          var key = p.name.toLowerCase();
+          var key = (p.name || '').trim().toLowerCase();
           // Skip tombstoned names unless the profile was created after
           // the deletion (createdAt > tombstone ts) — that lets you
           // legitimately recreate a profile with the same name later.
