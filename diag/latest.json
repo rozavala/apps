@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-11T02:40:26.077Z",
+  "generatedAt": "2026-06-11T13:14:09.718Z",
   "windowHours": 72,
-  "totalGroups": 9,
-  "totalEvents": 37,
+  "totalGroups": 8,
+  "totalEvents": 29,
   "topGroups": [
     {
       "app": "world-cup",
@@ -103,23 +103,10 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 21,
-      "firstTs": 1780923546212,
+      "count": 16,
+      "firstTs": 1780927631700,
       "lastTs": 1780937193158,
       "users": 4
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "Trying to play video that is already playing.",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 3,
-      "firstTs": 1780924269872,
-      "lastTs": 1780924307009,
-      "users": 1
     }
   ]
 }

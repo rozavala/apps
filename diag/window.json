@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T02:40:26.077Z",
+  "generatedAt": "2026-06-11T13:14:09.718Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mq57waxw_1q3n9v",
-            "ts": 1780923546212,
-            "clientTs": 1780923546212,
+            "id": "e_mq5abvbo_cjzwm3",
+            "ts": 1780927631700,
+            "clientTs": 1780927631700,
             "kind": "console.error",
             "app": "world-cup",
             "page": "world-cup.html",
@@ -24,40 +24,14 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 21,
-          "firstTs": 1780923546212,
+          "count": 16,
+          "firstTs": 1780927631700,
           "lastTs": 1780937193158,
           "users": [
             "u-3bda7c",
             "u-46a6e4",
             "u-9b4aef",
             "u-8620c5"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mq58btbk_1hwnvg",
-            "ts": 1780924269872,
-            "clientTs": 1780924269872,
-            "kind": "console.warn",
-            "app": "book-movie-check",
-            "page": "book-movie-check.html",
-            "message": "Trying to play video that is already playing.",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 3,
-          "firstTs": 1780924269872,
-          "lastTs": 1780924307009,
-          "users": [
-            "u-3bda7c"
           ]
         },
         {
