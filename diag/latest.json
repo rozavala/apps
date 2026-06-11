@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-11T17:00:10.653Z",
+  "generatedAt": "2026-06-11T17:30:16.058Z",
   "windowHours": 72,
-  "totalGroups": 7,
-  "totalEvents": 16,
+  "totalGroups": 6,
+  "totalEvents": 15,
   "topGroups": [
     {
       "app": "world-cup",
@@ -80,19 +80,6 @@
       "count": 1,
       "firstTs": 1780970761896,
       "lastTs": 1780970761896,
-      "users": 1
-    },
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Evaluate failed: HTTP 500",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1780939644207,
-      "lastTs": 1780939644207,
       "users": 1
     }
   ]
