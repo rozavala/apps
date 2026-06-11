@@ -3,9 +3,9 @@
   "groups": [
     {
       "entry": {
-        "id": "e_mq5abvbo_cjzwm3",
-        "ts": 1780927631700,
-        "clientTs": 1780927631700,
+        "id": "e_mq5chkke_imw3xp",
+        "ts": 1780931256926,
+        "clientTs": 1780931256926,
         "kind": "console.error",
         "app": "world-cup",
         "page": "world-cup.html",
@@ -14,20 +14,19 @@
         "lineno": null,
         "colno": null,
         "stack": null,
-        "user": "u-3bda7c",
-        "age": 11,
+        "user": "u-9b4aef",
+        "age": 9,
         "guest": false,
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 16,
-      "firstTs": 1780927631700,
+      "count": 9,
+      "firstTs": 1780931256926,
       "lastTs": 1780937193158,
       "users": [
-        "u-3bda7c",
-        "u-46a6e4",
         "u-9b4aef",
-        "u-8620c5"
+        "u-8620c5",
+        "u-46a6e4"
       ]
     },
     {
