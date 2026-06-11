@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T15:15:03.748Z",
+  "generatedAt": "2026-06-11T15:45:05.257Z",
   "windowHours": 72,
   "days": [
     {
@@ -223,12 +223,14 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 2,
+          "count": 4,
           "firstTs": 1781145460512,
-          "lastTs": 1781189712433,
+          "lastTs": 1781192422199,
           "users": [
             "u-3bda7c",
-            "u-0797f2"
+            "u-0797f2",
+            "u-b30c16",
+            "u-9b4aef"
           ]
         }
       ]
