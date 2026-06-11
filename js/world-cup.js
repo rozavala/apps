@@ -2359,6 +2359,30 @@
   }
 
   /* ----------------------------------------------------------------
+     Live auto-sync — poll OpenFootball while matches are in play.
+     A match window opens 5 min before kickoff and runs ~2h45m (covers
+     extra time + penalties). Polls are quiet: no toast unless a score
+     actually changed. Source is human-maintained, so treat this as
+     "live results", not minute-by-minute.
+     ---------------------------------------------------------------- */
+  const LIVE_WINDOW_MS = 165 * 60000;
+  let _scoreSyncBusy = false;
+  let _lastScoreSyncAt = null;
+  function anyMatchLiveWindow() {
+    const now = Date.now();
+    return state.matches.some(m => {
+      const k = kickoffDate(m).getTime();
+      return now >= k - 5 * 60000 && now <= k + LIVE_WINDOW_MS;
+    });
+  }
+  function autoSyncTick() {
+    if (document.visibilityState === 'hidden') return;
+    if (navigator.onLine === false) return;
+    if (!anyMatchLiveWindow()) return;
+    syncScores({ quiet: true });
+  }
+
+  /* ----------------------------------------------------------------
      Lock deadlines — each group/stage locks once its first match starts.
      ---------------------------------------------------------------- */
   function _matchStarted(m) {
@@ -3503,10 +3527,13 @@
     const venue = venueById(m.venue);
     const played = !!m.result;
     const diffMs = kickoffDate(m).getTime() - Date.now();
+    // A synced score inside the live window may be partial (OpenFootball
+    // updates as games run), so keep the LIVE badge until the window ends.
+    const inLiveWindow = diffMs <= 0 && diffMs > -LIVE_WINDOW_MS;
     let when;
-    if (played) {
+    if (played && !inLiveWindow) {
       when = '<span style="color:var(--wc-green);font-weight:800;">FT</span>';
-    } else if (diffMs <= 0 && diffMs > -2*3600*1000) {
+    } else if (inLiveWindow) {
       when = '<span style="color:var(--wc-red);font-weight:800;">LIVE</span>';
     } else if (diffMs > 0) {
       const hrs = Math.floor(diffMs / 3600000);
@@ -3712,11 +3739,17 @@
       </div>
     `;
 
+    const liveNow = anyMatchLiveWindow();
+    const lastSyncStr = _lastScoreSyncAt ? new Date(_lastScoreSyncAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : null;
+    const liveLine = liveNow
+      ? `<div style="font-size:0.78rem;margin-top:6px;color:var(--wc-red);font-weight:700;">🔴 Match in play — auto-syncing results every minute${lastSyncStr ? ` · last checked ${lastSyncStr}` : ''}</div>`
+      : (lastSyncStr ? `<div class="muted" style="font-size:0.74rem;margin-top:6px;">Auto-sync runs during matches · last checked ${lastSyncStr}</div>` : '');
     let html = `<div class="card" style="border-left:3px solid var(--wc-green);padding:12px 16px;margin-bottom:10px;">
       <div style="font-size:0.86rem;line-height:1.5;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <span>✅ <b>Official 2026 schedule</b> — sourced from FIFA via the public OpenFootball dataset. Tap any match to enter scores or edit details.</span>
         <button class="btn gold" style="padding:6px 12px;font-size:0.78rem;flex-shrink:0;" onclick="WC.syncScores()">⟳ Sync scores</button>
       </div>
+      ${liveLine}
     </div>` + filterHTML;
     if (list.length === 0) html += '<div class="empty">No matches for these filters.</div>';
     Object.keys(byDate).sort().forEach(date => {
@@ -5306,6 +5339,14 @@
     document.querySelectorAll('.tab[data-tab]').forEach(t => {
       t.addEventListener('click', () => activateTab(t.dataset.tab));
     });
+    // Live score auto-sync: poll once a minute during match windows, and
+    // immediately when the app returns to the foreground mid-match (the
+    // classic "reopen phone at half time" case).
+    setInterval(autoSyncTick, 60000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') autoSyncTick();
+    });
+    autoSyncTick();
     // refresh countdown every second on home
     setInterval(() => {
       if (document.querySelector('.tab.active')?.dataset.tab === 'home') {
@@ -5489,8 +5530,11 @@
      ---------------------------------------------------------------- */
   const OPENFOOTBALL_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 
-  async function syncScores() {
-    toast('Fetching latest scores…');
+  async function syncScores(opts = {}) {
+    const quiet = !!opts.quiet;
+    if (_scoreSyncBusy) return;
+    _scoreSyncBusy = true;
+    if (!quiet) toast('Fetching latest scores…');
     try {
       const res = await fetch(OPENFOOTBALL_URL, { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -5588,13 +5632,25 @@
         .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
 
       save();
-      const cur = document.querySelector('.tab.active')?.dataset.tab;
-      if (cur) activateTab(cur);
-      const scorersNote = state.scorers.length ? `, ${state.scorers.length} scorer${state.scorers.length===1?'':'s'} tracked` : '';
-      toast(`Synced — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
+      _lastScoreSyncAt = Date.now();
+      const changed = updated > 0 || teamsResolved > 0;
+      // Don't yank the DOM out from under an open editor modal mid-poll.
+      const modalOpen = !!document.querySelector('.modal.open');
+      if ((!quiet || changed) && !modalOpen) {
+        const cur = document.querySelector('.tab.active')?.dataset.tab;
+        if (cur) activateTab(cur);
+      }
+      if (!quiet) {
+        const scorersNote = state.scorers.length ? `, ${state.scorers.length} scorer${state.scorers.length===1?'':'s'} tracked` : '';
+        toast(`Synced — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
+      } else if (changed) {
+        toast(`⚽ Live — ${updated} score${updated===1?'':'s'} updated`);
+      }
     } catch (e) {
       console.error('Sync failed', e);
-      toast('Sync failed: ' + (e.message || 'network error'));
+      if (!quiet) toast('Sync failed: ' + (e.message || 'network error'));
+    } finally {
+      _scoreSyncBusy = false;
     }
   }
 
