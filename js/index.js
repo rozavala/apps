@@ -152,6 +152,15 @@
   var editEmoji = null;
   var editColor = null;
   var editAge = null;
+  // Tap-to-confirm state for the Delete button. The native confirm()
+  // dialog used to live here, but it is unreliable in iPad PWAs (the
+  // standalone shell silently auto-dismisses with `false`) — which
+  // made Delete look like a dead button: click did nothing, modal
+  // never closed. The button now arms on first tap and commits on the
+  // second tap within ARM_WINDOW_MS.
+  var _deleteArmedAt   = 0;
+  var _deleteArmTimer  = 0;
+  var DELETE_ARM_WINDOW_MS = 5000;
   var pinCallback = null;
 
   // ── Implementation ──
@@ -1668,6 +1677,19 @@
     var mod = document.getElementById('edit-modal');
     if (mod) mod.classList.remove('active');
     editingIndex = -1;
+    _resetDeleteButton();
+  }
+
+  function _resetDeleteButton() {
+    var btn = document.querySelector('.btn-delete-profile');
+    if (btn) {
+      btn.textContent = '🗑 Delete';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.fontWeight = '';
+    }
+    _deleteArmedAt = 0;
+    if (_deleteArmTimer) { clearTimeout(_deleteArmTimer); _deleteArmTimer = 0; }
   }
 
   function _updateEditPreview() {
@@ -1743,10 +1765,36 @@
   }
 
   function deleteEditingProfile() {
+    var armed = _deleteArmedAt > 0 && (Date.now() - _deleteArmedAt) <= DELETE_ARM_WINDOW_MS;
+    if (typeof Debug !== 'undefined') Debug.log('[Profile] delete clicked, editingIndex=' + editingIndex + ' armed=' + armed);
+    if (editingIndex < 0) {
+      if (typeof Debug !== 'undefined') Debug.warn('[Profile] delete: editingIndex < 0 — no-op');
+      return;
+    }
     var profiles = getProfiles();
-    if (editingIndex < 0) return;
-    var name = profiles[editingIndex].name;
-    if (!confirm('Delete ' + name + '?')) return;
+    if (!profiles[editingIndex]) {
+      if (typeof Debug !== 'undefined') Debug.warn('[Profile] delete: profiles[' + editingIndex + '] missing — no-op');
+      return;
+    }
+    var name = (profiles[editingIndex].name || '').trim();
+
+    // First tap arms the button; second tap within the window commits.
+    if (!armed) {
+      _deleteArmedAt = Date.now();
+      var btn = document.querySelector('.btn-delete-profile');
+      if (btn) {
+        btn.textContent = 'Tap again to delete ' + name;
+        btn.style.background = '#EF4444';
+        btn.style.color = '#fff';
+        btn.style.fontWeight = '800';
+      }
+      if (_deleteArmTimer) clearTimeout(_deleteArmTimer);
+      _deleteArmTimer = setTimeout(_resetDeleteButton, DELETE_ARM_WINDOW_MS);
+      if (typeof Debug !== 'undefined') Debug.log('[Profile] delete armed for "' + name + '" (' + DELETE_ARM_WINDOW_MS + 'ms)');
+      return;
+    }
+
+    if (typeof Debug !== 'undefined') Debug.log('[Profile] deleting "' + name + '"');
     profiles.splice(editingIndex, 1);
     saveProfiles(profiles);
 
@@ -1759,13 +1807,17 @@
       try { existing = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
       if (!Array.isArray(existing)) existing = [];
       // Drop any older tombstone for the same name, then add a fresh one.
+      // Matching is trim+lowercase so a stored name with stray whitespace
+      // can't bypass the tombstone (same defensive normalization we did
+      // for the Little Maestro profile dedup).
       var lname = name.toLowerCase();
       existing = existing.filter(function(t) {
-        return !t || !t.name || t.name.toLowerCase() !== lname;
+        return !t || !t.name || (t.name || '').trim().toLowerCase() !== lname;
       });
       existing.push({ name: name, ts: Date.now() });
       localStorage.setItem(key, JSON.stringify(existing));
       if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(key);
+      if (typeof Debug !== 'undefined') Debug.log('[Profile] tombstone written for "' + name + '"');
     } catch (e) {
       if (typeof Debug !== 'undefined') Debug.error('[Profile] tombstone failed', e.message);
     }
