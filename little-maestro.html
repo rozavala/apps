@@ -9911,7 +9911,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function createUser(name, avatar, color) {
         const idx = _getIndex();
-        if (idx.length >= 6) throw new Error('Maximum 6 profiles reached');
+        // Cap was 6, which the family actually hit (#diag: "Maximum 6
+        // profiles reached" left Isabel unable to use the app at all).
+        // The synced index can also carry ghost names from other
+        // devices, so the cap needs headroom beyond the family size.
+        if (idx.length >= 10) throw new Error('Maximum 10 profiles reached');
         if (idx.some(n => n.toLowerCase() === name.toLowerCase())) {
           throw new Error('A student named "' + name + '" already exists');
         }
@@ -9936,9 +9940,18 @@ document.addEventListener('DOMContentLoaded', () => {
           if (typeof Debug !== 'undefined') Debug.error('[User] Student not found: ' + name);
           throw new Error('Student "' + name + '" not found');
         }
-        const data = JSON.parse(localStorage.getItem(_key(found)));
+        let data = JSON.parse(localStorage.getItem(_key(found)));
         if (!data) {
-          if (typeof Debug !== 'undefined') Debug.error('[User] Data empty in localStorage for ' + name);
+          // The index syncs across devices ahead of the per-student data
+          // blobs (CloudSync.pull above is async and not awaited), so on
+          // a fresh device a student can be in the index with no local
+          // data yet. _current = null here made every screen flaky until
+          // the kid force-reloaded (#diag "very unstable"). Start from a
+          // default profile instead — when the pull lands, the synced
+          // blob takes over on next load.
+          if (typeof Debug !== 'undefined') Debug.warn('[User] No local data for ' + found + ' — starting default profile until sync lands');
+          data = _defaultProfile(found, '🐱', '#7C3AED');
+          try { localStorage.setItem(_key(found), JSON.stringify(data)); } catch (e) {}
         }
         _current = data;
         sessionStorage.setItem('lm_active_user', found);
@@ -9993,7 +10006,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = data.profile.name;
         const idx  = _getIndex();
         if (!idx.some(n => n.toLowerCase() === name.toLowerCase())) {
-          if (idx.length >= 6) throw new Error('Maximum 6 profiles reached');
+          if (idx.length >= 10) throw new Error('Maximum 10 profiles reached');
           idx.push(name);
           _saveIndex(idx);
         }

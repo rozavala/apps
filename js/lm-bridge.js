@@ -69,10 +69,33 @@
         if (typeof Debug !== 'undefined') Debug.warn('[LM-Bridge] Create failed, trying load: ' + e.message);
         console.warn('[LM-Bridge] Create failed, trying load:', e.message);
         try { UserManager.loadUser(name); }
-        catch(e2) { 
-          if (typeof Debug !== 'undefined') Debug.error('[LM-Bridge] Cannot create or load', e2.message);
-          console.error('[LM-Bridge] Cannot create or load:', e2); 
-          return; 
+        catch(e2) {
+          // Last resort: the LM index is one synced localStorage key, so
+          // two devices saving it concurrently clobber each other
+          // (last-writer-wins). A student created on this device can
+          // vanish from the index while their data blob survives. If
+          // that orphaned blob exists, re-register it through importUser
+          // (which re-adds the index entry) instead of stranding the kid
+          // at a dead screen (#diag: "Cannot create or load: Student
+          // \"Isabel\" not found").
+          var orphanKey = 'littlemaestro_' + name.toLowerCase().replace(/\s+/g, '_');
+          var orphan = null;
+          try { orphan = localStorage.getItem(orphanKey); } catch (e3) {}
+          if (orphan) {
+            try {
+              if (typeof Debug !== 'undefined') Debug.warn('[LM-Bridge] Index lost "' + name + '" but data blob exists — re-registering');
+              UserManager.importUser(orphan);
+              UserManager.loadUser(name);
+            } catch (e4) {
+              if (typeof Debug !== 'undefined') Debug.error('[LM-Bridge] Orphan recovery failed', e4.message);
+              console.error('[LM-Bridge] Cannot create or load:', e4);
+              return;
+            }
+          } else {
+            if (typeof Debug !== 'undefined') Debug.error('[LM-Bridge] Cannot create or load', e2.message);
+            console.error('[LM-Bridge] Cannot create or load:', e2);
+            return;
+          }
         }
       }
     }
