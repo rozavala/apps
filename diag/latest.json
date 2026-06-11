@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-11T16:45:09.708Z",
+  "generatedAt": "2026-06-11T17:00:10.653Z",
   "windowHours": 72,
-  "totalGroups": 8,
-  "totalEvents": 17,
+  "totalGroups": 7,
+  "totalEvents": 16,
   "topGroups": [
     {
       "app": "world-cup",
@@ -93,19 +93,6 @@
       "count": 1,
       "firstTs": 1780939644207,
       "lastTs": 1780939644207,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.error",
-      "page": "world-cup.html",
-      "message": "Nominations sync failed The quota has been exceeded.",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1780937193158,
-      "lastTs": 1780937193158,
       "users": 1
     }
   ]

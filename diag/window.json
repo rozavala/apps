@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T16:45:09.708Z",
+  "generatedAt": "2026-06-11T17:00:10.653Z",
   "windowHours": 72,
   "days": [
     {
@@ -27,32 +27,6 @@
           "count": 1,
           "firstTs": 1780939644207,
           "lastTs": 1780939644207,
-          "users": [
-            "u-8620c5"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mq5g0szq_mxtjiw",
-            "ts": 1780937193158,
-            "clientTs": 1780937193158,
-            "kind": "console.error",
-            "app": "world-cup",
-            "page": "world-cup.html",
-            "message": "Nominations sync failed The quota has been exceeded.",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-8620c5",
-            "age": 5,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1780937193158,
-          "lastTs": 1780937193158,
           "users": [
             "u-8620c5"
           ]
