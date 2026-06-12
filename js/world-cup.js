@@ -2688,7 +2688,7 @@
         const payload = decodeBracket(shareEnc);
         url.searchParams.delete('wc_share');
         history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?'+url.searchParams.toString() : ''));
-        if (payload) setTimeout(() => promptImportBracket(payload), 600);
+        if (payload) setTimeout(() => promptImportBracket(payload, shareEnc), 600);
       }
 
       // Full-family-pool snapshot (?wc_pool=...)
@@ -2697,9 +2697,33 @@
         const payload = decodePool(poolEnc);
         url.searchParams.delete('wc_pool');
         history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? '?'+url.searchParams.toString() : ''));
-        if (payload) setTimeout(() => promptImportPool(payload), 700);
+        if (payload) setTimeout(() => promptImportPool(payload, poolEnc), 700);
       }
     } catch (e) {}
+  }
+
+  /* ----------------------------------------------------------------
+     Tailnet "private app" hop for imports
+     The CloudSync VPS lives on the Tailscale tailnet, so importing on
+     the public host saves locally but doesn't push out to the rest of
+     the family. When we see an import URL on the public host, offer a
+     one-tap relaunch onto the tailnet host with the same payload.
+     ---------------------------------------------------------------- */
+  const TAILNET_HOST = 'all-options-dev.tail57521e.ts.net';
+  function _onPublicHost() {
+    return window.location.hostname !== TAILNET_HOST;
+  }
+  function _tailnetImportUrl(param, encoded) {
+    return 'https://' + TAILNET_HOST + window.location.pathname + '?' + param + '=' + encoded;
+  }
+  function _privateAppHopButton(param, encoded) {
+    if (!_onPublicHost()) return '';
+    const href = _tailnetImportUrl(param, encoded);
+    return `
+      <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:0.82rem;line-height:1.45;">
+        🔒 <b>Hosting this pool?</b> Import on the private app so the family sees it:
+        <a href="${escapeHTML(href)}" style="display:block;margin-top:6px;color:var(--wc-gold);font-weight:700;word-break:break-all;text-decoration:underline;">Open in private app →</a>
+      </div>`;
   }
 
   /* ----------------------------------------------------------------
@@ -2755,7 +2779,7 @@
     save();
     return { added, updated, results: resultsApplied };
   }
-  function promptImportPool(payload) {
+  function promptImportPool(payload, encoded) {
     const modal = document.getElementById('match-modal');
     if (!modal) return;
     _pendingImport = { type:'pool', payload };
@@ -2771,6 +2795,7 @@
       <div class="sub">${memberCount} bracket${memberCount===1?'':'s'} · ${resultCount} match result${resultCount===1?'':'s'}</div>
       <p style="margin:10px 0;font-size:0.9rem;line-height:1.5;">${escapeHTML(memberList)}${memberCount > 8 ? ' …' : ''}</p>
       <p style="font-size:0.82rem;color:var(--text-muted);">Existing brackets with the same name will be updated. Your own bracket is preserved unless someone with your name is in the snapshot.</p>
+      ${encoded ? _privateAppHopButton('wc_pool', encoded) : ''}
       <div class="modal-actions">
         <button class="btn ghost" onclick="WC.closeModal()">Not now</button>
         <button class="btn" onclick="WC.confirmImportPool()">✓ Import snapshot</button>
@@ -2793,7 +2818,7 @@
     activateTab('pool');
   }
   let _pendingImport = null;
-  function promptImportBracket(payload) {
+  function promptImportBracket(payload, encoded) {
     const modal = document.getElementById('match-modal');
     if (!modal) return;
     _pendingImport = { type: 'bracket', payload };
@@ -2803,6 +2828,7 @@
       <div class="sub">From <b>${payload.avatar ? escapeHTML(payload.avatar)+' ' : ''}${escapeHTML(payload.name)}</b></div>
       <p style="margin:10px 0;font-size:0.9rem;">Add this bracket to the family pool? Picks will start scoring as results come in.</p>
       ${guess ? `<p style="font-size:0.82rem;color:var(--text-muted);">${guess}</p>` : ''}
+      ${encoded ? _privateAppHopButton('wc_share', encoded) : ''}
       <div class="modal-actions">
         <button class="btn ghost" onclick="WC.closeModal()">Not now</button>
         <button class="btn" onclick="WC.confirmImportBracket()">✓ Add to pool</button>
