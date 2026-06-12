@@ -1,38 +1,7 @@
 {
-  "generatedAt": "2026-06-12T19:27:17.601Z",
+  "generatedAt": "2026-06-12T23:13:34.041Z",
   "windowHours": 72,
   "days": [
-    {
-      "day": "2026-06-09",
-      "groups": [
-        {
-          "entry": {
-            "id": "e_mq78zg8q_k30nw6",
-            "ts": 1781046305018,
-            "clientTs": 1781046305018,
-            "kind": "console.error",
-            "app": "world-cup",
-            "page": "world-cup.html",
-            "message": "Nominations sync failed The quota has been exceeded.",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-8620c5",
-            "age": 5,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1781046305018,
-          "lastTs": 1781046305018,
-          "users": [
-            "u-8620c5"
-          ]
-        }
-      ]
-    },
     {
       "day": "2026-06-10",
       "groups": [
