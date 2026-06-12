@@ -2714,7 +2714,10 @@
     return window.location.hostname !== TAILNET_HOST;
   }
   function _tailnetImportUrl(param, encoded) {
-    return 'https://' + TAILNET_HOST + window.location.pathname + '?' + param + '=' + encoded;
+    // Public host serves at /apps/world-cup.html, tailnet host serves at
+    // the root — use just the basename so the path resolves either way.
+    const basename = window.location.pathname.split('/').filter(Boolean).pop() || 'world-cup.html';
+    return 'https://' + TAILNET_HOST + '/' + basename + '?' + param + '=' + encoded;
   }
   function _privateAppHopButton(param, encoded) {
     if (!_onPublicHost()) return '';
