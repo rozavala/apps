@@ -509,58 +509,91 @@ var CloudSync = (function() {
     pill.style.animation = (status === 'syncing') ? 'syncPulse 1s infinite' : '';
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  // Run the initial sync flow once a successful ping comes back. Split
+  // out of the DOMContentLoaded handler so we can retry/reconnect later
+  // without re-doing the household pull every visibilitychange.
+  var _initialSynced = false;
+  function _runInitialSync() {
+    if (_initialSynced) return;
+    _initialSynced = true;
+    var path = window.location.pathname;
+    var isHub = path.indexOf('index.html') !== -1 || path === '/' || (path.length > 0 && path[path.length - 1] === '/');
+    state.pullHousehold().then(function() {
+      try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
+      state.pushHousehold();
+      if (isHub) {
+        state.syncProfiles()
+          .then(function() {
+            var loginScr = document.getElementById('login-screen');
+            if (typeof renderLogin === 'function' && loginScr && loginScr.style.display !== 'none') {
+              renderLogin();
+            }
+          })
+          .catch(function() { _updatePill('offline'); });
+      } else {
+        var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+        if (user) {
+          var kidKey = user.name.toLowerCase().replace(/\s+/g, '_');
+          state.pullAll(kidKey).catch(function() { _updatePill('offline'); });
+        }
+      }
+    }).catch(function() { _updatePill('offline'); _initialSynced = false; });
+  }
+
+  // Ping the VPS, flip the pill, and kick the initial sync on first
+  // success. On failure, schedule the next attempt with backoff (up to
+  // ~1 min) so a cold Tailscale handshake or transient drop heals on
+  // its own — previously a single 5s timeout left the pill stuck red.
+  var _pingAttempt = 0;
+  var _pingTimer = null;
+  var _pinging = false;
+  function _scheduleReping(delayMs) {
+    if (_pingTimer) clearTimeout(_pingTimer);
+    _pingTimer = setTimeout(_pingNow, delayMs);
+  }
+  function _pingNow() {
+    if (_pinging) return;
     if (!state.isConfigured()) { _updatePill('unconfigured'); return; }
-    
+    _pinging = true;
     _fetchWithTimeout(SYNC_SERVER + '/api/ping', { timeout: 5000 })
       .then(function(res) {
-        if (res.ok) {
+        _pinging = false;
+        if (res && res.ok) {
+          _pingAttempt = 0;
           state.online = true;
           _updatePill('idle');
-
-          var path = window.location.pathname;
-          var isHub = path.indexOf('index.html') !== -1 || path === '/' || (path.length > 0 && path[path.length - 1] === '/');
-
-          // Pull household-shared state first (shopping list, menu,
-          // calendar URLs, sports matches, home location, *and the
-          // profile-deletion tombstones*) before profile sync, so the
-          // syncProfiles merge can honor the latest tombstones. Then
-          // push any local household state that was changed while
-          // CloudSync was still offline (so this device's edits before
-          // the first ping resolved propagate to others).
-          // Network can drop between the ping and the follow-up calls.
-          // Swallow transient sync failures so they don't surface as
-          // unhandled promise rejections (#diag).
-          state.pullHousehold().then(function() {
-            try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
-            state.pushHousehold();
-
-            if (isHub) {
-              state.syncProfiles()
-                .then(function() {
-                  var loginScr = document.getElementById('login-screen');
-                  if (typeof renderLogin === 'function' && loginScr && loginScr.style.display !== 'none') {
-                    renderLogin();
-                  }
-                })
-                .catch(function() { _updatePill('offline'); });
-            } else {
-              var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
-              if (user) {
-                var kidKey = user.name.toLowerCase().replace(/\s+/g, '_');
-                state.pullAll(kidKey).catch(function() { _updatePill('offline'); });
-              }
-            }
-          }).catch(function() { _updatePill('offline'); });
+          _runInitialSync();
         } else {
-          state.online = false;
-          _updatePill('offline');
+          throw new Error('ping http ' + (res && res.status));
         }
       })
-      .catch(function(e) {
+      .catch(function() {
+        _pinging = false;
         state.online = false;
         _updatePill('offline');
+        _pingAttempt++;
+        // 2s, 5s, 10s, 20s, 30s, then cap at 60s.
+        var schedule = [2000, 5000, 10000, 20000, 30000];
+        var delay = schedule[_pingAttempt - 1] || 60000;
+        _scheduleReping(delay);
       });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    _pingNow();
+    // Reconnect attempts triggered by the tab returning to the
+    // foreground or the OS reporting the network back. Both are
+    // common scenarios where the initial 5s ping lost a race with a
+    // cold Tailscale handshake.
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible' && !state.online) {
+        _pingAttempt = 0;
+        _pingNow();
+      }
+    });
+    window.addEventListener('online', function() {
+      if (!state.online) { _pingAttempt = 0; _pingNow(); }
+    });
   });
 
   return state;
