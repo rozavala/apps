@@ -7,6 +7,7 @@ const path = require('path');
 const media = require('./media');
 const diag = require('./diag');
 const ical = require('./ical');
+const wcScores = require('./wc-scores');
 
 const app = express();
 const PORT = 3333;
@@ -25,6 +26,9 @@ diag.init(app, DATA_DIR);
 
 // Register iCal proxy (CORS-safe family calendar fetches)
 ical.init(app);
+
+// Register World Cup scores proxy (ESPN scoreboard JSON, CORS-safe live scores)
+wcScores.init(app);
 
 app.get('/api/kids', (req, res) => {
   try {

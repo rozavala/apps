@@ -5524,11 +5524,43 @@
   }
 
   /* ----------------------------------------------------------------
-     SYNC — pull latest scores from OpenFootball (community-maintained
-     public-domain dataset). Updates results without overwriting any
-     manual edits unless the remote also has a score for that match.
+     SYNC — pull latest scores. Primary source is the VPS-side ESPN
+     scoreboard proxy (truly live, minute-by-minute) when CloudSync is
+     connected; fallback is the OpenFootball community dataset (lags,
+     but works without the VPS for guests on the public host).
      ---------------------------------------------------------------- */
   const OPENFOOTBALL_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+  const VPS_WC_SCORES_URL = (window.CloudSync && CloudSync.isConfigured && CloudSync.isConfigured())
+    ? 'https://all-options-dev.tail57521e.ts.net/api/wc-scores'
+    : null;
+
+  // Dates the proxy should query — every distinct match date through today
+  // plus a one-day buffer either side. Tournament size is bounded (~40
+  // match-days), so the URL stays compact.
+  function _vpsQueryDates() {
+    const cutoff = Date.now() + 24 * 3600 * 1000;
+    const dates = new Set();
+    for (const m of state.matches) {
+      const kt = kickoffDate(m).getTime();
+      if (kt <= cutoff) dates.add(m.date.replace(/-/g, ''));
+    }
+    return Array.from(dates).sort();
+  }
+
+  async function _fetchEspn() {
+    if (!VPS_WC_SCORES_URL || !window.CloudSync || !CloudSync.online) return null;
+    const dates = _vpsQueryDates();
+    if (dates.length === 0) return null;
+    try {
+      const res = await fetch(VPS_WC_SCORES_URL + '?dates=' + dates.join(','), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      return Array.isArray(data.matches) ? data.matches : null;
+    } catch (e) {
+      console.warn('ESPN scoreboard fetch failed, falling back to OpenFootball:', e.message);
+      return null;
+    }
+  }
 
   async function syncScores(opts = {}) {
     const quiet = !!opts.quiet;
@@ -5536,10 +5568,17 @@
     _scoreSyncBusy = true;
     if (!quiet) toast('Fetching latest scores…');
     try {
-      const res = await fetch(OPENFOOTBALL_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      const remote = data.matches || [];
+      // Try ESPN-via-VPS first; fall back to OpenFootball when the VPS
+      // is unreachable (offline, guest device, transient hiccup).
+      let remote = await _fetchEspn();
+      let sourceLabel = 'ESPN';
+      if (!remote) {
+        const res = await fetch(OPENFOOTBALL_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        remote = data.matches || [];
+        sourceLabel = 'OpenFootball';
+      }
 
       let updated = 0, teamsResolved = 0;
       // Build a lookup: by (date, team1, team2) and also by team codes if mapping known.
@@ -5568,15 +5607,35 @@
       nameToCode['Iraq'] = 'IRQ';
       nameToCode['Haiti'] = 'HAI';
       nameToCode['Algeria'] = 'ALG';
-      // Inverse for placeholders like "1A" (Group A winner)
-      function placeholderMatchesCode(label, code) {
-        // We don't compute placeholders dynamically here — just match by date+raw labels.
-        return false;
+      // ESPN-side variants
+      nameToCode['Türkiye'] = 'TUR';
+      nameToCode['Cape Verde Islands'] = 'CPV';
+      nameToCode['Korea Republic'] = 'KOR';
+      nameToCode['IR Iran'] = 'IRN';
+      nameToCode['United States of America'] = 'USA';
+
+      // ESPN sends a 3-letter abbreviation alongside the display name —
+      // most line up with our FIFA codes but a handful differ (e.g.
+      // GHA→GHA, but SUI vs SWZ etc). Build the abbr lookup defensively
+      // and let the team-name match win on ties.
+      const abbrToCode = {};
+      for (const c of COUNTRIES) abbrToCode[c.code] = c.code;
+      abbrToCode['RSA'] = 'ZAF';   // ESPN uses RSA for South Africa
+      abbrToCode['CZR'] = 'CZE';   // ESPN: Czech Republic
+      abbrToCode['IVO'] = 'CIV';   // ESPN: Ivory Coast
+      abbrToCode['CTA'] = 'CIV';   // alt
+      abbrToCode['MOR'] = 'MAR';   // ESPN: Morocco
+      abbrToCode['SAU'] = 'KSA';
+      abbrToCode['CRC'] = 'CRC';
+      abbrToCode['NED'] = 'NED';
+      abbrToCode['POR'] = 'POR';
+      function _resolveCode(name, abbr) {
+        return nameToCode[name] || (abbr && abbrToCode[abbr]) || null;
       }
 
       for (const rm of remote) {
-        const rh = nameToCode[rm.team1] || rm.team1;  // real code or placeholder string
-        const ra = nameToCode[rm.team2] || rm.team2;
+        const rh = _resolveCode(rm.team1, rm.team1_abbr) || rm.team1;
+        const ra = _resolveCode(rm.team2, rm.team2_abbr) || rm.team2;
         // Find local match: same date, and either (codes match) or (labels match)
         const local = state.matches.find(lm => {
           if (lm.date !== rm.date) return false;
@@ -5587,8 +5646,14 @@
         if (!local) continue;
 
         // If local has placeholder labels but remote has resolved teams, fill them in
-        if (!local.home && nameToCode[rm.team1]) { local.home = nameToCode[rm.team1]; local.home_label = null; teamsResolved++; }
-        if (!local.away && nameToCode[rm.team2]) { local.away = nameToCode[rm.team2]; local.away_label = null; teamsResolved++; }
+        if (!local.home) {
+          const code = _resolveCode(rm.team1, rm.team1_abbr);
+          if (code) { local.home = code; local.home_label = null; teamsResolved++; }
+        }
+        if (!local.away) {
+          const code = _resolveCode(rm.team2, rm.team2_abbr);
+          if (code) { local.away = code; local.away_label = null; teamsResolved++; }
+        }
 
         // Score: OpenFootball uses rm.score.ft = [home, away] (or sometimes top-level rm.score1/rm.score2)
         let hs = null, as = null;
@@ -5642,7 +5707,7 @@
       }
       if (!quiet) {
         const scorersNote = state.scorers.length ? `, ${state.scorers.length} scorer${state.scorers.length===1?'':'s'} tracked` : '';
-        toast(`Synced — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
+        toast(`Synced from ${sourceLabel} — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
       } else if (changed) {
         toast(`⚽ Live — ${updated} score${updated===1?'':'s'} updated`);
       }
