@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-13T14:06:19.963Z",
+  "generatedAt": "2026-06-13T14:36:24.281Z",
   "windowHours": 72,
-  "totalGroups": 5,
-  "totalEvents": 9,
+  "totalGroups": 3,
+  "totalEvents": 7,
   "topGroups": [
     {
       "app": "world-cup",
@@ -41,32 +41,6 @@
       "count": 1,
       "firstTs": 1781117077662,
       "lastTs": 1781117077662,
-      "users": 1
-    },
-    {
-      "app": "little-maestro",
-      "kind": "console.error",
-      "page": "little-maestro.html",
-      "message": "[LM-Bridge] Cannot create or load: Student \"Isabel\" not found",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1781101340149,
-      "lastTs": 1781101340149,
-      "users": 1
-    },
-    {
-      "app": "little-maestro",
-      "kind": "console.warn",
-      "page": "little-maestro.html",
-      "message": "[LM-Bridge] Create failed, trying load: Maximum 6 profiles reached",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1781101340148,
-      "lastTs": 1781101340148,
       "users": 1
     }
   ]
