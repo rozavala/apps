@@ -2734,17 +2734,98 @@
      the URL and import to see the family leaderboard locally
      (read-only-ish — they can still edit their own bracket).
      ---------------------------------------------------------------- */
+  // Picks live in memory with verbose key names (groupWinners, ko, etc.)
+  // and verbose score objects ({home:2, away:0}). For pool snapshot URLs
+  // we re-key into single-letter fields and flatten the two largest
+  // structures into positional comma-separated strings:
+  //   sc = "2x0,1x1,..." indexed m001..m072 (group matches)
+  //   ko = "MEX,BRA,..."  indexed m073..m104 (R32→Final, incl. 3rd)
+  // Trailing empties trim. Symmetric expand restores the verbose shape.
+  function _stageForKoIndex(i) {
+    const n = 73 + i;
+    if (n <= 88)  return 'R32';
+    if (n <= 96)  return 'R16';
+    if (n <= 100) return 'QF';
+    if (n <= 102) return 'SF';
+    if (n === 103) return '3rd';
+    return 'Final';
+  }
+  function _compactPicks(p) {
+    if (!p) return null;
+    const out = {};
+    if (p.groupWinners && Object.keys(p.groupWinners).length) out.gw = p.groupWinners;
+    if (p.groupRunnersUp && Object.keys(p.groupRunnersUp).length) out.gr = p.groupRunnersUp;
+    if (p.groupThird && Object.keys(p.groupThird).length) out.g3 = p.groupThird;
+    if (p.ko) {
+      const allKo = Object.assign({}, p.ko.R32, p.ko.R16, p.ko.QF, p.ko.SF, p.ko['3rd'], p.ko.Final);
+      const arr = [];
+      for (let i = 73; i <= 104; i++) arr.push(allKo['m' + String(i).padStart(3, '0')] || '');
+      while (arr.length && !arr[arr.length - 1]) arr.pop();
+      if (arr.length) out.ko = arr.join(',');
+    }
+    if (p.champion) out.ch = p.champion;
+    if (p.runnerUp) out.ru = p.runnerUp;
+    if (p.goldenBoot) out.gb = p.goldenBoot;
+    if (p.goldenBootCorrect) out.gbc = 1;
+    if (p.mode && p.mode !== 'buildup') out.m = p.mode;
+    if (p.scores) {
+      const arr = [];
+      for (let i = 1; i <= 72; i++) {
+        const s = p.scores['m' + String(i).padStart(3, '0')];
+        arr.push(s && typeof s.home === 'number' && typeof s.away === 'number' ? s.home + 'x' + s.away : '');
+      }
+      while (arr.length && !arr[arr.length - 1]) arr.pop();
+      if (arr.length) out.sc = arr.join(',');
+    }
+    return out;
+  }
+  function _expandPicks(p) {
+    if (!p) return null;
+    // v=1 used the verbose shape directly — leave it alone.
+    if (p.groupWinners || p.groupRunnersUp || p.scores) return p;
+    const out = {
+      groupWinners: p.gw || {},
+      groupRunnersUp: p.gr || {},
+      groupThird: p.g3 || {},
+      ko: { R32:{}, R16:{}, QF:{}, SF:{}, '3rd':{}, Final:{} },
+      champion: p.ch || null,
+      runnerUp: p.ru || null,
+      goldenBoot: p.gb || '',
+      goldenBootCorrect: !!p.gbc,
+      mode: p.m || 'buildup',
+      scores: {},
+    };
+    if (typeof p.ko === 'string' && p.ko.length) {
+      const arr = p.ko.split(',');
+      for (let i = 0; i < arr.length; i++) {
+        const code = arr[i];
+        if (!code) continue;
+        out.ko[_stageForKoIndex(i)]['m' + String(73 + i).padStart(3, '0')] = code;
+      }
+    }
+    if (typeof p.sc === 'string' && p.sc.length) {
+      const arr = p.sc.split(',');
+      for (let i = 0; i < arr.length; i++) {
+        const entry = arr[i];
+        if (!entry) continue;
+        const m = entry.match(/^(\d+)x(\d+)$/);
+        if (m) out.scores['m' + String(i + 1).padStart(3, '0')] = { home: parseInt(m[1], 10), away: parseInt(m[2], 10) };
+      }
+    }
+    return out;
+  }
+
   function encodePool() {
     const members = state.members
       .filter(m => m.name && m.name.trim())
       .map(m => ({
         n: m.name,
         a: m.avatar || '',
-        p: state.picks[m.id] || null,
+        p: _compactPicks(state.picks[m.id]),
       }));
     const results = {};
     for (const m of state.matches) if (m.result) results[m.id] = m.result;
-    const payload = { v: 1, type: 'pool', members, results };
+    const payload = { v: 2, type: 'pool', members, results };
     return _encodePayload(JSON.stringify(payload));
   }
   function decodePool(encoded) {
@@ -2752,7 +2833,14 @@
       const json = _decodePayload(encoded);
       if (!json) return null;
       const p = JSON.parse(json);
-      if (p && p.v === 1 && p.type === 'pool' && Array.isArray(p.members)) return p;
+      if (!p || p.type !== 'pool' || !Array.isArray(p.members)) return null;
+      if (p.v !== 1 && p.v !== 2) return null;
+      // Re-hydrate v=2 compact picks back into the verbose in-memory shape
+      // so importPool can drop them straight into state.picks.
+      if (p.v === 2) {
+        p.members = p.members.map(m => Object.assign({}, m, { p: _expandPicks(m.p) }));
+      }
+      return p;
     } catch (e) {}
     return null;
   }
