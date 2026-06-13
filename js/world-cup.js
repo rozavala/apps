@@ -2627,6 +2627,31 @@
     while (s.length % 4) s += '=';
     return decodeURIComponent(escape(atob(s)));
   }
+  // LZ-compressed payloads are prefixed with 'z' so the decoder can
+  // tell them apart from the legacy base64url shape. Anything that
+  // doesn't start with 'z' decodes the old way — share/pool links
+  // generated before this change keep working.
+  function _encodePayload(jsonStr) {
+    if (typeof LZString !== 'undefined' && LZString.compressToEncodedURIComponent) {
+      const compressed = LZString.compressToEncodedURIComponent(jsonStr);
+      // Fall back to the legacy encoding on the off chance LZ produces
+      // a longer string for a trivially small payload.
+      const legacy = _b64urlEncode(jsonStr);
+      if (compressed && compressed.length + 1 < legacy.length) return 'z' + compressed;
+      return legacy;
+    }
+    return _b64urlEncode(jsonStr);
+  }
+  function _decodePayload(encoded) {
+    if (!encoded) return null;
+    try {
+      if (encoded.charAt(0) === 'z' && typeof LZString !== 'undefined') {
+        const out = LZString.decompressFromEncodedURIComponent(encoded.slice(1));
+        if (out) return out;
+      }
+      return _b64urlDecode(encoded);
+    } catch (e) { return null; }
+  }
   function encodeBracket(member) {
     const picks = state.picks[member.id] || {};
     const payload = {
@@ -2641,11 +2666,12 @@
       gb: picks.goldenBoot || '',
     };
     if (picks.scores && Object.keys(picks.scores).length > 0) payload.sc = picks.scores;
-    return _b64urlEncode(JSON.stringify(payload));
+    return _encodePayload(JSON.stringify(payload));
   }
   function decodeBracket(encoded) {
     try {
-      const json = _b64urlDecode(encoded);
+      const json = _decodePayload(encoded);
+      if (!json) return null;
       const p = JSON.parse(json);
       if (p && p.v === 1 && typeof p.name === 'string') return p;
     } catch (e) {}
@@ -2719,11 +2745,12 @@
     const results = {};
     for (const m of state.matches) if (m.result) results[m.id] = m.result;
     const payload = { v: 1, type: 'pool', members, results };
-    return _b64urlEncode(JSON.stringify(payload));
+    return _encodePayload(JSON.stringify(payload));
   }
   function decodePool(encoded) {
     try {
-      const json = _b64urlDecode(encoded);
+      const json = _decodePayload(encoded);
+      if (!json) return null;
       const p = JSON.parse(json);
       if (p && p.v === 1 && p.type === 'pool' && Array.isArray(p.members)) return p;
     } catch (e) {}
