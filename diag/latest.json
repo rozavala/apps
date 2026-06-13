@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-13T14:36:24.281Z",
+  "generatedAt": "2026-06-13T18:53:47.134Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 7,
+  "totalGroups": 2,
+  "totalEvents": 6,
   "topGroups": [
     {
       "app": "world-cup",
@@ -29,19 +29,6 @@
       "firstTs": 1781145460512,
       "lastTs": 1781192422199,
       "users": 4
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "Nominations cache skipped (storage full) — squads still loaded for this session",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1781117077662,
-      "lastTs": 1781117077662,
-      "users": 1
     }
   ]
 }
