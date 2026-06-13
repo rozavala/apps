@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-13T18:53:47.134Z",
+  "generatedAt": "2026-06-13T22:40:49.213Z",
   "windowHours": 72,
   "days": [
     {
@@ -58,9 +58,9 @@
             "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36",
             "trail": []
           },
-          "count": 2,
+          "count": 4,
           "firstTs": 1781321049060,
-          "lastTs": 1781323104618,
+          "lastTs": 1781324079216,
           "users": [
             "u-34d354"
           ]
