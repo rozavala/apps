@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-12T23:13:34.041Z",
+  "generatedAt": "2026-06-13T03:46:45.258Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 9,
+  "totalGroups": 5,
+  "totalEvents": 10,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Failed to fetch",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1781321049060,
+      "lastTs": 1781321049060,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
