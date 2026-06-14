@@ -1,9 +1,35 @@
 {
-  "generatedAt": "2026-06-14T21:38:21.169Z",
+  "generatedAt": "2026-06-14T23:09:19.493Z",
   "windowHours": 72,
-  "totalGroups": 6,
-  "totalEvents": 10,
+  "totalGroups": 7,
+  "totalEvents": 18,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Sync failed Failed to fetch",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 7,
+      "firstTs": 1781471195006,
+      "lastTs": 1781476958743,
+      "users": 2
+    },
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Nominations sync failed Failed to fetch",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1781476598265,
+      "lastTs": 1781476958738,
+      "users": 1
+    },
     {
       "app": "fe-explorador",
       "kind": "error",
@@ -15,19 +41,6 @@
       "count": 2,
       "firstTs": 1781471179198,
       "lastTs": 1781471222628,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.error",
-      "page": "world-cup.html",
-      "message": "Sync failed Failed to fetch",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1781471195006,
-      "lastTs": 1781471195006,
       "users": 1
     },
     {

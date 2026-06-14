@@ -3,6 +3,59 @@
   "groups": [
     {
       "entry": {
+        "id": "e_mqe9ybge_s5vdjd",
+        "ts": 1781471195006,
+        "clientTs": 1781471195006,
+        "kind": "console.error",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "Sync failed Failed to fetch",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+        "trail": []
+      },
+      "count": 7,
+      "firstTs": 1781471195006,
+      "lastTs": 1781476958743,
+      "users": [
+        "u-3bda7c",
+        "u-34d354"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mqed64mx_5ik32l",
+        "ts": 1781476598265,
+        "clientTs": 1781476598265,
+        "kind": "console.error",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "Nominations sync failed Failed to fetch",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1781476598265,
+      "lastTs": 1781476958738,
+      "users": [
+        "u-34d354"
+      ]
+    },
+    {
+      "entry": {
         "id": "e_mqe9xz9a_fjmk24",
         "ts": 1781471179198,
         "clientTs": 1781471179198,
@@ -25,32 +78,6 @@
       "lastTs": 1781471222628,
       "users": [
         "u-34d354"
-      ]
-    },
-    {
-      "entry": {
-        "id": "e_mqe9ybge_s5vdjd",
-        "ts": 1781471195006,
-        "clientTs": 1781471195006,
-        "kind": "console.error",
-        "app": "world-cup",
-        "page": "world-cup.html",
-        "message": "Sync failed Failed to fetch",
-        "filename": null,
-        "lineno": null,
-        "colno": null,
-        "stack": null,
-        "user": "u-3bda7c",
-        "age": 11,
-        "guest": false,
-        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
-        "trail": []
-      },
-      "count": 1,
-      "firstTs": 1781471195006,
-      "lastTs": 1781471195006,
-      "users": [
-        "u-3bda7c"
       ]
     },
     {
