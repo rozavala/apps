@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-14T19:52:24.650Z",
+  "generatedAt": "2026-06-14T21:08:05.840Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 6,
+  "totalGroups": 4,
+  "totalEvents": 8,
   "topGroups": [
+    {
+      "app": "fe-explorador",
+      "kind": "error",
+      "page": "fe-explorador.html",
+      "message": "Uncaught TypeError: FeManager.getRosarySetIndexForDay is not a function",
+      "filename": "https://rozavala.github.io/apps/fe-explorador.html",
+      "lineno": 300,
+      "colno": 34,
+      "count": 2,
+      "firstTs": 1781471179198,
+      "lastTs": 1781471222628,
+      "users": 1
+    },
     {
       "app": "fe-explorador",
       "kind": "error",

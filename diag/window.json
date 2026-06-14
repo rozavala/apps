@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-14T19:52:24.650Z",
+  "generatedAt": "2026-06-14T21:08:05.840Z",
   "windowHours": 72,
   "days": [
     {
@@ -36,6 +36,32 @@
     {
       "day": "2026-06-14",
       "groups": [
+        {
+          "entry": {
+            "id": "e_mqe9xz9a_fjmk24",
+            "ts": 1781471179198,
+            "clientTs": 1781471179198,
+            "kind": "error",
+            "app": "fe-explorador",
+            "page": "fe-explorador.html",
+            "message": "Uncaught TypeError: FeManager.getRosarySetIndexForDay is not a function",
+            "filename": "https://rozavala.github.io/apps/fe-explorador.html",
+            "lineno": 300,
+            "colno": 34,
+            "stack": "TypeError: FeManager.getRosarySetIndexForDay is not a function\n    at renderRosary (https://rozavala.github.io/apps/fe-explorador.html:300:34)\n    at render (https://rozavala.github.io/apps/fe-explorador.html:209:41)\n    at showTab (https://rozavala.github.io/apps/fe-explorador.html:200:7)\n    at HTMLDivElement.onclick (https://rozavala.github.io/apps/fe-explorador.html:145:50)",
+            "user": "u-34d354",
+            "age": 12,
+            "guest": false,
+            "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1781471179198,
+          "lastTs": 1781471222628,
+          "users": [
+            "u-34d354"
+          ]
+        },
         {
           "entry": {
             "id": "e_mqe6zeu3_anlnpo",
