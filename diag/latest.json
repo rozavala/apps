@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-14T21:08:05.840Z",
+  "generatedAt": "2026-06-14T21:38:21.169Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 8,
+  "totalGroups": 6,
+  "totalEvents": 10,
   "topGroups": [
     {
       "app": "fe-explorador",
@@ -15,6 +15,32 @@
       "count": 2,
       "firstTs": 1781471179198,
       "lastTs": 1781471222628,
+      "users": 1
+    },
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Sync failed Failed to fetch",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1781471195006,
+      "lastTs": 1781471195006,
+      "users": 1
+    },
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Failed to fetch",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1781471194907,
+      "lastTs": 1781471194907,
       "users": 1
     },
     {
