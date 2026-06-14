@@ -168,7 +168,18 @@
     let saintIndex = 0;
     let rosarySet = null;   // selected mystery set; null = use today's
     let rosaryDecade = 0;   // which of the 5 mysteries (0-4)
-    let rosaryBead = 0;     // bead within the current decade (0-9)
+    let rosaryStep = 0;     // prayer within the current decade (0-11)
+    let rosarySalve = false; // true when showing the closing Salve
+
+    // The prayers prayed in each decade (mystery) of the rosary, in order:
+    // 1 Padre Nuestro, 10 Ave Marías, 1 Gloria. After the 5th decade comes
+    // the Salve. Kids can read each prayer's text as they pray it.
+    const DECADE_PRAYERS = [
+      'padrenuestro',
+      'avemaria', 'avemaria', 'avemaria', 'avemaria', 'avemaria',
+      'avemaria', 'avemaria', 'avemaria', 'avemaria', 'avemaria',
+      'gloria'
+    ];
     let heritageIndex = 0;
 
     // Auto-pull sync
@@ -297,7 +308,8 @@
 
       const card = document.createElement('div');
       card.className = 'card';
-      card.innerHTML = `
+
+      const header = `
         <h2 style="font-family:'Baloo 2';text-align:center;">📿 Santo Rosario</h2>
         <p class="rosary-today">Hoy es ${dayName}: se rezan los <strong>${todaySet.name}</strong></p>
 
@@ -311,7 +323,42 @@
         </div>
 
         <div class="set-days">${set.name} — se rezan ${set.daysLabel}</div>
+      `;
 
+      // Closing Salve: shown once after the 5th decade is finished.
+      if (rosarySalve) {
+        const salve = FeManager.getPrayer('salve');
+        card.innerHTML = header + `
+          <div class="mystery-card">
+            <div class="mystery-title">🎉 ¡Rosario completo!</div>
+            <div class="mystery-desc">Para terminar, recemos juntos la Salve.</div>
+          </div>
+          <h3 style="font-family:'Baloo 2';text-align:center;margin:16px 0 8px;color:var(--faith-gold-light);">${salve.title}</h3>
+          <div id="prayer-lines">
+            ${salve.lines.map(l => `<div class="prayer-line active">${l}</div>`).join('')}
+          </div>
+          <div class="bottom-actions">
+            <button class="next-btn" onclick="finishRosary()">¡Terminar! 🌟</button>
+          </div>
+        `;
+        container.appendChild(card);
+        return;
+      }
+
+      const prayerId = DECADE_PRAYERS[rosaryStep];
+      const prayer = FeManager.getPrayer(prayerId);
+      // For Ave Marías, show which of the ten we're on (steps 1–10).
+      const aveNum = rosaryStep; // step 1 => Ave María 1, ... step 10 => 10
+      const prayerLabel = prayerId === 'avemaria'
+        ? `${prayer.title} (${aveNum} de 10)`
+        : prayer.title;
+      const isLastStep = rosaryStep === DECADE_PRAYERS.length - 1;
+      const isLastDecade = rosaryDecade === set.mysteries.length - 1;
+      const nextLabel = isLastStep
+        ? (isLastDecade ? 'Rezar la Salve ➔' : 'Siguiente misterio ➔')
+        : 'Continuar ➔';
+
+      card.innerHTML = header + `
         <div class="mystery-list">
           ${set.mysteries.map((my, i) => `
             <button class="mystery-item ${i === rosaryDecade ? 'active' : ''}" onclick="selectDecade(${i})">
@@ -328,15 +375,23 @@
           <div class="mystery-title">${rosaryDecade + 1}. ${m.name}</div>
           <div class="mystery-desc">${m.desc}</div>
         </div>
+
         <div class="rosary-beads">
-          ${Array.from({length: 10}).map((_, i) => `
-            <div class="rosary-bead ${i === rosaryBead ? 'active' : (i < rosaryBead ? 'done' : '')}"
-                 onclick="tapBead(${i})">${i + 1}</div>
-          `).join('')}
+          ${DECADE_PRAYERS.map((id, i) => {
+            const label = id === 'padrenuestro' ? 'PN' : (id === 'gloria' ? 'G' : String(i));
+            const state = i === rosaryStep ? 'active' : (i < rosaryStep ? 'done' : '');
+            return `<div class="rosary-bead ${state}" onclick="goToStep(${i})">${label}</div>`;
+          }).join('')}
         </div>
-        <p style="text-align:center;font-size:0.9rem;opacity:0.7;">
-          Toca cada cuenta para rezar un Ave María (${rosaryBead}/10)
-        </p>
+
+        <h3 style="font-family:'Baloo 2';text-align:center;margin:16px 0 8px;color:var(--faith-gold-light);">${prayerLabel}</h3>
+        <div id="prayer-lines">
+          ${prayer.lines.map(l => `<div class="prayer-line active">${l}</div>`).join('')}
+        </div>
+
+        <div class="bottom-actions">
+          <button class="next-btn" onclick="nextRosaryStep()">${nextLabel}</button>
+        </div>
       `;
       container.appendChild(card);
     }
@@ -344,39 +399,59 @@
     function selectRosarySet(i) {
       rosarySet = i;
       rosaryDecade = 0;
-      rosaryBead = 0;
+      rosaryStep = 0;
+      rosarySalve = false;
       if (typeof playSound === 'function') playSound('click');
       render();
     }
 
     function selectDecade(i) {
       rosaryDecade = i;
-      rosaryBead = 0;
+      rosaryStep = 0;
+      rosarySalve = false;
       if (typeof playSound === 'function') playSound('click');
       render();
     }
 
-    function tapBead(i) {
-      if (i !== rosaryBead) return;
+    // Jump to a specific prayer within the current decade by tapping its bead.
+    function goToStep(i) {
+      rosaryStep = i;
       if (typeof playSound === 'function') playSound('click');
+      render();
+    }
 
-      if (rosaryBead < 9) {
-        rosaryBead++;
+    function nextRosaryStep() {
+      // Still prayers left in this decade (Padre Nuestro → 10 Aves → Gloria).
+      if (rosaryStep < DECADE_PRAYERS.length - 1) {
+        rosaryStep++;
+        if (typeof playSound === 'function') playSound('click');
         render();
         return;
       }
 
-      // Decade complete — award a star and move to the next mystery.
+      // Decade complete — award a star and move on.
       FeManager.addStar();
       if (typeof playSound === 'function') playSound('success');
-      rosaryBead = 0;
+      rosaryStep = 0;
 
       const set = FeManager.ROSARY_SETS[rosarySet];
       if (rosaryDecade < set.mysteries.length - 1) {
         rosaryDecade++;
       } else {
-        rosaryDecade = 0; // full rosary finished
+        // All five mysteries done — close with the Salve.
+        rosarySalve = true;
       }
+      render();
+    }
+
+    // Finish the full rosary after the closing Salve.
+    function finishRosary() {
+      FeManager.addStar();
+      if (typeof playSound === 'function') playSound('success');
+      if (typeof showConfetti === 'function') showConfetti();
+      rosarySalve = false;
+      rosaryDecade = 0;
+      rosaryStep = 0;
       render();
     }
 
