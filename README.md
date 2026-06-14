@@ -70,6 +70,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Mejora en el Hub (Hub Update)**: Confirmación de dos toques al eliminar perfiles para mayor seguridad. (Tap-to-confirm defense when deleting profiles.)
 - **Actualización World Cup 2026**: Integración de proxy de resultados en vivo de ESPN en el VPS, con OpenFootball como respaldo. (World Cup: ESPN live-scores proxy on the VPS, OpenFootball as fallback.)
 - **Actualización Infraestructura**: Se actualizó el hostname de Tailscale para la sincronización familiar (`all-options-dev`). (Updated Tailscale hostname for family sync to `all-options-dev`.)
 - **Actualización World Cup 2026**: Planteles oficiales con los 48 equipos finales, nuevo modo cascada para las llaves, álbum de figuritas, Trophy Room, filtros de partidos y snapshot de la quiniela familiar. (Official 48-team squads, new cascade mode for brackets, sticker album, Trophy Room, match filters, and family-pool snapshot.)
