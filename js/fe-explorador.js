@@ -61,6 +61,24 @@ const FeManager = (() => {
         'que me perdería.',
         'Amén.'
       ]
+    },
+    {
+      id: 'salve',
+      title: 'Salve',
+      lines: [
+        'Dios te salve, Reina y Madre de misericordia,',
+        'vida, dulzura y esperanza nuestra;',
+        'Dios te salve.',
+        'A ti llamamos los desterrados hijos de Eva;',
+        'a ti suspiramos, gimiendo y llorando,',
+        'en este valle de lágrimas.',
+        'Ea, pues, Señora, abogada nuestra,',
+        'vuelve a nosotros esos tus ojos misericordiosos;',
+        'y después de este destierro,',
+        'muéstranos a Jesús, fruto bendito de tu vientre.',
+        '¡Oh clemente, oh piadosa, oh dulce Virgen María!',
+        'Amén.'
+      ]
     }
   ];
 
@@ -328,6 +346,12 @@ const FeManager = (() => {
   // Backward-compatible alias: the Joyful mysteries as a flat array.
   const MYSTERIES = ROSARY_SETS[0].mysteries;
 
+  // Look up a prayer by its id (e.g. 'padrenuestro', 'avemaria', 'gloria',
+  // 'salve'). Used by the rosary so kids can read each prayer as they pray it.
+  function getPrayer(id) {
+    return PRAYERS.find(p => p.id === id) || null;
+  }
+
   const HERITAGE = [
     // PRUNED [2026-06-15]: Removed duplicate 'tirana' object (different structure) to respect MAX 8 limit
     // PRUNED [2026-06-15]: Removed 'vasquez' to make room for 'fiesta_san_pedro' and stay within MAX 8 limit
@@ -414,7 +438,7 @@ const FeManager = (() => {
 
   return {
     PRAYERS, SAINTS, MYSTERIES, ROSARY_SETS, HERITAGE, addStar,
-    getRosarySetIndexForDay, DAY_NAMES,
+    getRosarySetIndexForDay, DAY_NAMES, getPrayer,
     getStatus: _getData
   };
 })();
