@@ -1,9 +1,35 @@
 {
-  "generatedAt": "2026-06-14T15:49:45.954Z",
+  "generatedAt": "2026-06-14T19:52:24.650Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 4,
+  "totalGroups": 3,
+  "totalEvents": 6,
   "topGroups": [
+    {
+      "app": "fe-explorador",
+      "kind": "error",
+      "page": "fe-explorador.html",
+      "message": "Uncaught ReferenceError: FeManager is not defined",
+      "filename": "https://rozavala.github.io/apps/fe-explorador.html",
+      "lineno": 255,
+      "colno": 17,
+      "count": 1,
+      "firstTs": 1781466207195,
+      "lastTs": 1781466207195,
+      "users": 1
+    },
+    {
+      "app": "fe-explorador",
+      "kind": "error",
+      "page": "fe-explorador.html",
+      "message": "Uncaught ReferenceError: FeManager is not defined",
+      "filename": "https://rozavala.github.io/apps/fe-explorador.html",
+      "lineno": 170,
+      "colno": 17,
+      "count": 1,
+      "firstTs": 1781466204826,
+      "lastTs": 1781466204826,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
