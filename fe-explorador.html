@@ -71,6 +71,39 @@
     .quiz-btn.wrong { background: #EF4444; border-color: #EF4444; }
 
     /* Rosary Section */
+    .rosary-today { text-align: center; font-size: 0.95rem; opacity: 0.85; margin: 8px 0 16px; }
+    .rosary-today strong { color: var(--faith-gold-light); }
+
+    .set-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+    .set-tab {
+      padding: 8px 14px; border-radius: 99px; background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.12); color: #FFFBEB; font-weight: 700;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .set-tab:hover { border-color: var(--faith-gold); }
+    .set-tab.active { background: var(--faith-gold); color: #000; border-color: var(--faith-gold); }
+    .set-tab.is-today { box-shadow: 0 0 0 2px rgba(245,158,11,0.35); }
+
+    .set-days { text-align: center; font-size: 0.85rem; color: var(--faith-gold-light); font-weight: 700; margin-bottom: 16px; }
+
+    .mystery-list { display: grid; gap: 8px; margin-bottom: 8px; }
+    .mystery-item {
+      display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+      padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.1); color: #FFFBEB; cursor: pointer; transition: all 0.2s;
+    }
+    .mystery-item:hover { border-color: var(--faith-gold); background: rgba(255,255,255,0.08); }
+    .mystery-item.active { border-color: var(--faith-gold); background: rgba(245,158,11,0.12); }
+    .mystery-num {
+      flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%;
+      background: var(--faith-gold); color: #000; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+    }
+    .mystery-item.active .mystery-num { box-shadow: 0 0 10px var(--faith-gold); }
+    .mystery-item-text { display: flex; flex-direction: column; gap: 2px; }
+    .mystery-item-name { font-weight: 800; font-size: 1rem; line-height: 1.2; }
+    .mystery-item-desc { font-size: 0.82rem; opacity: 0.75; line-height: 1.35; }
+
     .rosary-beads { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 32px 0; }
     .rosary-bead { width: 44px; height: 44px; border-radius: 50%; background: #2D1B0A; border: 3px solid #4D2B1A; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 800; color: rgba(255,255,255,0.2); }
     .rosary-bead.active { background: var(--faith-gold); border-color: #FFF; color: #000; box-shadow: 0 0 20px var(--faith-gold); transform: scale(1.15); }
@@ -133,7 +166,9 @@
     let prayerIndex = 0;
     let prayerLine = 0;
     let saintIndex = 0;
-    let rosaryBead = 0;
+    let rosarySet = null;   // selected mystery set; null = use today's
+    let rosaryDecade = 0;   // which of the 5 mysteries (0-4)
+    let rosaryBead = 0;     // bead within the current decade (0-9)
     let heritageIndex = 0;
 
     // Auto-pull sync
@@ -250,41 +285,99 @@
     }
 
     function renderRosary(container) {
-      const day = new Date().getDay(); // 0-6, we use Joyful mysteries for weekdays
-      const mIdx = (day === 0 || day === 6) ? 0 : (day - 1) % 5;
-      const m = FeManager.MYSTERIES[mIdx];
-      
+      const today = new Date().getDay();
+      const todayIdx = FeManager.getRosarySetIndexForDay(today);
+      if (rosarySet === null) rosarySet = todayIdx;
+
+      const sets = FeManager.ROSARY_SETS;
+      const set = sets[rosarySet];
+      const todaySet = sets[todayIdx];
+      const m = set.mysteries[rosaryDecade];
+      const dayName = FeManager.DAY_NAMES[today];
+
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-        <h2 style="font-family:'Baloo 2';text-align:center;">Misterios Gozosos</h2>
+        <h2 style="font-family:'Baloo 2';text-align:center;">📿 Santo Rosario</h2>
+        <p class="rosary-today">Hoy es ${dayName}: se rezan los <strong>${todaySet.name}</strong></p>
+
+        <div class="set-tabs">
+          ${sets.map((s, i) => `
+            <button class="set-tab ${i === rosarySet ? 'active' : ''} ${i === todayIdx ? 'is-today' : ''}"
+                    onclick="selectRosarySet(${i})">
+              ${s.emoji} ${s.shortName}${i === todayIdx ? ' · Hoy' : ''}
+            </button>
+          `).join('')}
+        </div>
+
+        <div class="set-days">${set.name} — se rezan ${set.daysLabel}</div>
+
+        <div class="mystery-list">
+          ${set.mysteries.map((my, i) => `
+            <button class="mystery-item ${i === rosaryDecade ? 'active' : ''}" onclick="selectDecade(${i})">
+              <span class="mystery-num">${i + 1}</span>
+              <span class="mystery-item-text">
+                <span class="mystery-item-name">${my.name}</span>
+                <span class="mystery-item-desc">${my.desc}</span>
+              </span>
+            </button>
+          `).join('')}
+        </div>
+
         <div class="mystery-card">
-          <div class="mystery-title">${mIdx + 1}. ${m.name}</div>
+          <div class="mystery-title">${rosaryDecade + 1}. ${m.name}</div>
           <div class="mystery-desc">${m.desc}</div>
         </div>
         <div class="rosary-beads">
           ${Array.from({length: 10}).map((_, i) => `
-            <div class="rosary-bead ${i === rosaryBead ? 'active' : (i < rosaryBead ? 'done' : '')}" 
+            <div class="rosary-bead ${i === rosaryBead ? 'active' : (i < rosaryBead ? 'done' : '')}"
                  onclick="tapBead(${i})">${i + 1}</div>
           `).join('')}
         </div>
-        <p style="text-align:center;font-size:0.9rem;opacity:0.7;">Toca cada cuenta para rezar un Ave María</p>
+        <p style="text-align:center;font-size:0.9rem;opacity:0.7;">
+          Toca cada cuenta para rezar un Ave María (${rosaryBead}/10)
+        </p>
       `;
       container.appendChild(card);
     }
 
+    function selectRosarySet(i) {
+      rosarySet = i;
+      rosaryDecade = 0;
+      rosaryBead = 0;
+      if (typeof playSound === 'function') playSound('click');
+      render();
+    }
+
+    function selectDecade(i) {
+      rosaryDecade = i;
+      rosaryBead = 0;
+      if (typeof playSound === 'function') playSound('click');
+      render();
+    }
+
     function tapBead(i) {
-      if (i === rosaryBead) {
-        if (typeof playSound === 'function') playSound('click');
-        if (rosaryBead < 9) {
-          rosaryBead++;
-        } else {
-          FeManager.addStar();
-          if (typeof playSound === 'function') playSound('success');
-          rosaryBead = 0;
-        }
+      if (i !== rosaryBead) return;
+      if (typeof playSound === 'function') playSound('click');
+
+      if (rosaryBead < 9) {
+        rosaryBead++;
         render();
+        return;
       }
+
+      // Decade complete — award a star and move to the next mystery.
+      FeManager.addStar();
+      if (typeof playSound === 'function') playSound('success');
+      rosaryBead = 0;
+
+      const set = FeManager.ROSARY_SETS[rosarySet];
+      if (rosaryDecade < set.mysteries.length - 1) {
+        rosaryDecade++;
+      } else {
+        rosaryDecade = 0; // full rosary finished
+      }
+      render();
     }
 
     function renderHeritage(container) {

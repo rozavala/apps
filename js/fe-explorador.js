@@ -249,13 +249,84 @@ const FeManager = (() => {
     }
   ];
 
-  const MYSTERIES = [
-    { name: 'La Encarnación', desc: 'El ángel Gabriel visita a María.' },
-    { name: 'La Visitación', desc: 'María visita a su prima Isabel.' },
-    { name: 'El Nacimiento', desc: 'Jesús nace en Belén.' },
-    { name: 'La Presentación', desc: 'María y José llevan al Niño al Templo.' },
-    { name: 'El Niño Perdido', desc: 'Encuentran a Jesús en el Templo.' }
+  /* The four sets of mysteries of the Holy Rosary, with the traditional
+     weekly schedule (post-2002, including the Luminous mysteries).
+     `days` uses JS Date.getDay() values: 0=Sun, 1=Mon ... 6=Sat. */
+  const ROSARY_SETS = [
+    {
+      id: 'gozosos',
+      name: 'Misterios Gozosos',
+      shortName: 'Gozosos',
+      emoji: '🌟',
+      days: [1, 6],
+      daysLabel: 'Lunes y Sábado',
+      mysteries: [
+        { name: 'La Anunciación', desc: 'El ángel Gabriel anuncia a María que será la Madre de Dios.' },
+        { name: 'La Visitación', desc: 'María visita a su prima Isabel, que espera a Juan el Bautista.' },
+        { name: 'El Nacimiento de Jesús', desc: 'Jesús nace en el portal de Belén.' },
+        { name: 'La Presentación', desc: 'María y José presentan al Niño Jesús en el Templo.' },
+        { name: 'El Niño hallado en el Templo', desc: 'Tras tres días, encuentran a Jesús enseñando entre los doctores del Templo.' }
+      ]
+    },
+    {
+      id: 'luminosos',
+      name: 'Misterios Luminosos',
+      shortName: 'Luminosos',
+      emoji: '💡',
+      days: [4],
+      daysLabel: 'Jueves',
+      mysteries: [
+        { name: 'El Bautismo en el Jordán', desc: 'Juan bautiza a Jesús y el Padre lo proclama su Hijo amado.' },
+        { name: 'Las Bodas de Caná', desc: 'Jesús convierte el agua en vino a petición de María.' },
+        { name: 'El Anuncio del Reino', desc: 'Jesús anuncia el Reino de Dios e invita a la conversión.' },
+        { name: 'La Transfiguración', desc: 'Jesús se transfigura en el monte ante Pedro, Santiago y Juan.' },
+        { name: 'La Institución de la Eucaristía', desc: 'En la Última Cena, Jesús se entrega en el pan y el vino.' }
+      ]
+    },
+    {
+      id: 'dolorosos',
+      name: 'Misterios Dolorosos',
+      shortName: 'Dolorosos',
+      emoji: '✝️',
+      days: [2, 5],
+      daysLabel: 'Martes y Viernes',
+      mysteries: [
+        { name: 'La Oración en el Huerto', desc: 'Jesús ora en Getsemaní la noche antes de su pasión.' },
+        { name: 'La Flagelación', desc: 'Jesús es azotado por orden de Pilato.' },
+        { name: 'La Coronación de Espinas', desc: 'Coronan a Jesús con espinas y se burlan de Él.' },
+        { name: 'Jesús con la Cruz a Cuestas', desc: 'Jesús carga la cruz camino del Calvario.' },
+        { name: 'La Crucifixión', desc: 'Jesús muere en la cruz por amor a todos.' }
+      ]
+    },
+    {
+      id: 'gloriosos',
+      name: 'Misterios Gloriosos',
+      shortName: 'Gloriosos',
+      emoji: '👑',
+      days: [3, 0],
+      daysLabel: 'Miércoles y Domingo',
+      mysteries: [
+        { name: 'La Resurrección', desc: 'Jesús resucita victorioso al tercer día.' },
+        { name: 'La Ascensión', desc: 'Jesús sube al Cielo a la derecha del Padre.' },
+        { name: 'La Venida del Espíritu Santo', desc: 'El Espíritu Santo desciende sobre los apóstoles en Pentecostés.' },
+        { name: 'La Asunción de María', desc: 'María es llevada en cuerpo y alma al Cielo.' },
+        { name: 'La Coronación de María', desc: 'María es coronada como Reina del Cielo y de la Tierra.' }
+      ]
+    }
   ];
+
+  const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+  // Index into ROSARY_SETS for the mysteries traditionally prayed on a given
+  // weekday (defaults to today). Falls back to the Joyful mysteries.
+  function getRosarySetIndexForDay(day) {
+    if (typeof day !== 'number') day = new Date().getDay();
+    const idx = ROSARY_SETS.findIndex(s => s.days.includes(day));
+    return idx === -1 ? 0 : idx;
+  }
+
+  // Backward-compatible alias: the Joyful mysteries as a flat array.
+  const MYSTERIES = ROSARY_SETS[0].mysteries;
 
   const HERITAGE = [
     // PRUNED [2026-06-15]: Removed duplicate 'tirana' object (different structure) to respect MAX 8 limit
@@ -341,8 +412,9 @@ const FeManager = (() => {
     }
   }
 
-  return { 
-    PRAYERS, SAINTS, MYSTERIES, HERITAGE, addStar, 
+  return {
+    PRAYERS, SAINTS, MYSTERIES, ROSARY_SETS, HERITAGE, addStar,
+    getRosarySetIndexForDay, DAY_NAMES,
     getStatus: _getData
   };
 })();
