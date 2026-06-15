@@ -1,0 +1,32 @@
+{
+  "day": "2026-06-15",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mqeh5kwv_o1d6fr",
+        "ts": 1781483291167,
+        "clientTs": 1781483291167,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "Nominations cache skipped (storage full) — squads still loaded for this session",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 3,
+      "firstTs": 1781483291167,
+      "lastTs": 1781483944547,
+      "users": [
+        "u-9b4aef",
+        "u-8620c5"
+      ]
+    }
+  ]
+}
