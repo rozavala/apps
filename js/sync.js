@@ -115,6 +115,99 @@ var CloudSync = (function() {
     return isNaN(n) ? 0 : n;
   }
 
+  // Count "filled" fields in a World Cup picks object — used as the
+  // tiebreaker when two devices have a bracket for the same member id
+  // and we want to keep the more complete one rather than coin-flip.
+  function _wcPickRichness(p) {
+    if (!p) return 0;
+    var n = 0;
+    ['groupWinners','groupRunnersUp','groupThird','ko','scores'].forEach(function(k) {
+      var v = p[k];
+      if (v && typeof v === 'object') n += Object.keys(v).length;
+    });
+    ['champion','runnerUp','goldenBoot'].forEach(function(k) {
+      if (p[k]) n += 1;
+    });
+    return n;
+  }
+
+  // Union-merge two World Cup snapshots so neither side ever loses
+  // members, picks, or match results just because its _syncedAt got
+  // out-flanked by a stale device's push. Conflicts ("both sides
+  // have this member id") resolve toward whichever side has more
+  // filled-in fields; match results prefer a side that actually has
+  // a result over a side that doesn't.
+  function _mergeWorldCup(server, local) {
+    var s = server || {};
+    var l = local || {};
+    var out = {};
+
+    // Members: union by id, falling back to lowercase name. Local
+    // first so the device's own member identity wins if both sides
+    // have the same person under different ids.
+    var byKey = {};
+    function _key(m) { return (m && m.id) || (m && m.name ? '_n:' + m.name.toLowerCase().trim() : null); }
+    (l.members || []).forEach(function(m) { var k = _key(m); if (k) byKey[k] = m; });
+    (s.members || []).forEach(function(m) {
+      var k = _key(m);
+      if (!k) return;
+      var existing = byKey[k];
+      if (!existing) { byKey[k] = m; return; }
+      byKey[k] = {
+        id: existing.id || m.id,
+        name: existing.name || m.name,
+        avatar: existing.avatar || m.avatar || null,
+      };
+    });
+    out.members = Object.keys(byKey).map(function(k) { return byKey[k]; });
+
+    // Picks: union by id, richer side wins on conflict.
+    var pickIds = {};
+    Object.keys(l.picks || {}).forEach(function(id) { pickIds[id] = 1; });
+    Object.keys(s.picks || {}).forEach(function(id) { pickIds[id] = 1; });
+    out.picks = {};
+    Object.keys(pickIds).forEach(function(id) {
+      var lp = (l.picks || {})[id], sp = (s.picks || {})[id];
+      if (!lp) { out.picks[id] = sp; return; }
+      if (!sp) { out.picks[id] = lp; return; }
+      out.picks[id] = _wcPickRichness(lp) >= _wcPickRichness(sp) ? lp : sp;
+    });
+
+    // matchOverrides: union by id. Prefer the side with a `result`
+    // present; if both have one, server wins (score-sync is the
+    // source of truth). Other override fields (venue/team edits)
+    // merge with server overriding local on conflict.
+    var ovIds = {};
+    Object.keys(l.matchOverrides || {}).forEach(function(id) { ovIds[id] = 1; });
+    Object.keys(s.matchOverrides || {}).forEach(function(id) { ovIds[id] = 1; });
+    out.matchOverrides = {};
+    Object.keys(ovIds).forEach(function(id) {
+      var lo = (l.matchOverrides || {})[id], so = (s.matchOverrides || {})[id];
+      if (!lo) { out.matchOverrides[id] = so; return; }
+      if (!so) { out.matchOverrides[id] = lo; return; }
+      var sHasResult = so.result != null;
+      var lHasResult = lo.result != null;
+      if (sHasResult && !lHasResult) out.matchOverrides[id] = Object.assign({}, lo, so);
+      else if (lHasResult && !sHasResult) out.matchOverrides[id] = Object.assign({}, so, lo);
+      else out.matchOverrides[id] = Object.assign({}, lo, so);
+    });
+
+    // Groups: take whichever side actually has a draw recorded.
+    out.groups = (s.groups && Object.keys(s.groups).length) ? s.groups : (l.groups || {});
+
+    // Other top-level fields: server wins on conflict, but keep
+    // local-only keys (uiSelectedMember, stickers, scorers, etc.).
+    var skip = { members:1, picks:1, matchOverrides:1, groups:1, _syncedAt:1 };
+    Object.keys(l).forEach(function(k) { if (!skip[k]) out[k] = l[k]; });
+    Object.keys(s).forEach(function(k) { if (!skip[k]) out[k] = s[k]; });
+
+    // Stamp the merge with the max of both timestamps + now so the
+    // next pull on this device doesn't redo the work, and the next
+    // push wins over either side's prior state.
+    out._syncedAt = Math.max(_parseTs(s._syncedAt), _parseTs(l._syncedAt), Date.now());
+    return out;
+  }
+
   state.push = function(key) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var info = _getAppInfo(key);
@@ -142,6 +235,22 @@ var CloudSync = (function() {
             });
           }
           return data;
+        })
+        .catch(function() { return data; });
+    } else if (info.appName === 'worldcup') {
+      // Before pushing the World Cup snapshot, fetch the server's
+      // current copy and union-merge it with ours, then push the
+      // result. Prevents a stale device's save from wiping members or
+      // results that another device has added since the last pull.
+      mergeStep = _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + info.kidKey + '/' + info.appName)
+        .then(function(res) {
+          if (!res.ok) return data;
+          return res.json().then(function(serverData) {
+            if (!serverData) return data;
+            var merged = _mergeWorldCup(serverData, data);
+            try { localStorage.setItem(key, JSON.stringify(merged)); } catch (e) {}
+            return merged;
+          });
         })
         .catch(function() { return data; });
     }
@@ -212,6 +321,20 @@ var CloudSync = (function() {
         var lTime = _parseTs(localData._syncedAt);
         var localMissing = !localStorage.getItem(key);
 
+        // World Cup pulls always union-merge — never overwrite — so a
+        // device whose _syncedAt got out-flanked by a stale push still
+        // picks up the missing members / results, and one that has
+        // unique local additions keeps them.
+        if (info.appName === 'worldcup') {
+          var mergedWc = _mergeWorldCup(serverData, localData);
+          try { localStorage.setItem(key, JSON.stringify(mergedWc)); }
+          catch (e) {
+            if (typeof Debug !== 'undefined') Debug.error('[Sync] Quota Exceeded', key + ' size: ' + JSON.stringify(mergedWc).length);
+            throw e;
+          }
+          return true;
+        }
+
         if (sTime > lTime || localMissing || info.appName === 'activity') {
           var toStore = serverData;
           if (serverData._isList && Array.isArray(serverData._items)) {
@@ -221,7 +344,7 @@ var CloudSync = (function() {
               toStore = _mergeLists(toStore, localItems);
             }
           }
-          
+
           try {
             if (info.appName === 'art' && !Array.isArray(toStore)) {
               var merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
