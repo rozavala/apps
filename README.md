@@ -70,6 +70,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Mejora en Sincronización (CloudSync Update)**: Fusión profunda (deep-merge) para pronósticos y resultados de la Copa del Mundo, protegiendo los datos entre dispositivos. (Deep-merge for World Cup picks and results, protecting data across devices.)
 - **Actualización World Cup 2026**: Formato de enlaces compartidos optimizado para grupos de WhatsApp familiares grandes. (Optimized share link format for large family WhatsApp pools.)
 - **Nuevo Contenido**: Agregamos contenido factual a Descubre Chile, Story Explorer y World Explorer. (Added factual content to Descubre Chile, Story Explorer, and World Explorer.)
 - **Mejora en el Hub (Hub Update)**: Confirmación de dos toques al eliminar perfiles para mayor seguridad. (Tap-to-confirm defense when deleting profiles.)
