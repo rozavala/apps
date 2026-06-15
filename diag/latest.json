@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-15T02:25:18.598Z",
+  "generatedAt": "2026-06-15T02:55:19.546Z",
   "windowHours": 72,
   "totalGroups": 8,
-  "totalEvents": 28,
+  "totalEvents": 29,
   "topGroups": [
     {
       "app": "world-cup",
@@ -12,9 +12,9 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 8,
+      "count": 9,
       "firstTs": 1781483291167,
-      "lastTs": 1781489974178,
+      "lastTs": 1781491661527,
       "users": 3
     },
     {
