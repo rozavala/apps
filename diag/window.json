@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-15T00:54:51.860Z",
+  "generatedAt": "2026-06-15T01:24:56.082Z",
   "windowHours": 72,
   "days": [
     {
@@ -82,11 +82,38 @@
             "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36",
             "trail": []
           },
-          "count": 2,
+          "count": 3,
           "firstTs": 1781476598265,
           "lastTs": 1781476958738,
           "users": [
-            "u-34d354"
+            "u-34d354",
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mqe9ybdn_tpl7aq",
+            "ts": 1781471194907,
+            "clientTs": 1781471194907,
+            "kind": "console.warn",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Failed to fetch",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1781471194907,
+          "lastTs": 1781476945916,
+          "users": [
+            "u-3bda7c"
           ]
         },
         {
@@ -113,32 +140,6 @@
           "lastTs": 1781471222628,
           "users": [
             "u-34d354"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mqe9ybdn_tpl7aq",
-            "ts": 1781471194907,
-            "clientTs": 1781471194907,
-            "kind": "console.warn",
-            "app": "world-cup",
-            "page": "world-cup.html",
-            "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Failed to fetch",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-3bda7c",
-            "age": 11,
-            "guest": false,
-            "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1781471194907,
-          "lastTs": 1781471194907,
-          "users": [
-            "u-3bda7c"
           ]
         },
         {
@@ -217,9 +218,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 4,
+          "count": 6,
           "firstTs": 1781483291167,
-          "lastTs": 1781484037994,
+          "lastTs": 1781486566351,
           "users": [
             "u-9b4aef",
             "u-8620c5",
