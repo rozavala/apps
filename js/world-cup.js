@@ -4832,6 +4832,116 @@
   /* ----------------------------------------------------------------
      Match result editor (modal)
      ---------------------------------------------------------------- */
+  /* ----------------------------------------------------------------
+     Match result editor (modal) — also surfaces every family pool
+     participant's prediction for the match, with point-earned badges
+     once a real result is in, plus prev/next arrows to swipe through
+     the day's slate without closing the modal.
+     ---------------------------------------------------------------- */
+
+  // Compare picks for a played group match against the recorded result
+  // and return the points awarded (5 exact / 3 GD / 1 result / 0 miss),
+  // matching the live scoring rules in scoreMember.
+  function _groupPickBadge(sp, result) {
+    if (!result || !sp || typeof sp.home !== 'number' || typeof sp.away !== 'number') return '';
+    if (sp.home === result.home && sp.away === result.away) {
+      return `<span class="correct">✓ ${SCORING.scoreExact}</span>`;
+    }
+    const predSign = Math.sign(sp.home - sp.away);
+    const realSign = Math.sign(result.home - result.away);
+    if (predSign !== realSign) return '<span class="miss">✗</span>';
+    if ((sp.home - sp.away) === (result.home - result.away)) {
+      return `<span class="correct">✓ ${SCORING.scoreGD}</span>`;
+    }
+    return `<span class="correct">✓ ${SCORING.scoreResult}</span>`;
+  }
+
+  // Render a "Family picks" section listing each participant's
+  // prediction for this match. Group games show predicted scorelines;
+  // knockout games show predicted advancing team. Empty pool → no-op
+  // (returns '') so guests with nobody in the pool don't see clutter.
+  function _renderMatchPoolPicks(m) {
+    const named = state.members.filter(x => x.name && x.name.trim());
+    if (named.length === 0) return '';
+
+    const isGroup = m.stage === 'group';
+    const koActual = isGroup ? null : getKnockoutWinners();
+    const actualWinner = !isGroup && koActual && koActual[m.stage] ? koActual[m.stage][m.id] : null;
+
+    // Sort participants alphabetically — predictable, no ranking noise.
+    const rows = named
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(member => {
+        const picks = state.picks[member.id] || {};
+        const avatar = member.avatar ? `<span style="margin-right:6px;">${escapeHTML(member.avatar)}</span>` : '';
+        const who = `${avatar}<b>${escapeHTML(member.name)}</b>`;
+
+        if (isGroup) {
+          const sp = (picks.scores || {})[m.id];
+          if (!sp || typeof sp.home !== 'number' || typeof sp.away !== 'number') {
+            return `<div class="pool-pick"><div>${who}</div><div class="muted" style="font-size:0.8rem;">— no pick —</div><div></div></div>`;
+          }
+          const badge = _groupPickBadge(sp, m.result);
+          return `<div class="pool-pick">
+            <div>${who}</div>
+            <div class="pool-pick-val">${sp.home}<span class="muted">–</span>${sp.away}</div>
+            <div class="pool-pick-badge">${badge}</div>
+          </div>`;
+        }
+
+        // Knockout match: show who they think advances.
+        const stagePicks = (picks.ko || {})[m.stage] || {};
+        const pickedCode = stagePicks[m.id];
+        if (!pickedCode) {
+          return `<div class="pool-pick"><div>${who}</div><div class="muted" style="font-size:0.8rem;">— no pick —</div><div></div></div>`;
+        }
+        const c = countryByCode(pickedCode);
+        const label = c ? `${c.flag} ${escapeHTML(c.name)}` : escapeHTML(pickedCode);
+        let badge = '';
+        if (actualWinner) {
+          badge = pickedCode === actualWinner
+            ? `<span class="correct">✓ ${SCORING[m.stage] || ''}</span>`
+            : '<span class="miss">✗</span>';
+        }
+        return `<div class="pool-pick">
+          <div>${who}</div>
+          <div class="pool-pick-val" style="font-size:0.85rem;">${label}</div>
+          <div class="pool-pick-badge">${badge}</div>
+        </div>`;
+      })
+      .join('');
+
+    const hint = m.result || actualWinner
+      ? 'Points awarded as soon as the result lands.'
+      : (isGroup
+          ? 'Predictions lock when this match kicks off. Badges appear after the result is entered.'
+          : 'Showing each picker\'s advancing team. Locks at kickoff of this round.');
+
+    return `
+      <div class="pool-picks-section">
+        <h4 style="margin:14px 0 4px;font-size:0.95rem;">👨‍👩‍👧 Family picks <span class="muted" style="font-size:0.8rem;font-weight:400;">(${named.length})</span></h4>
+        <p class="muted" style="font-size:0.74rem;margin-bottom:8px;">${hint}</p>
+        <div>${rows}</div>
+      </div>`;
+  }
+
+  // Chronologically sorted match list used by the prev/next nav. Cached
+  // per-render is overkill — there are only ~104 matches.
+  function _sortedMatchIds() {
+    return state.matches
+      .slice()
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+      .map(x => x.id);
+  }
+  function editResultNeighbor(currentId, dir) {
+    const ids = _sortedMatchIds();
+    const idx = ids.indexOf(currentId);
+    if (idx < 0) return;
+    const next = ids[(idx + dir + ids.length) % ids.length];
+    editResult(next);
+  }
+
   function editResult(matchId) {
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
@@ -4850,8 +4960,18 @@
 
     const inputStyle = 'background:var(--wc-card-strong);border:1px solid var(--wc-line);color:var(--text-primary);border-radius:8px;padding:6px 8px;font-size:0.85rem;width:100%;';
 
+    const navHeader = `
+      <div class="match-modal-nav">
+        <button class="nav-arrow" onclick="WC.editResultNeighbor('${m.id}', -1)" aria-label="Previous match">‹</button>
+        <div class="nav-title">
+          <h3 style="margin:0;">${stage}</h3>
+          <div class="muted" style="font-size:0.72rem;">${fmtDate(m.date)} · ${m.time}</div>
+        </div>
+        <button class="nav-arrow" onclick="WC.editResultNeighbor('${m.id}', 1)" aria-label="Next match">›</button>
+      </div>`;
+
     modal.querySelector('.modal-inner').innerHTML = `
-      <h3>${stage}</h3>
+      ${navHeader}
       <div class="sub">Edit any field below — match, score, or schedule.</div>
 
       <div class="pick-row"><div class="lbl">Home</div><div>
@@ -4893,6 +5013,8 @@
         <button class="btn ghost" onclick="WC.closeModal()">Cancel</button>
         <button class="btn" onclick="WC.saveResult('${m.id}')">Save</button>
       </div>
+
+      ${_renderMatchPoolPicks(m)}
     `;
     modal.classList.add('open');
   }
@@ -5839,7 +5961,7 @@
     tab: activateTab,
     openCountry,
     renderMatches,
-    editResult, saveResult, clearResult, closeModal,
+    editResult, editResultNeighbor, saveResult, clearResult, closeModal,
     openGroupEditor, saveGroups,
     startEntry, editEntry, doneEntry, setEntrantName, removeMember,
     setGroupPick, setKoPick, setOutcomePick, setScorePred,
