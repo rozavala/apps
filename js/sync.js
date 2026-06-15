@@ -131,6 +131,61 @@ var CloudSync = (function() {
     return n;
   }
 
+  // Deep-merge two World Cup picks objects. Union every collection
+  // (groupWinners, ko[stage], scores, etc.) so a key entered on either
+  // side never disappears; on a direct key conflict, the newer
+  // snapshot wins. Scalars (champion, runnerUp, goldenBoot) prefer
+  // the newer side's non-empty value.
+  function _mergeWcPicks(local, server, localNewer) {
+    if (!local && !server) return null;
+    if (!local) return server;
+    if (!server) return local;
+    var older = localNewer ? server : local;
+    var newer = localNewer ? local : server;
+    function unionMap(o, n) { return Object.assign({}, o || {}, n || {}); }
+    var oko = older.ko || {}, nko = newer.ko || {};
+    function nonEmpty(a, b) { return (a !== null && a !== undefined && a !== '') ? a : b; }
+    return {
+      groupWinners:    unionMap(older.groupWinners,    newer.groupWinners),
+      groupRunnersUp:  unionMap(older.groupRunnersUp,  newer.groupRunnersUp),
+      groupThird:      unionMap(older.groupThird,      newer.groupThird),
+      ko: {
+        R32:   unionMap(oko.R32,   nko.R32),
+        R16:   unionMap(oko.R16,   nko.R16),
+        QF:    unionMap(oko.QF,    nko.QF),
+        SF:    unionMap(oko.SF,    nko.SF),
+        '3rd': unionMap(oko['3rd'], nko['3rd']),
+        Final: unionMap(oko.Final, nko.Final),
+      },
+      champion:          nonEmpty(newer.champion,   older.champion)   || null,
+      runnerUp:          nonEmpty(newer.runnerUp,   older.runnerUp)   || null,
+      goldenBoot:        nonEmpty(newer.goldenBoot, older.goldenBoot) || '',
+      goldenBootCorrect: !!(older.goldenBootCorrect || newer.goldenBootCorrect),
+      mode:              nonEmpty(newer.mode, older.mode) || 'buildup',
+      // Score predictions: union by match id. On direct conflict
+      // (same match, two predictions), newer side wins so the most
+      // recent typed prediction doesn't get clobbered.
+      scores: unionMap(older.scores, newer.scores),
+    };
+  }
+
+  // Deep-merge two match-override objects (per match id). Every
+  // editable field is unioned with newer-side-wins on conflict, except
+  // that a side with a real `result` always beats a side without one.
+  function _mergeWcOverride(local, server, localNewer) {
+    if (!local) return server;
+    if (!server) return local;
+    var older = localNewer ? server : local;
+    var newer = localNewer ? local : server;
+    var out = Object.assign({}, older, newer);
+    var sHasRes = server.result != null, lHasRes = local.result != null;
+    if (sHasRes && !lHasRes) out.result = server.result;
+    else if (lHasRes && !sHasRes) out.result = local.result;
+    // both have result → newer's wins via Object.assign above; if both
+    // have it as the same score this is a no-op.
+    return out;
+  }
+
   // Union-merge two World Cup snapshots so neither side ever loses
   // members, picks, or match results just because its _syncedAt got
   // out-flanked by a stale device's push. Conflicts ("both sides
@@ -161,35 +216,31 @@ var CloudSync = (function() {
     });
     out.members = Object.keys(byKey).map(function(k) { return byKey[k]; });
 
-    // Picks: union by id, richer side wins on conflict.
+    // Snapshot-level recency for per-field conflict resolution. Lacking
+    // per-field timestamps, the newer snapshot wins on direct collisions
+    // (one device's last edit beats an older one's stale value for the
+    // same key), while every non-conflicting key from both sides
+    // survives the union.
+    var localNewer = _parseTs(l._syncedAt) >= _parseTs(s._syncedAt);
+
+    // Picks: union by id; on shared ids, deep-merge each picks object.
     var pickIds = {};
     Object.keys(l.picks || {}).forEach(function(id) { pickIds[id] = 1; });
     Object.keys(s.picks || {}).forEach(function(id) { pickIds[id] = 1; });
     out.picks = {};
     Object.keys(pickIds).forEach(function(id) {
-      var lp = (l.picks || {})[id], sp = (s.picks || {})[id];
-      if (!lp) { out.picks[id] = sp; return; }
-      if (!sp) { out.picks[id] = lp; return; }
-      out.picks[id] = _wcPickRichness(lp) >= _wcPickRichness(sp) ? lp : sp;
+      out.picks[id] = _mergeWcPicks((l.picks || {})[id], (s.picks || {})[id], localNewer);
     });
 
-    // matchOverrides: union by id. Prefer the side with a `result`
-    // present; if both have one, server wins (score-sync is the
-    // source of truth). Other override fields (venue/team edits)
-    // merge with server overriding local on conflict.
+    // matchOverrides: union by id; on shared ids, deep-merge each
+    // override (field-by-field) so a venue/team edit on one device
+    // can't wipe a `result` recorded on another.
     var ovIds = {};
     Object.keys(l.matchOverrides || {}).forEach(function(id) { ovIds[id] = 1; });
     Object.keys(s.matchOverrides || {}).forEach(function(id) { ovIds[id] = 1; });
     out.matchOverrides = {};
     Object.keys(ovIds).forEach(function(id) {
-      var lo = (l.matchOverrides || {})[id], so = (s.matchOverrides || {})[id];
-      if (!lo) { out.matchOverrides[id] = so; return; }
-      if (!so) { out.matchOverrides[id] = lo; return; }
-      var sHasResult = so.result != null;
-      var lHasResult = lo.result != null;
-      if (sHasResult && !lHasResult) out.matchOverrides[id] = Object.assign({}, lo, so);
-      else if (lHasResult && !sHasResult) out.matchOverrides[id] = Object.assign({}, so, lo);
-      else out.matchOverrides[id] = Object.assign({}, lo, so);
+      out.matchOverrides[id] = _mergeWcOverride((l.matchOverrides || {})[id], (s.matchOverrides || {})[id], localNewer);
     });
 
     // Groups: take whichever side actually has a draw recorded.
