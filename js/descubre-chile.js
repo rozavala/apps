@@ -431,6 +431,8 @@ const QB={
     {q:'¿Quién compuso la canción "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Víctor Jara','Los Jaivas','Margot Loyola'], tier:'intermediate'}
   ],
   inventors:[
+    {q:'¿Qué invento chileno ayuda a reunir agua en el norte?',a:'Atrapanieblas',o:['Atrapanieblas','Desalinizadora','Bomba de agua','Tubo solar'], tier:'expert'},
+    {q:'¿Qué vacuna ayudó a desarrollar Pablo Valenzuela?',a:'Vacuna contra la Hepatitis B',o:['Vacuna contra la Hepatitis B','Vacuna contra el COVID','Vacuna contra la Influenza','Vacuna contra el Sarampión'], tier:'advanced'},
     {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
     {q:'¿Qué es un atrapanieblas?',a:'Una malla para atrapar agua',o:['Una malla para atrapar agua','Un telescopio especial','Un tipo de tienda de campaña','Un barco de pesca'], tier:'advanced'},
     {q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto'], tier:'advanced'},
@@ -447,6 +449,8 @@ const QB={
     {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'}
   ],
   animales:[
+    {q:'¿Qué ave aparece en el escudo nacional junto al huemul?',a:'El cóndor',o:['El cóndor','El ñandú','El pingüino','El flamenco'], tier:'beginner'},
+    {q:'¿Cuál es el felino más grande que habita en Chile?',a:'El puma',o:['El puma','El gato colocolo','El jaguar','El tigre'], tier:'intermediate'},
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
     {q:'¿Dónde habita principalmente la vicuña?',a:'A gran altitud en los Andes',o:['A gran altitud en los Andes','En la costa del Pacífico','En los bosques del sur','En la selva lluviosa'], tier:'intermediate'},
     {q:'¿Qué animal tiene una de las lanas más finas y valiosas?',a:'La vicuña',o:['La vicuña','La oveja común','El guanaco','El zorro'], tier:'advanced'},
@@ -456,6 +460,8 @@ const QB={
     {q:'¿Qué animal marino se puede ver en las costas chilenas?',a:'El lobo marino',o:['El lobo marino','El oso polar','La morsa','El manatí'], tier:'beginner'}
   ],
   volcanes_chile:[
+    {q:'¿Qué volcán de Chile es uno de los más activos de Sudamérica?',a:'Villarrica',o:['Villarrica','Osorno','San José','Llaima'], tier:'beginner'},
+    {q:'¿En qué lago se refleja el volcán Osorno?',a:'Lago Llanquihue',o:['Lago Llanquihue','Lago Ranco','Lago General Carrera','Lago Budi'], tier:'intermediate'},
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Menos de 100','Alrededor de 500','Solo 10'], tier:'expert'},
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},

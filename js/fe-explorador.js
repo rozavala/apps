@@ -241,16 +241,17 @@ const FeManager = (() => {
         { q: '¿En qué siglo vivió?', a: ['Siglo X', 'Siglo I', 'Siglo V'], correct: 1 }
       ]
     },
+    // PRUNED [2026-XX-XX]: Removed 'pedro' to make room for 'lucas' and stay within MAX 15 limit
     {
-      id: 'pedro',
-      name: 'San Pedro',
+      id: 'lucas',
+      name: 'San Lucas',
       dates: 'Siglo I',
-      country: 'Judea 🗝️',
-      bio: 'Fue un pescador y uno de los apóstoles más cercanos a Jesús. Es considerado el primer Papa de la Iglesia Católica.',
+      country: 'Grecia 🇬🇷',
+      bio: 'Fue médico y compañero de San Pablo. Escribió uno de los Evangelios y los Hechos de los Apóstoles.',
       questions: [
-        { q: '¿Cuál era la profesión original de San Pedro?', a: ['Carpintero', 'Pescador', 'Soldado'], correct: 1 },
-        { q: '¿A quién se le considera el primer Papa?', a: ['San Pablo', 'San Pedro', 'San Juan'], correct: 1 },
-        { q: '¿En qué siglo vivió?', a: ['Siglo V', 'Siglo III', 'Siglo I'], correct: 2 }
+        { q: '¿Cuál era la profesión de San Lucas?', a: ['Pescador', 'Médico', 'Carpintero'], correct: 1 },
+        { q: '¿De quién fue compañero de viajes?', a: ['San Pablo', 'San Pedro', 'San Juan'], correct: 0 },
+        { q: '¿Qué libros de la Biblia escribió?', a: ['Evangelio y Hechos de los Apóstoles', 'Apocalipsis', 'Génesis'], correct: 0 }
       ]
     },
     {
@@ -361,11 +362,12 @@ const FeManager = (() => {
       info: 'Se celebra el 29 de junio. Los pescadores de la costa chilena adornan sus botes para pedir buena pesca y protección a su patrono.',
       q: '¿Qué grupo de trabajadores celebra a San Pedro?', a: ['Los pescadores', 'Los mineros', 'Los agricultores'], correct: 0
     },
+    // PRUNED [2026-XX-XX]: Removed 'carmen' to make room for 'santuario_teresa' and stay within MAX 8 limit
     {
-      id: 'carmen',
-      title: 'Virgen del Carmen',
-      info: 'Es la Patrona de Chile. Fue declarada así en 1923. Cada 16 de julio se celebra su fiesta con procesiones y bailes religiosos.',
-      q: '¿Qué día es la fiesta de la Virgen del Carmen?', a: ['18 de septiembre', '16 de julio', '25 de diciembre'], correct: 1
+      id: 'santuario_teresa',
+      title: 'Santuario de Santa Teresa',
+      info: 'Ubicado en Auco, Los Andes. Es un lugar de peregrinación muy importante donde descansan los restos de la primera santa de Chile.',
+      q: '¿En qué ciudad se encuentra este santuario?', a: ['Santiago', 'Los Andes', 'Valparaíso'], correct: 1
     },
     {
       id: 'sanfrancisco_stgo',

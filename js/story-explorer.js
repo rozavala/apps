@@ -165,48 +165,48 @@ const StoryExplorer = (() => {
         }
       ]
     },
+    // PRUNED [2026-XX-XX]: Removed 'condor_flight' to make room for 'desert_fox' and stay within MAX 12 limit
     {
-      id: 'condor_flight',
-      title: 'The Condor\'s First Flight',
-      titleEs: 'El Primer Vuelo del Cóndor',
-      tier: 'cadet', ageMin: 4, region: 'andes', icon: '🦅',
+      id: 'desert_fox',
+      title: 'The Desert Fox',
+      titleEs: 'El Zorro del Desierto',
+      tier: 'cadet', ageMin: 4, region: 'north', icon: '🦊',
       pages: [
         {
-          en: 'High in the Andes mountains, a baby condor sat on a rocky ledge. His name was Ciro.',
-          es: 'En lo alto de los Andes, un bebé cóndor estaba sentado en una roca. Su nombre era Ciro.',
+          en: 'In the dry Atacama desert, a little fox named Zorro looked for water.',
+          es: 'En el seco desierto de Atacama, un pequeño zorro llamado Zorro buscaba agua.',
           vocab: [
-            { word: 'condor', wordEs: 'cóndor', def: 'A very large bird that lives in the mountains.', defEs: 'Un ave muy grande que vive en las montañas.' },
-            { word: 'ledge', wordEs: 'cornisa', def: 'A flat piece of rock sticking out from a cliff.', defEs: 'Una roca plana que sobresale de un acantilado.' },
+            { word: 'desert', wordEs: 'desierto', def: 'A very dry place.', defEs: 'Un lugar muy seco.' },
+            { word: 'water', wordEs: 'agua', def: 'Clear liquid for drinking.', defEs: 'Líquido claro para beber.' }
           ]
         },
         {
-          en: 'Ciro looked down at the valley far below. "It\'s so far!" he said. "I\'m not sure I can fly."',
-          es: 'Ciro miró hacia el valle muy abajo. "¡Está tan lejos!" dijo. "No estoy seguro de poder volar."',
+          en: 'He walked over the hot sand and saw a tall cactus.',
+          es: 'Caminó sobre la arena caliente y vio un cactus alto.',
           vocab: [
-            { word: 'valley', wordEs: 'valle', def: 'A low area of land between mountains.', defEs: 'Una zona baja entre montañas.' },
+            { word: 'sand', wordEs: 'arena', def: 'Tiny pieces of rock on the ground.', defEs: 'Pequeñas piezas de roca en el suelo.' },
+            { word: 'tall', wordEs: 'alto', def: 'Rising high.', defEs: 'Que se eleva mucho.' }
           ]
         },
         {
-          en: '"Watch me," said his mother. She spread her enormous wings and glided into the wind.',
-          es: '"Mírame," dijo su madre. Abrió sus enormes alas y planeó en el viento.',
+          en: 'Under the cactus, there was a tiny pool of cool water!',
+          es: '¡Bajo el cactus, había un pequeño charco de agua fresca!',
           vocab: [
-            { word: 'enormous', wordEs: 'enorme', def: 'Very, very big.', defEs: 'Muy, muy grande.' },
-            { word: 'glided', wordEs: 'planeó', def: 'Flew smoothly without flapping wings.', defEs: 'Voló suavemente sin mover las alas.' },
+            { word: 'pool', wordEs: 'charco', def: 'A small amount of water.', defEs: 'Una pequeña cantidad de agua.' }
           ]
         },
         {
-          en: 'Ciro took a deep breath, opened his wings, and jumped. The wind lifted him up! He was flying!',
-          es: 'Ciro respiró profundo, abrió sus alas y saltó. ¡El viento lo levantó! ¡Estaba volando!',
+          en: 'Zorro drank the water and rested in the shade. It was a good day.',
+          es: 'Zorro bebió el agua y descansó en la sombra. Fue un buen día.',
           vocab: [
-            { word: 'breath', wordEs: 'respiro', def: 'Air taken into the lungs.', defEs: 'Aire que se lleva a los pulmones.' },
-            { word: 'jumped', wordEs: 'saltó', def: 'Pushed oneself off the ground.', defEs: 'Se impulsó fuera del suelo.' }
+            { word: 'shade', wordEs: 'sombra', def: 'A dark area away from the sun.', defEs: 'Un área oscura lejos del sol.' }
           ]
-        },
+        }
       ],
       quiz: [
-        { q: 'Where did Ciro live?', qEs: '¿Dónde vivía Ciro?', options: ['A beach', 'The Andes mountains', 'A forest', 'A desert'], optionsEs: ['Una playa', 'Las montañas de los Andes', 'Un bosque', 'Un desierto'], answer: 1 },
-        { q: 'What was Ciro afraid of?', qEs: '¿De qué tenía miedo Ciro?', options: ['Swimming', 'Flying', 'Running', 'Singing'], optionsEs: ['Nadar', 'Volar', 'Correr', 'Cantar'], answer: 1 },
-        { q: 'Who helped Ciro?', qEs: '¿Quién ayudó a Ciro?', options: ['His father', 'His mother', 'A friend', 'A teacher'], optionsEs: ['Su padre', 'Su madre', 'Un amigo', 'Un maestro'], answer: 1 },
+        { q: 'What was the fox looking for?', qEs: '¿Qué buscaba el zorro?', options: ['Food', 'Water', 'Friends', 'Toys'], optionsEs: ['Comida', 'Agua', 'Amigos', 'Juguetes'], answer: 1 },
+        { q: 'Where did he find it?', qEs: '¿Dónde lo encontró?', options: ['Under a rock', 'In a river', 'Under a cactus', 'In a tree'], optionsEs: ['Bajo una roca', 'En un río', 'Bajo un cactus', 'En un árbol'], answer: 2 },
+        { q: 'Where does the story happen?', qEs: '¿Dónde ocurre la historia?', options: ['The beach', 'The mountains', 'The desert', 'The forest'], optionsEs: ['La playa', 'Las montañas', 'El desierto', 'El bosque'], answer: 2 }
       ]
     },
     {

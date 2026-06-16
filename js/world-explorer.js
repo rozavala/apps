@@ -309,6 +309,23 @@ const WorldExplorer = (() => {
         ]
       },
       {
+        id: 'italy', name: 'Italy', nameEs: 'Italia', flag: '🇮🇹',
+        capital: 'Rome', capitalEs: 'Roma',
+        facts: [
+          { en: 'Italy is shaped like a boot.', es: 'Italia tiene forma de bota.' },
+          { en: 'Rome was the center of the Roman Empire.', es: 'Roma fue el centro del Imperio Romano.' },
+          { en: 'The Colosseum is a famous ancient amphitheater.', es: 'El Coliseo es un famoso anfiteatro antiguo.' },
+          { en: 'It is famous for pasta and pizza.', es: 'Es famosa por la pasta y la pizza.' }
+        ],
+        landmark: { name: 'Colosseum', nameEs: 'Coliseo', emoji: '🏟️' },
+        animal: { name: 'Wolf', nameEs: 'Lobo', emoji: '🐺' },
+        quiz: [
+          { q: 'What is the capital of Italy?', qEs: '¿Cuál es la capital de Italia?', options: ['Rome', 'Milan', 'Venice', 'Naples'], optionsEs: ['Roma', 'Milán', 'Venecia', 'Nápoles'], answer: 0 },
+          { q: 'What famous monument is in Rome?', qEs: '¿Qué famoso monumento está en Roma?', options: ['Eiffel Tower', 'Colosseum', 'Big Ben', 'Parthenon'], optionsEs: ['Torre Eiffel', 'Coliseo', 'Big Ben', 'Partenón'], answer: 1 },
+          { q: 'What shape is the country of Italy?', qEs: '¿Qué forma tiene el país de Italia?', options: ['Circle', 'Square', 'Boot', 'Triangle'], optionsEs: ['Círculo', 'Cuadrado', 'Bota', 'Triángulo'], answer: 2 }
+        ]
+      },
+      {
         id: 'france', name: 'France', nameEs: 'Francia', flag: '🇫🇷',
         capital: 'Paris', capitalEs: 'París',
         facts: [

@@ -3,8 +3,9 @@
    ================================================================ */
 
 const CHORDS = [
+  // PRUNED [2026-XX-XX]: Removed 'Cmaj7' to make room for 'Dm7' and stay within MAX 18 limit.
   // PRUNED [2026-06-15]: Removed duplicate Dm (already in intermediate section) to make room for Cmaj7.
-  { name: 'Cmaj7', fullName: 'C Major 7', tier: 'advanced', frets: [-1, 3, 2, 0, 0, 0], fingers: [0, 3, 2, 0, 0, 0], funFact: 'Cmaj7 sounds very peaceful and jazzy. It is like a regular C chord but you take off your first finger!' },
+  { name: 'Dm7', fullName: 'D Minor 7', tier: 'advanced', frets: [-1, -1, 0, 2, 1, 1], fingers: [0, 0, 0, 2, 1, 1], funFact: 'Dm7 sounds a little jazzy and cool. Use your first finger to press two strings!' },
 
   // Beginner
   { name: 'Em', fullName: 'E Minor', tier: 'beginner', frets: [0, 2, 2, 0, 0, 0], fingers: [0, 2, 3, 0, 0, 0], funFact: 'Em is one of the easiest guitar chords — just two fingers!' },
@@ -30,8 +31,9 @@ const CHORDS = [
 ];
 
 const SONGS = [
+  // PRUNED [2026-XX-XX]: Removed 'clementine' to make room for 'row_boat' and stay within MAX 12 limit.
   // PRUNED [2026-06-15]: Removed duplicate lalabamba (already in intermediate) to make room for Clementine.
-  { id: 'clementine', title: 'Oh My Clementine', tier: 'beginner', bpm: 100, progression: [['D', 6], ['D', 6], ['A', 6], ['D', 6]] },
+  { id: 'row_boat', title: 'Row Your Boat', tier: 'beginner', bpm: 110, progression: [['C', 8], ['C', 8], ['G', 8], ['C', 8]] },
 
   { id: 'twinkle', title: 'Twinkle Twinkle', tier: 'beginner', bpm: 90, progression: [['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['C', 4], ['G', 4], ['C', 8]] },
   { id: 'birthday', title: 'Happy Birthday', tier: 'beginner', bpm: 100, progression: [['G', 4], ['G', 4], ['G', 4], ['C', 4], ['C', 4], ['Am', 4], ['G', 4], ['G', 4], ['C', 8]] },

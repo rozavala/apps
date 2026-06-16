@@ -18,7 +18,8 @@ var LearningCheck = (function() {
       { q: 'What is 20 / 4?', options: ['4', '5', '6', '10'], answer: 1 },
       { q: 'What is 9 x 9?', options: ['81', '72', '90', '99'], answer: 0 },
       { q: 'What is 50 + 50?', options: ['90', '100', '110', '120'], answer: 1 },
-      { q: 'What is 6 x 6?', options: ['36', '30', '42', '48'], answer: 0 }
+      // PRUNED [2026-XX-XX]: Removed '6 x 6' to make room for '15 + 15' to refresh content
+      { q: 'What is 15 + 15?', options: ['25', '30', '35', '40'], answer: 1 }
     ],
     music: [
       { q: 'Which note is higher?', options: ['C4', 'G4', 'E4', 'D4'], answer: 1 },
