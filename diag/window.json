@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-15T04:10:52.719Z",
+  "generatedAt": "2026-06-16T03:25:25.175Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mqbsk63o_f8l70y",
-            "ts": 1781321049060,
-            "clientTs": 1781321049060,
+            "id": "e_mqbts86i_o229bo",
+            "ts": 1781323104618,
+            "clientTs": 1781323104618,
             "kind": "console.warn",
             "app": "world-cup",
             "page": "world-cup.html",
@@ -24,8 +24,8 @@
             "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36",
             "trail": []
           },
-          "count": 4,
-          "firstTs": 1781321049060,
+          "count": 3,
+          "firstTs": 1781323104618,
           "lastTs": 1781324079216,
           "users": [
             "u-34d354"
