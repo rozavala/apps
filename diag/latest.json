@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-17T19:43:46.176Z",
+  "generatedAt": "2026-06-17T21:14:25.318Z",
   "windowHours": 72,
-  "totalGroups": 5,
-  "totalEvents": 34,
+  "totalGroups": 4,
+  "totalEvents": 30,
   "topGroups": [
     {
       "app": "world-cup",
@@ -25,10 +25,10 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 7,
-      "firstTs": 1781471195006,
+      "count": 6,
+      "firstTs": 1781476598267,
       "lastTs": 1781476958743,
-      "users": 2
+      "users": 1
     },
     {
       "app": "world-cup",
@@ -51,22 +51,9 @@
       "filename": null,
       "lineno": null,
       "colno": null,
-      "count": 2,
-      "firstTs": 1781471194907,
+      "count": 1,
+      "firstTs": 1781476945916,
       "lastTs": 1781476945916,
-      "users": 1
-    },
-    {
-      "app": "fe-explorador",
-      "kind": "error",
-      "page": "fe-explorador.html",
-      "message": "Uncaught TypeError: FeManager.getRosarySetIndexForDay is not a function",
-      "filename": "https://rozavala.github.io/apps/fe-explorador.html",
-      "lineno": 300,
-      "colno": 34,
-      "count": 2,
-      "firstTs": 1781471179198,
-      "lastTs": 1781471222628,
       "users": 1
     }
   ]
