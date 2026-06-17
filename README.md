@@ -70,6 +70,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Actualización World Cup 2026**: Navegación de partidos y selecciones familiares en el modal de resultados. (Family picks and match navigation inside the match-result modal.)
 - **Actualización World Cup 2026**: Formato de enlaces compartidos optimizado para grupos de WhatsApp familiares grandes. (Optimized share link format for large family WhatsApp pools.)
 - **Nuevo Contenido**: Agregamos contenido factual a Descubre Chile, Story Explorer y World Explorer. (Added factual content to Descubre Chile, Story Explorer, and World Explorer.)
 - **Mejora en el Hub (Hub Update)**: Confirmación de dos toques al eliminar perfiles para mayor seguridad. (Tap-to-confirm defense when deleting profiles.)
