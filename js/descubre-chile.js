@@ -436,7 +436,10 @@ const QB={
     {q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto'], tier:'advanced'},
     {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'},
     {q:'¿Qué virus ayudó a descubrir Pablo Valenzuela?',a:'Hepatitis C',o:['Hepatitis C','Gripe','Sarampión','Varicela'], tier:'advanced'},
-    {q:'¿Cuál será el telescopio más grande del mundo en construcción en Chile?',a:'ELT',o:['ELT','VLT','ALMA','Hubble'], tier:'expert'}
+    {q:'¿Cuál será el telescopio más grande del mundo en construcción en Chile?',a:'ELT',o:['ELT','VLT','ALMA','Hubble'], tier:'expert'},
+    {q:'¿Qué instrumento se usa para estudiar las estrellas en ALMA?',a:'Radiotelescopio',o:['Radiotelescopio','Microscopio','Sismógrafo','Barómetro'], tier:'advanced'},
+    {q:'¿En qué desierto se prueban algunos vehículos espaciales por su parecido a Marte?',a:'Desierto de Atacama',o:['Desierto de Atacama','Desierto del Sahara','Desierto de Gobi','Desierto de Mojave'], tier:'intermediate'},
+    {q:'¿Qué premio nacional ganó el científico Humberto Maturana?',a:'Premio Nacional de Ciencias',o:['Premio Nacional de Ciencias','Premio Nobel','Premio Nacional de Literatura','Premio Óscar'], tier:'expert'}
   ],
   volcanes:[
     {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced'},
@@ -444,7 +447,10 @@ const QB={
     {q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno'], tier:'expert'},
     {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'},
     {q:'¿Qué volcán es famoso por su forma de cono perfecto en el sur?',a:'Osorno',o:['Osorno','Llaima','Calbuco','Villarrica'], tier:'advanced'},
-    {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'}
+    {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'},
+    {q:'¿Qué volcán entró en erupción cerca de Pucón?',a:'Villarrica',o:['Villarrica','Osorno','Chaitén','Calbuco'], tier:'intermediate'},
+    {q:'¿Qué sale de un volcán durante una erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Hielo y nieve','Arena del desierto'], tier:'beginner'},
+    {q:'¿Qué forma tienen muchos volcanes en el sur de Chile?',a:'Forma de cono',o:['Forma de cono','Forma de cubo','Forma plana','Forma de estrella'], tier:'beginner'}
   ],
   animales:[
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},

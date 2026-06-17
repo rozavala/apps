@@ -324,6 +324,40 @@ const WorldExplorer = (() => {
           { q: 'Which famous monument is in France?', qEs: '¿Qué famoso monumento está en Francia?', options: ['Colosseum', 'Eiffel Tower', 'Big Ben', 'Parthenon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Big Ben', 'Partenón'], answer: 1 },
           { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 }
         ]
+      },
+      {
+        id: 'italy', name: 'Italy', nameEs: 'Italia', flag: '🇮🇹',
+        capital: 'Rome', capitalEs: 'Roma',
+        facts: [
+          { en: 'Italy is shaped like a boot.', es: 'Italia tiene forma de bota.' },
+          { en: 'The Colosseum is a famous ancient amphitheater in Rome.', es: 'El Coliseo es un famoso anfiteatro antiguo en Roma.' },
+          { en: 'Pizza and pasta are traditional Italian foods.', es: 'La pizza y la pasta son comidas tradicionales italianas.' },
+          { en: 'Venice is a city with canals instead of roads.', es: 'Venecia es una ciudad con canales en lugar de calles.' }
+        ],
+        landmark: { name: 'Colosseum', nameEs: 'Coliseo', emoji: '🏛️' },
+        animal: { name: 'Wolf', nameEs: 'Lobo', emoji: '🐺' },
+        quiz: [
+          { q: 'What is the capital of Italy?', qEs: '¿Cuál es la capital de Italia?', options: ['Rome', 'Milan', 'Naples', 'Venice'], optionsEs: ['Roma', 'Milán', 'Nápoles', 'Venecia'], answer: 0 },
+          { q: 'What shape is the country of Italy?', qEs: '¿Qué forma tiene el país de Italia?', options: ['A boot', 'A square', 'A circle', 'A star'], optionsEs: ['Una bota', 'Un cuadrado', 'Un círculo', 'Una estrella'], answer: 0 },
+          { q: 'Which ancient amphitheater is in Rome?', qEs: '¿Qué antiguo anfiteatro está en Roma?', options: ['The Colosseum', 'The Parthenon', 'The Pantheon', 'The Forum'], optionsEs: ['El Coliseo', 'El Partenón', 'El Panteón', 'El Foro'], answer: 0 }
+        ]
+      },
+      {
+        id: 'germany', name: 'Germany', nameEs: 'Alemania', flag: '🇩🇪',
+        capital: 'Berlin', capitalEs: 'Berlín',
+        facts: [
+          { en: 'Germany is known for its many beautiful castles.', es: 'Alemania es conocida por sus muchos hermosos castillos.' },
+          { en: 'The Autobahn is a famous highway system in Germany.', es: 'La Autobahn es un famoso sistema de autopistas en Alemania.' },
+          { en: 'The Brandenburg Gate is a famous landmark in Berlin.', es: 'La Puerta de Brandeburgo es un famoso monumento en Berlín.' },
+          { en: 'Germany has a large forest called the Black Forest.', es: 'Alemania tiene un gran bosque llamado la Selva Negra.' }
+        ],
+        landmark: { name: 'Brandenburg Gate', nameEs: 'Puerta de Brandeburgo', emoji: '🏛️' },
+        animal: { name: 'Eagle', nameEs: 'Águila', emoji: '🦅' },
+        quiz: [
+          { q: 'What is the capital of Germany?', qEs: '¿Cuál es la capital de Alemania?', options: ['Berlin', 'Munich', 'Frankfurt', 'Hamburg'], optionsEs: ['Berlín', 'Múnich', 'Fráncfort', 'Hamburgo'], answer: 0 },
+          { q: 'What is the famous highway system in Germany called?', qEs: '¿Cómo se llama el famoso sistema de autopistas en Alemania?', options: ['Autobahn', 'Route 66', 'Pan-American Highway', 'M1'], optionsEs: ['Autobahn', 'Ruta 66', 'Carretera Panamericana', 'M1'], answer: 0 },
+          { q: 'What famous gate is located in Berlin?', qEs: '¿Qué famosa puerta se encuentra en Berlín?', options: ['Brandenburg Gate', 'Golden Gate', 'Arc de Triomphe', 'Gateway Arch'], optionsEs: ['Puerta de Brandeburgo', 'Golden Gate', 'Arco del Triunfo', 'Gateway Arch'], answer: 0 }
+        ]
       }
     ] },
     { id: 'africa', name: 'Africa', nameEs: 'África', icon: '🌍', color: '#EF4444', countries: [
