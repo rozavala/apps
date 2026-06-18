@@ -4926,6 +4926,34 @@
       </div>`;
   }
 
+  // Render the goal scorers attached to a match's result. Two columns:
+  // home on the left, away on the right. Returns '' when neither side
+  // has scorer data (manual entry, or remote feed didn't include it),
+  // so the modal stays clean.
+  function _renderMatchScorers(m) {
+    const r = m && m.result;
+    const g1 = (r && Array.isArray(r.goals1)) ? r.goals1.slice() : [];
+    const g2 = (r && Array.isArray(r.goals2)) ? r.goals2.slice() : [];
+    if (g1.length === 0 && g2.length === 0) return '';
+    const sortByMin = (a, b) => (a.minute || 999) - (b.minute || 999);
+    g1.sort(sortByMin);
+    g2.sort(sortByMin);
+    function renderList(goals) {
+      if (goals.length === 0) return '<span class="muted" style="font-size:0.78rem;">—</span>';
+      return goals.map(g => {
+        const min = typeof g.minute === 'number' ? `<span class="muted">${g.minute}'</span>` : '';
+        const og  = g.owngoal ? ' <span class="og">(OG)</span>' : '';
+        return `<div class="scorer">${escapeHTML(g.name)}${og} ${min}</div>`;
+      }).join('');
+    }
+    return `
+      <div class="scorers-grid">
+        <div class="scorers-col home">${renderList(g1)}</div>
+        <div class="scorers-icon">⚽</div>
+        <div class="scorers-col away">${renderList(g2)}</div>
+      </div>`;
+  }
+
   // Chronologically sorted match list used by the prev/next nav. Cached
   // per-render is overkill — there are only ~104 matches.
   function _sortedMatchIds() {
@@ -4998,6 +5026,8 @@
         <input type="number" min="0" max="20" id="sc-away" value="${m.result?m.result.away:''}" />
         <div class="side">${away ? away.flag+' '+escapeHTML(away.name) : '<span class="muted">TBD</span>'}</div>
       </div>
+
+      ${_renderMatchScorers(m)}
 
       ${m.stage !== 'group' ? `
         <div class="pick-row"><div class="lbl">PK winner<br><span style="font-size:0.7rem;">(only if draw)</span></div><div>
@@ -5910,6 +5940,22 @@
             local.result = { home: hs, away: as, pkWinner };
             updated++;
           }
+          // Refresh per-match scorer lists whether or not the score
+          // moved — the remote may have just attached a name to an
+          // existing 1-1. Empty arrays clear stale entries so an
+          // edited-then-cleared scorer doesn't linger.
+          const cleanGoals = arr => Array.isArray(arr)
+            ? arr.filter(g => g && g.name).map(g => {
+                const out = { name: g.name };
+                if (typeof g.minute === 'number') out.minute = g.minute;
+                if (g.owngoal) out.owngoal = true;
+                return out;
+              })
+            : null;
+          const g1 = cleanGoals(rm.goals1);
+          const g2 = cleanGoals(rm.goals2);
+          if (g1 !== null) local.result.goals1 = g1;
+          if (g2 !== null) local.result.goals2 = g2;
         }
       }
 

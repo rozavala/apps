@@ -650,6 +650,22 @@ body {
 }
 .match-modal-nav .nav-arrow:hover { background: var(--wc-card); }
 
+/* Scorer lists under the score input in the match modal */
+.scorers-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  margin: 6px 0 10px;
+  align-items: start;
+  font-size: 0.86rem;
+}
+.scorers-icon { font-size: 1.05rem; opacity: 0.7; align-self: center; }
+.scorers-col { line-height: 1.45; }
+.scorers-col.home { text-align: right; }
+.scorers-col.away { text-align: left; }
+.scorers-col .scorer { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scorers-col .og { color: var(--wc-red); font-size: 0.7rem; font-weight: 800; }
+
 /* Family picks list inside the match modal */
 .pool-picks-section {
   margin-top: 14px;
