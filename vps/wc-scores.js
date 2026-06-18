@@ -96,6 +96,7 @@ function _normalizeEvent(ev) {
 
   const out = {
     date,
+    eventId: ev.id ? String(ev.id) : null,
     team1: home.team.displayName || home.team.name,
     team1_abbr: home.team.abbreviation || null,
     team2: away.team.displayName || away.team.name,
