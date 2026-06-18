@@ -292,6 +292,23 @@ const WorldExplorer = (() => {
     ] },
     { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [
       {
+        id: 'italy', name: 'Italy', nameEs: 'Italia', flag: '🇮🇹',
+        capital: 'Rome', capitalEs: 'Roma',
+        facts: [
+          { en: 'Italy is shaped like a boot.', es: 'Italia tiene forma de bota.' },
+          { en: 'The Colosseum is an ancient amphitheater in Rome.', es: 'El Coliseo es un antiguo anfiteatro en Roma.' },
+          { en: 'Mount Vesuvius is a famous volcano near Naples.', es: 'El Monte Vesubio es un famoso volcán cerca de Nápoles.' },
+          { en: 'The Renaissance began in Italy.', es: 'El Renacimiento comenzó en Italia.' }
+        ],
+        landmark: { name: 'Colosseum', nameEs: 'Coliseo', emoji: '🏟️' },
+        animal: { name: 'Italian Wolf', nameEs: 'Lobo italiano', emoji: '🐺' },
+        quiz: [
+          { q: 'What shape does Italy resemble?', qEs: '¿A qué forma se asemeja Italia?', options: ['A hat', 'A boot', 'A square', 'A star'], optionsEs: ['Un sombrero', 'Una bota', 'Un cuadrado', 'Una estrella'], answer: 1 },
+          { q: 'What is the capital of Italy?', qEs: '¿Cuál es la capital de Italia?', options: ['Rome', 'Milan', 'Venice', 'Florence'], optionsEs: ['Roma', 'Milán', 'Venecia', 'Florencia'], answer: 0 },
+          { q: 'Which volcano is famous in Italy?', qEs: '¿Qué volcán es famoso en Italia?', options: ['Etna', 'Vesuvius', 'Stromboli', 'Fuji'], optionsEs: ['Etna', 'Vesubio', 'Stromboli', 'Fuji'], answer: 1 }
+        ]
+      },
+      {
         id: 'spain', name: 'Spain', nameEs: 'España', flag: '🇪🇸',
         capital: 'Madrid', capitalEs: 'Madrid',
         facts: [
