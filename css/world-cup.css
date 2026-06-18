@@ -672,6 +672,16 @@ body {
 .scorers-col.away { text-align: left; }
 .scorers-col .scorer { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scorers-col .og { color: var(--wc-red); font-size: 0.7rem; font-weight: 800; }
+.card-icon {
+  display: inline-block;
+  width: 8px;
+  height: 11px;
+  border-radius: 1px;
+  vertical-align: middle;
+  margin-right: 3px;
+}
+.card-icon.yellow { background: #FBBF24; }
+.card-icon.red    { background: var(--wc-red); }
 
 /* Family picks list inside the match modal */
 .pool-picks-section {

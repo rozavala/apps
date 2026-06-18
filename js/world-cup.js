@@ -4926,6 +4926,91 @@
       </div>`;
   }
 
+  /* ----------------------------------------------------------------
+     Lazy match-detail fetch (ESPN summary endpoint via VPS proxy)
+     Scoreboard JSON loses play-by-play after ~2 days, so on modal
+     open we fetch the summary endpoint for the match's eventId and
+     overlay scorers + cards on top of anything we already had. Cache
+     keyed by event id, 5 min TTL, in-memory only (small, ephemeral).
+     ---------------------------------------------------------------- */
+  const _matchDetailCache = new Map(); // eventId -> { fetchedAt, payload }
+  const MATCH_DETAIL_TTL_MS = 5 * 60 * 1000;
+  const VPS_WC_MATCH_URL = (window.CloudSync && CloudSync.isConfigured && CloudSync.isConfigured())
+    ? 'https://all-options-dev.tail57521e.ts.net/api/wc-match'
+    : null;
+
+  async function _fetchMatchDetail(eventId) {
+    if (!eventId || !VPS_WC_MATCH_URL) return null;
+    const cached = _matchDetailCache.get(eventId);
+    if (cached && Date.now() - cached.fetchedAt < MATCH_DETAIL_TTL_MS) return cached.payload;
+    try {
+      const res = await fetch(VPS_WC_MATCH_URL + '?eventId=' + encodeURIComponent(eventId), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const payload = await res.json();
+      _matchDetailCache.set(eventId, { fetchedAt: Date.now(), payload });
+      return payload;
+    } catch (e) {
+      console.warn('match detail fetch failed for', eventId, e.message);
+      return null;
+    }
+  }
+
+  // Kick a lazy fetch and re-render the modal in place when it lands.
+  // Modal might have been closed or stepped to a different match in
+  // the meantime — guard by checking the rendered match id.
+  function _hydrateMatchDetail(m) {
+    const eventId = m && m.result && m.result.eventId;
+    if (!eventId) return;
+    _fetchMatchDetail(eventId).then(detail => {
+      if (!detail) return;
+      // Overlay onto local result so the static scorer renderer picks
+      // it up — and so it sticks through subsequent navigations.
+      if (detail.scorers) {
+        if (Array.isArray(detail.scorers.home)) m.result.goals1 = detail.scorers.home;
+        if (Array.isArray(detail.scorers.away)) m.result.goals2 = detail.scorers.away;
+      }
+      if (detail.cards) {
+        m.result.cards1 = Array.isArray(detail.cards.home) ? detail.cards.home : [];
+        m.result.cards2 = Array.isArray(detail.cards.away) ? detail.cards.away : [];
+      }
+      save();
+      const inner = document.querySelector('#match-modal.open .modal-inner');
+      if (!inner) return;
+      const openId = inner.getAttribute('data-match-id');
+      if (openId !== m.id) return;
+      // In-place re-render without re-opening the modal so the user's
+      // scroll position is preserved as much as possible.
+      editResult(m.id);
+    });
+  }
+
+  // Render yellow/red cards under the scorers, same two-column shape.
+  function _renderMatchCards(m) {
+    const c1 = (m && m.result && Array.isArray(m.result.cards1)) ? m.result.cards1.slice() : [];
+    const c2 = (m && m.result && Array.isArray(m.result.cards2)) ? m.result.cards2.slice() : [];
+    if (c1.length === 0 && c2.length === 0) return '';
+    const sortByMin = (a, b) => (a.minute || 999) - (b.minute || 999);
+    c1.sort(sortByMin); c2.sort(sortByMin);
+    function cardIcon(color) {
+      if (color === 'red') return '<span class="card-icon red" title="Red card"></span>';
+      if (color === 'second-yellow') return '<span class="card-icon yellow"></span><span class="card-icon red" style="margin-left:-3px;"></span>';
+      return '<span class="card-icon yellow" title="Yellow card"></span>';
+    }
+    function renderList(cards) {
+      if (cards.length === 0) return '<span class="muted" style="font-size:0.78rem;">—</span>';
+      return cards.map(c => {
+        const min = typeof c.minute === 'number' ? `<span class="muted">${c.minute}'</span>` : '';
+        return `<div class="scorer">${cardIcon(c.color)} ${escapeHTML(c.name)} ${min}</div>`;
+      }).join('');
+    }
+    return `
+      <div class="scorers-grid" style="margin-top:0;">
+        <div class="scorers-col home">${renderList(c1)}</div>
+        <div class="scorers-icon" style="font-size:0.85rem;">🟨🟥</div>
+        <div class="scorers-col away">${renderList(c2)}</div>
+      </div>`;
+  }
+
   // Render the goal scorers attached to a match's result. Two columns:
   // home on the left, away on the right. Returns '' when neither side
   // has scorer data (manual entry, or remote feed didn't include it),
@@ -5028,6 +5113,7 @@
       </div>
 
       ${_renderMatchScorers(m)}
+      ${_renderMatchCards(m)}
 
       ${m.stage !== 'group' ? `
         <div class="pick-row"><div class="lbl">PK winner<br><span style="font-size:0.7rem;">(only if draw)</span></div><div>
@@ -5046,7 +5132,12 @@
 
       ${_renderMatchPoolPicks(m)}
     `;
+    modal.querySelector('.modal-inner').setAttribute('data-match-id', m.id);
     modal.classList.add('open');
+    // Fire-and-forget summary fetch — if the cached scoreboard entry
+    // already had goals1/goals2 from a recent sync we still upgrade
+    // to the richer summary view (cards become available).
+    _hydrateMatchDetail(m);
   }
 
   function saveResult(matchId) {
@@ -5956,6 +6047,11 @@
           const g2 = cleanGoals(rm.goals2);
           if (g1 !== null) local.result.goals1 = g1;
           if (g2 !== null) local.result.goals2 = g2;
+          // Persist ESPN's event id so the modal can lazy-fetch the
+          // full per-match summary (cards, lineups, stats) on open
+          // even for older matches whose scoreboard details have
+          // been archived.
+          if (rm.eventId) local.result.eventId = rm.eventId;
         }
       }
 
