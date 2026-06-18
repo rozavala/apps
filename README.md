@@ -70,6 +70,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Actualización World Cup 2026**: Detalles de partidos, incluyendo tarjetas, estadísticas y goleadores a través de ESPN. (Match details, including cards, stats, and scorers via ESPN.)
 - **Actualización World Cup 2026**: Formato de enlaces compartidos optimizado para grupos de WhatsApp familiares grandes. (Optimized share link format for large family WhatsApp pools.)
 - **Nuevo Contenido**: Agregamos contenido factual a Descubre Chile, Story Explorer y World Explorer. (Added factual content to Descubre Chile, Story Explorer, and World Explorer.)
 - **Mejora en el Hub (Hub Update)**: Confirmación de dos toques al eliminar perfiles para mayor seguridad. (Tap-to-confirm defense when deleting profiles.)
@@ -153,12 +154,12 @@ Para la mejor experiencia en dispositivos móviles:
 
 ### Opción 3: Ejecutar el Servidor VPS (Run the Sync / Media Server)
 
-The static apps work standalone, but **Book & Movie Check** and cross-device sync require the small Express server in `vps/`. It handles:
-- CloudSync (per-kid app data + family profiles)
-- Book & Movie Check (title lookup, AI evaluation, trailer fetch)
-- World Cup 2026 live-scores proxy
+Las aplicaciones estáticas funcionan de forma independiente, pero **Book & Movie Check** y la sincronización entre dispositivos requieren el pequeño servidor Express en `vps/`. Este maneja: (The static apps work standalone, but **Book & Movie Check** and cross-device sync require the small Express server in `vps/`. It handles:)
+- CloudSync (datos de aplicaciones por niño + perfiles familiares) (CloudSync: per-kid app data + family profiles)
+- Book & Movie Check (búsqueda de títulos, evaluación con IA, obtención de tráilers) (Book & Movie Check: title lookup, AI evaluation, trailer fetch)
+- Proxy de resultados en vivo para World Cup 2026 (World Cup 2026 live-scores proxy)
 
-**1. Install deps**
+**1. Instalar dependencias (Install deps)**
 
 ```bash
 cd vps
