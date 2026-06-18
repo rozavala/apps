@@ -602,6 +602,13 @@ body {
   padding: 18px;
   max-width: 420px;
   width: 100%;
+  /* Tall modals (family picks + scorers + cards) overflowed in
+     landscape on small screens — cap the height and let the body
+     scroll, with smooth iOS momentum. */
+  max-height: 92vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .modal-inner h3 { font-family: var(--font-display); margin-bottom: 4px; font-size: 1.1rem; }
 .modal-inner .sub { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 12px; }
