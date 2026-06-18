@@ -1,7 +1,21 @@
 {
-  "generatedAt": "2026-06-18T04:16:30.040Z",
+  "generatedAt": "2026-06-18T13:50:51.053Z",
   "windowHours": 72,
-  "totalGroups": 0,
-  "totalEvents": 0,
-  "topGroups": []
+  "totalGroups": 1,
+  "totalEvents": 3,
+  "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "match detail fetch failed for 760415 Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 3,
+      "firstTs": 1781790224288,
+      "lastTs": 1781790224288,
+      "users": 1
+    }
+  ]
 }
