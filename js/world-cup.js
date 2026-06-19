@@ -4961,6 +4961,12 @@
   function _hydrateMatchDetail(m) {
     const eventId = m && m.result && m.result.eventId;
     if (!eventId) return;
+    // Bail if cache is fresh — m.result already holds the latest
+    // scorers/cards from the previous fetch. Without this gate, the
+    // post-fetch re-render below calls editResult, which calls us
+    // again, which sees the cache as still empty... freeze.
+    const cached = _matchDetailCache.get(eventId);
+    if (cached && Date.now() - cached.fetchedAt < MATCH_DETAIL_TTL_MS) return;
     _fetchMatchDetail(eventId).then(detail => {
       if (!detail) return;
       // Overlay onto local result so the static scorer renderer picks
