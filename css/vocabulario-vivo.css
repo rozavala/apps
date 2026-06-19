@@ -4,9 +4,9 @@
    ============================================================ */
 
 :root {
-  --vv-accent: #F472B6;       /* rose-400 */
+  --vv-accent: #BE185D;       /* rose, deep for text/borders on light */
   --vv-accent-deep: #BE185D;  /* rose-700 */
-  --vv-terra: #F97316;        /* orange-500, terracotta */
+  --vv-terra: #C2410C;        /* deep terracotta for text/borders on light */
   --vv-terra-deep: #9A3412;
 }
 
@@ -199,8 +199,8 @@
 .vv-root-big-origin {
   display: inline-block;
   margin-top: 4px;
-  background: rgba(244,114,182,0.18);
-  color: var(--vv-accent);
+  background: #BE185D;
+  color: #fff;
   border-radius: 999px;
   padding: 4px 12px;
   font-size: 0.85rem;
@@ -233,7 +233,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid #e6e6ee;
   font-weight: 700;
 }
 .vv-word-pair:last-child { border-bottom: 0; }
@@ -284,8 +284,8 @@
 }
 .vv-match-word {
   display: inline-block;
-  background: rgba(244,114,182,0.18);
-  color: var(--vv-accent);
+  background: #BE185D;
+  color: #fff;
   border-radius: 8px;
   padding: 2px 10px;
   font-family: var(--font-display);

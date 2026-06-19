@@ -14,16 +14,16 @@ body {
 /* Tabs */
 .tabs-bar {
   display: flex;
-  background: rgba(0, 0, 0, 0.4);
+  background: #ffffff;
   padding: 12px;
   gap: 8px;
   overflow-x: auto;
-  border-bottom: 2px solid rgba(255,255,255,0.05);
+  border-bottom: 2px solid #e6e6ee;
 }
 .tab {
   padding: 10px 20px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #ece9f5;
   color: var(--text);
   font-family: var(--font-display);
   font-size: 1rem;
@@ -33,7 +33,7 @@ body {
   white-space: nowrap;
   transition: all 0.2s;
 }
-.tab:hover { background: rgba(255,255,255,0.1); }
+.tab:hover { background: #d6d2ea; }
 .tab.active { background: var(--guitar-accent); color: #000; }
 
 .content-container {
@@ -49,9 +49,9 @@ body {
 .placeholder-msg {
   text-align: center;
   padding: 60px 20px;
-  background: rgba(255,255,255,0.02);
+  background: #ffffff;
   border-radius: 24px;
-  border: 2px dashed rgba(255,255,255,0.1);
+  border: 2px dashed #d6d2ea;
   margin-top: 20px;
 }
 .placeholder-msg h2 { font-family: var(--font-display); font-size: 2rem; margin: 16px 0; }
@@ -65,16 +65,16 @@ body {
 }
 .chord-sidebar {
   flex: 0 0 240px;
-  background: rgba(255,255,255,0.03);
+  background: #ffffff;
   padding: 16px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid #e6e6ee;
   max-height: calc(100vh - 150px);
   overflow-y: auto;
 }
 .chord-main {
   flex: 1;
-  background: rgba(0,0,0,0.2);
+  background: #ffffff;
   padding: 32px 20px;
   border-radius: 24px;
   display: flex;
@@ -90,11 +90,11 @@ body {
   gap: 10px;
 }
 .chord-btn {
-  background: rgba(255,255,255,0.05);
+  background: #ece9f5;
   border: 2px solid transparent;
   padding: 12px;
   border-radius: 12px;
-  color: #fff;
+  color: var(--text-primary);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 1.2rem;
@@ -102,19 +102,19 @@ body {
   transition: all 0.2s;
   text-align: center;
 }
-.chord-btn:hover { background: rgba(255,255,255,0.1); }
+.chord-btn:hover { background: #d6d2ea; }
 .chord-btn.active {
-  background: rgba(52, 211, 153, 0.15);
-  border-color: var(--guitar-accent);
-  color: var(--guitar-accent);
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
 }
-.chord-btn.viewed { border-color: rgba(255,255,255,0.2); }
+.chord-btn.viewed { border-color: #d6d2ea; }
 
 /* Fretboard SVG */
 .fretboard-wrap {
   width: 100%;
   max-width: 300px;
-  background: rgba(255,255,255,0.02);
+  background: #ece9f5;
   border-radius: 16px;
   padding: 20px;
 }
@@ -129,7 +129,7 @@ body {
   font-size: 2.5rem;
   font-weight: 800;
   margin-top: 20px;
-  color: var(--guitar-accent);
+  color: #059669;
 }
 .chord-fact {
   text-align: center;
@@ -166,7 +166,7 @@ body {
 }
 .song-card {
   background: var(--bg-surface);
-  border: 2px solid rgba(255,255,255,0.06);
+  border: 2px solid #e6e6ee;
   border-radius: 20px;
   padding: 20px;
   cursor: pointer;
@@ -179,9 +179,9 @@ body {
 .song-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
 .song-meta { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; }
 .song-chords { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
-.chord-mini { 
-  font-size: 0.75rem; background: rgba(255,255,255,0.1); 
-  padding: 2px 6px; border-radius: 4px; font-weight: 800; 
+.chord-mini {
+  font-size: 0.75rem; background: #ece9f5;
+  padding: 2px 6px; border-radius: 4px; font-weight: 800;
 }
 
 /* Gameplay */
@@ -194,15 +194,15 @@ body {
 .game-header { display: flex; align-items: center; justify-content: space-between; }
 .game-song-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; }
 .back-to-songs, .metro-toggle {
-  background: rgba(255,255,255,0.05); border: none; padding: 8px 16px;
+  background: #ffffff; border: 1px solid #e6e6ee; padding: 8px 16px;
   border-radius: 10px; color: var(--text-muted); font-weight: 700; cursor: pointer;
 }
-.metro-toggle.on { color: var(--guitar-accent); background: rgba(52, 211, 153, 0.1); }
+.metro-toggle.on { color: #059669; background: #ece9f5; }
 
 .chord-strip-container {
   position: relative;
   height: 80px;
-  background: rgba(0,0,0,0.3);
+  background: #ece9f5;
   border-radius: 16px;
   overflow: hidden;
   display: flex;
@@ -218,8 +218,8 @@ body {
 .strip-chord {
   min-width: 60px;
   height: 50px;
-  background: rgba(255,255,255,0.05);
-  border: 2px solid rgba(255,255,255,0.1);
+  background: #ffffff;
+  border: 2px solid #e6e6ee;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -249,7 +249,7 @@ body {
 
 .game-main { flex: 1; display: flex; align-items: center; justify-content: center; }
 .fretboard-display {
-  background: rgba(255,255,255,0.02);
+  background: #ece9f5;
   padding: 20px;
   border-radius: 20px;
   display: flex;
@@ -258,7 +258,7 @@ body {
   gap: 12px;
 }
 #game-fretboard { height: 200px; width: auto; }
-.game-chord-name { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--guitar-accent); }
+.game-chord-name { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: #059669; }
 
 .big-strum-btn {
   width: 100%;
@@ -305,17 +305,17 @@ body {
   font-family: var(--font-display); cursor: pointer; transition: all 0.2s;
 }
 .results-btn.primary { background: var(--guitar-accent); color: #000; }
-.results-btn:not(.primary) { background: rgba(255,255,255,0.05); color: var(--text); }
+.results-btn:not(.primary) { background: #ece9f5; color: var(--text); }
 .results-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
 /* Ear Training */
 .ear-game-screen { display: flex; flex-direction: column; gap: 24px; }
 .ear-header { display: flex; justify-content: space-between; font-weight: 800; font-family: var(--font-display); font-size: 1.2rem; }
-.ear-streak { color: #F59E0B; }
+.ear-streak { color: #B45309; }
 .ear-main { display: flex; flex-direction: column; gap: 32px; align-items: center; }
 .ear-question-card {
-  background: rgba(255,255,255,0.03); padding: 40px; border-radius: 24px;
-  border: 2px solid rgba(255,255,255,0.08); text-align: center; width: 100%;
+  background: #ffffff; padding: 40px; border-radius: 24px;
+  border: 2px solid #e6e6ee; text-align: center; width: 100%;
 }
 .ear-replay-btn {
   background: var(--guitar-accent); color: #000; border: none; padding: 12px 24px;
@@ -323,11 +323,11 @@ body {
 }
 .ear-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
 .ear-opt-btn {
-  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 20px; color: #fff; font-family: var(--font-display);
+  background: #ffffff; border: 2px solid #e6e6ee;
+  border-radius: 16px; padding: 20px; color: var(--text-primary); font-family: var(--font-display);
   font-weight: 800; font-size: 1.5rem; cursor: pointer; transition: all 0.2s;
 }
-.ear-opt-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--guitar-accent); }
+.ear-opt-btn:hover { background: #ece9f5; border-color: var(--guitar-accent); }
 .ear-opt-btn.correct { background: #10B981; border-color: #10B981; }
 .ear-opt-btn.wrong { background: #EF4444; border-color: #EF4444; }
 
@@ -335,23 +335,23 @@ body {
 .tuner-container { display: flex; flex-direction: column; align-items: center; gap: 24px; }
 .string-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; }
 .tuner-btn {
-  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 16px; padding: 16px; color: #fff; font-family: var(--font-display);
+  background: #ffffff; border: 2px solid #e6e6ee;
+  border-radius: 16px; padding: 16px; color: var(--text-primary); font-family: var(--font-display);
   font-weight: 800; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center;
   justify-content: center; gap: 8px; transition: all 0.2s;
 }
 .tuner-btn span { font-size: 0.8rem; color: var(--text-muted); }
-.tuner-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--guitar-accent); }
-.tuner-btn.playing { 
-  background: rgba(52, 211, 153, 0.1); border-color: var(--guitar-accent); 
-  color: var(--guitar-accent); box-shadow: 0 0 20px var(--guitar-glow);
+.tuner-btn:hover { background: #ece9f5; border-color: var(--guitar-accent); }
+.tuner-btn.playing {
+  background: #ece9f5; border-color: var(--guitar-accent);
+  color: #059669; box-shadow: 0 0 20px var(--guitar-glow);
   animation: pulse 1s infinite;
 }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 .tuner-help { text-align: center; color: var(--text-muted); font-weight: 600; max-width: 400px; }
-.tuner-tuning { 
-  font-family: var(--font-display); font-size: 2rem; font-weight: 900; 
-  letter-spacing: 8px; color: var(--guitar-accent); opacity: 0.5; 
+.tuner-tuning {
+  font-family: var(--font-display); font-size: 2rem; font-weight: 900;
+  letter-spacing: 8px; color: #059669; opacity: 0.5;
 }
 
 /* Responsive */
