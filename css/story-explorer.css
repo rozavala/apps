@@ -5,8 +5,8 @@
 :root {
   --story-accent: #8B5CF6;
   --story-glow: rgba(139, 92, 246, 0.3);
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --bg-card: #ffffff;
+  --border-subtle: #e6e6ee;
 }
 
 body {
@@ -105,19 +105,19 @@ body {
   color: var(--purple); border-bottom: 2px dashed var(--purple);
   cursor: pointer; transition: all 0.2s;
 }
-.vocab-link:hover { background: rgba(167, 139, 250, 0.1); }
+.vocab-link:hover { background: #ece9f5; }
 
 /* Read-aloud word highlighting (word at a time) */
 .rw-word { transition: background 0.15s ease, color 0.15s ease; padding: 0 1px; border-radius: 4px; }
 .rw-word.speaking {
   background: rgba(251, 191, 36, 0.25);
-  color: #FBBF24;
+  color: #B45309;
   box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35);
 }
 
 .page-controls { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; width: 100%; justify-content: center; }
 .nav-btn {
-  padding: 10px 20px; border-radius: 12px; background: rgba(255,255,255,0.05);
+  padding: 10px 20px; border-radius: 12px; background: #ffffff;
   border: 1.5px solid var(--border-subtle); color: var(--text-primary);
   font-weight: 800; cursor: pointer; transition: all 0.2s;
 }
@@ -147,8 +147,8 @@ body {
   font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease;
   border: none; width: 100%; max-width: 280px; margin-bottom: 12px;
 }
-.btn-primary { background: linear-gradient(135deg, var(--story-accent), #A78BFA); color: #fff; }
-.btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
+.btn-primary { background: linear-gradient(135deg, #4338CA, #6366F1); color: #fff; }
+.btn-secondary { background: #ffffff; color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
 
 .feedback {
   position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);

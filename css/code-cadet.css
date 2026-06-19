@@ -202,7 +202,7 @@
   text-align: center;
   cursor: pointer;
   border-radius: var(--radius-xs);
-  background: rgba(255,255,255,0.02);
+  background: #ece9f5;
 }
 
 .cc-block {
@@ -329,8 +329,8 @@
 }
 .cc-ctrl-btn:hover { transform: translateY(-2px); border-color: var(--cc-accent); }
 .cc-ctrl-btn.cc-primary {
-  background: var(--cc-accent);
-  color: #0E1A2E;
+  background: linear-gradient(135deg,#4338CA,#6366F1);
+  color: #fff;
   border: none;
   box-shadow: 0 6px 18px var(--cc-glow);
 }
