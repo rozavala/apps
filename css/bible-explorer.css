@@ -4,9 +4,9 @@
    ============================================================ */
 
 :root {
-  --bx-accent: #818CF8;       /* indigo-400 */
+  --bx-accent: #4338CA;       /* indigo-700 (deep for text on light) */
   --bx-accent-deep: #4338CA;  /* indigo-700 */
-  --bx-gold: #FBBF24;
+  --bx-gold: #B45309;
   --bx-gold-deep: #B45309;
 }
 
@@ -168,8 +168,8 @@
 .bx-story-detail-tag {
   display: inline-block;
   margin-top: 6px;
-  background: rgba(129,140,248,0.18);
-  color: var(--bx-accent);
+  background: #4338CA;
+  color: #fff;
   border-radius: 999px;
   padding: 4px 12px;
   font-size: 0.8rem;
@@ -249,12 +249,14 @@
 }
 .bx-quiz-opt:hover { transform: translateY(-2px); border-color: var(--bx-accent); }
 .bx-quiz-opt.bx-correct {
-  background: rgba(52,211,153,0.25);
+  background: #059669;
   border-color: var(--green);
+  color: #fff;
 }
 .bx-quiz-opt.bx-wrong {
-  background: rgba(248,113,113,0.25);
+  background: #B91C1C;
   border-color: var(--red);
+  color: #fff;
 }
 .bx-quiz-result {
   text-align: center;
@@ -317,7 +319,7 @@
 .bx-blank {
   border: none;
   border-bottom: 2px solid var(--bx-accent);
-  background: rgba(129,140,248,0.10);
+  background: #ece9f5;
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 700;
@@ -330,15 +332,18 @@
 .bx-blank:focus { outline: 2px solid var(--bx-accent); }
 .bx-blank-correct {
   border-bottom-color: var(--green);
-  background: rgba(52,211,153,0.25);
+  background: #059669;
+  color: #fff;
 }
 .bx-blank-wrong {
   border-bottom-color: var(--red);
-  background: rgba(248,113,113,0.25);
+  background: #B91C1C;
+  color: #fff;
 }
 .bx-blank-hint {
   border-bottom-color: var(--bx-gold);
-  background: rgba(251,191,36,0.25);
+  background: #B45309;
+  color: #fff;
 }
 .bx-verse-actions {
   margin-top: 16px;
@@ -387,8 +392,8 @@
 .bx-book-card:hover { transform: translateY(-2px); border-color: var(--bx-accent); }
 .bx-book-card.bx-done { border-color: var(--bx-gold); }
 .bx-book-tag {
-  background: rgba(129,140,248,0.20);
-  color: var(--bx-accent);
+  background: #4338CA;
+  color: #fff;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.06em;
