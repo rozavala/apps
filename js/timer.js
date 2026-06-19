@@ -171,16 +171,16 @@ var TimerManager = (function() {
     var style = document.createElement('style');
     style.id = 'timer-lock-styles';
     style.textContent = 
-      '#timer-lock-overlay { position:fixed; inset:0; background:rgba(11,11,26,0.98); z-index:10000; display:flex; align-items:center; justify-content:center; color:#fff; text-align:center; font-family:var(--font-display); }' +
+      '#timer-lock-overlay { position:fixed; inset:0; background:rgba(241,241,244,0.98); z-index:10000; display:flex; align-items:center; justify-content:center; color:#1c1b29; text-align:center; font-family:var(--font-display); }' +
       '.lock-panel { max-width:400px; padding:40px 20px; }' +
       '.lock-emoji { font-size:80px; margin-bottom:20px; }' +
-      '.lock-msg { font-size:1.2rem; margin-bottom:30px; line-height:1.5; color:var(--text-muted); }' +
+      '.lock-msg { font-size:1.2rem; margin-bottom:30px; line-height:1.5; color:#6b6878; }' +
       '.lock-actions { display:flex; flex-direction:column; gap:12px; }' +
       '.lock-btn { padding:14px; border-radius:12px; border:none; font-weight:800; font-family:var(--font-display); cursor:pointer; }' +
-      '.btn-switch { background:var(--purple); color:#fff; }' +
-      '.btn-parent { background:#333; color:var(--text-muted); }' +
+      '.btn-switch { background:linear-gradient(135deg,#4338CA,#6366F1); color:#fff; }' +
+      '.btn-parent { background:#ffffff; border:1px solid #e6e6ee; color:#6b6878; }' +
       '.lock-pin-area { margin-top:20px; display:none; flex-direction:column; gap:10px; }' +
-      '.lock-pin-input { background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:8px; color:#fff; text-align:center; font-size:1.5rem; letter-spacing:8px; }';
+      '.lock-pin-input { background:#f4f3f8; border:2px solid #e2def0; padding:12px; border-radius:8px; color:#1c1b29; text-align:center; font-size:1.5rem; letter-spacing:8px; }';
     document.head.appendChild(style);
 
     var paused = isPaused();

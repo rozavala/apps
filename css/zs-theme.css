@@ -1,0 +1,128 @@
+/* ================================================================
+   ZAVALA SERRA — LIGHT THEME (global)  ·  css/zs-theme.css
+   ----------------------------------------------------------------
+   The single source of truth for the 2026 light redesign.
+   Link AFTER css/common.css (and the app's own stylesheet) on every
+   page so it wins on source order:
+
+     <link rel="stylesheet" href="css/common.css">
+     <link rel="stylesheet" href="css/<app>.css">
+     <link rel="stylesheet" href="css/zs-theme.css">   <-- last
+
+   This file re-themes the SHARED tokens + shared chrome (body, home
+   button, user badge, modals, feedback) for ALL apps. Per-app
+   bespoke surfaces (custom panels, game boards, etc.) still use the
+   tokens below — convert their hardcoded dark values using the
+   dark→light map in the redesign handoff README.
+   ================================================================ */
+
+/* ---------------- DESIGN TOKENS ---------------- */
+:root {
+  /* Surfaces — light grey screen, white modules */
+  --bg-deep:    #f1f1f4;   /* screen / app background */
+  --bg-surface: #ffffff;   /* cards / modules */
+  --bg-card:    #ffffff;
+  --bg-sunken:  #ece9f5;   /* tracks, wells, inset bars */
+  --border-subtle: #e6e6ee;
+  --border-strong: #d6d2ea;
+
+  /* Text */
+  --text:         #1c1b29;
+  --text-primary: #1c1b29;
+  --text-muted:   #6b6878;
+  --ink-title:    #312e81;   /* solid display-title color (NO gradient) */
+
+  /* Brand + accents (deep enough for white text on solid fills) */
+  --purple: #6D28D9;
+  --indigo: #4338CA;
+  --blue:   #2563EB;
+  --green:  #059669;
+  --teal:   #0D9488;
+  --gold:   #B45309;
+  --pink:   #BE185D;
+  --red:    #B91C1C;
+  --cyan:   #0E7490;
+  --orange: #C2410C;
+
+  /* Effects */
+  --radius:    20px;
+  --radius-sm: 16px;
+  --radius-xs: 12px;
+  --mod-shadow:    0 4px 14px rgba(15,15,25,0.08);
+  --mod-shadow-sm: 0 2px 6px rgba(15,15,25,0.05);
+
+  --font-display: 'Baloo 2', 'Nunito', cursive;
+  --font-body: 'Nunito', system-ui, sans-serif;
+}
+
+/* ---------------- BACKGROUND ---------------- */
+/* Light screen, no dark starfield / aurora. */
+body { background: var(--bg-deep) !important; color: var(--text-primary) !important; }
+body::before { display: none !important; }
+.aurora, .atmo, .nebula { display: none !important; }
+
+/* ---------------- SHARED CHROME (common.css) ---------------- */
+.home-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  box-shadow: var(--mod-shadow-sm);
+}
+.home-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+.user-badge {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  box-shadow: var(--mod-shadow-sm);
+}
+.star-counter { background: rgba(180,83,9,0.12); color: var(--gold); }
+
+/* ---------------- COMPONENT RECIPES ----------------
+   Reusable classes apps can adopt. (See DESIGN_SYSTEM.md for the
+   full conversion playbook + dark->light value map.) */
+
+/* Module / card — white surface on the grey screen */
+.zs-module {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--mod-shadow);
+}
+
+/* Solid, saturated pill — NOT a chalky pastel tint.
+   Set --pill to any accent token, e.g. style="--pill:var(--blue)". */
+.zs-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 99px;
+  font-weight: 800; font-size: 0.72rem;
+  background: var(--pill, var(--indigo));
+  color: #ffffff;
+}
+
+/* Solid title — replaces rainbow gradient text */
+.zs-title { color: var(--ink-title); font-family: var(--font-display); font-weight: 800; }
+
+/* Option-C app card — colored header band + white body.
+   Markup: <a class="zs-card" style="--accent:var(--blue)">
+             <div class="zs-card-head">🧮</div>
+             <div class="zs-card-body"> … </div>
+           </a> */
+.zs-card {
+  display: block; text-decoration: none; color: var(--text-primary);
+  background: #ffffff; border: 1px solid var(--border-subtle);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--mod-shadow);
+  transition: transform .3s, box-shadow .3s;
+}
+.zs-card:hover { transform: translateY(-5px); box-shadow: 0 18px 40px -16px rgba(20,18,40,0.25); }
+.zs-card-head {
+  height: 94px; display: flex; align-items: center; justify-content: center;
+  font-size: 44px; color: #fff;
+  background: var(--accent, var(--indigo));
+}
+.zs-card-body { padding: 15px 20px 18px; }
+
+/* Inset bar / progress track */
+.zs-track { height: 9px; border-radius: 99px; background: var(--bg-sunken); overflow: hidden; }
+.zs-track > .zs-fill { height: 100%; border-radius: 99px; background: var(--accent, var(--indigo)); }
