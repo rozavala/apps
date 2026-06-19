@@ -8,11 +8,11 @@
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 5vw, 2.4rem);
   font-weight: 800;
-  background: linear-gradient(135deg, #60A5FA, #FBBF24, #F472B6);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: none;
+  -webkit-text-fill-color: #312e81;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  color: #312e81;
   animation: gradShift 6s ease-in-out infinite;
 }
 .vc-header p {
@@ -32,17 +32,17 @@
 .vc-toolbar button {
   padding: 8px 14px;
   border-radius: 99px;
-  border: 1.5px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border: 1.5px solid #e6e6ee;
+  background: #ffffff;
   color: var(--text);
   font-weight: 700;
   font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.15s;
 }
-.vc-toolbar button:hover { border-color: #60A5FA; color: #60A5FA; }
+.vc-toolbar button:hover { border-color: #2563EB; color: #2563EB; }
 .vc-toolbar .vc-tb-primary {
-  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+  background: linear-gradient(135deg, #4338CA, #6366F1);
   border-color: transparent;
   color: #fff;
 }
@@ -56,7 +56,7 @@
 .vc-trip {
   padding: 16px 18px;
   background: var(--bg-surface);
-  border: 1.5px solid rgba(255,255,255,0.06);
+  border: 1.5px solid #e6e6ee;
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s;
@@ -92,14 +92,14 @@
   display: inline-block;
   padding: 4px 12px;
   border-radius: 99px;
-  background: rgba(251,191,36,0.12);
-  color: #FBBF24;
+  color: #fff;
+  background: #B45309;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.85rem;
 }
-.vc-countdown.now { background: rgba(52,211,153,0.15); color: #34D399; }
-.vc-countdown.past { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+.vc-countdown.now { color: #fff; background: #059669; }
+.vc-countdown.past { background: #ffffff; color: var(--text-muted); }
 
 .vc-empty {
   text-align: center;
@@ -111,7 +111,7 @@
 /* Trip detail */
 .vc-detail {
   background: var(--bg-surface);
-  border: 1.5px solid rgba(255,255,255,0.06);
+  border: 1.5px solid #e6e6ee;
   border-radius: 18px;
   padding: 20px;
 }
@@ -141,7 +141,7 @@
 .vc-detail-meta span {
   padding: 4px 10px;
   border-radius: 99px;
-  background: rgba(255,255,255,0.04);
+  background: #ffffff;
 }
 
 .vc-section { margin-bottom: 20px; }
@@ -155,7 +155,7 @@
 .vc-section-head a {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #60A5FA;
+  color: #2563EB;
   text-decoration: none;
   margin-left: 8px;
 }
@@ -168,8 +168,8 @@
 }
 .vc-pack-col {
   padding: 10px 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: #ffffff;
+  border: 1px solid #e6e6ee;
   border-radius: 12px;
 }
 .vc-pack-col h4 {
@@ -214,8 +214,8 @@
   flex: 1;
   padding: 6px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2);
+  border: 1px solid #e6e6ee;
+  background: #ece9f5;
   color: var(--text);
   font-size: 0.8rem;
   outline: none;
@@ -224,8 +224,8 @@
   padding: 6px 10px;
   border-radius: 6px;
   border: none;
-  background: rgba(52,211,153,0.15);
-  color: #34D399;
+  color: #fff;
+  background: #059669;
   font-weight: 800;
   font-size: 0.78rem;
   cursor: pointer;
@@ -234,8 +234,8 @@
 /* Itinerary */
 .vc-day {
   padding: 10px 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: #ffffff;
+  border: 1px solid #e6e6ee;
   border-radius: 12px;
   margin-bottom: 8px;
 }
@@ -260,8 +260,8 @@
   min-height: 50px;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(0,0,0,0.2);
+  border: 1px solid #e6e6ee;
+  background: #ece9f5;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.85rem;
@@ -269,7 +269,7 @@
   outline: none;
   resize: vertical;
 }
-.vc-day textarea:focus { border-color: #60A5FA; }
+.vc-day textarea:focus { border-color: #2563EB; }
 
 /* Form */
 .vc-form .vc-field {
@@ -288,15 +288,15 @@
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2);
+  border: 1px solid #e6e6ee;
+  background: #ece9f5;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 700;
   outline: none;
 }
-.vc-form input:focus, .vc-form select:focus { border-color: #60A5FA; }
+.vc-form input:focus, .vc-form select:focus { border-color: #2563EB; }
 .vc-form-actions {
   display: flex;
   gap: 8px;
@@ -312,9 +312,9 @@
   font-size: 0.9rem;
   cursor: pointer;
 }
-.vc-btn-primary { background: linear-gradient(135deg, #7C3AED, #A78BFA); color: #fff; }
-.vc-btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); }
-.vc-btn-danger { background: rgba(248,113,113,0.12); color: #F87171; }
+.vc-btn-primary { background: linear-gradient(135deg, #4338CA, #6366F1); color: #fff; }
+.vc-btn-secondary { background: #ffffff; color: var(--text); }
+.vc-btn-danger { color: #fff; background: #B91C1C; }
 
 @media (max-width: 480px) {
   .vc-pack-cols { grid-template-columns: 1fr; }

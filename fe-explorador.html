@@ -8,14 +8,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/zs-theme.css">
   <style>
     :root {
       --faith-gold: #F59E0B;
       --faith-gold-light: #FBBF24;
-      --faith-bg: #1A1005;
-      --faith-surface: #2D1B0A;
+      --faith-gold-ink: #B45309;
+      --faith-bg: #f1f1f4;
+      --faith-surface: #ffffff;
     }
-    body { background-color: var(--faith-bg); color: #FFFBEB; }
+    body { background-color: var(--faith-bg); color: #1c1b29; }
     
     .header {
       background: var(--faith-surface);
@@ -25,75 +27,75 @@
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
     .back-btn {
-      background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
+      background: #ece9f5; border: none; border-radius: 50%;
       width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 20px; cursor: pointer; text-decoration: none;
+      color: #1c1b29; font-size: 20px; cursor: pointer; text-decoration: none;
     }
-    .back-btn:hover { background: rgba(255,255,255,0.2); }
+    .back-btn:hover { background: #d6d2ea; }
     .title { font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 1.4rem; }
-    .stars-badge { background: rgba(245,158,11,0.2); border: 1px solid var(--faith-gold); padding: 4px 12px; border-radius: 99px; font-weight: 800; color: var(--faith-gold-light); }
+    .stars-badge { color:#fff; background:#B45309; border: 1px solid #B45309; padding: 4px 12px; border-radius: 99px; font-weight: 800; }
 
     .nav-tabs {
       display: flex; gap: 8px; padding: 12px; overflow-x: auto;
-      background: rgba(0,0,0,0.2);
+      background: #ece9f5;
     }
     .tab {
-      padding: 10px 20px; border-radius: 12px; background: rgba(255,255,255,0.05);
+      padding: 10px 20px; border-radius: 12px; background: #ffffff;
       font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: all 0.2s;
     }
     .tab.active { background: var(--faith-gold); color: #000; }
 
     .content-area { padding: 24px; max-width: 600px; margin: 0 auto; min-height: 70vh; }
-    .card { background: var(--faith-surface); border-radius: 20px; border: 1.5px solid rgba(245,158,11,0.2); padding: 24px; animation: fadeIn 0.4s ease-out; }
+    .card { background: var(--faith-surface); border-radius: 20px; border: 1.5px solid #e6e6ee; padding: 24px; animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     /* Prayer Section */
     .prayer-line { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; line-height: 1.4; opacity: 0.4; transition: opacity 0.3s; }
-    .prayer-line.active { opacity: 1; color: var(--faith-gold-light); transform: scale(1.05); transform-origin: left; }
+    .prayer-line.active { opacity: 1; color: var(--faith-gold-ink); transform: scale(1.05); transform-origin: left; }
     .bead-counter { display: flex; gap: 8px; justify-content: center; margin-top: 24px; }
-    .bead { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+    .bead { width: 12px; height: 12px; border-radius: 50%; background: #ece9f5; border: 1px solid #e6e6ee; transition: all 0.3s; }
     .bead.active { background: var(--faith-gold); box-shadow: 0 0 10px var(--faith-gold); }
 
     /* Saint/Heritage Section */
     .item-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-    .item-icon { font-size: 3rem; background: rgba(255,255,255,0.05); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+    .item-icon { font-size: 3rem; background: #ece9f5; width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
     .item-title { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
-    .item-meta { font-size: 0.85rem; color: var(--faith-gold-light); font-weight: 700; }
+    .item-meta { font-size: 0.85rem; color: var(--faith-gold-ink); font-weight: 700; }
     .item-bio { font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px; }
 
     .quiz-options { display: grid; gap: 12px; }
     .quiz-btn {
-      padding: 16px; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1);
-      border-radius: 12px; color: white; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;
+      padding: 16px; background: #ffffff; border: 1.5px solid #e6e6ee;
+      border-radius: 12px; color: #1c1b29; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;
     }
-    .quiz-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--faith-gold); }
+    .quiz-btn:hover { background: #ece9f5; border-color: var(--faith-gold); }
     .quiz-btn.correct { background: #10B981; border-color: #10B981; }
     .quiz-btn.wrong { background: #EF4444; border-color: #EF4444; }
 
     /* Rosary Section */
     .rosary-today { text-align: center; font-size: 0.95rem; opacity: 0.85; margin: 8px 0 16px; }
-    .rosary-today strong { color: var(--faith-gold-light); }
+    .rosary-today strong { color: var(--faith-gold-ink); }
 
     .set-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
     .set-tab {
-      padding: 8px 14px; border-radius: 99px; background: rgba(255,255,255,0.05);
-      border: 1.5px solid rgba(255,255,255,0.12); color: #FFFBEB; font-weight: 700;
+      padding: 8px 14px; border-radius: 99px; background: #ffffff;
+      border: 1.5px solid #d6d2ea; color: #1c1b29; font-weight: 700;
       font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap;
     }
     .set-tab:hover { border-color: var(--faith-gold); }
     .set-tab.active { background: var(--faith-gold); color: #000; border-color: var(--faith-gold); }
     .set-tab.is-today { box-shadow: 0 0 0 2px rgba(245,158,11,0.35); }
 
-    .set-days { text-align: center; font-size: 0.85rem; color: var(--faith-gold-light); font-weight: 700; margin-bottom: 16px; }
+    .set-days { text-align: center; font-size: 0.85rem; color: var(--faith-gold-ink); font-weight: 700; margin-bottom: 16px; }
 
     .mystery-list { display: grid; gap: 8px; margin-bottom: 8px; }
     .mystery-item {
       display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-      padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.04);
-      border: 1.5px solid rgba(255,255,255,0.1); color: #FFFBEB; cursor: pointer; transition: all 0.2s;
+      padding: 12px 14px; border-radius: 12px; background: #ffffff;
+      border: 1.5px solid #e6e6ee; color: #1c1b29; cursor: pointer; transition: all 0.2s;
     }
-    .mystery-item:hover { border-color: var(--faith-gold); background: rgba(255,255,255,0.08); }
-    .mystery-item.active { border-color: var(--faith-gold); background: rgba(245,158,11,0.12); }
+    .mystery-item:hover { border-color: var(--faith-gold); background: #ece9f5; }
+    .mystery-item.active { border-color: var(--faith-gold); background: #fdf6e7; }
     .mystery-num {
       flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%;
       background: var(--faith-gold); color: #000; font-weight: 800;
@@ -105,17 +107,17 @@
     .mystery-item-desc { font-size: 0.82rem; opacity: 0.75; line-height: 1.35; }
 
     .rosary-beads { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 32px 0; }
-    .rosary-bead { width: 44px; height: 44px; border-radius: 50%; background: #2D1B0A; border: 3px solid #4D2B1A; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 800; color: rgba(255,255,255,0.2); }
+    .rosary-bead { width: 44px; height: 44px; border-radius: 50%; background: #ece9f5; border: 3px solid #d6d2ea; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #6b6878; }
     .rosary-bead.active { background: var(--faith-gold); border-color: #FFF; color: #000; box-shadow: 0 0 20px var(--faith-gold); transform: scale(1.15); }
-    .rosary-bead.done { background: #4D2B1A; border-color: var(--faith-gold); color: var(--faith-gold); }
+    .rosary-bead.done { background: #fdf6e7; border-color: var(--faith-gold); color: var(--faith-gold-ink); }
 
-    .mystery-card { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 16px; text-align: center; margin-top: 24px; }
-    .mystery-title { font-weight: 800; font-size: 1.2rem; color: var(--faith-gold-light); margin-bottom: 4px; }
+    .mystery-card { background: #ece9f5; padding: 20px; border-radius: 16px; text-align: center; margin-top: 24px; }
+    .mystery-title { font-weight: 800; font-size: 1.2rem; color: var(--faith-gold-ink); margin-bottom: 4px; }
     .mystery-desc { font-size: 0.95rem; opacity: 0.8; }
 
     .bottom-actions { margin-top: 32px; display: flex; justify-content: center; }
     .next-btn {
-      padding: 14px 32px; border-radius: 12px; background: var(--faith-gold); color: #000;
+      padding: 14px 32px; border-radius: 12px; background: linear-gradient(135deg,#4338CA,#6366F1); color: #fff;
       border: none; font-weight: 800; font-family: 'Baloo 2', cursive; font-size: 1.1rem; cursor: pointer;
     }
     .next-btn:hover { transform: scale(1.05); }
@@ -333,7 +335,7 @@
             <div class="mystery-title">🎉 ¡Rosario completo!</div>
             <div class="mystery-desc">Para terminar, recemos juntos la Salve.</div>
           </div>
-          <h3 style="font-family:'Baloo 2';text-align:center;margin:16px 0 8px;color:var(--faith-gold-light);">${salve.title}</h3>
+          <h3 style="font-family:'Baloo 2';text-align:center;margin:16px 0 8px;color:var(--faith-gold-ink);">${salve.title}</h3>
           <div id="prayer-lines">
             ${salve.lines.map(l => `<div class="prayer-line active">${l}</div>`).join('')}
           </div>
@@ -384,7 +386,7 @@
           }).join('')}
         </div>
 
-        <h3 style="font-family:'Baloo 2';text-align:center;margin:16px 0 8px;color:var(--faith-gold-light);">${prayerLabel}</h3>
+        <h3 style="font-family:'Baloo 2';text-align:center;margin:16px 0 8px;color:var(--faith-gold-ink);">${prayerLabel}</h3>
         <div id="prayer-lines">
           ${prayer.lines.map(l => `<div class="prayer-line active">${l}</div>`).join('')}
         </div>

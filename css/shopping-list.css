@@ -16,11 +16,12 @@
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 5vw, 2.4rem);
   font-weight: 800;
-  background: linear-gradient(135deg, #34D399, #FBBF24, #60A5FA);
+  background: none;
+  -webkit-text-fill-color: #312e81;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  color: #312e81;
   background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   animation: gradShift 6s ease-in-out infinite;
 }
 .sl-header p {
@@ -41,7 +42,7 @@
   min-width: 0;
   padding: 12px 14px;
   border-radius: var(--radius-xs);
-  border: 2px solid rgba(255,255,255,0.08);
+  border: 2px solid #e6e6ee;
   background: var(--bg-deep);
   color: var(--text);
   font-family: var(--font-body);
@@ -54,7 +55,7 @@
 .sl-add select {
   padding: 12px 10px;
   border-radius: var(--radius-xs);
-  border: 2px solid rgba(255,255,255,0.08);
+  border: 2px solid #e6e6ee;
   background: var(--bg-deep);
   color: var(--text);
   font-family: var(--font-body);
@@ -88,8 +89,8 @@
 .sl-action-btn {
   padding: 8px 14px;
   border-radius: 99px;
-  border: 1.5px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border: 1.5px solid #e6e6ee;
+  background: #ffffff;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.8rem;
@@ -137,12 +138,12 @@
   gap: 12px;
   padding: 12px 14px;
   background: var(--bg-surface);
-  border: 1.5px solid rgba(255,255,255,0.06);
+  border: 1.5px solid #e6e6ee;
   border-radius: var(--radius-xs);
   transition: all 0.2s;
   animation: fadeUp 0.25s ease-out both;
 }
-.sl-item:hover { border-color: rgba(255,255,255,0.15); }
+.sl-item:hover { border-color: #d6d2ea; }
 .sl-item.checked {
   opacity: 0.5;
 }
@@ -155,7 +156,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 2px solid #d6d2ea;
   background: transparent;
   cursor: pointer;
   display: flex;

@@ -1,0 +1,345 @@
+/* ================================================================
+   ZAVALA SERRA — LIGHT REDESIGN (2026)
+   Layered LAST on index.html + family.html only, so the 25 sub-apps
+   keep their dark theme untouched. Light-grey screen, white modules,
+   solid saturated pills, option-C app cards, no rainbow gradients.
+   ================================================================ */
+
+/* ---------- Tokens (scoped to these two pages) ---------- */
+:root {
+  --bg-deep:    #f1f1f4;   /* screen / grey backdrop */
+  --bg-surface: #ffffff;   /* modules */
+  --bg-card:    #ffffff;
+  --border-subtle: #e6e6ee;
+  --text-primary: #1c1b29;
+  --text:         #1c1b29;
+  --text-muted:   #6b6878;
+  --ink-title:    #312e81;  /* solid title color (replaces rainbow) */
+  --mod-shadow: 0 4px 14px rgba(15,15,25,0.08);
+}
+
+/* ---------- Background: kill dark starfield + aurora ---------- */
+body { background: var(--bg-deep) !important; color: var(--text-primary) !important; }
+body::before { display: none !important; }
+.aurora { display: none !important; }
+
+/* ================================================================
+   HEADERS / HERO  — solid ink titles, no gradient
+   ================================================================ */
+.header h1,
+.login-hero h1 {
+  background: none !important;
+  -webkit-text-fill-color: var(--ink-title) !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  color: var(--ink-title) !important;
+  animation: none !important;
+}
+.header p, .login-hero p { color: var(--text-muted); }
+
+/* ================================================================
+   USER BAR  — white module + solid status pills
+   ================================================================ */
+.user-bar {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--mod-shadow);
+}
+.user-bar-name { color: var(--text-primary); }
+.user-bar-greeting { color: var(--text-muted); }
+
+#timer-display {
+  background: #2563EB !important;
+  color: #ffffff !important;
+}
+#timer-display.timer-low { background: #DC2626 !important; color:#fff !important; }
+#token-balance {
+  background: #B45309 !important;
+  color: #ffffff !important;
+}
+.switch-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+.switch-btn:hover {
+  border-color: #c9c5e0;
+  color: var(--text-primary);
+  background: #faf9fd;
+}
+
+/* ================================================================
+   SCHEDULE BANNER + WIDGETS  — white modules
+   ================================================================ */
+#schedule-banner {
+  background: #ffffff !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--mod-shadow);
+}
+#schedule-day { color: var(--ink-title) !important; }
+#schedule-theme { color: var(--text-muted) !important; }
+
+.fcal-widget {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--mod-shadow);
+}
+.fcal-w-empty, .fcal-w-when { color: var(--text-muted); }
+
+/* ================================================================
+   APP GRID  — option C: bold colored header + white body
+   ================================================================ */
+.app-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  box-shadow: var(--mod-shadow);
+}
+.app-card::before { display: none !important; }
+.app-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border-subtle);
+  box-shadow: 0 18px 40px -16px var(--card-glow, rgba(20,18,40,0.25));
+}
+
+/* icon tile -> full-width colored header band (keeps per-card --card-icon-bg) */
+.card-icon {
+  width: 100%;
+  height: 94px;
+  border-radius: 0;
+  font-size: 44px;
+  box-shadow: none;
+}
+.app-card:hover .card-icon { transform: none; }
+
+.card-title { padding: 15px 20px 0; color: var(--text-primary); }
+.card-desc  { padding: 6px 20px 0; color: var(--text-muted); }
+.card-stats { padding: 10px 20px 0; color: var(--text-muted); }
+.card-stats:empty { display: none; }
+.card-stats .cs-item { background: #f0eef7; color: var(--text-muted); }
+.card-stats .cs-item.active { background: rgba(180,83,9,0.12); color: #B45309; }
+
+/* tag -> solid saturated chip using the card's own gradient */
+.card-tag {
+  margin: 14px 20px 18px;
+  background: var(--card-icon-bg) !important;
+  color: #ffffff !important;
+}
+
+/* ================================================================
+   LOGIN  — white profile cards on grey, solid stat chips
+   ================================================================ */
+.profile-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--mod-shadow);
+}
+.profile-card:hover {
+  border-color: #d6d2ea;
+  box-shadow: 0 18px 44px -18px rgba(67,56,202,0.30);
+}
+.profile-name { color: var(--text-primary); }
+.profile-age  { color: var(--text-muted); }
+
+.profile-card.add-card {
+  background: #f7f6fc;
+  border: 1.5px dashed #cfcbe2;
+}
+.profile-card.add-card:hover { background:#f1eff9; border-color:#a99fe0; box-shadow:none; }
+.add-icon {
+  background: #f0eef7;
+  color: var(--text-muted);
+  border: 2px dashed #cfcbe2;
+}
+.add-label { color: var(--text-muted); }
+.guest-card { background:#eef4ff !important; border-color:#bcd4ff !important; }
+
+.profile-edit-btn {
+  background: #f0eef7;
+  border: 1.5px solid #ddd8ee;
+}
+.profile-edit-btn:hover { background:#e6e1f6; border-color:#c4bce6; }
+
+/* ================================================================
+   PARENT ACCESS BUTTONS  — clean light pills
+   ================================================================ */
+.parent-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  color: #3a3850;
+  box-shadow: 0 2px 6px rgba(15,15,25,0.05);
+}
+.parent-btn:hover {
+  border-color: #c9c5e0;
+  color: var(--text-primary);
+  background: #faf9fd;
+}
+
+/* ================================================================
+   MODALS  — white sheets, light inputs
+   ================================================================ */
+.modal { background: #ffffff; border: 1px solid var(--border-subtle); }
+.modal h2 { color: var(--text-primary); }
+.modal-field label { color: var(--text-muted); }
+.modal-field input,
+#pin-input {
+  background: #f4f3f8;
+  border: 2px solid #e2def0;
+  color: var(--text-primary);
+}
+.modal-field input:focus, #pin-input:focus { border-color: #6D28D9; }
+.emoji-option, .age-option, .color-option {
+  background: #f4f3f8;
+  border-color: #e2def0;
+}
+.age-option { color: var(--text-muted); }
+.age-option.selected, .emoji-option.selected {
+  border-color: #6D28D9; background:#efeafb; color:#6D28D9;
+  box-shadow: 0 0 0 3px rgba(109,40,217,0.12);
+}
+.btn-cancel { background:#eceaf3; color:#3a3850; }
+.btn-cancel:hover { background:#e2dff0; color:var(--text-primary); }
+.btn-create {
+  background: linear-gradient(135deg,#4338CA,#6366F1);
+  box-shadow: 0 4px 16px -4px rgba(67,56,202,0.5);
+}
+.hub-action-btn {
+  background: linear-gradient(135deg,#4338CA,#6366F1);
+  box-shadow: 0 4px 16px -4px rgba(67,56,202,0.5);
+}
+.hub-action-btn.secondary {
+  background:#eceaf3; color:#3a3850; border:1px solid var(--border-subtle);
+}
+.hub-action-btn.secondary:hover { background:#e2dff0; color:var(--text-primary); border-color:#c9c5e0; }
+.edit-preview { border-bottom-color: var(--border-subtle); }
+.edit-preview-name { color: var(--text-primary); }
+.edit-actions { border-top-color: var(--border-subtle); }
+
+/* ================================================================
+   DASHBOARD / PARENTS CORNER SHELL  — grey panel, white modules
+   (chart widgets are added in Phase 2 via JS)
+   ================================================================ */
+.dash-panel {
+  background: #f1f1f4;
+  border: 1px solid #e2e2e6;
+}
+.dash-panel h2 { color: var(--text-primary); }
+.dash-close { background:#ffffff; border:1px solid var(--border-subtle); color:var(--text-muted); }
+.dash-close:hover { color:var(--text-primary); border-color:#c9c5e0; }
+
+.dash-kid, .dash-profile {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--mod-shadow);
+}
+.dash-kid-name, .dash-name { color: var(--text-primary); }
+.dash-kid-age, .dash-age { color: var(--text-muted); }
+.dash-app-row { border-top-color: #eceaf3; }
+.dash-app-stat { color: var(--text-muted); }
+.dash-bar-wrap { background: #ece9f5; }
+
+.ins-card { background:#ffffff; border:1px solid var(--border-subtle); box-shadow:var(--mod-shadow); }
+.ins-name { color: var(--text-primary); }
+.ins-bar { background:#ece9f5; }
+.ins-legend { color: var(--text-muted); }
+.ins-stats { color: var(--text-muted); border-top-color:#eceaf3; }
+.ins-nudges { border-top-color:#eceaf3; }
+.ins-nudge {
+  background: rgba(67,56,202,0.06);
+  border: 1px solid rgba(67,56,202,0.18);
+  color: #2a2840;
+}
+
+.tokens-summary { background:#ffffff; border:1px solid rgba(180,83,9,0.25); }
+.chore-item { background:#ffffff; border:1px solid var(--border-subtle); }
+.chore-item:hover { background:#faf9fd; border-color:#d6d2ea; }
+.chore-label { color: var(--text-primary); }
+.parent-kid-card { background:#ffffff; border:1px solid var(--border-subtle); box-shadow:var(--mod-shadow); }
+.pk-name { color: var(--text-primary); }
+.pk-setting label { color: var(--text-muted); }
+.a11y-scale-btn { background:#f4f3f8; border:1px solid #e2def0; color:var(--text-primary); }
+.a11y-scale-btn.active { background:rgba(109,40,217,0.14); border-color:#6D28D9; color:#6D28D9; }
+
+/* ================================================================
+   FAMILY WALL  (family.html) — light bento
+   ================================================================ */
+:root {
+  --fw-bg: #f1f1f4;
+  --fw-card: #ffffff;
+  --fw-card-strong: #f4f3f8;
+  --fw-border: #e6e6ee;
+  --fw-text: #1c1b29;
+  --fw-muted: #6b6878;
+}
+body { background: var(--fw-bg) !important; }
+#fw-root { color: var(--fw-text); }
+
+.fw-back { background:#ffffff; border:1px solid var(--fw-border); color:var(--fw-text); box-shadow:0 2px 6px rgba(15,15,25,0.05); }
+.fw-back:hover { background:#faf9fd; }
+.fw-avatar { background:#ffffff; }
+.fw-avatar-name { color: var(--fw-muted); }
+.fw-date {
+  background: none !important;
+  -webkit-text-fill-color: var(--ink-title) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--ink-title) !important;
+}
+.fw-greeting { color: var(--fw-muted); }
+
+.fw-card {
+  background: #ffffff;
+  border: 1px solid var(--fw-border);
+  box-shadow: var(--mod-shadow);
+}
+.fw-card-empty { color: var(--fw-muted); }
+.fw-weather-meta { color: var(--fw-muted); }
+.fw-weather-cta { color: var(--fw-muted); }
+
+.fw-routines-head > div { color: var(--fw-muted); border-bottom-color: var(--fw-border); }
+.fw-r-kid-avatar { background:#f4f3f8; }
+.fw-r-section { background:#f6f5fb; }
+.fw-r-section-label { color: var(--fw-muted); }
+.fw-r-task {
+  background:#f4f3f8;
+  border:1px solid var(--fw-border);
+  color: var(--fw-text);
+}
+.fw-r-task:hover { background:#ece9f5; }
+.fw-r-task.done {
+  background:#0D9488;          /* solid teal "done" */
+  border-color:#0D9488;
+  color:#ffffff;
+  text-decoration-color: rgba(255,255,255,0.6);
+}
+.fw-r-task.done .fw-r-check { background:#ffffff; border-color:#ffffff; color:#0D9488; }
+.fw-r-check { border-color: var(--fw-muted); }
+.fw-r-empty, .fw-week-empty, .fw-week-day-date { color: var(--fw-muted); }
+
+.fw-event-row, .fw-menu-row, .fw-shop-row, .fw-week-day { border-bottom-color: var(--fw-border); }
+.fw-when, .fw-menu-meal { color: var(--fw-muted); }
+.fw-menu-text.empty { color: var(--fw-muted); }
+.fw-shop-row .fw-shop-cat { color: var(--fw-muted); }
+.fw-shop-more { color: var(--fw-muted); }
+
+.fw-quick a {
+  background:#f4f3f8;
+  border:1px solid var(--fw-border);
+  color: var(--fw-text);
+}
+.fw-quick a:hover { transform:translateY(-2px); border-color:#c9c5e0; }
+
+.fw-weather-suggest { background:#eef4ff; border-left-color:#2563EB; }
+.fw-weather-suggest.warm { background:#fff7e6; border-left-color:#B45309; }
+.fw-weather-suggest .when { color: var(--fw-muted); }
+
+.fw-modal-card { background:#ffffff; border:1px solid var(--fw-border); }
+.fw-modal-card p, .fw-or, .fw-loc-empty { color: var(--fw-muted); }
+.fw-loc-search input, .fw-loc-result, .fw-loc-city { background:#f4f3f8; border:1px solid var(--fw-border); color:var(--fw-text); }
+.fw-btn { border:1px solid var(--fw-border); }
+.fw-btn-primary { background:linear-gradient(135deg,#4338CA,#6366F1); border-color:transparent; }
+.fw-btn-ghost { background:transparent; color:var(--fw-text); }
+.fw-week-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }

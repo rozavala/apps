@@ -11,11 +11,8 @@
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 5vw, 2.4rem);
   font-weight: 800;
-  background: linear-gradient(135deg, #F87171, #FBBF24, #34D399);
+  background:none; -webkit-text-fill-color:#312e81; background-clip:border-box; -webkit-background-clip:border-box; color:#312e81;
   background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   animation: gradShift 6s ease-in-out infinite;
 }
 .mn-header p {
@@ -35,26 +32,25 @@
 .mn-toolbar button {
   padding: 8px 14px;
   border-radius: 99px;
-  border: 1.5px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border: 1.5px solid #e6e6ee;
+  background: #ffffff;
   color: var(--text);
   font-weight: 700;
   font-size: 0.82rem;
   cursor: pointer;
   transition: all 0.15s;
 }
-.mn-toolbar button:hover { border-color: #FBBF24; color: #FBBF24; }
+.mn-toolbar button:hover { border-color: #B45309; color: #B45309; }
 .mn-toolbar .mn-tb-lock {
-  background: linear-gradient(135deg, rgba(167,139,250,0.15), rgba(96,165,250,0.12));
-  border-color: rgba(167,139,250,0.3);
-  color: #A78BFA;
+  color:#fff; background:#6D28D9;
+  border-color: #6D28D9;
 }
 
 .mn-today {
   padding: 16px;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(239,68,68,0.08));
-  border: 1.5px solid rgba(251,191,36,0.3);
+  background: #ffffff;
+  border: 1.5px solid #B45309;
   border-radius: 16px;
   text-align: center;
   animation: fadeUp 0.5s ease-out both;
@@ -62,7 +58,7 @@
 .mn-today-label {
   font-size: 0.75rem;
   font-weight: 800;
-  color: #FBBF24;
+  color: #B45309;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 4px;
@@ -91,12 +87,12 @@
 .mn-day {
   padding: 12px 14px;
   background: var(--bg-surface);
-  border: 1.5px solid rgba(255,255,255,0.06);
+  border: 1.5px solid #e6e6ee;
   border-radius: 14px;
 }
 .mn-day.today {
-  border-color: rgba(251,191,36,0.35);
-  background: linear-gradient(180deg, rgba(251,191,36,0.06), rgba(255,255,255,0.02));
+  border-color: #B45309;
+  background: #ffffff;
 }
 .mn-day-head {
   display: flex;
@@ -114,7 +110,7 @@
   color: var(--text-muted);
   font-weight: 700;
 }
-.mn-day.today .mn-day-name { color: #FBBF24; }
+.mn-day.today .mn-day-name { color: #B45309; }
 
 .mn-meals {
   display: grid;
@@ -123,8 +119,8 @@
 }
 .mn-meal {
   padding: 8px 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: #ffffff;
+  border: 1px solid #e6e6ee;
   border-radius: 10px;
 }
 .mn-meal-label {
@@ -150,7 +146,7 @@
 }
 .mn-meal input::placeholder { color: var(--text-muted); font-weight: 500; opacity: 0.6; }
 .mn-meal input:focus {
-  background: rgba(251,191,36,0.05);
+  background: #ece9f5;
   border-radius: 6px;
 }
 .mn-meal.read-only input {
@@ -171,7 +167,7 @@
 .mn-modal-panel {
   max-width: 420px; width: 100%;
   background: var(--bg-surface);
-  border: 1.5px solid rgba(255,255,255,0.1);
+  border: 1.5px solid #e6e6ee;
   border-radius: 18px;
   padding: 20px 22px;
 }
@@ -186,8 +182,8 @@
   min-height: 160px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.2);
+  border: 1px solid #e6e6ee;
+  background: #ece9f5;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.9rem;
@@ -209,8 +205,8 @@
   font-size: 0.85rem;
   cursor: pointer;
 }
-.mn-btn-primary { background: linear-gradient(135deg, #7C3AED, #A78BFA); color: #fff; }
-.mn-btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); }
+.mn-btn-primary { background:linear-gradient(135deg,#4338CA,#6366F1); color:#fff; }
+.mn-btn-secondary { background: #ffffff; color: var(--text); }
 
 @media (max-width: 640px) {
   .mn-meals { grid-template-columns: 1fr; }

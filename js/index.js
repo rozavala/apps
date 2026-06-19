@@ -691,6 +691,231 @@
     } catch(err) {}
   }
 
+  // ════════════════════════════════════════════════════════════════
+  //  REDESIGN — Dashboard "Overview" (charts from real local data)
+  //  All values are derived from data the suite already stores:
+  //    • totalStars / rank  → getPlayerStats / getExplorerRank
+  //    • screen time today  → TimerManager (per-kid minutesUsed/max)
+  //    • tokens             → zs_chores_<kid>.totalTokens
+  //    • activity trend +   → ActivityLog timestamped events
+  //      app usage + streak
+  // ════════════════════════════════════════════════════════════════
+  var _DASH_RANKS = [
+    { n: 'Cadet', s: 0, i: '🛸' }, { n: 'Apprentice', s: 15, i: '🌟' },
+    { n: 'Veteran', s: 30, i: '🛡️' }, { n: 'Explorer', s: 60, i: '🌍' },
+    { n: 'Pilot', s: 100, i: '🚀' }, { n: 'Astronaut', s: 150, i: '🌌' },
+    { n: 'Elite', s: 250, i: '💎' }, { n: 'Grand Master', s: 500, i: '👑' }
+  ];
+  var _APP_COLOR = {
+    'Math Galaxy': '#1D4ED8', 'Little Maestro': '#6D28D9', 'Chess Quest': '#B45309',
+    'Art Studio': '#BE185D', 'Descubre Chile': '#B91C1C', 'Lab Explorer': '#047857',
+    'World Explorer': '#1D4ED8', 'Story Explorer': '#6D28D9', 'Guitar Jam': '#047857',
+    'Fe Explorador': '#B45309', 'Sports Arena': '#0D9488', 'Guess Quest': '#B45309',
+    'Quest Adventure': '#B45309', 'Book & Movie Check': '#1D4ED8', 'Routines': '#0D9488'
+  };
+  function _appColor(name) { return _APP_COLOR[name] || '#4338CA'; }
+  function _slug(s) { return String(s || '').toLowerCase().replace(/\s+/g, '_'); }
+  function _nextRank(stars) {
+    for (var i = 0; i < _DASH_RANKS.length; i++) {
+      if (stars < _DASH_RANKS[i].s) return { next: _DASH_RANKS[i], prev: _DASH_RANKS[i - 1] || _DASH_RANKS[0] };
+    }
+    return { next: null, prev: _DASH_RANKS[_DASH_RANKS.length - 1] };
+  }
+
+  // Weekly STARS history — one snapshot per ISO week (Monday key), last 12 weeks.
+  function _starsWeekKey(ts) { var d = new Date(ts); var dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow); return d.toISOString().split('T')[0]; }
+  function _readStarsHistory() { try { return JSON.parse(localStorage.getItem('zs_stars_history')) || {}; } catch (e) { return {}; } }
+  function _recordStarsSnapshot(profiles) {
+    var h = _readStarsHistory();
+    try {
+      var total = 0;
+      (profiles || []).forEach(function(p) { try { var s = (typeof getPlayerStats === 'function') ? getPlayerStats(p.name) : {}; total += (s.totalStars || 0); } catch (e) {} });
+      h[_starsWeekKey(Date.now())] = total;
+      var keys = Object.keys(h).sort();
+      while (keys.length > 12) { delete h[keys.shift()]; }
+      localStorage.setItem('zs_stars_history', JSON.stringify(h));
+    } catch (e) {}
+    return h;
+  }
+  function _seriesSvg(vals, color) {
+    var n = vals.length; if (n < 2) return '';
+    var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals), span = (max - min) || 1;
+    var pts = vals.map(function(v, i) { return [i * (520 / (n - 1)), 80 - ((v - min) / span) * 62]; });
+    var line = pts.map(function(pt, i) { return (i ? 'L' : 'M') + pt[0].toFixed(0) + ',' + pt[1].toFixed(0); }).join(' ');
+    var last = pts[n - 1];
+    return '<svg viewBox="0 0 520 96" width="100%" height="120" preserveAspectRatio="none" style="display:block;">' +
+      '<defs><linearGradient id="ovTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.22"></stop><stop offset="100%" stop-color="' + color + '" stop-opacity="0"></stop></linearGradient></defs>' +
+      '<path d="' + line + ' L520,90 L0,90 Z" fill="url(#ovTrend)"></path>' +
+      '<path d="' + line + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>' +
+      '<circle cx="' + last[0].toFixed(0) + '" cy="' + last[1].toFixed(0) + '" r="4.5" fill="' + color + '" stroke="#ffffff" stroke-width="2"></circle>' +
+    '</svg>';
+  }
+  // Accrue a weekly snapshot on every hub load (so the trend fills even if the dashboard is rarely opened).
+  try { document.addEventListener('DOMContentLoaded', function() { try { if (typeof getProfiles === 'function') _recordStarsSnapshot(getProfiles()); } catch (e) {} }); } catch (e) {}
+
+  function _renderOverview(profiles) {
+    if (!profiles || !profiles.length) return '';
+    var DAY = 86400000, now = Date.now();
+    var totalStars = 0, tokens = 0, usedMin = 0, maxMin = 0;
+    var activeDays = {}, weekBuckets = [0,0,0,0,0,0,0,0];
+    var appCount = {}, appIcon = {};
+    var perKid = [];
+
+    profiles.forEach(function(p) {
+      var stats = {}, ts = 0, rank = { icon: '🛸', name: 'Cadet' };
+      try { stats = (typeof getPlayerStats === 'function') ? getPlayerStats(p.name) : {}; ts = stats.totalStars || 0; } catch (e) {}
+      try { rank = (typeof getExplorerRank === 'function') ? getExplorerRank(p.name, stats) : rank; } catch (e) {}
+      totalStars += ts;
+      try { var ch = JSON.parse(localStorage.getItem('zs_chores_' + _slug(p.name))); if (ch && ch.totalTokens) tokens += ch.totalTokens; } catch (e) {}
+      try { var td = (typeof TimerManager !== 'undefined' && TimerManager.getDataForKid) ? TimerManager.getDataForKid(p.name) : null; if (td) { usedMin += (td.minutesUsed || 0); maxMin += (td.maxMinutes || 0); } } catch (e) {}
+
+      var ev = [];
+      try { ev = (typeof ActivityLog !== 'undefined') ? (ActivityLog.getForUser(p.name) || []) : []; } catch (e) {}
+      var kidDays = {}, kidWeek = 0, kidApps = {};
+      ev.forEach(function(e) {
+        if (!e || !e.ts) return;
+        var age = now - e.ts;
+        var wk = Math.floor(age / (7 * DAY));
+        if (wk >= 0 && wk < 8) weekBuckets[7 - wk]++;
+        if (age <= 7 * DAY) {
+          var d = new Date(e.ts).toISOString().split('T')[0];
+          activeDays[d] = true; kidDays[d] = true; kidWeek++;
+          if (e.app) { appCount[e.app] = (appCount[e.app] || 0) + 1; if (e.icon) appIcon[e.app] = e.icon; }
+        }
+      });
+      // streak: consecutive days ending today (or yesterday) with activity
+      var streak = 0;
+      for (var i = 0; i < 60; i++) {
+        var dk = new Date(now - i * DAY).toISOString().split('T')[0];
+        if (kidDays[dk]) streak++;
+        else if (i > 0) break;
+      }
+      var topApps = Object.keys(kidApps).sort(function(a, b) { return kidApps[b] - kidApps[a]; }).slice(0, 2);
+      perKid.push({ p: p, stars: ts, rank: rank, week: kidWeek, streak: streak, top: topApps, used: 0, max: 0 });
+    });
+
+    var activeDayCount = Object.keys(activeDays).length;
+    var hasActivity = weekBuckets.some(function(v) { return v > 0; });
+
+    // ---------- summary tiles ----------
+    function tile(accent, icon, big, sub) {
+      return '<div style="padding:16px 16px 14px;border-radius:16px;background:linear-gradient(180deg,' + accent + '14,' + accent + '05);border:1px solid ' + accent + '55;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<div style="width:34px;height:34px;border-radius:10px;background:' + accent + '22;display:flex;align-items:center;justify-content:center;font-size:18px;">' + icon + '</div>' +
+        '</div>' +
+        '<div style="font-family:var(--font-display);font-weight:800;font-size:1.85rem;line-height:1;margin-top:12px;color:#1c1b29;">' + big + '</div>' +
+        '<div style="font-size:0.78rem;font-weight:700;color:#6b6878;margin-top:3px;">' + sub + '</div>' +
+      '</div>';
+    }
+    var tiles = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">' +
+      tile('#B45309', '⭐', totalStars, 'Total stars · family') +
+      tile('#0D9488', '🔥', activeDayCount + '<span style="font-size:0.95rem;color:#6b6878;">/7</span>', 'Active days this week') +
+      tile('#2563EB', '⏱', (maxMin ? usedMin : 0) + '<span style="font-size:0.95rem;color:#6b6878;">m</span>', 'Screen time today' + (maxMin ? ' · ' + maxMin + 'm limit' : '')) +
+      tile('#6D28D9', '🪙', tokens, 'Adventure tokens') +
+    '</div>';
+
+    // ---------- trend: prefer real weekly STARS history, else activity sessions ----------
+    var starsHist = _recordStarsSnapshot(profiles);
+    var histKeys = Object.keys(starsHist).sort();
+    var trend, trendTitle, trendBadge, axisL = '', trendAxis = '';
+    if (histKeys.length >= 2) {
+      trend = _seriesSvg(histKeys.map(function(k) { return starsHist[k]; }), '#B45309');
+      trendTitle = 'Stars earned · last ' + histKeys.length + ' weeks';
+      trendBadge = totalStars + ' total';
+      axisL = histKeys.length + ' wks ago';
+    } else if (hasActivity) {
+      trend = _seriesSvg(weekBuckets, '#4338CA');
+      trendTitle = 'Activity · last 8 weeks';
+      trendBadge = weekBuckets.reduce(function(a, b) { return a + b; }, 0) + ' this week';
+      axisL = '8 wks ago';
+    } else {
+      trend = '<div style="padding:28px 8px;text-align:center;color:#9a97a8;font-weight:700;font-size:0.85rem;">Trend builds up one snapshot per week — check back soon.</div>';
+      trendTitle = 'Stars earned · trend';
+      trendBadge = totalStars + ' total';
+    }
+    if (trend.indexOf('<svg') === 0) {
+      trendAxis = '<div style="display:flex;justify-content:space-between;font-size:0.66rem;font-weight:700;color:#9a97a8;margin-top:2px;"><span>' + axisL + '</span><span>now</span></div>';
+    }
+
+    // ---------- screen-time donut (today) ----------
+    var pct = maxMin ? Math.min(1, usedMin / maxMin) : 0;
+    var donutColor = pct < 0.8 ? '#0D9488' : (pct < 1 ? '#B45309' : '#DC2626');
+    var off = (314 * (1 - pct)).toFixed(0);
+    var donut = '<div style="display:flex;align-items:center;gap:16px;">' +
+      '<div style="position:relative;width:104px;height:104px;flex:none;">' +
+        '<svg viewBox="0 0 120 120" width="104" height="104">' +
+          '<circle cx="60" cy="60" r="50" fill="none" stroke="#ece9f5" stroke-width="13"></circle>' +
+          '<circle cx="60" cy="60" r="50" fill="none" stroke="' + donutColor + '" stroke-width="13" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="' + off + '" transform="rotate(-90 60 60)"></circle>' +
+        '</svg>' +
+        '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">' +
+          '<div style="font-family:var(--font-display);font-weight:800;font-size:1.3rem;line-height:1;color:#1c1b29;">' + Math.round(pct * 100) + '%</div>' +
+          '<div style="font-size:0.62rem;font-weight:700;color:#6b6878;">of limit</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="flex:1;font-size:0.8rem;font-weight:700;color:#3a3850;line-height:1.7;">' +
+        '<div>Used <b style="float:right;">' + usedMin + ' min</b></div>' +
+        '<div>Left <b style="float:right;">' + Math.max(0, maxMin - usedMin) + ' min</b></div>' +
+        '<div style="border-top:1px solid #eceaf3;margin-top:6px;padding-top:6px;color:#6b6878;">Daily limit <b style="color:#1c1b29;">' + maxMin + ' min</b></div>' +
+      '</div>' +
+    '</div>';
+
+    // ---------- charts row ----------
+    var charts = '<div style="display:grid;grid-template-columns:1.7fr 1fr;gap:14px;margin-bottom:18px;">' +
+      '<div style="padding:18px 20px 14px;border-radius:16px;background:#ffffff;border:1px solid #e6e6ee;box-shadow:0 4px 14px rgba(15,15,25,0.08);">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><div style="font-weight:800;font-size:0.9rem;color:#1c1b29;">' + trendTitle + '</div><div style="font-size:0.78rem;font-weight:800;color:#4338CA;">' + trendBadge + '</div></div>' +
+        trend + trendAxis +
+      '</div>' +
+      '<div style="padding:18px 20px;border-radius:16px;background:#ffffff;border:1px solid #e6e6ee;box-shadow:0 4px 14px rgba(15,15,25,0.08);">' +
+        '<div style="font-weight:800;font-size:0.9rem;color:#1c1b29;margin-bottom:12px;">Screen time today</div>' + donut +
+      '</div>' +
+    '</div>';
+
+    // ---------- per-kid snapshot cards ----------
+    var kidCards = perKid.map(function(k) {
+      var col = safeColor(k.p.color);
+      var nr = _nextRank(k.stars);
+      var pPct = 100;
+      if (nr.next) { var span = nr.next.s - nr.prev.s; pPct = span > 0 ? Math.round(((k.stars - nr.prev.s) / span) * 100) : 0; }
+      var chips = k.top.map(function(a) {
+        return '<span style="font-size:0.62rem;font-weight:800;color:#fff;background:' + _appColor(a) + ';padding:3px 8px;border-radius:99px;">' + escHtml((appIcon[a] || '') + ' ' + a) + '</span>';
+      }).join('');
+      return '<div style="padding:15px;border-radius:16px;background:#ffffff;border:1px solid #e6e6ee;box-shadow:0 4px 14px rgba(15,15,25,0.08);">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">' +
+          '<div style="width:40px;height:40px;border-radius:50%;border:2.5px solid ' + col + ';background:' + col + '1a;display:flex;align-items:center;justify-content:center;font-size:20px;">' + escHtml(k.p.avatar) + '</div>' +
+          '<div style="min-width:0;"><div style="font-family:var(--font-display);font-weight:800;font-size:0.98rem;color:#1c1b29;">' + escHtml(k.p.name) + '</div>' +
+          '<div style="font-size:0.7rem;font-weight:800;color:' + col + ';">' + k.rank.icon + ' ' + escHtml(k.rank.name) + ' · ' + k.stars + ' ★</div></div>' +
+          (k.streak > 1 ? '<div style="margin-left:auto;font-size:0.7rem;font-weight:800;color:#C2410C;">🔥 ' + k.streak + 'd</div>' : '') +
+        '</div>' +
+        '<div style="height:7px;border-radius:99px;background:#ece9f5;overflow:hidden;margin-bottom:6px;"><div style="width:' + Math.max(3, Math.min(100, pPct)) + '%;height:100%;border-radius:99px;background:' + col + ';"></div></div>' +
+        '<div style="font-size:0.68rem;font-weight:700;color:#6b6878;margin-bottom:' + (chips ? '10' : '0') + 'px;">' + (nr.next ? (nr.next.s - k.stars) + ' ★ to ' + nr.next.i + ' ' + nr.next.n : 'Top rank reached! 👑') + '</div>' +
+        (chips ? '<div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips + '</div>' : '') +
+      '</div>';
+    }).join('');
+    var kids = '<div style="font-weight:800;font-size:0.9rem;color:#1c1b29;margin:4px 0 12px;">Explorers</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(' + Math.min(3, perKid.length) + ',1fr);gap:14px;margin-bottom:18px;">' + kidCards + '</div>';
+
+    // ---------- most-used apps (last 7 days) ----------
+    var apps = '';
+    var appList = Object.keys(appCount).sort(function(a, b) { return appCount[b] - appCount[a]; }).slice(0, 5);
+    if (appList.length) {
+      var amax = Math.max.apply(null, appList.map(function(a) { return appCount[a]; }).concat([1]));
+      var rows = appList.map(function(a) {
+        var w = Math.round((appCount[a] / amax) * 100);
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+          '<span style="font-size:15px;width:20px;text-align:center;">' + escHtml(appIcon[a] || '📦') + '</span>' +
+          '<span style="font-size:0.8rem;font-weight:700;width:110px;color:#1c1b29;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(a) + '</span>' +
+          '<div style="flex:1;height:9px;border-radius:99px;background:#ece9f5;overflow:hidden;"><div style="width:' + w + '%;height:100%;border-radius:99px;background:' + _appColor(a) + ';"></div></div>' +
+          '<span style="font-size:0.72rem;font-weight:800;color:#6b6878;width:34px;text-align:right;">' + appCount[a] + '×</span>' +
+        '</div>';
+      }).join('');
+      apps = '<div style="padding:18px 20px;border-radius:16px;background:#ffffff;border:1px solid #e6e6ee;box-shadow:0 4px 14px rgba(15,15,25,0.08);margin-bottom:24px;">' +
+        '<div style="font-weight:800;font-size:0.9rem;color:#1c1b29;margin-bottom:14px;">Most-used apps · this week</div>' + rows +
+      '</div>';
+    }
+
+    return '<div style="margin-bottom:8px;">' + tiles + charts + kids + apps + '</div>';
+  }
+
   function _openDashboard() {
     if (typeof Debug !== 'undefined') Debug.log('Opening Dashboard...');
     var content = document.getElementById('dash-content');
@@ -706,6 +931,9 @@
       }
 
       var html = '';
+
+      // ── Redesign: at-a-glance overview (charts wired to real data) ──
+      try { html += _renderOverview(profiles); } catch (e) { if (typeof Debug !== 'undefined') Debug.error('overview render failed', e.message); }
 
       // Diagnostics flush row — small utility for parents / dev
       if (typeof ZsDiag !== 'undefined') {
@@ -754,7 +982,7 @@
           html += '<div style="display:flex; flex-direction:column; gap:8px;">';
           allRecent.forEach(function(e) {
             var when = _timeAgo(e.ts);
-            html += '<div style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:12px;">' +
+            html += '<div style="display:flex; align-items:center; gap:10px; padding:10px; background:#ffffff; border:1px solid #e6e6ee; box-shadow:0 2px 6px rgba(15,15,25,0.05); border-radius:12px;">' +
               '<span style="font-size:1.2rem;">' + escHtml(e.icon) + '</span>' +
               '<div style="flex:1; min-width:0;">' +
                 '<div style="font-weight:700; font-size:0.85rem;">' + escHtml(e.kidName) + ' · ' + escHtml(e.app) + '</div>' +
@@ -899,16 +1127,16 @@
   //     suggest Sports Arena?") when the balance is skewed
   // No writes, no push notifications — nudges live inside this panel.
   var _INSIGHT_CATEGORIES = {
-    physical:       { label: 'Physical', color: '#34D399', apps: ['Sports Arena'] },
-    math:           { label: 'Math',     color: '#60A5FA', apps: ['Math Galaxy'] },
-    music:          { label: 'Music',    color: '#A78BFA', apps: ['Little Maestro', 'Guitar Jam'] },
-    creative:       { label: 'Creative', color: '#F472B6', apps: ['Art Studio'] },
-    language:       { label: 'Language', color: '#F59E0B', apps: ['Story Explorer', 'Guess Quest'] },
-    culture:        { label: 'Culture',  color: '#F87171', apps: ['Descubre Chile', 'Fe Explorador', 'World Explorer'] },
-    science:        { label: 'Science',  color: '#22D3EE', apps: ['Lab Explorer'] },
-    strategy:       { label: 'Strategy', color: '#FBBF24', apps: ['Chess Quest'] },
-    adventure:      { label: 'Quests',   color: '#8B5CF6', apps: ['Quest Adventure', 'Book & Movie Check'] },
-    habit:          { label: 'Habits',   color: '#10B981', apps: ['Routines'] }
+    physical:       { label: 'Physical', color: '#0D9488', apps: ['Sports Arena'] },
+    math:           { label: 'Math',     color: '#1D4ED8', apps: ['Math Galaxy'] },
+    music:          { label: 'Music',    color: '#6D28D9', apps: ['Little Maestro', 'Guitar Jam'] },
+    creative:       { label: 'Creative', color: '#BE185D', apps: ['Art Studio'] },
+    language:       { label: 'Language', color: '#C2410C', apps: ['Story Explorer', 'Guess Quest'] },
+    culture:        { label: 'Culture',  color: '#B91C1C', apps: ['Descubre Chile', 'Fe Explorador', 'World Explorer'] },
+    science:        { label: 'Science',  color: '#0E7490', apps: ['Lab Explorer'] },
+    strategy:       { label: 'Strategy', color: '#B45309', apps: ['Chess Quest'] },
+    adventure:      { label: 'Quests',   color: '#4338CA', apps: ['Quest Adventure', 'Book & Movie Check'] },
+    habit:          { label: 'Habits',   color: '#047857', apps: ['Routines'] }
   };
 
   function _classifyApp(appName) {

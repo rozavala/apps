@@ -66,7 +66,7 @@ body {
 /* Toolbar */
 .toolbar {
   background: var(--bg-surface);
-  border-top: 2px solid rgba(255,255,255,0.08);
+  border-top: 2px solid #e6e6ee;
   padding: 12px;
   display: flex;
   gap: 16px;
@@ -81,7 +81,7 @@ body {
   gap: 8px;
   align-items: center;
   padding: 0 8px;
-  border-right: 1.5px solid rgba(255,255,255,0.05);
+  border-right: 1.5px solid #e6e6ee;
 }
 .tool-section:last-child { border-right: none; }
 
@@ -103,14 +103,14 @@ body {
   transition: transform 0.2s;
 }
 .color-swatch:hover { transform: scale(1.15); }
-.color-swatch.active { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.5); transform: scale(1.15); }
+.color-swatch.active { border-color: #1c1b29; box-shadow: 0 0 0 2px #d6d2ea; transform: scale(1.15); }
 
 /* Brush Sizes */
 .brush-size {
   width: 36px;
   height: 36px;
-  background: rgba(255,255,255,0.05);
-  border: 2px solid transparent;
+  background: #ffffff;
+  border: 2px solid #e6e6ee;
   border-radius: 8px;
   cursor: pointer;
   position: relative;
@@ -120,7 +120,7 @@ body {
   content: '';
   width: var(--size);
   height: var(--size);
-  background: #fff;
+  background: #1c1b29;
   border-radius: 50%;
 }
 .brush-size.active { border-color: var(--art-accent); background: rgba(244, 114, 182, 0.1); }
@@ -129,15 +129,15 @@ body {
 .tool-btn, .action-btn {
   width: 44px;
   height: 44px;
-  background: rgba(255,255,255,0.05);
-  border: 2px solid transparent;
+  background: #ffffff;
+  border: 2px solid #e6e6ee;
   border-radius: 10px;
   font-size: 1.2rem;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
-.tool-btn:hover, .action-btn:hover { background: rgba(255,255,255,0.1); }
+.tool-btn:hover, .action-btn:hover { background: #ece9f5; }
 .tool-btn.active { border-color: var(--art-accent); background: rgba(244, 114, 182, 0.15); }
 .action-btn.primary { background: var(--art-accent); color: #000; }
 
@@ -154,8 +154,8 @@ body {
   border: 2px solid var(--art-accent);
 }
 .modal-card input {
-  width: 100%; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2);
-  border: 2px solid rgba(255,255,255,0.1); color: #fff; margin: 20px 0;
+  width: 100%; padding: 12px; border-radius: 12px; background: #ece9f5;
+  border: 2px solid #e6e6ee; color: #1c1b29; margin: 20px 0;
   font-family: var(--font-body); font-size: 1rem;
 }
 .modal-btns { display: flex; gap: 12px; }
@@ -175,7 +175,7 @@ body {
 }
 .gallery-card {
   background: var(--bg-surface); border-radius: 16px; overflow: hidden;
-  border: 2px solid rgba(255,255,255,0.06); cursor: pointer;
+  border: 2px solid #e6e6ee; cursor: pointer;
   transition: transform 0.2s;
 }
 .gallery-card:hover { transform: translateY(-4px); border-color: var(--art-accent); }
@@ -208,7 +208,7 @@ body {
   padding: 20px;
 }
 .lesson-card {
-  background: var(--bg-surface); border: 2px solid rgba(255,255,255,0.06);
+  background: var(--bg-surface); border: 2px solid #e6e6ee;
   border-radius: 20px; padding: 24px; cursor: pointer; transition: all 0.2s;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
 }
@@ -270,8 +270,8 @@ body {
 .mixing-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; padding: 20px; }
 .mixing-pots { display: flex; align-items: center; gap: 20px; }
 .mix-pot {
-  width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
+  width: 80px; height: 80px; border-radius: 50%; border: 4px solid #e6e6ee;
+  background: #ece9f5; display: flex; align-items: center; justify-content: center;
   font-size: 2rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
 }
 .mix-pot.empty { color: var(--text-muted); border-style: dashed; }

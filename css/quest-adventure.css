@@ -6,8 +6,8 @@
 :root {
   --quest-accent: #F59E0B;
   --quest-glow: rgba(245, 158, 11, 0.3);
-  --bg-card: rgba(255, 255, 255, 0.04);
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --bg-card: #ffffff;
+  --border-subtle: #e6e6ee;
 }
 
 body {
@@ -66,7 +66,7 @@ body {
   padding: 16px; margin-bottom: 40px; text-align: center;
 }
 .quest-ep-label { font-weight: 800; font-size: 1.1rem; margin-bottom: 10px; color: var(--quest-accent); }
-.quest-ep-track { height: 10px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.quest-ep-track { height: 10px; background: #ece9f5; border-radius: 99px; overflow: hidden; }
 .quest-ep-fill { height: 100%; background: linear-gradient(90deg, #F59E0B, #FBBF24); border-radius: 99px; transition: width 1s ease-out; }
 
 /* Nodes & Connectors */
@@ -77,14 +77,14 @@ body {
   position: relative; cursor: pointer; transition: all 0.3s ease;
   z-index: 2; margin: 20px 0;
 }
-.quest-node.unlocked { background: rgba(245, 158, 11, 0.1); border-color: var(--quest-accent); box-shadow: 0 0 20px var(--quest-glow); }
+.quest-node.unlocked { background: #B45309; color: #fff; border-color: var(--quest-accent); box-shadow: 0 0 20px var(--quest-glow); }
 .quest-node.locked { opacity: 0.6; cursor: not-allowed; }
-.quest-node.current { border-color: #fff; animation: pulse 2s infinite; }
+.quest-node.current { border-color: #4338CA; animation: pulse 2s infinite; }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-  70% { box-shadow: 0 0 0 15px rgba(255,255,255,0); }
-  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  0% { box-shadow: 0 0 0 0 rgba(67,56,202,0.45); }
+  70% { box-shadow: 0 0 0 15px rgba(67,56,202,0); }
+  100% { box-shadow: 0 0 0 0 rgba(67,56,202,0); }
 }
 
 .quest-node-icon { font-size: 2rem; }
@@ -115,46 +115,46 @@ body {
 .quest-detail-card h2 { font-family: var(--font-display); font-size: 2rem; font-weight: 800; margin-bottom: 12px; color: var(--quest-accent); }
 .quest-detail-card p { font-size: 1.1rem; font-weight: 600; line-height: 1.5; color: var(--text-primary); margin-bottom: 24px; }
 
-.quest-reward { background: rgba(245, 158, 11, 0.1); border-radius: 20px; padding: 20px; margin-bottom: 32px; text-align: left; border: 1px dashed var(--quest-accent); }
-.reward-label { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--quest-accent); margin-bottom: 6px; }
-.reward-text { font-size: 1rem; font-weight: 700; line-height: 1.4; color: var(--text-primary); }
+.quest-reward { background: #B45309; border-radius: 20px; padding: 20px; margin-bottom: 32px; text-align: left; border: 1px dashed var(--quest-accent); }
+.reward-label { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #fff; margin-bottom: 6px; }
+.reward-text { font-size: 1rem; font-weight: 700; line-height: 1.4; color: #fff; }
 
 .action-btn {
   padding: 16px 32px; border-radius: var(--radius-sm); font-family: var(--font-body);
   font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease;
   border: none; width: 100%;
 }
-.btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
+.btn-secondary { background: #ffffff; color: var(--text-primary); border: 1.5px solid var(--border-subtle); }
 
 /* ============================================================
    SEASONAL GRAND TOURS
    ============================================================ */
 .quest-tour {
-  background: rgba(255,255,255,0.03);
-  border: 1.5px solid rgba(255,255,255,0.08);
+  background: #ffffff;
+  border: 1.5px solid #e6e6ee;
   border-radius: 16px;
   padding: 16px 18px;
   margin: 18px 0;
 }
 .quest-tour.current {
-  background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(167,139,250,0.06));
-  border-color: rgba(251,191,36,0.35);
+  background: linear-gradient(135deg, rgba(180,83,9,0.08), rgba(109,40,217,0.05));
+  border-color: #B45309;
 }
 .quest-tour.done {
-  background: linear-gradient(135deg, rgba(52,211,153,0.1), rgba(251,191,36,0.06));
-  border-color: rgba(52,211,153,0.35);
+  background: linear-gradient(135deg, rgba(5,150,105,0.08), rgba(180,83,9,0.05));
+  border-color: #059669;
 }
 .quest-tour-head {
   font-family: var(--font-display, 'Baloo 2');
   font-weight: 800;
   font-size: 1.15rem;
-  color: var(--text-primary, #F0EDFF);
+  color: var(--text-primary, #1c1b29);
   margin-bottom: 6px;
 }
-.quest-tour.current .quest-tour-head { color: #FBBF24; }
+.quest-tour.current .quest-tour-head { color: #B45309; }
 .quest-tour-desc {
   font-size: 0.85rem;
-  color: var(--text-muted, #8B86B0);
+  color: var(--text-muted, #6b6878);
   font-weight: 600;
   line-height: 1.4;
   margin-bottom: 12px;
@@ -166,7 +166,7 @@ body {
 }
 .quest-goal {
   padding: 10px 12px;
-  background: rgba(0,0,0,0.18);
+  background: #ece9f5;
   border-radius: 10px;
 }
 .quest-goal-head {
@@ -176,19 +176,19 @@ body {
   gap: 10px;
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--text-primary, #F0EDFF);
+  color: var(--text-primary, #1c1b29);
 }
 .quest-goal-num {
   font-family: var(--font-display, 'Baloo 2');
   font-weight: 800;
-  color: #FBBF24;
+  color: #B45309;
   font-size: 0.9rem;
   white-space: nowrap;
 }
 .quest-goal-bar {
   margin-top: 6px;
   height: 6px;
-  background: rgba(255,255,255,0.06);
+  background: #ece9f5;
   border-radius: 99px;
   overflow: hidden;
 }
@@ -201,24 +201,24 @@ body {
 .quest-tour-done {
   margin-top: 10px;
   padding: 8px 12px;
-  background: rgba(52,211,153,0.1);
-  border: 1px solid rgba(52,211,153,0.28);
+  background: #059669;
+  border: 1px solid #059669;
   border-radius: 10px;
   font-weight: 700;
   font-size: 0.82rem;
-  color: #34D399;
+  color: #fff;
   text-align: center;
 }
 .quest-tours-browse {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px dashed rgba(255,255,255,0.08);
+  border-top: 1px dashed #e6e6ee;
 }
 .quest-tours-head {
   font-family: var(--font-display, 'Baloo 2');
   font-weight: 800;
   font-size: 1rem;
-  color: var(--text-muted, #8B86B0);
+  color: var(--text-muted, #6b6878);
   margin-bottom: 4px;
   letter-spacing: 0.04em;
   text-transform: uppercase;

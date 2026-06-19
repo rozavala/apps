@@ -12,11 +12,11 @@
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 5vw, 2.4rem);
   font-weight: 800;
-  background: linear-gradient(135deg, #FBBF24, #EC4899, #60A5FA);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: none;
+  -webkit-text-fill-color: #312e81;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  color: #312e81;
   animation: gradShift 6s ease-in-out infinite;
 }
 .ht-header p {
@@ -35,8 +35,8 @@
 }
 .ht-profile {
   padding: 12px 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(255,255,255,0.08);
+  background: #ffffff;
+  border: 1.5px solid #e6e6ee;
   border-radius: 14px;
   cursor: pointer;
   text-align: center;
@@ -47,7 +47,7 @@
 .ht-profile:hover { transform: translateY(-2px); border-color: #60A5FA; }
 .ht-profile.active {
   border-color: #FBBF24;
-  background: rgba(251,191,36,0.08);
+  background: #ece9f5;
 }
 .ht-profile-avatar {
   font-size: 1.8rem;
@@ -69,8 +69,8 @@
 }
 .ht-mode {
   padding: 16px 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(255,255,255,0.08);
+  background: #ffffff;
+  border: 1.5px solid #e6e6ee;
   border-radius: 16px;
   cursor: pointer;
   text-align: center;
@@ -97,8 +97,8 @@
 /* Session */
 .ht-session {
   padding: 24px 18px;
-  background: rgba(255,255,255,0.03);
-  border: 1.5px solid rgba(255,255,255,0.08);
+  background: #ffffff;
+  border: 1.5px solid #e6e6ee;
   border-radius: 20px;
   text-align: center;
 }
@@ -133,7 +133,7 @@
 .ht-timer svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .ht-timer-track {
   fill: none;
-  stroke: rgba(255,255,255,0.08);
+  stroke: #ece9f5;
   stroke-width: 10;
 }
 .ht-timer-fill {
@@ -182,9 +182,9 @@
   transition: transform 0.15s;
 }
 .ht-actions button:hover { transform: translateY(-2px); }
-.ht-btn-primary { background: linear-gradient(135deg, #7C3AED, #A78BFA); color: #fff; }
-.ht-btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1.5px solid rgba(255,255,255,0.12) !important; }
-.ht-btn-danger { background: rgba(248,113,113,0.12); color: #F87171; border: 1.5px solid rgba(248,113,113,0.25) !important; }
+.ht-btn-primary { background: linear-gradient(135deg, #4338CA, #6366F1); color: #fff; }
+.ht-btn-secondary { background: #ffffff; color: var(--text); border: 1.5px solid #e6e6ee !important; }
+.ht-btn-danger { background: #B91C1C; color: #fff; border: 1.5px solid #B91C1C !important; }
 
 .ht-progress {
   display: flex;
@@ -196,7 +196,7 @@
 .ht-prog-dot {
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
+  background: #ece9f5;
 }
 .ht-prog-dot.done { background: #34D399; }
 .ht-prog-dot.active {
@@ -222,12 +222,12 @@
 .ht-skip-log {
   margin-top: 16px;
   padding: 10px 14px;
-  background: rgba(248,113,113,0.06);
-  border: 1px solid rgba(248,113,113,0.18);
+  background: #ffffff;
+  border: 1px solid #e6e6ee;
   border-radius: 10px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #F87171;
+  color: #B91C1C;
 }
 
 .ht-mute-toggle {
@@ -236,8 +236,8 @@
   gap: 6px;
   margin-top: 10px;
   padding: 6px 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #ffffff;
+  border: 1px solid #e6e6ee;
   border-radius: 99px;
   font-size: 0.78rem;
   font-weight: 700;

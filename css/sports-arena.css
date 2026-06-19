@@ -3,18 +3,18 @@
    ================================================================ */
 
     :root {
-      --bg: #0B0B1A;
-      --bg-card: rgba(255,255,255,0.04);
-      --border-subtle: rgba(255,255,255,0.08);
-      --text: #F0EDFF;
-      --text-muted: rgba(240,237,255,0.55);
-      --green: #10B981;
-      --green-light: #34D399;
-      --orange: #F59E0B;
-      --red: #EF4444;
-      --purple: #A78BFA;
-      --blue: #60A5FA;
-      --gold: #FBBF24;
+      --bg: #f1f1f4;
+      --bg-card: #ffffff;
+      --border-subtle: #e6e6ee;
+      --text: #1c1b29;
+      --text-muted: #6b6878;
+      --green: #059669;
+      --green-light: #059669;
+      --orange: #C2410C;
+      --red: #B91C1C;
+      --purple: #6D28D9;
+      --blue: #2563EB;
+      --gold: #B45309;
       --font-display: 'Baloo 2', cursive;
       --font-body: 'Nunito', sans-serif;
       --radius: 20px;
@@ -83,10 +83,10 @@
     .arena-header h1 {
       font-family: var(--font-display);
       font-size: clamp(2rem, 6vw, 2.8rem); font-weight: 800;
-      background: linear-gradient(135deg, var(--green), var(--gold), var(--orange));
-      background-size: 200% 200%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; animation: gradShift 5s ease-in-out infinite;
+      background: none;
+      -webkit-text-fill-color: #312e81;
+      background-clip: border-box; -webkit-background-clip: border-box;
+      color: #312e81;
     }
     @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
     .arena-header p { color: var(--text-muted); font-weight: 600; margin-top: 6px; font-size: 1rem; }
@@ -138,7 +138,7 @@
       align-items: center; gap: 6px;
     }
     .sport-btn:hover { border-color: var(--green); }
-    .sport-btn.selected { border-color: var(--green); background: rgba(16,185,129,0.12); color: var(--green-light); }
+    .sport-btn.selected { border-color: var(--green); background: #059669; color: #fff; }
     .sport-btn .sport-icon { font-size: 1.5rem; }
 
     /* ---- Form elements ---- */
@@ -162,7 +162,7 @@
       background-repeat: no-repeat; background-position: right 14px center;
       padding-right: 36px;
     }
-    select.form-input option { background: #1a1a3a; color: var(--text); }
+    select.form-input option { background: #ffffff; color: var(--text); }
 
     /* ---- Player chips ---- */
     .player-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
@@ -172,7 +172,7 @@
       cursor: pointer; transition: all 0.2s;
     }
     .player-chip:hover { border-color: var(--green); }
-    .player-chip.selected { border-color: var(--green); background: rgba(16,185,129,0.15); color: var(--green-light); }
+    .player-chip.selected { border-color: var(--green); background: #059669; color: #fff; }
 
     /* ---- Score inputs ---- */
     .score-row {
@@ -184,7 +184,7 @@
     .score-name { flex: 1; font-weight: 700; font-size: 0.95rem; }
     .score-input {
       width: 70px; padding: 8px; text-align: center;
-      background: rgba(0,0,0,0.3); border: 1.5px solid var(--border-subtle);
+      background: #ece9f5; border: 1.5px solid var(--border-subtle);
       border-radius: 10px; color: var(--text); font-weight: 800; font-size: 1.1rem;
       font-family: var(--font-body);
     }
@@ -193,12 +193,12 @@
     /* ---- Action buttons ---- */
     .btn-primary {
       padding: 14px 28px; border-radius: var(--radius-sm); border: none;
-      background: linear-gradient(135deg, var(--green), var(--green-light));
+      background: linear-gradient(135deg, #4338CA, #6366F1);
       color: #fff; font-weight: 800; font-size: 1rem; cursor: pointer;
       font-family: var(--font-body); transition: all 0.2s; width: 100%;
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
-    .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(67,56,202,0.3); }
+    .btn-primary:disabled { background: #ece9f5; color: #6b6878; cursor: not-allowed; transform: none; box-shadow: none; }
 
     .btn-secondary {
       padding: 12px 24px; border-radius: var(--radius-sm);
@@ -243,7 +243,7 @@
     .match-actions { display: flex; gap: 4px; align-items: center; margin-left: 8px; }
     .match-edit, .match-delete {
       width: 32px; height: 32px;
-      background: rgba(255,255,255,0.04);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: 8px;
       cursor: pointer;
@@ -252,8 +252,8 @@
       display: inline-flex; align-items: center; justify-content: center;
       transition: background 0.15s, border-color 0.15s, transform 0.12s;
     }
-    .match-edit:hover { background: rgba(96,165,250,0.15); border-color: var(--blue); }
-    .match-delete:hover { background: rgba(248,113,113,0.15); border-color: var(--red); }
+    .match-edit:hover { background: #ece9f5; border-color: var(--blue); }
+    .match-delete:hover { background: #ece9f5; border-color: var(--red); }
     .match-edit:active, .match-delete:active { transform: scale(0.92); }
 
     /* ---- Tournament bracket ---- */
