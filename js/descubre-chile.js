@@ -436,7 +436,10 @@ const QB={
     {q:'¿Qué fenómeno del norte aprovechan los atrapanieblas?',a:'La camanchaca',o:['La camanchaca','El viento puelche','La lluvia intensa','El sol del desierto'], tier:'advanced'},
     {q:'¿Cómo se llama el gran observatorio ubicado en el norte?',a:'ALMA',o:['ALMA','Hubble','James Webb','Paranal'], tier:'intermediate'},
     {q:'¿Qué virus ayudó a descubrir Pablo Valenzuela?',a:'Hepatitis C',o:['Hepatitis C','Gripe','Sarampión','Varicela'], tier:'advanced'},
-    {q:'¿Cuál será el telescopio más grande del mundo en construcción en Chile?',a:'ELT',o:['ELT','VLT','ALMA','Hubble'], tier:'expert'}
+    {q:'¿Cuál será el telescopio más grande del mundo en construcción en Chile?',a:'ELT',o:['ELT','VLT','ALMA','Hubble'], tier:'expert'},
+    {q:'¿En qué año se inauguró el observatorio ALMA?',a:'2013',o:['2013','1990','2005','2020'], tier:'intermediate'},
+    {q:'¿En qué localidad están los atrapanieblas pioneros en Chile?',a:'Chungungo',o:['Chungungo','Santiago','Punta Arenas','Valparaíso'], tier:'expert'},
+    {q:'¿En qué año nació el biólogo y filósofo Francisco Varela?',a:'1946',o:['1946','1920','1980','1965'], tier:'advanced'}
   ],
   volcanes:[
     {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced'},
@@ -444,7 +447,10 @@ const QB={
     {q:'¿Cuántos volcanes activos tiene Chile aproximadamente?',a:'Unos 90',o:['Unos 90','1.000','5','Ninguno'], tier:'expert'},
     {q:'¿Cuál es el volcán más alto del mundo ubicado en Chile?',a:'Nevado Ojos del Salado',o:['Nevado Ojos del Salado','Villarrica','Osorno','Llaima'], tier:'expert'},
     {q:'¿Qué volcán es famoso por su forma de cono perfecto en el sur?',a:'Osorno',o:['Osorno','Llaima','Calbuco','Villarrica'], tier:'advanced'},
-    {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'}
+    {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'},
+    {q:'¿En qué región se encuentra el volcán Villarrica?',a:'La Araucanía',o:['La Araucanía','Antofagasta','Magallanes','Coquimbo'], tier:'intermediate'},
+    {q:'¿Qué ciudad turística está a los pies del volcán Villarrica?',a:'Pucón',o:['Pucón','Valparaíso','Iquique','Concepción'], tier:'beginner'},
+    {q:'¿En la orilla de qué lago se ve el volcán Osorno?',a:'Lago Llanquihue',o:['Lago Llanquihue','Lago General Carrera','Lago Chungará','Lago Budi'], tier:'advanced'}
   ],
   animales:[
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
@@ -453,7 +459,9 @@ const QB={
     {q:'¿A qué velocidad puede correr un guanaco?',a:'Casi 60 km/h',o:['Casi 60 km/h','Unos 10 km/h','Más de 100 km/h','30 km/h'], tier:'expert'},
     {q:'¿Qué animal es el pudú?',a:'Un pequeño ciervo',o:['Un pequeño ciervo','Un roedor','Un ave','Un tipo de zorro'], tier:'beginner'},
     {q:'¿Dónde vive principalmente el pudú?',a:'En el sur de Chile',o:['En el sur de Chile','En el desierto','En la Isla de Pascua','En Santiago'], tier:'intermediate'},
-    {q:'¿Qué animal marino se puede ver en las costas chilenas?',a:'El lobo marino',o:['El lobo marino','El oso polar','La morsa','El manatí'], tier:'beginner'}
+    {q:'¿Qué animal marino se puede ver en las costas chilenas?',a:'El lobo marino',o:['El lobo marino','El oso polar','La morsa','El manatí'], tier:'beginner'},
+    {q:'¿Qué animal es el huemul?',a:'Un ciervo nativo',o:['Un ciervo nativo','Un felino','Una rapaz','Un roedor'], tier:'beginner'},
+    {q:'¿Cuál es el felino más grande que habita en Chile?',a:'El puma',o:['El puma','El gato colocolo','El jaguar','El güiña'], tier:'intermediate'}
   ],
   volcanes_chile:[
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},

@@ -70,6 +70,9 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Nuevo Contenido**: Más preguntas en Descubre Chile (ALMA, atrapanieblas, volcán Villarrica, huemul) y nuevo país Italia en World Explorer. (More questions in Descubre Chile and a new Italy country in World Explorer.)
+- **Actualización World Cup 2026**: Opciones familiares y navegación anterior/siguiente dentro del modal de resultados de partidos. (Family picks + prev/next nav inside the match-result modal.)
+- **Mejora en Sincronización (CloudSync Update)**: Fusión profunda (deep-merge) para pronósticos y resultados de la Copa del Mundo, protegiendo los datos entre dispositivos. (Deep-merge for World Cup picks and results, protecting data across devices.)
 - **Actualización World Cup 2026**: Detalles de partidos, incluyendo tarjetas, estadísticas y goleadores a través de ESPN. (Match details, including cards, stats, and scorers via ESPN.)
 - **Actualización World Cup 2026**: Formato de enlaces compartidos optimizado para grupos de WhatsApp familiares grandes. (Optimized share link format for large family WhatsApp pools.)
 - **Nuevo Contenido**: Agregamos contenido factual a Descubre Chile, Story Explorer y World Explorer. (Added factual content to Descubre Chile, Story Explorer, and World Explorer.)
