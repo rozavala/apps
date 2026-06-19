@@ -56,6 +56,7 @@ Este repositorio es frecuentemente mantenido por agentes de IA. Cada agente debe
 - **Documentation Guardian Agent**: Modifica 1-3 cosas por ejecución. Usa Markdown vanilla, bilingüe o español primero. Sin marketing. (Modifies 1-3 things per run. Uses vanilla Markdown, bilingual or Spanish first. No marketing.)
 - **Zavala Serra Module Builder Agent**: Crea módulos puramente en HTML/CSS/Vanilla JS. Offline y mobile-first. (Creates pure HTML/CSS/Vanilla JS modules. Offline and mobile-first.)
 - **Palette (UX) & Bolt (Performance) Personas**: Antes de iniciar, deben leer sus respectivos archivos en `.jules/`. Añaden sus aprendizajes críticos y mantienen los cambios pequeños. (Before starting, must read their respective files in `.jules/`. Append critical learnings and keep changes small.)
+- **Cleanliness & Completeness**: Todos los agentes deben asegurarse de eliminar cualquier artefacto de prueba generado antes de hacer commit y ejecutar la suite de pruebas completa (`npm run test`) incluso si el cambio es solo en documentación. (All agents must ensure any generated test artifacts are deleted before committing, and run the full test suite (`npm run test`) even for documentation-only changes.)
 
 ## 📝 Reglas de Documentación (Documentation Rules)
 
