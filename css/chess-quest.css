@@ -50,7 +50,7 @@
     .mode-header{text-align:center;margin:60px 0 28px;animation:fadeUp 0.6s ease-out both}
     .mode-header .icon{font-size:56px;display:block;margin-bottom:4px;animation:pieceBounce 3s ease-in-out infinite}
     @keyframes pieceBounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
-    .mode-header h1{font-family:var(--font-display);font-size:clamp(2rem,6vw,2.8rem);font-weight:800;background:linear-gradient(135deg,var(--gold),var(--cream),var(--brown-light));background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradShift 5s ease-in-out infinite}
+    .mode-header h1{font-family:var(--font-display);font-size:clamp(2rem,6vw,2.8rem);font-weight:800;background:none;background-size:200% 200%;-webkit-background-clip:border-box;-webkit-text-fill-color:#312e81;background-clip:border-box;color:#312e81;animation:gradShift 5s ease-in-out infinite}
     @keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
     .mode-header p{color:var(--text-muted);font-weight:600;margin-top:6px;font-size:1rem}
     .mode-header .greeting{color:var(--gold);font-weight:700;font-size:0.9rem}
@@ -65,8 +65,8 @@
     .mode-card .m-title{font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--gold)}
     .mode-card .m-desc{font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-top:2px}
     .mode-card .m-badge{margin-top:6px;display:inline-block;padding:2px 10px;border-radius:99px;font-size:0.7rem;font-weight:700}
-    .m-badge.rec{background:rgba(52,211,153,0.12);color:var(--green)}
-    .m-badge.prog{background:rgba(251,191,36,0.12);color:var(--gold)}
+    .m-badge.rec{background:#059669;color:#fff}
+    .m-badge.prog{background:#B45309;color:#fff}
     /* ================================================================ CHESSBOARD ================================================================ */
     .board-wrap{width:100%;max-width:400px;margin:0 auto}
     .board{width:100%;aspect-ratio:1;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border-radius:8px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5);border:3px solid var(--brown-dark)}
@@ -89,14 +89,14 @@
     .piece-card{background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:var(--radius-sm);padding:20px 12px;text-align:center;cursor:pointer;transition:all 0.3s ease;animation:fadeUp 0.4s ease-out both}
     .piece-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 8px 24px -8px var(--gold-glow)}
     .piece-card .p-icon{font-size:40px;display:block;margin-bottom:6px}
-    .piece-card .p-name{font-family:var(--font-display);font-size:0.95rem;font-weight:700;color:var(--cream)}
+    .piece-card .p-name{font-family:var(--font-display);font-size:0.95rem;font-weight:700;color:var(--text)}
     .piece-card .p-val{font-size:0.72rem;color:var(--text-muted);font-weight:600}
     .piece-card.completed{border-color:var(--green)}
     .piece-card.completed .p-name::after{content:' ✓';color:var(--green)}
     .lesson-info{background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:var(--radius);padding:20px;margin:16px 0;line-height:1.7;width:100%}
     .lesson-info h3{font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--gold)}
     .lesson-info p{color:var(--text-muted);font-size:0.9rem;font-weight:600}
-    .lesson-info .tip{margin-top:10px;padding:8px 12px;border-radius:var(--radius-sm);background:rgba(251,191,36,0.06);border-left:3px solid var(--gold);font-size:0.82rem;color:var(--amber)}
+    .lesson-info .tip{margin-top:10px;padding:8px 12px;border-radius:var(--radius-sm);background:rgba(251,191,36,0.12);border-left:3px solid var(--gold);font-size:0.82rem;color:#B45309}
     .lesson-nav{display:flex;gap:10px;margin-top:16px;width:100%}
     .lesson-nav button{flex:1;padding:14px;border-radius:var(--radius-sm);border:none;font-family:var(--font-display);font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.25s ease}
     .btn-gold{background:linear-gradient(135deg,var(--amber),var(--gold));color:#1A1410;box-shadow:0 4px 16px var(--gold-glow)}
@@ -105,12 +105,12 @@
     .btn-outline:hover{border-color:var(--gold)!important;color:var(--text)}
     /* ================================================================ PUZZLE MODE ================================================================ */
     .puzzle-top{width:100%;display:flex;align-items:center;justify-content:space-between;margin:16px 0 12px}
-    .puzzle-badge{font-family:var(--font-display);font-size:0.9rem;font-weight:700;padding:6px 14px;border-radius:99px;background:rgba(251,191,36,0.12);color:var(--gold)}
-    .puzzle-hint{background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:var(--radius);padding:16px;text-align:center;margin:12px 0;width:100%;font-weight:700;color:var(--cream)}
+    .puzzle-badge{font-family:var(--font-display);font-size:0.9rem;font-weight:700;padding:6px 14px;border-radius:99px;background:#B45309;color:#fff}
+    .puzzle-hint{background:var(--bg-card);border:1.5px solid var(--border-subtle);border-radius:var(--radius);padding:16px;text-align:center;margin:12px 0;width:100%;font-weight:700;color:var(--text)}
     .puzzle-feedback{font-family:var(--font-display);font-size:1.1rem;font-weight:700;text-align:center;min-height:32px;margin:8px 0}
     /* ================================================================ PLAY MODE ================================================================ */
     .play-top{width:100%;display:flex;align-items:center;justify-content:space-between;margin:16px 0 12px}
-    .play-status{font-family:var(--font-display);font-size:0.95rem;font-weight:700;padding:8px 16px;border-radius:99px;background:var(--bg-card);border:1.5px solid var(--border-subtle);color:var(--cream)}
+    .play-status{font-family:var(--font-display);font-size:0.95rem;font-weight:700;padding:8px 16px;border-radius:99px;background:var(--bg-card);border:1.5px solid var(--border-subtle);color:var(--text)}
     .play-info{width:100%;display:flex;justify-content:space-between;padding:8px 0;font-size:0.82rem;color:var(--text-muted);font-weight:600}
     .captured-row{display:flex;gap:2px;font-size:18px;min-height:24px;flex-wrap:wrap}
     .game-over-box{background:var(--bg-card);border:1.5px solid var(--gold);border-radius:var(--radius);padding:28px;text-align:center;width:100%;margin:16px 0;animation:popIn 0.4s ease-out}
@@ -129,7 +129,7 @@
     .rush-intro h2 { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; margin: 8px 0 4px; }
     .rush-intro p { color: var(--text-muted); font-weight: 700; margin: 8px 0 18px; }
     .rush-big { font-size: 4rem; line-height: 1; }
-    .rush-best { display: inline-block; padding: 6px 14px; border-radius: 99px; background: rgba(251,191,36,0.12); color: var(--gold); font-weight: 800; margin-bottom: 16px; }
+    .rush-best { display: inline-block; padding: 6px 14px; border-radius: 99px; background: #B45309; color: #fff; font-weight: 800; margin-bottom: 16px; }
     .rush-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .rush-result-num { font-family: var(--font-display); font-size: 4rem; font-weight: 800; color: var(--gold); line-height: 1; margin: 8px 0 4px; }
     .rush-result-sub { color: var(--text-muted); font-weight: 700; margin-bottom: 16px; }
@@ -139,23 +139,23 @@
       padding: 8px 4px; margin-bottom: 4px;
     }
     .rush-chip {
-      padding: 6px 12px; border-radius: 99px; background: rgba(255,255,255,0.06);
+      padding: 6px 12px; border-radius: 99px; background: #ece9f5;
       font-family: var(--font-display); font-weight: 800; font-size: 0.9rem; color: var(--text);
     }
-    .rush-chip.rush-score { background: rgba(52,211,153,0.15); color: #34D399; }
+    .rush-chip.rush-score { background: #059669; color: #fff; }
     .rush-chip.rush-strikes { background: rgba(248,113,113,0.12); letter-spacing: 2px; }
     .rush-hint { text-align: center; color: var(--text-muted); font-size: 0.9rem; font-weight: 700; margin-top: 8px; min-height: 22px; }
     .rush-feedback { text-align: center; font-size: 2.4rem; min-height: 50px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
-    .rush-feedback.correct { color: #34D399; animation: popIn 0.25s; }
-    .rush-feedback.wrong { color: #F87171; animation: shake 0.3s; }
+    .rush-feedback.correct { color: #059669; animation: popIn 0.25s; }
+    .rush-feedback.wrong { color: #B91C1C; animation: shake 0.3s; }
 
     /* ============================================================
        OPENINGS PRIMER
        ============================================================ */
     .op-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 0 4px; }
     .op-card {
-      padding: 18px 14px; background: rgba(255,255,255,0.04);
-      border: 1.5px solid rgba(255,255,255,0.08); border-radius: 16px;
+      padding: 18px 14px; background: #ffffff;
+      border: 1.5px solid #e6e6ee; border-radius: 16px;
       color: var(--text); cursor: pointer; text-align: center;
       font-family: var(--font-body); transition: all 0.2s;
     }
@@ -165,21 +165,21 @@
     .op-era { font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-top: 4px; }
 
     .op-card-view {
-      background: rgba(255,255,255,0.04);
-      border: 1.5px solid rgba(255,255,255,0.08);
+      background: #ffffff;
+      border: 1.5px solid #e6e6ee;
       border-radius: 20px; padding: 22px 20px;
       display: flex; flex-direction: column; gap: 14px;
       animation: fadeUp 0.3s ease-out both;
     }
     .op-idea {
-      padding: 12px 14px; background: rgba(251,191,36,0.08);
+      padding: 12px 14px; background: rgba(251,191,36,0.12);
       border: 1px solid rgba(251,191,36,0.2); border-radius: 12px;
-      color: #FDE68A; font-size: 0.9rem; font-weight: 700; line-height: 1.4;
+      color: #B45309; font-size: 0.9rem; font-weight: 700; line-height: 1.4;
     }
     .op-step-badge {
       align-self: flex-start;
       padding: 4px 12px; border-radius: 99px;
-      background: rgba(167,139,250,0.15); color: #A78BFA;
+      background: #6D28D9; color: #fff;
       font-family: var(--font-display); font-weight: 800; font-size: 0.78rem;
     }
     .op-move {
