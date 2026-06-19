@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-18T14:37:14.979Z",
+  "generatedAt": "2026-06-19T14:31:57.430Z",
   "windowHours": 72,
   "days": [
     {
@@ -53,6 +53,37 @@
           "count": 2,
           "firstTs": 1781792804255,
           "lastTs": 1781792804255,
+          "users": [
+            "u-3bda7c"
+          ]
+        }
+      ]
+    },
+    {
+      "day": "2026-06-19",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mql0tp6u_dj5h8m",
+            "ts": 1781879126214,
+            "clientTs": 1781879126214,
+            "kind": "console.warn",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "match detail fetch failed for 760440 Load failed",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1781879126214,
+          "lastTs": 1781879126214,
           "users": [
             "u-3bda7c"
           ]
