@@ -292,6 +292,23 @@ const WorldExplorer = (() => {
     ] },
     { id: 'europe', name: 'Europe', nameEs: 'Europa', icon: '🌍', color: '#3B82F6', countries: [
       {
+        id: 'italy', name: 'Italy', nameEs: 'Italia', flag: '🇮🇹',
+        capital: 'Rome', capitalEs: 'Roma',
+        facts: [
+          { en: 'Italy is shaped like a boot.', es: 'Italia tiene forma de bota.' },
+          { en: 'Rome was the center of the Roman Empire.', es: 'Roma fue el centro del Imperio Romano.' },
+          { en: 'The Colosseum is an ancient amphitheater in Rome.', es: 'El Coliseo es un antiguo anfiteatro en Roma.' },
+          { en: 'Mount Vesuvius is a famous volcano near Naples.', es: 'El Monte Vesubio es un famoso volcán cerca de Nápoles.' }
+        ],
+        landmark: { name: 'Colosseum', nameEs: 'Coliseo', emoji: '🏟️' },
+        animal: { name: 'Italian Wolf', nameEs: 'Lobo italiano', emoji: '🐺' },
+        quiz: [
+          { q: 'What is the capital of Italy?', qEs: '¿Cuál es la capital de Italia?', options: ['Rome', 'Milan', 'Venice', 'Naples'], optionsEs: ['Roma', 'Milán', 'Venecia', 'Nápoles'], answer: 0 },
+          { q: 'What shape does Italy resemble on the map?', qEs: '¿A qué forma se asemeja Italia en el mapa?', options: ['A hat', 'A boot', 'A square', 'A star'], optionsEs: ['Un sombrero', 'Una bota', 'Un cuadrado', 'Una estrella'], answer: 1 },
+          { q: 'Which famous volcano is near Naples?', qEs: '¿Qué famoso volcán está cerca de Nápoles?', options: ['Etna', 'Vesuvius', 'Stromboli', 'Fuji'], optionsEs: ['Etna', 'Vesubio', 'Stromboli', 'Fuji'], answer: 1 }
+        ]
+      },
+      {
         id: 'spain', name: 'Spain', nameEs: 'España', flag: '🇪🇸',
         capital: 'Madrid', capitalEs: 'Madrid',
         facts: [
