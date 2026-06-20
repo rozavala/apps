@@ -49,6 +49,7 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Sistema de Tareas (Chores System)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra (1 token = 5 minutos extra). (When time runs out, kids can earn extra time (tokens) by completing real-world chores (e.g. "Make the bed", "Read 20 minutes"). A parent PIN is required to approve extra time (1 token = 5 extra minutes)).
 - **Horario Inteligente (Smart Schedule)**: Rotación automática diaria de aplicaciones sugeridas para fomentar una dieta equilibrada de aprendizaje y evitar la fatiga de decisiones. (Automatic daily rotation of suggested apps to encourage a balanced learning diet).
 - **Insights para Padres (Parent Insights)**: Monitorea el balance de actividades y recibe sugerencias para cada perfil desde el Panel de Padres. (Monitor activity balance and receive nudges for each profile from the Parent Dashboard).
+- **Protección por PIN (PIN Protection)**: El Rincón para Padres, los límites diarios y la aprobación de tokens de aventura están protegidos por un PIN para evitar cambios no autorizados. (The Parents Corner, daily limits, and adventure token approvals are protected by a PIN to prevent unauthorized changes).
 - **Privacidad Local (Local Privacy)**: Todos los datos, progresos y tiempos de uso se almacenan localmente en el dispositivo (`localStorage`). (All data and progress are stored locally on the device, ensuring maximum family privacy).
 
 ## 🛠️ Características Principales (Key Features)
@@ -70,6 +71,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Corrección de Errores en World Cup 2026**: Se solucionó un problema de rendimiento (bucle infinito) en los detalles de los partidos. (Fixed an infinite render loop performance issue in match details).
 - **Nuevo Contenido**: Más preguntas en Descubre Chile (ALMA, atrapanieblas, volcán Villarrica, huemul) y nuevo país Italia en World Explorer. (More questions in Descubre Chile and a new Italy country in World Explorer.)
 - **Actualización World Cup 2026**: Opciones familiares y navegación anterior/siguiente dentro del modal de resultados de partidos. (Family picks + prev/next nav inside the match-result modal.)
 - **Mejora en Sincronización (CloudSync Update)**: Fusión profunda (deep-merge) para pronósticos y resultados de la Copa del Mundo, protegiendo los datos entre dispositivos. (Deep-merge for World Cup picks and results, protecting data across devices.)
