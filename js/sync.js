@@ -43,6 +43,7 @@ var CloudSync = (function() {
     'zs_sports_matches_shared': 'sports_matches',
     'zs_home_location':         'home_location',
     'zs_deleted_profiles':      'deleted_profiles',
+    'zs_summer_todos':          'summer',
     'wc2026.v2':                'worldcup'
   };
   var HOUSEHOLD_KID = '_household';

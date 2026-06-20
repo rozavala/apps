@@ -266,6 +266,7 @@ var FamilyWall = (function() {
       '<div class="fw-grid">' +
         _renderWeatherCard() +
         _renderRoutinesCard(profiles) +
+        _renderSummerCard(profiles) +
         _renderCalendarCard() +
         _renderWeekCard() +
         _renderMenuCard() +
@@ -390,6 +391,149 @@ var FamilyWall = (function() {
         rows +
       '</div>' +
     '</div>';
+  }
+
+  // ---- Summer Quest card ----------------------------------------
+  // Shared family summer bucket list with per-kid credit + streaks.
+  // `_summerKid` is the kid that completions are credited to; it's a
+  // UI selection (not persisted), defaulting to the logged-in kid.
+  var _summerKid = null;
+
+  function _summerKidsList(profiles) {
+    // Same set of profiles the Routines card shows (parents who opt out
+    // of routines don't clutter the wall with a summer chip either).
+    return (profiles || []).filter(function(p) {
+      if (typeof Routines !== 'undefined' && typeof Routines.isEnabledFor === 'function') {
+        return Routines.isEnabledFor(p.name);
+      }
+      return p && p.routinesEnabled !== false;
+    });
+  }
+
+  function _summerActiveKid(profiles) {
+    var kids = _summerKidsList(profiles);
+    if (_summerKid && kids.some(function(p) { return p.name === _summerKid; })) return _summerKid;
+    var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+    if (active && kids.some(function(p) { return p.name === active.name; })) return active.name;
+    return kids.length ? kids[0].name : null;
+  }
+
+  function _renderSummerCard(profiles) {
+    if (typeof SummerTodos === 'undefined') return '';
+
+    var prog = SummerTodos.getProgress();
+    var target = SummerTodos.getTarget();
+    var items = SummerTodos.getItems();
+    var kids = _summerKidsList(profiles);
+    var creditKid = _summerActiveKid(profiles);
+
+    var pct = prog.total ? Math.round((prog.done / prog.total) * 100) : 0;
+
+    // Per-kid chips: tap to choose who's checking things off.
+    var chips = kids.map(function(p) {
+      var c = SummerTodos.getCreditFor(p.name);
+      var on = p.name === creditKid;
+      var stat = c.doneToday + '/' + target + (c.reachedTarget ? ' ✓' : '') +
+        (c.streak > 0 ? ' · 🔥' + c.streak : '');
+      return '<button class="fw-sq-kid ' + (on ? 'active' : '') + '" ' +
+               'style="--avatar-color:' + _esc(p.color || '#A78BFA') + '" ' +
+               'onclick="FamilyWall.summerPickKid(\'' + _escAttr(p.name) + '\')">' +
+        '<span class="fw-sq-kid-av">' + _esc(p.avatar || '🦊') + '</span>' +
+        '<span class="fw-sq-kid-meta">' +
+          '<span class="fw-sq-kid-name">' + _esc(p.name) + '</span>' +
+          '<span class="fw-sq-kid-stat">' + _esc(stat) + '</span>' +
+        '</span>' +
+      '</button>';
+    }).join('');
+
+    var chipsBlock = kids.length
+      ? '<div class="fw-sq-kids">' + chips + '</div>' +
+        '<div class="fw-sq-hint">' +
+          (creditKid
+            ? 'Crediting <b>' + _esc(creditKid) + '</b> — tap a name to switch, then tap what you did.'
+            : 'Tap a name, then check off what you did today.') +
+        '</div>'
+      : '';
+
+    var addForm =
+      '<form class="fw-sq-add" onsubmit="return FamilyWall.summerAdd(event)">' +
+        '<input type="text" id="fw-sq-input" maxlength="120" autocomplete="off" ' +
+               'placeholder="Add a summer to-do…" aria-label="New summer to-do" />' +
+        '<button type="submit" class="fw-sq-add-btn" aria-label="Add to-do">＋</button>' +
+      '</form>';
+
+    var listBlock;
+    if (!items.length) {
+      listBlock = '<div class="fw-card-empty fw-sq-empty">No summer to-dos yet — add your first one above ☀️</div>';
+    } else {
+      // Unfinished first, then completed (struck through with who did it).
+      var ordered = items.slice().sort(function(a, b) {
+        if (!!a.done === !!b.done) return (a.createdAt || 0) - (b.createdAt || 0);
+        return a.done ? 1 : -1;
+      });
+      var rows = ordered.map(function(it) {
+        var who = it.done && it.doneBy ? '<span class="fw-sq-who">✓ ' + _esc(it.doneBy) + '</span>' : '';
+        return '<div class="fw-sq-item ' + (it.done ? 'done' : '') + '">' +
+          '<button class="fw-sq-check" aria-label="Toggle done" ' +
+                  'onclick="FamilyWall.summerToggle(\'' + _escAttr(it.id) + '\')">' +
+            (it.done ? '✓' : '') +
+          '</button>' +
+          '<span class="fw-sq-label">' + _esc(it.label) + who + '</span>' +
+          '<button class="fw-sq-del" aria-label="Remove to-do" ' +
+                  'onclick="FamilyWall.summerRemove(\'' + _escAttr(it.id) + '\')">🗑</button>' +
+        '</div>';
+      }).join('');
+      listBlock = '<div class="fw-sq-list">' + rows + '</div>';
+    }
+
+    var goal =
+      '<div class="fw-sq-goal">' +
+        '<span>🎯 Daily goal: <b>' + target + '</b> per kid</span>' +
+        '<span class="fw-sq-goal-btns">' +
+          '<button onclick="FamilyWall.summerTarget(-1)" aria-label="Lower daily goal">−</button>' +
+          '<button onclick="FamilyWall.summerTarget(1)" aria-label="Raise daily goal">＋</button>' +
+        '</span>' +
+      '</div>';
+
+    return '<div class="fw-card fw-card-summer">' +
+      '<div class="fw-card-head"><span class="fw-card-icon">🏖️</span> Summer Quest · ' +
+        prog.done + '/' + prog.total + '</div>' +
+      '<div class="fw-sq-bar"><div class="fw-sq-bar-fill" style="width:' + pct + '%"></div></div>' +
+      chipsBlock +
+      addForm +
+      listBlock +
+      goal +
+    '</div>';
+  }
+
+  // ---- Summer Quest handlers ----
+  function summerPickKid(name) {
+    _summerKid = name;
+    _paint();
+  }
+  function summerAdd(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    var inp = document.getElementById('fw-sq-input');
+    if (inp && typeof SummerTodos !== 'undefined') SummerTodos.addItem(inp.value);
+    _paint();
+    return false;
+  }
+  function summerToggle(id) {
+    if (typeof SummerTodos === 'undefined') return;
+    var profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
+    SummerTodos.toggleItem(id, _summerActiveKid(profiles));
+    _paint();
+  }
+  function summerRemove(id) {
+    if (typeof SummerTodos === 'undefined') return;
+    if (typeof confirm === 'function' && !confirm('Remove this summer to-do?')) return;
+    SummerTodos.removeItem(id);
+    _paint();
+  }
+  function summerTarget(delta) {
+    if (typeof SummerTodos === 'undefined') return;
+    SummerTodos.setTarget(SummerTodos.getTarget() + delta);
+    _paint();
   }
 
   function _renderCalendarCard() {
@@ -712,6 +856,11 @@ var FamilyWall = (function() {
     paint: _paint,
     loginAs: loginAs,
     toggleRoutine: toggleRoutine,
+    summerPickKid: summerPickKid,
+    summerAdd: summerAdd,
+    summerToggle: summerToggle,
+    summerRemove: summerRemove,
+    summerTarget: summerTarget,
     openLocationModal: openLocationModal,
     closeLocationModal: closeLocationModal,
     requestGeo: requestGeo,
