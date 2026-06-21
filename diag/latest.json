@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-21T14:41:32.788Z",
+  "generatedAt": "2026-06-21T15:57:17.861Z",
   "windowHours": 72,
-  "totalGroups": 2,
-  "totalEvents": 9,
+  "totalGroups": 3,
+  "totalEvents": 22,
   "topGroups": [
+    {
+      "app": "art-studio",
+      "kind": "error",
+      "page": "art-studio.html",
+      "message": "IndexSizeError: The index is not in the allowed range.",
+      "filename": "https://rozavala.github.io/apps/js/art-studio.js",
+      "lineno": 418,
+      "colno": 39,
+      "count": 13,
+      "firstTs": 1782057301820,
+      "lastTs": 1782057303607,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
