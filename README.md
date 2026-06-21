@@ -69,6 +69,8 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 - **Neutral Language**: Factual storytelling without modern social or political agendas.
 
 ## 🆕 Novedades de la Semana (What's New This Week)
+- **Novedades en Family Wall**: Agregamos la tarjeta "Summer Quest" para las tareas de verano de los niños. (Added the "Summer Quest" kids' summer to-do card to Family Wall.)
+
 
 - **Nuevo Contenido**: Más preguntas en Descubre Chile (ALMA, atrapanieblas, volcán Villarrica, huemul) y nuevo país Italia en World Explorer. (More questions in Descubre Chile and a new Italy country in World Explorer.)
 - **Actualización World Cup 2026**: Opciones familiares y navegación anterior/siguiente dentro del modal de resultados de partidos. (Family picks + prev/next nav inside the match-result modal.)
