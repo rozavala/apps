@@ -8,6 +8,12 @@
        trips: [
          { id, name, destination, country, icon,
            startDate, endDate, notes,
+           hidden,     // when true, trip is a "surprise": invisible in
+                       // the list and blocked from detail view until a
+                       // parent unlocks with the PIN. Kids never see it.
+           overview,   // free text intro (blank lines separate paragraphs)
+           images: [ { url, caption } ],      // photo gallery
+           suggestions: [ { icon, title, text } ], // things to do / tips
            packing: { shared: [...], <profileName>: [...] },
                        // each item: { id, label, packed: bool }
            itinerary: { "YYYY-MM-DD": "Activities text…" }
@@ -17,7 +23,8 @@
      }
 
    Uses parent PIN to unlock editing (reuses requestPinThen).
-   Read-only browsing by default.
+   Read-only browsing by default. Surprise trips (hidden:true) stay
+   out of sight for kids until a parent unlocks with the PIN.
    ================================================================ */
 
 var Vacation = (function() {
@@ -141,6 +148,8 @@ var Vacation = (function() {
     var start = document.getElementById('vc-new-start').value;
     var end = document.getElementById('vc-new-end').value;
     var icon = document.getElementById('vc-new-icon').value.trim() || '✈️';
+    var overview = document.getElementById('vc-new-overview').value.trim();
+    var hidden = document.getElementById('vc-new-hidden').checked;
 
     if (!name || !start) {
       alert('Pick a trip name and a start date.');
@@ -168,6 +177,10 @@ var Vacation = (function() {
       startDate: start,
       endDate: end || start,
       notes: '',
+      hidden: hidden,
+      overview: overview,
+      images: [],
+      suggestions: [],
       packing: packing,
       itinerary: {}
     });
@@ -254,6 +267,13 @@ var Vacation = (function() {
   function _renderList(wrap) {
     var data = _load();
     var trips = data.trips.slice();
+    // Surprise trips (hidden:true) are kept out of the list entirely
+    // until a parent unlocks with the PIN — that's what keeps a planned
+    // surprise invisible to the kids browsing the planner.
+    var hiddenCount = trips.filter(function(t) { return t.hidden; }).length;
+    if (!_parentUnlocked) {
+      trips = trips.filter(function(t) { return !t.hidden; });
+    }
     // Sort: upcoming/current first by start date, then past
     trips.sort(function(a, b) {
       var aPast = !_isUpcomingOrCurrent(a);
@@ -274,6 +294,11 @@ var Vacation = (function() {
           ? '<button class="vc-tb-primary" onclick="Vacation.newTrip()">＋ New trip</button>'
           : '<button onclick="Vacation.unlockParent()">' + lockTxt + '</button>') +
       '</div>' +
+      (_parentUnlocked && hiddenCount > 0
+        ? '<div class="vc-surprise-note">🤫 ' + hiddenCount + ' surprise trip' +
+          (hiddenCount === 1 ? '' : 's') + ' shown below — hidden from the kids until you reveal ' +
+          (hiddenCount === 1 ? 'it' : 'them') + '.</div>'
+        : '') +
       (trips.length === 0
         ? '<div class="vc-empty">No trips yet. Tap "Unlock to edit" then "New trip" to add one.</div>'
         : '<div class="vc-trips">' + trips.map(_tripCardHtml).join('') + '</div>');
@@ -282,10 +307,11 @@ var Vacation = (function() {
   function _tripCardHtml(trip) {
     var cd = _countdown(trip);
     var cls = cd ? cd.kind : 'upcoming';
-    return '<div class="vc-trip ' + cls + '" onclick="Vacation.openTrip(\'' + trip.id + '\')">' +
+    return '<div class="vc-trip ' + cls + (trip.hidden ? ' surprise' : '') + '" onclick="Vacation.openTrip(\'' + trip.id + '\')">' +
       '<div class="vc-trip-head">' +
         '<span class="vc-trip-icon">' + _esc(trip.icon || '✈️') + '</span>' +
         '<span class="vc-trip-name">' + _esc(trip.name) + '</span>' +
+        (trip.hidden ? '<span class="vc-surprise-badge">🤫 Surprise</span>' : '') +
       '</div>' +
       '<div class="vc-trip-dest">' + _esc(trip.destination || '') +
         (trip.country ? ' · ' + _esc(trip.country) : '') + '</div>' +
@@ -307,6 +333,9 @@ var Vacation = (function() {
           '<div class="vc-field"><label>Icon (one emoji)</label><input type="text" id="vc-new-icon" maxlength="2" placeholder="✈️"></div>' +
           '<div class="vc-field"><label>Start date</label><input type="date" id="vc-new-start"></div>' +
           '<div class="vc-field"><label>End date (optional)</label><input type="date" id="vc-new-end"></div>' +
+          '<div class="vc-field"><label>Overview (optional)</label><textarea id="vc-new-overview" rows="3" placeholder="A short intro to the trip…" maxlength="2000"></textarea></div>' +
+          '<label class="vc-check"><input type="checkbox" id="vc-new-hidden">' +
+            '<span>🤫 Surprise — hide from the kids until I reveal it</span></label>' +
           '<div class="vc-form-actions">' +
             '<button class="vc-btn-secondary" onclick="Vacation.backToList()">Cancel</button>' +
             '<button class="vc-btn-primary" onclick="Vacation.saveNewTrip()">Save trip</button>' +
@@ -319,8 +348,14 @@ var Vacation = (function() {
     var data = _load();
     var trip = data.trips.find(function(t) { return t.id === _viewing; });
     if (!trip) { backToList(); return; }
+    // A surprise trip can only be opened while a parent is unlocked —
+    // belt-and-suspenders so it can never be reached from a kid session.
+    if (trip.hidden && !_parentUnlocked) { backToList(); return; }
 
     var cd = _countdown(trip);
+    var overviewHtml = _renderOverview(trip);
+    var galleryHtml = _renderGallery(trip);
+    var suggestionsHtml = _renderSuggestions(trip);
     var packingHtml = _renderPacking(trip);
     var itinHtml = _renderItinerary(trip);
     var linksHtml = _learningLinks(trip).map(function(l) {
@@ -346,12 +381,16 @@ var Vacation = (function() {
           '<div class="vc-detail-title">' + _esc(trip.name) + '</div>' +
         '</div>' +
         '<div class="vc-detail-meta">' +
+          (trip.hidden ? '<span class="vc-surprise-badge">🤫 Surprise</span>' : '') +
           (trip.destination ? '<span>📍 ' + _esc(trip.destination) + '</span>' : '') +
           (trip.country ? '<span>' + _esc(trip.country) + '</span>' : '') +
           (trip.startDate ? '<span>📅 ' + _esc(trip.startDate) +
             (trip.endDate && trip.endDate !== trip.startDate ? ' → ' + _esc(trip.endDate) : '') + '</span>' : '') +
           (cd ? '<span class="vc-countdown ' + cd.kind + '">' + _esc(cd.text) + '</span>' : '') +
         '</div>' +
+        overviewHtml +
+        galleryHtml +
+        suggestionsHtml +
         '<div class="vc-section">' +
           '<div class="vc-section-head">🧳 Packing</div>' +
           packingHtml +
@@ -365,6 +404,62 @@ var Vacation = (function() {
           '<div class="vc-trips">' + linksHtml + '</div>' +
         '</div>' : '') +
       '</div>';
+  }
+
+  // Free-text intro. Blank lines split paragraphs; single newlines become
+  // line breaks. Everything is escaped first, so trip data can't inject HTML.
+  function _renderOverview(trip) {
+    var txt = String(trip.overview || '').trim();
+    if (!txt) return '';
+    var paras = txt.split(/\n\s*\n/).map(function(p) {
+      return '<p>' + _esc(p).replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+    return '<div class="vc-section">' +
+      '<div class="vc-section-head">📝 About this trip</div>' +
+      '<div class="vc-overview">' + paras + '</div>' +
+    '</div>';
+  }
+
+  // Photo strip. Images that fail to load (e.g. a bad URL) hide their own
+  // tile via onerror so a broken-image icon never spoils the page.
+  function _renderGallery(trip) {
+    var imgs = Array.isArray(trip.images) ? trip.images : [];
+    if (imgs.length === 0) return '';
+    var tiles = imgs.map(function(im) {
+      var url = String(im && im.url || '');
+      if (!url) return '';
+      var cap = im.caption ? '<span class="vc-photo-cap">' + _esc(im.caption) + '</span>' : '';
+      return '<div class="vc-photo">' +
+        '<img src="' + _esc(url) + '" alt="' + _esc(im.caption || trip.name || '') + '" ' +
+          'loading="lazy" referrerpolicy="no-referrer" ' +
+          'onerror="this.closest(\'.vc-photo\').style.display=\'none\'">' +
+        cap +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section">' +
+      '<div class="vc-section-head">📸 Photos</div>' +
+      '<div class="vc-gallery">' + tiles + '</div>' +
+    '</div>';
+  }
+
+  // Curated ideas / tips for the trip (things to do, good-to-know notes).
+  function _renderSuggestions(trip) {
+    var list = Array.isArray(trip.suggestions) ? trip.suggestions : [];
+    if (list.length === 0) return '';
+    var rows = list.map(function(s) {
+      if (!s || (!s.title && !s.text)) return '';
+      return '<div class="vc-sugg">' +
+        '<span class="vc-sugg-icon">' + _esc(s.icon || '💡') + '</span>' +
+        '<div class="vc-sugg-body">' +
+          (s.title ? '<div class="vc-sugg-title">' + _esc(s.title) + '</div>' : '') +
+          (s.text ? '<div class="vc-sugg-text">' + _esc(s.text) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section">' +
+      '<div class="vc-section-head">💡 Ideas &amp; tips</div>' +
+      '<div class="vc-suggs">' + rows + '</div>' +
+    '</div>';
   }
 
   function _renderPacking(trip) {

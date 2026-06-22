@@ -44,7 +44,8 @@ var CloudSync = (function() {
     'zs_home_location':         'home_location',
     'zs_deleted_profiles':      'deleted_profiles',
     'zs_summer_todos':          'summer',
-    'wc2026.v2':                'worldcup'
+    'wc2026.v2':                'worldcup',
+    'zs_vacation':              'vacation'
   };
   var HOUSEHOLD_KID = '_household';
 
