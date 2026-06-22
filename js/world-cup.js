@@ -2750,12 +2750,39 @@
     if (n === 103) return '3rd';
     return 'Final';
   }
+  // Group letters A-L in order — positional encoding key for gw/gr/g3.
+  const _GROUP_ORDER = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  function _packGroups(obj) {
+    if (!obj) return '';
+    const arr = _GROUP_ORDER.map(g => obj[g] || '');
+    while (arr.length && !arr[arr.length - 1]) arr.pop();
+    return arr.join(',');
+  }
+  function _unpackGroups(str) {
+    const out = {};
+    if (typeof str !== 'string' || !str) return out;
+    const arr = str.split(',');
+    for (let i = 0; i < arr.length && i < _GROUP_ORDER.length; i++) {
+      if (arr[i]) out[_GROUP_ORDER[i]] = arr[i];
+    }
+    return out;
+  }
+
   function _compactPicks(p) {
     if (!p) return null;
     const out = {};
-    if (p.groupWinners && Object.keys(p.groupWinners).length) out.gw = p.groupWinners;
-    if (p.groupRunnersUp && Object.keys(p.groupRunnersUp).length) out.gr = p.groupRunnersUp;
-    if (p.groupThird && Object.keys(p.groupThird).length) out.g3 = p.groupThird;
+    if (p.groupWinners && Object.keys(p.groupWinners).length) {
+      const packed = _packGroups(p.groupWinners);
+      if (packed) out.gw = packed;
+    }
+    if (p.groupRunnersUp && Object.keys(p.groupRunnersUp).length) {
+      const packed = _packGroups(p.groupRunnersUp);
+      if (packed) out.gr = packed;
+    }
+    if (p.groupThird && Object.keys(p.groupThird).length) {
+      const packed = _packGroups(p.groupThird);
+      if (packed) out.g3 = packed;
+    }
     if (p.ko) {
       const allKo = Object.assign({}, p.ko.R32, p.ko.R16, p.ko.QF, p.ko.SF, p.ko['3rd'], p.ko.Final);
       const arr = [];
@@ -2784,9 +2811,10 @@
     // v=1 used the verbose shape directly — leave it alone.
     if (p.groupWinners || p.groupRunnersUp || p.scores) return p;
     const out = {
-      groupWinners: p.gw || {},
-      groupRunnersUp: p.gr || {},
-      groupThird: p.g3 || {},
+      // Both v=2 (object form) and v=3 (positional string) survive this.
+      groupWinners:   typeof p.gw === 'string' ? _unpackGroups(p.gw) : (p.gw || {}),
+      groupRunnersUp: typeof p.gr === 'string' ? _unpackGroups(p.gr) : (p.gr || {}),
+      groupThird:     typeof p.g3 === 'string' ? _unpackGroups(p.g3) : (p.g3 || {}),
       ko: { R32:{}, R16:{}, QF:{}, SF:{}, '3rd':{}, Final:{} },
       champion: p.ch || null,
       runnerUp: p.ru || null,
@@ -2815,6 +2843,49 @@
     return out;
   }
 
+  // Results packing: each of 104 match slots → "HxA[p]" where the
+  // optional p suffix encodes a penalty-shootout winner (h or a). Empty
+  // slot = unplayed. Trailing empties trim.
+  function _packResults(map) {
+    const arr = [];
+    for (let i = 1; i <= 104; i++) {
+      const id = 'm' + String(i).padStart(3, '0');
+      const r = map[id];
+      if (!r || typeof r.home !== 'number' || typeof r.away !== 'number') {
+        arr.push('');
+        continue;
+      }
+      let entry = r.home + 'x' + r.away;
+      if (r.pkWinner === 'home') entry += 'ph';
+      else if (r.pkWinner === 'away') entry += 'pa';
+      arr.push(entry);
+    }
+    while (arr.length && !arr[arr.length - 1]) arr.pop();
+    return arr.join(',');
+  }
+  function _unpackResults(str, matches) {
+    const out = {};
+    if (typeof str !== 'string' || !str) return out;
+    const arr = str.split(',');
+    for (let i = 0; i < arr.length; i++) {
+      const entry = arr[i];
+      if (!entry) continue;
+      const m = entry.match(/^(\d+)x(\d+)(p[ha])?$/);
+      if (!m) continue;
+      const id = 'm' + String(i + 1).padStart(3, '0');
+      const r = { home: parseInt(m[1], 10), away: parseInt(m[2], 10), pkWinner: null };
+      if (m[3] === 'ph' || m[3] === 'pa') {
+        // pkWinner is a team CODE on result, not 'home'/'away' — look it
+        // up from the local match list when available, fall back to the
+        // marker if the match isn't loaded yet.
+        const local = matches && matches.find(x => x.id === id);
+        if (local) r.pkWinner = m[3] === 'ph' ? local.home : local.away;
+      }
+      out[id] = r;
+    }
+    return out;
+  }
+
   function encodePool() {
     const members = state.members
       .filter(m => m.name && m.name.trim())
@@ -2823,9 +2894,9 @@
         a: m.avatar || '',
         p: _compactPicks(state.picks[m.id]),
       }));
-    const results = {};
-    for (const m of state.matches) if (m.result) results[m.id] = m.result;
-    const payload = { v: 2, type: 'pool', members, results };
+    const resultsMap = {};
+    for (const m of state.matches) if (m.result) resultsMap[m.id] = m.result;
+    const payload = { v: 3, type: 'pool', members, r: _packResults(resultsMap) };
     return _encodePayload(JSON.stringify(payload));
   }
   function decodePool(encoded) {
@@ -2834,11 +2905,18 @@
       if (!json) return null;
       const p = JSON.parse(json);
       if (!p || p.type !== 'pool' || !Array.isArray(p.members)) return null;
-      if (p.v !== 1 && p.v !== 2) return null;
-      // Re-hydrate v=2 compact picks back into the verbose in-memory shape
-      // so importPool can drop them straight into state.picks.
-      if (p.v === 2) {
+      if (p.v !== 1 && p.v !== 2 && p.v !== 3) return null;
+      // Re-hydrate v=2/v=3 compact picks back into the verbose in-memory
+      // shape so importPool can drop them straight into state.picks.
+      if (p.v === 2 || p.v === 3) {
         p.members = p.members.map(m => Object.assign({}, m, { p: _expandPicks(m.p) }));
+      }
+      // v=3 packs the results dict as a single positional string under
+      // `r`; expand it back into the {matchId:{home,away,pkWinner}} shape
+      // importPool already knows how to consume.
+      if (p.v === 3) {
+        p.results = _unpackResults(p.r, state.matches);
+        delete p.r;
       }
       return p;
     } catch (e) {}
