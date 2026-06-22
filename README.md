@@ -70,6 +70,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Actualización Family Wall**: Agregamos "Summer Quest", una lista compartida de tareas de verano para los niños. (Added "Summer Quest", a shared kids' summer to-do list.)
 - **Nuevo Contenido**: Más preguntas en Descubre Chile (ALMA, atrapanieblas, volcán Villarrica, huemul) y nuevo país Italia en World Explorer. (More questions in Descubre Chile and a new Italy country in World Explorer.)
 - **Actualización World Cup 2026**: Opciones familiares y navegación anterior/siguiente dentro del modal de resultados de partidos. (Family picks + prev/next nav inside the match-result modal.)
 - **Mejora en Sincronización (CloudSync Update)**: Fusión profunda (deep-merge) para pronósticos y resultados de la Copa del Mundo, protegiendo los datos entre dispositivos. (Deep-merge for World Cup picks and results, protecting data across devices.)
