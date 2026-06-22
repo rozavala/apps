@@ -2943,7 +2943,13 @@
     let resultsApplied = 0;
     for (const id of Object.keys(payload.results || {})) {
       const m = state.matches.find(x => x.id === id);
-      if (m) { m.result = payload.results[id]; resultsApplied++; }
+      if (!m) continue;
+      // Merge incoming result into the existing one so scorer/card/event
+      // detail attached by sync (goals1, goals2, cards1, cards2, eventId)
+      // survives a pool import — the snapshot only carries home/away/
+      // pkWinner, and overwriting would clear everything else.
+      m.result = Object.assign({}, m.result || {}, payload.results[id] || {});
+      resultsApplied++;
     }
     save();
     return { added, updated, results: resultsApplied };
@@ -5050,12 +5056,21 @@
       // Overlay onto local result so the static scorer renderer picks
       // it up — and so it sticks through subsequent navigations.
       if (detail.scorers) {
-        if (Array.isArray(detail.scorers.home)) m.result.goals1 = detail.scorers.home;
-        if (Array.isArray(detail.scorers.away)) m.result.goals2 = detail.scorers.away;
+        // Only overlay scorer lists when the summary actually has them.
+        // Empty arrays from ESPN (older match with no detail published)
+        // would otherwise wipe goals attached by the scoreboard sync.
+        if (Array.isArray(detail.scorers.home) && detail.scorers.home.length) {
+          m.result.goals1 = detail.scorers.home;
+        }
+        if (Array.isArray(detail.scorers.away) && detail.scorers.away.length) {
+          m.result.goals2 = detail.scorers.away;
+        }
       }
       if (detail.cards) {
-        m.result.cards1 = Array.isArray(detail.cards.home) ? detail.cards.home : [];
-        m.result.cards2 = Array.isArray(detail.cards.away) ? detail.cards.away : [];
+        // Cards only ever come from the summary endpoint, so an empty
+        // array is the authoritative "no cards" — safe to write.
+        if (Array.isArray(detail.cards.home)) m.result.cards1 = detail.cards.home;
+        if (Array.isArray(detail.cards.away)) m.result.cards2 = detail.cards.away;
       }
       save();
       const inner = document.querySelector('#match-modal.open .modal-inner');
@@ -6169,8 +6184,12 @@
         if (cur) activateTab(cur);
       }
       if (!quiet) {
-        const scorersNote = state.scorers.length ? `, ${state.scorers.length} scorer${state.scorers.length===1?'':'s'} tracked` : '';
-        toast(`Synced from ${sourceLabel} — ${updated} score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
+        // Two distinct numbers — match-result deltas vs. cumulative Golden
+        // Boot leaderboard size — were getting misread as a fraction.
+        // Spell each out so "8 scores updated, 88 scorers tracked" reads
+        // as two unrelated counts.
+        const scorersNote = state.scorers.length ? ` · 👟 ${state.scorers.length} scorer${state.scorers.length===1?'':'s'} on Golden Boot board` : '';
+        toast(`Synced from ${sourceLabel} — ${updated} match score${updated===1?'':'s'} updated${teamsResolved?`, ${teamsResolved} team${teamsResolved===1?'':'s'} resolved`:''}${scorersNote}`);
       } else if (changed) {
         toast(`⚽ Live — ${updated} score${updated===1?'':'s'} updated`);
       }
