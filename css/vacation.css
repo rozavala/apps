@@ -297,6 +297,22 @@
   outline: none;
 }
 .vc-form input:focus, .vc-form select:focus { border-color: #2563EB; }
+.vc-form label code {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  background: #ece9f5;
+  padding: 1px 5px;
+  border-radius: 5px;
+  color: #4338CA;
+}
+.vc-form-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin: 4px 0 0;
+}
 .vc-form-actions {
   display: flex;
   gap: 8px;

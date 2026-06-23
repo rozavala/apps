@@ -123,6 +123,13 @@ var Vacation = (function() {
     _render();
   }
 
+  function editTrip(id) {
+    if (!_parentUnlocked) { unlockParent(); return; }
+    _viewing = id;
+    _mode = 'edit';
+    _render();
+  }
+
   function backToList() {
     _viewing = null;
     _mode = 'list';
@@ -186,6 +193,70 @@ var Vacation = (function() {
     });
     _save(data);
     _mode = 'list';
+    _render();
+  }
+
+  // Photos editor uses one line per image: "url | caption" (caption optional).
+  function _parseImages(text) {
+    return String(text || '').split('\n').map(function(line) {
+      var s = line.trim();
+      if (!s) return null;
+      var bar = s.indexOf('|');
+      var url = (bar === -1 ? s : s.slice(0, bar)).trim();
+      var cap = bar === -1 ? '' : s.slice(bar + 1).trim();
+      if (!url) return null;
+      return { url: url, caption: cap };
+    }).filter(Boolean);
+  }
+
+  // Tips editor uses one line per tip: "icon | title | text".
+  function _parseSuggestions(text) {
+    return String(text || '').split('\n').map(function(line) {
+      var s = line.trim();
+      if (!s) return null;
+      var parts = s.split('|');
+      var icon = (parts[0] || '').trim() || '💡';
+      var title = (parts[1] || '').trim();
+      var rest = parts.slice(2).join('|').trim();
+      // Allow "title | text" (no icon) too: if only two parts and the first
+      // isn't a short emoji-ish token, treat it as the title.
+      if (parts.length === 2 && (parts[0] || '').trim().length > 3) {
+        title = (parts[0] || '').trim();
+        rest = (parts[1] || '').trim();
+        icon = '💡';
+      }
+      if (!title && !rest) return null;
+      return { icon: icon, title: title, text: rest };
+    }).filter(Boolean);
+  }
+
+  function saveEditTrip() {
+    if (!_parentUnlocked) return;
+    var data = _load();
+    var trip = data.trips.find(function(t) { return t.id === _viewing; });
+    if (!trip) { backToList(); return; }
+
+    var name = document.getElementById('vc-edit-name').value.trim();
+    var start = document.getElementById('vc-edit-start').value;
+    if (!name || !start) {
+      alert('Pick a trip name and a start date.');
+      return;
+    }
+    var end = document.getElementById('vc-edit-end').value;
+
+    trip.name = name;
+    trip.destination = document.getElementById('vc-edit-dest').value.trim();
+    trip.country = document.getElementById('vc-edit-country').value.trim();
+    trip.icon = document.getElementById('vc-edit-icon').value.trim() || '✈️';
+    trip.startDate = start;
+    trip.endDate = end || start;
+    trip.overview = document.getElementById('vc-edit-overview').value.trim();
+    trip.hidden = document.getElementById('vc-edit-hidden').checked;
+    trip.images = _parseImages(document.getElementById('vc-edit-images').value);
+    trip.suggestions = _parseSuggestions(document.getElementById('vc-edit-suggestions').value);
+
+    _save(data);
+    _mode = 'detail';
     _render();
   }
 
@@ -260,6 +331,7 @@ var Vacation = (function() {
     if (!wrap) return;
 
     if (_mode === 'new') return _renderNewForm(wrap);
+    if (_mode === 'edit' && _viewing) return _renderEditForm(wrap);
     if (_mode === 'detail' && _viewing) return _renderDetail(wrap);
     return _renderList(wrap);
   }
@@ -344,6 +416,51 @@ var Vacation = (function() {
       '</div>';
   }
 
+  function _renderEditForm(wrap) {
+    if (!_parentUnlocked) { backToList(); return; }
+    var data = _load();
+    var trip = data.trips.find(function(t) { return t.id === _viewing; });
+    if (!trip) { backToList(); return; }
+
+    var imagesText = (Array.isArray(trip.images) ? trip.images : []).map(function(im) {
+      return (im && im.url ? im.url : '') + (im && im.caption ? ' | ' + im.caption : '');
+    }).join('\n');
+    var suggText = (Array.isArray(trip.suggestions) ? trip.suggestions : []).map(function(s) {
+      return [(s && s.icon) || '💡', (s && s.title) || '', (s && s.text) || ''].join(' | ');
+    }).join('\n');
+
+    wrap.innerHTML =
+      '<div class="vc-toolbar">' +
+        '<button onclick="Vacation.openTrip(\'' + trip.id + '\')">← Back to trip</button>' +
+      '</div>' +
+      '<div class="vc-header">' +
+        '<span class="vc-icon">✏️</span>' +
+        '<h1>Edit trip</h1>' +
+      '</div>' +
+      '<div class="vc-detail">' +
+        '<div class="vc-form">' +
+          '<div class="vc-field"><label>Name</label><input type="text" id="vc-edit-name" maxlength="40" value="' + _esc(trip.name || '') + '"></div>' +
+          '<div class="vc-field"><label>Destination</label><input type="text" id="vc-edit-dest" maxlength="60" value="' + _esc(trip.destination || '') + '"></div>' +
+          '<div class="vc-field"><label>Country</label><input type="text" id="vc-edit-country" maxlength="40" value="' + _esc(trip.country || '') + '"></div>' +
+          '<div class="vc-field"><label>Icon (one emoji)</label><input type="text" id="vc-edit-icon" maxlength="2" value="' + _esc(trip.icon || '✈️') + '"></div>' +
+          '<div class="vc-field"><label>Start date</label><input type="date" id="vc-edit-start" value="' + _esc(trip.startDate || '') + '"></div>' +
+          '<div class="vc-field"><label>End date</label><input type="date" id="vc-edit-end" value="' + _esc(trip.endDate || '') + '"></div>' +
+          '<div class="vc-field"><label>Overview</label><textarea id="vc-edit-overview" rows="4" maxlength="2000" placeholder="A short intro to the trip…">' + _esc(trip.overview || '') + '</textarea></div>' +
+          '<div class="vc-field"><label>Photos — one per line: <code>url | caption</code></label>' +
+            '<textarea id="vc-edit-images" rows="5" placeholder="https://example.com/photo.jpg | A sunny beach">' + _esc(imagesText) + '</textarea></div>' +
+          '<div class="vc-field"><label>Ideas &amp; tips — one per line: <code>icon | title | text</code></label>' +
+            '<textarea id="vc-edit-suggestions" rows="5" placeholder="🛂 | Passports | Check they\'re valid 6+ months out">' + _esc(suggText) + '</textarea></div>' +
+          '<label class="vc-check"><input type="checkbox" id="vc-edit-hidden"' + (trip.hidden ? ' checked' : '') + '>' +
+            '<span>🤫 Surprise — hide from the kids until I reveal it</span></label>' +
+          '<p class="vc-form-hint">Packing and the day-by-day itinerary are edited on the trip page itself.</p>' +
+          '<div class="vc-form-actions">' +
+            '<button class="vc-btn-secondary" onclick="Vacation.openTrip(\'' + trip.id + '\')">Cancel</button>' +
+            '<button class="vc-btn-primary" onclick="Vacation.saveEditTrip()">Save changes</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
   function _renderDetail(wrap) {
     var data = _load();
     var trip = data.trips.find(function(t) { return t.id === _viewing; });
@@ -372,7 +489,8 @@ var Vacation = (function() {
       '<div class="vc-toolbar">' +
         '<button onclick="Vacation.backToList()">← All trips</button>' +
         (_parentUnlocked
-          ? '<button class="vc-btn-danger" style="border-color:rgba(248,113,113,0.25);" onclick="Vacation.deleteTrip(\'' + trip.id + '\')">🗑 Delete</button>'
+          ? '<button class="vc-tb-primary" onclick="Vacation.editTrip(\'' + trip.id + '\')">✏️ Edit trip</button>' +
+            '<button class="vc-btn-danger" style="border-color:rgba(248,113,113,0.25);" onclick="Vacation.deleteTrip(\'' + trip.id + '\')">🗑 Delete</button>'
           : '<button onclick="Vacation.unlockParent()">🔒 Unlock to edit</button>') +
       '</div>' +
       '<div class="vc-detail">' +
@@ -549,9 +667,11 @@ var Vacation = (function() {
     unlockParent: unlockParent,
     newTrip: newTrip,
     openTrip: openTrip,
+    editTrip: editTrip,
     backToList: backToList,
     deleteTrip: deleteTrip,
     saveNewTrip: saveNewTrip,
+    saveEditTrip: saveEditTrip,
     _togglePack: togglePackItem,
     _addPack: addPackItem,
     _delPack: removePackItem,
