@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-22T14:25:35.992Z",
+  "generatedAt": "2026-06-23T16:54:22.822Z",
   "windowHours": 72,
-  "totalGroups": 2,
-  "totalEvents": 14,
+  "totalGroups": 1,
+  "totalEvents": 13,
   "topGroups": [
     {
       "app": "art-studio",
@@ -15,19 +15,6 @@
       "count": 13,
       "firstTs": 1782057301820,
       "lastTs": 1782057303607,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1781973609314,
-      "lastTs": 1781973609314,
       "users": 1
     }
   ]
