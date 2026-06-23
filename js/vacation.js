@@ -64,7 +64,16 @@ var Vacation = (function() {
   }
 
   function _save(data) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    try {
+      // Bump our own sync stamp so a later pull doesn't treat the
+      // server's (pre-edit) copy as newer and clobber this change, then
+      // push to the VPS like every other household-synced module. Without
+      // this, edits live only in this browser and get overwritten on the
+      // next household pull.
+      data._syncedAt = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(STORAGE_KEY);
+    }
     catch (e) {}
   }
 
