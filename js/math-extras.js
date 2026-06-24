@@ -348,7 +348,12 @@ var MathExtras = (function() {
         { en: 'What is 3² + 4²?', es: '¿Cuánto es 3² + 4²?', answer: 25 },
         { en: 'The temperature is 5°C and drops 8°C. What is it now?', es: 'La temperatura es 5°C y baja 8°C. ¿Cuál es ahora?', answer: -3 },
         { en: 'For every 2 robots there are 5 batteries. How many batteries for 8 robots?', es: 'Por cada 2 robots hay 5 baterías. ¿Cuántas baterías para 8 robots?', answer: 20 },
-        { en: 'A store buys pencils for $300 and sells for $450 each. Profit on 10 pencils?', es: 'Una tienda compra lápices a $300 y vende a $450 cada uno. ¿Ganancia en 10 lápices?', answer: 1500 }
+        { en: 'A store buys pencils for $300 and sells for $450 each. Profit on 10 pencils?', es: 'Una tienda compra lápices a $300 y vende a $450 cada uno. ¿Ganancia en 10 lápices?', answer: 1500 },
+        { en: 'Your first 3 tests average 85. What score on the 4th test makes the average 88?', es: 'Tus 3 primeras pruebas promedian 85. ¿Qué nota en la 4ª prueba sube el promedio a 88?', answer: 97 },
+        { en: 'A $8,000 shirt is 30% off, then an extra 10% off the sale price. Final price?', es: 'Una polera de $8.000 tiene 30% de descuento y luego 10% extra sobre el precio rebajado. ¿Precio final?', answer: 5040 },
+        { en: 'Paint mixes blue to red in a 3:5 ratio. In 24 L of mix, how many litres are blue?', es: 'Una pintura mezcla azul y rojo en razón 3:5. En 24 L de mezcla, ¿cuántos litros son azules?', answer: 9 },
+        { en: 'In a class of 30, 20% are absent. How many students are present?', es: 'En un curso de 30, el 20% está ausente. ¿Cuántos estudiantes están presentes?', answer: 24 },
+        { en: 'Two trains are 360 km apart, heading toward each other at 50 and 70 km/h. After how many hours do they meet?', es: 'Dos trenes están a 360 km, acercándose a 50 y 70 km/h. ¿En cuántas horas se encuentran?', answer: 3 }
       ]
     };
 

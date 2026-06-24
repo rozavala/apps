@@ -37,7 +37,8 @@
   var MODES = [
     { id: 'identify', icon: '🔎', name: 'Identify',   desc: 'Spot a coin or bill — what is it worth?' },
     { id: 'count',    icon: '🧮', name: 'Count Up',   desc: 'Add up a small pile of coins and bills.' },
-    { id: 'change',   icon: '🛒', name: 'Make Change', desc: 'You buy something. How much change comes back?' }
+    { id: 'change',   icon: '🛒', name: 'Make Change', desc: 'You buy something. How much change comes back?' },
+    { id: 'challenge', icon: '🧠', name: 'Challenge',  desc: 'Harder mix: totals, discounts, fewest coins & word problems.' }
   ];
 
   var STORAGE_PREFIX = 'zs_money_';
@@ -261,8 +262,269 @@
     };
   }
 
+  // ---- harder generators (older kids) ----
+
+  // Make 3 numeric distractors that model common mistakes, fall back to safe offsets.
+  function _numDistractors(currency, correct, candidates) {
+    var step = currency === 'USD' ? 25 : 100;
+    var out = [];
+    var seen = {};
+    seen[correct] = 1;
+    function tryAdd(v) {
+      v = Math.round(v);
+      if (out.length >= 3) return;
+      if (v > 0 && !seen[v]) { seen[v] = 1; out.push(v); }
+    }
+    (candidates || []).forEach(tryAdd);
+    var bump = 1;
+    while (out.length < 3) {
+      tryAdd(correct + bump * step);
+      if (out.length < 3) tryAdd(correct - bump * step);
+      bump++;
+      if (bump > 40) { // last-resort uniqueness
+        tryAdd(correct + out.length + 1);
+      }
+    }
+    return out;
+  }
+
+  function _itemNames() {
+    return ['apple', 'pencil', 'sticker', 'cookie', 'eraser', 'juice box',
+            'toy car', 'marker', 'notebook', 'candy', 'ball', 'crayon'];
+  }
+
+  // 1) Buy 2-3 items, sum prices, optionally compute change from a payment.
+  function _genMultiItem(currency) {
+    var n = 2 + _rand(2); // 2 or 3 items
+    var names = _shuffle(_itemNames()).slice(0, n);
+    var prices = [];
+    var sum = 0;
+    var i;
+    for (i = 0; i < n; i++) {
+      var price;
+      if (currency === 'USD') {
+        price = (1 + _rand(8)) * 100 + (_rand(4) * 25); // $1.00–$8.75 in quarters
+      } else {
+        price = (1 + _rand(18)) * 100; // $100–$1.800 in hundreds
+      }
+      prices.push(price);
+      sum += price;
+    }
+
+    var listHtml = names.map(function(nm, k) {
+      return '<div>' + nm + ' — ' + _formatAmount(currency, prices[k]) + '</div>';
+    }).join('');
+
+    var withChange = Math.random() < 0.5;
+    var correct, prompt, display, candidates;
+    if (withChange) {
+      // Choose a payment larger than the sum.
+      var payOpts;
+      if (currency === 'USD') payOpts = [500, 1000, 2000, 5000];
+      else payOpts = [2000, 5000, 10000, 20000];
+      payOpts = payOpts.filter(function(p) { return p > sum; });
+      if (!payOpts.length) { withChange = false; }
+      else {
+        var paid = payOpts[0];
+        correct = paid - sum;
+        prompt = 'Buy these items and pay with ' + _formatAmount(currency, paid) + '. How much change?';
+        display = '<div class="mm-q-text">' + listHtml +
+          '<div>Pay ' + _formatAmount(currency, paid) + ' → change?</div></div>';
+        candidates = [
+          sum,                 // forgot to subtract / gave the total
+          paid - prices[0],    // subtracted only first item
+          correct + (currency === 'USD' ? 100 : 1000),
+          paid + sum           // added instead of subtracted
+        ];
+      }
+    }
+    if (!withChange) {
+      correct = sum;
+      prompt = 'What is the total cost of these items?';
+      display = '<div class="mm-q-text">' + listHtml + '</div>';
+      candidates = [
+        sum - prices[0],                                 // missed an item
+        sum + prices[_rand(prices.length)],              // counted one twice
+        sum + (currency === 'USD' ? 100 : 1000),         // off by one unit
+        sum - (currency === 'USD' ? 25 : 100)
+      ];
+    }
+
+    var distractors = _numDistractors(currency, correct, candidates);
+    var optionVals = _shuffle([correct].concat(distractors));
+    return {
+      type: 'wordmath',
+      prompt: prompt,
+      display: display,
+      options: optionVals.map(function(v) { return { text: _formatAmount(currency, v), correct: v === correct }; }),
+      answer: _formatAmount(currency, correct)
+    };
+  }
+
+  // 2) Make X using the fewest coins/bills (greedy minimal count).
+  function _genFewestCoins(currency) {
+    var denoms = DENOMS[currency].slice().sort(function(a, b) { return b.v - a.v; });
+    var smallest = denoms[denoms.length - 1].v;
+    // Build a target that is a multiple of the smallest denom so it's always makeable.
+    var units;
+    if (currency === 'USD') units = 2 + _rand(20); // 2–21 "smallest" (pennies)... keep modest
+    else units = 1 + _rand(40);
+    var target = units * smallest;
+    // Keep target within a reasonable range.
+    var cap = currency === 'USD' ? 1000 : 20000;
+    if (target > cap) target = cap - (cap % smallest);
+    if (target < smallest) target = smallest;
+
+    // Greedy fewest-piece count.
+    var remaining = target;
+    var count = 0;
+    for (var i = 0; i < denoms.length; i++) {
+      if (denoms[i].v <= remaining) {
+        var k = Math.floor(remaining / denoms[i].v);
+        count += k;
+        remaining -= k * denoms[i].v;
+      }
+    }
+    // (Greedy is optimal for these canonical denomination sets.)
+
+    var candidates = [count + 1, count - 1, count + 2, count + 3];
+    var distractors = [];
+    var seen = {}; seen[count] = 1;
+    candidates.forEach(function(c) {
+      if (distractors.length < 3 && c > 0 && !seen[c]) { seen[c] = 1; distractors.push(c); }
+    });
+    var extra = count + 4;
+    while (distractors.length < 3) { if (!seen[extra]) { seen[extra] = 1; distractors.push(extra); } extra++; }
+
+    var optionVals = _shuffle([count].concat(distractors));
+    var unitWord = 'coins or bills';
+    return {
+      type: 'fewest',
+      prompt: 'Make ' + _formatAmount(currency, target) + ' using the fewest ' + unitWord + '. How many do you need?',
+      display: '<div class="mm-q-text">Target: ' + _formatAmount(currency, target) + '</div>',
+      options: optionVals.map(function(v) { return { text: String(v), correct: v === count }; }),
+      answer: String(count)
+    };
+  }
+
+  // 3) Percentage discount — whole currency units.
+  function _genDiscount(currency) {
+    var pcts = [10, 20, 25, 50];
+    var pct = _pick(pcts);
+    var unit = currency === 'USD' ? 100 : 100; // 1 dollar = 100 cents; CLP step 100 pesos.
+    var price;
+    // Choose price so that pct% lands on whole currency units.
+    if (currency === 'USD') {
+      // price in whole dollars; pct% of dollars must be whole dollars too -> pick dollars divisible appropriately.
+      var baseDollars;
+      if (pct === 50) baseDollars = (1 + _rand(20)) * 2;        // even
+      else if (pct === 25) baseDollars = (1 + _rand(10)) * 4;   // mult of 4
+      else if (pct === 20) baseDollars = (1 + _rand(10)) * 5;   // mult of 5
+      else baseDollars = (1 + _rand(10)) * 10;                  // 10% -> mult of 10
+      price = baseDollars * 100;
+    } else {
+      var baseUnits; // in hundreds of pesos
+      if (pct === 50) baseUnits = (1 + _rand(40)) * 2;
+      else if (pct === 25) baseUnits = (1 + _rand(20)) * 4;
+      else if (pct === 20) baseUnits = (1 + _rand(20)) * 5;
+      else baseUnits = (1 + _rand(20)) * 10;
+      price = baseUnits * 100;
+    }
+    var discount = price * pct / 100;
+    var correct = price - discount; // new price
+    var candidates = [
+      discount,                       // gave the discount amount instead of new price
+      price,                          // forgot to apply discount
+      price + discount,               // added instead of subtracted
+      price - (price * (100 - pct) / 100) // confused which part is taken
+    ];
+    var distractors = _numDistractors(currency, correct, candidates);
+    var optionVals = _shuffle([correct].concat(distractors));
+    return {
+      type: 'discount',
+      prompt: 'An item costs ' + _formatAmount(currency, price) + '. It is ' + pct + '% off. What is the new price?',
+      display: '<div class="mm-q-text">' + _formatAmount(currency, price) + ' − ' + pct + '% = ?</div>',
+      options: optionVals.map(function(v) { return { text: _formatAmount(currency, v), correct: v === correct }; }),
+      answer: _formatAmount(currency, correct)
+    };
+  }
+
+  // 4) Short narrative multi-step word problem.
+  function _genWordProblem(currency) {
+    var names = ['Sofia', 'Diego', 'Mia', 'Lucas', 'Emma', 'Mateo'];
+    var who = _pick(names);
+    var item = _pick(_itemNames());
+
+    // Starting cash: pick a couple of bills/coins.
+    var denoms = DENOMS[currency];
+    var bills = denoms.filter(function(d) { return d.kind === 'bill'; });
+    var pickPool = bills.length ? bills : denoms;
+    var nPieces = 2 + _rand(2); // 2–3 pieces
+    var pieces = [];
+    var start = 0;
+    for (var i = 0; i < nPieces; i++) {
+      var d = _pick(pickPool);
+      pieces.push(d);
+      start += d.v;
+    }
+
+    // Cost less than start.
+    var step = currency === 'USD' ? 25 : 100;
+    var maxUnits = Math.floor((start - step) / step);
+    if (maxUnits < 1) maxUnits = 1;
+    var cost = (1 + _rand(maxUnits)) * step;
+    if (cost >= start) cost = start - step;
+    if (cost < step) cost = step;
+    var correct = start - cost;
+
+    var piecesText = pieces.map(function(d) { return d.label; }).join(' + ');
+    var prompt = who + ' has ' + piecesText + ' and buys a ' + item +
+      ' for ' + _formatAmount(currency, cost) + '. How much money is left?';
+    var candidates = [
+      start,                              // forgot to spend
+      cost,                               // gave the cost
+      start + cost,                       // added instead of subtracted
+      correct + (currency === 'USD' ? 100 : 1000)
+    ];
+    var distractors = _numDistractors(currency, correct, candidates);
+    var optionVals = _shuffle([correct].concat(distractors));
+    return {
+      type: 'word',
+      prompt: prompt,
+      display: '<div class="mm-q-text">' + _formatAmount(currency, start) + ' − ' +
+        _formatAmount(currency, cost) + ' = ?</div>',
+      options: optionVals.map(function(v) { return { text: _formatAmount(currency, v), correct: v === correct }; }),
+      answer: _formatAmount(currency, correct)
+    };
+  }
+
   function _generateQuestions(mode, currency) {
-    var fns = { identify: _genIdentify, count: _genCount, change: _genChange };
+    var fns = {
+      identify: _genIdentify,
+      count: _genCount,
+      change: _genChange,
+      multiitem: _genMultiItem,
+      fewest: _genFewestCoins,
+      discount: _genDiscount,
+      word: _genWordProblem
+    };
+    // "challenge" mode mixes all the harder generators.
+    if (mode === 'challenge') {
+      var pool = [_genMultiItem, _genFewestCoins, _genDiscount, _genWordProblem];
+      var qs2 = [];
+      var seen2 = {};
+      var safety2 = 0;
+      while (qs2.length < ROUND_LEN && safety2 < 400) {
+        safety2++;
+        var gen = pool[_rand(pool.length)];
+        var q2 = gen(currency);
+        var fp2 = q2.prompt + '|' + q2.answer;
+        if (seen2[fp2]) continue;
+        seen2[fp2] = 1;
+        qs2.push(q2);
+      }
+      return qs2;
+    }
     var fn = fns[mode];
     var qs = [];
     var seen = {};

@@ -484,7 +484,8 @@ function genCommander() {
   // PRUNED [2026-05-18]: Removed 'rocket_pct', 'asteroid_decimal' to make room for 'pulsar_add', 'galaxy_pct' and stay within MAX 25 limit.
   // PRUNED [2026-06-15]: Removed 'robot_ops', 'ufo_decimal' to make room for 'blackhole_sub', 'galaxy_pct_2' and stay within MAX 25 limit.
   // ADDED [2026-06-24]: Harder content for ages 10-12 — 'void_neg' (negatives), 'star_power' (exponents), 'cosmic_pemdas' (parentheses), 'orbit_ratio' (ratios), 'warp_algebra' (one/two-step algebra), 'prime_scan' (primes), 'station_geo' (area/perimeter). Array grown intentionally.
-  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2', 'void_neg', 'star_power', 'cosmic_pemdas', 'orbit_ratio', 'warp_algebra', 'prime_scan', 'station_geo'];
+  // ADDED [2026-06-24]: More breadth at the harder end — 'data_mean' (average), 'data_median' (median), 'data_mode' (mode), 'frac_to_dec' (fraction→decimal), 'pct_of_num' (N% of a number), 'dec_to_pct' (decimal→percent).
+  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2', 'void_neg', 'star_power', 'cosmic_pemdas', 'orbit_ratio', 'warp_algebra', 'prime_scan', 'station_geo', 'data_mean', 'data_median', 'data_mode', 'frac_to_dec', 'pct_of_num', 'dec_to_pct'];
   const type = types[rand(0, types.length - 1)];
   if (type === 'void_neg') {
     // Negative-number arithmetic: subtracting a larger number, or adding a negative.
@@ -544,6 +545,78 @@ function genCommander() {
     }
     const ans = 2 * (w + h);
     return { label: 'Station Geometry', text: `Perimeter of a ${w} × ${h} module?`, hint: 'Perimeter = 2 × (width + height).', answer: ans, options: generateDistractors(ans, 3, 5, ans + 30), mode: 'choice' };
+  }
+  if (type === 'data_mean') {
+    // Mean (average) of 3-4 small integers chosen to divide evenly.
+    const count = rand(3, 4);
+    const mean = rand(3, 15);
+    const nums = [];
+    let remaining = mean * count;
+    for (let i = 0; i < count - 1; i++) {
+      const lo = Math.max(1, remaining - (mean * 2) * (count - 1 - i));
+      const hi = Math.min(remaining - (count - 1 - i), mean * 2);
+      const v = rand(lo, Math.max(lo, hi));
+      nums.push(v);
+      remaining -= v;
+    }
+    nums.push(remaining);
+    return { label: 'Star Data Mean', text: `Mean (average) of ${shuffle(nums).join(', ')}?`, hint: 'Add them all, then divide by how many.', answer: mean, options: generateDistractors(mean, 3, 1, mean + 12), mode: 'choice' };
+  }
+  if (type === 'data_median') {
+    // Median of 5 integers: sort then pick the middle.
+    const nums = [];
+    while (nums.length < 5) {
+      const v = rand(1, 40);
+      if (!nums.includes(v)) nums.push(v);
+    }
+    const sorted = [...nums].sort((a, b) => a - b);
+    const ans = sorted[2];
+    return { label: 'Nebula Median', text: `Median of ${nums.join(', ')}?`, hint: 'Sort the numbers, then take the middle one.', answer: ans, options: generateDistractors(ans, 3, 1, 40), mode: 'choice' };
+  }
+  if (type === 'data_mode') {
+    // Mode of a small list: the value that appears most often.
+    const ans = rand(2, 9);
+    const others = [];
+    while (others.length < 2) {
+      const v = rand(2, 9);
+      if (v !== ans && !others.includes(v)) others.push(v);
+    }
+    const list = [ans, ans, ans, others[0], others[1]];
+    return { label: 'Comet Mode', text: `Mode of ${shuffle(list).join(', ')}?`, hint: 'The mode is the value that appears most often.', answer: ans, options: generateDistractors(ans, 3, 2, 12), mode: 'choice' };
+  }
+  if (type === 'frac_to_dec') {
+    // Convert a simple fraction to a decimal.
+    const pairs = [[1, 2, '0.5'], [1, 4, '0.25'], [3, 4, '0.75'], [1, 5, '0.2'], [2, 5, '0.4'], [3, 5, '0.6'], [4, 5, '0.8'], [1, 10, '0.1'], [3, 10, '0.3'], [7, 10, '0.7'], [1, 8, '0.125'], [3, 8, '0.375']];
+    const [n, d, ans] = pairs[rand(0, pairs.length - 1)];
+    const opts = new Set([ans]);
+    let attempts = 0;
+    while (opts.size < 4 && attempts < 30) {
+      attempts++;
+      const fake = pairs[rand(0, pairs.length - 1)][2];
+      if (fake !== ans) opts.add(fake);
+    }
+    return { label: 'Fraction to Decimal', text: `${n}/${d} = ? (as a decimal)`, hint: 'Divide the top by the bottom.', answer: ans, options: shuffle(Array.from(opts)), mode: 'choice' };
+  }
+  if (type === 'pct_of_num') {
+    // Find N% of a number with clean results.
+    const p = [10, 20, 25, 50][rand(0, 3)];
+    const base = rand(2, 12) * (100 / p);
+    const ans = base * p / 100;
+    return { label: 'Quasar Percent', text: `${p}% of ${base} = ?`, hint: `Multiply ${base} by ${p}/100.`, answer: ans, options: generateDistractors(ans, 3, 1, base), mode: 'choice' };
+  }
+  if (type === 'dec_to_pct') {
+    // Convert a decimal to a percent.
+    const decimals = ['0.1', '0.2', '0.25', '0.3', '0.4', '0.5', '0.6', '0.7', '0.75', '0.8', '0.9'];
+    const d = decimals[rand(0, decimals.length - 1)];
+    const ans = `${parseFloat(d) * 100}%`;
+    const opts = new Set([ans]);
+    let attempts = 0;
+    while (opts.size < 4 && attempts < 30) {
+      attempts++;
+      const fake = `${parseFloat(decimals[rand(0, decimals.length - 1)]) * 100}%`;
+      if (fake !== ans) opts.add(fake);
+    }
+    return { label: 'Pulsar Percent', text: `${d} = ? (as a percent)`, hint: 'Multiply the decimal by 100.', answer: ans, options: shuffle(Array.from(opts)), mode: 'choice' };
   }
   if (type === 'blackhole_sub') { const a = rand(100, 500), b = rand(50, a - 1); return { label: 'Big Subtraction', text: `${a} 🕳️ - ${b} 🕳️ = ?`, hint: 'Subtract', answer: a - b, options: generateDistractors(a - b, 3, 10, 450), mode: 'choice' }; }
   if (type === 'galaxy_pct_2') { const p = [10, 20, 25, 50][rand(0, 3)]; const base = rand(10, 50) * (100/p); const ans = base * p/100; return { label: 'Percentages', text: `${p}% of ${base} 🌌`, hint: 'Calculate', answer: ans, options: generateDistractors(ans, 3, 5, 200), mode: 'choice' }; }
