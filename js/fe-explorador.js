@@ -79,22 +79,74 @@ const FeManager = (() => {
         '¡Oh clemente, oh piadosa, oh dulce Virgen María!',
         'Amén.'
       ]
+    },
+    {
+      id: 'senalcruz',
+      title: 'Señal de la Cruz',
+      lines: [
+        'Por la señal de la Santa Cruz,',
+        'de nuestros enemigos',
+        'líbranos, Señor, Dios nuestro.',
+        'En el nombre del Padre,',
+        'y del Hijo,',
+        'y del Espíritu Santo. Amén.'
+      ]
+    },
+    {
+      id: 'credo',
+      title: 'Credo (Símbolo de los Apóstoles)',
+      lines: [
+        'Creo en Dios, Padre todopoderoso,',
+        'Creador del cielo y de la tierra.',
+        'Creo en Jesucristo, su único Hijo, nuestro Señor,',
+        'que fue concebido por obra y gracia del Espíritu Santo,',
+        'nació de Santa María Virgen,',
+        'padeció bajo el poder de Poncio Pilato,',
+        'fue crucificado, muerto y sepultado,',
+        'descendió a los infiernos,',
+        'al tercer día resucitó de entre los muertos,',
+        'subió a los cielos',
+        'y está sentado a la derecha de Dios, Padre todopoderoso.',
+        'Desde allí ha de venir a juzgar a vivos y muertos.',
+        'Creo en el Espíritu Santo,',
+        'la santa Iglesia católica,',
+        'la comunión de los santos,',
+        'el perdón de los pecados,',
+        'la resurrección de la carne',
+        'y la vida eterna. Amén.'
+      ]
+    },
+    {
+      id: 'contricion',
+      title: 'Acto de Contrición',
+      lines: [
+        'Señor mío Jesucristo,',
+        'Dios y hombre verdadero,',
+        'Creador, Padre y Redentor mío;',
+        'por ser Tú quien eres, Bondad infinita,',
+        'y porque te amo sobre todas las cosas,',
+        'me pesa de todo corazón haberte ofendido.',
+        'También me pesa porque puedes castigarme',
+        'con las penas del infierno.',
+        'Ayudado de tu divina gracia,',
+        'propongo firmemente nunca más pecar,',
+        'confesarme y cumplir la penitencia',
+        'que me fuere impuesta. Amén.'
+      ]
+    },
+    {
+      id: 'bendicionmesa',
+      title: 'Bendición de la Mesa',
+      lines: [
+        'Bendícenos, Señor,',
+        'y bendice estos alimentos',
+        'que por tu bondad vamos a recibir.',
+        'Por Jesucristo, nuestro Señor. Amén.'
+      ]
     }
   ];
 
   const SAINTS = [
-    {
-      id: 'jose',
-      name: 'San José',
-      dates: 'Siglo I',
-      country: 'Israel 🇮🇱',
-      bio: 'Fue el padre adoptivo de Jesús y esposo de la Virgen María. De oficio carpintero.',
-      questions: [
-        { q: '¿Cuál era el oficio de San José?', a: ['Carpintero', 'Pescador', 'Pastor'], correct: 0 },
-        { q: '¿De quién fue padre adoptivo?', a: ['Jesús', 'Pedro', 'Juan'], correct: 0 },
-        { q: '¿Quién fue su esposa?', a: ['María', 'Isabel', 'Marta'], correct: 0 }
-      ]
-    },
     {
       id: 'benito',
       name: 'San Benito de Nursia',
@@ -264,6 +316,78 @@ const FeManager = (() => {
         { q: '¿Por qué es famoso?', a: ['Por ser místico y poeta', 'Por fundar Roma', 'Por inventar la imprenta'], correct: 0 },
         { q: '¿De qué país era?', a: ['España', 'Francia', 'Italia'], correct: 0 }
       ]
+    },
+    {
+      id: 'tomas_aquino',
+      name: 'Santo Tomás de Aquino',
+      dates: '1225–1274',
+      country: 'Italia 🇮🇹',
+      bio: 'Fue un fraile dominico, filósofo y teólogo. Es autor de la "Suma Teológica" y uno de los grandes maestros de la Iglesia. Nació en Italia.',
+      questions: [
+        { q: '¿Cuál es la obra más famosa de Santo Tomás de Aquino?', a: ['La Divina Comedia', 'La Suma Teológica', 'El Quijote'], correct: 1 },
+        { q: '¿A qué orden religiosa pertenecía?', a: ['Dominicos', 'Franciscanos', 'Jesuitas'], correct: 0 },
+        { q: '¿En qué siglo vivió Santo Tomás de Aquino?', a: ['Siglo XIII', 'Siglo XVI', 'Siglo X'], correct: 0 }
+      ]
+    },
+    {
+      id: 'agustin',
+      name: 'San Agustín de Hipona',
+      dates: '354–430',
+      country: 'Tagaste, Numidia 🌍',
+      bio: 'Obispo de Hipona, en el norte de África, y uno de los Padres de la Iglesia. Escribió las "Confesiones" y "La Ciudad de Dios".',
+      questions: [
+        { q: '¿De qué ciudad fue obispo San Agustín?', a: ['Roma', 'Hipona', 'Milán'], correct: 1 },
+        { q: '¿Cuál de estas obras escribió San Agustín?', a: ['Las Confesiones', 'La Odisea', 'La Eneida'], correct: 0 },
+        { q: '¿En qué siglo vivió San Agustín?', a: ['Siglo IV y V', 'Siglo XII', 'Siglo I'], correct: 0 }
+      ]
+    },
+    {
+      id: 'catalina_siena',
+      name: 'Santa Catalina de Siena',
+      dates: '1347–1380',
+      country: 'Italia 🇮🇹',
+      bio: 'Religiosa dominica italiana, Doctora de la Iglesia y copatrona de Europa. Influyó para que el Papa volviera de Aviñón a Roma.',
+      questions: [
+        { q: '¿De qué ciudad italiana era Santa Catalina?', a: ['Siena', 'Florencia', 'Venecia'], correct: 0 },
+        { q: '¿A qué ciudad ayudó a que regresara el Papa?', a: ['Roma', 'París', 'Madrid'], correct: 0 },
+        { q: '¿En qué siglo vivió Santa Catalina de Siena?', a: ['Siglo XIV', 'Siglo XVIII', 'Siglo IX'], correct: 0 }
+      ]
+    },
+    {
+      id: 'jorge',
+      name: 'San Jorge',
+      dates: 'Siglo IV',
+      country: 'Capadocia 🐉',
+      bio: 'Soldado romano y mártir cristiano. La tradición lo representa venciendo a un dragón. Es patrono de muchos países y ciudades.',
+      questions: [
+        { q: '¿Qué profesión tenía San Jorge?', a: ['Soldado romano', 'Pescador', 'Comerciante'], correct: 0 },
+        { q: '¿Con qué animal se le representa en la tradición?', a: ['Un dragón', 'Un león', 'Un caballo de mar'], correct: 0 },
+        { q: '¿En qué siglo vivió San Jorge?', a: ['Siglo IV', 'Siglo XII', 'Siglo XVII'], correct: 0 }
+      ]
+    },
+    {
+      id: 'ambrosio',
+      name: 'San Ambrosio de Milán',
+      dates: '340–397',
+      country: 'Tréveris 🇮🇹',
+      bio: 'Obispo de Milán y uno de los Padres de la Iglesia. Fue un gran predicador e himnógrafo, y bautizó a San Agustín.',
+      questions: [
+        { q: '¿De qué ciudad fue obispo San Ambrosio?', a: ['Milán', 'Roma', 'Nápoles'], correct: 0 },
+        { q: '¿A qué famoso santo bautizó San Ambrosio?', a: ['San Agustín', 'San Benito', 'San Francisco'], correct: 0 },
+        { q: '¿En qué siglo vivió San Ambrosio?', a: ['Siglo IV', 'Siglo X', 'Siglo XV'], correct: 0 }
+      ]
+    },
+    {
+      id: 'monica',
+      name: 'Santa Mónica',
+      dates: '331–387',
+      country: 'Tagaste, Numidia 🌍',
+      bio: 'Madre de San Agustín. Es recordada por su constancia y sus oraciones durante muchos años por la conversión de su hijo.',
+      questions: [
+        { q: '¿De quién fue madre Santa Mónica?', a: ['De San Agustín', 'De San Benito', 'De San Jorge'], correct: 0 },
+        { q: '¿Por qué es especialmente recordada Santa Mónica?', a: ['Por sus oraciones por su hijo', 'Por fundar conventos', 'Por sus viajes'], correct: 0 },
+        { q: '¿En qué siglo vivió Santa Mónica?', a: ['Siglo IV', 'Siglo XI', 'Siglo XVI'], correct: 0 }
+      ]
     }
   ];
 
@@ -402,6 +526,24 @@ const FeManager = (() => {
       title: 'Santuario de Santa Teresa de Los Andes',
       info: 'Ubicado en Auco, es un importante lugar de peregrinación donde descansan los restos de la primera santa chilena.',
       q: '¿Qué santa chilena descansa en este santuario?', a: ['Santa Rosa', 'Santa Teresa de Los Andes', 'Santa Cecilia'], correct: 1
+    },
+    {
+      id: 'catedral_stgo',
+      title: 'Catedral Metropolitana de Santiago',
+      info: 'Ubicada en la Plaza de Armas de Santiago, es la iglesia principal de la Arquidiócesis. La construcción del edificio actual comenzó en 1748.',
+      q: '¿En qué plaza se encuentra la Catedral Metropolitana?', a: ['Plaza de Armas', 'Plaza Italia', 'Plaza Brasil'], correct: 0
+    },
+    {
+      id: 'lourdes_punta_arenas',
+      title: 'Santuario de Lourdes en Punta Arenas',
+      info: 'Es una gruta y santuario dedicado a la Virgen de Lourdes en la ciudad de Punta Arenas, en el extremo sur de Chile. Es un destacado lugar de peregrinación en la Patagonia.',
+      q: '¿En qué ciudad del sur de Chile está este santuario?', a: ['Punta Arenas', 'La Serena', 'Arica'], correct: 0
+    },
+    {
+      id: 'candelaria',
+      title: 'Fiesta de la Virgen de la Candelaria',
+      info: 'Se celebra el 2 de febrero, fiesta de la Presentación del Señor. En Copiapó, en el norte de Chile, se honra a la Virgen de la Candelaria con bailes religiosos.',
+      q: '¿Qué día se celebra la Virgen de la Candelaria?', a: ['2 de febrero', '16 de julio', '8 de diciembre'], correct: 0
     }
   ];
 

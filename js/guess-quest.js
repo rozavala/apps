@@ -58,6 +58,20 @@ const GuessQuest = (() => {
     { id: 'monkey', emoji: '🐒', category: 'animal', name: { en: 'Monkey', es: 'Mono' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, livesInJungle: true, livesOnLand: true, hasTail: true, hasLegs: true, makesSounds: true } },
     { id: 'panda', emoji: '🐼', category: 'animal', name: { en: 'Panda', es: 'Panda' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, isBig: true, livesOnLand: true, isBlack: true, isWhite: true, hasLegs: true } },
     { id: 'whale', emoji: '🐋', category: 'animal', name: { en: 'Whale', es: 'Ballena' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, livesInWater: true, isBig: true, hasTail: true, makesSounds: true } },
+    { id: 'cheetah', emoji: '🐆', category: 'animal', name: { en: 'Cheetah', es: 'Guepardo' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, isDangerous: true, hasTail: true, isYellow: true, makesSounds: true, livesInAfrica: true } },
+    { id: 'crocodile', emoji: '🐊', category: 'animal', name: { en: 'Crocodile', es: 'Cocodrilo' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isBig: true, isDangerous: true, livesInWater: true, hasTail: true, isGreen: true, makesSounds: true, livesInAfrica: true } },
+    { id: 'octopus', emoji: '🐙', category: 'animal', name: { en: 'Octopus', es: 'Pulpo' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: false, livesInWater: true, isRed: true } },
+    { id: 'flamingo', emoji: '🦩', category: 'animal', name: { en: 'Flamingo', es: 'Flamenco' }, attrs: { isAlive: true, isReal: true, isAnimal: true, canFly: true, livesInWater: true, isRed: true, hasWings: true, makesSounds: true } },
+    { id: 'jaguar', emoji: '🐆', category: 'animal', name: { en: 'Jaguar', es: 'Jaguar' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, isDangerous: true, livesInJungle: true, hasTail: true, isYellow: true, makesSounds: true } },
+    { id: 'gorilla', emoji: '🦍', category: 'animal', name: { en: 'Gorilla', es: 'Gorila' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, isBig: true, livesInJungle: true, isBlack: true, makesSounds: true, livesInAfrica: true } },
+    { id: 'wolf', emoji: '🐺', category: 'animal', name: { en: 'Wolf', es: 'Lobo' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, isDangerous: true, hasTail: true, isGrey: true, makesSounds: true } },
+    { id: 'fox', emoji: '🦊', category: 'animal', name: { en: 'Fox', es: 'Zorro' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, hasTail: true, isRed: true, makesSounds: true } },
+    { id: 'owl', emoji: '🦉', category: 'animal', name: { en: 'Owl', es: 'Búho' }, attrs: { isAlive: true, isReal: true, isAnimal: true, canFly: true, hasWings: true, isBrown: true, makesSounds: true } },
+    { id: 'hedgehog', emoji: '🦔', category: 'animal', name: { en: 'Hedgehog', es: 'Erizo' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, isSmall: true, isBrown: true } },
+    { id: 'seahorse', emoji: '🐠', category: 'animal', name: { en: 'Seahorse', es: 'Caballito de mar' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: false, isSmall: true, livesInWater: true, hasTail: true, isYellow: true } },
+    { id: 'crab', emoji: '🦀', category: 'animal', name: { en: 'Crab', es: 'Cangrejo' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: false, isSmall: true, livesInWater: true, isRed: true } },
+    { id: 'frog', emoji: '🐸', category: 'animal', name: { en: 'Frog', es: 'Rana' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isSmall: true, livesInWater: true, isGreen: true, makesSounds: true } },
+    { id: 'kangaroo', emoji: '🦘', category: 'animal', name: { en: 'Kangaroo', es: 'Canguro' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, hasTail: true, isBrown: true, makesSounds: true } },
 
     // --- FOODS ---
     { id: 'pizza', emoji: '🍕', category: 'food', name: { en: 'Pizza', es: 'Pizza' }, attrs: { isFood: true, isSweet: false, isRound: true, foundInKitchen: true, hasCheese: true } },
@@ -70,6 +84,15 @@ const GuessQuest = (() => {
     { id: 'empanada', emoji: '🥟', category: 'food', name: { en: 'Empanada', es: 'Empanada' }, attrs: { isFood: true, isSweet: false, foundInChile: true, foundInKitchen: true } },
     { id: 'sopaipilla', emoji: '🍘', category: 'food', name: { en: 'Sopaipilla', es: 'Sopaipilla' }, attrs: { isFood: true, isSweet: false, foundInChile: true, isYellow: true, isRound: true } },
     { id: 'manjar', emoji: '🍯', category: 'food', name: { en: 'Manjar', es: 'Manjar' }, attrs: { isFood: true, isSweet: true, foundInChile: true, isBrown: true } },
+    { id: 'sushi', emoji: '🍣', category: 'food', name: { en: 'Sushi', es: 'Sushi' }, attrs: { isFood: true, isSweet: false, foundInKitchen: true } },
+    { id: 'taco', emoji: '🌮', category: 'food', name: { en: 'Taco', es: 'Taco' }, attrs: { isFood: true, isSweet: false, foundInKitchen: true } },
+    { id: 'pasta', emoji: '🍝', category: 'food', name: { en: 'Pasta', es: 'Pasta' }, attrs: { isFood: true, isSweet: false, foundInKitchen: true } },
+    { id: 'cheese', emoji: '🧀', category: 'food', name: { en: 'Cheese', es: 'Queso' }, attrs: { isFood: true, isSweet: false, isYellow: true, foundInKitchen: true } },
+    { id: 'avocado', emoji: '🥑', category: 'food', name: { en: 'Avocado', es: 'Palta' }, attrs: { isFood: true, isSweet: false, isGreen: true, isFruit: true } },
+    { id: 'lemon', emoji: '🍋', category: 'food', name: { en: 'Lemon', es: 'Limón' }, attrs: { isFood: true, isSweet: false, isYellow: true, isRound: true, isFruit: true } },
+    { id: 'carrot', emoji: '🥕', category: 'food', name: { en: 'Carrot', es: 'Zanahoria' }, attrs: { isFood: true, isSweet: false, foundInKitchen: true } },
+    { id: 'honey', emoji: '🍯', category: 'food', name: { en: 'Honey', es: 'Miel' }, attrs: { isFood: true, isSweet: true, isYellow: true, foundInKitchen: true } },
+    { id: 'grapes', emoji: '🍇', category: 'food', name: { en: 'Grapes', es: 'Uvas' }, attrs: { isFood: true, isSweet: true, isRound: true, isFruit: true } },
 
     // --- PLANTS ---
     { id: 'sunflower', emoji: '🌻', category: 'plant', name: { en: 'Sunflower', es: 'Girasol' }, attrs: { isAlive: true, isReal: true, isPlant: true, isYellow: true, isBig: true } },
@@ -77,6 +100,11 @@ const GuessQuest = (() => {
     { id: 'cactus', emoji: '🌵', category: 'plant', name: { en: 'Cactus', es: 'Cactus' }, attrs: { isAlive: true, isReal: true, isPlant: true, isGreen: true, livesInDesert: true, hasThorns: true } },
     { id: 'tree', emoji: '🌳', category: 'plant', name: { en: 'Tree', es: 'Árbol' }, attrs: { isAlive: true, isReal: true, isPlant: true, isBig: true, hasLeaves: true, isGreen: true, isBrown: true } },
     { id: 'copihue', emoji: '🌺', category: 'plant', name: { en: 'Copihue', es: 'Copihue' }, attrs: { isAlive: true, isReal: true, isPlant: true, isRed: true, foundInChile: true } },
+    { id: 'fern', emoji: '🌿', category: 'plant', name: { en: 'Fern', es: 'Helecho' }, attrs: { isAlive: true, isReal: true, isPlant: true, isGreen: true, hasLeaves: true } },
+    { id: 'bamboo', emoji: '🎋', category: 'plant', name: { en: 'Bamboo', es: 'Bambú' }, attrs: { isAlive: true, isReal: true, isPlant: true, isGreen: true, isBig: true } },
+    { id: 'orchid', emoji: '🌸', category: 'plant', name: { en: 'Orchid', es: 'Orquídea' }, attrs: { isAlive: true, isReal: true, isPlant: true, isWhite: true, isSmall: true } },
+    { id: 'oak', emoji: '🌳', category: 'plant', name: { en: 'Oak', es: 'Roble' }, attrs: { isAlive: true, isReal: true, isPlant: true, isBig: true, hasLeaves: true, isGreen: true, isBrown: true } },
+    { id: 'mushroom', emoji: '🍄', category: 'plant', name: { en: 'Mushroom', es: 'Hongo' }, attrs: { isAlive: true, isReal: true, isPlant: true, isSmall: true, isRed: true } },
 
     // --- VEHICLES ---
     { id: 'car', emoji: '🚗', category: 'vehicle', name: { en: 'Car', es: 'Auto' }, attrs: { isVehicle: true, hasWheels: true, livesOnLand: true, makesSounds: true, foundInHouse: true } },
@@ -84,6 +112,12 @@ const GuessQuest = (() => {
     { id: 'bicycle', emoji: '🚲', category: 'vehicle', name: { en: 'Bicycle', es: 'Bicicleta' }, attrs: { isVehicle: true, hasWheels: true, livesOnLand: true, isSmall: true } },
     { id: 'boat', emoji: '🚢', category: 'vehicle', name: { en: 'Boat', es: 'Barco' }, attrs: { isVehicle: true, livesInWater: true, makesSounds: true, isBig: true } },
     { id: 'rocket', emoji: '🚀', category: 'vehicle', name: { en: 'Rocket', es: 'Cohete' }, attrs: { isVehicle: true, canFly: true, makesSounds: true, isBig: true, goesToSpace: true } },
+    { id: 'helicopter', emoji: '🚁', category: 'vehicle', name: { en: 'Helicopter', es: 'Helicóptero' }, attrs: { isVehicle: true, canFly: true, makesSounds: true } },
+    { id: 'submarine', emoji: '🚤', category: 'vehicle', name: { en: 'Submarine', es: 'Submarino' }, attrs: { isVehicle: true, livesInWater: true, isBig: true } },
+    { id: 'train', emoji: '🚆', category: 'vehicle', name: { en: 'Train', es: 'Tren' }, attrs: { isVehicle: true, hasWheels: true, makesSounds: true, isBig: true } },
+    { id: 'motorcycle', emoji: '🏍️', category: 'vehicle', name: { en: 'Motorcycle', es: 'Motocicleta' }, attrs: { isVehicle: true, hasWheels: true, makesSounds: true } },
+    { id: 'hot_air_balloon', emoji: '🎈', category: 'vehicle', name: { en: 'Hot Air Balloon', es: 'Globo aerostático' }, attrs: { isVehicle: true, canFly: true, isBig: true, isRound: true } },
+    { id: 'bus', emoji: '🚌', category: 'vehicle', name: { en: 'Bus', es: 'Autobús' }, attrs: { isVehicle: true, hasWheels: true, makesSounds: true, isBig: true } },
 
     // --- CHARACTERS ---
     { id: 'pirate', emoji: '🏴‍☠️', category: 'character', name: { en: 'Pirate', es: 'Pirata' }, attrs: { isCharacter: true, isHuman: true, isFictional: true, livesInWater: true } },
@@ -91,16 +125,36 @@ const GuessQuest = (() => {
     { id: 'robot', emoji: '🤖', category: 'character', name: { en: 'Robot', es: 'Robot' }, attrs: { isCharacter: true, isReal: true, makesSounds: true } },
     { id: 'dragon', emoji: '🐉', category: 'character', name: { en: 'Dragon', es: 'Dragón' }, attrs: { isCharacter: true, isFictional: true, canFly: true, isBig: true, makesSounds: true, isDangerous: true, hasWings: true, hasTail: true } },
     { id: 'unicorn', emoji: '🦄', category: 'character', name: { en: 'Unicorn', es: 'Unicornio' }, attrs: { isCharacter: true, isFictional: true, isMammal: true, hasFur: true, livesOnLand: true, hasTail: true, hasLegs: true, isWhite: true } },
+    { id: 'wizard', emoji: '🧙', category: 'character', name: { en: 'Wizard', es: 'Mago' }, attrs: { isCharacter: true, isHuman: true, isFictional: true } },
+    { id: 'knight', emoji: '⚔️', category: 'character', name: { en: 'Knight', es: 'Caballero' }, attrs: { isCharacter: true, isHuman: true, isFictional: true } },
+    { id: 'vampire', emoji: '🧛', category: 'character', name: { en: 'Vampire', es: 'Vampiro' }, attrs: { isCharacter: true, isHuman: true, isFictional: true, isDangerous: true } },
+    { id: 'phoenix', emoji: '🔥', category: 'character', name: { en: 'Phoenix', es: 'Fénix' }, attrs: { isCharacter: true, isFictional: true, canFly: true, hasWings: true, isRed: true, isBig: true } },
+    { id: 'mermaid', emoji: '🧜', category: 'character', name: { en: 'Mermaid', es: 'Sirena' }, attrs: { isCharacter: true, isFictional: true, livesInWater: true, hasTail: true } },
+    { id: 'ghost', emoji: '👻', category: 'character', name: { en: 'Ghost', es: 'Fantasma' }, attrs: { isCharacter: true, isFictional: true, canFly: true, isWhite: true } },
+    { id: 'giant', emoji: '🗿', category: 'character', name: { en: 'Giant', es: 'Gigante' }, attrs: { isCharacter: true, isHuman: true, isFictional: true, isBig: true } },
 
     // --- PLACES ---
     { id: 'beach', emoji: '🏖️', category: 'place', name: { en: 'Beach', es: 'Playa' }, attrs: { isPlace: true, isReal: true, livesInWater: true, livesOnLand: true } },
     { id: 'mountain', emoji: '⛰️', category: 'place', name: { en: 'Mountain', es: 'Montaña' }, attrs: { isPlace: true, isReal: true, isBig: true, livesOnLand: true, foundInChile: true } },
     { id: 'moon', emoji: '🌙', category: 'place', name: { en: 'Moon', es: 'Luna' }, attrs: { isPlace: true, isReal: true, isBig: true, goesToSpace: true, isWhite: true, isRound: true } },
+    { id: 'volcano', emoji: '🌋', category: 'place', name: { en: 'Volcano', es: 'Volcán' }, attrs: { isPlace: true, isReal: true, isBig: true, isDangerous: true, isRed: true, foundInChile: true } },
+    { id: 'desert', emoji: '🏜️', category: 'place', name: { en: 'Desert', es: 'Desierto' }, attrs: { isPlace: true, isReal: true, isBig: true, isYellow: true, foundInChile: true } },
+    { id: 'castle', emoji: '🏰', category: 'place', name: { en: 'Castle', es: 'Castillo' }, attrs: { isPlace: true, isReal: true, isBig: true } },
+    { id: 'lighthouse', emoji: '🗼', category: 'place', name: { en: 'Lighthouse', es: 'Faro' }, attrs: { isPlace: true, isReal: true, isBig: true, livesInWater: true } },
+    { id: 'island', emoji: '🏝️', category: 'place', name: { en: 'Island', es: 'Isla' }, attrs: { isPlace: true, isReal: true, isBig: true, livesInWater: true, isGreen: true } },
+    { id: 'forest', emoji: '🌲', category: 'place', name: { en: 'Forest', es: 'Bosque' }, attrs: { isPlace: true, isReal: true, isBig: true, isGreen: true, foundInChile: true } },
 
     // --- OBJECTS ---
     { id: 'guitar', emoji: '🎸', category: 'object', name: { en: 'Guitar', es: 'Guitarra' }, attrs: { isObject: true, isReal: true, makesSounds: true, foundInHouse: true } },
     { id: 'book', emoji: '📚', category: 'object', name: { en: 'Book', es: 'Libro' }, attrs: { isObject: true, isReal: true, foundInHouse: true } },
-    { id: 'clock', emoji: '⏰', category: 'object', name: { en: 'Clock', es: 'Reloj' }, attrs: { isObject: true, isReal: true, makesSounds: true, foundInHouse: true, isRound: true } }
+    { id: 'clock', emoji: '⏰', category: 'object', name: { en: 'Clock', es: 'Reloj' }, attrs: { isObject: true, isReal: true, makesSounds: true, foundInHouse: true, isRound: true } },
+    { id: 'telescope', emoji: '🔭', category: 'object', name: { en: 'Telescope', es: 'Telescopio' }, attrs: { isObject: true, isReal: true, foundInHouse: true } },
+    { id: 'compass', emoji: '🧭', category: 'object', name: { en: 'Compass', es: 'Brújula' }, attrs: { isObject: true, isReal: true, isSmall: true, isRound: true } },
+    { id: 'camera', emoji: '📷', category: 'object', name: { en: 'Camera', es: 'Cámara' }, attrs: { isObject: true, isReal: true, isSmall: true, makesSounds: true, foundInHouse: true, isBlack: true } },
+    { id: 'umbrella', emoji: '☂️', category: 'object', name: { en: 'Umbrella', es: 'Paraguas' }, attrs: { isObject: true, isReal: true, foundInHouse: true } },
+    { id: 'lantern', emoji: '🏮', category: 'object', name: { en: 'Lantern', es: 'Farol' }, attrs: { isObject: true, isReal: true, isRed: true, foundInHouse: true } },
+    { id: 'drum', emoji: '🥁', category: 'object', name: { en: 'Drum', es: 'Tambor' }, attrs: { isObject: true, isReal: true, makesSounds: true, isRound: true, foundInHouse: true } },
+    { id: 'key', emoji: '🔑', category: 'object', name: { en: 'Key', es: 'Llave' }, attrs: { isObject: true, isReal: true, isSmall: true, isYellow: true, foundInHouse: true } }
   ];
 
   // (Adding more items to reach ~200+ would go here, but starting with these core sets)

@@ -234,7 +234,11 @@ const MEM_PAIRS=[
   {icon:'📝',name:'Pablo Neruda',match:'Nobel Literatura 1971'},
   {icon:'📖',name:'Gabriela Mistral',match:'Primera Nobel latina'},
   {icon:'🪶',name:'Pueblo Mapuche',match:'Nunca conquistados'},
-  {icon:'⚽',name:'Alexis Sánchez',match:'Copa América 2015'}
+  {icon:'⚽',name:'Alexis Sánchez',match:'Copa América 2015'},
+  {icon:'🎵',name:'Violeta Parra',match:'Compuso Gracias a la vida'},
+  {icon:'🎹',name:'Claudio Arrau',match:'Pianista de fama mundial'},
+  {icon:'🌊',name:'Terremoto de Valdivia',match:'Magnitud 9,5 en 1960'},
+  {icon:'🔭',name:'Observatorio ALMA',match:'Radiotelescopio en Atacama'}
 ];
 let memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false;
 
@@ -328,7 +332,10 @@ const QB={
     {q:'¿Qué país está al norte de Chile?',a:'Perú',o:['Perú','Argentina','Bolivia','Brasil'], tier:'intermediate'},
     {q:'¿Cuál es el lago más grande de Chile?',a:'Lago General Carrera',o:['Lago General Carrera','Lago Llanquihue','Lago Villarrica','Lago Ranco'], tier:'advanced'},
     {q:'¿Qué cordillera recorre la costa chilena?',a:'Cordillera de la Costa',o:['Cordillera de la Costa','Cordillera de los Andes','Cordillera Frontal','Cordillera Domeyko'], tier:'intermediate'},
-    {q:'¿En qué región se encuentra el desierto de Atacama?',a:'Norte Grande',o:['Norte Grande','Zona Central','Patagonia','Sur'], tier:'beginner'}
+    {q:'¿En qué región se encuentra el desierto de Atacama?',a:'Norte Grande',o:['Norte Grande','Zona Central','Patagonia','Sur'], tier:'beginner'},
+    {q:'¿Qué río del norte es el más largo de Chile?',a:'Río Loa',o:['Río Loa','Río Bío Bío','Río Maipo','Río Baker'], tier:'advanced'},
+    {q:'¿En qué región se encuentra el campo de hielo Patagónico Sur?',a:'Magallanes',o:['Magallanes','Antofagasta','Coquimbo','Valparaíso'], tier:'expert'},
+    {q:'¿Cuál es el punto más austral del Chile continental americano?',a:'Cabo de Hornos',o:['Cabo de Hornos','Punta Arenas','Puerto Montt','Chiloé'], tier:'advanced'}
   ],
   antartica:[
     {q:'¿En qué mes es más cálido en la Antártica chilena?',a:'Enero',o:['Enero','Julio','Agosto','Septiembre'], tier:'beginner'},
@@ -359,7 +366,11 @@ const QB={
     {q:'¿Quiénes pastorean llamas en los Andes?',a:'Los Aymara',o:['Los Aymara','Los Mapuche','Los Rapa Nui','Los Inca'], tier:'intermediate'},
     {q:'¿A qué distancia está Isla de Pascua?',a:'3.700 km',o:['3.700 km','100 km','500 km','10.000 km'], tier:'expert'},
     {q:'¿Qué famoso baile chilote es originario del sur?',a:'La Trastrasera',o:['La Trastrasera','La Cueca','El Sau Sau','El Tango'], tier:'advanced'},
-    {q:'¿Quiénes construyeron los Moai?',a:'Los Rapa Nui',o:['Los Rapa Nui','Los Mapuches','Los Incas','Los Diaguitas'], tier:'beginner'}
+    {q:'¿Quiénes construyeron los Moai?',a:'Los Rapa Nui',o:['Los Rapa Nui','Los Mapuches','Los Incas','Los Diaguitas'], tier:'beginner'},
+    {q:'¿Cómo llaman los Rapa Nui a la Isla de Pascua en su propia lengua?',a:'Rapa Nui',o:['Rapa Nui','Te Pito','Hanga Roa','Motu Nui'], tier:'advanced'},
+    {q:'¿Cómo se llaman los sombreros de piedra roja que coronan algunos Moai?',a:'Pukao',o:['Pukao','Ahu','Tapa','Rongo'], tier:'expert'},
+    {q:'¿Qué pueblo del Norte Grande cultivaba en oasis y terrazas del salar de Atacama?',a:'Los Atacameños (Likan Antai)',o:['Los Atacameños (Likan Antai)','Los Selknam','Los Chonos','Los Yaganes'], tier:'expert'},
+    {q:'¿Qué pueblo canoero habitó los canales del extremo sur cerca del Cabo de Hornos?',a:'Los Yaganes',o:['Los Yaganes','Los Diaguitas','Los Aymaras','Los Picunches'], tier:'advanced'}
   ],
   history:[
     {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar',
@@ -382,7 +393,14 @@ const QB={
     {q:'¿En qué ciudad ocurrió el Combate Naval el 21 de mayo?',a:'Iquique',o:['Iquique','Valparaíso','Antofagasta','Arica'], tier:'advanced'},
     {q:'¿Qué batalla selló la independencia de Chile en 1818?',a:'Batalla de Maipú',o:['Batalla de Maipú','Batalla de Chacabuco','Combate Naval de Iquique','Batalla de Rancagua'], tier:'expert'},
     {q:'¿Quién fue el primer Director Supremo de Chile?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','José Miguel Carrera','Manuel Bulnes','Pedro de Valdivia'], tier:'intermediate'},
-    {q:'¿En qué siglo se fundó la ciudad de Santiago?',a:'Siglo XVI (16)',o:['Siglo XVI (16)','Siglo XVIII (18)','Siglo XIX (19)','Siglo XV (15)'], tier:'advanced'}
+    {q:'¿En qué siglo se fundó la ciudad de Santiago?',a:'Siglo XVI (16)',o:['Siglo XVI (16)','Siglo XVIII (18)','Siglo XIX (19)','Siglo XV (15)'], tier:'advanced'},
+    {q:'¿Quién dirigió la primera expedición española a Chile en 1536?',a:'Diego de Almagro',o:['Diego de Almagro','Pedro de Valdivia','Francisco Pizarro','Hernán Cortés'], tier:'advanced'},
+    {q:'¿Cómo se llamó la guerra entre Chile, Perú y Bolivia de 1879 a 1883?',a:'Guerra del Pacífico',o:['Guerra del Pacífico','Guerra de la Independencia','Guerra Civil','Guerra contra la Confederación'], tier:'advanced'},
+    {q:'¿Qué recurso del desierto fue la causa económica de la Guerra del Pacífico?',a:'El salitre',o:['El salitre','El cobre','El petróleo','El oro'], tier:'expert'},
+    {q:'¿Qué territorios anexó Chile tras la Guerra del Pacífico?',a:'Tarapacá y Antofagasta',o:['Tarapacá y Antofagasta','Aysén y Magallanes','Chiloé y Valdivia','Mendoza y San Juan'], tier:'expert'},
+    {q:'Durante la "era del salitre", ¿en qué se transformaron muchas oficinas salitreras al cerrar?',a:'Pueblos fantasma',o:['Pueblos fantasma','Grandes ciudades','Puertos pesqueros','Centros de esquí'], tier:'expert'},
+    {q:'¿Qué guerrero mapuche lideró la resistencia y derrotó a Pedro de Valdivia en Tucapel (1553)?',a:'Lautaro',o:['Lautaro','Caupolicán','Galvarino','Colo Colo'], tier:'expert'},
+    {q:'¿Quién fue el jefe del Ejército de los Andes junto a O\'Higgins?',a:'José de San Martín',o:['José de San Martín','Simón Bolívar','Manuel Rodríguez','Diego Portales'], tier:'advanced'}
   ],
   culture:[
     {q:'¿Qué instrumento folclórico se parece a un charango o guitarrita?',a:'Guitarrón chileno',o:['Guitarrón chileno','Violín','Arpa','Flauta'], tier:'advanced'},
@@ -397,7 +415,9 @@ const QB={
     {q:'¿Qué famoso sándwich lleva carne, porotos verdes, tomate y ají verde?',a:'Chacarero',o:['Chacarero','Barros Luco','Italiano','Chemilico'], tier:'intermediate'},
     {q:'¿En qué mes se celebran las Fiestas Patrias en Chile?',a:'Septiembre',o:['Septiembre','Diciembre','Julio','Octubre'], tier:'beginner'},
     {q:'¿En qué ciudad del extremo sur se celebra el Carnaval de Invierno?',a:'Punta Arenas',o:['Punta Arenas','Valparaíso','La Serena','Iquique'], tier:'advanced'},
-    {q:'¿Qué embarcación tradicional usaban los Chonos en los canales del sur?',a:'Dalca',o:['Dalca','Caravela','Goleta','Balsa de totora'], tier:'advanced'}
+    {q:'¿Qué embarcación tradicional usaban los Chonos en los canales del sur?',a:'Dalca',o:['Dalca','Caravela','Goleta','Balsa de totora'], tier:'advanced'},
+    {q:'¿Qué metal es hoy la principal exportación de Chile, líder mundial en su producción?',a:'El cobre',o:['El cobre','El hierro','La plata','El estaño'], tier:'advanced'},
+    {q:'¿Cuál es la mina de cobre a tajo abierto más grande del mundo, ubicada en Chile?',a:'Chuquicamata',o:['Chuquicamata','El Teniente','La Escondida','Andina'], tier:'expert'}
   ],
   nature:[
     {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble',
@@ -415,7 +435,9 @@ const QB={
     {q:'¿En qué parte viven los pingüinos en Chile?',a:'En el sur',o:['En el sur','En el desierto','En Santiago','En Isla de Pascua'], tier:'intermediate'},
     {q:'¿Qué pájaro habita en los salares del norte?',a:'Flamenco',o:['Flamenco','Cóndor','Gaviota','Pelícano'], tier:'beginner'},
     {q:'¿Qué ave corredora habita las estepas patagónicas?',a:'Ñandú',o:['Ñandú','Avestruz','Pingüino','Cóndor'], tier:'intermediate'},
-    {q:'¿Cuál es el árbol nacional de Chile, sagrado para los Mapuche?',a:'Araucaria',o:['Araucaria','Alerce','Coihue','Roble'], tier:'advanced'}
+    {q:'¿Cuál es el árbol nacional de Chile, sagrado para los Mapuche?',a:'Araucaria',o:['Araucaria','Alerce','Coihue','Roble'], tier:'advanced'},
+    {q:'¿Qué planta del desierto de Atacama florece tras lluvias inusuales en el "desierto florido"?',a:'La añañuca',o:['La añañuca','El copihue','La araucaria','El cardón'], tier:'expert'},
+    {q:'¿Qué fenómeno marino frente a Chile enfría las aguas y favorece la pesca?',a:'La Corriente de Humboldt',o:['La Corriente de Humboldt','El Niño','La Corriente del Golfo','El Tsunami'], tier:'advanced'}
   ],
   famous:[
     {q:'¿Quién escribió "Altazor"?',a:'Vicente Huidobro',o:['Vicente Huidobro','Pablo Neruda','Gabriela Mistral','Nicanor Parra'], tier:'expert'},
@@ -428,7 +450,11 @@ const QB={
     {q:'¿Qué deporte practicaba Marcelo Ríos?',a:'Tenis',o:['Tenis','Fútbol','Gimnasia','Natación'], tier:'beginner'},
     {q:'¿En qué año fue Marcelo Ríos número 1 del mundo?',a:'1998',o:['1998','2000','1995','2005'], tier:'advanced'},
     {q:'¿Qué explorador cruzó por primera vez el estrecho que lleva su nombre en 1520?',a:'Hernando de Magallanes',o:['Hernando de Magallanes','Cristóbal Colón','Pedro de Valdivia','Diego de Almagro'], tier:'expert'},
-    {q:'¿Quién compuso la canción "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Víctor Jara','Los Jaivas','Margot Loyola'], tier:'intermediate'}
+    {q:'¿Quién compuso la canción "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Víctor Jara','Los Jaivas','Margot Loyola'], tier:'intermediate'},
+    {q:'¿Cuál es una de las obras más famosas de Pablo Neruda?',a:'Veinte poemas de amor y una canción desesperada',o:['Veinte poemas de amor y una canción desesperada','Cien años de soledad','La casa de los espíritus','Martín Rivas'], tier:'advanced'},
+    {q:'¿En qué año recibió Gabriela Mistral el Premio Nobel de Literatura?',a:'1945',o:['1945','1971','1920','1955'], tier:'expert'},
+    {q:'¿Cuál era el verdadero nombre de Gabriela Mistral?',a:'Lucila Godoy Alcayaga',o:['Lucila Godoy Alcayaga','Neftalí Reyes Basoalto','Isabel Allende','Marcela Paz'], tier:'expert'},
+    {q:'¿Cuál era el verdadero nombre del poeta Pablo Neruda?',a:'Neftalí Reyes Basoalto',o:['Neftalí Reyes Basoalto','Lucila Godoy','Vicente García','Ricardo Eliécer'], tier:'expert'}
   ],
   inventors:[
     {q:'¿Qué científico chileno ayudó a crear la vacuna de la hepatitis B?',a:'Pablo Valenzuela',o:['Pablo Valenzuela','Humberto Maturana','Francisco Varela','Ignacio Domeyko'], tier:'expert'},
@@ -439,7 +465,10 @@ const QB={
     {q:'¿Cuál será el telescopio más grande del mundo en construcción en Chile?',a:'ELT',o:['ELT','VLT','ALMA','Hubble'], tier:'expert'},
     {q:'¿En qué año se inauguró el observatorio ALMA?',a:'2013',o:['2013','1990','2005','2020'], tier:'intermediate'},
     {q:'¿En qué localidad están los atrapanieblas pioneros en Chile?',a:'Chungungo',o:['Chungungo','Santiago','Punta Arenas','Valparaíso'], tier:'expert'},
-    {q:'¿En qué año nació el biólogo y filósofo Francisco Varela?',a:'1946',o:['1946','1920','1980','1965'], tier:'advanced'}
+    {q:'¿En qué año nació el biólogo y filósofo Francisco Varela?',a:'1946',o:['1946','1920','1980','1965'], tier:'advanced'},
+    {q:'¿Qué tipo de telescopio es ALMA, en el llano de Chajnantor?',a:'Radiotelescopio',o:['Radiotelescopio','Telescopio óptico','Telescopio de rayos X','Telescopio infrarrojo casero'], tier:'expert'},
+    {q:'¿Por qué el desierto de Atacama es ideal para los observatorios astronómicos?',a:'Cielos despejados y secos',o:['Cielos despejados y secos','Mucha lluvia','Bosques densos','Alta humedad'], tier:'advanced'},
+    {q:'¿En qué cerro del norte se construye el Telescopio Extremadamente Grande (ELT)?',a:'Cerro Armazones',o:['Cerro Armazones','Cerro Paranal','Cerro Tololo','Cerro La Silla'], tier:'expert'}
   ],
   volcanes:[
     {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced'},
@@ -450,7 +479,10 @@ const QB={
     {q:'¿En qué cordillera están los volcanes de Chile?',a:'Los Andes',o:['Los Andes','La Costa','Domeyko','Nahuelbuta'], tier:'beginner'},
     {q:'¿En qué región se encuentra el volcán Villarrica?',a:'La Araucanía',o:['La Araucanía','Antofagasta','Magallanes','Coquimbo'], tier:'intermediate'},
     {q:'¿Qué ciudad turística está a los pies del volcán Villarrica?',a:'Pucón',o:['Pucón','Valparaíso','Iquique','Concepción'], tier:'beginner'},
-    {q:'¿En la orilla de qué lago se ve el volcán Osorno?',a:'Lago Llanquihue',o:['Lago Llanquihue','Lago General Carrera','Lago Chungará','Lago Budi'], tier:'advanced'}
+    {q:'¿En la orilla de qué lago se ve el volcán Osorno?',a:'Lago Llanquihue',o:['Lago Llanquihue','Lago General Carrera','Lago Chungará','Lago Budi'], tier:'advanced'},
+    {q:'¿Qué volcán de la Región de Los Lagos hizo grandes erupciones en abril de 2015?',a:'Calbuco',o:['Calbuco','Villarrica','Osorno','Lonquimay'], tier:'advanced'},
+    {q:'¿Qué volcán de la Araucanía tuvo una erupción a comienzos de marzo de 2015?',a:'Villarrica',o:['Villarrica','Calbuco','Chaitén','Llaima'], tier:'expert'},
+    {q:'¿Qué columna de material puede subir kilómetros en el aire durante una erupción?',a:'Columna eruptiva de ceniza',o:['Columna eruptiva de ceniza','Columna de agua','Columna de hielo','Columna de arena'], tier:'advanced'}
   ],
   animales:[
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
@@ -469,7 +501,10 @@ const QB={
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
     {q:'¿Qué expulsa un volcán cuando hace erupción?',a:'Lava y ceniza',o:['Lava y ceniza','Agua salada','Solo humo','Hielo'], tier:'beginner'},
     {q:'¿Qué instrumento se usa para medir los sismos cerca de un volcán?',a:'Sismógrafo',o:['Sismógrafo','Termómetro','Telescopio','Barómetro'], tier:'advanced'},
-    {q:'¿Qué volcán hizo erupción en 2015 en la Región de Los Lagos?',a:'Calbuco',o:['Calbuco','Villarrica','Osorno','Llaima'], tier:'expert'}
+    {q:'¿Qué volcán hizo erupción en 2015 en la Región de Los Lagos?',a:'Calbuco',o:['Calbuco','Villarrica','Osorno','Llaima'], tier:'expert'},
+    {q:'¿Cuál fue la magnitud del terremoto de Valdivia de 1960, el más fuerte registrado en la historia?',a:'9,5',o:['9,5','7,0','6,2','8,0'], tier:'expert'},
+    {q:'¿En qué año ocurrió el terremoto de Valdivia, el mayor jamás medido?',a:'1960',o:['1960','1985','2010','1939'], tier:'advanced'},
+    {q:'¿Qué gran ola provocó el terremoto de Valdivia de 1960 que cruzó el Pacífico?',a:'Un tsunami',o:['Un tsunami','Una marejada leve','Una nevada','Una sequía'], tier:'expert'}
   ],
   folk:[
     {q:'¿Quién compuso "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Mercedes Sosa','Patricio Manns','Víctor Jara'], tier:'beginner'},
@@ -481,7 +516,9 @@ const QB={
     {q:'¿Qué tipo de canto rural se acompaña con guitarra?',a:'La tonada',o:['La tonada','La cueca','La sirilla','El corrido'], tier:'intermediate'},
     {q:'¿Cuál de estos NO es una variante de la cueca?',a:'Cueca tropical',o:['Cueca tropical','Cueca brava','Cueca chilota','Cueca nortina'], tier:'advanced'},
     {q:'¿Qué instrumento andino de cuerda tenía caparazón de armadillo antiguamente?',a:'El charango',o:['El charango','La guitarra','El bombo','La quena'], tier:'advanced'},
-    {q:'¿Qué grupo folclórico mantuvo vivo el repertorio de tonadas por más de 80 años?',a:'Los Huasos Quincheros',o:['Los Huasos Quincheros','Inti-Illimani','Quilapayún','Los Jaivas'], tier:'advanced'}
+    {q:'¿Qué grupo folclórico mantuvo vivo el repertorio de tonadas por más de 80 años?',a:'Los Huasos Quincheros',o:['Los Huasos Quincheros','Inti-Illimani','Quilapayún','Los Jaivas'], tier:'advanced'},
+    {q:'¿Qué grupo chileno fusionó el folclore andino con el rock progresivo?',a:'Los Jaivas',o:['Los Jaivas','Los Huasos Quincheros','Los Cuatro Cuartos','Los de Ramón'], tier:'expert'},
+    {q:'¿Qué instrumento de viento andino se fabrica con cañas de distinto largo?',a:'La zampoña',o:['La zampoña','El charango','El bombo','El guitarrón'], tier:'advanced'}
   ],
   fiestas_patrias:[
     {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},

@@ -421,6 +421,136 @@ const VocabularioVivo = (() => {
         { en: 'polyglot', es: 'políglota' },
         { en: 'polyhedron',es: 'poliedro' },
         { en: 'polygamy', es: 'poligamia' }
+      ] },
+    // ── Advanced additions (tier 3) ──
+    { id: 'anim', origin: 'L', tier: 3,
+      meaning: { en: 'soul, life, spirit', es: 'alma, vida, espíritu' },
+      words: [
+        { en: 'animal',    es: 'animal' },
+        { en: 'animate',   es: 'animar' },
+        { en: 'animation', es: 'animación' },
+        { en: 'unanimous', es: 'unánime' }
+      ] },
+    { id: 'ver', origin: 'L', tier: 3,
+      meaning: { en: 'truth', es: 'verdad' },
+      words: [
+        { en: 'verify',  es: 'verificar' },
+        { en: 'verdict', es: 'veredicto' },
+        { en: 'veracity',es: 'veracidad' },
+        { en: 'verity',  es: 'verdad' }
+      ] },
+    { id: 'fer', origin: 'L', tier: 3,
+      meaning: { en: 'carry, bear', es: 'llevar, portar' },
+      words: [
+        { en: 'transfer',es: 'transferir' },
+        { en: 'refer',   es: 'referir' },
+        { en: 'fertile', es: 'fértil' },
+        { en: 'conifer', es: 'conífera' }
+      ] },
+    { id: 'vor', origin: 'L', tier: 3,
+      meaning: { en: 'eat, devour', es: 'comer, devorar' },
+      words: [
+        { en: 'carnivore', es: 'carnívoro' },
+        { en: 'herbivore', es: 'herbívoro' },
+        { en: 'omnivore',  es: 'omnívoro' },
+        { en: 'voracious', es: 'voraz' }
+      ] },
+    { id: 'ten', origin: 'L', tier: 3,
+      meaning: { en: 'hold, keep', es: 'sostener, mantener' },
+      words: [
+        { en: 'retain',  es: 'retener' },
+        { en: 'tenant',  es: 'inquilino' },
+        { en: 'tenacious',es: 'tenaz' },
+        { en: 'sustain', es: 'sostener' }
+      ] },
+    { id: 'fort', origin: 'L', tier: 3,
+      meaning: { en: 'strong', es: 'fuerte' },
+      words: [
+        { en: 'fortify',   es: 'fortificar' },
+        { en: 'fortress',  es: 'fortaleza' },
+        { en: 'fortitude', es: 'fortaleza' },
+        { en: 'comfort',   es: 'confortar' }
+      ] },
+    { id: 'leg', origin: 'L', tier: 3,
+      meaning: { en: 'law, read', es: 'ley, leer' },
+      words: [
+        { en: 'legal',     es: 'legal' },
+        { en: 'legislate', es: 'legislar' },
+        { en: 'legible',   es: 'legible' },
+        { en: 'legend',    es: 'leyenda' }
+      ] },
+    { id: 'vis', origin: 'L', tier: 3,
+      meaning: { en: 'see, sight', es: 'ver, vista' },
+      words: [
+        { en: 'visible', es: 'visible' },
+        { en: 'vision',  es: 'visión' },
+        { en: 'visual',  es: 'visual' },
+        { en: 'revise',  es: 'revisar' }
+      ] },
+    // ── Greek ──
+    { id: 'morph', origin: 'G', tier: 3,
+      meaning: { en: 'shape, form', es: 'forma' },
+      words: [
+        { en: 'metamorphosis',es: 'metamorfosis' },
+        { en: 'morphology',   es: 'morfología' },
+        { en: 'amorphous',    es: 'amorfo' },
+        { en: 'morpheme',     es: 'morfema' }
+      ] },
+    { id: 'path', origin: 'G', tier: 3,
+      meaning: { en: 'feeling, suffering', es: 'sentimiento, sufrimiento' },
+      words: [
+        { en: 'sympathy', es: 'simpatía' },
+        { en: 'empathy',  es: 'empatía' },
+        { en: 'apathy',   es: 'apatía' },
+        { en: 'pathology',es: 'patología' }
+      ] },
+    { id: 'crat', origin: 'G', tier: 3,
+      meaning: { en: 'rule, power', es: 'gobierno, poder' },
+      words: [
+        { en: 'democrat',   es: 'demócrata' },
+        { en: 'aristocrat', es: 'aristócrata' },
+        { en: 'autocrat',   es: 'autócrata' },
+        { en: 'bureaucrat', es: 'burócrata' }
+      ] },
+    { id: 'arch', origin: 'G', tier: 3,
+      meaning: { en: 'rule, ancient, chief', es: 'gobierno, antiguo, principal' },
+      words: [
+        { en: 'monarch',  es: 'monarca' },
+        { en: 'archaic',  es: 'arcaico' },
+        { en: 'archive',  es: 'archivo' },
+        { en: 'anarchy',  es: 'anarquía' }
+      ] },
+    { id: 'scope', origin: 'G', tier: 3,
+      meaning: { en: 'look at, examine', es: 'mirar, examinar' },
+      words: [
+        { en: 'telescope',  es: 'telescopio' },
+        { en: 'periscope',  es: 'periscopio' },
+        { en: 'stethoscope',es: 'estetoscopio' },
+        { en: 'horoscope',  es: 'horóscopo' }
+      ] },
+    { id: 'derm', origin: 'G', tier: 3,
+      meaning: { en: 'skin', es: 'piel' },
+      words: [
+        { en: 'epidermis',   es: 'epidermis' },
+        { en: 'dermatology', es: 'dermatología' },
+        { en: 'pachyderm',   es: 'paquidermo' },
+        { en: 'taxidermy',   es: 'taxidermia' }
+      ] },
+    { id: 'cycl', origin: 'G', tier: 3,
+      meaning: { en: 'circle, wheel', es: 'círculo, rueda' },
+      words: [
+        { en: 'bicycle',     es: 'bicicleta' },
+        { en: 'cyclone',     es: 'ciclón' },
+        { en: 'cycle',       es: 'ciclo' },
+        { en: 'encyclopedia',es: 'enciclopedia' }
+      ] },
+    { id: 'polis', origin: 'G', tier: 3,
+      meaning: { en: 'city', es: 'ciudad' },
+      words: [
+        { en: 'metropolis', es: 'metrópolis' },
+        { en: 'police',     es: 'policía' },
+        { en: 'politics',   es: 'política' },
+        { en: 'megalopolis',es: 'megalópolis' }
       ] }
   ];
 
@@ -487,7 +617,25 @@ const VocabularioVivo = (() => {
       es: { meaning: 'que ocurre al mismo tiempo', word: 'sincrónico' } },
     { tier: 3, prefix: 'de',    root: 'hydro',  suffix: 'ate',
       en: { meaning: 'to remove water from', word: 'dehydrate' },
-      es: { meaning: 'quitarle el agua a algo', word: 'deshidratar' } }
+      es: { meaning: 'quitarle el agua a algo', word: 'deshidratar' } },
+    { tier: 3, prefix: 'trans', root: 'fer',    suffix: '',
+      en: { meaning: 'to carry from one place to another', word: 'transfer' },
+      es: { meaning: 'llevar de un lugar a otro', word: 'transferir' } },
+    { tier: 3, prefix: 're',    root: 'vis',    suffix: 'e',
+      en: { meaning: 'to look at again to correct', word: 'revise' },
+      es: { meaning: 'mirar de nuevo para corregir', word: 'revisar' } },
+    { tier: 3, prefix: '',      root: 'morph',  suffix: 'ology',
+      en: { meaning: 'the study of shape and form', word: 'morphology' },
+      es: { meaning: 'el estudio de la forma', word: 'morfología' } },
+    { tier: 3, prefix: '',      root: 'tele',   suffix: 'scope',
+      en: { meaning: 'a tool to look at far things', word: 'telescope' },
+      es: { meaning: 'instrumento para mirar cosas lejanas', word: 'telescopio' } },
+    { tier: 3, prefix: 'sym',   root: 'path',   suffix: 'y',
+      en: { meaning: 'a feeling shared with another', word: 'sympathy' },
+      es: { meaning: 'un sentimiento compartido con otro', word: 'simpatía' } },
+    { tier: 3, prefix: 'demo',  root: 'crat',   suffix: '',
+      en: { meaning: 'one who supports rule by the people', word: 'democrat' },
+      es: { meaning: 'quien apoya el gobierno del pueblo', word: 'demócrata' } }
   ];
 
   // ── 30 dictation pairs: definition → word ────────────────────────
@@ -554,7 +702,25 @@ const VocabularioVivo = (() => {
     { tier: 3, en: { def: 'sudden, without warning',           word: 'abrupt' },
                 es: { def: 'repentino, sin aviso',             word: 'abrupto' } },
     { tier: 3, en: { def: 'something out of its time',         word: 'anachronism' },
-                es: { def: 'algo fuera de su tiempo',          word: 'anacronismo' } }
+                es: { def: 'algo fuera de su tiempo',          word: 'anacronismo' } },
+    { tier: 3, en: { def: 'an animal that eats only meat',     word: 'carnivore' },
+                es: { def: 'animal que solo come carne',       word: 'carnívoro' } },
+    { tier: 3, en: { def: 'an animal that eats only plants',   word: 'herbivore' },
+                es: { def: 'animal que solo come plantas',     word: 'herbívoro' } },
+    { tier: 3, en: { def: 'a complete change of form',         word: 'metamorphosis' },
+                es: { def: 'un cambio completo de forma',      word: 'metamorfosis' } },
+    { tier: 3, en: { def: 'the ability to be seen',            word: 'visible' },
+                es: { def: 'que se puede ver',                 word: 'visible' } },
+    { tier: 3, en: { def: 'to check that something is true',   word: 'verify' },
+                es: { def: 'comprobar que algo es verdad',     word: 'verificar' } },
+    { tier: 3, en: { def: 'a single ruler of a kingdom',       word: 'monarch' },
+                es: { def: 'gobernante único de un reino',     word: 'monarca' } },
+    { tier: 3, en: { def: 'the feeling of sharing another\'s emotion', word: 'empathy' },
+                es: { def: 'capacidad de sentir lo que otro siente', word: 'empatía' } },
+    { tier: 3, en: { def: 'a tool to look at distant objects', word: 'telescope' },
+                es: { def: 'instrumento para mirar objetos lejanos', word: 'telescopio' } },
+    { tier: 3, en: { def: 'the outer layer of the skin',       word: 'epidermis' },
+                es: { def: 'la capa exterior de la piel',      word: 'epidermis' } }
   ];
 
   // ── State ──

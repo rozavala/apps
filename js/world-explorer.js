@@ -30,7 +30,9 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the capital of Chile?', qEs: '¿Cuál es la capital de Chile?', options: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], optionsEs: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], answer: 2 },
             { q: 'What desert is in Chile?', qEs: '¿Qué desierto está en Chile?', options: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], optionsEs: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], answer: 2 },
-            { q: 'What bird is on Chile\'s coat of arms?', qEs: '¿Qué ave está en el escudo de Chile?', options: ['Eagle', 'Condor', 'Hawk', 'Falcon'], optionsEs: ['Águila', 'Cóndor', 'Halcón', 'Falcón'], answer: 1 }
+            { q: 'What bird is on Chile\'s coat of arms?', qEs: '¿Qué ave está en el escudo de Chile?', options: ['Eagle', 'Condor', 'Hawk', 'Falcon'], optionsEs: ['Águila', 'Cóndor', 'Halcón', 'Falcón'], answer: 1 },
+            { q: 'What is the currency of Chile?', qEs: '¿Cuál es la moneda de Chile?', options: ['Peso', 'Sol', 'Real', 'Boliviano'], optionsEs: ['Peso', 'Sol', 'Real', 'Boliviano'], answer: 0 },
+            { q: 'Which mountain range forms Chile\'s eastern border?', qEs: '¿Qué cordillera forma la frontera oriental de Chile?', options: ['Rocky Mountains', 'Andes', 'Alps', 'Himalayas'], optionsEs: ['Montañas Rocosas', 'Los Andes', 'Alpes', 'Himalaya'], answer: 1 }
           ]
         },
         {
@@ -64,7 +66,9 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the largest country in South America?', qEs: '¿Cuál es el país más grande de América del Sur?', options: ['Argentina', 'Peru', 'Brazil', 'Colombia'], optionsEs: ['Argentina', 'Perú', 'Brasil', 'Colombia'], answer: 2 },
             { q: 'What language is spoken in Brazil?', qEs: '¿Qué idioma se habla en Brasil?', options: ['Spanish', 'Portuguese', 'English', 'French'], optionsEs: ['Español', 'Portugués', 'Inglés', 'Francés'], answer: 1 },
-            { q: 'Which rainforest is mostly in Brazil?', qEs: '¿Qué selva está mayoritariamente en Brasil?', options: ['Congo', 'Amazon', 'Daintree', 'Valdivian'], optionsEs: ['Congo', 'Amazonas', 'Daintree', 'Valdiviana'], answer: 1 }
+            { q: 'Which rainforest is mostly in Brazil?', qEs: '¿Qué selva está mayoritariamente en Brasil?', options: ['Congo', 'Amazon', 'Daintree', 'Valdivian'], optionsEs: ['Congo', 'Amazonas', 'Daintree', 'Valdiviana'], answer: 1 },
+            { q: 'What is the currency of Brazil?', qEs: '¿Cuál es la moneda de Brasil?', options: ['Peso', 'Real', 'Dollar', 'Sol'], optionsEs: ['Peso', 'Real', 'Dólar', 'Sol'], answer: 1 },
+            { q: 'Which river in Brazil carries the most water in the world?', qEs: '¿Qué río de Brasil lleva más agua que ningún otro del mundo?', options: ['Nile', 'Amazon', 'Paraná', 'São Francisco'], optionsEs: ['Nilo', 'Amazonas', 'Paraná', 'São Francisco'], answer: 1 }
           ]
         },
         {
@@ -305,7 +309,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Italy?', qEs: '¿Cuál es la capital de Italia?', options: ['Rome', 'Milan', 'Venice', 'Naples'], optionsEs: ['Roma', 'Milán', 'Venecia', 'Nápoles'], answer: 0 },
           { q: 'What shape does Italy resemble on the map?', qEs: '¿A qué forma se asemeja Italia en el mapa?', options: ['A hat', 'A boot', 'A square', 'A star'], optionsEs: ['Un sombrero', 'Una bota', 'Un cuadrado', 'Una estrella'], answer: 1 },
-          { q: 'Which famous volcano is near Naples?', qEs: '¿Qué famoso volcán está cerca de Nápoles?', options: ['Etna', 'Vesuvius', 'Stromboli', 'Fuji'], optionsEs: ['Etna', 'Vesubio', 'Stromboli', 'Fuji'], answer: 1 }
+          { q: 'Which famous volcano is near Naples?', qEs: '¿Qué famoso volcán está cerca de Nápoles?', options: ['Etna', 'Vesuvius', 'Stromboli', 'Fuji'], optionsEs: ['Etna', 'Vesubio', 'Stromboli', 'Fuji'], answer: 1 },
+          { q: 'What is the currency of Italy?', qEs: '¿Cuál es la moneda de Italia?', options: ['Lira', 'Euro', 'Franc', 'Pound'], optionsEs: ['Lira', 'Euro', 'Franco', 'Libra'], answer: 1 },
+          { q: 'What is the longest river in Italy?', qEs: '¿Cuál es el río más largo de Italia?', options: ['Tiber', 'Po', 'Arno', 'Adige'], optionsEs: ['Tíber', 'Po', 'Arno', 'Adigio'], answer: 1 }
         ]
       },
       {
@@ -339,7 +345,85 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of France?', qEs: '¿Cuál es la capital de Francia?', options: ['London', 'Berlin', 'Madrid', 'Paris'], optionsEs: ['Londres', 'Berlín', 'Madrid', 'París'], answer: 3 },
           { q: 'Which famous monument is in France?', qEs: '¿Qué famoso monumento está en Francia?', options: ['Colosseum', 'Eiffel Tower', 'Big Ben', 'Parthenon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Big Ben', 'Partenón'], answer: 1 },
-          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 }
+          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 },
+          { q: 'What is the longest river in France?', qEs: '¿Cuál es el río más largo de Francia?', options: ['Seine', 'Loire', 'Rhône', 'Garonne'], optionsEs: ['Sena', 'Loira', 'Ródano', 'Garona'], answer: 1 },
+          { q: 'What is the currency of France?', qEs: '¿Cuál es la moneda de Francia?', options: ['Franc', 'Euro', 'Pound', 'Lira'], optionsEs: ['Franco', 'Euro', 'Libra', 'Lira'], answer: 1 }
+        ]
+      },
+      {
+        id: 'germany', name: 'Germany', nameEs: 'Alemania', flag: '🇩🇪',
+        capital: 'Berlin', capitalEs: 'Berlín',
+        facts: [
+          { en: 'Germany is the most populous country in the European Union.', es: 'Alemania es el país más poblado de la Unión Europea.' },
+          { en: 'The Rhine and the Danube are two of its major rivers.', es: 'El Rin y el Danubio son dos de sus ríos principales.' },
+          { en: 'The Brandenburg Gate in Berlin is a famous landmark.', es: 'La Puerta de Brandeburgo en Berlín es un hito famoso.' },
+          { en: 'Germany is famous for its autobahn highways and engineering.', es: 'Alemania es famosa por sus autopistas autobahn y su ingeniería.' }
+        ],
+        landmark: { name: 'Brandenburg Gate', nameEs: 'Puerta de Brandeburgo', emoji: '🏛️' },
+        animal: { name: 'Golden Eagle', nameEs: 'Águila Real', emoji: '🦅' },
+        quiz: [
+          { q: 'What is the capital of Germany?', qEs: '¿Cuál es la capital de Alemania?', options: ['Munich', 'Berlin', 'Hamburg', 'Frankfurt'], optionsEs: ['Múnich', 'Berlín', 'Hamburgo', 'Fráncfort'], answer: 1 },
+          { q: 'What famous gate is in Berlin?', qEs: '¿Qué famosa puerta está en Berlín?', options: ['Golden Gate', 'Brandenburg Gate', 'India Gate', 'Lions\' Gate'], optionsEs: ['Puerta Dorada', 'Puerta de Brandeburgo', 'Puerta de la India', 'Puerta de los Leones'], answer: 1 },
+          { q: 'What is the currency of Germany?', qEs: '¿Cuál es la moneda de Alemania?', options: ['Mark', 'Pound', 'Euro', 'Franc'], optionsEs: ['Marco', 'Libra', 'Euro', 'Franco'], answer: 2 },
+          { q: 'Which major river flows through Germany?', qEs: '¿Qué río importante fluye por Alemania?', options: ['Thames', 'Rhine', 'Seine', 'Tiber'], optionsEs: ['Támesis', 'Rin', 'Sena', 'Tíber'], answer: 1 },
+          { q: 'What language is spoken in Germany?', qEs: '¿Qué idioma se habla en Alemania?', options: ['Dutch', 'German', 'Austrian', 'Swiss'], optionsEs: ['Holandés', 'Alemán', 'Austriaco', 'Suizo'], answer: 1 }
+        ]
+      },
+      {
+        id: 'united_kingdom', name: 'United Kingdom', nameEs: 'Reino Unido', flag: '🇬🇧',
+        capital: 'London', capitalEs: 'Londres',
+        facts: [
+          { en: 'The United Kingdom is made up of England, Scotland, Wales, and Northern Ireland.', es: 'El Reino Unido está formado por Inglaterra, Escocia, Gales e Irlanda del Norte.' },
+          { en: 'Big Ben is the famous clock tower in London.', es: 'El Big Ben es la famosa torre del reloj en Londres.' },
+          { en: 'The River Thames flows through London.', es: 'El río Támesis atraviesa Londres.' },
+          { en: 'The United Kingdom is an island nation in Western Europe.', es: 'El Reino Unido es una nación insular en Europa Occidental.' }
+        ],
+        landmark: { name: 'Big Ben', nameEs: 'Big Ben', emoji: '🕰️' },
+        animal: { name: 'Red Fox', nameEs: 'Zorro Rojo', emoji: '🦊' },
+        quiz: [
+          { q: 'What is the capital of the United Kingdom?', qEs: '¿Cuál es la capital del Reino Unido?', options: ['Dublin', 'London', 'Edinburgh', 'Cardiff'], optionsEs: ['Dublín', 'Londres', 'Edimburgo', 'Cardiff'], answer: 1 },
+          { q: 'Which river flows through London?', qEs: '¿Qué río atraviesa Londres?', options: ['Seine', 'Thames', 'Rhine', 'Danube'], optionsEs: ['Sena', 'Támesis', 'Rin', 'Danubio'], answer: 1 },
+          { q: 'What is the currency of the United Kingdom?', qEs: '¿Cuál es la moneda del Reino Unido?', options: ['Euro', 'Pound sterling', 'Dollar', 'Krona'], optionsEs: ['Euro', 'Libra esterlina', 'Dólar', 'Corona'], answer: 1 },
+          { q: 'Which of these is part of the United Kingdom?', qEs: '¿Cuál de estos forma parte del Reino Unido?', options: ['Ireland', 'Scotland', 'France', 'Norway'], optionsEs: ['Irlanda', 'Escocia', 'Francia', 'Noruega'], answer: 1 },
+          { q: 'What famous clock tower is in London?', qEs: '¿Qué famosa torre del reloj está en Londres?', options: ['Big Ben', 'Eiffel Tower', 'CN Tower', 'Spasskaya'], optionsEs: ['Big Ben', 'Torre Eiffel', 'Torre CN', 'Spásskaya'], answer: 0 }
+        ]
+      },
+      {
+        id: 'greece', name: 'Greece', nameEs: 'Grecia', flag: '🇬🇷',
+        capital: 'Athens', capitalEs: 'Atenas',
+        facts: [
+          { en: 'Greece is the birthplace of democracy and the ancient Olympic Games.', es: 'Grecia es la cuna de la democracia y de los antiguos Juegos Olímpicos.' },
+          { en: 'The Parthenon sits on the Acropolis in Athens.', es: 'El Partenón se encuentra en la Acrópolis de Atenas.' },
+          { en: 'Greece has thousands of islands in the Aegean and Ionian seas.', es: 'Grecia tiene miles de islas en los mares Egeo y Jónico.' },
+          { en: 'Mount Olympus was believed to be the home of the Greek gods.', es: 'Se creía que el monte Olimpo era el hogar de los dioses griegos.' }
+        ],
+        landmark: { name: 'Parthenon', nameEs: 'Partenón', emoji: '🏛️' },
+        animal: { name: 'Loggerhead Turtle', nameEs: 'Tortuga Boba', emoji: '🐢' },
+        quiz: [
+          { q: 'What is the capital of Greece?', qEs: '¿Cuál es la capital de Grecia?', options: ['Athens', 'Sparta', 'Thessaloniki', 'Corinth'], optionsEs: ['Atenas', 'Esparta', 'Salónica', 'Corinto'], answer: 0 },
+          { q: 'On which hill in Athens is the Parthenon?', qEs: '¿En qué colina de Atenas está el Partenón?', options: ['Acropolis', 'Capitoline', 'Palatine', 'Aventine'], optionsEs: ['Acrópolis', 'Capitolina', 'Palatina', 'Aventina'], answer: 0 },
+          { q: 'What is the currency of Greece?', qEs: '¿Cuál es la moneda de Grecia?', options: ['Drachma', 'Euro', 'Lira', 'Dinar'], optionsEs: ['Dracma', 'Euro', 'Lira', 'Dinar'], answer: 1 },
+          { q: 'Which mountain was home to the Greek gods?', qEs: '¿Qué montaña era el hogar de los dioses griegos?', options: ['Mount Olympus', 'Mount Etna', 'Mount Athos', 'Mount Ida'], optionsEs: ['Monte Olimpo', 'Monte Etna', 'Monte Athos', 'Monte Ida'], answer: 0 },
+          { q: 'Greece is the birthplace of what form of government?', qEs: '¿Grecia es la cuna de qué forma de gobierno?', options: ['Monarchy', 'Democracy', 'Empire', 'Theocracy'], optionsEs: ['Monarquía', 'Democracia', 'Imperio', 'Teocracia'], answer: 1 }
+        ]
+      },
+      {
+        id: 'portugal', name: 'Portugal', nameEs: 'Portugal', flag: '🇵🇹',
+        capital: 'Lisbon', capitalEs: 'Lisboa',
+        facts: [
+          { en: 'Portugal is on the western edge of the Iberian Peninsula.', es: 'Portugal está en el extremo occidental de la península ibérica.' },
+          { en: 'Portuguese explorers led the Age of Discovery in the 1400s.', es: 'Los exploradores portugueses lideraron la Era de los Descubrimientos en el siglo XV.' },
+          { en: 'Lisbon is one of the oldest cities in Western Europe.', es: 'Lisboa es una de las ciudades más antiguas de Europa Occidental.' },
+          { en: 'Fado is a traditional style of Portuguese music.', es: 'El fado es un estilo tradicional de música portuguesa.' }
+        ],
+        landmark: { name: 'Belém Tower', nameEs: 'Torre de Belém', emoji: '🗼' },
+        animal: { name: 'Iberian Wolf', nameEs: 'Lobo Ibérico', emoji: '🐺' },
+        quiz: [
+          { q: 'What is the capital of Portugal?', qEs: '¿Cuál es la capital de Portugal?', options: ['Porto', 'Lisbon', 'Faro', 'Braga'], optionsEs: ['Oporto', 'Lisboa', 'Faro', 'Braga'], answer: 1 },
+          { q: 'On which peninsula is Portugal located?', qEs: '¿En qué península se encuentra Portugal?', options: ['Italian', 'Balkan', 'Iberian', 'Scandinavian'], optionsEs: ['Itálica', 'Balcánica', 'Ibérica', 'Escandinava'], answer: 2 },
+          { q: 'What is the official language of Portugal?', qEs: '¿Cuál es el idioma oficial de Portugal?', options: ['Spanish', 'Portuguese', 'Galician', 'Catalan'], optionsEs: ['Español', 'Portugués', 'Gallego', 'Catalán'], answer: 1 },
+          { q: 'What country borders Portugal by land?', qEs: '¿Qué país limita con Portugal por tierra?', options: ['France', 'Spain', 'Morocco', 'Italy'], optionsEs: ['Francia', 'España', 'Marruecos', 'Italia'], answer: 1 },
+          { q: 'What traditional music style comes from Portugal?', qEs: '¿Qué estilo de música tradicional viene de Portugal?', options: ['Flamenco', 'Fado', 'Tango', 'Bolero'], optionsEs: ['Flamenco', 'Fado', 'Tango', 'Bolero'], answer: 1 }
         ]
       }
     ] },
@@ -358,7 +442,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Kenya?', qEs: '¿Cuál es la capital de Kenia?', options: ['Cairo', 'Nairobi', 'Lagos', 'Pretoria'], optionsEs: ['El Cairo', 'Nairobi', 'Lagos', 'Pretoria'], answer: 1 },
           { q: 'What landscape is Kenya famous for?', qEs: '¿Por qué paisaje es famosa Kenia?', options: ['Deserts', 'Rainforests', 'Tundras', 'Savannas'], optionsEs: ['Desiertos', 'Selvas', 'Tundras', 'Sabanas'], answer: 3 },
-          { q: 'What is the second highest mountain in Africa?', qEs: '¿Cuál es la segunda montaña más alta de África?', options: ['Kilimanjaro', 'Mount Kenya', 'Atlas', 'Ruwenzori'], optionsEs: ['Kilimanjaro', 'Monte Kenia', 'Atlas', 'Ruwenzori'], answer: 1 }
+          { q: 'What is the second highest mountain in Africa?', qEs: '¿Cuál es la segunda montaña más alta de África?', options: ['Kilimanjaro', 'Mount Kenya', 'Atlas', 'Ruwenzori'], optionsEs: ['Kilimanjaro', 'Monte Kenia', 'Atlas', 'Ruwenzori'], answer: 1 },
+          { q: 'What is the currency of Kenya?', qEs: '¿Cuál es la moneda de Kenia?', options: ['Shilling', 'Rand', 'Naira', 'Pound'], optionsEs: ['Chelín', 'Rand', 'Naira', 'Libra'], answer: 0 },
+          { q: 'What great valley runs through Kenya?', qEs: '¿Qué gran valle atraviesa Kenia?', options: ['Great Rift Valley', 'Death Valley', 'Indus Valley', 'Jordan Valley'], optionsEs: ['Gran Valle del Rift', 'Valle de la Muerte', 'Valle del Indo', 'Valle del Jordán'], answer: 0 }
         ]
       },
       {
@@ -375,6 +461,63 @@ const WorldExplorer = (() => {
           { q: 'What river flows through Egypt?', qEs: '¿Qué río fluye por Egipto?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], optionsEs: ['Amazonas', 'Nilo', 'Yangtsé', 'Misisipi'], answer: 1 },
           { q: 'What famous monument is in Egypt?', qEs: '¿Qué monumento famoso está en Egipto?', options: ['Colosseum', 'Eiffel Tower', 'Pyramids', 'Taj Mahal'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Pirámides', 'Taj Mahal'], answer: 2 },
           { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0 }
+        ]
+      },
+      {
+        id: 'south_africa', name: 'South Africa', nameEs: 'Sudáfrica', flag: '🇿🇦',
+        capital: 'Pretoria', capitalEs: 'Pretoria',
+        facts: [
+          { en: 'South Africa has three capital cities: Pretoria, Cape Town, and Bloemfontein.', es: 'Sudáfrica tiene tres capitales: Pretoria, Ciudad del Cabo y Bloemfontein.' },
+          { en: 'Table Mountain overlooks the city of Cape Town.', es: 'La Montaña de la Mesa domina la ciudad de Ciudad del Cabo.' },
+          { en: 'South Africa has 11 official languages.', es: 'Sudáfrica tiene 11 idiomas oficiales.' },
+          { en: 'The country is famous for safari wildlife like the Big Five.', es: 'El país es famoso por la fauna de safari como los Cinco Grandes.' }
+        ],
+        landmark: { name: 'Table Mountain', nameEs: 'Montaña de la Mesa', emoji: '⛰️' },
+        animal: { name: 'Springbok', nameEs: 'Springbok', emoji: '🦌' },
+        quiz: [
+          { q: 'What is the administrative capital of South Africa?', qEs: '¿Cuál es la capital administrativa de Sudáfrica?', options: ['Pretoria', 'Cairo', 'Lagos', 'Nairobi'], optionsEs: ['Pretoria', 'El Cairo', 'Lagos', 'Nairobi'], answer: 0 },
+          { q: 'What flat-topped mountain overlooks Cape Town?', qEs: '¿Qué montaña de cima plana domina Ciudad del Cabo?', options: ['Table Mountain', 'Kilimanjaro', 'Mount Kenya', 'Atlas'], optionsEs: ['Montaña de la Mesa', 'Kilimanjaro', 'Monte Kenia', 'Atlas'], answer: 0 },
+          { q: 'What is the currency of South Africa?', qEs: '¿Cuál es la moneda de Sudáfrica?', options: ['Dollar', 'Rand', 'Naira', 'Dirham'], optionsEs: ['Dólar', 'Rand', 'Naira', 'Dírham'], answer: 1 },
+          { q: 'How many official languages does South Africa have?', qEs: '¿Cuántos idiomas oficiales tiene Sudáfrica?', options: ['2', '5', '11', '20'], optionsEs: ['2', '5', '11', '20'], answer: 2 },
+          { q: 'At the southern tip of South Africa, two oceans meet. Which?', qEs: 'En la punta sur de Sudáfrica se encuentran dos océanos. ¿Cuáles?', options: ['Pacific and Arctic', 'Atlantic and Indian', 'Indian and Arctic', 'Atlantic and Pacific'], optionsEs: ['Pacífico y Ártico', 'Atlántico e Índico', 'Índico y Ártico', 'Atlántico y Pacífico'], answer: 1 }
+        ]
+      },
+      {
+        id: 'morocco', name: 'Morocco', nameEs: 'Marruecos', flag: '🇲🇦',
+        capital: 'Rabat', capitalEs: 'Rabat',
+        facts: [
+          { en: 'Morocco is in northwest Africa, close to Spain across the Strait of Gibraltar.', es: 'Marruecos está en el noroeste de África, cerca de España a través del estrecho de Gibraltar.' },
+          { en: 'The Sahara Desert covers much of southern Morocco.', es: 'El desierto del Sahara cubre gran parte del sur de Marruecos.' },
+          { en: 'The Atlas Mountains run across the country.', es: 'La cordillera del Atlas atraviesa el país.' },
+          { en: 'Marrakesh is famous for its lively markets called souks.', es: 'Marrakech es famosa por sus animados mercados llamados zocos.' }
+        ],
+        landmark: { name: 'Koutoubia Mosque', nameEs: 'Mezquita Kutubía', emoji: '🕌' },
+        animal: { name: 'Barbary Macaque', nameEs: 'Macaco de Berbería', emoji: '🐒' },
+        quiz: [
+          { q: 'What is the capital of Morocco?', qEs: '¿Cuál es la capital de Marruecos?', options: ['Casablanca', 'Rabat', 'Marrakesh', 'Fez'], optionsEs: ['Casablanca', 'Rabat', 'Marrakech', 'Fez'], answer: 1 },
+          { q: 'Which mountain range runs across Morocco?', qEs: '¿Qué cordillera atraviesa Marruecos?', options: ['Andes', 'Alps', 'Atlas', 'Himalayas'], optionsEs: ['Andes', 'Alpes', 'Atlas', 'Himalaya'], answer: 2 },
+          { q: 'What is the currency of Morocco?', qEs: '¿Cuál es la moneda de Marruecos?', options: ['Dirham', 'Euro', 'Pound', 'Rand'], optionsEs: ['Dírham', 'Euro', 'Libra', 'Rand'], answer: 0 },
+          { q: 'Which desert covers part of southern Morocco?', qEs: '¿Qué desierto cubre parte del sur de Marruecos?', options: ['Gobi', 'Sahara', 'Atacama', 'Kalahari'], optionsEs: ['Gobi', 'Sahara', 'Atacama', 'Kalahari'], answer: 1 },
+          { q: 'Morocco is separated from Spain by which strait?', qEs: '¿Qué estrecho separa a Marruecos de España?', options: ['Bering', 'Gibraltar', 'Malacca', 'Hormuz'], optionsEs: ['Bering', 'Gibraltar', 'Malaca', 'Ormuz'], answer: 1 }
+        ]
+      },
+      {
+        id: 'nigeria', name: 'Nigeria', nameEs: 'Nigeria', flag: '🇳🇬',
+        capital: 'Abuja', capitalEs: 'Abuya',
+        facts: [
+          { en: 'Nigeria is the most populous country in Africa.', es: 'Nigeria es el país más poblado de África.' },
+          { en: 'The Niger River gives the country its name.', es: 'El río Níger da nombre al país.' },
+          { en: 'Lagos is one of the largest cities in Africa.', es: 'Lagos es una de las ciudades más grandes de África.' },
+          { en: 'English is the official language of Nigeria.', es: 'El inglés es el idioma oficial de Nigeria.' }
+        ],
+        landmark: { name: 'Zuma Rock', nameEs: 'Roca Zuma', emoji: '🪨' },
+        animal: { name: 'African Elephant', nameEs: 'Elefante Africano', emoji: '🐘' },
+        quiz: [
+          { q: 'What is the capital of Nigeria?', qEs: '¿Cuál es la capital de Nigeria?', options: ['Lagos', 'Abuja', 'Kano', 'Ibadan'], optionsEs: ['Lagos', 'Abuya', 'Kano', 'Ibadán'], answer: 1 },
+          { q: 'Which river gives Nigeria its name?', qEs: '¿Qué río da nombre a Nigeria?', options: ['Nile', 'Congo', 'Niger', 'Zambezi'], optionsEs: ['Nilo', 'Congo', 'Níger', 'Zambeze'], answer: 2 },
+          { q: 'What is the currency of Nigeria?', qEs: '¿Cuál es la moneda de Nigeria?', options: ['Naira', 'Cedi', 'Rand', 'Shilling'], optionsEs: ['Naira', 'Cedi', 'Rand', 'Chelín'], answer: 0 },
+          { q: 'What is the official language of Nigeria?', qEs: '¿Cuál es el idioma oficial de Nigeria?', options: ['French', 'English', 'Arabic', 'Portuguese'], optionsEs: ['Francés', 'Inglés', 'Árabe', 'Portugués'], answer: 1 },
+          { q: 'Nigeria is the most populous country on which continent?', qEs: '¿Nigeria es el país más poblado de qué continente?', options: ['Asia', 'Africa', 'Europe', 'South America'], optionsEs: ['Asia', 'África', 'Europa', 'América del Sur'], answer: 1 }
         ]
       }
     ] },
@@ -393,7 +536,9 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Japan?', qEs: '¿Cuál es la capital de Japón?', options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'], optionsEs: ['Kioto', 'Osaka', 'Tokio', 'Hiroshima'], answer: 2 },
           { q: 'What is the highest mountain in Japan?', qEs: '¿Cuál es la montaña más alta de Japón?', options: ['Mount Everest', 'Mount Fuji', 'Mount Kilimanjaro', 'Mount Blanc'], optionsEs: ['Monte Everest', 'Monte Fuji', 'Monte Kilimanjaro', 'Mont Blanc'], answer: 1 },
-          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2 }
+          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2 },
+          { q: 'What is the currency of Japan?', qEs: '¿Cuál es la moneda de Japón?', options: ['Won', 'Yuan', 'Yen', 'Baht'], optionsEs: ['Won', 'Yuan', 'Yen', 'Baht'], answer: 2 },
+          { q: 'What is Japan\'s largest island called?', qEs: '¿Cómo se llama la isla más grande de Japón?', options: ['Hokkaido', 'Honshu', 'Kyushu', 'Shikoku'], optionsEs: ['Hokkaido', 'Honshu', 'Kyushu', 'Shikoku'], answer: 1 }
         ]
       },
       {
@@ -411,6 +556,63 @@ const WorldExplorer = (() => {
           { q: 'What is the capital of China?', qEs: '¿Cuál es la capital de China?', options: ['Shanghai', 'Beijing', 'Hong Kong', 'Shenzhen'], optionsEs: ['Shanghái', 'Pekín', 'Hong Kong', 'Shenzhen'], answer: 1 },
           { q: 'Which famous wall is located in China?', qEs: '¿Qué famosa muralla se encuentra en China?', options: ['Berlin Wall', 'Hadrian\'s Wall', 'Great Wall', 'Western Wall'], optionsEs: ['Muro de Berlín', 'Muro de Adriano', 'Gran Muralla', 'Muro de los Lamentos'], answer: 2 },
           { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2 }
+        ]
+      },
+      {
+        id: 'india', name: 'India', nameEs: 'India', flag: '🇮🇳',
+        capital: 'New Delhi', capitalEs: 'Nueva Delhi',
+        facts: [
+          { en: 'India is the most populous country in the world.', es: 'India es el país más poblado del mundo.' },
+          { en: 'The Taj Mahal in Agra is a famous marble mausoleum.', es: 'El Taj Mahal en Agra es un famoso mausoleo de mármol.' },
+          { en: 'The Ganges is a major sacred river in India.', es: 'El Ganges es un importante río sagrado en India.' },
+          { en: 'India is home to the Bengal tiger, its national animal.', es: 'India es el hogar del tigre de Bengala, su animal nacional.' }
+        ],
+        landmark: { name: 'Taj Mahal', nameEs: 'Taj Mahal', emoji: '🕌' },
+        animal: { name: 'Bengal Tiger', nameEs: 'Tigre de Bengala', emoji: '🐅' },
+        quiz: [
+          { q: 'What is the capital of India?', qEs: '¿Cuál es la capital de India?', options: ['Mumbai', 'New Delhi', 'Kolkata', 'Chennai'], optionsEs: ['Bombay', 'Nueva Delhi', 'Calcuta', 'Chennai'], answer: 1 },
+          { q: 'Which famous marble mausoleum is in India?', qEs: '¿Qué famoso mausoleo de mármol está en India?', options: ['Taj Mahal', 'Petra', 'Colosseum', 'Angkor Wat'], optionsEs: ['Taj Mahal', 'Petra', 'Coliseo', 'Angkor Wat'], answer: 0 },
+          { q: 'What is the currency of India?', qEs: '¿Cuál es la moneda de India?', options: ['Rupee', 'Yen', 'Baht', 'Won'], optionsEs: ['Rupia', 'Yen', 'Baht', 'Won'], answer: 0 },
+          { q: 'What sacred river flows through India?', qEs: '¿Qué río sagrado fluye por India?', options: ['Mekong', 'Ganges', 'Yangtze', 'Indus only'], optionsEs: ['Mekong', 'Ganges', 'Yangtsé', 'Solo el Indo'], answer: 1 },
+          { q: 'What is the national animal of India?', qEs: '¿Cuál es el animal nacional de India?', options: ['Lion', 'Elephant', 'Bengal Tiger', 'Peacock'], optionsEs: ['León', 'Elefante', 'Tigre de Bengala', 'Pavo real'], answer: 2 }
+        ]
+      },
+      {
+        id: 'south_korea', name: 'South Korea', nameEs: 'Corea del Sur', flag: '🇰🇷',
+        capital: 'Seoul', capitalEs: 'Seúl',
+        facts: [
+          { en: 'South Korea is on the southern half of the Korean Peninsula.', es: 'Corea del Sur está en la mitad sur de la península de Corea.' },
+          { en: 'Seoul is one of the largest and most modern cities in Asia.', es: 'Seúl es una de las ciudades más grandes y modernas de Asia.' },
+          { en: 'Taekwondo, a martial art, originated in Korea.', es: 'El taekwondo, un arte marcial, se originó en Corea.' },
+          { en: 'South Korea is known worldwide for its technology and K-pop music.', es: 'Corea del Sur es conocida mundialmente por su tecnología y la música K-pop.' }
+        ],
+        landmark: { name: 'Gyeongbokgung Palace', nameEs: 'Palacio Gyeongbokgung', emoji: '🏯' },
+        animal: { name: 'Korean Magpie', nameEs: 'Urraca Coreana', emoji: '🐦' },
+        quiz: [
+          { q: 'What is the capital of South Korea?', qEs: '¿Cuál es la capital de Corea del Sur?', options: ['Busan', 'Seoul', 'Incheon', 'Daegu'], optionsEs: ['Busan', 'Seúl', 'Incheon', 'Daegu'], answer: 1 },
+          { q: 'Which martial art originated in Korea?', qEs: '¿Qué arte marcial se originó en Corea?', options: ['Karate', 'Judo', 'Taekwondo', 'Kung Fu'], optionsEs: ['Karate', 'Judo', 'Taekwondo', 'Kung Fu'], answer: 2 },
+          { q: 'What is the currency of South Korea?', qEs: '¿Cuál es la moneda de Corea del Sur?', options: ['Yen', 'Won', 'Yuan', 'Baht'], optionsEs: ['Yen', 'Won', 'Yuan', 'Baht'], answer: 1 },
+          { q: 'On which peninsula is South Korea located?', qEs: '¿En qué península se encuentra Corea del Sur?', options: ['Indochina', 'Korean', 'Arabian', 'Iberian'], optionsEs: ['Indochina', 'Coreana', 'Arábiga', 'Ibérica'], answer: 1 },
+          { q: 'Which country borders South Korea to the north?', qEs: '¿Qué país limita con Corea del Sur al norte?', options: ['China', 'Japan', 'North Korea', 'Russia'], optionsEs: ['China', 'Japón', 'Corea del Norte', 'Rusia'], answer: 2 }
+        ]
+      },
+      {
+        id: 'thailand', name: 'Thailand', nameEs: 'Tailandia', flag: '🇹🇭',
+        capital: 'Bangkok', capitalEs: 'Bangkok',
+        facts: [
+          { en: 'Thailand is in Southeast Asia and was never colonized by Europeans.', es: 'Tailandia está en el sudeste asiático y nunca fue colonizada por europeos.' },
+          { en: 'Bangkok is famous for its ornate Buddhist temples.', es: 'Bangkok es famosa por sus elaborados templos budistas.' },
+          { en: 'The elephant is a national symbol of Thailand.', es: 'El elefante es un símbolo nacional de Tailandia.' },
+          { en: 'The Mekong River forms part of Thailand\'s eastern border.', es: 'El río Mekong forma parte de la frontera oriental de Tailandia.' }
+        ],
+        landmark: { name: 'Grand Palace', nameEs: 'Gran Palacio', emoji: '🏯' },
+        animal: { name: 'Asian Elephant', nameEs: 'Elefante Asiático', emoji: '🐘' },
+        quiz: [
+          { q: 'What is the capital of Thailand?', qEs: '¿Cuál es la capital de Tailandia?', options: ['Bangkok', 'Phuket', 'Chiang Mai', 'Pattaya'], optionsEs: ['Bangkok', 'Phuket', 'Chiang Mai', 'Pattaya'], answer: 0 },
+          { q: 'In which region of Asia is Thailand?', qEs: '¿En qué región de Asia está Tailandia?', options: ['East Asia', 'Southeast Asia', 'South Asia', 'Central Asia'], optionsEs: ['Asia Oriental', 'Sudeste Asiático', 'Asia del Sur', 'Asia Central'], answer: 1 },
+          { q: 'What is the currency of Thailand?', qEs: '¿Cuál es la moneda de Tailandia?', options: ['Baht', 'Ringgit', 'Dong', 'Kip'], optionsEs: ['Baht', 'Ringgit', 'Dong', 'Kip'], answer: 0 },
+          { q: 'Which animal is a national symbol of Thailand?', qEs: '¿Qué animal es un símbolo nacional de Tailandia?', options: ['Tiger', 'Elephant', 'Panda', 'Crane'], optionsEs: ['Tigre', 'Elefante', 'Panda', 'Grulla'], answer: 1 },
+          { q: 'Which major river borders Thailand?', qEs: '¿Qué río importante bordea Tailandia?', options: ['Ganges', 'Mekong', 'Yangtze', 'Indus'], optionsEs: ['Ganges', 'Mekong', 'Yangtsé', 'Indo'], answer: 1 }
         ]
       }
     ] },

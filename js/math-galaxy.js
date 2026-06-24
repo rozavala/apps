@@ -483,8 +483,68 @@ function genCommander() {
   // PRUNED [2026-04-22]: Removed 'speed_ops', 'planet_pct' to make room for 'quasar_ops', 'pulsar_dec'
   // PRUNED [2026-05-18]: Removed 'rocket_pct', 'asteroid_decimal' to make room for 'pulsar_add', 'galaxy_pct' and stay within MAX 25 limit.
   // PRUNED [2026-06-15]: Removed 'robot_ops', 'ufo_decimal' to make room for 'blackhole_sub', 'galaxy_pct_2' and stay within MAX 25 limit.
-  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2'];
+  // ADDED [2026-06-24]: Harder content for ages 10-12 — 'void_neg' (negatives), 'star_power' (exponents), 'cosmic_pemdas' (parentheses), 'orbit_ratio' (ratios), 'warp_algebra' (one/two-step algebra), 'prime_scan' (primes), 'station_geo' (area/perimeter). Array grown intentionally.
+  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2', 'void_neg', 'star_power', 'cosmic_pemdas', 'orbit_ratio', 'warp_algebra', 'prime_scan', 'station_geo'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'void_neg') {
+    // Negative-number arithmetic: subtracting a larger number, or adding a negative.
+    if (rand(0, 1) === 0) {
+      const a = rand(1, 20), b = rand(a + 1, 40);
+      const ans = a - b;
+      return { label: 'Deep Void', text: `${a} - ${b} = ?`, hint: 'The answer drops below zero.', answer: ans, options: generateDistractors(ans, 3, ans - 10, 10), mode: 'choice' };
+    }
+    const a = rand(-30, -1), b = rand(1, 30);
+    const ans = a + b;
+    return { label: 'Deep Void', text: `(${a}) + ${b} = ?`, hint: 'Adding to a negative number.', answer: ans, options: generateDistractors(ans, 3, ans - 10, ans + 10), mode: 'choice' };
+  }
+  if (type === 'star_power') {
+    // Exponents / powers.
+    const base = rand(2, 9), exp = [2, 3][rand(0, 1)];
+    const ans = Math.pow(base, exp);
+    return { label: 'Star Power', text: `${base}^${exp} = ?`, hint: exp === 2 ? 'Multiply the base by itself.' : 'Multiply the base three times.', answer: ans, options: generateDistractors(ans, 3, 1, ans + 30), mode: 'choice' };
+  }
+  if (type === 'cosmic_pemdas') {
+    // Order of operations with parentheses and division.
+    const a = rand(2, 9), b = rand(2, 9), c = rand(2, 6);
+    const ans = (a + b) * c;
+    return { label: 'Cosmic PEMDAS', text: `(${a} + ${b}) × ${c} = ?`, hint: 'Solve inside the parentheses first.', answer: ans, options: generateDistractors(ans, 3, 5, ans + 30), mode: 'choice' };
+  }
+  if (type === 'orbit_ratio') {
+    // Ratios / proportions: scale a known ratio up.
+    const unit = rand(2, 6), factor = rand(2, 6);
+    const known = rand(2, 8);
+    const ans = known * factor;
+    return { label: 'Orbit Ratio', text: `If ${unit} moons orbit per ${known} planets, how many moons orbit ${known * factor} planets?`, hint: 'The ratio stays the same — scale it up.', answer: unit * factor, options: generateDistractors(unit * factor, 3, 1, unit * factor + 20), mode: 'choice' };
+  }
+  if (type === 'warp_algebra') {
+    // Simple one-step / two-step algebra: solve ax + b = c.
+    const x = rand(2, 9), a = rand(2, 5), b = rand(1, 10);
+    const c = a * x + b;
+    return { label: 'Warp Algebra', text: `Solve for x:  ${a}x + ${b} = ${c}`, hint: 'Subtract, then divide.', answer: x, options: generateDistractors(x, 3, 1, x + 12), mode: 'choice' };
+  }
+  if (type === 'prime_scan') {
+    // Prime numbers: identify the prime among the options.
+    const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+    const composites = [4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24, 25];
+    const prime = primes[rand(0, primes.length - 1)];
+    const opts = new Set([prime]);
+    let attempts = 0;
+    while (opts.size < 4 && attempts < 50) {
+      opts.add(composites[rand(0, composites.length - 1)]);
+      attempts++;
+    }
+    return { label: 'Prime Scan', text: 'Which of these numbers is PRIME?', hint: 'A prime has exactly two factors: 1 and itself.', answer: prime, options: shuffle(Array.from(opts)), mode: 'choice' };
+  }
+  if (type === 'station_geo') {
+    // Simple geometry: area or perimeter of a rectangle.
+    const w = rand(3, 12), h = rand(3, 12);
+    if (rand(0, 1) === 0) {
+      const ans = w * h;
+      return { label: 'Station Geometry', text: `Area of a ${w} × ${h} module?`, hint: 'Area = width × height.', answer: ans, options: generateDistractors(ans, 3, 5, ans + 40), mode: 'choice' };
+    }
+    const ans = 2 * (w + h);
+    return { label: 'Station Geometry', text: `Perimeter of a ${w} × ${h} module?`, hint: 'Perimeter = 2 × (width + height).', answer: ans, options: generateDistractors(ans, 3, 5, ans + 30), mode: 'choice' };
+  }
   if (type === 'blackhole_sub') { const a = rand(100, 500), b = rand(50, a - 1); return { label: 'Big Subtraction', text: `${a} 🕳️ - ${b} 🕳️ = ?`, hint: 'Subtract', answer: a - b, options: generateDistractors(a - b, 3, 10, 450), mode: 'choice' }; }
   if (type === 'galaxy_pct_2') { const p = [10, 20, 25, 50][rand(0, 3)]; const base = rand(10, 50) * (100/p); const ans = base * p/100; return { label: 'Percentages', text: `${p}% of ${base} 🌌`, hint: 'Calculate', answer: ans, options: generateDistractors(ans, 3, 5, 200), mode: 'choice' }; }
   if (type === 'gravity_ops') { const a=rand(5,10), b=rand(2,5); const ans=a+(b*b); return { label: 'Gravity Math', text: `${a} + ${b}² = ?`, hint: 'Square first!', answer: ans, options: generateDistractors(ans, 3, 5, 50), mode: 'choice' }; }
