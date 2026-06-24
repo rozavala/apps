@@ -1,21 +1,7 @@
 {
-  "generatedAt": "2026-06-23T16:54:22.822Z",
+  "generatedAt": "2026-06-24T16:00:35.517Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 13,
-  "topGroups": [
-    {
-      "app": "art-studio",
-      "kind": "error",
-      "page": "art-studio.html",
-      "message": "IndexSizeError: The index is not in the allowed range.",
-      "filename": "https://rozavala.github.io/apps/js/art-studio.js",
-      "lineno": 418,
-      "colno": 39,
-      "count": 13,
-      "firstTs": 1782057301820,
-      "lastTs": 1782057303607,
-      "users": 1
-    }
-  ]
+  "totalGroups": 0,
+  "totalEvents": 0,
+  "topGroups": []
 }
