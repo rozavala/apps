@@ -71,6 +71,11 @@
     .quiz-btn:hover { background: #ece9f5; border-color: var(--faith-gold); }
     .quiz-btn.correct { background: #10B981; border-color: #10B981; }
     .quiz-btn.wrong { background: #EF4444; border-color: #EF4444; }
+    .fe-explain {
+      margin-top: 12px; padding: 14px 16px; border-radius: 12px;
+      background: #fdf6e7; border: 1.5px solid var(--faith-gold);
+      color: var(--faith-gold-ink); font-weight: 600; font-size: 0.95rem; line-height: 1.5;
+    }
 
     /* Rosary Section */
     .rosary-today { text-align: center; font-size: 0.95rem; opacity: 0.85; margin: 8px 0 16px; }
@@ -270,13 +275,36 @@
       container.appendChild(card);
     }
 
+    // Returns the quiz object currently shown (saint's first question or
+    // heritage item), so we can read an optional `explain` string.
+    function currentQuizItem() {
+      if (currentTab === 'saint') {
+        const s = FeManager.SAINTS[saintIndex];
+        return s && s.questions ? s.questions[0] : null;
+      }
+      if (currentTab === 'heritage') {
+        return FeManager.HERITAGE[heritageIndex] || null;
+      }
+      return null;
+    }
+
     function checkQuiz(btn, isCorrect) {
       if (btn.disabled) return;
+
+      // Show the factual explanation (if any) once an answer is chosen.
+      const item = currentQuizItem();
+      if (item && item.explain && !btn.parentElement.querySelector('.fe-explain')) {
+        const exp = document.createElement('div');
+        exp.className = 'fe-explain';
+        exp.textContent = item.explain;
+        btn.parentElement.appendChild(exp);
+      }
+
       if (isCorrect) {
         btn.classList.add('correct');
         FeManager.addStar();
         if (typeof playSound === 'function') playSound('success');
-        
+
         const next = () => {
           saintIndex = (saintIndex + 1) % FeManager.SAINTS.length;
           heritageIndex = (heritageIndex + 1) % FeManager.HERITAGE.length;
