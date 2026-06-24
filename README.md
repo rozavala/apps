@@ -60,6 +60,7 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso y balance con insights para cada niño. (A secure area to monitor progress and balance with insights for each child).
 - **Diseño Seguro (Safe by Design)**: Sin llamadas API externas, sin contenido dinámico de terceros y sin funciones generadas por el usuario. (No external API calls, no dynamic third-party content, and no user-generated features).
 - **Enfoque Histórico y Factual (Historical & Factual Focus)**: Contenido enfocado en hechos demostrables, patrimonio cultural y habilidades clásicas, manteniendo la estricta neutralidad. (Content focuses on demonstrable facts, cultural heritage, and classical skills, maintaining strict neutrality.)
+- **Patrimonio Católico (Catholic Heritage)**: "Fe Explorador" enseña oraciones clásicas y biografías de santos chilenos enfocándose puramente en la historia y los hechos demostrables. (Teaches classic prayers and biographies of Chilean saints focusing purely on history and demonstrable facts.)
 
 ## 📜 Filosofía de Contenido (Content Philosophy)
 
@@ -70,6 +71,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Actualización Family Wall**: Agregamos "Summer Quest", una lista compartida de tareas de verano para los niños. (Added "Summer Quest", a shared kids' summer to-do list.)
 - **Nuevo Contenido**: Más preguntas en Descubre Chile (ALMA, atrapanieblas, volcán Villarrica, huemul) y nuevo país Italia en World Explorer. (More questions in Descubre Chile and a new Italy country in World Explorer.)
 - **Actualización World Cup 2026**: Opciones familiares y navegación anterior/siguiente dentro del modal de resultados de partidos. (Family picks + prev/next nav inside the match-result modal.)
 - **Mejora en Sincronización (CloudSync Update)**: Fusión profunda (deep-merge) para pronósticos y resultados de la Copa del Mundo, protegiendo los datos entre dispositivos. (Deep-merge for World Cup picks and results, protecting data across devices.)
