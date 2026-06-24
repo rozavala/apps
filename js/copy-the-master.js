@@ -145,6 +145,134 @@ var CopyMaster = (function() {
           '<path d="M665 520 L672 490 L660 495 Z"/>' +
         '</g>' +
         '</svg>'
+    },
+    {
+      id: 'great_wave',
+      title: 'The Great Wave off Kanagawa',
+      artist: 'Katsushika Hokusai',
+      year: 1831,
+      note: 'A woodblock print. The huge wave curls left like a claw and frames tiny Mount Fuji behind it. Draw the big wave arc first, then the foam fingers, then the boats and the mountain.',
+      thumbBg: 'linear-gradient(135deg,#1d4ed8,#0ea5e9,#e0f2fe)',
+      guideSvg:
+        '<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">' +
+        '<g fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          // Great cresting wave — big curl on the left
+          '<path d="M20 380 Q120 160 320 160 Q470 160 520 280 Q470 220 380 240 Q300 260 300 330"/>' +
+          // Curling foam crest
+          '<path d="M300 160 Q260 120 300 90 Q360 80 360 140 Q340 190 290 180"/>' +
+          // Foam fingers reaching down
+          '<path d="M340 200 Q360 250 330 300"/>' +
+          '<path d="M400 200 Q420 260 390 320"/>' +
+          '<path d="M460 220 Q480 280 450 340"/>' +
+          // Trough wave (middle)
+          '<path d="M40 460 Q200 400 360 440 Q520 480 760 420"/>' +
+          // Far smaller wave
+          '<path d="M520 360 Q620 320 760 360"/>' +
+          // Mount Fuji (small, in distance, with snow notch)
+          '<path d="M560 380 L650 300 L740 380"/>' +
+          '<path d="M625 325 L635 340 L650 330 L665 345 L675 335"/>' +
+          // Two long boats riding the swells
+          '<path d="M120 430 Q200 470 300 440"/>' +
+          '<path d="M260 470 Q340 510 440 480"/>' +
+        '</g>' +
+        '</svg>'
+    },
+    {
+      id: 'mona_lisa',
+      title: 'Mona Lisa',
+      artist: 'Leonardo da Vinci',
+      year: 1503,
+      note: 'A portrait built on a calm triangle: the folded hands form the base and the head the top. The figure sits slightly turned (three-quarter view). Block in the triangle and the oval face before any detail.',
+      thumbBg: 'linear-gradient(135deg,#78350f,#a16207,#1c1917)',
+      guideSvg:
+        '<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">' +
+        '<g fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          // Stable triangle of the pose (compositional guide)
+          '<path d="M400 150 L250 560 L550 560 Z"/>' +
+          // Head — oval, slightly turned
+          '<ellipse cx="400" cy="200" rx="80" ry="100"/>' +
+          // Hairline framing the face
+          '<path d="M325 180 Q400 110 475 180"/>' +
+          // Eyes, nose, the famous faint smile
+          '<path d="M350 195 Q370 185 390 195"/>' +
+          '<path d="M410 195 Q430 185 450 195"/>' +
+          '<path d="M400 200 L392 235 L408 235"/>' +
+          '<path d="M370 260 Q400 275 430 260"/>' +
+          // Shoulders and body (three-quarter turn)
+          '<path d="M300 300 Q400 260 500 300 L530 560 L270 560 Z"/>' +
+          // Folded hands at the base
+          '<path d="M330 470 Q400 440 470 470 Q430 510 370 510 Q345 500 330 470 Z"/>' +
+          // Distant landscape horizon behind the shoulders
+          '<path d="M40 300 Q200 270 360 300"/>' +
+          '<path d="M440 300 Q600 270 760 300"/>' +
+        '</g>' +
+        '</svg>'
+    },
+    {
+      id: 'the_scream',
+      title: 'The Scream',
+      artist: 'Edvard Munch',
+      year: 1893,
+      note: 'A strong diagonal bridge pulls your eye from the front figure back to two small walkers. The sky flows in wavy bands above a swirling fjord. Draw the bridge rails first to set the diagonal.',
+      thumbBg: 'linear-gradient(135deg,#b45309,#f59e0b,#7c2d12)',
+      guideSvg:
+        '<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">' +
+        '<g fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          // Wavy sky bands
+          '<path d="M0 90 Q200 50 400 90 Q600 130 800 80"/>' +
+          '<path d="M0 150 Q200 110 400 150 Q600 190 800 140"/>' +
+          '<path d="M0 210 Q200 170 400 210 Q600 250 800 200"/>' +
+          // Swirling fjord water below
+          '<path d="M0 320 Q200 290 400 330 Q600 370 800 320"/>' +
+          '<path d="M0 380 Q200 350 400 390 Q600 430 800 380"/>' +
+          // Diagonal bridge rail (the line that drives the composition)
+          '<path d="M20 580 L520 300"/>' +
+          '<path d="M120 580 L560 330"/>' +
+          // Bridge deck edge
+          '<path d="M20 580 L120 580"/>' +
+          // Foreground figure: oval head, wavy body, hands to cheeks
+          '<ellipse cx="200" cy="360" rx="55" ry="70"/>' +
+          '<path d="M200 430 Q150 500 170 580"/>' +
+          '<path d="M200 430 Q250 500 230 580"/>' +
+          '<path d="M150 350 Q140 400 165 420"/>' +
+          '<path d="M250 350 Q260 400 235 420"/>' +
+          // Two small distant figures on the bridge
+          '<path d="M470 320 L470 360"/>' +
+          '<path d="M510 305 L510 345"/>' +
+        '</g>' +
+        '</svg>'
+    },
+    {
+      id: 'pointillist_park',
+      title: 'A Pointillist Park',
+      artist: 'after Georges Seurat',
+      year: 1886,
+      note: 'Pointillism: build the whole scene from tiny separate dots of pure colour. Up close they are specks; step back and your eye blends them. Keep figures as simple upright shapes along the riverbank.',
+      thumbBg: 'linear-gradient(135deg,#15803d,#65a30d,#fde68a)',
+      guideSvg:
+        '<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">' +
+        '<g fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          // Riverbank lawn line and water edge
+          '<path d="M0 440 Q200 420 400 440 Q600 460 800 430"/>' +
+          '<path d="M0 520 L800 520"/>' +
+          // Tall tree trunk and rounded canopy (right)
+          '<path d="M650 440 L650 200"/>' +
+          '<path d="M650 200 Q560 180 560 110 Q650 60 740 110 Q740 180 650 200"/>' +
+          // Smaller tree (left)
+          '<path d="M150 440 L150 280"/>' +
+          '<circle cx="150" cy="240" r="60"/>' +
+          // A standing figure (parasol lady) — simple oval head + bell skirt
+          '<circle cx="440" cy="300" r="26"/>' +
+          '<path d="M440 326 L410 460 L470 460 Z"/>' +
+          '<path d="M380 270 Q440 230 500 270"/>' +
+          '<path d="M440 270 L440 300"/>' +
+          // A seated figure
+          '<circle cx="280" cy="380" r="22"/>' +
+          '<path d="M280 402 L260 470 L320 470 Z"/>' +
+          // Small sailboat on the water
+          '<path d="M560 480 L620 480 L590 460 Z"/>' +
+        '</g>' +
+        '</svg>'
     }
   ];
 

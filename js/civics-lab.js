@@ -32,17 +32,23 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'How long is the President\'s term in Chile?', es: '¿Cuánto dura el mandato del Presidente en Chile?' },
-          options: { en: ['2 years','4 years','6 years','8 years'], es: ['2 años','4 años','6 años','8 años'] }, answer: 1 },
+          options: { en: ['2 years','4 years','6 years','8 years'], es: ['2 años','4 años','6 años','8 años'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'The President of Chile serves a fixed 4-year term.', es: 'El Presidente de Chile cumple un mandato fijo de 4 años.' } },
         { q: { en: 'Where does the Chilean President work?', es: '¿Dónde trabaja el Presidente de Chile?' },
-          options: { en: ['The Congress','The Supreme Court','La Moneda','The Stock Exchange'], es: ['El Congreso','La Corte Suprema','La Moneda','La Bolsa'] }, answer: 2 },
+          options: { en: ['The Congress','The Supreme Court','La Moneda','The Stock Exchange'], es: ['El Congreso','La Corte Suprema','La Moneda','La Bolsa'] }, answer: 2, tier: 'beginner',
+          explain: { en: 'La Moneda Palace in Santiago is the seat of the executive branch.', es: 'El Palacio de La Moneda, en Santiago, es la sede del poder ejecutivo.' } },
         { q: { en: 'Can a Chilean President be re-elected immediately?', es: '¿Puede el Presidente chileno ser reelegido inmediatamente?' },
-          options: { en: ['Yes, twice','Yes, once','No','Only with Congress approval'], es: ['Sí, dos veces','Sí, una vez','No','Sólo con aprobación del Congreso'] }, answer: 2 },
+          options: { en: ['Yes, twice','Yes, once','No','Only with Congress approval'], es: ['Sí, dos veces','Sí, una vez','No','Sólo con aprobación del Congreso'] }, answer: 2, tier: 'intermediate',
+          explain: { en: 'The Constitution bars immediate re-election; a former President may run again later.', es: 'La Constitución prohíbe la reelección inmediata; un ex Presidente puede postular de nuevo más adelante.' } },
         { q: { en: 'If the President vetoes a bill, how can Congress still pass it?', es: 'Si el Presidente veta un proyecto, ¿cómo puede el Congreso aprobarlo igual?' },
-          options: { en: ['Simple majority','A two-thirds vote in both chambers','A Supreme Court order','It cannot be passed'], es: ['Mayoría simple','Dos tercios en ambas cámaras','Una orden de la Corte Suprema','No puede aprobarse'] }, answer: 1 },
+          options: { en: ['Simple majority','A two-thirds vote in both chambers','A Supreme Court order','It cannot be passed'], es: ['Mayoría simple','Dos tercios en ambas cámaras','Una orden de la Corte Suprema','No puede aprobarse'] }, answer: 1, tier: 'advanced',
+          explain: { en: 'A presidential veto is overridden only if both chambers re-approve the original text by two-thirds.', es: 'Un veto presidencial se supera sólo si ambas cámaras reaprueban el texto original por dos tercios.' } },
         { q: { en: 'What is a "decreto supremo"?', es: '¿Qué es un "decreto supremo"?' },
-          options: { en: ['A law passed by Congress','An order issued by the President to carry out the law','A ruling of the Supreme Court','A treaty with another country'], es: ['Una ley aprobada por el Congreso','Una orden del Presidente para ejecutar la ley','Un fallo de la Corte Suprema','Un tratado con otro país'] }, answer: 1 },
+          options: { en: ['A law passed by Congress','An order issued by the President to carry out the law','A ruling of the Supreme Court','A treaty with another country'], es: ['Una ley aprobada por el Congreso','Una orden del Presidente para ejecutar la ley','Un fallo de la Corte Suprema','Un tratado con otro país'] }, answer: 1, tier: 'advanced',
+          explain: { en: 'A "decreto supremo" is an executive order the President uses to apply the law.', es: 'Un "decreto supremo" es una orden del Ejecutivo que el Presidente usa para aplicar la ley.' } },
         { q: { en: 'Who formally appoints government ministers in Chile?', es: '¿Quién nombra formalmente a los ministros de Estado en Chile?' },
-          options: { en: ['The Senate','The President','The Supreme Court','The voters'], es: ['El Senado','El Presidente','La Corte Suprema','Los votantes'] }, answer: 1 }
+          options: { en: ['The Senate','The President','The Supreme Court','The voters'], es: ['El Senado','El Presidente','La Corte Suprema','Los votantes'] }, answer: 1, tier: 'intermediate',
+          explain: { en: 'Ministers are appointed and removed freely by the President.', es: 'Los ministros son nombrados y removidos libremente por el Presidente.' } }
       ]
     },
     {
@@ -58,17 +64,23 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'How many chambers does the Chilean Congress have?', es: '¿Cuántas cámaras tiene el Congreso chileno?' },
-          options: { en: ['One','Two','Three','Four'], es: ['Una','Dos','Tres','Cuatro'] }, answer: 1 },
+          options: { en: ['One','Two','Three','Four'], es: ['Una','Dos','Tres','Cuatro'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'Chile has a bicameral Congress: the Chamber of Deputies and the Senate.', es: 'Chile tiene un Congreso bicameral: la Cámara de Diputados y el Senado.' } },
         { q: { en: 'In which city does the Chilean Congress sit?', es: '¿En qué ciudad se reúne el Congreso de Chile?' },
-          options: { en: ['Santiago','Concepción','Valparaíso','La Serena'], es: ['Santiago','Concepción','Valparaíso','La Serena'] }, answer: 2 },
+          options: { en: ['Santiago','Concepción','Valparaíso','La Serena'], es: ['Santiago','Concepción','Valparaíso','La Serena'] }, answer: 2, tier: 'beginner',
+          explain: { en: 'The National Congress has sat in Valparaíso since 1990.', es: 'El Congreso Nacional sesiona en Valparaíso desde 1990.' } },
         { q: { en: 'How many senators serve in Chile?', es: '¿Cuántos senadores hay en Chile?' },
-          options: { en: ['30','50','100','155'], es: ['30','50','100','155'] }, answer: 1 },
+          options: { en: ['30','50','100','155'], es: ['30','50','100','155'] }, answer: 1, tier: 'intermediate',
+          explain: { en: 'The Senate has 50 members; the Chamber of Deputies has 155.', es: 'El Senado tiene 50 miembros; la Cámara de Diputados tiene 155.' } },
         { q: { en: 'How much of the Senate is renewed at each election?', es: '¿Qué parte del Senado se renueva en cada elección?' },
-          options: { en: ['All of it','One half','One third','One quarter'], es: ['Todo el Senado','La mitad','Un tercio','Un cuarto'] }, answer: 1 },
+          options: { en: ['All of it','One half','One third','One quarter'], es: ['Todo el Senado','La mitad','Un tercio','Un cuarto'] }, answer: 1, tier: 'advanced',
+          explain: { en: 'Senators serve 8 years and the chamber is renewed by halves every 4 years.', es: 'Los senadores duran 8 años y la cámara se renueva por mitades cada 4 años.' } },
         { q: { en: 'What vote is generally needed to approve a "ley orgánica constitucional"?', es: '¿Qué votación se necesita en general para aprobar una "ley orgánica constitucional"?' },
-          options: { en: ['Simple majority','Four-sevenths of sitting members','Two-thirds','Unanimity'], es: ['Mayoría simple','Cuatro séptimos de los miembros en ejercicio','Dos tercios','Unanimidad'] }, answer: 1 },
+          options: { en: ['Simple majority','Four-sevenths of sitting members','Two-thirds','Unanimity'], es: ['Mayoría simple','Cuatro séptimos de los miembros en ejercicio','Dos tercios','Unanimidad'] }, answer: 1, tier: 'expert',
+          explain: { en: 'A "ley orgánica constitucional" needs four-sevenths of the members in office.', es: 'Una "ley orgánica constitucional" requiere cuatro séptimos de los miembros en ejercicio.' } },
         { q: { en: 'Before a full vote, where is a bill first studied in detail?', es: 'Antes de la votación en sala, ¿dónde se estudia primero un proyecto en detalle?' },
-          options: { en: ['In a specialised committee','In the Supreme Court','In La Moneda','In the Central Bank'], es: ['En una comisión especializada','En la Corte Suprema','En La Moneda','En el Banco Central'] }, answer: 0 }
+          options: { en: ['In a specialised committee','In the Supreme Court','In La Moneda','In the Central Bank'], es: ['En una comisión especializada','En la Corte Suprema','En La Moneda','En el Banco Central'] }, answer: 0, tier: 'advanced',
+          explain: { en: 'Bills are first examined by a specialised committee before the floor vote.', es: 'Los proyectos se estudian primero en una comisión especializada antes de votarse en sala.' } }
       ]
     },
     {
@@ -84,17 +96,23 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'What is the highest court in Chile?', es: '¿Cuál es el tribunal más alto en Chile?' },
-          options: { en: ['Constitutional Tribunal','Supreme Court','Court of Appeals','Contraloría'], es: ['Tribunal Constitucional','Corte Suprema','Corte de Apelaciones','Contraloría'] }, answer: 1 },
+          options: { en: ['Constitutional Tribunal','Supreme Court','Court of Appeals','Contraloría'], es: ['Tribunal Constitucional','Corte Suprema','Corte de Apelaciones','Contraloría'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'The Supreme Court is the highest court in the ordinary judicial system.', es: 'La Corte Suprema es el tribunal más alto del sistema judicial ordinario.' } },
         { q: { en: 'At what age must Chilean Supreme Court justices retire?', es: '¿A qué edad deben jubilarse los ministros de la Corte Suprema?' },
-          options: { en: ['65','70','75','80'], es: ['65','70','75','80'] }, answer: 2 },
+          options: { en: ['65','70','75','80'], es: ['65','70','75','80'] }, answer: 2, tier: 'intermediate',
+          explain: { en: 'Justices leave office at age 75.', es: 'Los ministros cesan en el cargo a los 75 años.' } },
         { q: { en: 'Who must ratify the Supreme Court justices?', es: '¿Quién debe ratificar a los ministros de la Corte Suprema?' },
-          options: { en: ['The Chamber of Deputies','The President alone','The Senate','The Constitutional Tribunal'], es: ['La Cámara de Diputados','El Presidente solo','El Senado','El Tribunal Constitucional'] }, answer: 2 },
+          options: { en: ['The Chamber of Deputies','The President alone','The Senate','The Constitutional Tribunal'], es: ['La Cámara de Diputados','El Presidente solo','El Senado','El Tribunal Constitucional'] }, answer: 2, tier: 'advanced',
+          explain: { en: 'The President proposes each justice, and the Senate must ratify the appointment.', es: 'El Presidente propone a cada ministro y el Senado debe ratificar el nombramiento.' } },
         { q: { en: 'How many justices serve on the Chilean Supreme Court?', es: '¿Cuántos ministros tiene la Corte Suprema de Chile?' },
-          options: { en: ['7','11','21','50'], es: ['7','11','21','50'] }, answer: 2 },
+          options: { en: ['7','11','21','50'], es: ['7','11','21','50'] }, answer: 2, tier: 'intermediate',
+          explain: { en: 'The Supreme Court is composed of 21 justices.', es: 'La Corte Suprema está compuesta por 21 ministros.' } },
         { q: { en: 'From whose list does the President propose a Supreme Court justice?', es: '¿De qué lista propone el Presidente a un ministro de la Corte Suprema?' },
-          options: { en: ['A list of 5 made by the Court itself','A list made by the Senate','A list made by voters','A list made by the Contraloría'], es: ['Una lista de 5 hecha por la propia Corte','Una lista hecha por el Senado','Una lista hecha por los votantes','Una lista hecha por la Contraloría'] }, answer: 0 },
+          options: { en: ['A list of 5 made by the Court itself','A list made by the Senate','A list made by voters','A list made by the Contraloría'], es: ['Una lista de 5 hecha por la propia Corte','Una lista hecha por el Senado','Una lista hecha por los votantes','Una lista hecha por la Contraloría'] }, answer: 0, tier: 'expert',
+          explain: { en: 'The Court itself draws up a list of 5 (a "quina"), from which the President picks one for Senate ratification.', es: 'La propia Corte elabora una lista de 5 (una "quina"), de la que el Presidente elige a uno para ratificación del Senado.' } },
         { q: { en: 'What does the judicial branch mainly do?', es: '¿Qué hace principalmente el Poder Judicial?' },
-          options: { en: ['Write new laws','Apply and interpret the law in disputes','Collect taxes','Command the armed forces'], es: ['Redactar nuevas leyes','Aplicar e interpretar la ley en los conflictos','Recaudar impuestos','Comandar las Fuerzas Armadas'] }, answer: 1 }
+          options: { en: ['Write new laws','Apply and interpret the law in disputes','Collect taxes','Command the armed forces'], es: ['Redactar nuevas leyes','Aplicar e interpretar la ley en los conflictos','Recaudar impuestos','Comandar las Fuerzas Armadas'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'The judicial branch applies and interprets the law to resolve disputes.', es: 'El Poder Judicial aplica e interpreta la ley para resolver conflictos.' } }
       ]
     }
   ];
@@ -111,13 +129,16 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'What was La Moneda originally?', es: '¿Qué era originalmente La Moneda?' },
-          options: { en: ['A bank','A coin mint','A hospital','A school'], es: ['Un banco','Una casa de moneda','Un hospital','Una escuela'] }, answer: 1 },
+          options: { en: ['A bank','A coin mint','A hospital','A school'], es: ['Un banco','Una casa de moneda','Un hospital','Una escuela'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'It was built as the royal mint, which is why it is called "La Moneda".', es: 'Fue construida como la casa de moneda, por eso se llama "La Moneda".' } },
         { q: { en: 'Which branch of government uses La Moneda?', es: '¿Qué poder del Estado ocupa La Moneda?' },
-          options: { en: ['Legislative','Judicial','Executive','Electoral'], es: ['Legislativo','Judicial','Ejecutivo','Electoral'] }, answer: 2 },
+          options: { en: ['Legislative','Judicial','Executive','Electoral'], es: ['Legislativo','Judicial','Ejecutivo','Electoral'] }, answer: 2, tier: 'beginner',
+          explain: { en: 'La Moneda is the seat of the executive branch and the President.', es: 'La Moneda es la sede del poder ejecutivo y del Presidente.' } },
         { q: { en: 'In which city is La Moneda located?', es: '¿En qué ciudad está La Moneda?' },
-          options: { en: ['Valparaíso','Santiago','Concepción','La Serena'], es: ['Valparaíso','Santiago','Concepción','La Serena'] }, answer: 1 },
+          options: { en: ['Valparaíso','Santiago','Concepción','La Serena'], es: ['Valparaíso','Santiago','Concepción','La Serena'] }, answer: 1, tier: 'beginner' },
         { q: { en: 'The name "La Moneda" refers to its original use as a place that…', es: 'El nombre "La Moneda" viene de su uso original como un lugar donde se…' },
-          options: { en: ['Stored grain','Made coins','Printed newspapers','Trained soldiers'], es: ['Guardaba grano','Acuñaban monedas','Imprimían periódicos','Entrenaban soldados'] }, answer: 1 }
+          options: { en: ['Stored grain','Made coins','Printed newspapers','Trained soldiers'], es: ['Guardaba grano','Acuñaban monedas','Imprimían periódicos','Entrenaban soldados'] }, answer: 1, tier: 'intermediate',
+          explain: { en: 'The building minted (made) coins before becoming the presidential palace.', es: 'El edificio acuñaba monedas antes de convertirse en el palacio presidencial.' } }
       ]
     },
     {
@@ -130,13 +151,17 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'How often is the entire Chamber of Deputies elected?', es: '¿Cada cuántos años se elige toda la Cámara de Diputados?' },
-          options: { en: ['Every 2 years','Every 4 years','Every 6 years','Every 8 years'], es: ['Cada 2 años','Cada 4 años','Cada 6 años','Cada 8 años'] }, answer: 1 },
+          options: { en: ['Every 2 years','Every 4 years','Every 6 years','Every 8 years'], es: ['Cada 2 años','Cada 4 años','Cada 6 años','Cada 8 años'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'All 155 deputies are elected at once every 4 years.', es: 'Los 155 diputados se eligen en su totalidad cada 4 años.' } },
         { q: { en: 'In what year did Congress move to Valparaíso?', es: '¿En qué año se mudó el Congreso a Valparaíso?' },
-          options: { en: ['1973','1980','1990','2005'], es: ['1973','1980','1990','2005'] }, answer: 2 },
+          options: { en: ['1973','1980','1990','2005'], es: ['1973','1980','1990','2005'] }, answer: 2, tier: 'intermediate',
+          explain: { en: 'The current Congress building opened in Valparaíso in 1990.', es: 'El actual edificio del Congreso se inauguró en Valparaíso en 1990.' } },
         { q: { en: 'Why are senators elected for 8 years but deputies for 4?', es: '¿Por qué los senadores se eligen por 8 años y los diputados por 4?' },
-          options: { en: ['Senators are older','To give the Senate longer, staggered terms','To save money','It is random'], es: ['Los senadores son mayores','Para dar al Senado mandatos más largos y escalonados','Para ahorrar dinero','Es al azar'] }, answer: 1 },
+          options: { en: ['Senators are older','To give the Senate longer, staggered terms','To save money','It is random'], es: ['Los senadores son mayores','Para dar al Senado mandatos más largos y escalonados','Para ahorrar dinero','Es al azar'] }, answer: 1, tier: 'advanced',
+          explain: { en: 'Longer, staggered Senate terms give the upper chamber more continuity.', es: 'Los mandatos más largos y escalonados dan al Senado mayor continuidad.' } },
         { q: { en: 'A legislature with two chambers is described as…', es: 'Una legislatura con dos cámaras se describe como…' },
-          options: { en: ['Unicameral','Bicameral','Tricameral','Multicameral'], es: ['Unicameral','Bicameral','Tricameral','Multicameral'] }, answer: 1 }
+          options: { en: ['Unicameral','Bicameral','Tricameral','Multicameral'], es: ['Unicameral','Bicameral','Tricameral','Multicameral'] }, answer: 1, tier: 'intermediate',
+          explain: { en: '"Bicameral" means two chambers; Chile has the Chamber of Deputies and the Senate.', es: '"Bicameral" significa dos cámaras; Chile tiene la Cámara de Diputados y el Senado.' } }
       ]
     },
     {
@@ -149,13 +174,17 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'How many ministers serve on the Constitutional Tribunal?', es: '¿Cuántos ministros tiene el Tribunal Constitucional?' },
-          options: { en: ['5','7','10','15'], es: ['5','7','10','15'] }, answer: 2 },
+          options: { en: ['5','7','10','15'], es: ['5','7','10','15'] }, answer: 2, tier: 'intermediate',
+          explain: { en: 'The Constitutional Tribunal has 10 ministers chosen across the three branches.', es: 'El Tribunal Constitucional tiene 10 ministros elegidos por los tres poderes.' } },
         { q: { en: 'What does the Constitutional Tribunal review?', es: '¿Qué revisa el Tribunal Constitucional?' },
-          options: { en: ['Sports rules','Tax returns','Whether laws agree with the Constitution','School curricula'], es: ['Reglas deportivas','Declaraciones de impuestos','Si las leyes concuerdan con la Constitución','Planes escolares'] }, answer: 2 },
+          options: { en: ['Sports rules','Tax returns','Whether laws agree with the Constitution','School curricula'], es: ['Reglas deportivas','Declaraciones de impuestos','Si las leyes concuerdan con la Constitución','Planes escolares'] }, answer: 2, tier: 'beginner',
+          explain: { en: 'It checks whether laws and decrees agree with the Constitution.', es: 'Revisa si las leyes y decretos concuerdan con la Constitución.' } },
         { q: { en: 'How long is a Constitutional Tribunal minister\'s term?', es: '¿Cuánto dura el cargo de un ministro del Tribunal Constitucional?' },
-          options: { en: ['4 years','6 years','9 years','For life'], es: ['4 años','6 años','9 años','De por vida'] }, answer: 2 },
+          options: { en: ['4 years','6 years','9 years','For life'], es: ['4 años','6 años','9 años','De por vida'] }, answer: 2, tier: 'advanced',
+          explain: { en: 'Ministers serve a single 9-year term.', es: 'Los ministros duran un único período de 9 años.' } },
         { q: { en: 'Can a Constitutional Tribunal ruling on a law\'s constitutionality be appealed?', es: '¿Se puede apelar un fallo del Tribunal Constitucional sobre la constitucionalidad de una ley?' },
-          options: { en: ['Yes, to the Supreme Court','Yes, to the Senate','No, it is final','Yes, to the President'], es: ['Sí, a la Corte Suprema','Sí, al Senado','No, es definitivo','Sí, al Presidente'] }, answer: 2 }
+          options: { en: ['Yes, to the Supreme Court','Yes, to the Senate','No, it is final','Yes, to the President'], es: ['Sí, a la Corte Suprema','Sí, al Senado','No, es definitivo','Sí, al Presidente'] }, answer: 2, tier: 'expert',
+          explain: { en: 'Its rulings on the constitutionality of a law are final and cannot be appealed.', es: 'Sus fallos sobre la constitucionalidad de una ley son definitivos y no se pueden apelar.' } }
       ]
     },
     {
@@ -168,13 +197,17 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'What does the Contraloría mainly do?', es: '¿Qué hace principalmente la Contraloría?' },
-          options: { en: ['Audit public spending and legality','Print money','Build roads','Set tax rates'], es: ['Auditar el gasto público y la legalidad','Imprimir dinero','Construir carreteras','Fijar impuestos'] }, answer: 0 },
+          options: { en: ['Audit public spending and legality','Print money','Build roads','Set tax rates'], es: ['Auditar el gasto público y la legalidad','Imprimir dinero','Construir carreteras','Fijar impuestos'] }, answer: 0, tier: 'beginner',
+          explain: { en: 'The Contraloría audits public spending and reviews the legality of government acts.', es: 'La Contraloría audita el gasto público y revisa la legalidad de los actos del gobierno.' } },
         { q: { en: 'How long does the Contralor serve?', es: '¿Cuánto dura el Contralor en el cargo?' },
-          options: { en: ['4 years','6 years','8 years','10 years'], es: ['4 años','6 años','8 años','10 años'] }, answer: 2 },
+          options: { en: ['4 years','6 years','8 years','10 years'], es: ['4 años','6 años','8 años','10 años'] }, answer: 2, tier: 'intermediate',
+          explain: { en: 'The Contralor serves a single 8-year, non-renewable term.', es: 'El Contralor dura un único período de 8 años, no renovable.' } },
         { q: { en: 'What is the process called when the Contraloría checks a decree\'s legality before it takes effect?', es: '¿Cómo se llama el control de legalidad que hace la Contraloría a un decreto antes de que rija?' },
-          options: { en: ['Promulgación','Toma de razón','Sufragio','Moción'], es: ['Promulgación','Toma de razón','Sufragio','Moción'] }, answer: 1 },
+          options: { en: ['Promulgación','Toma de razón','Sufragio','Moción'], es: ['Promulgación','Toma de razón','Sufragio','Moción'] }, answer: 1, tier: 'expert',
+          explain: { en: 'The "toma de razón" is the prior legality check the Contraloría applies to decrees.', es: 'La "toma de razón" es el control previo de legalidad que la Contraloría aplica a los decretos.' } },
         { q: { en: 'Can the Contralor be re-appointed for a second term?', es: '¿Puede el Contralor ser reelegido para un segundo período?' },
-          options: { en: ['Yes, once','Yes, twice','No, the term is non-renewable','Only with Senate approval'], es: ['Sí, una vez','Sí, dos veces','No, el cargo no es renovable','Sólo con aprobación del Senado'] }, answer: 2 }
+          options: { en: ['Yes, once','Yes, twice','No, the term is non-renewable','Only with Senate approval'], es: ['Sí, una vez','Sí, dos veces','No, el cargo no es renovable','Sólo con aprobación del Senado'] }, answer: 2, tier: 'advanced',
+          explain: { en: 'The 8-year term is non-renewable to protect the office\'s independence.', es: 'El período de 8 años no es renovable para proteger la independencia del cargo.' } }
       ]
     },
     {
@@ -187,13 +220,17 @@ const CivicsLab = (() => {
       },
       quiz: [
         { q: { en: 'What is the main job of the Central Bank?', es: '¿Cuál es la principal tarea del Banco Central?' },
-          options: { en: ['Run hospitals','Manage monetary policy and inflation','Set the speed limit','Pick the president'], es: ['Administrar hospitales','Gestionar la política monetaria y la inflación','Fijar el límite de velocidad','Elegir al presidente'] }, answer: 1 },
+          options: { en: ['Run hospitals','Manage monetary policy and inflation','Set the speed limit','Pick the president'], es: ['Administrar hospitales','Gestionar la política monetaria y la inflación','Fijar el límite de velocidad','Elegir al presidente'] }, answer: 1, tier: 'beginner',
+          explain: { en: 'The Central Bank manages monetary policy, the peso and inflation.', es: 'El Banco Central gestiona la política monetaria, el peso y la inflación.' } },
         { q: { en: 'Why are Central Bank terms 10 years long?', es: '¿Por qué los cargos del Banco Central duran 10 años?' },
-          options: { en: ['To match the president','For tradition','So they outlast any single government','To save money'], es: ['Para coincidir con el presidente','Por tradición','Para que duren más que cualquier gobierno','Para ahorrar dinero'] }, answer: 2 },
+          options: { en: ['To match the president','For tradition','So they outlast any single government','To save money'], es: ['Para coincidir con el presidente','Por tradición','Para que duren más que cualquier gobierno','Para ahorrar dinero'] }, answer: 2, tier: 'advanced',
+          explain: { en: 'Ten-year terms are designed to outlast any single government, protecting the bank\'s independence.', es: 'Los períodos de 10 años buscan durar más que cualquier gobierno, protegiendo la independencia del banco.' } },
         { q: { en: 'How many members sit on the Central Bank council?', es: '¿Cuántos miembros tiene el consejo del Banco Central?' },
-          options: { en: ['3','5','7','10'], es: ['3','5','7','10'] }, answer: 1 },
+          options: { en: ['3','5','7','10'], es: ['3','5','7','10'] }, answer: 1, tier: 'intermediate',
+          explain: { en: 'The council has 5 members, appointed by the President and ratified by the Senate.', es: 'El consejo tiene 5 miembros, nombrados por el Presidente y ratificados por el Senado.' } },
         { q: { en: 'What word describes the Central Bank\'s status within the State?', es: '¿Qué palabra describe la condición del Banco Central dentro del Estado?' },
-          options: { en: ['A ministry','Autonomous','A court','A committee'], es: ['Un ministerio','Autónomo','Un tribunal','Una comisión'] }, answer: 1 }
+          options: { en: ['A ministry','Autonomous','A court','A committee'], es: ['Un ministerio','Autónomo','Un tribunal','Una comisión'] }, answer: 1, tier: 'advanced',
+          explain: { en: 'The Central Bank is an autonomous body, independent of the government of the day.', es: 'El Banco Central es un organismo autónomo, independiente del gobierno de turno.' } }
       ]
     }
   ];
@@ -267,71 +304,121 @@ const CivicsLab = (() => {
 
   const LAW_QUIZ = [
     { q: { en: 'What is the official name for a bill in Chile?', es: '¿Cómo se llama oficialmente un proyecto en Chile?' },
-      options: { en: ['Idea de ley','Proyecto de ley','Carta de ley','Sugerencia'], es: ['Idea de ley','Proyecto de ley','Carta de ley','Sugerencia'] }, answer: 1 },
+      options: { en: ['Idea de ley','Proyecto de ley','Carta de ley','Sugerencia'], es: ['Idea de ley','Proyecto de ley','Carta de ley','Sugerencia'] }, answer: 1, tier: 'beginner',
+      explain: { en: 'A bill is officially called a "proyecto de ley".', es: 'Un proyecto se llama oficialmente "proyecto de ley".' } },
     { q: { en: 'What is the document called when a member of Congress starts a bill?', es: '¿Cómo se llama el documento cuando un congresista inicia un proyecto?' },
-      options: { en: ['Mensaje','Moción','Decreto','Memorando'], es: ['Mensaje','Moción','Decreto','Memorando'] }, answer: 1 },
+      options: { en: ['Mensaje','Moción','Decreto','Memorando'], es: ['Mensaje','Moción','Decreto','Memorando'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'A "moción" is started by members of Congress; a "mensaje" is sent by the President.', es: 'Una "moción" la inician congresistas; un "mensaje" lo envía el Presidente.' } },
     { q: { en: 'Who can start a bill about taxes in Chile?', es: '¿Quién puede iniciar un proyecto sobre impuestos en Chile?' },
-      options: { en: ['Any deputy','Any senator','Only the President','Any citizen'], es: ['Cualquier diputado','Cualquier senador','Sólo el Presidente','Cualquier ciudadano'] }, answer: 2 },
+      options: { en: ['Any deputy','Any senator','Only the President','Any citizen'], es: ['Cualquier diputado','Cualquier senador','Sólo el Presidente','Cualquier ciudadano'] }, answer: 2, tier: 'advanced',
+      explain: { en: 'Tax bills are an exclusive initiative of the President.', es: 'Los proyectos sobre impuestos son de iniciativa exclusiva del Presidente.' } },
     { q: { en: 'How is a presidential veto overridden in Chile?', es: '¿Cómo se supera un veto presidencial en Chile?' },
-      options: { en: ['Simple majority','Two-thirds in both chambers','Half plus one','Supreme Court order'], es: ['Mayoría simple','Dos tercios en ambas cámaras','La mitad más uno','Orden de la Corte Suprema'] }, answer: 1 },
+      options: { en: ['Simple majority','Two-thirds in both chambers','Half plus one','Supreme Court order'], es: ['Mayoría simple','Dos tercios en ambas cámaras','La mitad más uno','Orden de la Corte Suprema'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'Both chambers must re-approve the original text by two-thirds to override the veto.', es: 'Ambas cámaras deben reaprobar el texto original por dos tercios para superar el veto.' } },
     { q: { en: 'In which publication is a new law published?', es: '¿En qué publicación se publica una ley nueva?' },
-      options: { en: ['El Mercurio','Diario Oficial','La Tercera','Boletín Constitucional'], es: ['El Mercurio','Diario Oficial','La Tercera','Boletín Constitucional'] }, answer: 1 },
+      options: { en: ['El Mercurio','Diario Oficial','La Tercera','Boletín Constitucional'], es: ['El Mercurio','Diario Oficial','La Tercera','Boletín Constitucional'] }, answer: 1, tier: 'beginner',
+      explain: { en: 'Laws take effect after being published in the Diario Oficial.', es: 'Las leyes rigen tras publicarse en el Diario Oficial.' } },
     { q: { en: 'What does the President use to set how urgent a bill is?', es: '¿Qué usa el Presidente para fijar qué tan urgente es un proyecto?' },
-      options: { en: ['Una "urgencia"','Una multa','Un veto','Una toma de razón'], es: ['Una "urgencia"','Una multa','Un veto','Una toma de razón'] }, answer: 0 },
+      options: { en: ['Una "urgencia"','Una multa','Un veto','Una toma de razón'], es: ['Una "urgencia"','Una multa','Un veto','Una toma de razón'] }, answer: 0, tier: 'advanced',
+      explain: { en: 'An "urgencia" lets the President set deadlines for Congress to vote a bill.', es: 'Una "urgencia" permite al Presidente fijar plazos para que el Congreso vote un proyecto.' } },
     { q: { en: 'Which of these matters can ONLY begin as a presidential "mensaje"?', es: '¿Cuál de estas materias SÓLO puede iniciarse por "mensaje" presidencial?' },
-      options: { en: ['Renaming a street','The national budget','A holiday tradition','A school motto'], es: ['Renombrar una calle','El presupuesto nacional','Una tradición festiva','Un lema escolar'] }, answer: 1 },
+      options: { en: ['Renaming a street','The national budget','A holiday tradition','A school motto'], es: ['Renombrar una calle','El presupuesto nacional','Una tradición festiva','Un lema escolar'] }, answer: 1, tier: 'expert',
+      explain: { en: 'The national budget is an exclusive presidential initiative each year.', es: 'El presupuesto nacional es de iniciativa exclusiva del Presidente cada año.' } },
     { q: { en: 'When the two chambers disagree on a bill\'s wording, what group is formed?', es: 'Cuando las dos cámaras no concuerdan en el texto, ¿qué grupo se forma?' },
-      options: { en: ['Comisión Mixta','Corte Suprema','Banco Central','Contraloría'], es: ['Comisión Mixta','Corte Suprema','Banco Central','Contraloría'] }, answer: 0 },
+      options: { en: ['Comisión Mixta','Corte Suprema','Banco Central','Contraloría'], es: ['Comisión Mixta','Corte Suprema','Banco Central','Contraloría'] }, answer: 0, tier: 'intermediate',
+      explain: { en: 'A "Comisión Mixta" of deputies and senators drafts a compromise text.', es: 'Una "Comisión Mixta" de diputados y senadores redacta un texto de consenso.' } },
     { q: { en: 'How many members make up a Comisión Mixta?', es: '¿Por cuántos miembros se forma una Comisión Mixta?' },
-      options: { en: ['5 deputies + 5 senators','3 deputies + 3 senators','10 senators only','21 justices'], es: ['5 diputados + 5 senadores','3 diputados + 3 senadores','Sólo 10 senadores','21 ministros'] }, answer: 0 },
+      options: { en: ['5 deputies + 5 senators','3 deputies + 3 senators','10 senators only','21 justices'], es: ['5 diputados + 5 senadores','3 diputados + 3 senadores','Sólo 10 senadores','21 ministros'] }, answer: 0, tier: 'expert',
+      explain: { en: 'A Comisión Mixta is made of 5 deputies and 5 senators.', es: 'Una Comisión Mixta se forma con 5 diputados y 5 senadores.' } },
     { q: { en: 'What is the difference between promulgación and publicación?', es: '¿Cuál es la diferencia entre promulgación y publicación?' },
-      options: { en: ['They are the same','Promulgación is the President\'s formal sign-off; publicación makes it public in the Diario Oficial','Publicación happens first','Promulgación is done by Congress'], es: ['Son lo mismo','La promulgación es la firma formal del Presidente; la publicación la hace pública en el Diario Oficial','La publicación ocurre primero','La promulgación la hace el Congreso'] }, answer: 1 },
+      options: { en: ['They are the same','Promulgación is the President\'s formal sign-off; publicación makes it public in the Diario Oficial','Publicación happens first','Promulgación is done by Congress'], es: ['Son lo mismo','La promulgación es la firma formal del Presidente; la publicación la hace pública en el Diario Oficial','La publicación ocurre primero','La promulgación la hace el Congreso'] }, answer: 1, tier: 'expert',
+      explain: { en: 'Promulgación is the President\'s formal sign-off; publicación then prints it in the Diario Oficial.', es: 'La promulgación es la firma formal del Presidente; la publicación luego la imprime en el Diario Oficial.' } },
     { q: { en: 'What vote do "leyes orgánicas constitucionales" generally require?', es: '¿Qué votación requieren en general las "leyes orgánicas constitucionales"?' },
-      options: { en: ['Simple majority','Four-sevenths of sitting members','One third','Just the President'], es: ['Mayoría simple','Cuatro séptimos de los miembros en ejercicio','Un tercio','Sólo el Presidente'] }, answer: 1 }
+      options: { en: ['Simple majority','Four-sevenths of sitting members','One third','Just the President'], es: ['Mayoría simple','Cuatro séptimos de los miembros en ejercicio','Un tercio','Sólo el Presidente'] }, answer: 1, tier: 'expert',
+      explain: { en: 'These laws need a four-sevenths majority of the members in office.', es: 'Estas leyes requieren una mayoría de cuatro séptimos de los miembros en ejercicio.' } }
   ];
 
   // ── Comparative civics — quiz pool ───────────────────────────────
   const COMPARATIVE_QUIZ = [
     { q: { en: 'What kind of government system does Chile have?', es: '¿Qué tipo de sistema de gobierno tiene Chile?' },
-      options: { en: ['Parliamentary','Presidential','Absolute monarchy','Direct democracy'], es: ['Parlamentario','Presidencial','Monarquía absoluta','Democracia directa'] }, answer: 1 },
+      options: { en: ['Parliamentary','Presidential','Absolute monarchy','Direct democracy'], es: ['Parlamentario','Presidencial','Monarquía absoluta','Democracia directa'] }, answer: 1, tier: 'beginner',
+      explain: { en: 'Chile is a presidential republic: voters elect the President directly.', es: 'Chile es una república presidencial: los votantes eligen al Presidente directamente.' } },
     { q: { en: 'A presidential system means the head of state and head of government are…', es: 'En un sistema presidencial, el jefe de Estado y de gobierno son…' },
-      options: { en: ['Different people','The same person','Chosen by Congress','Hereditary'], es: ['Personas distintas','La misma persona','Elegidos por el Congreso','Hereditarios'] }, answer: 1 },
+      options: { en: ['Different people','The same person','Chosen by Congress','Hereditary'], es: ['Personas distintas','La misma persona','Elegidos por el Congreso','Hereditarios'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'In a presidential system one elected person is both head of state and head of government.', es: 'En un sistema presidencial una misma persona elegida es jefe de Estado y de gobierno.' } },
     { q: { en: 'A parliamentary system means the head of government is…', es: 'En un sistema parlamentario, el jefe de gobierno es…' },
-      options: { en: ['Directly elected by voters','Chosen by parliament','Appointed by judges','The richest citizen'], es: ['Elegido directamente por los votantes','Elegido por el parlamento','Designado por jueces','El ciudadano más rico'] }, answer: 1 },
+      options: { en: ['Directly elected by voters','Chosen by parliament','Appointed by judges','The richest citizen'], es: ['Elegido directamente por los votantes','Elegido por el parlamento','Designado por jueces','El ciudadano más rico'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'In a parliamentary system the legislature chooses the head of government.', es: 'En un sistema parlamentario el parlamento elige al jefe de gobierno.' } },
     { q: { en: 'In a federal system, power is divided between…', es: 'En un sistema federal, el poder se divide entre…' },
-      options: { en: ['Capital and provinces','Central government and states','Two parliaments','Two presidents'], es: ['Capital y provincias','Gobierno central y estados','Dos parlamentos','Dos presidentes'] }, answer: 1 },
+      options: { en: ['Capital and provinces','Central government and states','Two parliaments','Two presidents'], es: ['Capital y provincias','Gobierno central y estados','Dos parlamentos','Dos presidentes'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'Federalism splits power between a central government and member states.', es: 'El federalismo divide el poder entre un gobierno central y los estados miembros.' } },
     { q: { en: 'Is Chile a federal or unitary state?', es: '¿Chile es un Estado federal o unitario?' },
-      options: { en: ['Federal','Unitary','Confederation','Empire'], es: ['Federal','Unitario','Confederación','Imperio'] }, answer: 1 },
+      options: { en: ['Federal','Unitary','Confederation','Empire'], es: ['Federal','Unitario','Confederación','Imperio'] }, answer: 1, tier: 'beginner',
+      explain: { en: 'Chile is a unitary state; its regions get authority from the central government.', es: 'Chile es un Estado unitario; sus regiones reciben autoridad del gobierno central.' } },
     { q: { en: 'At what age can citizens vote in Chile?', es: '¿A qué edad pueden votar los ciudadanos en Chile?' },
-      options: { en: ['16','18','21','25'], es: ['16','18','21','25'] }, answer: 1 },
+      options: { en: ['16','18','21','25'], es: ['16','18','21','25'] }, answer: 1, tier: 'beginner',
+      explain: { en: 'Chileans may vote from age 18.', es: 'Los chilenos pueden votar desde los 18 años.' } },
     { q: { en: 'Which country is a parliamentary monarchy?', es: '¿Cuál de estos países es una monarquía parlamentaria?' },
-      options: { en: ['Chile','United States','Spain','France'], es: ['Chile','Estados Unidos','España','Francia'] }, answer: 2 },
+      options: { en: ['Chile','United States','Spain','France'], es: ['Chile','Estados Unidos','España','Francia'] }, answer: 2, tier: 'intermediate',
+      explain: { en: 'Spain is a parliamentary monarchy, with a king as ceremonial head of state.', es: 'España es una monarquía parlamentaria, con un rey como jefe de Estado ceremonial.' } },
     { q: { en: 'Which country has a federal system?', es: '¿Cuál de estos países tiene un sistema federal?' },
-      options: { en: ['Chile','United States','France','Japan'], es: ['Chile','Estados Unidos','Francia','Japón'] }, answer: 1 },
+      options: { en: ['Chile','United States','France','Japan'], es: ['Chile','Estados Unidos','Francia','Japón'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'The United States is federal, dividing power between the nation and the states.', es: 'Estados Unidos es federal, dividiendo el poder entre la nación y los estados.' } },
     { q: { en: 'How long is the US President\'s term?', es: '¿Cuánto dura el mandato del Presidente de Estados Unidos?' },
-      options: { en: ['2 years','4 years','5 years','6 years'], es: ['2 años','4 años','5 años','6 años'] }, answer: 1 },
+      options: { en: ['2 years','4 years','5 years','6 years'], es: ['2 años','4 años','5 años','6 años'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'The US President serves a 4-year term, like Chile\'s.', es: 'El Presidente de EE.UU. cumple un mandato de 4 años, igual que en Chile.' } },
     { q: { en: 'In Chile, what document is the highest law of the country?', es: 'En Chile, ¿qué documento es la ley más alta del país?' },
-      options: { en: ['Civil Code','Constitution','Bible','Penal Code'], es: ['Código Civil','Constitución','Biblia','Código Penal'] }, answer: 1 },
+      options: { en: ['Civil Code','Constitution','Bible','Penal Code'], es: ['Código Civil','Constitución','Biblia','Código Penal'] }, answer: 1, tier: 'beginner',
+      explain: { en: 'The Constitution is the supreme law; all other laws must respect it.', es: 'La Constitución es la ley suprema; todas las demás leyes deben respetarla.' } },
     { q: { en: 'Suffrage means…', es: 'Sufragio significa…' },
-      options: { en: ['Right to vote','Right to drive','Right to own land','Right to travel'], es: ['Derecho a votar','Derecho a conducir','Derecho a tener tierra','Derecho a viajar'] }, answer: 0 },
+      options: { en: ['Right to vote','Right to drive','Right to own land','Right to travel'], es: ['Derecho a votar','Derecho a conducir','Derecho a tener tierra','Derecho a viajar'] }, answer: 0, tier: 'beginner',
+      explain: { en: 'Suffrage is the right to vote in elections.', es: 'El sufragio es el derecho a votar en las elecciones.' } },
     { q: { en: 'A bicameral legislature has…', es: 'Una legislatura bicameral tiene…' },
-      options: { en: ['One chamber','Two chambers','Three chambers','No chambers'], es: ['Una cámara','Dos cámaras','Tres cámaras','Ninguna cámara'] }, answer: 1 },
+      options: { en: ['One chamber','Two chambers','Three chambers','No chambers'], es: ['Una cámara','Dos cámaras','Tres cámaras','Ninguna cámara'] }, answer: 1, tier: 'beginner',
+      explain: { en: '"Bicameral" means two chambers.', es: '"Bicameral" significa dos cámaras.' } },
     { q: { en: 'In a parliamentary system, the government can be removed by…', es: 'En un sistema parlamentario, el gobierno puede ser removido por…' },
-      options: { en: ['A vote of no confidence in parliament','A court ruling','The voters at any time','The army'], es: ['Un voto de censura en el parlamento','Un fallo judicial','Los votantes en cualquier momento','El ejército'] }, answer: 0 },
+      options: { en: ['A vote of no confidence in parliament','A court ruling','The voters at any time','The army'], es: ['Un voto de censura en el parlamento','Un fallo judicial','Los votantes en cualquier momento','El ejército'] }, answer: 0, tier: 'advanced',
+      explain: { en: 'A no-confidence vote in parliament can bring down the government.', es: 'Un voto de censura en el parlamento puede hacer caer al gobierno.' } },
     { q: { en: 'In a constitutional monarchy, the monarch is mainly…', es: 'En una monarquía constitucional, el monarca es principalmente…' },
-      options: { en: ['An absolute ruler','A ceremonial head of state under the constitution','The head of the courts','Elected each year'], es: ['Un gobernante absoluto','Un jefe de Estado ceremonial bajo la constitución','El jefe de los tribunales','Elegido cada año'] }, answer: 1 },
+      options: { en: ['An absolute ruler','A ceremonial head of state under the constitution','The head of the courts','Elected each year'], es: ['Un gobernante absoluto','Un jefe de Estado ceremonial bajo la constitución','El jefe de los tribunales','Elegido cada año'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'A constitutional monarch is a ceremonial head of state bound by the constitution.', es: 'Un monarca constitucional es un jefe de Estado ceremonial sujeto a la constitución.' } },
     { q: { en: 'Which pair are both constitutional monarchies?', es: '¿Cuál par está formado por dos monarquías constitucionales?' },
-      options: { en: ['United States and France','Spain and the United Kingdom','Chile and Brazil','Germany and Italy'], es: ['Estados Unidos y Francia','España y el Reino Unido','Chile y Brasil','Alemania e Italia'] }, answer: 1 },
+      options: { en: ['United States and France','Spain and the United Kingdom','Chile and Brazil','Germany and Italy'], es: ['Estados Unidos y Francia','España y el Reino Unido','Chile y Brasil','Alemania e Italia'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'Spain and the United Kingdom are both constitutional monarchies.', es: 'España y el Reino Unido son ambas monarquías constitucionales.' } },
     { q: { en: 'What is "judicial review"?', es: '¿Qué es el "control de constitucionalidad" (judicial review)?' },
-      options: { en: ['Courts checking whether laws agree with the constitution','Judges writing new laws','Voters reviewing judges','Parliament reviewing the budget'], es: ['Los tribunales revisan si las leyes concuerdan con la constitución','Los jueces escriben nuevas leyes','Los votantes evalúan a los jueces','El parlamento revisa el presupuesto'] }, answer: 0 },
+      options: { en: ['Courts checking whether laws agree with the constitution','Judges writing new laws','Voters reviewing judges','Parliament reviewing the budget'], es: ['Los tribunales revisan si las leyes concuerdan con la constitución','Los jueces escriben nuevas leyes','Los votantes evalúan a los jueces','El parlamento revisa el presupuesto'] }, answer: 0, tier: 'advanced',
+      explain: { en: 'Judicial review lets courts check whether laws comply with the constitution.', es: 'El control de constitucionalidad permite a los tribunales verificar que las leyes cumplan la constitución.' } },
     { q: { en: 'In the United States, who has the power to ratify treaties?', es: 'En Estados Unidos, ¿quién tiene la facultad de ratificar tratados?' },
-      options: { en: ['The President alone','The Senate','The Supreme Court','State governors'], es: ['Sólo el Presidente','El Senado','La Corte Suprema','Los gobernadores estatales'] }, answer: 1 },
+      options: { en: ['The President alone','The Senate','The Supreme Court','State governors'], es: ['Sólo el Presidente','El Senado','La Corte Suprema','Los gobernadores estatales'] }, answer: 1, tier: 'expert',
+      explain: { en: 'In the US the Senate ratifies treaties, by a two-thirds vote.', es: 'En EE.UU. el Senado ratifica los tratados, por dos tercios.' } },
     { q: { en: 'A unicameral legislature is found in which kind of arrangement?', es: 'Una legislatura unicameral se encuentra en qué tipo de arreglo?' },
-      options: { en: ['One single chamber makes the laws','Two chambers share power','Three chambers vote','No chamber exists'], es: ['Una sola cámara hace las leyes','Dos cámaras comparten el poder','Tres cámaras votan','No existe cámara'] }, answer: 0 },
+      options: { en: ['One single chamber makes the laws','Two chambers share power','Three chambers vote','No chamber exists'], es: ['Una sola cámara hace las leyes','Dos cámaras comparten el poder','Tres cámaras votan','No existe cámara'] }, answer: 0, tier: 'intermediate',
+      explain: { en: 'A unicameral legislature has a single law-making chamber.', es: 'Una legislatura unicameral tiene una sola cámara que hace las leyes.' } },
     { q: { en: 'In a federal state, sub-national units (states or provinces) usually have…', es: 'En un Estado federal, las unidades (estados o provincias) suelen tener…' },
-      options: { en: ['No powers of their own','Their own constitutions and laws','Only one shared parliament','A single national mayor'], es: ['Ningún poder propio','Sus propias constituciones y leyes','Sólo un parlamento compartido','Un único alcalde nacional'] }, answer: 1 },
+      options: { en: ['No powers of their own','Their own constitutions and laws','Only one shared parliament','A single national mayor'], es: ['Ningún poder propio','Sus propias constituciones y leyes','Sólo un parlamento compartido','Un único alcalde nacional'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'In federal states, member units often have their own constitutions and laws.', es: 'En los Estados federales, las unidades suelen tener sus propias constituciones y leyes.' } },
     { q: { en: 'In a unitary state like Chile, regions get their authority from…', es: 'En un Estado unitario como Chile, las regiones obtienen su autoridad de…' },
-      options: { en: ['Their own constitutions','The central government','Foreign treaties','The Central Bank'], es: ['Sus propias constituciones','El gobierno central','Tratados extranjeros','El Banco Central'] }, answer: 1 }
+      options: { en: ['Their own constitutions','The central government','Foreign treaties','The Central Bank'], es: ['Sus propias constituciones','El gobierno central','Tratados extranjeros','El Banco Central'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'In a unitary state, regional powers are granted by the central government.', es: 'En un Estado unitario, los poderes regionales los otorga el gobierno central.' } },
+    // ── Elections & local government in Chile (advanced/expert) ──
+    { q: { en: 'Which body organises and administers elections in Chile?', es: '¿Qué organismo organiza y administra las elecciones en Chile?' },
+      options: { en: ['SERVEL (Servicio Electoral)','The Central Bank','The Supreme Court','The Contraloría'], es: ['SERVEL (Servicio Electoral)','El Banco Central','La Corte Suprema','La Contraloría'] }, answer: 0, tier: 'advanced',
+      explain: { en: 'SERVEL, the Servicio Electoral, runs the electoral roll and administers elections.', es: 'El SERVEL, Servicio Electoral, lleva el padrón y administra las elecciones.' } },
+    { q: { en: 'Into how many regiones is Chile divided?', es: '¿En cuántas regiones se divide Chile?' },
+      options: { en: ['12','14','16','21'], es: ['12','14','16','21'] }, answer: 2, tier: 'advanced',
+      explain: { en: 'Chile is divided into 16 regiones for administration.', es: 'Chile se divide en 16 regiones para su administración.' } },
+    { q: { en: 'Who leads the government of a Chilean comuna (municipality)?', es: '¿Quién dirige el gobierno de una comuna en Chile?' },
+      options: { en: ['A senator','An alcalde (mayor)','A regional judge','The President'], es: ['Un senador','Un alcalde','Un juez regional','El Presidente'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'Each comuna is led by an alcalde (mayor), supported by an elected concejo.', es: 'Cada comuna la dirige un alcalde, apoyado por un concejo elegido.' } },
+    { q: { en: 'How are alcaldes and concejales chosen in Chile?', es: '¿Cómo se eligen los alcaldes y concejales en Chile?' },
+      options: { en: ['Appointed by the President','Elected by local voters','Chosen by Congress','Named by the courts'], es: ['Designados por el Presidente','Elegidos por los votantes locales','Elegidos por el Congreso','Nombrados por los tribunales'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'Alcaldes and concejales are elected directly by the voters of each comuna.', es: 'Los alcaldes y concejales son elegidos directamente por los votantes de cada comuna.' } },
+    { q: { en: 'How does a voter join Chile\'s electoral roll today?', es: '¿Cómo se inscribe hoy un votante en el padrón electoral de Chile?' },
+      options: { en: ['By paying a fee','Automatically at age 18','By asking a deputy','Only by mail'], es: ['Pagando una cuota','Automáticamente a los 18 años','Pidiéndolo a un diputado','Sólo por correo'] }, answer: 1, tier: 'expert',
+      explain: { en: 'Enrolment is automatic: citizens are added to the roll when they turn 18.', es: 'La inscripción es automática: los ciudadanos entran al padrón al cumplir 18 años.' } },
+    { q: { en: 'How is the President of Chile elected if no candidate wins a majority?', es: '¿Cómo se elige al Presidente de Chile si ningún candidato logra mayoría?' },
+      options: { en: ['Congress decides','A runoff between the top two candidates','The oldest candidate wins','By lottery'], es: ['Decide el Congreso','Una segunda vuelta entre los dos más votados','Gana el candidato de más edad','Por sorteo'] }, answer: 1, tier: 'expert',
+      explain: { en: 'If no one wins more than half the vote, a runoff is held between the top two candidates.', es: 'Si nadie supera la mitad de los votos, hay una segunda vuelta entre los dos más votados.' } }
   ];
 
   // ── State ──
@@ -367,6 +454,21 @@ const CivicsLab = (() => {
     if (!obj) return fallback || '';
     if (typeof obj === 'string') return obj;
     return obj[state.lang] || obj.en || fallback || '';
+  }
+
+  // Filter a quiz pool to questions at or below the active child's age tier.
+  // Defensive: if filtering empties the pool, return the original pool so a
+  // quiz is never empty.
+  function _filterByTier(pool) {
+    if (!Array.isArray(pool) || !pool.length) return pool;
+    var tier = (typeof getAgeTier === 'function') ? getAgeTier() : 'expert';
+    var order = ['beginner', 'intermediate', 'advanced', 'expert'];
+    var maxIdx = order.indexOf(tier);
+    if (maxIdx === -1) maxIdx = order.length - 1;
+    var filtered = pool.filter(function (q) {
+      return order.indexOf(q.tier || 'intermediate') <= maxIdx;
+    });
+    return filtered.length ? filtered : pool;
   }
 
   function _shuffle(arr) {
@@ -455,7 +557,7 @@ const CivicsLab = (() => {
   function startBranchQuiz() {
     const b = BRANCHES[state.activeBranchIdx];
     if (!b) return;
-    state.quizPool = b.quiz;
+    state.quizPool = _filterByTier(b.quiz);
     state.quizIdx = 0;
     state.quizCorrect = 0;
     _renderQuiz('branches', b.id, () => {
@@ -517,7 +619,7 @@ const CivicsLab = (() => {
   function startInstitutionQuiz() {
     const inst = INSTITUTIONS[state.activeInstIdx];
     if (!inst) return;
-    state.quizPool = inst.quiz;
+    state.quizPool = _filterByTier(inst.quiz);
     state.quizIdx = 0;
     state.quizCorrect = 0;
     _renderQuiz('institutions', inst.id, () => {
@@ -576,7 +678,7 @@ const CivicsLab = (() => {
   }
 
   function startLawQuiz() {
-    state.quizPool = LAW_QUIZ;
+    state.quizPool = _filterByTier(LAW_QUIZ);
     state.quizIdx = 0;
     state.quizCorrect = 0;
     _renderQuiz('law', null, () => {
@@ -593,7 +695,7 @@ const CivicsLab = (() => {
   // ── Comparative civics mode ──
   function openComparative() {
     state.mode = 'comparative';
-    state.quizPool = _shuffle(COMPARATIVE_QUIZ).slice(0, 10);
+    state.quizPool = _shuffle(_filterByTier(COMPARATIVE_QUIZ)).slice(0, 10);
     state.quizIdx = 0;
     state.quizCorrect = 0;
     _renderQuiz('comparative', null, () => {
@@ -634,6 +736,15 @@ const CivicsLab = (() => {
         const correct = btn.dataset.correct === '1';
         btn.classList.add(correct ? 'cv-correct' : 'cv-wrong');
         if (correct) state.quizCorrect++;
+        // Optional factual explanation, shown after the answer is chosen.
+        if (q.explain && !wrap.querySelector('.cv-quiz-explain')) {
+          const exp = document.createElement('p');
+          exp.className = 'cv-quiz-explain';
+          exp.textContent = _l(q.explain);
+          const optsBox = wrap.querySelector('.cv-quiz-options');
+          if (optsBox) optsBox.insertAdjacentElement('afterend', exp);
+          else wrap.appendChild(exp);
+        }
         if (typeof SFX !== 'undefined') {
           (correct && SFX.correct) ? SFX.correct() : (SFX.wrong && SFX.wrong());
         }

@@ -154,7 +154,7 @@ const FeManager = (() => {
       country: 'Italia 🇮🇹',
       bio: 'Es el patrón de Europa y fundador del monacato occidental. Su famosa regla se resume en "Ora et labora" (Reza y trabaja).',
       questions: [
-        { q: '¿Cuál es el lema de San Benito?', a: ['Reza y trabaja', 'Solo trabaja', 'Estudia y duerme'], correct: 0 },
+        { q: '¿Cuál es el lema de San Benito?', a: ['Reza y trabaja', 'Solo trabaja', 'Estudia y duerme'], correct: 0, explain: 'San Benito de Nursia (480–547) vivió en Italia y resumió su regla monástica en el lema "Ora et labora" (Reza y trabaja).' },
         { q: '¿De qué continente es patrón?', a: ['América', 'Europa', 'Asia'], correct: 1 },
         { q: '¿Dónde nació?', a: ['España', 'Italia', 'Francia'], correct: 1 }
       ]
@@ -166,7 +166,7 @@ const FeManager = (() => {
       country: 'Italia 🇮🇹',
       bio: 'Nació en Italia. Es conocido por su amor a la naturaleza y a los animales. Fundó la orden de los franciscanos y escribió el Cántico de las Criaturas.',
       questions: [
-        { q: '¿Por qué es más conocido San Francisco?', a: ['Amor a la naturaleza', 'Ser un gran rey', 'Inventar el piano'], correct: 0 },
+        { q: '¿Por qué es más conocido San Francisco?', a: ['Amor a la naturaleza', 'Ser un gran rey', 'Inventar el piano'], correct: 0, explain: 'San Francisco de Asís (1181–1226) nació en Italia, fundó la orden franciscana y es conocido por su amor a la naturaleza.' },
         { q: '¿En qué país nació?', a: ['Chile', 'Italia', 'España'], correct: 1 },
         { q: '¿Qué orden religiosa fundó?', a: ['Los Jesuitas', 'Los Dominicos', 'Los Franciscanos'], correct: 2 }
       ]
@@ -178,7 +178,7 @@ const FeManager = (() => {
       country: 'Chile 🇨🇱',
       bio: 'Es la primera santa de Chile. Nació en Santiago y vivió en el monasterio de Los Andes. Es conocida por su alegría y su entrega a Dios desde joven.',
       questions: [
-        { q: '¿Dónde nació Santa Teresa de los Andes?', a: ['Roma', 'Santiago', 'Concepción'], correct: 1 },
+        { q: '¿Dónde nació Santa Teresa de los Andes?', a: ['Roma', 'Santiago', 'Concepción'], correct: 1, explain: 'Santa Teresa de los Andes (1900–1920) nació en Santiago y fue la primera santa de Chile.' },
         { q: 'Fue la primera santa de...', a: ['Argentina', 'España', 'Chile'], correct: 2 },
         { q: '¿En qué ciudad vivió en un monasterio?', a: ['Roma', 'Los Andes', 'Valparaíso'], correct: 1 }
       ]
@@ -191,7 +191,7 @@ const FeManager = (() => {
       country: 'Chile 🇨🇱',
       bio: 'Sacerdote jesuita chileno que fundó el Hogar de Cristo para ayudar a las personas más pobres. Siempre decía: "Contento, Señor, contento".',
       questions: [
-        { q: '¿Qué institución fundó el Padre Hurtado?', a: ['Un banco', 'El Hogar de Cristo', 'Una universidad'], correct: 1 },
+        { q: '¿Qué institución fundó el Padre Hurtado?', a: ['Un banco', 'El Hogar de Cristo', 'Una universidad'], correct: 1, explain: 'San Alberto Hurtado (1901–1952) fue un sacerdote jesuita chileno que fundó el Hogar de Cristo para ayudar a los más pobres.' },
         { q: '¿Cuál era su frase más famosa?', a: ['"Hola amigos"', '"Contento, Señor, contento"', '"A estudiar mucho"'], correct: 1 },
         { q: '¿A qué orden pertenecía el Padre Hurtado?', a: ['Franciscanos', 'Jesuitas', 'Dominicos'], correct: 1 }
       ]
@@ -204,7 +204,7 @@ const FeManager = (() => {
       country: 'Perú 🇵🇪',
       bio: 'Es la primera santa de América. Vivió en Lima y dedicó su vida a ayudar a los enfermos y a los necesitados en su propia casa.',
       questions: [
-        { q: 'Fue la primera santa de...', a: ['Europa', 'América', 'Asia'], correct: 1 },
+        { q: 'Fue la primera santa de...', a: ['Europa', 'América', 'Asia'], correct: 1, explain: 'Santa Rosa de Lima (1586–1617) vivió en Lima, Perú, y fue la primera santa de América.' },
         { q: '¿En qué ciudad vivió?', a: ['Santiago', 'Lima', 'Bogotá'], correct: 1 },
         { q: '¿A quiénes dedicó su vida a ayudar?', a: ['A los enfermos y necesitados', 'A los reyes', 'A los comerciantes'], correct: 0 }
       ]
@@ -216,7 +216,7 @@ const FeManager = (() => {
       country: 'Perú 🇵🇪',
       bio: 'Conocido como el "Santo de la Escoba" por su humildad. Era un gran enfermero y se dice que podía hacer que perros, gatos y ratones comieran del mismo plato.',
       questions: [
-        { q: '¿Cómo es conocido San Martín?', a: ['El Santo de la Escoba', 'El Gran Guerrero', 'El Rey de los Mares'], correct: 0 },
+        { q: '¿Cómo es conocido San Martín?', a: ['El Santo de la Escoba', 'El Gran Guerrero', 'El Rey de los Mares'], correct: 0, explain: 'San Martín de Porres (1579–1639) vivió en Lima, Perú, y es conocido como el "Santo de la Escoba" por su humildad.' },
         { q: '¿Qué animales se dice que alimentó juntos?', a: ['Leones y tigres', 'Perros, gatos y ratones', 'Elefantes y jirafas'], correct: 1 },
         { q: '¿Por qué virtud es muy conocido?', a: ['Su gran riqueza', 'Su humildad', 'Sus viajes'], correct: 1 }
       ]
@@ -228,7 +228,7 @@ const FeManager = (() => {
       country: 'España 🇪🇸',
       bio: 'Fue un soldado que, tras ser herido, decidió dedicar su vida a Dios. Fundó la Compañía de Jesús (los Jesuitas) para enseñar y ayudar en todo el mundo.',
       questions: [
-        { q: '¿Qué orden religiosa fundó?', a: ['Los Franciscanos', 'Los Jesuitas', 'Los Dominicos'], correct: 1 },
+        { q: '¿Qué orden religiosa fundó?', a: ['Los Franciscanos', 'Los Jesuitas', 'Los Dominicos'], correct: 1, explain: 'San Ignacio de Loyola (1491–1556) era español y fundó la Compañía de Jesús (los Jesuitas).' },
         { q: '¿Qué era antes de dedicar su vida a Dios?', a: ['Marinero', 'Soldado', 'Panadero'], correct: 1 },
         { q: '¿De qué país era San Ignacio?', a: ['España', 'Francia', 'Italia'], correct: 0 }
       ]
@@ -240,7 +240,7 @@ const FeManager = (() => {
       country: 'España 🇪🇸',
       bio: 'Una gran escritora y maestra que fundó muchos conventos. Es famosa por sus libros y por su valentía para reformar su orden religiosa.',
       questions: [
-        { q: '¿Por qué es famosa Santa Teresa de Ávila?', a: ['Por ser una gran escritora', 'Por descubrir un país', 'Por inventar la imprenta'], correct: 0 },
+        { q: '¿Por qué es famosa Santa Teresa de Ávila?', a: ['Por ser una gran escritora', 'Por descubrir un país', 'Por inventar la imprenta'], correct: 0, explain: 'Santa Teresa de Ávila (1515–1582) fue una escritora española que fundó muchos conventos y reformó su orden religiosa.' },
         { q: '¿Qué fundó en España?', a: ['Muchos hospitales', 'Muchos conventos', 'Muchas escuelas'], correct: 1 },
         { q: '¿Además de fundar conventos, por qué es famosa?', a: ['Por sus viajes en barco', 'Por ser una gran escritora', 'Por inventar la imprenta'], correct: 1 }
       ]
@@ -252,7 +252,7 @@ const FeManager = (() => {
       country: 'Italia 🇮🇹',
       bio: 'Dedicó su vida a ayudar a los niños y jóvenes, enseñándoles oficios y divirtiéndolos con juegos y trucos de magia para hablarles de Dios.',
       questions: [
-        { q: '¿A quiénes dedicó su vida San Juan Bosco?', a: ['A los ancianos', 'A los niños y jóvenes', 'A los soldados'], correct: 1 },
+        { q: '¿A quiénes dedicó su vida San Juan Bosco?', a: ['A los ancianos', 'A los niños y jóvenes', 'A los soldados'], correct: 1, explain: 'San Juan Bosco (1815–1888) fue un sacerdote italiano que dedicó su vida a educar a niños y jóvenes.' },
         { q: '¿Qué usaba para divertir a los niños?', a: ['Magia y juegos', 'Barcos de vela', 'Espadas de madera'], correct: 0 },
         { q: '¿A quiénes ayudó principalmente?', a: ['A los soldados', 'A los niños y jóvenes', 'A los ancianos'], correct: 1 }
       ]
@@ -264,7 +264,7 @@ const FeManager = (() => {
       country: 'Nazaret 🪚',
       bio: 'Fue el esposo de María y padre adoptivo de Jesús. Era carpintero y es conocido por su paciencia, silencio y trabajo duro.',
       questions: [
-        { q: '¿Cuál era el oficio de San José?', a: ['Herrero', 'Carpintero', 'Pastor'], correct: 1 },
+        { q: '¿Cuál era el oficio de San José?', a: ['Herrero', 'Carpintero', 'Pastor'], correct: 1, explain: 'San José, que vivió en Nazaret en el siglo I, era carpintero y fue el esposo de María y padre adoptivo de Jesús.' },
         { q: 'San José es el padre adoptivo de...', a: ['Juan', 'Pedro', 'Jesús'], correct: 2 },
         { q: '¿Por qué virtud es conocido San José?', a: ['Ser guerrero', 'Su paciencia y silencio', 'Sus viajes'], correct: 1 }
       ]
@@ -276,7 +276,7 @@ const FeManager = (() => {
       country: 'España 🇪🇸',
       bio: 'Dedicó su vida a cuidar enfermos fundando hospitales. Es un ejemplo de caridad y entrega.',
       questions: [
-        { q: '¿A qué se dedicó principalmente?', a: ['A cuidar enfermos', 'A la guerra', 'Al comercio'], correct: 0 },
+        { q: '¿A qué se dedicó principalmente?', a: ['A cuidar enfermos', 'A la guerra', 'Al comercio'], correct: 0, explain: 'San Juan de Dios (1495–1550) fue un español que dedicó su vida a cuidar enfermos y fundó hospitales.' },
         { q: '¿Qué tipo de institución fundó?', a: ['Escuelas', 'Hospitales', 'Bancos'], correct: 1 },
         { q: '¿De qué país era San Juan de Dios?', a: ['Francia', 'España', 'Italia'], correct: 1 }
       ]
@@ -288,7 +288,7 @@ const FeManager = (() => {
       country: 'Tarso 📜',
       bio: 'Escribió muchas cartas que están en la Biblia. Viajó por todo el mundo conocido para enseñar sobre Jesús.',
       questions: [
-        { q: '¿Qué escribió San Pablo en la Biblia?', a: ['Muchas cartas', 'Poemas', 'Canciones'], correct: 0 },
+        { q: '¿Qué escribió San Pablo en la Biblia?', a: ['Muchas cartas', 'Poemas', 'Canciones'], correct: 0, explain: 'San Pablo, natural de Tarso y del siglo I, escribió muchas cartas de la Biblia y viajó para enseñar sobre Jesús.' },
         { q: '¿Qué hizo para enseñar sobre Jesús?', a: ['Viajó por el mundo', 'Construyó barcos', 'Pintó cuadros'], correct: 0 },
         { q: '¿En qué siglo vivió?', a: ['Siglo X', 'Siglo I', 'Siglo V'], correct: 1 }
       ]
@@ -300,7 +300,7 @@ const FeManager = (() => {
       country: 'Judea 🗝️',
       bio: 'Fue un pescador y uno de los apóstoles más cercanos a Jesús. Es considerado el primer Papa de la Iglesia Católica.',
       questions: [
-        { q: '¿Cuál era la profesión original de San Pedro?', a: ['Carpintero', 'Pescador', 'Soldado'], correct: 1 },
+        { q: '¿Cuál era la profesión original de San Pedro?', a: ['Carpintero', 'Pescador', 'Soldado'], correct: 1, explain: 'San Pedro, de Judea y del siglo I, era pescador y es considerado el primer Papa de la Iglesia Católica.' },
         { q: '¿A quién se le considera el primer Papa?', a: ['San Pablo', 'San Pedro', 'San Juan'], correct: 1 },
         { q: '¿En qué siglo vivió?', a: ['Siglo V', 'Siglo III', 'Siglo I'], correct: 2 }
       ]
@@ -312,7 +312,7 @@ const FeManager = (() => {
       country: 'España 🇪🇸',
       bio: 'Famoso místico y poeta que ayudó a Santa Teresa de Ávila a reformar la Orden del Carmelo.',
       questions: [
-        { q: '¿A quién ayudó a reformar su orden?', a: ['Santa Teresa de Ávila', 'Santa Rosa de Lima', 'San Francisco de Asís'], correct: 0 },
+        { q: '¿A quién ayudó a reformar su orden?', a: ['Santa Teresa de Ávila', 'Santa Rosa de Lima', 'San Francisco de Asís'], correct: 0, explain: 'San Juan de la Cruz (1542–1591) fue un místico y poeta español que ayudó a Santa Teresa de Ávila a reformar la Orden del Carmelo.' },
         { q: '¿Por qué es famoso?', a: ['Por ser místico y poeta', 'Por fundar Roma', 'Por inventar la imprenta'], correct: 0 },
         { q: '¿De qué país era?', a: ['España', 'Francia', 'Italia'], correct: 0 }
       ]
@@ -324,7 +324,7 @@ const FeManager = (() => {
       country: 'Italia 🇮🇹',
       bio: 'Fue un fraile dominico, filósofo y teólogo. Es autor de la "Suma Teológica" y uno de los grandes maestros de la Iglesia. Nació en Italia.',
       questions: [
-        { q: '¿Cuál es la obra más famosa de Santo Tomás de Aquino?', a: ['La Divina Comedia', 'La Suma Teológica', 'El Quijote'], correct: 1 },
+        { q: '¿Cuál es la obra más famosa de Santo Tomás de Aquino?', a: ['La Divina Comedia', 'La Suma Teológica', 'El Quijote'], correct: 1, explain: 'Santo Tomás de Aquino (1225–1274) fue un fraile dominico italiano, autor de la "Suma Teológica".' },
         { q: '¿A qué orden religiosa pertenecía?', a: ['Dominicos', 'Franciscanos', 'Jesuitas'], correct: 0 },
         { q: '¿En qué siglo vivió Santo Tomás de Aquino?', a: ['Siglo XIII', 'Siglo XVI', 'Siglo X'], correct: 0 }
       ]
@@ -336,7 +336,7 @@ const FeManager = (() => {
       country: 'Tagaste, Numidia 🌍',
       bio: 'Obispo de Hipona, en el norte de África, y uno de los Padres de la Iglesia. Escribió las "Confesiones" y "La Ciudad de Dios".',
       questions: [
-        { q: '¿De qué ciudad fue obispo San Agustín?', a: ['Roma', 'Hipona', 'Milán'], correct: 1 },
+        { q: '¿De qué ciudad fue obispo San Agustín?', a: ['Roma', 'Hipona', 'Milán'], correct: 1, explain: 'San Agustín de Hipona (354–430) fue obispo de Hipona, en el norte de África, y escribió las "Confesiones".' },
         { q: '¿Cuál de estas obras escribió San Agustín?', a: ['Las Confesiones', 'La Odisea', 'La Eneida'], correct: 0 },
         { q: '¿En qué siglo vivió San Agustín?', a: ['Siglo IV y V', 'Siglo XII', 'Siglo I'], correct: 0 }
       ]
@@ -348,7 +348,7 @@ const FeManager = (() => {
       country: 'Italia 🇮🇹',
       bio: 'Religiosa dominica italiana, Doctora de la Iglesia y copatrona de Europa. Influyó para que el Papa volviera de Aviñón a Roma.',
       questions: [
-        { q: '¿De qué ciudad italiana era Santa Catalina?', a: ['Siena', 'Florencia', 'Venecia'], correct: 0 },
+        { q: '¿De qué ciudad italiana era Santa Catalina?', a: ['Siena', 'Florencia', 'Venecia'], correct: 0, explain: 'Santa Catalina de Siena (1347–1380) fue una religiosa dominica italiana, Doctora de la Iglesia y copatrona de Europa.' },
         { q: '¿A qué ciudad ayudó a que regresara el Papa?', a: ['Roma', 'París', 'Madrid'], correct: 0 },
         { q: '¿En qué siglo vivió Santa Catalina de Siena?', a: ['Siglo XIV', 'Siglo XVIII', 'Siglo IX'], correct: 0 }
       ]
@@ -360,7 +360,7 @@ const FeManager = (() => {
       country: 'Capadocia 🐉',
       bio: 'Soldado romano y mártir cristiano. La tradición lo representa venciendo a un dragón. Es patrono de muchos países y ciudades.',
       questions: [
-        { q: '¿Qué profesión tenía San Jorge?', a: ['Soldado romano', 'Pescador', 'Comerciante'], correct: 0 },
+        { q: '¿Qué profesión tenía San Jorge?', a: ['Soldado romano', 'Pescador', 'Comerciante'], correct: 0, explain: 'San Jorge, de Capadocia y del siglo IV, fue un soldado romano y mártir cristiano.' },
         { q: '¿Con qué animal se le representa en la tradición?', a: ['Un dragón', 'Un león', 'Un caballo de mar'], correct: 0 },
         { q: '¿En qué siglo vivió San Jorge?', a: ['Siglo IV', 'Siglo XII', 'Siglo XVII'], correct: 0 }
       ]
@@ -372,7 +372,7 @@ const FeManager = (() => {
       country: 'Tréveris 🇮🇹',
       bio: 'Obispo de Milán y uno de los Padres de la Iglesia. Fue un gran predicador e himnógrafo, y bautizó a San Agustín.',
       questions: [
-        { q: '¿De qué ciudad fue obispo San Ambrosio?', a: ['Milán', 'Roma', 'Nápoles'], correct: 0 },
+        { q: '¿De qué ciudad fue obispo San Ambrosio?', a: ['Milán', 'Roma', 'Nápoles'], correct: 0, explain: 'San Ambrosio (340–397) fue obispo de Milán, Padre de la Iglesia, y bautizó a San Agustín.' },
         { q: '¿A qué famoso santo bautizó San Ambrosio?', a: ['San Agustín', 'San Benito', 'San Francisco'], correct: 0 },
         { q: '¿En qué siglo vivió San Ambrosio?', a: ['Siglo IV', 'Siglo X', 'Siglo XV'], correct: 0 }
       ]
@@ -384,7 +384,7 @@ const FeManager = (() => {
       country: 'Tagaste, Numidia 🌍',
       bio: 'Madre de San Agustín. Es recordada por su constancia y sus oraciones durante muchos años por la conversión de su hijo.',
       questions: [
-        { q: '¿De quién fue madre Santa Mónica?', a: ['De San Agustín', 'De San Benito', 'De San Jorge'], correct: 0 },
+        { q: '¿De quién fue madre Santa Mónica?', a: ['De San Agustín', 'De San Benito', 'De San Jorge'], correct: 0, explain: 'Santa Mónica (331–387) fue la madre de San Agustín y es recordada por sus oraciones por la conversión de su hijo.' },
         { q: '¿Por qué es especialmente recordada Santa Mónica?', a: ['Por sus oraciones por su hijo', 'Por fundar conventos', 'Por sus viajes'], correct: 0 },
         { q: '¿En qué siglo vivió Santa Mónica?', a: ['Siglo IV', 'Siglo XI', 'Siglo XVI'], correct: 0 }
       ]
@@ -483,67 +483,78 @@ const FeManager = (() => {
       id: 'fiesta_san_pedro',
       title: 'Fiesta de San Pedro',
       info: 'Se celebra el 29 de junio. Los pescadores de la costa chilena adornan sus botes para pedir buena pesca y protección a su patrono.',
-      q: '¿Qué grupo de trabajadores celebra a San Pedro?', a: ['Los pescadores', 'Los mineros', 'Los agricultores'], correct: 0
+      q: '¿Qué grupo de trabajadores celebra a San Pedro?', a: ['Los pescadores', 'Los mineros', 'Los agricultores'], correct: 0,
+      explain: 'La Fiesta de San Pedro se celebra el 29 de junio; los pescadores de la costa chilena adornan sus botes en honor a su patrono.'
     },
     {
       id: 'carmen',
       title: 'Virgen del Carmen',
       info: 'Es la Patrona de Chile. Fue declarada así en 1923. Cada 16 de julio se celebra su fiesta con procesiones y bailes religiosos.',
-      q: '¿Qué día es la fiesta de la Virgen del Carmen?', a: ['18 de septiembre', '16 de julio', '25 de diciembre'], correct: 1
+      q: '¿Qué día es la fiesta de la Virgen del Carmen?', a: ['18 de septiembre', '16 de julio', '25 de diciembre'], correct: 1,
+      explain: 'La Virgen del Carmen, Patrona de Chile desde 1923, se celebra cada 16 de julio con procesiones y bailes religiosos.'
     },
     {
       id: 'sanfrancisco_stgo',
       title: 'Iglesia de San Francisco',
       info: 'Es la iglesia más antigua de Santiago. Su construcción comenzó en 1586 y ha sobrevivido a muchos terremotos.',
-      q: '¿Qué tiene de especial esta iglesia?', a: ['Es la más alta', 'Es la más antigua de Santiago', 'Es de cristal'], correct: 1
+      q: '¿Qué tiene de especial esta iglesia?', a: ['Es la más alta', 'Es la más antigua de Santiago', 'Es de cristal'], correct: 1,
+      explain: 'La Iglesia de San Francisco es la más antigua de Santiago; su construcción comenzó en 1586.'
     },
     {
       id: 'tirana',
       title: 'Fiesta de La Tirana',
       info: 'Se celebra en el norte de Chile cada 16 de julio. Es famosa por sus coloridas "Diabladas" y bailes en honor a la Virgen del Carmen.',
-      q: '¿En qué zona de Chile se celebra La Tirana?', a: ['En el sur', 'En el centro', 'En el norte'], correct: 2
+      q: '¿En qué zona de Chile se celebra La Tirana?', a: ['En el sur', 'En el centro', 'En el norte'], correct: 2,
+      explain: 'La Fiesta de La Tirana se celebra en el norte de Chile cada 16 de julio, con coloridas "Diabladas" en honor a la Virgen del Carmen.'
     },
     {
       id: 'cuasimodo',
       title: 'Fiesta de Cuasimodo',
       info: 'Se celebra en la zona central el domingo siguiente a Pascua. Los huasos acompañan al sacerdote a caballo para llevar la comunión a los enfermos.',
-      q: '¿Cómo acompañan los huasos al sacerdote en Cuasimodo?', a: ['A pie', 'En auto', 'A caballo'], correct: 2
+      q: '¿Cómo acompañan los huasos al sacerdote en Cuasimodo?', a: ['A pie', 'En auto', 'A caballo'], correct: 2,
+      explain: 'La Fiesta de Cuasimodo se celebra en la zona central el domingo después de Pascua; los huasos acompañan a caballo al sacerdote que lleva la comunión a los enfermos.'
     },
     {
       id: 'andacollo',
       title: 'Fiesta de Andacollo',
       info: 'Gran festividad mariana en el norte chico de Chile. Miles de peregrinos y bailes rinden homenaje a la Virgen.',
-      q: '¿Dónde se celebra la Fiesta de Andacollo?', a: ['En el norte chico', 'En Punta Arenas', 'En Santiago'], correct: 0
+      q: '¿Dónde se celebra la Fiesta de Andacollo?', a: ['En el norte chico', 'En Punta Arenas', 'En Santiago'], correct: 0,
+      explain: 'La Fiesta de Andacollo es una gran festividad mariana del norte chico de Chile, con miles de peregrinos y bailes.'
     },
     {
       id: 'maipu',
       title: 'Templo Votivo de Maipú',
       info: 'Construido en Santiago para cumplir la promesa hecha a la Virgen del Carmen tras ganar la independencia de Chile.',
-      q: '¿A quién se le hizo la promesa de construir este templo?', a: ['A San José', 'A la Virgen del Carmen', 'A San Miguel'], correct: 1
+      q: '¿A quién se le hizo la promesa de construir este templo?', a: ['A San José', 'A la Virgen del Carmen', 'A San Miguel'], correct: 1,
+      explain: 'El Templo Votivo de Maipú se construyó en Santiago para cumplir la promesa hecha a la Virgen del Carmen tras la independencia de Chile.'
     },
     {
       id: 'teresa',
       title: 'Santuario de Santa Teresa de Los Andes',
       info: 'Ubicado en Auco, es un importante lugar de peregrinación donde descansan los restos de la primera santa chilena.',
-      q: '¿Qué santa chilena descansa en este santuario?', a: ['Santa Rosa', 'Santa Teresa de Los Andes', 'Santa Cecilia'], correct: 1
+      q: '¿Qué santa chilena descansa en este santuario?', a: ['Santa Rosa', 'Santa Teresa de Los Andes', 'Santa Cecilia'], correct: 1,
+      explain: 'El Santuario de Santa Teresa de Los Andes está ubicado en Auco y guarda los restos de la primera santa chilena.'
     },
     {
       id: 'catedral_stgo',
       title: 'Catedral Metropolitana de Santiago',
       info: 'Ubicada en la Plaza de Armas de Santiago, es la iglesia principal de la Arquidiócesis. La construcción del edificio actual comenzó en 1748.',
-      q: '¿En qué plaza se encuentra la Catedral Metropolitana?', a: ['Plaza de Armas', 'Plaza Italia', 'Plaza Brasil'], correct: 0
+      q: '¿En qué plaza se encuentra la Catedral Metropolitana?', a: ['Plaza de Armas', 'Plaza Italia', 'Plaza Brasil'], correct: 0,
+      explain: 'La Catedral Metropolitana de Santiago está en la Plaza de Armas; la construcción del edificio actual comenzó en 1748.'
     },
     {
       id: 'lourdes_punta_arenas',
       title: 'Santuario de Lourdes en Punta Arenas',
       info: 'Es una gruta y santuario dedicado a la Virgen de Lourdes en la ciudad de Punta Arenas, en el extremo sur de Chile. Es un destacado lugar de peregrinación en la Patagonia.',
-      q: '¿En qué ciudad del sur de Chile está este santuario?', a: ['Punta Arenas', 'La Serena', 'Arica'], correct: 0
+      q: '¿En qué ciudad del sur de Chile está este santuario?', a: ['Punta Arenas', 'La Serena', 'Arica'], correct: 0,
+      explain: 'El Santuario de Lourdes está en Punta Arenas, en el extremo sur de Chile, y es un lugar de peregrinación de la Patagonia.'
     },
     {
       id: 'candelaria',
       title: 'Fiesta de la Virgen de la Candelaria',
       info: 'Se celebra el 2 de febrero, fiesta de la Presentación del Señor. En Copiapó, en el norte de Chile, se honra a la Virgen de la Candelaria con bailes religiosos.',
-      q: '¿Qué día se celebra la Virgen de la Candelaria?', a: ['2 de febrero', '16 de julio', '8 de diciembre'], correct: 0
+      q: '¿Qué día se celebra la Virgen de la Candelaria?', a: ['2 de febrero', '16 de julio', '8 de diciembre'], correct: 0,
+      explain: 'La Virgen de la Candelaria se celebra el 2 de febrero, fiesta de la Presentación del Señor; en Copiapó se honra con bailes religiosos.'
     }
   ];
 

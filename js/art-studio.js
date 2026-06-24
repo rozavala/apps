@@ -77,6 +77,44 @@ const ArtStudio = (() => {
         { text: 'Mondrian: Use straight lines and primary colors.', type: 'grid' },
         { text: 'Pixel Art: Color squares on the grid!', type: 'pixelgrid' }
       ]
+    },
+    {
+      id: 'warm_cool',
+      title: 'Warm & Cool Colors',
+      description: 'Reds, oranges and yellows feel warm; blues, greens and purples feel cool.',
+      icon: '🔥',
+      tier: 'beginner',
+      steps: [
+        { text: 'Pick a warm color (red, orange or yellow) and draw a big sun circle.', type: 'circle', x: 100, y: 80, r: 45 },
+        { text: 'Now pick a cool color (blue, green or purple) for a pond circle.', type: 'circle', x: 100, y: 150, r: 40 },
+        { text: 'Free draw: warm colors on top, cool colors on the bottom.', type: 'pencil' }
+      ]
+    },
+    {
+      id: 'pattern_pointillism',
+      title: 'Pattern Pointillism',
+      description: 'Seurat made whole pictures from tiny dots. Tap dots to build a shape!',
+      icon: '🟣',
+      tier: 'intermediate',
+      steps: [
+        { text: 'Tap lots of dots to fill in a flower shape.', type: 'dots' },
+        { text: 'Switch colors and tap dots for the leaves.', type: 'dots' },
+        { text: 'Step back — your eye blends the dots into one picture!', type: 'dots' }
+      ]
+    },
+    {
+      id: 'robot_shapes',
+      title: 'Build a Robot from Shapes',
+      description: 'Engineers and artists both build big things from simple shapes.',
+      icon: '🤖',
+      tier: 'advanced',
+      steps: [
+        { text: 'Draw a square head.', type: 'rect', x: 80, y: 40, w: 40, h: 40 },
+        { text: 'Draw a tall rectangle body under the head.', type: 'rect', x: 70, y: 80, w: 60, h: 80 },
+        { text: 'Add two round eyes.', type: 'circle', x: 92, y: 58, r: 6 },
+        { text: 'Add an antenna line on top of the head.', type: 'line', points: [[100,40], [100,20]] },
+        { text: 'Draw two leg lines under the body.', type: 'line', points: [[85,160], [85,200]] }
+      ]
     }
   ];
 

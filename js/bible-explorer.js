@@ -408,6 +408,94 @@ const BibleExplorer = (() => {
         { q: { en: 'For how long was he blind?', es: '¿Cuánto tiempo quedó ciego?' },
           options: { en: ['1 day','3 days','7 days','40 days'], es: ['1 día','3 días','7 días','40 días'] }, answer: 1 }
       ]
+    },
+    { id: 'commandments', testament: 'OT', icon: '📜', ageMin: 8,
+      title: { en: 'The Ten Commandments', es: 'Los Diez Mandamientos' },
+      summary: {
+        en: 'After Israel left Egypt, they camped at Mount Sinai. Moses went up the mountain, which was covered in smoke and fire. God gave him the Ten Commandments written on two tablets of stone, the law for His people to follow.',
+        es: 'Después de que Israel salió de Egipto, acamparon en el monte Sinaí. Moisés subió al monte, que estaba cubierto de humo y fuego. Dios le entregó los Diez Mandamientos escritos en dos tablas de piedra, la ley para que Su pueblo la siguiera.'
+      },
+      quiz: [
+        { q: { en: 'On what mountain were the commandments given?', es: '¿En qué monte se dieron los mandamientos?' },
+          options: { en: ['Mount Sinai','Mount Carmel','Mount Tabor','Mount Olives'], es: ['Monte Sinaí','Monte Carmelo','Monte Tabor','Monte de los Olivos'] }, answer: 0 },
+        { q: { en: 'On what were the commandments written?', es: '¿En qué se escribieron los mandamientos?' },
+          options: { en: ['Paper scrolls','Two tablets of stone','Clay pots','A wooden door'], es: ['Rollos de papel','Dos tablas de piedra','Vasijas de barro','Una puerta de madera'] }, answer: 1 },
+        { q: { en: 'Who received the commandments?', es: '¿Quién recibió los mandamientos?' },
+          options: { en: ['Aaron','Joshua','Moses','David'], es: ['Aarón','Josué','Moisés','David'] }, answer: 2 }
+      ]
+    },
+    { id: 'sheba', testament: 'OT', icon: '👑', ageMin: 9,
+      title: { en: 'The Queen of Sheba', es: 'La Reina de Sabá' },
+      summary: {
+        en: 'The Queen of Sheba heard of Solomon\'s great wisdom and came to test him with hard questions. Solomon answered them all. She brought gold, spices, and precious stones, and marvelled at his wisdom and the temple he had built.',
+        es: 'La reina de Sabá oyó de la gran sabiduría de Salomón y vino a probarlo con preguntas difíciles. Salomón respondió a todas. Ella trajo oro, especias y piedras preciosas, y se maravilló de su sabiduría y del templo que había edificado.'
+      },
+      quiz: [
+        { q: { en: 'Why did the Queen of Sheba visit Solomon?', es: '¿Por qué visitó la reina de Sabá a Salomón?' },
+          options: { en: ['To test his wisdom','To make war','To collect taxes','To build a road'], es: ['Para probar su sabiduría','Para hacer guerra','Para cobrar impuestos','Para construir un camino'] }, answer: 0 },
+        { q: { en: 'What did the queen bring to Solomon?', es: '¿Qué le trajo la reina a Salomón?' },
+          options: { en: ['Soldiers','Gold and spices','Cattle only','Empty hands'], es: ['Soldados','Oro y especias','Solo ganado','Manos vacías'] }, answer: 1 }
+      ]
+    },
+    { id: 'sower', testament: 'NT', icon: '🌱', ageMin: 8,
+      title: { en: 'The Parable of the Sower', es: 'La Parábola del Sembrador' },
+      summary: {
+        en: 'Jesus told of a sower who scattered seed. Some fell on the path and birds ate it; some on rocky ground and withered; some among thorns and was choked; and some on good soil, where it grew and bore fruit a hundredfold. He said the seed is the word of God.',
+        es: 'Jesús habló de un sembrador que esparció semilla. Una parte cayó junto al camino y las aves la comieron; otra en terreno pedregoso y se secó; otra entre espinos y fue ahogada; y otra en buena tierra, donde creció y dio fruto a ciento por uno. Dijo que la semilla es la palabra de Dios.'
+      },
+      quiz: [
+        { q: { en: 'What did the sower scatter?', es: '¿Qué esparció el sembrador?' },
+          options: { en: ['Stones','Seed','Water','Gold'], es: ['Piedras','Semilla','Agua','Oro'] }, answer: 1 },
+        { q: { en: 'Where did the seed bear much fruit?', es: '¿Dónde dio mucho fruto la semilla?' },
+          options: { en: ['On the path','On rocky ground','Among thorns','On good soil'], es: ['Junto al camino','En terreno pedregoso','Entre espinos','En buena tierra'] }, answer: 3 },
+        { q: { en: 'What does the seed represent?', es: '¿Qué representa la semilla?' },
+          options: { en: ['The word of God','Money','Rain','The sun'], es: ['La palabra de Dios','El dinero','La lluvia','El sol'] }, answer: 0 }
+      ]
+    },
+    { id: 'talents', testament: 'NT', icon: '💰', ageMin: 10,
+      title: { en: 'The Parable of the Talents', es: 'La Parábola de los Talentos' },
+      summary: {
+        en: 'A man going on a journey gave his servants talents of money: five to one, two to another, one to a third. The first two traded and doubled theirs, but the third buried his in the ground. On returning, the master praised the first two and rebuked the one who hid his talent.',
+        es: 'Un hombre que se iba de viaje dio a sus siervos talentos de dinero: cinco a uno, dos a otro, uno a un tercero. Los dos primeros negociaron y los duplicaron, pero el tercero enterró el suyo en la tierra. Al volver, el señor alabó a los dos primeros y reprendió al que escondió su talento.'
+      },
+      quiz: [
+        { q: { en: 'How many talents did the first servant receive?', es: '¿Cuántos talentos recibió el primer siervo?' },
+          options: { en: ['One','Two','Five','Ten'], es: ['Uno','Dos','Cinco','Diez'] }, answer: 2 },
+        { q: { en: 'What did the third servant do with his talent?', es: '¿Qué hizo el tercer siervo con su talento?' },
+          options: { en: ['Doubled it','Gave it away','Buried it in the ground','Lost it gambling'], es: ['Lo duplicó','Lo regaló','Lo enterró en la tierra','Lo perdió jugando'] }, answer: 2 },
+        { q: { en: 'A talent in the parable was a measure of what?', es: '¿Un talento en la parábola era una medida de qué?' },
+          options: { en: ['Money','Grain','Land','Time'], es: ['Dinero','Grano','Tierra','Tiempo'] }, answer: 0 }
+      ]
+    },
+    { id: 'lazarus', testament: 'NT', icon: '🪦', ageMin: 9,
+      title: { en: 'Lazarus Raised from the Dead', es: 'La Resurrección de Lázaro' },
+      summary: {
+        en: 'Lazarus of Bethany, the brother of Martha and Mary, fell sick and died. When Jesus arrived, Lazarus had been four days in the tomb. Jesus wept, then called out, "Lazarus, come forth!" Lazarus came out of the tomb still bound in burial cloths, alive again.',
+        es: 'Lázaro de Betania, hermano de Marta y María, enfermó y murió. Cuando Jesús llegó, Lázaro llevaba cuatro días en el sepulcro. Jesús lloró, y luego clamó: "¡Lázaro, ven fuera!" Lázaro salió del sepulcro envuelto aún en vendas, vivo de nuevo.'
+      },
+      quiz: [
+        { q: { en: 'How many days had Lazarus been in the tomb?', es: '¿Cuántos días llevaba Lázaro en el sepulcro?' },
+          options: { en: ['One','Two','Four','Seven'], es: ['Uno','Dos','Cuatro','Siete'] }, answer: 2 },
+        { q: { en: 'Who were the sisters of Lazarus?', es: '¿Quiénes eran las hermanas de Lázaro?' },
+          options: { en: ['Martha and Mary','Ruth and Naomi','Rachel and Leah','Sarah and Hagar'], es: ['Marta y María','Rut y Noemí','Raquel y Lea','Sara y Agar'] }, answer: 0 },
+        { q: { en: 'What did Jesus say to call Lazarus out?', es: '¿Qué dijo Jesús para llamar a Lázaro?' },
+          options: { en: ['Rise and walk','Lazarus, come forth','Peace be with you','Follow me'], es: ['Levántate y anda','Lázaro, ven fuera','La paz sea contigo','Sígueme'] }, answer: 1 }
+      ]
+    },
+    { id: 'journeys', testament: 'NT', icon: '⛵', ageMin: 10,
+      title: { en: 'Paul\'s Missionary Journeys', es: 'Los Viajes Misioneros de Pablo' },
+      summary: {
+        en: 'After his conversion, the apostle Paul made several journeys across the Roman world, sailing the Mediterranean and travelling by land. He preached in cities such as Antioch, Philippi, Corinth, Ephesus, and Athens, founding churches and writing letters to them that are part of the New Testament.',
+        es: 'Tras su conversión, el apóstol Pablo realizó varios viajes por el mundo romano, navegando el Mediterráneo y viajando por tierra. Predicó en ciudades como Antioquía, Filipos, Corinto, Éfeso y Atenas, fundando iglesias y escribiéndoles cartas que forman parte del Nuevo Testamento.'
+      },
+      quiz: [
+        { q: { en: 'How did Paul travel across the Mediterranean?', es: '¿Cómo viajaba Pablo por el Mediterráneo?' },
+          options: { en: ['By ship','By horse','By chariot','By camel'], es: ['En barco','A caballo','En carro','En camello'] }, answer: 0 },
+        { q: { en: 'In which city did Paul preach at the Areopagus?', es: '¿En qué ciudad predicó Pablo en el Areópago?' },
+          options: { en: ['Rome','Athens','Jerusalem','Damascus'], es: ['Roma','Atenas','Jerusalén','Damasco'] }, answer: 1 },
+        { q: { en: 'What did Paul write to the churches he founded?', es: '¿Qué escribió Pablo a las iglesias que fundó?' },
+          options: { en: ['Maps','Letters','Songs','Laws'], es: ['Mapas','Cartas','Canciones','Leyes'] }, answer: 1 }
+      ]
     }
   ];
 
@@ -601,7 +689,46 @@ const BibleExplorer = (() => {
       es: 'Ahora permanecen la [fe], la [esperanza], y la [caridad].' },
     { ref: 'Gal 5:22', tier: 2,
       en: 'The fruit of the Spirit is [charity], [joy], peace, patience.',
-      es: 'El fruto del Espíritu es [caridad], [gozo], paz, paciencia.' }
+      es: 'El fruto del Espíritu es [caridad], [gozo], paz, paciencia.' },
+
+    // ── v3 expansion: 12 more verses, with harder tier-3/tier-4 ──────
+    // Same public-domain translations (Reina-Valera 1909 / Douay-Rheims).
+    { ref: 'Ex 20:12', tier: 2,
+      en: 'Honour thy [father] and thy [mother], that thou mayest be longlived upon the land.',
+      es: 'Honra a tu [padre] y a tu [madre], para que tus días se alarguen en la tierra.' },
+    { ref: 'Num 6:24', tier: 2,
+      en: 'The Lord [bless] thee, and [keep] thee.',
+      es: 'Jehová te [bendiga], y te [guarde].' },
+    { ref: 'Dt 31:6', tier: 3,
+      en: 'Be of good courage, and be [strong]: fear not, for the [Lord] thy God himself is thy [leader].',
+      es: 'Esforzaos y cobrad [ánimo]; no temáis, porque [Jehová] tu Dios es el que [va] contigo.' },
+    { ref: 'Jos 24:15', tier: 2,
+      en: 'But as for me and my [house], we will serve the [Lord].',
+      es: 'Pero yo y mi [casa] serviremos a [Jehová].' },
+    { ref: 'Ps 1:1', tier: 3,
+      en: 'Blessed is the [man] who hath not walked in the [counsel] of the [ungodly].',
+      es: 'Bienaventurado el [varón] que no anduvo en [consejo] de [malos].' },
+    { ref: 'Ps 27:14', tier: 3,
+      en: '[Expect] the Lord, do [manfully], and let thy [heart] take courage.',
+      es: '[Aguarda] a Jehová; esfuérzate, y aliéntese tu [corazón]; sí, espera a [Jehová].' },
+    { ref: 'Ps 91:1', tier: 3,
+      en: 'He that [dwelleth] in the aid of the [most High], shall abide under the [protection] of the God of heaven.',
+      es: 'El que [habita] al abrigo del [Altísimo] morará bajo la [sombra] del Omnipotente.' },
+    { ref: 'Prov 22:6', tier: 2,
+      en: '[Train] up a child in the way he should go: and when he is old, he will not [depart] from it.',
+      es: '[Instruye] al niño en su camino, y aun cuando fuere viejo no se [apartará] de él.' },
+    { ref: 'Isa 6:3', tier: 3,
+      en: '[Holy], holy, holy, the Lord God of [hosts], all the earth is full of his [glory].',
+      es: '[Santo], santo, santo, Jehová de los [ejércitos]: toda la tierra está llena de su [gloria].' },
+    { ref: 'Mt 5:14', tier: 2,
+      en: 'You are the [light] of the world. A city seated on a [mountain] cannot be hid.',
+      es: 'Vosotros sois la [luz] del mundo; una ciudad asentada sobre un [monte] no se puede esconder.' },
+    { ref: 'Mt 11:28', tier: 3,
+      en: 'Come to me, all you that [labour] and are [burdened], and I will [refresh] you.',
+      es: 'Venid a mí todos los que estáis [trabajados] y [cargados], y yo os haré [descansar].' },
+    { ref: 'Rev 21:4', tier: 4,
+      en: 'God shall wipe away all [tears] from their eyes: and [death] shall be no more, nor [mourning], nor crying, nor [sorrow].',
+      es: 'Dios enjugará toda [lágrima] de los ojos de ellos; y ya no habrá [muerte], ni habrá más [llanto], ni clamor, ni [dolor].' }
   ];
 
   // ── 73 books of the Catholic canon, grouped ─────────────────────

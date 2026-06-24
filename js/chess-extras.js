@@ -344,6 +344,49 @@
           { san: '2... g6', note: 'Plan: fianchetto the bishop on g7.' },
           { san: '3. Nc3', note: 'Typical development; sets up a full centre to challenge later.' }
         ]
+      },
+      {
+        id: 'caro_kann',
+        name: 'Caro-Kann Defence',
+        emoji: '🛡️',
+        era: 'Rock-solid; trusted by world champions like Capablanca and Karpov',
+        idea: 'Black prepares …d5 with the c-pawn instead of blocking the bishop, aiming for a safe, sturdy position.',
+        moves: [
+          { san: '1. e4', note: 'White takes the centre.' },
+          { san: '1... c6', note: 'Quietly preparing …d5 — the Caro-Kann.' },
+          { san: '2. d4', note: 'White builds a big centre.' },
+          { san: '2... d5', note: 'Now Black challenges e4, and the light-squared bishop is still free to develop.' },
+          { san: '3. Nc3', note: 'Defends e4 and adds a second attacker on d5; if Black plays …dxe4, the knight recaptures.' }
+        ]
+      },
+      {
+        id: 'scandinavian',
+        name: 'Scandinavian Defence',
+        emoji: '⚔️',
+        era: 'One of the oldest recorded openings (15th century)',
+        idea: 'Black challenges the centre immediately. The queen comes out early but is steered to a safe square.',
+        moves: [
+          { san: '1. e4', note: 'White takes the centre.' },
+          { san: '1... d5', note: 'An instant challenge to e4 — the Scandinavian!' },
+          { san: '2. exd5', note: 'White captures the pawn.' },
+          { san: '2... Qxd5', note: 'Black recaptures with the queen to keep material equal.' },
+          { san: '3. Nc3', note: 'Develops with tempo by attacking the queen.' },
+          { san: '3... Qa5', note: 'The queen retreats to a safe diagonal, out of the knight\'s reach.' }
+        ]
+      },
+      {
+        id: 'english',
+        name: 'English Opening',
+        emoji: '🏰',
+        era: 'Named after Howard Staunton; a favourite of many world champions',
+        idea: 'White starts on the flank, controlling the d5 square and keeping the game flexible — like a Sicilian with an extra move.',
+        moves: [
+          { san: '1. c4', note: 'A flank opening: White grips the d5 square instead of grabbing the centre right away.' },
+          { san: '1... e5', note: 'Black claims the centre — this is called the Reversed Sicilian.' },
+          { san: '2. Nc3', note: 'Develops and reinforces control of d5.' },
+          { san: '2... Nf6', note: 'Black develops and eyes the e4 square.' },
+          { san: '3. Nf3', note: 'A natural developing move that pressures e5 and prepares to fianchetto or play d4 later.' }
+        ]
       }
     ];
 

@@ -25,8 +25,20 @@ const CHORDS = [
   { name: 'D7', fullName: 'D Dominant 7', tier: 'advanced', frets: [-1, -1, 0, 2, 1, 2], fingers: [0, 0, 0, 2, 1, 3], funFact: 'It looks like a backwards D Major chord.' },
   { name: 'A7', fullName: 'A Dominant 7', tier: 'advanced', frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 0, 2, 0, 3, 0], funFact: 'Like an A Major chord, but with an open G string in the middle.' },
   { name: 'E7', fullName: 'E Dominant 7', tier: 'advanced', frets: [0, 2, 0, 1, 0, 0], fingers: [0, 2, 0, 1, 0, 0], funFact: 'A very bluesy sounding chord.' },
-  // PRUNED [2026-05-18]: Removed 'Am7', 'Fm' to make room for 'A#m' and stay within MAX 18 limit.
-  { name: 'A#m', fullName: 'A# Minor', tier: 'expert', frets: [-1, 1, 3, 3, 2, 1], fingers: [0, 1, 3, 4, 2, 1], funFact: 'A difficult barre chord starting on the first fret.' }
+  // PRUNED [2026-05-18]: Removed 'Am7', 'Fm' to make room for 'A#m' and stay within MAX 26 limit.
+  { name: 'A#m', fullName: 'A# Minor', tier: 'expert', frets: [-1, 1, 3, 3, 2, 1], fingers: [0, 1, 3, 4, 2, 1], funFact: 'A difficult barre chord starting on the first fret.' },
+
+  // Sus & add chords
+  { name: 'Dsus4', fullName: 'D Suspended 4', tier: 'intermediate', frets: [-1, -1, 0, 2, 3, 3], fingers: [0, 0, 0, 1, 2, 3], funFact: 'Add your pinky to a D chord and it sounds like it is waiting to resolve back to D.' },
+  { name: 'Asus2', fullName: 'A Suspended 2', tier: 'intermediate', frets: [-1, 0, 2, 2, 0, 0], fingers: [0, 0, 1, 2, 0, 0], funFact: 'Lift one finger off an A chord and it becomes Asus2 — open and dreamy.' },
+  { name: 'Cadd9', fullName: 'C add 9', tier: 'intermediate', frets: [-1, 3, 2, 0, 3, 3], fingers: [0, 2, 1, 0, 3, 4], funFact: 'A sparkly version of C that rock and folk players love.' },
+  // 7th chords (minor 7ths)
+  { name: 'Am7', fullName: 'A Minor 7', tier: 'intermediate', frets: [-1, 0, 2, 0, 1, 0], fingers: [0, 0, 2, 0, 1, 0], funFact: 'Just lift one finger off an Am chord — easy and smooth sounding.' },
+  { name: 'Dm7', fullName: 'D Minor 7', tier: 'intermediate', frets: [-1, -1, 0, 2, 1, 1], fingers: [0, 0, 0, 2, 1, 1], funFact: 'A soft, mellow chord that sounds great in slow songs.' },
+  { name: 'Em7', fullName: 'E Minor 7', tier: 'beginner', frets: [0, 2, 2, 0, 3, 0], fingers: [0, 1, 2, 0, 3, 0], funFact: 'An easy upgrade from Em — just add one finger on the B string.' },
+  // Barre chords
+  { name: 'Bb', fullName: 'B Flat Major (Barre)', tier: 'advanced', frets: [-1, 1, 3, 3, 3, 1], fingers: [0, 1, 2, 3, 4, 1], funFact: 'A barre chord on the first fret — the same shape as A moved up.' },
+  { name: 'F#m', fullName: 'F# Minor (Barre)', tier: 'expert', frets: [2, 4, 4, 2, 2, 2], fingers: [1, 3, 4, 1, 1, 1], funFact: 'An Em barre shape moved up to the second fret. Strong and moody!' }
 ];
 
 const SONGS = [
@@ -42,9 +54,15 @@ const SONGS = [
   { id: 'house', title: 'House of the Rising Sun', tier: 'advanced', bpm: 80, progression: [['Am', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 4], ['C', 4], ['E', 8]] },
   { id: 'scarborough', title: 'Scarborough Fair', tier: 'advanced', bpm: 90, progression: [['Am', 8], ['Am', 4], ['G', 4], ['Am', 4], ['G', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 8]] },
   { id: 'amazing', title: 'Amazing Grace', tier: 'intermediate', bpm: 100, progression: [['G', 6], ['G', 6], ['C', 6], ['G', 6], ['G', 6], ['G', 6], ['D', 12]] },
-  // PRUNED [2026-05-18]: Removed 'valerie', 'letitbe' to make room for 'twinkle2' and stay within MAX 12 limit.
+  // PRUNED [2026-05-18]: Removed 'valerie', 'letitbe' to make room for 'twinkle2' and stay within MAX 18 limit.
   { id: 'hallelujah', title: 'Hallelujah', tier: 'intermediate', bpm: 60, progression: [['C', 6], ['Am', 6], ['C', 6], ['Am', 6], ['F', 6], ['G', 6], ['C', 6], ['G', 6]] },
-  { id: 'twinkle2', title: 'Twinkle in G', tier: 'beginner', bpm: 90, progression: [['G', 4], ['D', 4], ['Em', 4], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] }
+  { id: 'twinkle2', title: 'Twinkle in G', tier: 'beginner', bpm: 90, progression: [['G', 4], ['D', 4], ['Em', 4], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] },
+  { id: 'downinvalley', title: 'Down in the Valley', tier: 'beginner', bpm: 90, progression: [['G', 12], ['D7', 12], ['D7', 12], ['G', 12]] },
+  { id: 'ohsusanna', title: 'Oh Susanna', tier: 'beginner', bpm: 120, progression: [['G', 4], ['G', 2], ['D7', 2], ['G', 4], ['C', 2], ['G', 2], ['G', 4], ['D7', 4], ['G', 4], ['D7', 4], ['G', 4]] },
+  { id: 'saints', title: 'When the Saints Go Marching In', tier: 'beginner', bpm: 110, progression: [['G', 12], ['G', 4], ['D7', 8], ['D7', 12], ['G', 8], ['G', 4], ['C', 8], ['G', 4], ['D7', 4], ['G', 8]] },
+  { id: 'auldlang', title: 'Auld Lang Syne', tier: 'intermediate', bpm: 90, progression: [['G', 4], ['C', 4], ['G', 4], ['D7', 4], ['G', 4], ['C', 4], ['G', 4], ['D7', 4], ['G', 8]] },
+  { id: 'redriver', title: 'Red River Valley', tier: 'intermediate', bpm: 100, progression: [['G', 8], ['C', 8], ['G', 8], ['D7', 8], ['G', 8], ['C', 4], ['D7', 4], ['G', 8]] },
+  { id: 'greensleeves', title: 'Greensleeves', tier: 'advanced', bpm: 90, progression: [['Am', 4], ['C', 4], ['G', 4], ['Em', 4], ['Am', 4], ['E', 4], ['Am', 4], ['C', 4], ['G', 4], ['Em', 4], ['Am', 2], ['E', 2], ['Am', 4]] }
 ];
 
 const GuitarJam = (() => {

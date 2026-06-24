@@ -85,6 +85,7 @@
     .quiz-card.correct{border-color:var(--green);box-shadow:0 0 24px var(--green-glow)}
     .quiz-card.wrong{border-color:var(--red);box-shadow:0 0 24px var(--red-glow);animation:shake 0.4s ease}
     .quiz-q-text{font-family:var(--font-display);font-size:clamp(1.1rem,3.5vw,1.4rem);font-weight:800;line-height:1.4}
+    .dc-explain{margin-top:10px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--border-subtle);color:var(--text-muted);font-family:var(--font-body);font-size:0.85rem;font-weight:600;line-height:1.4;text-align:center;animation:fadeUp 0.4s ease-out}
     .quiz-opts{width:100%;display:flex;flex-direction:column;gap:8px}
     .quiz-opt-btn{width:100%;padding:14px;border-radius:var(--radius-sm);border:1.5px solid var(--border-subtle);background:var(--bg-card);color:var(--text);font-family:var(--font-body);font-size:0.92rem;font-weight:700;cursor:pointer;text-align:left;transition:all 0.25s}
     .quiz-opt-btn:hover{border-color:var(--chile-red);background:#ece9f5}
