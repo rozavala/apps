@@ -28,11 +28,11 @@ const WorldExplorer = (() => {
           landmark: { name: 'Easter Island', nameEs: 'Isla de Pascua', emoji: '🗿' },
           animal: { name: 'Andean Condor', nameEs: 'Cóndor Andino', emoji: '🦅' },
           quiz: [
-            { q: 'What is the capital of Chile?', qEs: '¿Cuál es la capital de Chile?', options: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], optionsEs: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], answer: 2 },
-            { q: 'What desert is in Chile?', qEs: '¿Qué desierto está en Chile?', options: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], optionsEs: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], answer: 2 },
-            { q: 'What bird is on Chile\'s coat of arms?', qEs: '¿Qué ave está en el escudo de Chile?', options: ['Eagle', 'Condor', 'Hawk', 'Falcon'], optionsEs: ['Águila', 'Cóndor', 'Halcón', 'Falcón'], answer: 1 },
-            { q: 'What is the currency of Chile?', qEs: '¿Cuál es la moneda de Chile?', options: ['Peso', 'Sol', 'Real', 'Boliviano'], optionsEs: ['Peso', 'Sol', 'Real', 'Boliviano'], answer: 0 },
-            { q: 'Which mountain range forms Chile\'s eastern border?', qEs: '¿Qué cordillera forma la frontera oriental de Chile?', options: ['Rocky Mountains', 'Andes', 'Alps', 'Himalayas'], optionsEs: ['Montañas Rocosas', 'Los Andes', 'Alpes', 'Himalaya'], answer: 1 }
+            { q: 'What is the capital of Chile?', qEs: '¿Cuál es la capital de Chile?', options: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], optionsEs: ['Lima', 'Bogotá', 'Santiago', 'Buenos Aires'], answer: 2, tier: 'beginner', explain: { en: 'Santiago is the capital and largest city of Chile.', es: 'Santiago es la capital y la ciudad más grande de Chile.' } },
+            { q: 'What desert is in Chile?', qEs: '¿Qué desierto está en Chile?', options: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], optionsEs: ['Sahara', 'Gobi', 'Atacama', 'Kalahari'], answer: 2, tier: 'intermediate', explain: { en: 'The Atacama Desert in northern Chile is the driest place on Earth.', es: 'El desierto de Atacama, en el norte de Chile, es el lugar más seco de la Tierra.' } },
+            { q: 'What bird is on Chile\'s coat of arms?', qEs: '¿Qué ave está en el escudo de Chile?', options: ['Eagle', 'Condor', 'Hawk', 'Falcon'], optionsEs: ['Águila', 'Cóndor', 'Halcón', 'Falcón'], answer: 1, tier: 'advanced', explain: { en: 'The Andean condor appears on Chile\'s coat of arms.', es: 'El cóndor andino aparece en el escudo de Chile.' } },
+            { q: 'What is the currency of Chile?', qEs: '¿Cuál es la moneda de Chile?', options: ['Peso', 'Sol', 'Real', 'Boliviano'], optionsEs: ['Peso', 'Sol', 'Real', 'Boliviano'], answer: 0, tier: 'advanced', explain: { en: 'Chile uses the Chilean peso.', es: 'Chile usa el peso chileno.' } },
+            { q: 'Which mountain range forms Chile\'s eastern border?', qEs: '¿Qué cordillera forma la frontera oriental de Chile?', options: ['Rocky Mountains', 'Andes', 'Alps', 'Himalayas'], optionsEs: ['Montañas Rocosas', 'Los Andes', 'Alpes', 'Himalaya'], answer: 1, tier: 'expert', explain: { en: 'The Andes run along Chile\'s entire eastern border.', es: 'Los Andes recorren toda la frontera oriental de Chile.' } }
           ]
         },
         {
@@ -64,11 +64,11 @@ const WorldExplorer = (() => {
           landmark: { name: 'Christ the Redeemer', nameEs: 'Cristo Redentor', emoji: '⛪' },
           animal: { name: 'Macaw', nameEs: 'Guacamayo', emoji: '🦜' },
           quiz: [
-            { q: 'What is the largest country in South America?', qEs: '¿Cuál es el país más grande de América del Sur?', options: ['Argentina', 'Peru', 'Brazil', 'Colombia'], optionsEs: ['Argentina', 'Perú', 'Brasil', 'Colombia'], answer: 2 },
-            { q: 'What language is spoken in Brazil?', qEs: '¿Qué idioma se habla en Brasil?', options: ['Spanish', 'Portuguese', 'English', 'French'], optionsEs: ['Español', 'Portugués', 'Inglés', 'Francés'], answer: 1 },
-            { q: 'Which rainforest is mostly in Brazil?', qEs: '¿Qué selva está mayoritariamente en Brasil?', options: ['Congo', 'Amazon', 'Daintree', 'Valdivian'], optionsEs: ['Congo', 'Amazonas', 'Daintree', 'Valdiviana'], answer: 1 },
-            { q: 'What is the currency of Brazil?', qEs: '¿Cuál es la moneda de Brasil?', options: ['Peso', 'Real', 'Dollar', 'Sol'], optionsEs: ['Peso', 'Real', 'Dólar', 'Sol'], answer: 1 },
-            { q: 'Which river in Brazil carries the most water in the world?', qEs: '¿Qué río de Brasil lleva más agua que ningún otro del mundo?', options: ['Nile', 'Amazon', 'Paraná', 'São Francisco'], optionsEs: ['Nilo', 'Amazonas', 'Paraná', 'São Francisco'], answer: 1 }
+            { q: 'What is the largest country in South America?', qEs: '¿Cuál es el país más grande de América del Sur?', options: ['Argentina', 'Peru', 'Brazil', 'Colombia'], optionsEs: ['Argentina', 'Perú', 'Brasil', 'Colombia'], answer: 2, tier: 'beginner', explain: { en: 'Brazil covers about half of South America\'s land area.', es: 'Brasil abarca cerca de la mitad del territorio de América del Sur.' } },
+            { q: 'What language is spoken in Brazil?', qEs: '¿Qué idioma se habla en Brasil?', options: ['Spanish', 'Portuguese', 'English', 'French'], optionsEs: ['Español', 'Portugués', 'Inglés', 'Francés'], answer: 1, tier: 'beginner', explain: { en: 'Brazil is the largest Portuguese-speaking country in the world.', es: 'Brasil es el país de habla portuguesa más grande del mundo.' } },
+            { q: 'Which rainforest is mostly in Brazil?', qEs: '¿Qué selva está mayoritariamente en Brasil?', options: ['Congo', 'Amazon', 'Daintree', 'Valdivian'], optionsEs: ['Congo', 'Amazonas', 'Daintree', 'Valdiviana'], answer: 1, tier: 'intermediate', explain: { en: 'Most of the Amazon Rainforest lies within Brazil.', es: 'La mayor parte de la selva amazónica se encuentra en Brasil.' } },
+            { q: 'What is the currency of Brazil?', qEs: '¿Cuál es la moneda de Brasil?', options: ['Peso', 'Real', 'Dollar', 'Sol'], optionsEs: ['Peso', 'Real', 'Dólar', 'Sol'], answer: 1, tier: 'advanced', explain: { en: 'Brazil\'s currency is the Brazilian real.', es: 'La moneda de Brasil es el real brasileño.' } },
+            { q: 'Which river in Brazil carries the most water in the world?', qEs: '¿Qué río de Brasil lleva más agua que ningún otro del mundo?', options: ['Nile', 'Amazon', 'Paraná', 'São Francisco'], optionsEs: ['Nilo', 'Amazonas', 'Paraná', 'São Francisco'], answer: 1, tier: 'expert', explain: { en: 'The Amazon discharges more water than the next several rivers combined.', es: 'El Amazonas descarga más agua que los siguientes ríos juntos.' } }
           ]
         },
         {
@@ -248,11 +248,11 @@ const WorldExplorer = (() => {
         landmark: { name: 'Statue of Liberty', nameEs: 'Estatua de la Libertad', emoji: '🗽' },
         animal: { name: 'Bald Eagle', nameEs: 'Águila Calva', emoji: '🦅' },
         quiz: [
-          { q: 'What is the capital of the United States?', qEs: '¿Cuál es la capital de Estados Unidos?', options: ['New York', 'Washington, D.C.', 'Los Angeles', 'Chicago'], optionsEs: ['Nueva York', 'Washington, D.C.', 'Los Ángeles', 'Chicago'], answer: 1 },
-          { q: 'How many states make up the U.S.?', qEs: '¿Cuántos estados forman EE.UU.?', options: ['48', '50', '52', '45'], optionsEs: ['48', '50', '52', '45'], answer: 1 },
-          { q: 'In which state is the Grand Canyon?', qEs: '¿En qué estado está el Gran Cañón?', options: ['Arizona', 'Texas', 'Florida', 'Nevada'], optionsEs: ['Arizona', 'Texas', 'Florida', 'Nevada'], answer: 0 },
-          { q: 'Where is the Statue of Liberty?', qEs: '¿Dónde está la Estatua de la Libertad?', options: ['Miami', 'Boston', 'New York', 'Seattle'], optionsEs: ['Miami', 'Boston', 'Nueva York', 'Seattle'], answer: 2 },
-          { q: 'What is the U.S. national bird?', qEs: '¿Cuál es el ave nacional de EE.UU.?', options: ['Bald Eagle', 'Hawk', 'Falcon', 'Owl'], optionsEs: ['Águila Calva', 'Halcón', 'Falcón', 'Búho'], answer: 0 }
+          { q: 'What is the capital of the United States?', qEs: '¿Cuál es la capital de Estados Unidos?', options: ['New York', 'Washington, D.C.', 'Los Angeles', 'Chicago'], optionsEs: ['Nueva York', 'Washington, D.C.', 'Los Ángeles', 'Chicago'], answer: 1, tier: 'beginner', explain: { en: 'Washington, D.C. is the U.S. capital, named after George Washington.', es: 'Washington, D.C. es la capital de EE.UU., nombrada en honor a George Washington.' } },
+          { q: 'How many states make up the U.S.?', qEs: '¿Cuántos estados forman EE.UU.?', options: ['48', '50', '52', '45'], optionsEs: ['48', '50', '52', '45'], answer: 1, tier: 'beginner', explain: { en: 'There are 50 states, the last two being Alaska and Hawaii.', es: 'Hay 50 estados; los dos últimos fueron Alaska y Hawái.' } },
+          { q: 'In which state is the Grand Canyon?', qEs: '¿En qué estado está el Gran Cañón?', options: ['Arizona', 'Texas', 'Florida', 'Nevada'], optionsEs: ['Arizona', 'Texas', 'Florida', 'Nevada'], answer: 0, tier: 'intermediate', explain: { en: 'The Grand Canyon was carved by the Colorado River in Arizona.', es: 'El Gran Cañón fue formado por el río Colorado en Arizona.' } },
+          { q: 'Where is the Statue of Liberty?', qEs: '¿Dónde está la Estatua de la Libertad?', options: ['Miami', 'Boston', 'New York', 'Seattle'], optionsEs: ['Miami', 'Boston', 'Nueva York', 'Seattle'], answer: 2, tier: 'intermediate', explain: { en: 'The statue stands on Liberty Island in New York Harbor.', es: 'La estatua se alza en la Isla de la Libertad, en el puerto de Nueva York.' } },
+          { q: 'What is the U.S. national bird?', qEs: '¿Cuál es el ave nacional de EE.UU.?', options: ['Bald Eagle', 'Hawk', 'Falcon', 'Owl'], optionsEs: ['Águila Calva', 'Halcón', 'Falcón', 'Búho'], answer: 0, tier: 'advanced', explain: { en: 'The bald eagle has been the U.S. national bird since 1782.', es: 'El águila calva es el ave nacional de EE.UU. desde 1782.' } }
         ]
       },
       {
@@ -286,11 +286,11 @@ const WorldExplorer = (() => {
         landmark: { name: 'Chichén Itzá', nameEs: 'Chichén Itzá', emoji: '🏛️' },
         animal: { name: 'Axolotl', nameEs: 'Ajolote', emoji: '🦎' },
         quiz: [
-          { q: 'What is the capital of Mexico?', qEs: '¿Cuál es la capital de México?', options: ['Guadalajara', 'Monterrey', 'Mexico City', 'Cancun'], optionsEs: ['Guadalajara', 'Monterrey', 'Ciudad de México', 'Cancún'], answer: 2 },
-          { q: 'Which ancient city is located in Mexico?', qEs: '¿Qué antigua ciudad se encuentra en México?', options: ['Machu Picchu', 'Chichén Itzá', 'Petra', 'Colosseum'], optionsEs: ['Machu Picchu', 'Chichén Itzá', 'Petra', 'Coliseo'], answer: 1 },
-          { q: 'What unique amphibian is native to Mexico?', qEs: '¿Qué anfibio único es nativo de México?', options: ['Frog', 'Salamander', 'Toad', 'Axolotl'], optionsEs: ['Rana', 'Salamandra', 'Sapo', 'Ajolote'], answer: 3 },
-          { q: 'What is the most populous Spanish-speaking country?', qEs: '¿Cuál es el país de habla hispana más poblado?', options: ['Spain', 'Colombia', 'Argentina', 'Mexico'], optionsEs: ['España', 'Colombia', 'Argentina', 'México'], answer: 3 },
-          { q: 'Which food is famous worldwide from Mexico?', qEs: '¿Qué comida de México es famosa mundialmente?', options: ['Sushi', 'Tacos', 'Pasta', 'Croissants'], optionsEs: ['Sushi', 'Tacos', 'Pasta', 'Croissants'], answer: 1 }
+          { q: 'What is the capital of Mexico?', qEs: '¿Cuál es la capital de México?', options: ['Guadalajara', 'Monterrey', 'Mexico City', 'Cancun'], optionsEs: ['Guadalajara', 'Monterrey', 'Ciudad de México', 'Cancún'], answer: 2, tier: 'beginner', explain: { en: 'Mexico City is one of the largest cities in the world.', es: 'La Ciudad de México es una de las ciudades más grandes del mundo.' } },
+          { q: 'Which ancient city is located in Mexico?', qEs: '¿Qué antigua ciudad se encuentra en México?', options: ['Machu Picchu', 'Chichén Itzá', 'Petra', 'Colosseum'], optionsEs: ['Machu Picchu', 'Chichén Itzá', 'Petra', 'Coliseo'], answer: 1, tier: 'intermediate', explain: { en: 'Chichén Itzá was a major city of the ancient Maya.', es: 'Chichén Itzá fue una gran ciudad de los antiguos mayas.' } },
+          { q: 'What unique amphibian is native to Mexico?', qEs: '¿Qué anfibio único es nativo de México?', options: ['Frog', 'Salamander', 'Toad', 'Axolotl'], optionsEs: ['Rana', 'Salamandra', 'Sapo', 'Ajolote'], answer: 3, tier: 'advanced', explain: { en: 'The axolotl can regrow lost body parts and lives near Mexico City.', es: 'El ajolote puede regenerar partes del cuerpo y vive cerca de la Ciudad de México.' } },
+          { q: 'What is the most populous Spanish-speaking country?', qEs: '¿Cuál es el país de habla hispana más poblado?', options: ['Spain', 'Colombia', 'Argentina', 'Mexico'], optionsEs: ['España', 'Colombia', 'Argentina', 'México'], answer: 3, tier: 'expert', explain: { en: 'Mexico has more Spanish speakers than any other country.', es: 'México tiene más hispanohablantes que cualquier otro país.' } },
+          { q: 'Which food is famous worldwide from Mexico?', qEs: '¿Qué comida de México es famosa mundialmente?', options: ['Sushi', 'Tacos', 'Pasta', 'Croissants'], optionsEs: ['Sushi', 'Tacos', 'Pasta', 'Croissants'], answer: 1, tier: 'beginner', explain: { en: 'Tacos are a traditional Mexican dish enjoyed around the world.', es: 'Los tacos son un platillo tradicional mexicano disfrutado en todo el mundo.' } }
         ]
       }
     ] },
@@ -343,11 +343,11 @@ const WorldExplorer = (() => {
         landmark: { name: 'Eiffel Tower', nameEs: 'Torre Eiffel', emoji: '🗼' },
         animal: { name: 'Rooster', nameEs: 'Gallo', emoji: '🐓' },
         quiz: [
-          { q: 'What is the capital of France?', qEs: '¿Cuál es la capital de Francia?', options: ['London', 'Berlin', 'Madrid', 'Paris'], optionsEs: ['Londres', 'Berlín', 'Madrid', 'París'], answer: 3 },
-          { q: 'Which famous monument is in France?', qEs: '¿Qué famoso monumento está en Francia?', options: ['Colosseum', 'Eiffel Tower', 'Big Ben', 'Parthenon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Big Ben', 'Partenón'], answer: 1 },
-          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2 },
-          { q: 'What is the longest river in France?', qEs: '¿Cuál es el río más largo de Francia?', options: ['Seine', 'Loire', 'Rhône', 'Garonne'], optionsEs: ['Sena', 'Loira', 'Ródano', 'Garona'], answer: 1 },
-          { q: 'What is the currency of France?', qEs: '¿Cuál es la moneda de Francia?', options: ['Franc', 'Euro', 'Pound', 'Lira'], optionsEs: ['Franco', 'Euro', 'Libra', 'Lira'], answer: 1 }
+          { q: 'What is the capital of France?', qEs: '¿Cuál es la capital de Francia?', options: ['London', 'Berlin', 'Madrid', 'Paris'], optionsEs: ['Londres', 'Berlín', 'Madrid', 'París'], answer: 3, tier: 'beginner', explain: { en: 'Paris, on the Seine River, is the capital of France.', es: 'París, a orillas del río Sena, es la capital de Francia.' } },
+          { q: 'Which famous monument is in France?', qEs: '¿Qué famoso monumento está en Francia?', options: ['Colosseum', 'Eiffel Tower', 'Big Ben', 'Parthenon'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Big Ben', 'Partenón'], answer: 1, tier: 'beginner', explain: { en: 'The Eiffel Tower was built in Paris for the 1889 World\'s Fair.', es: 'La Torre Eiffel fue construida en París para la Exposición Universal de 1889.' } },
+          { q: 'What famous bicycle race happens here?', qEs: '¿Qué famosa carrera de bicicletas ocurre aquí?', options: ['Giro d\'Italia', 'Vuelta a España', 'Tour de France', 'Paris-Roubaix'], optionsEs: ['Giro d\'Italia', 'Vuelta a España', 'Tour de Francia', 'París-Roubaix'], answer: 2, tier: 'advanced', explain: { en: 'The Tour de France is the world\'s most famous cycling race.', es: 'El Tour de Francia es la carrera ciclista más famosa del mundo.' } },
+          { q: 'What is the longest river in France?', qEs: '¿Cuál es el río más largo de Francia?', options: ['Seine', 'Loire', 'Rhône', 'Garonne'], optionsEs: ['Sena', 'Loira', 'Ródano', 'Garona'], answer: 1, tier: 'expert', explain: { en: 'The Loire is the longest river in France.', es: 'El Loira es el río más largo de Francia.' } },
+          { q: 'What is the currency of France?', qEs: '¿Cuál es la moneda de Francia?', options: ['Franc', 'Euro', 'Pound', 'Lira'], optionsEs: ['Franco', 'Euro', 'Libra', 'Lira'], answer: 1, tier: 'intermediate', explain: { en: 'France uses the euro, shared by many European countries.', es: 'Francia usa el euro, compartido por muchos países europeos.' } }
         ]
       },
       {
@@ -458,9 +458,9 @@ const WorldExplorer = (() => {
         landmark: { name: 'Pyramids', nameEs: 'Pirámides', emoji: '🔺' },
         animal: { name: 'Camel', nameEs: 'Camello', emoji: '🐫' },
         quiz: [
-          { q: 'What river flows through Egypt?', qEs: '¿Qué río fluye por Egipto?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], optionsEs: ['Amazonas', 'Nilo', 'Yangtsé', 'Misisipi'], answer: 1 },
-          { q: 'What famous monument is in Egypt?', qEs: '¿Qué monumento famoso está en Egipto?', options: ['Colosseum', 'Eiffel Tower', 'Pyramids', 'Taj Mahal'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Pirámides', 'Taj Mahal'], answer: 2 },
-          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0 }
+          { q: 'What river flows through Egypt?', qEs: '¿Qué río fluye por Egipto?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], optionsEs: ['Amazonas', 'Nilo', 'Yangtsé', 'Misisipi'], answer: 1, tier: 'beginner', explain: { en: 'The Nile flows through Egypt and is one of the longest rivers on Earth.', es: 'El Nilo fluye por Egipto y es uno de los ríos más largos de la Tierra.' } },
+          { q: 'What famous monument is in Egypt?', qEs: '¿Qué monumento famoso está en Egipto?', options: ['Colosseum', 'Eiffel Tower', 'Pyramids', 'Taj Mahal'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Pirámides', 'Taj Mahal'], answer: 2, tier: 'intermediate', explain: { en: 'The Pyramids of Giza were built as tombs for ancient Egyptian pharaohs.', es: 'Las pirámides de Guiza se construyeron como tumbas para los faraones del antiguo Egipto.' } },
+          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0, tier: 'advanced', explain: { en: 'Cairo, on the Nile, is the capital of Egypt.', es: 'El Cairo, a orillas del Nilo, es la capital de Egipto.' } }
         ]
       },
       {
@@ -534,11 +534,11 @@ const WorldExplorer = (() => {
         landmark: { name: 'Mount Fuji', nameEs: 'Monte Fuji', emoji: '🗻' },
         animal: { name: 'Macaque', nameEs: 'Macaco', emoji: '🐒' },
         quiz: [
-          { q: 'What is the capital of Japan?', qEs: '¿Cuál es la capital de Japón?', options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'], optionsEs: ['Kioto', 'Osaka', 'Tokio', 'Hiroshima'], answer: 2 },
-          { q: 'What is the highest mountain in Japan?', qEs: '¿Cuál es la montaña más alta de Japón?', options: ['Mount Everest', 'Mount Fuji', 'Mount Kilimanjaro', 'Mount Blanc'], optionsEs: ['Monte Everest', 'Monte Fuji', 'Monte Kilimanjaro', 'Mont Blanc'], answer: 1 },
-          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2 },
-          { q: 'What is the currency of Japan?', qEs: '¿Cuál es la moneda de Japón?', options: ['Won', 'Yuan', 'Yen', 'Baht'], optionsEs: ['Won', 'Yuan', 'Yen', 'Baht'], answer: 2 },
-          { q: 'What is Japan\'s largest island called?', qEs: '¿Cómo se llama la isla más grande de Japón?', options: ['Hokkaido', 'Honshu', 'Kyushu', 'Shikoku'], optionsEs: ['Hokkaido', 'Honshu', 'Kyushu', 'Shikoku'], answer: 1 }
+          { q: 'What is the capital of Japan?', qEs: '¿Cuál es la capital de Japón?', options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'], optionsEs: ['Kioto', 'Osaka', 'Tokio', 'Hiroshima'], answer: 2, tier: 'beginner', explain: { en: 'Tokyo is the capital and largest metropolitan area of Japan.', es: 'Tokio es la capital y la mayor área metropolitana de Japón.' } },
+          { q: 'What is the highest mountain in Japan?', qEs: '¿Cuál es la montaña más alta de Japón?', options: ['Mount Everest', 'Mount Fuji', 'Mount Kilimanjaro', 'Mount Blanc'], optionsEs: ['Monte Everest', 'Monte Fuji', 'Monte Kilimanjaro', 'Mont Blanc'], answer: 1, tier: 'intermediate', explain: { en: 'Mount Fuji, a volcano, is the tallest mountain in Japan.', es: 'El monte Fuji, un volcán, es la montaña más alta de Japón.' } },
+          { q: 'Which flower is a symbol of spring in Japan?', qEs: '¿Qué flor es símbolo de la primavera en Japón?', options: ['Rose', 'Tulip', 'Cherry blossom', 'Sunflower'], optionsEs: ['Rosa', 'Tulipán', 'Flor de cerezo', 'Girasol'], answer: 2, tier: 'intermediate', explain: { en: 'Cherry blossoms (sakura) bloom across Japan each spring.', es: 'Las flores de cerezo (sakura) florecen en Japón cada primavera.' } },
+          { q: 'What is the currency of Japan?', qEs: '¿Cuál es la moneda de Japón?', options: ['Won', 'Yuan', 'Yen', 'Baht'], optionsEs: ['Won', 'Yuan', 'Yen', 'Baht'], answer: 2, tier: 'advanced', explain: { en: 'Japan\'s currency is the yen.', es: 'La moneda de Japón es el yen.' } },
+          { q: 'What is Japan\'s largest island called?', qEs: '¿Cómo se llama la isla más grande de Japón?', options: ['Hokkaido', 'Honshu', 'Kyushu', 'Shikoku'], optionsEs: ['Hokkaido', 'Honshu', 'Kyushu', 'Shikoku'], answer: 1, tier: 'expert', explain: { en: 'Honshu is the largest island, home to Tokyo and Mount Fuji.', es: 'Honshu es la isla más grande; allí están Tokio y el monte Fuji.' } }
         ]
       },
       {
@@ -553,9 +553,9 @@ const WorldExplorer = (() => {
         landmark: { name: 'Great Wall', nameEs: 'Gran Muralla', emoji: '🧱' },
         animal: { name: 'Giant Panda', nameEs: 'Oso Panda', emoji: '🐼' },
         quiz: [
-          { q: 'What is the capital of China?', qEs: '¿Cuál es la capital de China?', options: ['Shanghai', 'Beijing', 'Hong Kong', 'Shenzhen'], optionsEs: ['Shanghái', 'Pekín', 'Hong Kong', 'Shenzhen'], answer: 1 },
-          { q: 'Which famous wall is located in China?', qEs: '¿Qué famosa muralla se encuentra en China?', options: ['Berlin Wall', 'Hadrian\'s Wall', 'Great Wall', 'Western Wall'], optionsEs: ['Muro de Berlín', 'Muro de Adriano', 'Gran Muralla', 'Muro de los Lamentos'], answer: 2 },
-          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2 }
+          { q: 'What is the capital of China?', qEs: '¿Cuál es la capital de China?', options: ['Shanghai', 'Beijing', 'Hong Kong', 'Shenzhen'], optionsEs: ['Shanghái', 'Pekín', 'Hong Kong', 'Shenzhen'], answer: 1, tier: 'beginner', explain: { en: 'Beijing has been China\'s capital for much of its history.', es: 'Pekín ha sido la capital de China durante gran parte de su historia.' } },
+          { q: 'Which famous wall is located in China?', qEs: '¿Qué famosa muralla se encuentra en China?', options: ['Berlin Wall', 'Hadrian\'s Wall', 'Great Wall', 'Western Wall'], optionsEs: ['Muro de Berlín', 'Muro de Adriano', 'Gran Muralla', 'Muro de los Lamentos'], answer: 2, tier: 'intermediate', explain: { en: 'The Great Wall was built over centuries to defend China\'s borders.', es: 'La Gran Muralla se construyó durante siglos para defender las fronteras de China.' } },
+          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2, tier: 'advanced', explain: { en: 'Giant pandas live in bamboo forests of south-central China.', es: 'Los osos panda gigantes viven en bosques de bambú del centro-sur de China.' } }
         ]
       },
       {
@@ -570,11 +570,11 @@ const WorldExplorer = (() => {
         landmark: { name: 'Taj Mahal', nameEs: 'Taj Mahal', emoji: '🕌' },
         animal: { name: 'Bengal Tiger', nameEs: 'Tigre de Bengala', emoji: '🐅' },
         quiz: [
-          { q: 'What is the capital of India?', qEs: '¿Cuál es la capital de India?', options: ['Mumbai', 'New Delhi', 'Kolkata', 'Chennai'], optionsEs: ['Bombay', 'Nueva Delhi', 'Calcuta', 'Chennai'], answer: 1 },
-          { q: 'Which famous marble mausoleum is in India?', qEs: '¿Qué famoso mausoleo de mármol está en India?', options: ['Taj Mahal', 'Petra', 'Colosseum', 'Angkor Wat'], optionsEs: ['Taj Mahal', 'Petra', 'Coliseo', 'Angkor Wat'], answer: 0 },
-          { q: 'What is the currency of India?', qEs: '¿Cuál es la moneda de India?', options: ['Rupee', 'Yen', 'Baht', 'Won'], optionsEs: ['Rupia', 'Yen', 'Baht', 'Won'], answer: 0 },
-          { q: 'What sacred river flows through India?', qEs: '¿Qué río sagrado fluye por India?', options: ['Mekong', 'Ganges', 'Yangtze', 'Indus only'], optionsEs: ['Mekong', 'Ganges', 'Yangtsé', 'Solo el Indo'], answer: 1 },
-          { q: 'What is the national animal of India?', qEs: '¿Cuál es el animal nacional de India?', options: ['Lion', 'Elephant', 'Bengal Tiger', 'Peacock'], optionsEs: ['León', 'Elefante', 'Tigre de Bengala', 'Pavo real'], answer: 2 }
+          { q: 'What is the capital of India?', qEs: '¿Cuál es la capital de India?', options: ['Mumbai', 'New Delhi', 'Kolkata', 'Chennai'], optionsEs: ['Bombay', 'Nueva Delhi', 'Calcuta', 'Chennai'], answer: 1, tier: 'beginner', explain: { en: 'New Delhi is the capital of India.', es: 'Nueva Delhi es la capital de India.' } },
+          { q: 'Which famous marble mausoleum is in India?', qEs: '¿Qué famoso mausoleo de mármol está en India?', options: ['Taj Mahal', 'Petra', 'Colosseum', 'Angkor Wat'], optionsEs: ['Taj Mahal', 'Petra', 'Coliseo', 'Angkor Wat'], answer: 0, tier: 'intermediate', explain: { en: 'The Taj Mahal in Agra was built of white marble in the 1600s.', es: 'El Taj Mahal, en Agra, fue construido en mármol blanco en el siglo XVII.' } },
+          { q: 'What is the currency of India?', qEs: '¿Cuál es la moneda de India?', options: ['Rupee', 'Yen', 'Baht', 'Won'], optionsEs: ['Rupia', 'Yen', 'Baht', 'Won'], answer: 0, tier: 'advanced', explain: { en: 'India\'s currency is the Indian rupee.', es: 'La moneda de India es la rupia india.' } },
+          { q: 'What sacred river flows through India?', qEs: '¿Qué río sagrado fluye por India?', options: ['Mekong', 'Ganges', 'Yangtze', 'Indus only'], optionsEs: ['Mekong', 'Ganges', 'Yangtsé', 'Solo el Indo'], answer: 1, tier: 'expert', explain: { en: 'The Ganges is considered sacred by millions of people in India.', es: 'El Ganges es considerado sagrado por millones de personas en India.' } },
+          { q: 'What is the national animal of India?', qEs: '¿Cuál es el animal nacional de India?', options: ['Lion', 'Elephant', 'Bengal Tiger', 'Peacock'], optionsEs: ['León', 'Elefante', 'Tigre de Bengala', 'Pavo real'], answer: 2, tier: 'advanced', explain: { en: 'The Bengal tiger is the national animal of India.', es: 'El tigre de Bengala es el animal nacional de India.' } }
         ]
       },
       {
@@ -629,9 +629,9 @@ const WorldExplorer = (() => {
         landmark: { name: 'Sydney Opera House', nameEs: 'Ópera de Sídney', emoji: '🏛️' },
         animal: { name: 'Kangaroo', nameEs: 'Canguro', emoji: '🦘' },
         quiz: [
-          { q: 'What is the capital of Australia?', qEs: '¿Cuál es la capital de Australia?', options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'], optionsEs: ['Sídney', 'Melbourne', 'Canberra', 'Perth'], answer: 2 },
-          { q: 'Which animal is native to Australia?', qEs: '¿Qué animal es nativo de Australia?', options: ['Lion', 'Penguin', 'Kangaroo', 'Bear'], optionsEs: ['León', 'Pingüino', 'Canguro', 'Oso'], answer: 2 },
-          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0 }
+          { q: 'What is the capital of Australia?', qEs: '¿Cuál es la capital de Australia?', options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'], optionsEs: ['Sídney', 'Melbourne', 'Canberra', 'Perth'], answer: 2, tier: 'advanced', explain: { en: 'Canberra was chosen as the capital as a compromise between Sydney and Melbourne.', es: 'Canberra fue elegida capital como un acuerdo entre Sídney y Melbourne.' } },
+          { q: 'Which animal is native to Australia?', qEs: '¿Qué animal es nativo de Australia?', options: ['Lion', 'Penguin', 'Kangaroo', 'Bear'], optionsEs: ['León', 'Pingüino', 'Canguro', 'Oso'], answer: 2, tier: 'beginner', explain: { en: 'Kangaroos are marsupials found only in Australia.', es: 'Los canguros son marsupiales que solo se encuentran en Australia.' } },
+          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0, tier: 'intermediate', explain: { en: 'The Great Barrier Reef is the world\'s largest coral reef system.', es: 'La Gran Barrera de Coral es el mayor sistema de arrecifes del mundo.' } }
         ]
       },
       {
@@ -659,6 +659,12 @@ const WorldExplorer = (() => {
   let currentCountry = null;
   let lang = 'en';
   let stars = 0;
+
+  // ── Quiz state ──
+  let quizPool = [];
+  let quizIdx = 0;
+  let quizCorrect = 0;
+  let quizCountryId = null;
 
   // ── Storage ──
   function _key() { return typeof getUserAppKey === 'function' ? getUserAppKey('world') : null; }
@@ -816,6 +822,10 @@ const WorldExplorer = (() => {
       <button class="action-btn btn-primary" onclick="WorldExplorer.markVisited('${id}')" ${isVisited ? 'disabled' : ''}>
         ${isVisited ? '✅ ' + (lang === 'es' ? 'Visitado' : 'Visited') : '🗺️ ' + (lang === 'es' ? 'Marcar como Visitado' : 'Mark as Visited')}
       </button>
+      ${(currentCountry.quiz && currentCountry.quiz.length) ? `
+      <button class="action-btn btn-quiz" onclick="WorldExplorer.startQuiz('${id}')">
+        ${lang === 'es' ? '❓ Tomar Quiz' : '❓ Take Quiz'}
+      </button>` : ''}
       <button class="action-btn btn-secondary" onclick="WorldExplorer.backToContinent()">
         ${lang === 'es' ? 'Volver al Mapa' : 'Back to Map'}
       </button>
@@ -848,16 +858,129 @@ const WorldExplorer = (() => {
     }
   }
 
+  // ── Quiz (mirrors Civics Lab quiz flow) ──
+  function startQuiz(id) {
+    const country = (currentContinent && currentContinent.countries.find(c => c.id === id)) || currentCountry;
+    if (!country || !country.quiz || !country.quiz.length) return;
+    currentCountry = country;
+    quizCountryId = id;
+
+    // Filter the country's questions by the child's age tier.
+    const original = country.quiz.slice();
+    let qs = original.slice();
+    const tier = (typeof getAgeTier === 'function') ? getAgeTier() : 'expert';
+    const order = ['beginner', 'intermediate', 'advanced', 'expert'];
+    const max = order.indexOf(tier);
+    qs = qs.filter(q => order.indexOf(q.tier || 'intermediate') <= max);
+    if (!qs.length) qs = original;
+
+    quizPool = qs;
+    quizIdx = 0;
+    quizCorrect = 0;
+    _renderQuizQuestion();
+    _showScreen('quiz');
+  }
+
+  function _renderQuizQuestion() {
+    const wrap = document.getElementById('quiz-wrap');
+    if (!wrap) return;
+    const q = quizPool[quizIdx];
+    if (!q) return _finishQuiz();
+
+    const opts = lang === 'es' ? (q.optionsEs || q.options) : q.options;
+    wrap.innerHTML =
+      '<button class="back-btn quiz-back" aria-label="Back" onclick="WorldExplorer.backToCountry()">←</button>' +
+      '<div class="quiz-counter">' + (quizIdx + 1) + ' / ' + quizPool.length + '</div>' +
+      '<h2 class="quiz-q">' + (lang === 'es' ? q.qEs : q.q) + '</h2>' +
+      '<div class="quiz-options">' +
+        opts.map((o, i) =>
+          '<button class="quiz-opt" data-correct="' + (i === q.answer ? '1' : '0') + '">' + o + '</button>'
+        ).join('') +
+      '</div>' +
+      '<div class="quiz-explain" id="quiz-explain"></div>';
+
+    wrap.querySelectorAll('.quiz-opt').forEach(btn => {
+      btn.onclick = () => {
+        // Lock all options once answered.
+        wrap.querySelectorAll('.quiz-opt').forEach(b => { b.disabled = true; });
+        const correct = btn.dataset.correct === '1';
+        btn.classList.add(correct ? 'correct' : 'wrong');
+        if (!correct) {
+          // Highlight the right answer too.
+          const right = wrap.querySelector('.quiz-opt[data-correct="1"]');
+          if (right) right.classList.add('correct');
+        }
+        if (correct) quizCorrect++;
+        if (typeof playSound === 'function') playSound(correct ? 'correct' : 'wrong');
+
+        // Show explanation in the current language, if present.
+        const exEl = document.getElementById('quiz-explain');
+        if (exEl && q.explain && (q.explain[lang] || q.explain.en)) {
+          exEl.textContent = '💡 ' + (q.explain[lang] || q.explain.en);
+          exEl.classList.add('active');
+        }
+
+        const advance = document.createElement('button');
+        advance.className = 'action-btn btn-primary quiz-next';
+        advance.textContent = (quizIdx + 1 < quizPool.length)
+          ? (lang === 'es' ? 'Siguiente →' : 'Next →')
+          : (lang === 'es' ? 'Ver Resultado' : 'See Result');
+        advance.onclick = () => { quizIdx++; _renderQuizQuestion(); };
+        wrap.appendChild(advance);
+      };
+    });
+  }
+
+  function _finishQuiz() {
+    const total = quizPool.length;
+    const acc = total > 0 ? quizCorrect / total : 0;
+    const earnedStars = acc >= 0.95 ? 3 : acc >= 0.8 ? 2 : 1;
+
+    // Award a star on completion using World Explorer's progress store.
+    const data = _load();
+    data.totalStars = (data.totalStars || 0) + 1;
+    if (!data.quizDone) data.quizDone = [];
+    if (quizCountryId && !data.quizDone.includes(quizCountryId)) data.quizDone.push(quizCountryId);
+    _save(data);
+    _updateGlobalStars();
+    if (typeof playSound === 'function') playSound('correct');
+
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      ActivityLog.log('World Explorer', '🌍',
+        (lang === 'es' ? 'Quiz ' : 'Quiz ') +
+        (lang === 'es' ? currentCountry.nameEs : currentCountry.name) +
+        ': ' + quizCorrect + '/' + total);
+    }
+
+    const wrap = document.getElementById('results-wrap');
+    if (wrap) {
+      wrap.innerHTML =
+        '<div class="results-stars">' + '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars) + '</div>' +
+        '<div class="results-score">' + quizCorrect + ' / ' + total + ' ' + (lang === 'es' ? 'correctas' : 'correct') + '</div>' +
+        '<button class="action-btn btn-primary" onclick="WorldExplorer.startQuiz(\'' + quizCountryId + '\')">' +
+          (lang === 'es' ? '🔁 Reintentar' : '🔁 Try Again') + '</button>' +
+        '<button class="action-btn btn-secondary" onclick="WorldExplorer.backToCountry()">' +
+          (lang === 'es' ? 'Volver al País' : 'Back to Country') + '</button>';
+    }
+    _showScreen('results');
+  }
+
+  function backToCountry() {
+    if (quizCountryId) openCountry(quizCountryId);
+    else backToContinent();
+  }
+
   function toggleLanguage() {
     lang = lang === 'en' ? 'es' : 'en';
     const label = document.getElementById('lang-label');
     if (label) label.textContent = lang === 'en' ? 'ES / EN' : 'EN / ES';
-    
+
     // Refresh current screen
     const active = document.querySelector('.screen.active');
     if (active.id === 'screen-select') _renderContinentSelect();
     else if (active.id === 'screen-continent') openContinent(currentContinent.id);
     else if (active.id === 'screen-country') openCountry(currentCountry.id);
+    else if (active.id === 'screen-quiz') _renderQuizQuestion();
   }
 
   function backToSelect() { _showScreen('select'); _renderContinentSelect(); }
@@ -894,5 +1017,5 @@ const WorldExplorer = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { init, openContinent, openCountry, markVisited, toggleLanguage, backToSelect, backToContinent, getStats };
+  return { init, openContinent, openCountry, markVisited, toggleLanguage, backToSelect, backToContinent, startQuiz, backToCountry, getStats };
 })();
