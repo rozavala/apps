@@ -284,7 +284,107 @@ const CodeCadet = (() => {
         'S..........'
       ],
       rover: { x: 0, y: 4, dir: 1 },
-      allow: ['move','turnLeft','turnRight','repeat','ifStar','ifGreen','callF1'], funcAllowed: true, ideal: 8 }
+      allow: ['move','turnLeft','turnRight','repeat','ifStar','ifGreen','callF1'], funcAllowed: true, ideal: 8 },
+
+    // ── World 6 — Expert ───────────────────────────────────────────
+    { id: 'w6-1', world: 6, name: 'Square Dance',
+      // Walk the full perimeter of the 5×5 grid clockwise, then step
+      // onto G. Solution (ideal 5):
+      //   repeat 4 [ repeat 4 [move], turnRight ], move
+      // Trace from (0,0)E: each outer iter walks one 4-cell side and
+      // turns right; after 4 sides the rover is back at (0,0) facing E,
+      // then one move lands on G at (1,0).
+      tiles: [
+        'SG...',
+        '.....',
+        '.....',
+        '.....',
+        '.....'
+      ],
+      rover: { x: 0, y: 0, dir: 1 },
+      allow: ['move','turnRight','repeat'], ideal: 5 },
+    { id: 'w6-2', world: 6, name: 'Star Frame',
+      // Sweep the star-paved perimeter of the 6×6 grid clockwise and
+      // stop on G just below the start. Solution (ideal 6):
+      //   repeat 3 [ repeat 5 [move], turnRight ], repeat 4 [move]
+      // Trace from (0,0)E: three full 5-cell sides (E, S, W) leave the
+      // rover at (0,5) facing N; four moves north end on G at (0,1).
+      // Every '*' on the perimeter is collected while passing over it.
+      tiles: [
+        'S*****',
+        'G....*',
+        '*....*',
+        '*....*',
+        '*....*',
+        '******'
+      ],
+      rover: { x: 0, y: 0, dir: 1 },
+      allow: ['move','turnRight','repeat'], ideal: 6 },
+    { id: 'w6-3', world: 6, name: 'Star Corners',
+      // Clockwise lap where each corner is a star. ifStar turns the
+      // rover right at every corner so a single loop body navigates the
+      // whole perimeter. Solution (ideal 4):
+      //   repeat 11 [ move, ifStar[turnRight] ]
+      // Trace from (0,0)E: moves collect corner stars at (3,0),(3,3),
+      // (0,3) — turning right on each — and the 11th move lands on G at
+      // (0,1). Without the turns the rover would run into the edge.
+      tiles: [
+        'S..*',
+        'G...',
+        '....',
+        '*..*'
+      ],
+      rover: { x: 0, y: 0, dir: 1 },
+      allow: ['move','turnRight','ifStar','repeat'], ideal: 4 },
+    { id: 'w6-4', world: 6, name: 'Decision Stairs',
+      // Descending staircase. Green tiles mean turn right (go down),
+      // star tiles mean turn left (go right) — both conditions drive one
+      // loop body. Solution (ideal 6):
+      //   repeat 6 [ move, ifGreen[turnRight], ifStar[turnLeft] ]
+      // Trace from (0,0)E: move→(1,0)g turnR; move→(1,1)* turnL; move→
+      // (2,1)g turnR; move→(2,2)* turnL; move→(3,2)g turnR; move→(3,3)G.
+      // Both stars are collected on the way down.
+      tiles: [
+        'Sg..',
+        '.*g.',
+        '..*g',
+        '...G'
+      ],
+      rover: { x: 0, y: 0, dir: 1 },
+      allow: ['move','turnLeft','turnRight','ifGreen','ifStar','repeat'], ideal: 6 },
+    { id: 'w6-5', world: 6, name: 'Diagonal Function',
+      // The same SE step repeats four times, so define it once in F1.
+      // F1 = move, turnRight, move, turnLeft  (moves +1,+1, ends facing
+      // E). Solution (ideal 6):
+      //   F1: move, turnRight, move, turnLeft
+      //   main: repeat 4 [callF1]
+      // Trace from (0,0)E: each call advances one diagonal step,
+      // collecting stars at (1,1),(2,2),(3,3); the fourth call ends on G
+      // at (4,4).
+      tiles: [
+        'S....',
+        '.*...',
+        '..*..',
+        '...*.',
+        '....G'
+      ],
+      rover: { x: 0, y: 0, dir: 1 },
+      allow: ['move','turnLeft','turnRight','repeat','callF1'], funcAllowed: true, ideal: 6 },
+    { id: 'w6-6', world: 6, name: 'Comb Function',
+      // Three identical comb teeth: pop up, grab the star, come back,
+      // advance. Define the tooth once in F1 and repeat it.
+      // F1 = turnLeft, move, turnRight, turnRight, move, turnLeft, move
+      //   (from a base cell facing E: go up & collect, return, step to
+      //    the next base, ending facing E).
+      // Solution (ideal 9):  main: repeat 3 [callF1]
+      // Trace from (0,1)E: calls collect stars at (0,0),(1,0),(2,0) and
+      // the third call ends on G at (3,1).
+      tiles: [
+        '***.',
+        'S..G'
+      ],
+      rover: { x: 0, y: 1, dir: 1 },
+      allow: ['move','turnLeft','turnRight','repeat','callF1'], funcAllowed: true, ideal: 9 }
   ];
 
   // ── Storage helpers ──
@@ -877,7 +977,7 @@ const CodeCadet = (() => {
     // group puzzles by world
     const byWorld = {};
     PUZZLES.forEach(p => { (byWorld[p.world] = byWorld[p.world] || []).push(p); });
-    const worldNames = { 1:'Move', 2:'Repeat', 3:'Functions', 4:'Conditions', 5:'Adventure' };
+    const worldNames = { 1:'Move', 2:'Repeat', 3:'Functions', 4:'Conditions', 5:'Adventure', 6:'Expert' };
     Object.keys(byWorld).sort().forEach(wId => {
       const card = document.createElement('div');
       card.className = 'cc-world-card';

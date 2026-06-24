@@ -419,6 +419,298 @@ const StoryExplorer = (() => {
         { q: 'Where was the rocket going?', qEs: '¿A dónde iba el cohete?', options: ['The Sun', 'Mars', 'The Moon', 'Jupiter'], optionsEs: ['Al Sol', 'A Marte', 'A la Luna', 'A Júpiter'], answer: 2 },
         { q: 'What did Earth look like from space?', qEs: '¿Cómo se veía la Tierra desde el espacio?', options: ['A red square', 'A blue marble', 'A white cloud', 'A green leaf'], optionsEs: ['Un cuadrado rojo', 'Una canica azul', 'Una nube blanca', 'Una hoja verde'], answer: 1 }
       ]
+    },
+    {
+      id: 'darwin_patagonia',
+      title: 'Darwin in Patagonia',
+      titleEs: 'Darwin en la Patagonia',
+      tier: 'pilot', ageMin: 8, region: 'patagonia', icon: '🔬',
+      pages: [
+        {
+          en: 'In 1834, a young naturalist named Charles Darwin sailed along the coast of Patagonia aboard the ship HMS Beagle. He had come to observe the plants, animals, and rocks of South America.',
+          es: 'En 1834, un joven naturalista llamado Charles Darwin navegó por la costa de la Patagonia a bordo del barco HMS Beagle. Había venido a observar las plantas, los animales y las rocas de Sudamérica.',
+          vocab: [
+            { word: 'naturalist', wordEs: 'naturalista', def: 'A scientist who studies nature.', defEs: 'Un científico que estudia la naturaleza.' },
+            { word: 'observe', wordEs: 'observar', def: 'To watch something carefully.', defEs: 'Mirar algo con atención.' },
+            { word: 'coast', wordEs: 'costa', def: 'Land next to the sea.', defEs: 'Tierra junto al mar.' },
+            { word: 'aboard', wordEs: 'a bordo', def: 'On or inside a ship.', defEs: 'Sobre o dentro de un barco.' }
+          ]
+        },
+        {
+          en: 'Darwin walked across the dry plains and found the bones of giant animals buried in the cliffs. These fossils belonged to creatures that no longer lived on Earth.',
+          es: 'Darwin caminó por las llanuras secas y encontró los huesos de animales gigantes enterrados en los acantilados. Estos fósiles pertenecían a criaturas que ya no vivían en la Tierra.',
+          vocab: [
+            { word: 'plains', wordEs: 'llanuras', def: 'Large flat areas of land.', defEs: 'Grandes zonas planas de tierra.' },
+            { word: 'fossils', wordEs: 'fósiles', def: 'Remains of ancient living things preserved in rock.', defEs: 'Restos de seres vivos antiguos conservados en la roca.' },
+            { word: 'cliffs', wordEs: 'acantilados', def: 'Steep walls of rock.', defEs: 'Paredes empinadas de roca.' },
+            { word: 'creatures', wordEs: 'criaturas', def: 'Living animals.', defEs: 'Animales vivos.' }
+          ]
+        },
+        {
+          en: 'He carefully collected specimens and wrote detailed notes in his journal. He compared the living guanacos and rheas with the ancient bones he had dug up.',
+          es: 'Recolectó cuidadosamente muestras y escribió notas detalladas en su diario. Comparó los guanacos y ñandúes vivos con los huesos antiguos que había desenterrado.',
+          vocab: [
+            { word: 'specimens', wordEs: 'muestras', def: 'Examples collected for study.', defEs: 'Ejemplos recogidos para estudiar.' },
+            { word: 'journal', wordEs: 'diario', def: 'A book where you write daily notes.', defEs: 'Un libro donde se escriben notas diarias.' },
+            { word: 'compared', wordEs: 'comparó', def: 'Looked at how things are alike or different.', defEs: 'Observó en qué se parecen o diferencian las cosas.' },
+            { word: 'ancient', wordEs: 'antiguos', def: 'Very old, from long ago.', defEs: 'Muy viejos, de hace mucho tiempo.' }
+          ]
+        },
+        {
+          en: 'Darwin noticed that animals in different regions had small differences. He wondered why species seemed so well suited to their surroundings.',
+          es: 'Darwin notó que los animales de distintas regiones tenían pequeñas diferencias. Se preguntó por qué las especies parecían tan bien adaptadas a su entorno.',
+          vocab: [
+            { word: 'species', wordEs: 'especies', def: 'A group of similar living things.', defEs: 'Un grupo de seres vivos similares.' },
+            { word: 'differences', wordEs: 'diferencias', def: 'Ways in which things are not the same.', defEs: 'Maneras en que las cosas no son iguales.' },
+            { word: 'suited', wordEs: 'adaptadas', def: 'Right or fitting for something.', defEs: 'Apropiadas o adecuadas para algo.' },
+            { word: 'surroundings', wordEs: 'entorno', def: 'The area and conditions around you.', defEs: 'El área y las condiciones a tu alrededor.' }
+          ]
+        },
+        {
+          en: 'The Beagle continued south toward the channels and islands near Tierra del Fuego. The cold, stormy waters made the voyage difficult and dangerous.',
+          es: 'El Beagle siguió hacia el sur, hacia los canales e islas cerca de Tierra del Fuego. Las aguas frías y tormentosas hicieron el viaje difícil y peligroso.',
+          vocab: [
+            { word: 'channels', wordEs: 'canales', def: 'Narrow stretches of water between lands.', defEs: 'Tramos estrechos de agua entre tierras.' },
+            { word: 'voyage', wordEs: 'viaje', def: 'A long journey by sea.', defEs: 'Un viaje largo por mar.' },
+            { word: 'stormy', wordEs: 'tormentosas', def: 'With strong wind and rain.', defEs: 'Con viento fuerte y lluvia.' },
+            { word: 'dangerous', wordEs: 'peligroso', def: 'Likely to cause harm.', defEs: 'Que puede causar daño.' }
+          ]
+        },
+        {
+          en: 'Years later, the things Darwin saw in Patagonia helped him develop his ideas about how living things change slowly over time. His careful observations became part of the history of science.',
+          es: 'Años después, las cosas que Darwin vio en la Patagonia lo ayudaron a desarrollar sus ideas sobre cómo los seres vivos cambian lentamente con el tiempo. Sus observaciones cuidadosas se convirtieron en parte de la historia de la ciencia.',
+          vocab: [
+            { word: 'develop', wordEs: 'desarrollar', def: 'To build up or grow an idea.', defEs: 'Construir o hacer crecer una idea.' },
+            { word: 'gradually', wordEs: 'lentamente', def: 'Slowly, little by little.', defEs: 'Despacio, poco a poco.' },
+            { word: 'observations', wordEs: 'observaciones', def: 'Things noticed by watching carefully.', defEs: 'Cosas notadas al mirar con atención.' },
+            { word: 'science', wordEs: 'ciencia', def: 'The study of the natural world through facts.', defEs: 'El estudio del mundo natural mediante hechos.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What was Charles Darwin?', qEs: '¿Qué era Charles Darwin?', options: ['A pirate', 'A naturalist', 'A king', 'A farmer'], optionsEs: ['Un pirata', 'Un naturalista', 'Un rey', 'Un granjero'], answer: 1 },
+        { q: 'What did Darwin find buried in the cliffs?', qEs: '¿Qué encontró Darwin enterrado en los acantilados?', options: ['Gold coins', 'Fossils of giant animals', 'A lost ship', 'Fresh fruit'], optionsEs: ['Monedas de oro', 'Fósiles de animales gigantes', 'Un barco perdido', 'Fruta fresca'], answer: 1 },
+        { q: 'What ship did Darwin sail on?', qEs: '¿En qué barco navegó Darwin?', options: ['The Santa María', 'The Beagle', 'The Titanic', 'The Esmeralda'], optionsEs: ['El Santa María', 'El Beagle', 'El Titanic', 'La Esmeralda'], answer: 1 }
+      ]
+    },
+    {
+      id: 'valdivia_1960',
+      title: 'The Great Valdivia Earthquake',
+      titleEs: 'El Gran Terremoto de Valdivia',
+      tier: 'pilot', ageMin: 8, region: 'south', icon: '🌊',
+      pages: [
+        {
+          en: 'On May 22, 1960, the ground near the city of Valdivia in southern Chile began to shake violently. It was the most powerful earthquake ever recorded, reaching a magnitude of 9.5.',
+          es: 'El 22 de mayo de 1960, el suelo cerca de la ciudad de Valdivia, en el sur de Chile, comenzó a temblar violentamente. Fue el terremoto más potente jamás registrado, alcanzando una magnitud de 9,5.',
+          vocab: [
+            { word: 'earthquake', wordEs: 'terremoto', def: 'A sudden shaking of the ground.', defEs: 'Un temblor repentino del suelo.' },
+            { word: 'magnitude', wordEs: 'magnitud', def: 'A number that measures how strong an earthquake is.', defEs: 'Un número que mide cuán fuerte es un terremoto.' },
+            { word: 'recorded', wordEs: 'registrado', def: 'Measured and written down.', defEs: 'Medido y anotado.' },
+            { word: 'violently', wordEs: 'violentamente', def: 'With great force.', defEs: 'Con mucha fuerza.' }
+          ]
+        },
+        {
+          en: 'The earthquake happened because two giant pieces of the Earth\'s crust, called tectonic plates, suddenly slipped past each other deep below the ocean floor.',
+          es: 'El terremoto ocurrió porque dos piezas gigantes de la corteza de la Tierra, llamadas placas tectónicas, se deslizaron de repente una sobre otra en lo profundo del fondo del océano.',
+          vocab: [
+            { word: 'crust', wordEs: 'corteza', def: 'The hard outer layer of the Earth.', defEs: 'La capa exterior dura de la Tierra.' },
+            { word: 'tectonic plates', wordEs: 'placas tectónicas', def: 'Huge moving pieces of the Earth\'s surface.', defEs: 'Enormes piezas móviles de la superficie de la Tierra.' },
+            { word: 'slipped', wordEs: 'deslizaron', def: 'Moved smoothly and suddenly.', defEs: 'Se movieron suave y repentinamente.' },
+            { word: 'beneath', wordEs: 'debajo', def: 'Under something.', defEs: 'Debajo de algo.' }
+          ]
+        },
+        {
+          en: 'Minutes after the shaking stopped, the sea pulled back from the shore. Then a huge wave called a tsunami rushed onto the land, flooding towns along the coast.',
+          es: 'Minutos después de que el temblor se detuvo, el mar se retiró de la orilla. Luego una ola enorme llamada tsunami se precipitó sobre la tierra, inundando pueblos a lo largo de la costa.',
+          vocab: [
+            { word: 'tsunami', wordEs: 'tsunami', def: 'A giant ocean wave caused by an earthquake.', defEs: 'Una ola oceánica gigante causada por un terremoto.' },
+            { word: 'shore', wordEs: 'orilla', def: 'The land at the edge of the sea.', defEs: 'La tierra al borde del mar.' },
+            { word: 'flooding', wordEs: 'inundando', def: 'Covering with water.', defEs: 'Cubriendo con agua.' },
+            { word: 'rushed', wordEs: 'se precipitó', def: 'Moved very fast.', defEs: 'Se movió muy rápido.' }
+          ]
+        },
+        {
+          en: 'The tsunami was so strong that it traveled all the way across the Pacific Ocean, reaching Hawaii and Japan many hours later. Scientists studied how the waves spread so far.',
+          es: 'El tsunami fue tan fuerte que viajó por todo el océano Pacífico, llegando a Hawái y Japón muchas horas después. Los científicos estudiaron cómo las olas se propagaron tan lejos.',
+          vocab: [
+            { word: 'traveled', wordEs: 'viajó', def: 'Moved from one place to another.', defEs: 'Se movió de un lugar a otro.' },
+            { word: 'spread', wordEs: 'propagaron', def: 'Moved out over a wide area.', defEs: 'Se extendieron por una amplia zona.' },
+            { word: 'scientists', wordEs: 'científicos', def: 'People who study the natural world.', defEs: 'Personas que estudian el mundo natural.' },
+            { word: 'distance', wordEs: 'distancia', def: 'The amount of space between two places.', defEs: 'La cantidad de espacio entre dos lugares.' }
+          ]
+        },
+        {
+          en: 'After the disaster, engineers and scientists learned important lessons. They began to design stronger buildings and create warning systems to keep people safe.',
+          es: 'Después del desastre, los ingenieros y científicos aprendieron lecciones importantes. Comenzaron a diseñar edificios más fuertes y a crear sistemas de alerta para mantener a salvo a las personas.',
+          vocab: [
+            { word: 'disaster', wordEs: 'desastre', def: 'A very harmful event.', defEs: 'Un evento muy dañino.' },
+            { word: 'engineers', wordEs: 'ingenieros', def: 'People who design and build things.', defEs: 'Personas que diseñan y construyen cosas.' },
+            { word: 'warning', wordEs: 'alerta', def: 'A message that danger is coming.', defEs: 'Un mensaje de que viene un peligro.' },
+            { word: 'design', wordEs: 'diseñar', def: 'To plan how something will be made.', defEs: 'Planear cómo se hará algo.' }
+          ]
+        },
+        {
+          en: 'Today, the 1960 Valdivia earthquake is still studied around the world. It taught people how the Earth works and how communities can recover and rebuild after a great challenge.',
+          es: 'Hoy, el terremoto de Valdivia de 1960 todavía se estudia en todo el mundo. Enseñó a las personas cómo funciona la Tierra y cómo las comunidades pueden recuperarse y reconstruir después de un gran desafío.',
+          vocab: [
+            { word: 'communities', wordEs: 'comunidades', def: 'Groups of people who live together.', defEs: 'Grupos de personas que viven juntas.' },
+            { word: 'recover', wordEs: 'recuperarse', def: 'To return to normal after trouble.', defEs: 'Volver a la normalidad después de un problema.' },
+            { word: 'rebuild', wordEs: 'reconstruir', def: 'To build again.', defEs: 'Construir de nuevo.' },
+            { word: 'challenge', wordEs: 'desafío', def: 'A hard task to overcome.', defEs: 'Una tarea difícil de superar.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'How strong was the 1960 Valdivia earthquake?', qEs: '¿Qué tan fuerte fue el terremoto de Valdivia de 1960?', options: ['Magnitude 5.0', 'Magnitude 9.5', 'Magnitude 3.2', 'Magnitude 7.0'], optionsEs: ['Magnitud 5,0', 'Magnitud 9,5', 'Magnitud 3,2', 'Magnitud 7,0'], answer: 1 },
+        { q: 'What giant wave followed the earthquake?', qEs: '¿Qué ola gigante siguió al terremoto?', options: ['A tsunami', 'A waterfall', 'A whirlpool', 'A rainbow'], optionsEs: ['Un tsunami', 'Una cascada', 'Un remolino', 'Un arcoíris'], answer: 0 },
+        { q: 'What did scientists and engineers do after the disaster?', qEs: '¿Qué hicieron los científicos e ingenieros después del desastre?', options: ['Nothing changed', 'They designed stronger buildings and warning systems', 'They moved the ocean', 'They stopped studying earthquakes'], optionsEs: ['Nada cambió', 'Diseñaron edificios más fuertes y sistemas de alerta', 'Movieron el océano', 'Dejaron de estudiar los terremotos'], answer: 1 }
+      ]
+    },
+    {
+      id: 'crossing_andes',
+      title: 'Crossing the Andes',
+      titleEs: 'El Cruce de los Andes',
+      tier: 'commander', ageMin: 10, region: 'andes', icon: '⛰️',
+      pages: [
+        {
+          en: 'In 1817, a brave army set out to free Chile from Spanish rule. The soldiers were led by General José de San Martín and the Chilean patriot Bernardo O\'Higgins.',
+          es: 'En 1817, un valiente ejército partió para liberar a Chile del dominio español. Los soldados eran liderados por el general José de San Martín y el patriota chileno Bernardo O\'Higgins.',
+          vocab: [
+            { word: 'army', wordEs: 'ejército', def: 'A large group of soldiers.', defEs: 'Un gran grupo de soldados.' },
+            { word: 'liberate', wordEs: 'liberar', def: 'To set free.', defEs: 'Dejar en libertad.' },
+            { word: 'patriot', wordEs: 'patriota', def: 'A person who loves and defends their country.', defEs: 'Una persona que ama y defiende su país.' },
+            { word: 'general', wordEs: 'general', def: 'A high-ranking military leader.', defEs: 'Un líder militar de alto rango.' }
+          ]
+        },
+        {
+          en: 'To reach Chile, the army had to cross the towering Andes mountains. The high passes were freezing, and the thin air made it hard for the men and animals to breathe.',
+          es: 'Para llegar a Chile, el ejército tuvo que cruzar las imponentes montañas de los Andes. Los pasos altos eran helados, y el aire enrarecido dificultaba que los hombres y los animales respiraran.',
+          vocab: [
+            { word: 'towering', wordEs: 'imponentes', def: 'Very tall and impressive.', defEs: 'Muy altas e impresionantes.' },
+            { word: 'passes', wordEs: 'pasos', def: 'Routes through mountains.', defEs: 'Rutas a través de las montañas.' },
+            { word: 'altitude', wordEs: 'altitud', def: 'Height above sea level.', defEs: 'Altura sobre el nivel del mar.' },
+            { word: 'breathe', wordEs: 'respirar', def: 'To take air into the lungs.', defEs: 'Tomar aire en los pulmones.' }
+          ]
+        },
+        {
+          en: 'San Martín planned the journey with great care. He sent the army through several different mountain routes at once to confuse the Spanish forces waiting in Chile.',
+          es: 'San Martín planificó el viaje con gran cuidado. Envió al ejército por varias rutas de montaña distintas a la vez para confundir a las fuerzas españolas que esperaban en Chile.',
+          vocab: [
+            { word: 'planned', wordEs: 'planificó', def: 'Decided in advance how to do something.', defEs: 'Decidió de antemano cómo hacer algo.' },
+            { word: 'strategy', wordEs: 'estrategia', def: 'A clever plan to reach a goal.', defEs: 'Un plan ingenioso para lograr un objetivo.' },
+            { word: 'routes', wordEs: 'rutas', def: 'Paths from one place to another.', defEs: 'Caminos de un lugar a otro.' },
+            { word: 'confuse', wordEs: 'confundir', def: 'To make someone unsure of what is true.', defEs: 'Hacer que alguien no esté seguro de lo que es verdad.' }
+          ]
+        },
+        {
+          en: 'The march was exhausting. Many mules and horses did not survive the cold and the steep climbs, but the determined soldiers pressed onward toward their goal.',
+          es: 'La marcha fue agotadora. Muchas mulas y caballos no sobrevivieron al frío y a las empinadas subidas, pero los soldados decididos siguieron adelante hacia su meta.',
+          vocab: [
+            { word: 'march', wordEs: 'marcha', def: 'A long walk by an army.', defEs: 'Una larga caminata de un ejército.' },
+            { word: 'exhausting', wordEs: 'agotadora', def: 'Making one very tired.', defEs: 'Que cansa mucho.' },
+            { word: 'determined', wordEs: 'decididos', def: 'Firmly set on doing something.', defEs: 'Firmemente resueltos a hacer algo.' },
+            { word: 'survive', wordEs: 'sobrevivir', def: 'To stay alive through danger.', defEs: 'Permanecer vivo a pesar del peligro.' }
+          ]
+        },
+        {
+          en: 'On February 12, 1817, the army surprised the Spanish at the Battle of Chacabuco and won a great victory. The road to the capital, Santiago, was now open.',
+          es: 'El 12 de febrero de 1817, el ejército sorprendió a los españoles en la Batalla de Chacabuco y obtuvo una gran victoria. El camino hacia la capital, Santiago, ahora estaba abierto.',
+          vocab: [
+            { word: 'battle', wordEs: 'batalla', def: 'A fight between armies.', defEs: 'Una lucha entre ejércitos.' },
+            { word: 'surprised', wordEs: 'sorprendió', def: 'Attacked unexpectedly.', defEs: 'Atacó de forma inesperada.' },
+            { word: 'victory', wordEs: 'victoria', def: 'A win in a contest or battle.', defEs: 'Un triunfo en una competencia o batalla.' },
+            { word: 'capital', wordEs: 'capital', def: 'The main city of a country.', defEs: 'La ciudad principal de un país.' }
+          ]
+        },
+        {
+          en: 'The crossing of the Andes is remembered as one of the most daring military feats in history. It helped Chile move toward declaring its full independence in 1818.',
+          es: 'El cruce de los Andes es recordado como una de las hazañas militares más audaces de la historia. Ayudó a que Chile avanzara hacia la declaración de su independencia total en 1818.',
+          vocab: [
+            { word: 'daring', wordEs: 'audaz', def: 'Bold and brave.', defEs: 'Atrevido y valiente.' },
+            { word: 'feat', wordEs: 'hazaña', def: 'A great achievement.', defEs: 'Un gran logro.' },
+            { word: 'independence', wordEs: 'independencia', def: 'Freedom from the control of another country.', defEs: 'Libertad del control de otro país.' },
+            { word: 'declare', wordEs: 'declarar', def: 'To say something officially.', defEs: 'Decir algo de manera oficial.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Who led the army across the Andes with O\'Higgins?', qEs: '¿Quién lideró el ejército a través de los Andes junto a O\'Higgins?', options: ['Diego de Almagro', 'José de San Martín', 'Pedro de Valdivia', 'Charles Darwin'], optionsEs: ['Diego de Almagro', 'José de San Martín', 'Pedro de Valdivia', 'Charles Darwin'], answer: 1 },
+        { q: 'Why was crossing the Andes so difficult?', qEs: '¿Por qué fue tan difícil cruzar los Andes?', options: ['It was too hot and sunny', 'The cold, height, and thin air', 'There were too many roads', 'The mountains were very small'], optionsEs: ['Hacía demasiado calor y sol', 'El frío, la altura y el aire enrarecido', 'Había demasiados caminos', 'Las montañas eran muy pequeñas'], answer: 1 },
+        { q: 'What victory opened the road to Santiago in 1817?', qEs: '¿Qué victoria abrió el camino a Santiago en 1817?', options: ['The Battle of Maipú', 'The Battle of Chacabuco', 'The Naval Combat of Iquique', 'The Battle of Rancagua'], optionsEs: ['La Batalla de Maipú', 'La Batalla de Chacabuco', 'El Combate Naval de Iquique', 'La Batalla de Rancagua'], answer: 1 }
+      ]
+    },
+    {
+      id: 'atacama_stars',
+      title: 'Stargazing in the Atacama',
+      titleEs: 'Observando las Estrellas en Atacama',
+      tier: 'commander', ageMin: 10, region: 'north', icon: '🔭',
+      pages: [
+        {
+          en: 'High in the north of Chile lies the Atacama Desert, one of the driest places on Earth. Some parts of it can go years without a single drop of rain.',
+          es: 'En lo alto del norte de Chile se encuentra el desierto de Atacama, uno de los lugares más secos de la Tierra. Algunas partes pueden pasar años sin una sola gota de lluvia.',
+          vocab: [
+            { word: 'desert', wordEs: 'desierto', def: 'A very dry region with little rain.', defEs: 'Una región muy seca con poca lluvia.' },
+            { word: 'driest', wordEs: 'más seco', def: 'Having the least water.', defEs: 'Que tiene la menor cantidad de agua.' },
+            { word: 'region', wordEs: 'región', def: 'A particular area of land.', defEs: 'Una zona particular de tierra.' },
+            { word: 'rainfall', wordEs: 'lluvia', def: 'The amount of rain that falls.', defEs: 'La cantidad de lluvia que cae.' }
+          ]
+        },
+        {
+          en: 'Because the air is so dry and clear, and there are few city lights, the Atacama has some of the best night skies in the world for studying the stars.',
+          es: 'Como el aire es tan seco y claro, y hay pocas luces de ciudad, Atacama tiene algunos de los mejores cielos nocturnos del mundo para estudiar las estrellas.',
+          vocab: [
+            { word: 'clear', wordEs: 'claro', def: 'Easy to see through.', defEs: 'Fácil de ver a través.' },
+            { word: 'transparent', wordEs: 'transparente', def: 'Allowing light to pass through.', defEs: 'Que deja pasar la luz.' },
+            { word: 'astronomy', wordEs: 'astronomía', def: 'The study of stars and space.', defEs: 'El estudio de las estrellas y el espacio.' },
+            { word: 'observe', wordEs: 'observar', def: 'To watch carefully.', defEs: 'Mirar con atención.' }
+          ]
+        },
+        {
+          en: 'Scientists from many countries built large observatories on the desert mountains. One of the most famous is ALMA, a group of giant radio telescopes on a high plateau.',
+          es: 'Científicos de muchos países construyeron grandes observatorios en las montañas del desierto. Uno de los más famosos es ALMA, un conjunto de gigantescos radiotelescopios en una meseta alta.',
+          vocab: [
+            { word: 'observatories', wordEs: 'observatorios', def: 'Buildings for watching the sky.', defEs: 'Edificios para observar el cielo.' },
+            { word: 'telescopes', wordEs: 'telescopios', def: 'Tools that make distant objects look closer.', defEs: 'Herramientas que hacen ver más cercanos los objetos lejanos.' },
+            { word: 'plateau', wordEs: 'meseta', def: 'A flat area of high land.', defEs: 'Una zona plana de tierra elevada.' },
+            { word: 'instrument', wordEs: 'instrumento', def: 'A tool used for a special job.', defEs: 'Una herramienta usada para un trabajo especial.' }
+          ]
+        },
+        {
+          en: 'Radio telescopes do not collect light the way our eyes do. Instead, they gather invisible radio waves that come from clouds of gas and dust between the stars.',
+          es: 'Los radiotelescopios no captan la luz como lo hacen nuestros ojos. En cambio, recogen ondas de radio invisibles que provienen de nubes de gas y polvo entre las estrellas.',
+          vocab: [
+            { word: 'radio waves', wordEs: 'ondas de radio', def: 'A kind of invisible energy that travels through space.', defEs: 'Un tipo de energía invisible que viaja por el espacio.' },
+            { word: 'invisible', wordEs: 'invisible', def: 'Not able to be seen.', defEs: 'Que no se puede ver.' },
+            { word: 'gather', wordEs: 'recoger', def: 'To collect together.', defEs: 'Reunir o juntar.' },
+            { word: 'galaxy', wordEs: 'galaxia', def: 'A huge system of stars in space.', defEs: 'Un enorme sistema de estrellas en el espacio.' }
+          ]
+        },
+        {
+          en: 'With these telescopes, astronomers can study how stars and planets are born. They have even watched faraway galaxies that formed billions of years ago.',
+          es: 'Con estos telescopios, los astrónomos pueden estudiar cómo nacen las estrellas y los planetas. Incluso han observado galaxias lejanas que se formaron hace miles de millones de años.',
+          vocab: [
+            { word: 'astronomers', wordEs: 'astrónomos', def: 'Scientists who study space.', defEs: 'Científicos que estudian el espacio.' },
+            { word: 'planets', wordEs: 'planetas', def: 'Large bodies that orbit a star.', defEs: 'Cuerpos grandes que giran alrededor de una estrella.' },
+            { word: 'faraway', wordEs: 'lejanas', def: 'Very distant.', defEs: 'Muy distantes.' },
+            { word: 'formed', wordEs: 'se formaron', def: 'Came into being.', defEs: 'Llegaron a existir.' }
+          ]
+        },
+        {
+          en: 'Soon an even bigger telescope, called the Extremely Large Telescope, will open in the Atacama. Chile has become one of the most important places on Earth for exploring the universe.',
+          es: 'Pronto se inaugurará un telescopio aún más grande, llamado Telescopio Extremadamente Grande, en Atacama. Chile se ha convertido en uno de los lugares más importantes de la Tierra para explorar el universo.',
+          vocab: [
+            { word: 'extremely', wordEs: 'extremadamente', def: 'To a very high degree.', defEs: 'En un grado muy alto.' },
+            { word: 'universe', wordEs: 'universo', def: 'Everything that exists in space.', defEs: 'Todo lo que existe en el espacio.' },
+            { word: 'explore', wordEs: 'explorar', def: 'To travel and discover new things.', defEs: 'Viajar y descubrir cosas nuevas.' },
+            { word: 'important', wordEs: 'importante', def: 'Having great value or meaning.', defEs: 'Que tiene gran valor o significado.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Why is the Atacama Desert good for studying the stars?', qEs: '¿Por qué el desierto de Atacama es bueno para estudiar las estrellas?', options: ['It rains a lot', 'The air is dry and clear with few city lights', 'It is full of forests', 'It is very crowded'], optionsEs: ['Llueve mucho', 'El aire es seco y claro con pocas luces de ciudad', 'Está lleno de bosques', 'Está muy lleno de gente'], answer: 1 },
+        { q: 'What is ALMA?', qEs: '¿Qué es ALMA?', options: ['A famous mountain', 'A group of giant radio telescopes', 'A type of star', 'A river in the desert'], optionsEs: ['Una montaña famosa', 'Un conjunto de gigantescos radiotelescopios', 'Un tipo de estrella', 'Un río en el desierto'], answer: 1 },
+        { q: 'What do radio telescopes gather?', qEs: '¿Qué recogen los radiotelescopios?', options: ['Sunlight only', 'Invisible radio waves from space', 'Rain water', 'Desert sand'], optionsEs: ['Solo luz solar', 'Ondas de radio invisibles del espacio', 'Agua de lluvia', 'Arena del desierto'], answer: 1 }
+      ]
     }
   ];
 

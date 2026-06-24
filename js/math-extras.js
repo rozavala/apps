@@ -342,7 +342,13 @@ var MathExtras = (function() {
         { en: 'A bottle is 3/4 full holding 750 mL. Full capacity?', es: 'Una botella llena 3/4 tiene 750 mL. ¿Capacidad total?', answer: 1000 },
         { en: 'A cube has side 4. Volume = s³ = ?', es: 'Un cubo tiene lado 4. Volumen = s³ = ?', answer: 64 },
         { en: 'If 3 kg of grapes cost $6,600, what does 1 kg cost?', es: 'Si 3 kg de uvas cuestan $6.600, ¿cuánto cuesta 1 kg?', answer: 2200 },
-        { en: 'A project is 40% done after 10 days. Days to finish total?', es: 'Un proyecto va 40% tras 10 días. ¿Días totales para terminar?', answer: 25 }
+        { en: 'A project is 40% done after 10 days. Days to finish total?', es: 'Un proyecto va 40% tras 10 días. ¿Días totales para terminar?', answer: 25 },
+        { en: 'Solve for x: 2x + 3 = 11. x = ?', es: 'Resuelve x: 2x + 3 = 11. x = ?', answer: 4 },
+        { en: 'A train goes 80 km/h for 2 h, then 60 km/h for 1 h. Total distance?', es: 'Un tren va a 80 km/h por 2 h, luego 60 km/h por 1 h. ¿Distancia total?', answer: 220 },
+        { en: 'What is 3² + 4²?', es: '¿Cuánto es 3² + 4²?', answer: 25 },
+        { en: 'The temperature is 5°C and drops 8°C. What is it now?', es: 'La temperatura es 5°C y baja 8°C. ¿Cuál es ahora?', answer: -3 },
+        { en: 'For every 2 robots there are 5 batteries. How many batteries for 8 robots?', es: 'Por cada 2 robots hay 5 baterías. ¿Cuántas baterías para 8 robots?', answer: 20 },
+        { en: 'A store buys pencils for $300 and sells for $450 each. Profit on 10 pencils?', es: 'Una tienda compra lápices a $300 y vende a $450 cada uno. ¿Ganancia en 10 lápices?', answer: 1500 }
       ]
     };
 

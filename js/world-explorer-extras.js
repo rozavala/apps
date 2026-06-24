@@ -31,7 +31,17 @@ var WorldExplorerExtras = (function() {
     egypt:     { code: 'EGP', symbol: 'E£',  name: 'Egyptian pound',   sample: 'E£100' },
     japan:     { code: 'JPY', symbol: '¥',   name: 'Japanese yen',     sample: '¥1.000' },
     china:     { code: 'CNY', symbol: '¥',   name: 'Chinese yuan',     sample: '¥100' },
-    australia: { code: 'AUD', symbol: '$',   name: 'Australian dollar', sample: '$20' }
+    australia: { code: 'AUD', symbol: '$',   name: 'Australian dollar', sample: '$20' },
+    germany:        { code: 'EUR', symbol: '€',   name: 'Euro',              sample: '€20' },
+    united_kingdom: { code: 'GBP', symbol: '£',   name: 'Pound sterling',    sample: '£20' },
+    greece:         { code: 'EUR', symbol: '€',   name: 'Euro',              sample: '€20' },
+    portugal:       { code: 'EUR', symbol: '€',   name: 'Euro',              sample: '€20' },
+    south_africa:   { code: 'ZAR', symbol: 'R',   name: 'South African rand', sample: 'R100' },
+    morocco:        { code: 'MAD', symbol: 'DH',  name: 'Moroccan dirham',   sample: 'DH100' },
+    nigeria:        { code: 'NGN', symbol: '₦',   name: 'Nigerian naira',    sample: '₦1.000' },
+    india:          { code: 'INR', symbol: '₹',   name: 'Indian rupee',      sample: '₹500' },
+    south_korea:    { code: 'KRW', symbol: '₩',   name: 'South Korean won',  sample: '₩10.000' },
+    thailand:       { code: 'THB', symbol: '฿',   name: 'Thai baht',         sample: '฿100' }
   };
 
   // National anthems — title, composer, lyricist, year adopted, and
@@ -189,6 +199,86 @@ var WorldExplorerExtras = (function() {
       year: 1984,
       openingEs: '"Australians all let us rejoice…" (¡Australianos, alegrémonos todos!)',
       openingEn: '"Australians all let us rejoice, for we are one and free."'
+    },
+    germany: {
+      title: 'Deutschlandlied (third stanza)',
+      composer: 'Joseph Haydn',
+      lyricist: 'August Heinrich Hoffmann von Fallersleben',
+      year: 1922,
+      openingEs: '"Einigkeit und Recht und Freiheit…" — "Unidad, justicia y libertad."',
+      openingEn: '"Einigkeit und Recht und Freiheit…" — "Unity and justice and freedom."'
+    },
+    united_kingdom: {
+      title: 'God Save the King',
+      composer: 'Unknown (traditional)',
+      lyricist: 'Unknown (traditional)',
+      year: 1745,
+      openingEs: '"God save our gracious King…" (¡Dios salve a nuestro noble Rey!)',
+      openingEn: '"God save our gracious King, long live our noble King…"'
+    },
+    greece: {
+      title: 'Hymn to Liberty (Ýmnos eis tin Eleftherían)',
+      composer: 'Nikolaos Mantzaros',
+      lyricist: 'Dionysios Solomos',
+      year: 1865,
+      openingEs: '"Se reconozco por el filo de tu espada terrible…"',
+      openingEn: '"I recognize you by the fearsome edge of your sword…"'
+    },
+    portugal: {
+      title: 'A Portuguesa',
+      composer: 'Alfredo Keil',
+      lyricist: 'Henrique Lopes de Mendonça',
+      year: 1911,
+      openingEs: '"Heróis do mar, nobre povo…" (¡Héroes del mar, noble pueblo!)',
+      openingEn: '"Heroes of the sea, noble people…" (in Portuguese)'
+    },
+    south_africa: {
+      title: 'National Anthem of South Africa',
+      composer: 'Enoch Sontonga & Marthinus Lourens de Villiers',
+      lyricist: 'Enoch Sontonga, C. J. Langenhoven and others',
+      year: 1997,
+      openingEs: '"Nkosi Sikelel\' iAfrika…" — "Dios bendiga a África."',
+      openingEn: '"Nkosi Sikelel\' iAfrika…" — "God bless Africa."'
+    },
+    morocco: {
+      title: 'Hymne Chérifien',
+      composer: 'Léo Morgan',
+      lyricist: 'Ali Squalli Houssaini',
+      year: 1956,
+      openingEs: '"Cuna de los hombres libres, fuente de luz…"',
+      openingEn: '"Fountain of freedom, source of light…" (in Arabic)'
+    },
+    nigeria: {
+      title: 'Nigeria, We Hail Thee',
+      composer: 'Frances Berda',
+      lyricist: 'Lillian Jean Williams',
+      year: 1960,
+      openingEs: '"Nigeria, te saludamos, nuestra patria querida…"',
+      openingEn: '"Nigeria, we hail thee, our own dear native land…"'
+    },
+    india: {
+      title: 'Jana Gana Mana',
+      composer: 'Rabindranath Tagore',
+      lyricist: 'Rabindranath Tagore',
+      year: 1950,
+      openingEs: '"Jana-gana-mana…" — "Tú eres el gobernante de las mentes de todo el pueblo."',
+      openingEn: '"Jana-gana-mana…" — "Thou art the ruler of the minds of all people."'
+    },
+    south_korea: {
+      title: 'Aegukga',
+      composer: 'Ahn Eak-tai',
+      lyricist: 'Unknown (traditional)',
+      year: 1948,
+      openingEs: '"Hasta que el mar del Este se seque…"',
+      openingEn: '"Until the East Sea\'s waters run dry…" (in Korean)'
+    },
+    thailand: {
+      title: 'Phleng Chat Thai',
+      composer: 'Phra Chenduriyang',
+      lyricist: 'Luang Saranupraphan',
+      year: 1939,
+      openingEs: '"Tailandia une la carne y la sangre de los tailandeses…"',
+      openingEn: '"Thailand unites the flesh and blood of Thais…" (in Thai)'
     }
   };
 
