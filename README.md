@@ -60,6 +60,7 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Panel de Padres (Parent Dashboard)**: Un área segura para monitorear el progreso y balance con insights para cada niño. (A secure area to monitor progress and balance with insights for each child).
 - **Diseño Seguro (Safe by Design)**: Sin llamadas API externas, sin contenido dinámico de terceros y sin funciones generadas por el usuario. (No external API calls, no dynamic third-party content, and no user-generated features).
 - **Enfoque Histórico y Factual (Historical & Factual Focus)**: Contenido enfocado en hechos demostrables, patrimonio cultural y habilidades clásicas, manteniendo la estricta neutralidad. (Content focuses on demonstrable facts, cultural heritage, and classical skills, maintaining strict neutrality.)
+- **Patrimonio Católico (Catholic Heritage)**: "Fe Explorador" enseña oraciones clásicas y biografías de santos chilenos enfocándose puramente en la historia y los hechos demostrables. (Teaches classic prayers and biographies of Chilean saints focusing purely on history and demonstrable facts.)
 
 ## 📜 Filosofía de Contenido (Content Philosophy)
 
