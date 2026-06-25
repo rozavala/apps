@@ -3,6 +3,32 @@
   "groups": [
     {
       "entry": {
+        "id": "e_mqtlbpyy_f99fid",
+        "ts": 1782397288762,
+        "clientTs": 1782397288762,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Load failed",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 3,
+      "firstTs": 1782397288762,
+      "lastTs": 1782397288762,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
         "id": "e_mqsr775i_53mj72",
         "ts": 1782346689270,
         "clientTs": 1782346689270,
