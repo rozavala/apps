@@ -1,9 +1,35 @@
 {
-  "generatedAt": "2026-06-24T22:33:45.911Z",
+  "generatedAt": "2026-06-25T00:19:50.099Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 2,
+  "totalGroups": 3,
+  "totalEvents": 6,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Sync failed Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1782346689270,
+      "lastTs": 1782346689270,
+      "users": 1
+    },
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Nominations sync failed Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 2,
+      "firstTs": 1782346689268,
+      "lastTs": 1782346689268,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.error",

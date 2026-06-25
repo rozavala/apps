@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-24T22:33:45.911Z",
+  "generatedAt": "2026-06-25T00:19:50.099Z",
   "windowHours": 72,
   "days": [
     {
@@ -29,6 +29,63 @@
           "lastTs": 1782339808790,
           "users": [
             "u-3bda7c"
+          ]
+        }
+      ]
+    },
+    {
+      "day": "2026-06-25",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mqsr775i_53mj72",
+            "ts": 1782346689270,
+            "clientTs": 1782346689270,
+            "kind": "console.error",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "Sync failed Load failed",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-46a6e4",
+            "age": 7,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1782346689270,
+          "lastTs": 1782346689270,
+          "users": [
+            "u-46a6e4"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mqsr775g_hh7rd2",
+            "ts": 1782346689268,
+            "clientTs": 1782346689268,
+            "kind": "console.error",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "Nominations sync failed Load failed",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-46a6e4",
+            "age": 7,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1782346689268,
+          "lastTs": 1782346689268,
+          "users": [
+            "u-46a6e4"
           ]
         }
       ]
