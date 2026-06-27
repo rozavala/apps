@@ -1,8 +1,10 @@
 /* ================================================================
    INVEST QUEST — A kid-friendly market simulator.
-   Teaches risk, return, ROI, diversification, compounding and how a
-   market moves on news. Two modes: Play (simulator) + Learn (concepts
-   & quiz). Per-kid storage at zs_invest_<key>.
+   Teaches risk, return, ROI, diversification, compounding, and the
+   FACTORS that move prices up and down (company news, the whole
+   economy, hype & fear, interest rates).
+   Two modes: Play (simulator) + Learn (concepts & quiz).
+   Per-kid storage at zs_invest_<key>.
    ================================================================ */
 
 (function() {
@@ -11,24 +13,55 @@
   var TARGET_YEARS = 10;
   var STORAGE_PREFIX = 'zs_invest_';
 
-  // ---- the investment menu, ordered low → high risk ----------------
-  // mean = average yearly return, vol = how much it swings (volatility).
+  // ---- groups for the allocation screen ----------------------------
+  var GROUPS = [
+    { id: 'safe',   label: '🛡️ Safe & Steady',           note: 'Low risk. Grows slowly, rarely loses.' },
+    { id: 'stocks', label: '🏢 Company Stocks',            note: 'Own a piece of a real-style company. Moves on its own news + the market.' },
+    { id: 'risky',  label: '🔥 High Risk, High Reward',    note: 'Big swings. Can soar — or crash.' }
+  ];
+
+  // ---- the investment menu -----------------------------------------
+  // mean = average yearly return, vol = how much it swings,
+  // beta  = how strongly it follows the whole market's mood.
   var ASSETS = [
-    { id: 'savings', icon: '🏦', name: 'Savings Account', tag: 'Very low risk',
-      mean: 0.03, vol: 0.01, risk: 1, color: 'var(--iq-teal)',
-      desc: 'The bank pays you a little interest for keeping money there. Safe and steady — but it grows slowly.' },
-    { id: 'bonds', icon: '📜', name: 'Government Bonds', tag: 'Low risk',
-      mean: 0.05, vol: 0.04, risk: 2, color: 'var(--iq-blue)',
-      desc: 'You lend money to the government. They pay it back later, plus a bit extra. Pretty safe.' },
-    { id: 'stocks', icon: '🏢', name: 'Company Stocks', tag: 'Medium risk',
-      mean: 0.09, vol: 0.18, risk: 3, color: 'var(--iq-indigo)',
-      desc: 'You own a tiny piece of big companies. Over many years it grows well, but it bounces up and down a lot.' },
-    { id: 'biz', icon: '🍋', name: 'Lemonade Business', tag: 'High risk',
-      mean: 0.13, vol: 0.28, risk: 4, color: 'var(--iq-gold)',
-      desc: 'Invest in a small business, like your own lemonade stand. Big rewards if it does well — but it can flop.' },
-    { id: 'crypto', icon: '🚀', name: 'Crypto & Startups', tag: 'Very high risk',
-      mean: 0.20, vol: 0.55, risk: 5, color: 'var(--iq-pink)',
-      desc: 'Brand-new and exciting. It can rocket to the moon — or crash hard. Only risk what you could lose.' }
+    // ---- safe ----
+    { id: 'savings', group: 'safe', icon: '🏦', name: 'Savings Account', tag: 'Very low risk',
+      mean: 0.03, vol: 0.01, beta: 0, risk: 1, color: '#0D9488',
+      desc: 'The bank pays a little interest. Safe and steady — but it grows slowly.' },
+    { id: 'bonds', group: 'safe', icon: '📜', name: 'Government Bonds', tag: 'Low risk',
+      mean: 0.045, vol: 0.04, beta: -0.2, risk: 1, color: '#2563EB',
+      desc: 'You lend money to the government. When the stock market drops, bonds often go UP — a safe harbor.' },
+    { id: 'index', group: 'safe', icon: '🧺', name: 'Whole-Market Fund', tag: 'Medium risk',
+      mean: 0.08, vol: 0.14, beta: 1.0, risk: 3, color: '#4338CA',
+      desc: 'One pick that owns a tiny bit of HUNDREDS of companies. Built-in diversification — the classic smart choice.' },
+
+    // ---- company stocks (real-style) ----
+    { id: 'apple', group: 'stocks', icon: '🍏', name: 'Apple', tag: 'Tech',
+      mean: 0.10, vol: 0.20, beta: 1.1, risk: 3, color: '#475569',
+      desc: 'Phones, laptops and gadgets. Up when new products sell well; down if sales slow.' },
+    { id: 'games', group: 'stocks', icon: '🎮', name: 'Nintendo', tag: 'Video games',
+      mean: 0.10, vol: 0.26, beta: 1.0, risk: 4, color: '#DC2626',
+      desc: 'Games & consoles. A hit game sends it soaring; a flop drags it down.' },
+    { id: 'disney', group: 'stocks', icon: '🏰', name: 'Disney', tag: 'Movies & parks',
+      mean: 0.08, vol: 0.22, beta: 1.1, risk: 3, color: '#7C3AED',
+      desc: 'Movies, shows and theme parks. Blockbusters and busy parks lift it up.' },
+    { id: 'food', group: 'stocks', icon: '🍔', name: "McDonald's", tag: 'Restaurants',
+      mean: 0.07, vol: 0.13, beta: 0.7, risk: 2, color: '#D97706',
+      desc: 'Restaurants everywhere. People eat in good times and bad, so it is steadier than most stocks.' },
+    { id: 'ev', group: 'stocks', icon: '🚗', name: 'Tesla', tag: 'Electric cars',
+      mean: 0.14, vol: 0.42, beta: 1.6, risk: 5, color: '#BE123C',
+      desc: 'Electric cars and big dreams. Lots of hype = wild swings, big ups AND big downs.' },
+    { id: 'shop', group: 'stocks', icon: '🛒', name: 'Amazon', tag: 'Online store',
+      mean: 0.11, vol: 0.24, beta: 1.2, risk: 4, color: '#EA580C',
+      desc: 'Giant online store. Grows when people shop and ship more online.' },
+
+    // ---- risky ----
+    { id: 'biz', group: 'risky', icon: '🍋', name: 'Lemonade Business', tag: 'High risk',
+      mean: 0.12, vol: 0.30, beta: 1.2, risk: 4, color: '#B45309',
+      desc: 'Your own small business. Big rewards if it does well — but it can flop.' },
+    { id: 'crypto', group: 'risky', icon: '🪙', name: 'Crypto', tag: 'Very high risk',
+      mean: 0.18, vol: 0.60, beta: 2.0, risk: 5, color: '#BE185D',
+      desc: 'Brand-new digital money. Can rocket to the moon — or crash hard. Only risk what you could lose.' }
   ];
 
   function _asset(id) {
@@ -36,19 +69,44 @@
     return null;
   }
 
-  // ---- market news events ------------------------------------------
-  // adj = extra return added to specific assets that year.
-  var EVENTS = [
-    { icon: '😴', text: 'A calm, quiet year. Not much happened.', adj: {} },
-    { icon: '📈', text: 'Boom! The whole market went up this year.', adj: { stocks: 0.07, biz: 0.06, crypto: 0.10 } },
-    { icon: '📉', text: 'A recession hit. Risky investments dropped.', adj: { stocks: -0.13, biz: -0.10, crypto: -0.28 } },
-    { icon: '🚀', text: 'Tech mania! Startups and crypto went wild.', adj: { crypto: 0.45, stocks: 0.05 } },
-    { icon: '💥', text: 'A startup bubble popped. Crypto tumbled.', adj: { crypto: -0.45, stocks: -0.04 } },
-    { icon: '☀️', text: 'Hot summer — lemonade sales soared!', adj: { biz: 0.22 } },
-    { icon: '🌧️', text: 'A rainy year — small businesses struggled.', adj: { biz: -0.20 } },
-    { icon: '🏦', text: 'The bank raised interest rates.', adj: { savings: 0.02, bonds: 0.02 } },
-    { icon: '🎉', text: 'People are spending! Big companies earned more.', adj: { stocks: 0.08, biz: 0.05 } },
-    { icon: '🛒', text: 'Prices rose (inflation). Cash buys a little less.', adj: {}, inflation: true }
+  // ---- market climate (the macro factor: the whole economy) --------
+  // stockAdj is added to every stock-like asset, scaled by its beta.
+  var CLIMATES = [
+    { id: 'bull', icon: '📈', label: 'Bull market — investors feel great',
+      why: 'When people feel good about the economy, almost all stocks rise together.',
+      stockAdj: 0.08, volMul: 1.0, weight: 3, tone: 'good' },
+    { id: 'normal', icon: '😐', label: 'A calm, normal year',
+      why: 'Nothing big happened to the whole market — companies mostly moved on their own news.',
+      stockAdj: 0.0, volMul: 1.0, weight: 4, tone: 'calm' },
+    { id: 'bear', icon: '📉', label: 'Bear market — investors are nervous',
+      why: 'When people get worried, most stocks fall together — even great companies.',
+      stockAdj: -0.13, volMul: 1.2, weight: 3, tone: 'bad' },
+    { id: 'crash', icon: '💥', label: 'Market crash — a really tough year',
+      why: 'Sometimes the whole market drops fast. Notice how bonds held up — that is why we diversify!',
+      stockAdj: -0.30, volMul: 1.4, weight: 1, tone: 'bad' }
+  ];
+
+  // ---- company / sector news (the specific factors) ----------------
+  // Each headline explains WHY something moved. factor = the lesson.
+  var NEWS = [
+    { icon: '🍏', text: 'Apple launched a phone everyone wanted — it sold out!', factor: 'A popular new product → up', adj: { apple: 0.22 } },
+    { icon: '🍏', text: 'Apple sales slowed down this year.', factor: 'Fewer sales → down', adj: { apple: -0.16 } },
+    { icon: '🎮', text: 'Nintendo released a smash-hit game.', factor: 'A hit product → up', adj: { games: 0.30 } },
+    { icon: '🎮', text: "Nintendo's new console flopped.", factor: 'A flop → down', adj: { games: -0.24 } },
+    { icon: '🏰', text: 'Disney made a billion-dollar blockbuster movie.', factor: 'Big success → up', adj: { disney: 0.24 } },
+    { icon: '🏰', text: 'Disney parks were quiet and a movie bombed.', factor: 'Weak results → down', adj: { disney: -0.18 } },
+    { icon: '🍔', text: "McDonald's opened lots of new restaurants.", factor: 'Steady growth → up a bit', adj: { food: 0.10 } },
+    { icon: '🚗', text: 'Electric cars are the hottest trend — Tesla soared!', factor: 'Hype & demand → big up', adj: { ev: 0.45 } },
+    { icon: '🚗', text: 'Tesla had to recall some cars. Ouch.', factor: 'Bad news (a recall) → down', adj: { ev: -0.30 } },
+    { icon: '🛒', text: 'Amazon shipped record numbers of packages.', factor: 'More customers → up', adj: { shop: 0.22 } },
+    { icon: '🛒', text: 'Shipping cost Amazon more than expected.', factor: 'Higher costs → down', adj: { shop: -0.15 } },
+    { icon: '🍋', text: 'A hot summer made lemonade sales explode!', factor: 'Great season → up', adj: { biz: 0.28 } },
+    { icon: '🌧️', text: 'A rainy summer hurt the lemonade stand.', factor: 'Bad season → down', adj: { biz: -0.22 } },
+    { icon: '🪙', text: 'Everyone is talking about crypto — prices went wild!', factor: 'Hype can inflate prices fast', adj: { crypto: 0.60 } },
+    { icon: '💸', text: 'A big crypto company collapsed overnight.', factor: 'Fear can pop a bubble fast', adj: { crypto: -0.55 } },
+    { icon: '🏦', text: 'The bank raised interest rates.', factor: 'Higher rates help savers, hurt risky bets', adj: { savings: 0.02, bonds: 0.03, ev: -0.08, crypto: -0.10 } },
+    { icon: '🛍️', text: 'People had lots of money to spend this year.', factor: 'Strong shoppers lift many companies', adj: { shop: 0.10, food: 0.06, disney: 0.08, apple: 0.06 } },
+    { icon: '🛒', text: 'Prices rose (inflation) — cash buys a little less.', factor: 'Inflation quietly shrinks idle cash', adj: {}, inflation: true }
   ];
 
   // ---- helpers -----------------------------------------------------
@@ -71,9 +129,18 @@
   }
   function _rand(n) { return Math.floor(Math.random() * n); }
   function _pick(arr) { return arr[_rand(arr.length)]; }
+  function _weightedPick(arr) {
+    var total = 0, i;
+    for (i = 0; i < arr.length; i++) total += (arr[i].weight || 1);
+    var r = Math.random() * total;
+    for (i = 0; i < arr.length; i++) {
+      r -= (arr[i].weight || 1);
+      if (r <= 0) return arr[i];
+    }
+    return arr[arr.length - 1];
+  }
 
-  // Standard normal via Box–Muller, gently clamped so we never get
-  // a totally absurd single year.
+  // Standard normal via Box–Muller, gently clamped.
   function _gauss() {
     var u = 1 - Math.random(), v = Math.random();
     var z = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
@@ -101,13 +168,16 @@
     ASSETS.forEach(function(a) { holdings[a.id] = 0; });
     return {
       start: start,
-      step: Math.max(10, Math.round(start / 10)),
-      cash: start,            // money not yet invested
-      holdings: holdings,     // dollars in each asset
+      step: Math.max(5, Math.round(start / 20)),
+      cash: start,
+      holdings: holdings,
       year: 0,
-      history: [start],       // net worth at end of each year (index 0 = start)
-      lastEvent: null,
-      lastReturns: null
+      history: [start],
+      lastClimate: null,
+      lastNews: null,
+      lastReturns: null,
+      lastBefore: null,
+      lastWhy: null
     };
   }
 
@@ -119,7 +189,6 @@
 
   // ---- root --------------------------------------------------------
   function _root() { return document.getElementById('iq-wrap'); }
-
   function open() { _renderHome(); }
 
   function _renderHome() {
@@ -135,19 +204,19 @@
       '<div class="iq-header">' +
         '<span class="icon">📈</span>' +
         '<h1>Invest Quest</h1>' +
-        '<p>Grow your money — learn about risk, reward and the market.</p>' +
+        '<p>Grow your money — and learn what makes the market move.</p>' +
       '</div>' +
       statLine +
       '<div class="iq-home-grid">' +
         '<button type="button" class="iq-home-card iq-home-play" onclick="InvestQuest.setup()">' +
           '<span class="iq-home-icon">🪙</span>' +
           '<span class="iq-home-name">Play the Market</span>' +
-          '<span class="iq-home-desc">Invest your lemonade money and grow it over 10 years.</span>' +
+          '<span class="iq-home-desc">Invest in real-style companies and grow your money over 10 years.</span>' +
         '</button>' +
         '<button type="button" class="iq-home-card iq-home-learn" onclick="InvestQuest.learn()">' +
           '<span class="iq-home-icon">🧠</span>' +
           '<span class="iq-home-name">Learn the Ideas</span>' +
-          '<span class="iq-home-desc">What is risk, return, ROI and why spread your money out?</span>' +
+          '<span class="iq-home-desc">Risk, return, ROI — and why prices go up and down.</span>' +
         '</button>' +
       '</div>';
   }
@@ -185,38 +254,46 @@
   }
 
   // ---- allocation / rebalance screen -------------------------------
+  function _assetRow(a, net) {
+    var val = state.holdings[a.id];
+    var pctOfNet = net > 0 ? Math.round((val / net) * 100) : 0;
+    var dots = '';
+    for (var i = 1; i <= 5; i++) dots += '<span class="iq-risk-dot' + (i <= a.risk ? ' on' : '') + '"></span>';
+    return '<div class="iq-asset" style="--ac:' + a.color + '">' +
+      '<div class="iq-asset-main">' +
+        '<span class="iq-asset-icon">' + a.icon + '</span>' +
+        '<div class="iq-asset-info">' +
+          '<div class="iq-asset-name">' + a.name + '</div>' +
+          '<div class="iq-asset-meta"><span class="iq-risk">' + dots + '</span>' +
+            '<span class="iq-asset-tag">' + a.tag + '</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="iq-asset-ctrl">' +
+        '<button type="button" class="iq-step" aria-label="Sell ' + a.name + '" onclick="InvestQuest.adjust(\'' + a.id + '\',-1)">−</button>' +
+        '<div class="iq-asset-val"><span>' + _money(val) + '</span><small>' + pctOfNet + '%</small></div>' +
+        '<button type="button" class="iq-step plus" aria-label="Buy ' + a.name + '" onclick="InvestQuest.adjust(\'' + a.id + '\',1)">+</button>' +
+      '</div>' +
+      '<div class="iq-asset-desc">' + a.desc + '</div>' +
+    '</div>';
+  }
+
   function _renderAllocate(isFirst) {
     var net = _netWorth(state);
-    var rows = ASSETS.map(function(a) {
-      var val = state.holdings[a.id];
-      var pctOfNet = net > 0 ? Math.round((val / net) * 100) : 0;
-      var dots = '';
-      for (var i = 1; i <= 5; i++) {
-        dots += '<span class="iq-risk-dot' + (i <= a.risk ? ' on' : '') + '"></span>';
-      }
-      return '<div class="iq-asset" style="--ac:' + a.color + '">' +
-        '<div class="iq-asset-main">' +
-          '<span class="iq-asset-icon">' + a.icon + '</span>' +
-          '<div class="iq-asset-info">' +
-            '<div class="iq-asset-name">' + a.name + '</div>' +
-            '<div class="iq-asset-meta"><span class="iq-risk">' + dots + '</span>' +
-              '<span class="iq-asset-tag">' + a.tag + '</span></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="iq-asset-ctrl">' +
-          '<button type="button" class="iq-step" aria-label="Take money out of ' + a.name + '" onclick="InvestQuest.adjust(\'' + a.id + '\',-1)">−</button>' +
-          '<div class="iq-asset-val"><span>' + _money(val) + '</span><small>' + pctOfNet + '%</small></div>' +
-          '<button type="button" class="iq-step plus" aria-label="Put money into ' + a.name + '" onclick="InvestQuest.adjust(\'' + a.id + '\',1)">+</button>' +
-        '</div>' +
-        '<div class="iq-asset-desc">' + a.desc + '</div>' +
+    var sections = GROUPS.map(function(g) {
+      var rows = ASSETS.filter(function(a) { return a.group === g.id; })
+        .map(function(a) { return _assetRow(a, net); }).join('');
+      return '<div class="iq-group">' +
+        '<div class="iq-group-head"><span class="iq-group-label">' + g.label + '</span>' +
+          '<span class="iq-group-note">' + g.note + '</span></div>' +
+        '<div class="iq-asset-list">' + rows + '</div>' +
       '</div>';
     }).join('');
 
-    var canGo = state.cash < net; // at least something invested
+    var canGo = state.cash < net;
     var title = isFirst ? 'Spread out your money' : 'Year ' + state.year + ' — adjust your plan';
     var sub = isFirst
-      ? 'Tap + to invest, − to pull money back to Cash. Mixing different types is called <b>diversifying</b> — it lowers your risk.'
-      : 'You can buy more or sell some before the next year. Or leave it and let it grow!';
+      ? 'Tap + to invest, − to sell. Mixing different types is called <b>diversifying</b> — it lowers your risk.'
+      : 'Buy more or sell some before the next year — or leave it and let it grow!';
 
     _root().innerHTML =
       '<div class="iq-game">' +
@@ -226,11 +303,9 @@
           '<p class="iq-panel-sub">' + sub + '</p>' +
           '<div class="iq-cash">💵 Cash to invest: <b>' + _money(state.cash) + '</b>' +
             '<span class="iq-cash-note">(uninvested cash does not grow)</span></div>' +
-          '<div class="iq-asset-list">' + rows + '</div>' +
+          sections +
           '<div class="iq-actions">' +
-            (isFirst
-              ? '<button type="button" class="iq-btn ghost" onclick="InvestQuest.autoMix()">✨ Suggest a mix</button>'
-              : '') +
+            '<button type="button" class="iq-btn ghost" onclick="InvestQuest.autoMix()">✨ Suggest a mix</button>' +
             '<button type="button" class="iq-btn primary" ' + (canGo ? '' : 'disabled') +
               ' onclick="InvestQuest.runYear()">Run the year ▶</button>' +
           '</div>' +
@@ -257,15 +332,18 @@
     _renderAllocate(state.year === 0);
   }
 
-  // A sensible balanced starter mix so kids see what diversifying looks like.
+  // A sensible diversified starter mix.
   function autoMix() {
     _sound('star');
-    // pull everything back to cash first
     ASSETS.forEach(function(a) { state.cash += state.holdings[a.id]; state.holdings[a.id] = 0; });
-    var weights = { savings: 0.15, bonds: 0.20, stocks: 0.35, biz: 0.20, crypto: 0.10 };
+    var weights = {
+      savings: 0.08, bonds: 0.10, index: 0.20,
+      apple: 0.10, games: 0.07, disney: 0.07, food: 0.08, ev: 0.05, shop: 0.08,
+      biz: 0.10, crypto: 0.07
+    };
     var net = state.cash;
     ASSETS.forEach(function(a) {
-      var want = Math.round((net * weights[a.id]) / state.step) * state.step;
+      var want = Math.round((net * (weights[a.id] || 0)) / state.step) * state.step;
       want = Math.min(want, state.cash);
       state.holdings[a.id] = want;
       state.cash -= want;
@@ -277,53 +355,95 @@
   function runYear() {
     if (!state) return;
     _sound('click');
-    var event = _pick(EVENTS);
-    var returns = {};
-    var before = {};
+
+    var climate = _weightedPick(CLIMATES);
+
+    // pick 1–2 distinct news items
+    var nNews = 1 + (Math.random() < 0.6 ? 1 : 0);
+    var pool = NEWS.slice();
+    var chosen = [];
+    while (chosen.length < nNews && pool.length) {
+      chosen.push(pool.splice(_rand(pool.length), 1)[0]);
+    }
+    var newsAdj = {};
+    var whyMap = {};
+    chosen.forEach(function(n) {
+      for (var k in n.adj) {
+        newsAdj[k] = (newsAdj[k] || 0) + n.adj[k];
+        if (!whyMap[k]) whyMap[k] = [];
+        whyMap[k].push(n);
+      }
+    });
+
+    var returns = {}, before = {};
     ASSETS.forEach(function(a) {
       before[a.id] = state.holdings[a.id];
-      var r = a.mean + a.vol * _gauss();
-      if (event.adj[a.id]) r += event.adj[a.id];
-      if (r < -0.9) r = -0.9; // can't lose more than 90% in a year
+      var vol = a.vol * (climate.volMul || 1);
+      var r = a.mean + vol * _gauss();
+      r += (a.beta || 0) * climate.stockAdj;     // the whole-market factor
+      if (newsAdj[a.id]) r += newsAdj[a.id];      // the company-specific factor
+      if (r < -0.9) r = -0.9;
       returns[a.id] = r;
       state.holdings[a.id] = state.holdings[a.id] * (1 + r);
     });
+
     state.year += 1;
-    state.lastEvent = event;
+    state.lastClimate = climate;
+    state.lastNews = chosen;
     state.lastReturns = returns;
     state.lastBefore = before;
+    state.lastWhy = whyMap;
     state.history.push(_netWorth(state));
     _renderYearResult();
   }
 
   function _renderYearResult() {
-    var event = state.lastEvent;
+    var climate = state.lastClimate;
     var net = _netWorth(state);
     var roi = (net - state.start) / state.start;
     var prevNet = state.history[state.history.length - 2];
     var yearChange = net - prevNet;
 
-    var rows = ASSETS.map(function(a) {
-      var before = state.lastBefore[a.id];
-      var after = state.holdings[a.id];
-      if (before <= 0 && after <= 0) return '';
-      var delta = after - before;
-      var r = state.lastReturns[a.id];
-      var cls = delta > 0.5 ? 'up' : (delta < -0.5 ? 'down' : 'flat');
-      return '<div class="iq-res-row">' +
-        '<span class="iq-res-icon">' + a.icon + '</span>' +
-        '<span class="iq-res-name">' + a.name + '</span>' +
-        '<span class="iq-res-val">' + _money(after) + '</span>' +
-        '<span class="iq-res-delta ' + cls + '">' + (delta >= 0 ? '+' : '') + _money(delta) +
-          ' <small>' + _pct(r) + '</small></span>' +
+    var newsHtml = state.lastNews.map(function(n) {
+      return '<div class="iq-news-item">' +
+        '<span class="iq-news-icon">' + n.icon + '</span>' +
+        '<span class="iq-news-text">' + n.text +
+          '<span class="iq-news-factor">' + n.factor + '</span>' +
+        '</span>' +
       '</div>';
     }).join('');
 
-    var cashRow = state.cash > 0
-      ? '<div class="iq-res-row"><span class="iq-res-icon">💵</span>' +
+    // asset rows, only ones the kid holds, biggest holdings first
+    var held = ASSETS.filter(function(a) {
+      return state.lastBefore[a.id] > 0.5 || state.holdings[a.id] > 0.5;
+    }).sort(function(a, b) { return state.holdings[b.id] - state.holdings[a.id]; });
+
+    var rows = held.map(function(a) {
+      var before = state.lastBefore[a.id];
+      var after = state.holdings[a.id];
+      var delta = after - before;
+      var r = state.lastReturns[a.id];
+      var cls = delta > 0.5 ? 'up' : (delta < -0.5 ? 'down' : 'flat');
+      var why = '';
+      if (state.lastWhy[a.id]) {
+        why = '<div class="iq-res-why">💬 ' + state.lastWhy[a.id][0].factor + '</div>';
+      }
+      return '<div class="iq-res-item">' +
+        '<div class="iq-res-row">' +
+          '<span class="iq-res-icon">' + a.icon + '</span>' +
+          '<span class="iq-res-name">' + a.name + '</span>' +
+          '<span class="iq-res-val">' + _money(after) + '</span>' +
+          '<span class="iq-res-delta ' + cls + '">' + (delta >= 0 ? '+' : '') + _money(delta) +
+            ' <small>' + _pct(r) + '</small></span>' +
+        '</div>' + why +
+      '</div>';
+    }).join('');
+
+    var cashRow = state.cash > 0.5
+      ? '<div class="iq-res-item"><div class="iq-res-row"><span class="iq-res-icon">💵</span>' +
         '<span class="iq-res-name">Cash</span>' +
         '<span class="iq-res-val">' + _money(state.cash) + '</span>' +
-        '<span class="iq-res-delta flat">+$0 <small>0%</small></span></div>'
+        '<span class="iq-res-delta flat">+$0 <small>0%</small></span></div></div>'
       : '';
 
     var done = state.year >= TARGET_YEARS;
@@ -332,17 +452,19 @@
     _root().innerHTML =
       '<div class="iq-game">' +
         _topBar('Year ' + state.year + ' of ' + TARGET_YEARS, true) +
-        '<div class="iq-event ' + (event.inflation ? 'warn' : '') + '">' +
-          '<span class="iq-event-icon">' + event.icon + '</span>' +
-          '<span class="iq-event-text">' + event.text + '</span>' +
+        '<div class="iq-climate ' + climate.tone + '">' +
+          '<div class="iq-climate-top"><span class="iq-climate-icon">' + climate.icon + '</span>' +
+            '<span class="iq-climate-label">' + climate.label + '</span></div>' +
+          '<div class="iq-climate-why">' + climate.why + '</div>' +
         '</div>' +
+        '<div class="iq-news"><div class="iq-news-head">📰 This year\'s news</div>' + newsHtml + '</div>' +
         '<div class="iq-networth">' +
           '<div class="iq-nw-label">Your money is now</div>' +
           '<div class="iq-nw-value ' + roiCls + '">' + _money(net) + '</div>' +
           '<div class="iq-nw-sub">' +
             'This year: <b class="' + (yearChange >= 0 ? 'up' : 'down') + '">' +
               (yearChange >= 0 ? '+' : '') + _money(yearChange) + '</b>' +
-            ' · Total growth (ROI): <b class="' + roiCls + '">' + _pct(roi) + '</b>' +
+            ' · Total ROI: <b class="' + roiCls + '">' + _pct(roi) + '</b>' +
           '</div>' +
         '</div>' +
         _chart() +
@@ -390,31 +512,27 @@
     _sound('cheer');
     var net = _netWorth(state);
     var roi = (net - state.start) / state.start;
-    var perYear = Math.pow(net / state.start, 1 / TARGET_YEARS) - 1;
+    var perYear = Math.pow(Math.max(net, 1) / state.start, 1 / TARGET_YEARS) - 1;
 
-    // stars: did it grow, beat a savings account, grow strongly?
     var stars = 0;
     if (roi > 0) stars = 1;
-    if (perYear >= 0.04) stars = 2;          // beat a plain savings account
-    if (perYear >= 0.08) stars = 3;          // strong, stock-market-like growth
+    if (perYear >= 0.04) stars = 2;
+    if (perYear >= 0.08) stars = 3;
     var starsHtml = '';
     for (var i = 0; i < 3; i++) starsHtml += (i < stars ? '⭐' : '☆');
 
-    // lesson tailored to how they did
-    var allCrypto = state.history.length > 1;
     var lesson;
     if (roi <= 0) {
-      lesson = 'Markets go up and down. Some years you lose money — that is normal. Spreading money across safer and riskier choices (diversifying) softens the bad years.';
+      lesson = 'Markets go up AND down — losing some years is totally normal, even for the pros. Spreading money across safe and risky choices (diversifying) softens the bad years.';
     } else if (perYear >= 0.08) {
-      lesson = 'Great growth! You took some smart risks and stayed invested. Over many years, that is how money grows the most.';
+      lesson = 'Great growth! You took smart risks and stayed invested through the ups and downs. Over many years, that is how money grows the most.';
     } else {
-      lesson = 'Nice — your money grew! Safer choices grow slowly but steadily. Adding a little more risk can grow it faster, if you can handle the bumps.';
+      lesson = 'Nice — your money grew! Safer picks grow slowly but steadily. A little more risk can grow it faster, if you can handle the bumpy years.';
     }
 
     var emoji = stars >= 3 ? '🏆' : stars >= 2 ? '🌟' : stars >= 1 ? '💪' : '🌱';
     var title = stars >= 3 ? 'Master Investor!' : stars >= 2 ? 'Smart Investor!' : stars >= 1 ? 'You grew it!' : 'Keep learning!';
 
-    // save best
     var data = _load();
     data.games = (data.games || 0) + 1;
     if (data.bestRoi == null || roi > data.bestRoi) data.bestRoi = roi;
@@ -458,25 +576,26 @@
       '<span style="width:38px"></span>' +
     '</div>';
   }
-
   function home() { _sound('click'); state = null; _renderHome(); }
 
   // ================================================================
-  //  LEARN MODE — concept cards + quick quiz
+  //  LEARN MODE — concept cards + quiz
   // ================================================================
   var CONCEPTS = [
     { icon: '🌱', title: 'What is investing?',
-      body: 'Investing means putting your money to work so it can <b>grow</b> over time, instead of just sitting still. You buy something today hoping it will be worth more later.' },
+      body: 'Investing means putting your money to work so it can <b>grow</b> over time, instead of sitting still. You buy something today hoping it is worth more later.' },
     { icon: '⚖️', title: 'Risk vs. Return',
-      body: 'Return is the money you <b>make</b>. Risk is the chance you could <b>lose</b> some. Usually, the bigger the possible reward, the bigger the risk. Safe things grow slowly; risky things can grow fast — or drop.' },
-    { icon: '🧺', title: 'Diversify (don\'t put all your eggs in one basket)',
-      body: 'Spreading money across many different investments is called <b>diversifying</b>. If one drops, the others can hold you up. It is the smartest way to lower your risk.' },
-    { icon: '📊', title: 'What is ROI?',
-      body: 'ROI means <b>Return On Investment</b>. It is how much you gained compared to what you put in. Invest $100 and end with $120? That is a $20 gain, or <b>20% ROI</b>.' },
+      body: 'Return is the money you <b>make</b>. Risk is the chance you <b>lose</b> some. Usually the bigger the possible reward, the bigger the risk. Safe things grow slowly; risky things can jump — or drop.' },
+    { icon: '📊', title: 'What makes a stock go UP or DOWN?',
+      body: 'Four big factors: <b>1) Company news</b> — a hit product or more profit pushes it up; a flop or recall pushes it down. <b>2) The whole economy</b> — when times are good most stocks rise together; when scary, they fall together. <b>3) Hype & fear</b> — excited buyers can push prices too high, then they pop. <b>4) Interest rates</b> — when banks pay more, risky bets look less tempting.' },
+    { icon: '🧺', title: 'Diversify & index funds',
+      body: 'Don\'t put all your eggs in one basket! Spreading money across many investments is <b>diversifying</b>. An <b>index fund</b> does it for you — it owns a little piece of hundreds of companies at once.' },
+    { icon: '📈', title: 'What is ROI?',
+      body: '<b>ROI = Return On Investment</b>: how much you gained compared to what you put in. Invest $100 and end with $120? That is a $20 gain, or <b>20% ROI</b>.' },
     { icon: '❄️', title: 'Compounding (the snowball)',
       body: 'When your money earns money, and then <i>that</i> money earns even more — that is <b>compounding</b>. Like a snowball rolling downhill, it grows faster the longer you wait.' },
-    { icon: '🏪', title: 'What is "the market"?',
-      body: 'A market is where people <b>buy and sell</b> investments, like stocks. Prices go up and down every day depending on news and what people think things are worth.' }
+    { icon: '🎢', title: 'Losing is part of it',
+      body: 'Even the best investors have losing years. Prices go down sometimes — that is normal. The trick is to stay calm, stay diversified, and think <b>long-term</b>.' }
   ];
 
   function learn() {
@@ -505,9 +624,12 @@
     { q: 'What does ROI tell you?',
       opts: ['How much your money grew compared to what you invested', 'How many coins you have', 'The color of a stock'],
       a: 0, why: 'ROI = Return On Investment — your gain compared to what you put in.' },
-    { q: 'Which is usually the SAFEST place for money?',
-      opts: ['Crypto', 'A savings account', 'A brand-new startup'],
-      a: 1, why: 'Savings accounts barely move — safe, but they grow slowly.' },
+    { q: 'A company releases a hit new product. Its stock will probably…',
+      opts: ['Go down', 'Go up', 'Disappear'],
+      a: 1, why: 'Good company news — like a popular product — usually pushes a stock up.' },
+    { q: 'Why does the WHOLE market sometimes fall at once?',
+      opts: ['Every company had a recall on the same day', 'Investors get nervous about the economy', 'The stock market closes forever'],
+      a: 1, why: 'When people worry about the economy, most stocks drop together — even good ones.' },
     { q: 'Why do investors "diversify"?',
       opts: ['To spend money faster', 'So one bad investment won\'t sink everything', 'Because it looks cool'],
       a: 1, why: 'Spreading money out means a single drop won\'t hurt you as much.' },
@@ -517,18 +639,16 @@
     { q: 'You invest $100 and a year later have $130. Your ROI is…',
       opts: ['30%', '$30 only, no percent', '130%'],
       a: 0, why: 'You gained $30 on $100 = 30% ROI.' },
-    { q: 'What makes a "snowball" of growth over many years?',
-      opts: ['Spending it', 'Compounding — earnings making more earnings', 'Hiding it under the bed'],
-      a: 1, why: 'Compounding is money earning money, again and again.' }
+    { q: 'What is an index fund?',
+      opts: ['A single risky coin', 'One pick that owns a little of many companies', 'A type of bank loan'],
+      a: 1, why: 'An index fund spreads your money across many companies at once — instant diversification.' },
+    { q: 'Your stocks dropped this year. The smartest move is usually to…',
+      opts: ['Panic and sell everything', 'Remember losses are normal and think long-term', 'Never invest again'],
+      a: 1, why: 'Down years happen to everyone. Staying calm and long-term is how investors win.' }
   ];
 
   var quizState = null;
-
-  function quiz() {
-    _sound('click');
-    quizState = { idx: 0, correct: 0 };
-    _renderQuiz();
-  }
+  function quiz() { _sound('click'); quizState = { idx: 0, correct: 0 }; _renderQuiz(); }
 
   function _renderQuiz() {
     var item = QUIZ[quizState.idx];
@@ -554,19 +674,11 @@
       opts[k].disabled = true;
       if (k === item.a) opts[k].classList.add('correct');
     }
-    if (i === item.a) {
-      quizState.correct++;
-      _sound('correct');
-    } else {
-      btn.classList.add('wrong');
-      _sound('wrong');
-    }
+    if (i === item.a) { quizState.correct++; _sound('correct'); }
+    else { btn.classList.add('wrong'); _sound('wrong'); }
     var why = document.getElementById('iq-quiz-why');
     if (why) why.innerHTML = '💡 ' + item.why;
-    setTimeout(function() {
-      quizState.idx++;
-      _renderQuiz();
-    }, i === item.a ? 900 : 1700);
+    setTimeout(function() { quizState.idx++; _renderQuiz(); }, i === item.a ? 950 : 1750);
   }
 
   function _renderQuizResult() {
@@ -597,18 +709,9 @@
 
   // ---- expose ------------------------------------------------------
   window.InvestQuest = {
-    open: open,
-    home: home,
-    setup: setup,
-    begin: begin,
-    adjust: adjust,
-    autoMix: autoMix,
-    runYear: runYear,
-    manage: manage,
-    finish: finish,
-    learn: learn,
-    quiz: quiz,
-    _answer: _answer
+    open: open, home: home, setup: setup, begin: begin,
+    adjust: adjust, autoMix: autoMix, runYear: runYear, manage: manage,
+    finish: finish, learn: learn, quiz: quiz, _answer: _answer
   };
 
   if (document.readyState === 'loading') {
