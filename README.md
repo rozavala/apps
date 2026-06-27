@@ -39,6 +39,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **✈️ Vacation Planner** | Planifica las próximas aventuras y vacaciones familiares. (Plan upcoming family adventures and vacations.) | [vacation.html](vacation.html) |
 | **🏛️ Civics Lab** | Cómo funciona el gobierno de Chile y otros sistemas del mundo. (How the government of Chile and other world systems work.) | [civics-lab.html](civics-lab.html) |
 | **🏆 World Cup 2026** | Sigue los equipos, partidos y ciudades sede del torneo de la Copa del Mundo. (Follow the teams, matches and host cities of the World Cup tournament.) | [world-cup.html](world-cup.html) |
+| **📈 Invest Quest** | Un simulador de mercado para aprender sobre inversiones, riesgo y diversificación. (A kid-friendly market simulator to learn investing, risk, and diversification.) | [invest-quest.html](invest-quest.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -72,6 +73,7 @@ All content in this repository adheres to the [Content Guidelines](content-guide
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Invest Quest"!**: Aprende cómo crece el dinero, qué hace que los precios suban o bajen, y por qué diversificar es clave. (Learn how money grows, what makes prices move, and why diversification is key.)
 - **Refresco de Contenido II (Content Refresh II)**: Más apps con contenido nuevo y más difícil — Chess Quest (tácticas: horquillas, clavadas, jaque mate; finales; aperturas), Money Master (compras múltiples, descuentos, problemas), Bible Explorer (historias y versículos), Guitar Jam (acordes y canciones), Art Studio (obras maestras y lecciones) y más matemáticas (media/mediana/moda, fracciones↔decimales↔porcentajes). (More apps with new, harder content — Chess, Money, Bible, Guitar, Art, and more Math.)
 - **Aprende, no solo respondas (Explain-after-answer)**: Las preguntas ahora muestran una explicación con el dato clave después de responder, en Civics Lab, Descubre Chile, Fe Explorador y el nuevo modo Quiz de World Explorer. (Quizzes now show a short factual explanation after you answer.)
 - **Dificultad por Edad (Age-tiered quizzes)**: Civics Lab y el nuevo Quiz de World Explorer ahora ajustan las preguntas a la edad del explorador, como ya lo hacían Math y Descubre Chile. (Civics Lab and the new World Explorer quiz now adapt question difficulty to the child's age.)
