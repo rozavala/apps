@@ -17,7 +17,7 @@
   var GROUPS = [
     { id: 'safe',   label: '🛡️ Safe & Steady',           note: 'Low risk. Grows slowly, rarely loses.' },
     { id: 'stocks', label: '🏢 Company Stocks',            note: 'Own a piece of a real-style company. Moves on its own news + the market.' },
-    { id: 'risky',  label: '🔥 High Risk, High Reward',    note: 'Big swings. Can soar — or crash.' }
+    { id: 'risky',  label: '🔥 High Risk, High Reward',    note: 'Big swings — some are all-or-nothing bets that soar or crash.' }
   ];
 
   // ---- the investment menu -----------------------------------------
@@ -54,14 +54,26 @@
     { id: 'shop', group: 'stocks', icon: '🛒', name: 'Amazon', tag: 'Online store',
       mean: 0.11, vol: 0.24, beta: 1.2, risk: 4, color: '#EA580C',
       desc: 'Giant online store. Grows when people shop and ship more online.' },
+    { id: 'farms', group: 'stocks', icon: '🌾', name: 'GreenFields Farms', tag: 'Crops & food',
+      mean: 0.07, vol: 0.20, beta: 0.8, risk: 3, color: '#16A34A',
+      desc: 'Grows crops and sells food. Good weather and high food prices lift it; a drought hurts it. Very real-world!' },
 
     // ---- risky ----
     { id: 'biz', group: 'risky', icon: '🍋', name: 'Lemonade Business', tag: 'High risk',
       mean: 0.12, vol: 0.30, beta: 1.2, risk: 4, color: '#B45309',
       desc: 'Your own small business. Big rewards if it does well — but it can flop.' },
-    { id: 'crypto', group: 'risky', icon: '🪙', name: 'Crypto', tag: 'Very high risk',
-      mean: 0.18, vol: 0.60, beta: 2.0, risk: 5, color: '#BE185D',
-      desc: 'Brand-new digital money. Can rocket to the moon — or crash hard. Only risk what you could lose.' }
+    { id: 'biotech', group: 'risky', icon: '🧪', name: 'BioCure Labs', tag: 'Biotech · all-or-nothing',
+      mean: 0, vol: 0.15, beta: 0.3, risk: 5, color: '#0EA5E9',
+      desc: 'A science company betting on ONE new medicine. Pass the big test and it soars; fail and it crashes. Its fate is its own — not the market\'s.',
+      binary: { p: 0.5, win: 1.10, lose: -0.62,
+        winText: "BioCure's new medicine PASSED its big trial!", winFactor: 'Trial success → huge jump',
+        loseText: "BioCure's medicine FAILED its trial.", loseFactor: 'Trial failure → big crash' } },
+    { id: 'rocket', group: 'risky', icon: '🚀', name: 'AstroLaunch', tag: 'Space startup · all-or-nothing',
+      mean: 0, vol: 0.15, beta: 0.5, risk: 5, color: '#DB2777',
+      desc: 'A rocket company. A successful launch sends it to the moon; a failed one sends it down. Thrilling — and very risky.',
+      binary: { p: 0.55, win: 0.85, lose: -0.52,
+        winText: 'AstroLaunch nailed its big rocket launch! 🌝', winFactor: 'Successful launch → big jump',
+        loseText: "AstroLaunch's rocket failed to launch.", loseFactor: 'Failed launch → big drop' } }
   ];
 
   function _asset(id) {
@@ -102,9 +114,10 @@
     { icon: '🛒', text: 'Shipping cost Amazon more than expected.', factor: 'Higher costs → down', adj: { shop: -0.15 } },
     { icon: '🍋', text: 'A hot summer made lemonade sales explode!', factor: 'Great season → up', adj: { biz: 0.28 } },
     { icon: '🌧️', text: 'A rainy summer hurt the lemonade stand.', factor: 'Bad season → down', adj: { biz: -0.22 } },
-    { icon: '🪙', text: 'Everyone is talking about crypto — prices went wild!', factor: 'Hype can inflate prices fast', adj: { crypto: 0.60 } },
-    { icon: '💸', text: 'A big crypto company collapsed overnight.', factor: 'Fear can pop a bubble fast', adj: { crypto: -0.55 } },
-    { icon: '🏦', text: 'The bank raised interest rates.', factor: 'Higher rates help savers, hurt risky bets', adj: { savings: 0.02, bonds: 0.03, ev: -0.08, crypto: -0.10 } },
+    { icon: '🌾', text: 'Perfect weather gave farms a record harvest!', factor: 'Great harvest → up', adj: { farms: 0.22 } },
+    { icon: '🌵', text: "A drought ruined a lot of this year's crops.", factor: 'Bad weather → down', adj: { farms: -0.22 } },
+    { icon: '🍞', text: 'Food prices rose around the world.', factor: 'Pricier crops lift farms', adj: { farms: 0.12, food: -0.05 } },
+    { icon: '🏦', text: 'The bank raised interest rates.', factor: 'Higher rates help savers, hurt risky bets', adj: { savings: 0.02, bonds: 0.03, ev: -0.08 } },
     { icon: '🛍️', text: 'People had lots of money to spend this year.', factor: 'Strong shoppers lift many companies', adj: { shop: 0.10, food: 0.06, disney: 0.08, apple: 0.06 } },
     { icon: '🛒', text: 'Prices rose (inflation) — cash buys a little less.', factor: 'Inflation quietly shrinks idle cash', adj: {}, inflation: true }
   ];
@@ -337,9 +350,9 @@
     _sound('star');
     ASSETS.forEach(function(a) { state.cash += state.holdings[a.id]; state.holdings[a.id] = 0; });
     var weights = {
-      savings: 0.08, bonds: 0.10, index: 0.20,
-      apple: 0.10, games: 0.07, disney: 0.07, food: 0.08, ev: 0.05, shop: 0.08,
-      biz: 0.10, crypto: 0.07
+      savings: 0.07, bonds: 0.10, index: 0.20,
+      apple: 0.09, games: 0.06, disney: 0.06, food: 0.08, ev: 0.05, shop: 0.07, farms: 0.07,
+      biz: 0.07, biotech: 0.04, rocket: 0.04
     };
     var net = state.cash;
     ASSETS.forEach(function(a) {
@@ -376,16 +389,34 @@
     });
 
     var returns = {}, before = {};
+    var binaryHeadlines = [];
     ASSETS.forEach(function(a) {
       before[a.id] = state.holdings[a.id];
-      var vol = a.vol * (climate.volMul || 1);
-      var r = a.mean + vol * _gauss();
-      r += (a.beta || 0) * climate.stockAdj;     // the whole-market factor
-      if (newsAdj[a.id]) r += newsAdj[a.id];      // the company-specific factor
+      var r;
+      if (a.binary) {
+        // All-or-nothing: roll a single make-or-break event. Mostly its
+        // own destiny (low market beta) — that's company-specific risk.
+        var success = Math.random() < a.binary.p;
+        r = (success ? a.binary.win : a.binary.lose);
+        r += a.vol * _gauss() * 0.4;                  // small wiggle
+        r += (a.beta || 0) * climate.stockAdj * 0.5;  // mild market pull
+        var factor = success ? a.binary.winFactor : a.binary.loseFactor;
+        whyMap[a.id] = [{ factor: factor }];
+        if (before[a.id] > 0.5) {
+          binaryHeadlines.push({ icon: a.icon, text: success ? a.binary.winText : a.binary.loseText, factor: factor });
+        }
+      } else {
+        var vol = a.vol * (climate.volMul || 1);
+        r = a.mean + vol * _gauss();
+        r += (a.beta || 0) * climate.stockAdj;   // the whole-market factor
+        if (newsAdj[a.id]) r += newsAdj[a.id];    // the company-specific factor
+      }
       if (r < -0.9) r = -0.9;
       returns[a.id] = r;
       state.holdings[a.id] = state.holdings[a.id] * (1 + r);
     });
+    // Surface make-or-break outcomes for companies the kid actually owns.
+    chosen = chosen.concat(binaryHeadlines);
 
     state.year += 1;
     state.lastClimate = climate;
@@ -594,6 +625,8 @@
       body: '<b>ROI = Return On Investment</b>: how much you gained compared to what you put in. Invest $100 and end with $120? That is a $20 gain, or <b>20% ROI</b>.' },
     { icon: '❄️', title: 'Compounding (the snowball)',
       body: 'When your money earns money, and then <i>that</i> money earns even more — that is <b>compounding</b>. Like a snowball rolling downhill, it grows faster the longer you wait.' },
+    { icon: '🎲', title: 'All-or-nothing bets',
+      body: 'Some companies live or die on ONE event — a <b>biotech</b> whose medicine must pass a test, or a <b>rocket</b> that must launch. They can double your money or lose most of it. This is <b>company-specific risk</b>: it happens whether the market is up or down. Fun in small amounts, dangerous if you bet big.' },
     { icon: '🎢', title: 'Losing is part of it',
       body: 'Even the best investors have losing years. Prices go down sometimes — that is normal. The trick is to stay calm, stay diversified, and think <b>long-term</b>.' }
   ];
@@ -642,6 +675,9 @@
     { q: 'What is an index fund?',
       opts: ['A single risky coin', 'One pick that owns a little of many companies', 'A type of bank loan'],
       a: 1, why: 'An index fund spreads your money across many companies at once — instant diversification.' },
+    { q: 'A biotech\'s new medicine just FAILED its big test. Its stock will likely…',
+      opts: ['Soar', 'Crash', 'Stay exactly the same'],
+      a: 1, why: 'All-or-nothing companies crash when their one big bet fails — that is company-specific risk.' },
     { q: 'Your stocks dropped this year. The smartest move is usually to…',
       opts: ['Panic and sell everything', 'Remember losses are normal and think long-term', 'Never invest again'],
       a: 1, why: 'Down years happen to everyone. Staying calm and long-term is how investors win.' }
