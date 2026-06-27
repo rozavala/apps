@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-06-25T14:24:21.033Z",
+  "generatedAt": "2026-06-27T13:50:46.983Z",
   "windowHours": 72,
-  "totalGroups": 4,
-  "totalEvents": 11,
+  "totalGroups": 5,
+  "totalEvents": 12,
   "topGroups": [
+    {
+      "app": "math-galaxy",
+      "kind": "error",
+      "page": "math-galaxy.html",
+      "message": "TypeError: x.toFixed is not a function. (In 'x.toFixed(1)', 'x.toFixed' is undefined)",
+      "filename": "https://rozavala.github.io/apps/js/math-galaxy.js?v=2",
+      "lineno": 624,
+      "colno": 293,
+      "count": 1,
+      "firstTs": 1782567376044,
+      "lastTs": 1782567376044,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
