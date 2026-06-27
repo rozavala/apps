@@ -31,9 +31,9 @@
     { id: 'bonds', group: 'safe', icon: '📜', name: 'Government Bonds', tag: 'Low risk',
       mean: 0.045, vol: 0.04, beta: -0.2, risk: 1, color: '#2563EB',
       desc: 'You lend money to the government. When the stock market drops, bonds often go UP — a safe harbor.' },
-    { id: 'index', group: 'safe', icon: '🧺', name: 'Whole-Market Fund', tag: 'Medium risk',
+    { id: 'index', group: 'safe', icon: '📊', name: 'S&P 500 Fund', tag: 'The whole market',
       mean: 0.08, vol: 0.14, beta: 1.0, risk: 3, color: '#4338CA',
-      desc: 'One pick that owns a tiny bit of HUNDREDS of companies. Built-in diversification — the classic smart choice.' },
+      desc: 'One fund that owns the 500 biggest companies at once. When people say "the market," they mean this. Built-in diversification — many grown-ups just buy this and relax.' },
 
     // ---- company stocks (real-style) ----
     { id: 'apple', group: 'stocks', icon: '🍏', name: 'Apple', tag: 'Tech',
@@ -186,6 +186,8 @@
       holdings: holdings,
       year: 0,
       history: [start],
+      benchmark: [start],   // value of an all-S&P-500 portfolio over time
+      returnsLog: [],       // each year's return per asset, for the "what if" replay
       lastClimate: null,
       lastNews: null,
       lastReturns: null,
@@ -424,6 +426,9 @@
     state.lastReturns = returns;
     state.lastBefore = before;
     state.lastWhy = whyMap;
+    state.returnsLog.push(returns);
+    var bPrev = state.benchmark[state.benchmark.length - 1];
+    state.benchmark.push(bPrev * (1 + (returns.index || 0)));
     state.history.push(_netWorth(state));
     _renderYearResult();
   }
@@ -500,10 +505,11 @@
         '</div>' +
         _chart() +
         '<div class="iq-res-list">' + rows + cashRow + '</div>' +
+        (done ? '' : '<div class="iq-tip">💡 React to the news! Tap <b>Change my mix</b> to buy or sell before next year.</div>') +
         '<div class="iq-actions">' +
           (done
             ? '<button type="button" class="iq-btn primary" onclick="InvestQuest.finish()">See my results 🏁</button>'
-            : '<button type="button" class="iq-btn ghost" onclick="InvestQuest.manage()">✏️ Adjust plan</button>' +
+            : '<button type="button" class="iq-btn ghost" onclick="InvestQuest.manage()">✏️ Change my mix</button>' +
               '<button type="button" class="iq-btn primary" onclick="InvestQuest.runYear()">Next year ▶</button>') +
         '</div>' +
       '</div>';
@@ -513,28 +519,81 @@
 
   function manage() { _sound('click'); _renderAllocate(false); }
 
-  // ---- tiny SVG line chart of net worth over the years -------------
+  // ---- SVG line chart: the player vs the S&P 500 benchmark ---------
   function _chart() {
     var h = state.history;
     if (h.length < 2) return '';
+    var b = state.benchmark || [];
+    var hasB = b.length === h.length;
     var W = 280, H = 90, pad = 6;
-    var max = Math.max.apply(null, h), min = Math.min.apply(null, h);
+    var all = hasB ? h.concat(b) : h;
+    var max = Math.max.apply(null, all), min = Math.min.apply(null, all);
     if (max === min) max = min + 1;
-    var pts = h.map(function(v, i) {
-      var x = pad + (i / (h.length - 1)) * (W - pad * 2);
-      var y = pad + (1 - (v - min) / (max - min)) * (H - pad * 2);
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    });
+    function pathOf(arr) {
+      return arr.map(function(v, i) {
+        var x = pad + (i / (arr.length - 1)) * (W - pad * 2);
+        var y = pad + (1 - (v - min) / (max - min)) * (H - pad * 2);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      });
+    }
+    var hp = pathOf(h);
     var up = h[h.length - 1] >= state.start;
     var stroke = up ? 'var(--iq-green)' : 'var(--iq-red)';
-    var last = pts[pts.length - 1].split(',');
+    var dotColor = up ? '#059669' : '#DC2626';
+    var last = hp[hp.length - 1].split(',');
+    var marketLine = '';
+    if (hasB) {
+      var bp = pathOf(b);
+      marketLine = '<polyline fill="none" stroke="#9ca3af" stroke-width="2" ' +
+        'stroke-dasharray="4 4" stroke-linecap="round" stroke-linejoin="round" points="' + bp.join(' ') + '"/>';
+    }
     return '<div class="iq-chart">' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+        marketLine +
         '<polyline fill="none" stroke="' + stroke + '" stroke-width="2.5" ' +
-          'stroke-linecap="round" stroke-linejoin="round" points="' + pts.join(' ') + '"/>' +
-        '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.5" fill="' + stroke + '"/>' +
+          'stroke-linecap="round" stroke-linejoin="round" points="' + hp.join(' ') + '"/>' +
+        '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.5" fill="' + dotColor + '"/>' +
       '</svg>' +
-      '<div class="iq-chart-cap">📅 Your money over ' + (h.length - 1) + ' year' + (h.length - 1 === 1 ? '' : 's') + '</div>' +
+      '<div class="iq-chart-legend">' +
+        '<span><span class="iq-dot" style="background:' + dotColor + '"></span> You</span>' +
+        (hasB ? '<span><span class="iq-dot dash"></span> S&amp;P 500 (the market)</span>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  // ---- "what if" replay: all-in one asset across the same years ----
+  function _hypo(assetId) {
+    var v = state.start;
+    state.returnsLog.forEach(function(yr) { v *= (1 + (yr[assetId] || 0)); });
+    return v;
+  }
+
+  function _compareBlock(net) {
+    var rows = [
+      { label: '🧺 Your mix', val: net, me: true },
+      { label: '📊 All S&P 500', val: _hypo('index') },
+      { label: '🏦 All Savings', val: _hypo('savings') },
+      { label: '🧪 All on BioCure (one risky bet)', val: _hypo('biotech') }
+    ];
+    var maxv = Math.max(state.start, rows[0].val, rows[1].val, rows[2].val, rows[3].val);
+    var bars = rows.map(function(r) {
+      var w = Math.max(2, Math.round((r.val / maxv) * 100));
+      var roiR = (r.val - state.start) / state.start;
+      return '<div class="iq-cmp-row' + (r.me ? ' me' : '') + '">' +
+        '<span class="iq-cmp-label">' + r.label + '</span>' +
+        '<div class="iq-cmp-bar"><div class="iq-cmp-fill" style="width:' + w + '%"></div></div>' +
+        '<span class="iq-cmp-val">' + _money(r.val) + ' <small class="' + (roiR >= 0 ? 'up' : 'down') + '">' + _pct(roiR) + '</small></span>' +
+      '</div>';
+    }).join('');
+    var beat = net >= rows[1].val;
+    var verdict = beat
+      ? '🎉 You beat the market! Your mix did better than just buying the S&P 500.'
+      : 'The S&P 500 beat your mix this time — and that is super common! It is why many grown-ups just buy the index and relax.';
+    return '<div class="iq-compare">' +
+      '<div class="iq-compare-head">📊 What if you had invested it all in one thing?</div>' +
+      '<p class="iq-compare-sub">Same 10 years, same news — different choices:</p>' +
+      bars +
+      '<div class="iq-verdict ' + (beat ? 'good' : '') + '">' + verdict + '</div>' +
     '</div>';
   }
 
@@ -590,6 +649,7 @@
             '<div class="iq-final-stat"><small>Per year</small><b class="' + (perYear >= 0 ? 'up' : 'down') + '">' + _pct(perYear) + '</b></div>' +
           '</div>' +
           _chart() +
+          _compareBlock(net) +
           '<div class="iq-lesson">💡 ' + lesson + '</div>' +
           '<div class="iq-actions">' +
             '<button type="button" class="iq-btn primary" onclick="InvestQuest.setup()">Play again 🔁</button>' +
@@ -619,8 +679,8 @@
       body: 'Return is the money you <b>make</b>. Risk is the chance you <b>lose</b> some. Usually the bigger the possible reward, the bigger the risk. Safe things grow slowly; risky things can jump — or drop.' },
     { icon: '📊', title: 'What makes a stock go UP or DOWN?',
       body: 'Four big factors: <b>1) Company news</b> — a hit product or more profit pushes it up; a flop or recall pushes it down. <b>2) The whole economy</b> — when times are good most stocks rise together; when scary, they fall together. <b>3) Hype & fear</b> — excited buyers can push prices too high, then they pop. <b>4) Interest rates</b> — when banks pay more, risky bets look less tempting.' },
-    { icon: '🧺', title: 'Diversify & index funds',
-      body: 'Don\'t put all your eggs in one basket! Spreading money across many investments is <b>diversifying</b>. An <b>index fund</b> does it for you — it owns a little piece of hundreds of companies at once.' },
+    { icon: '🧺', title: 'Diversify & the S&P 500',
+      body: 'Don\'t put all your eggs in one basket! Spreading money across many investments is <b>diversifying</b>. The <b>S&P 500</b> is a famous index fund that owns the 500 biggest companies at once — instant diversification. It is also "the market": investors love to ask, <b>did I beat the S&P 500?</b> Surprisingly, most people don\'t — so many just buy it.' },
     { icon: '📈', title: 'What is ROI?',
       body: '<b>ROI = Return On Investment</b>: how much you gained compared to what you put in. Invest $100 and end with $120? That is a $20 gain, or <b>20% ROI</b>.' },
     { icon: '❄️', title: 'Compounding (the snowball)',
@@ -672,9 +732,9 @@
     { q: 'You invest $100 and a year later have $130. Your ROI is…',
       opts: ['30%', '$30 only, no percent', '130%'],
       a: 0, why: 'You gained $30 on $100 = 30% ROI.' },
-    { q: 'What is an index fund?',
-      opts: ['A single risky coin', 'One pick that owns a little of many companies', 'A type of bank loan'],
-      a: 1, why: 'An index fund spreads your money across many companies at once — instant diversification.' },
+    { q: 'What is the S&P 500?',
+      opts: ['A single risky startup', 'An index of the 500 biggest companies — "the market"', 'A type of bank loan'],
+      a: 1, why: 'The S&P 500 owns the 500 biggest companies at once — instant diversification, and the benchmark investors try to beat.' },
     { q: 'A biotech\'s new medicine just FAILED its big test. Its stock will likely…',
       opts: ['Soar', 'Crash', 'Stay exactly the same'],
       a: 1, why: 'All-or-nothing companies crash when their one big bet fails — that is company-specific risk.' },
