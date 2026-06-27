@@ -522,7 +522,8 @@
         story:  document.getElementById('stats-story'),
         quest:  document.getElementById('stats-quest'),
         guess:  document.getElementById('stats-guess'),
-        money:  document.getElementById('stats-money')
+        money:  document.getElementById('stats-money'),
+        invest: document.getElementById('stats-invest')
       };
 
       var stats = precalculatedStats || (typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} });
@@ -684,6 +685,19 @@
           });
           if (mStars > 0 || mRounds > 0) {
             els.money.innerHTML = '<span class="cs-item active">⭐ ' + mStars + '</span><span class="cs-item">🪙 ' + mRounds + ' modes</span>';
+          }
+        }
+      } catch (e) {}
+
+      try {
+        if (els.invest) {
+          var ikey = 'zs_invest_' + (user.name ? user.name.toLowerCase().replace(/\s+/g, '_') : '_default');
+          var iraw = localStorage.getItem(ikey);
+          var idata = iraw ? (JSON.parse(iraw) || {}) : {};
+          var iGames = idata.games || 0;
+          if (iGames > 0) {
+            var iBest = idata.bestRoi != null ? Math.round(idata.bestRoi * 100) : 0;
+            els.invest.innerHTML = '<span class="cs-item active">📈 ' + (iBest > 0 ? '+' : '') + iBest + '%</span><span class="cs-item">🎮 ' + iGames + '</span>';
           }
         }
       } catch (e) {}

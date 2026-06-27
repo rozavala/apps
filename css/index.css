@@ -572,6 +572,7 @@
     .card-bible   { --card-accent: #818CF8; --card-glow: rgba(129, 140, 248, 0.30); --card-icon-bg: linear-gradient(135deg, #4338CA, #818CF8); --card-tag-bg: rgba(129, 140, 248, 0.15); }
     .card-vocab   { --card-accent: #F472B6; --card-glow: rgba(244, 114, 182, 0.30); --card-icon-bg: linear-gradient(135deg, #BE185D, #F472B6); --card-tag-bg: rgba(244, 114, 182, 0.15); }
     .card-civics  { --card-accent: #FBBF24; --card-glow: rgba(251, 191, 36, 0.30); --card-icon-bg: linear-gradient(135deg, #1E3A8A, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
+    .card-invest  { --card-accent: #34D399; --card-glow: rgba(52, 211, 153, 0.30); --card-icon-bg: linear-gradient(135deg, #4338CA, #34D399); --card-tag-bg: rgba(52, 211, 153, 0.15); }
 
     /* ── Hub Calendar Widget (liturgical + Chilean) ── */
     #calendar-widget { animation: fadeUp 0.6s ease-out both; }
