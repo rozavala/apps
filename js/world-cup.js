@@ -2303,7 +2303,11 @@
       state.members = Array.isArray(saved.members) ? saved.members : [];
       state.picks = (saved.picks && typeof saved.picks === 'object') ? saved.picks : {};
       state.uiSelectedMember = saved.uiSelectedMember || null;
+      state.koAuto = (saved.koAuto && typeof saved.koAuto === 'object') ? saved.koAuto : {};
     } catch (e) { console.warn('wc load failed', e); }
+    // Re-derive the knockout bracket from whatever results we loaded so
+    // resolved teams persist across reloads and self-correct.
+    resolveBracketFromResults();
   }
 
   // Throttle save() so a flurry of edits doesn't write 20 times in a row,
@@ -2319,6 +2323,7 @@
         picks: state.picks,
         uiSelectedMember: state.uiSelectedMember || null,
       };
+      if (state.koAuto && Object.keys(state.koAuto).length) slim.koAuto = state.koAuto;
       const gd = _diffGroups();
       if (gd) slim.groups = gd;
       const md = _diffMatches();
@@ -2951,6 +2956,8 @@
       m.result = Object.assign({}, m.result || {}, payload.results[id] || {});
       resultsApplied++;
     }
+    // Imported results may resolve group standings / KO matches.
+    resolveBracketFromResults();
     save();
     return { added, updated, results: resultsApplied };
   }
@@ -3307,6 +3314,164 @@
       ru = final.result.pkWinner === final.home ? final.away : final.home;
     }
     return { champion: champ || null, runnerUp: ru || null };
+  }
+
+  /* ----------------------------------------------------------------
+     AUTO-RESOLVE the knockout bracket from real results.
+     Fills R32 1X/2X slots from completed group standings, seeds the 8
+     best third-placed teams into their slots, and cascades W##/L##
+     winners/losers forward as KO results are entered. Idempotent —
+     re-derives every auto side from the baseline label each call, so a
+     corrected group result re-flows correctly. Manual edits (sides not
+     in state.koAuto) are never clobbered.
+     ---------------------------------------------------------------- */
+
+  // Baseline placeholder label for a KO side, e.g. "2A", "3A/B/C/D/F",
+  // "W73", "L101" — the slot's *meaning*, independent of any fill.
+  function _koLabel(matchId, side) {
+    const base = _scheduleBaseline(matchId);
+    if (!base) return null;
+    return side === 'home' ? base.home_label : base.away_label;
+  }
+
+  // Ranked third-placed teams across all 12 groups (FIFA tiebreakers we
+  // model: points, goal difference, goals for). `complete` is true only
+  // once every group has played all three matchdays — third-place
+  // seeding can't be finalised until then.
+  function getThirdPlaceRanking() {
+    const tables = computeStandings();
+    let complete = true;
+    const thirds = [];
+    for (const g of GROUP_LETTERS) {
+      const t = tables[g];
+      if (!t || t.length < 3 || !t.every(x => x.p >= 3)) { complete = false; continue; }
+      const th = t[2];
+      thirds.push({ group: g, code: th.code, pts: th.pts, gd: th.gf - th.ga, gf: th.gf });
+    }
+    thirds.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+    return { thirds, complete, qualifiers: complete ? thirds.slice(0, 8) : [] };
+  }
+
+  // The 8 third-place R32 slots and the groups each can accept, parsed
+  // straight from the baseline "3X/Y/Z" labels so this stays in sync
+  // with the schedule.
+  function _thirdSlots() {
+    const out = [];
+    for (const base of OFFICIAL_SCHEDULE) {
+      if (base.stage !== 'R32') continue;
+      for (const side of ['home', 'away']) {
+        const label = side === 'home' ? base.home_label : base.away_label;
+        const mm = label && /^3([A-L/]+)$/.exec(label);
+        if (mm) out.push({ id: base.id, side, allowed: mm[1].split('/') });
+      }
+    }
+    return out;
+  }
+
+  // Assign each qualifying group to a distinct third-place slot within
+  // its allowed set (most-constrained slot first, backtracking). Returns
+  // { 'matchId.side': group } or null if no valid assignment. This is a
+  // VALID bracket but not guaranteed to match FIFA's official Annex C
+  // table when multiple assignments are possible — flagged provisional
+  // in the UI; the host can correct via the match editor.
+  function _assignThirds(qualGroups) {
+    const slots = _thirdSlots();
+    if (slots.length !== 8 || qualGroups.length !== 8) return null;
+    const order = slots.slice().sort((a, b) =>
+      a.allowed.filter(g => qualGroups.includes(g)).length -
+      b.allowed.filter(g => qualGroups.includes(g)).length);
+    const used = new Set();
+    const assign = {};
+    function bt(i) {
+      if (i === order.length) return true;
+      const slot = order[i];
+      for (const g of slot.allowed) {
+        if (!qualGroups.includes(g) || used.has(g)) continue;
+        used.add(g); assign[slot.id + '.' + slot.side] = g;
+        if (bt(i + 1)) return true;
+        used.delete(g); delete assign[slot.id + '.' + slot.side];
+      }
+      return false;
+    }
+    return bt(0) ? assign : null;
+  }
+
+  // Resolve a single KO side's label to a concrete team code given the
+  // current standings, third-place assignment, and KO results. Returns
+  // null when not yet determinable.
+  function _resolveKoSide(label, ctx) {
+    if (!label) return null;
+    let mm;
+    if ((mm = /^1([A-L])$/.exec(label))) return ctx.top2[mm[1]] ? ctx.top2[mm[1]].winner : null;
+    if ((mm = /^2([A-L])$/.exec(label))) return ctx.top2[mm[1]] ? ctx.top2[mm[1]].runnerUp : null;
+    if (/^3[A-L/]+$/.test(label)) return null; // third slots filled via ctx.thirdBySlot, not here
+    if ((mm = /^([WL])(\d+)$/.exec(label))) {
+      const refId = 'm' + String(parseInt(mm[2], 10)).padStart(3, '0');
+      const ref = state.matches.find(x => x.id === refId);
+      if (!ref || !ref.result) return null;
+      const { home, away, pkWinner } = ref.result;
+      let winner = home > away ? ref.home : (away > home ? ref.away : (pkWinner || null));
+      if (!winner) return null;
+      if (mm[1] === 'W') return winner;
+      // Loser: the other resolved side of the referenced match
+      if (ref.home && ref.away) return winner === ref.home ? ref.away : ref.home;
+      return null;
+    }
+    return null;
+  }
+
+  function resolveBracketFromResults() {
+    state.koAuto = state.koAuto || {};
+    const top2 = getActualGroupTop2();
+    const thirdRank = getThirdPlaceRanking();
+    // Map slot "id.side" -> resolved third-place team code (provisional).
+    let thirdBySlot = {};
+    if (thirdRank.complete && thirdRank.qualifiers.length === 8) {
+      const qualGroups = thirdRank.qualifiers.map(q => q.group);
+      const assign = _assignThirds(qualGroups);
+      if (assign) {
+        const codeByGroup = {};
+        for (const q of thirdRank.qualifiers) codeByGroup[q.group] = q.code;
+        for (const key of Object.keys(assign)) thirdBySlot[key] = codeByGroup[assign[key]];
+      }
+    }
+    const ctx = { top2, thirdBySlot };
+
+    // Write one side if it's empty or was previously auto-set by us.
+    function applySide(m, side) {
+      const key = m.id + '.' + side;
+      const label = _koLabel(m.id, side);
+      if (!label) return false; // group-stage match, nothing to resolve
+      const resolved = /^3[A-L/]+$/.test(label) ? (thirdBySlot[key] || null) : _resolveKoSide(label, ctx);
+      const current = m[side];
+      const isOurs = current == null || state.koAuto[key] === current;
+      if (!isOurs) return false;           // manual override — leave it
+      if (!resolved) {
+        // No longer determinable (e.g. a group result was corrected and
+        // the group is incomplete again). Revert our prior auto value.
+        if (current != null && state.koAuto[key] === current) {
+          m[side] = null;
+          delete state.koAuto[key];
+          return true;
+        }
+        return false;
+      }
+      if (current === resolved) return false;
+      m[side] = resolved;
+      state.koAuto[key] = resolved;
+      return true;
+    }
+
+    // Iterate to a fixed point so KO winners cascade R32 → R16 → … .
+    let changed = true, guard = 0;
+    while (changed && guard++ < 12) {
+      changed = false;
+      for (const m of state.matches) {
+        if (m.stage === 'group') continue;
+        if (applySide(m, 'home')) changed = true;
+        if (applySide(m, 'away')) changed = true;
+      }
+    }
   }
 
   function scoreMember(memberId) {
@@ -4043,6 +4208,33 @@
           </table>
           <p class="muted" style="font-size:0.72rem;margin-top:6px;">Top 10 · own goals excluded · updates with each score sync. Ties shown alphabetically — FIFA breaks ties on assists, then minutes played.</p>`}
     </div>`;
+
+    // ---- Best third-placed teams (8 qualify for the Round of 32) ----
+    const tr = getThirdPlaceRanking();
+    if (tr.thirds.length > 0) {
+      html += `<div class="card" style="padding:14px;border-left:3px solid var(--wc-blue);">
+        <h2>🥉 Best third-placed teams</h2>
+        <table class="standings-table">
+          <thead><tr><th></th><th style="text-align:left;">Team</th><th>Grp</th><th>Pts</th><th>GD</th><th>GF</th></tr></thead>
+          <tbody>
+            ${tr.thirds.map((t, i) => {
+              const c = countryByCode(t.code);
+              const through = i < 8;
+              return `<tr class="${through ? 'advancing' : ''}">
+                <td>${i + 1}</td>
+                <td class="team" style="text-align:left;">${c ? c.flag + ' ' + escapeHTML(c.name) : t.code}${through ? '' : ' <span class="muted" style="font-size:0.7rem;">(out)</span>'}</td>
+                <td>${t.group}</td><td><b>${t.pts}</b></td><td>${t.gd > 0 ? '+' : ''}${t.gd}</td><td>${t.gf}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+        <p class="muted" style="font-size:0.72rem;margin-top:6px;">
+          ${tr.complete
+            ? 'Top 8 qualify. They\'re auto-seeded into the Round of 32 — exact slotting is <b>provisional</b> until confirmed against the official bracket (tap a match to correct).'
+            : 'Ranking finalises once every group has played all three matchdays. Tiebreakers: points, goal difference, goals for.'}
+        </p>
+      </div>`;
+    }
 
     for (const g of GROUP_LETTERS) {
       const rows = tables[g] || [];
@@ -5247,8 +5439,11 @@
     const dateEl  = document.getElementById('ed-date');
     const timeEl  = document.getElementById('ed-time');
     const venueEl = document.getElementById('ed-venue');
-    if (homeEl)  m.home  = homeEl.value || null;
-    if (awayEl)  m.away  = awayEl.value || null;
+    // A manual team edit on a KO match overrides auto-resolution for
+    // that side — drop its auto flag so the resolver won't clobber it.
+    state.koAuto = state.koAuto || {};
+    if (homeEl)  { m.home  = homeEl.value || null; delete state.koAuto[m.id + '.home']; }
+    if (awayEl)  { m.away  = awayEl.value || null; delete state.koAuto[m.id + '.away']; }
     if (dateEl  && dateEl.value)  m.date  = dateEl.value;
     if (timeEl  && timeEl.value)  m.time  = timeEl.value;
     if (venueEl && venueEl.value) m.venue = venueEl.value;
@@ -5275,6 +5470,7 @@
         logActivity('⚽', `${user ? escapeHTML(user.name) : 'Someone'} recorded ${hC.flag} ${hC.name} ${hs}–${as} ${aC.name} ${aC.flag}`);
       }
     }
+    resolveBracketFromResults();
     save();
     closeModal();
     toast('Match saved');
@@ -5286,6 +5482,7 @@
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
     m.result = null;
+    resolveBracketFromResults();
     save();
     closeModal();
     toast('Result cleared');
@@ -6173,6 +6370,10 @@
       state.scorers = Object.entries(tally)
         .map(([k, n]) => { const i = k.lastIndexOf('|'); return { name: k.slice(0, i), team: k.slice(i + 1), goals: n }; })
         .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+
+      // Newly-synced group results may complete a group or a KO match —
+      // re-derive the bracket so qualified teams flow into the R32+ slots.
+      resolveBracketFromResults();
 
       save();
       _lastScoreSyncAt = Date.now();
