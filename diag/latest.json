@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-27T13:50:46.983Z",
+  "generatedAt": "2026-06-27T16:06:46.091Z",
   "windowHours": 72,
   "totalGroups": 5,
-  "totalEvents": 12,
+  "totalEvents": 13,
   "topGroups": [
     {
       "app": "math-galaxy",
@@ -12,9 +12,9 @@
       "filename": "https://rozavala.github.io/apps/js/math-galaxy.js?v=2",
       "lineno": 624,
       "colno": 293,
-      "count": 1,
+      "count": 2,
       "firstTs": 1782567376044,
-      "lastTs": 1782567376044,
+      "lastTs": 1782576244256,
       "users": 1
     },
     {
