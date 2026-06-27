@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-06-27T16:06:46.091Z",
+  "generatedAt": "2026-06-27T22:24:47.573Z",
   "windowHours": 72,
-  "totalGroups": 5,
-  "totalEvents": 13,
+  "totalGroups": 4,
+  "totalEvents": 11,
   "topGroups": [
     {
       "app": "math-galaxy",
@@ -54,19 +54,6 @@
       "count": 3,
       "firstTs": 1782346689268,
       "lastTs": 1782346689268,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.error",
-      "page": "world-cup.html",
-      "message": "Nominations sync failed Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1782339808790,
-      "lastTs": 1782339808790,
       "users": 1
     }
   ]
