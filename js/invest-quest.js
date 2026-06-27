@@ -188,6 +188,9 @@
       history: [start],
       benchmark: [start],   // value of an all-S&P-500 portfolio over time
       returnsLog: [],       // each year's return per asset, for the "what if" replay
+      mathCorrect: 0,
+      mathTotal: 0,
+      lastMathDoneYear: -1,
       lastClimate: null,
       lastNews: null,
       lastReturns: null,
@@ -232,6 +235,11 @@
           '<span class="iq-home-icon">🧠</span>' +
           '<span class="iq-home-name">Learn the Ideas</span>' +
           '<span class="iq-home-desc">Risk, return, ROI — and why prices go up and down.</span>' +
+        '</button>' +
+        '<button type="button" class="iq-home-card iq-home-math" onclick="InvestQuest.openMath()">' +
+          '<span class="iq-home-icon">🧮</span>' +
+          '<span class="iq-home-name">Money Math</span>' +
+          '<span class="iq-home-desc">Practice the real math of investing: percentages, ROI & totals.</span>' +
         '</button>' +
       '</div>';
   }
@@ -510,6 +518,9 @@
           (done
             ? '<button type="button" class="iq-btn primary" onclick="InvestQuest.finish()">See my results 🏁</button>'
             : '<button type="button" class="iq-btn ghost" onclick="InvestQuest.manage()">✏️ Change my mix</button>' +
+              (state.lastMathDoneYear === state.year
+                ? '<button type="button" class="iq-btn ghost" disabled>🧮 Math done ✓</button>'
+                : '<button type="button" class="iq-btn ghost" onclick="InvestQuest.playMath()">🧮 Quick Math +⭐</button>') +
               '<button type="button" class="iq-btn primary" onclick="InvestQuest.runYear()">Next year ▶</button>') +
         '</div>' +
       '</div>';
@@ -628,11 +639,15 @@
     if (data.bestRoi == null || roi > data.bestRoi) data.bestRoi = roi;
     if (data.bestStars == null || stars > data.bestStars) data.bestStars = stars;
     data.lastRoi = roi;
+    if (state.mathTotal) {
+      data.mathPlayCorrect = (data.mathPlayCorrect || 0) + (state.mathCorrect || 0);
+    }
     _save(data);
 
     if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      var mathNote = state.mathTotal ? ' · math ' + (state.mathCorrect || 0) + '/' + state.mathTotal : '';
       ActivityLog.log('Invest Quest', '📈',
-        'Finished a 10-year game — ' + _money(net) + ' (' + _pct(roi) + '), ' + stars + '⭐');
+        'Finished a 10-year game — ' + _money(net) + ' (' + _pct(roi) + '), ' + stars + '⭐' + mathNote);
     }
 
     _root().innerHTML =
@@ -650,6 +665,10 @@
           '</div>' +
           _chart() +
           _compareBlock(net) +
+          (state.mathTotal
+            ? '<div class="iq-mathbadge">🧮 Money math while you played: <b>' + (state.mathCorrect || 0) + ' / ' + state.mathTotal + '</b> correct ' +
+              ((state.mathCorrect || 0) === state.mathTotal ? '— perfect! 🎉' : '— keep practicing!') + '</div>'
+            : '') +
           '<div class="iq-lesson">💡 ' + lesson + '</div>' +
           '<div class="iq-actions">' +
             '<button type="button" class="iq-btn primary" onclick="InvestQuest.setup()">Play again 🔁</button>' +
@@ -803,11 +822,315 @@
       '</div>';
   }
 
+  // ================================================================
+  //  MONEY MATH — practice the real calculations of investing.
+  //  Shared problem generators + a kid-friendly number pad, used by
+  //  the dedicated practice mode AND the in-play Quick Math bonus.
+  // ================================================================
+  var MATH_ROUND = 8;
+
+  function _set(d, e, m, h) { return d === 'easy' ? e : d === 'medium' ? m : h; }
+
+  var MATHGEN = {
+    percentOf: function(d) {
+      var A = _pick(_set(d, [100, 200, 300], [200, 400, 500, 600], [400, 800, 1200, 1500]));
+      var p = _pick(_set(d, [10, 50], [10, 20, 25, 50], [5, 15, 20, 25]));
+      var gain = A * p / 100;
+      return { icon: '📈', prompt: 'You invest $' + A + ' and it grows ' + p + '%. How much money do you EARN?',
+        unit: '$', answer: gain, solution: p + '% of $' + A + ' = $' + gain + '  (' + A + ' × ' + p + ' ÷ 100).' };
+    },
+    applyGain: function(d) {
+      var A = _pick(_set(d, [100, 200, 300], [200, 400, 500], [400, 600, 800]));
+      var p = _pick(_set(d, [10, 50], [10, 20, 25, 50], [5, 15, 25, 50]));
+      var gain = A * p / 100, ans = A + gain;
+      return { icon: '💹', prompt: 'Your $' + A + ' investment grew ' + p + '%. What is it worth now?',
+        unit: '$', answer: ans, solution: '$' + A + ' + ' + p + '% ($' + gain + ') = $' + ans + '.' };
+    },
+    applyLoss: function(d) {
+      var A = _pick(_set(d, [100, 200, 300], [200, 400, 500], [400, 600, 800]));
+      var p = _pick(_set(d, [10, 50], [10, 20, 25, 50], [5, 15, 25, 50]));
+      var loss = A * p / 100, ans = A - loss;
+      return { icon: '📉', prompt: 'Uh oh — your $' + A + ' investment fell ' + p + '%. What is it worth now?',
+        unit: '$', answer: ans, solution: '$' + A + ' − ' + p + '% ($' + loss + ') = $' + ans + '.' };
+    },
+    roi: function(d) {
+      var S = _pick(_set(d, [100, 200], [100, 200, 400], [200, 400, 500]));
+      var p = _pick(_set(d, [10, 50, 100], [10, 20, 25, 50], [15, 25, 30, 75]));
+      var E = S + S * p / 100;
+      return { icon: '🧮', prompt: 'You invested $' + S + ' and now have $' + E + '. What is your ROI? (in %)',
+        unit: '%', answer: p, solution: 'Gain = $' + (E - S) + '. ROI = $' + (E - S) + ' ÷ $' + S + ' = ' + p + '%.' };
+    },
+    total: function(d) {
+      var n = _set(d, 2, 3, 4);
+      var parts = [], sum = 0;
+      var cap = _set(d, 9, 9, 12);
+      for (var i = 0; i < n; i++) { var v = (1 + _rand(cap)) * 10; parts.push(v); sum += v; }
+      return { icon: '🧺', prompt: 'Your portfolio holds ' + parts.map(function(v) { return '$' + v; }).join(' + ') + '. What is the total value?',
+        unit: '$', answer: sum, solution: parts.join(' + ') + ' = ' + sum + '.' };
+    },
+    weight: function(d) {
+      var T = _pick(_set(d, [100, 200], [200, 400, 500], [400, 800, 1000]));
+      var w = _pick(_set(d, [10, 50], [10, 20, 25, 50], [20, 25, 40, 75]));
+      var H = T * w / 100;
+      return { icon: '🥧', prompt: 'You have $' + H + ' in Apple out of $' + T + ' total. What percent of your money is that?',
+        unit: '%', answer: w, solution: '$' + H + ' ÷ $' + T + ' = ' + w + '%.' };
+    },
+    compound2: function() {
+      var A = _pick([100, 200, 300]);
+      var p = _pick([10, 20, 50]);
+      var y1 = A + A * p / 100;
+      var ans = y1 + y1 * p / 100;
+      return { icon: '❄️', prompt: 'Your $' + A + ' grows ' + p + '% TWO years in a row (compounding!). What is it worth after 2 years?',
+        unit: '$', answer: ans, solution: 'Year 1: $' + A + ' → $' + y1 + '. Year 2: +' + p + '% → $' + ans + '.' };
+    }
+  };
+
+  var MATH_TOPICS = [
+    { id: 'returns', icon: '📈', name: 'Returns & Earnings', desc: 'Grow or shrink money by a percent.', gens: ['percentOf', 'applyGain', 'applyLoss'] },
+    { id: 'roi', icon: '🧮', name: 'ROI', desc: 'Work out return on investment, in %.', gens: ['roi'] },
+    { id: 'totals', icon: '🧺', name: 'Portfolio Totals', desc: 'Add up holdings and find percentages.', gens: ['total', 'weight'] },
+    { id: 'mixed', icon: '🏆', name: 'Mixed Challenge', desc: 'A bit of everything, incl. compounding.', gens: ['percentOf', 'applyGain', 'applyLoss', 'roi', 'total', 'weight', 'compound2'] }
+  ];
+
+  function _diffFor(idx) { return idx < 3 ? 'easy' : idx < 6 ? 'medium' : 'hard'; }
+
+  function _genOne(genId, d) {
+    var fn = MATHGEN[genId];
+    return genId === 'compound2' ? fn() : fn(d);
+  }
+
+  // ---- the number pad (shared) ----
+  var _mathActive = null; // { input, q, kind, answered, correct, onNext }
+
+  function _mathPanel() {
+    var q = _mathActive.q;
+    var dollars = q.unit === '$';
+    var pct = q.unit === '%';
+    var disp = _mathActive.input === '' ? '0' : _mathActive.input;
+    var keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', 'del'];
+    var keypad = keys.map(function(k) {
+      if (k === 'del') return '<button type="button" class="iq-key wide" onclick="InvestQuest._mdel()" aria-label="Delete">⌫</button>';
+      if (k === 'C') return '<button type="button" class="iq-key" onclick="InvestQuest._mclr()">C</button>';
+      return '<button type="button" class="iq-key" onclick="InvestQuest._mk(\'' + k + '\')">' + k + '</button>';
+    }).join('');
+
+    var fb = '';
+    if (_mathActive.answered) {
+      fb = '<div class="iq-math-fb ' + (_mathActive.correct ? 'good' : 'bad') + '">' +
+        (_mathActive.correct ? '✅ Correct!' : '❌ Answer: ' + (dollars ? '$' : '') + q.answer + (pct ? '%' : '')) +
+        '<div class="iq-math-sol">' + q.solution + '</div></div>';
+    }
+
+    return '<div class="iq-math-card">' +
+      '<div class="iq-math-prompt"><span class="iq-math-q-icon">' + q.icon + '</span>' + q.prompt + '</div>' +
+      '<div class="iq-math-input' + (_mathActive.answered ? (_mathActive.correct ? ' ok' : ' no') : '') + '">' +
+        (dollars ? '<span class="iq-math-unit">$</span>' : '') +
+        '<span id="iq-math-display">' + disp + '</span>' +
+        (pct ? '<span class="iq-math-unit">%</span>' : '') +
+      '</div>' +
+      (_mathActive.answered
+        ? fb + '<div class="iq-actions"><button type="button" class="iq-btn primary" onclick="InvestQuest._mathNext()">Next ▶</button></div>'
+        : '<div class="iq-keypad">' + keypad + '</div>' +
+          '<div class="iq-actions">' +
+            (_mathActive.kind === 'quick' ? '<button type="button" class="iq-btn ghost" onclick="InvestQuest._mskip()">Skip</button>' : '') +
+            '<button type="button" class="iq-btn primary" onclick="InvestQuest._mcheck()">Check ✓</button>' +
+          '</div>') +
+    '</div>';
+  }
+
+  function _mk(d) {
+    if (!_mathActive || _mathActive.answered) return;
+    if (_mathActive.input.length >= 7) return;
+    if (_mathActive.input === '' && d === '0') return;
+    _mathActive.input += d;
+    var el = document.getElementById('iq-math-display');
+    if (el) el.textContent = _mathActive.input;
+    _sound('click');
+  }
+  function _mdel() {
+    if (!_mathActive || _mathActive.answered) return;
+    _mathActive.input = _mathActive.input.slice(0, -1);
+    var el = document.getElementById('iq-math-display');
+    if (el) el.textContent = _mathActive.input === '' ? '0' : _mathActive.input;
+  }
+  function _mclr() {
+    if (!_mathActive || _mathActive.answered) return;
+    _mathActive.input = '';
+    var el = document.getElementById('iq-math-display');
+    if (el) el.textContent = '0';
+  }
+
+  // ---- dedicated practice mode ----
+  var mathState = null;
+
+  function openMath() {
+    _sound('click');
+    var data = _load();
+    var cards = MATH_TOPICS.map(function(t) {
+      var best = (data.mathBest && data.mathBest[t.id]) || 0;
+      var bestTxt = best ? 'Best: ' + best + '/' + MATH_ROUND : 'Not tried yet';
+      return '<button type="button" class="iq-mtopic" onclick="InvestQuest.startMath(\'' + t.id + '\')">' +
+        '<span class="iq-mtopic-icon">' + t.icon + '</span>' +
+        '<span class="iq-mtopic-name">' + t.name + '</span>' +
+        '<span class="iq-mtopic-desc">' + t.desc + '</span>' +
+        '<span class="iq-mtopic-best">' + bestTxt + '</span>' +
+      '</button>';
+    }).join('');
+    _root().innerHTML =
+      '<div class="iq-game">' +
+        _topBar('Money Math', true) +
+        '<div class="iq-panel">' +
+          '<div class="iq-panel-title">🧮 Practice the math of money</div>' +
+          '<p class="iq-panel-sub">Type your answers — no guessing! Each round has ' + MATH_ROUND + ' questions that get a little harder.</p>' +
+          '<div class="iq-mtopic-grid">' + cards + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function startMath(topic) {
+    _sound('click');
+    var t = null;
+    MATH_TOPICS.forEach(function(x) { if (x.id === topic) t = x; });
+    if (!t) return;
+    var qs = [], seen = {}, safety = 0;
+    while (qs.length < MATH_ROUND && safety < 200) {
+      safety++;
+      var d = _diffFor(qs.length);
+      var q = _genOne(_pick(t.gens), d);
+      if (seen[q.prompt]) continue;
+      seen[q.prompt] = 1;
+      qs.push(q);
+    }
+    mathState = { topic: topic, idx: 0, correct: 0, questions: qs };
+    _renderMathQ();
+  }
+
+  function _renderMathQ() {
+    var q = mathState.questions[mathState.idx];
+    if (!q) return _renderMathResults();
+    _mathActive = { input: '', q: q, kind: 'practice', answered: false, correct: false };
+    var pct = Math.round((mathState.idx / MATH_ROUND) * 100);
+    _root().innerHTML =
+      '<div class="iq-game">' +
+        _topBar('Math · ' + (mathState.idx + 1) + ' of ' + MATH_ROUND, true) +
+        '<div class="iq-top" style="margin-top:-4px"><div class="iq-progress"><div class="iq-progress-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="iq-score">⭐ ' + mathState.correct + '</div></div>' +
+        _mathPanel() +
+      '</div>';
+  }
+
+  function _renderMathResults() {
+    var c = mathState.correct, n = MATH_ROUND;
+    var stars = c >= n ? 3 : c >= Math.ceil(n * 0.7) ? 2 : c >= Math.ceil(n * 0.4) ? 1 : 0;
+    var starsHtml = '';
+    for (var i = 0; i < 3; i++) starsHtml += (i < stars ? '⭐' : '☆');
+    var emoji = stars >= 3 ? '🏆' : stars >= 2 ? '🌟' : stars >= 1 ? '💪' : '🧮';
+    var title = stars >= 3 ? 'Math Master!' : stars >= 2 ? 'Great calculating!' : stars >= 1 ? 'Nice work!' : 'Keep practicing!';
+
+    var data = _load();
+    if (!data.mathBest) data.mathBest = {};
+    if (!data.mathBest[mathState.topic] || c > data.mathBest[mathState.topic]) data.mathBest[mathState.topic] = c;
+    _save(data);
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      ActivityLog.log('Invest Quest', '🧮', 'Money Math (' + mathState.topic + ') — ' + c + '/' + n + ' correct');
+    }
+
+    var topic = mathState.topic;
+    _root().innerHTML =
+      '<div class="iq-game">' +
+        _topBar('Math results', true) +
+        '<div class="iq-final">' +
+          '<span class="iq-final-emoji">' + emoji + '</span>' +
+          '<div class="iq-final-title">' + title + '</div>' +
+          '<div class="iq-stars">' + starsHtml + '</div>' +
+          '<div class="iq-final-sub">You solved <b>' + c + ' / ' + n + '</b> correctly.</div>' +
+          '<div class="iq-actions">' +
+            '<button type="button" class="iq-btn primary" onclick="InvestQuest.startMath(\'' + topic + '\')">Try again 🔁</button>' +
+            '<button type="button" class="iq-btn ghost" onclick="InvestQuest.openMath()">Other topics</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ---- in-play Quick Math (bonus during a game) ----
+  function playMath() {
+    if (!state) return;
+    _sound('click');
+    var topic = _pick(['returns', 'roi', 'totals']);
+    var t = null;
+    MATH_TOPICS.forEach(function(x) { if (x.id === topic) t = x; });
+    var q = _genOne(_pick(t.gens), 'medium');
+    _mathActive = { input: '', q: q, kind: 'quick', answered: false, correct: false };
+    _root().innerHTML =
+      '<div class="iq-game">' +
+        _topBar('Quick Math · bonus ⭐', true) +
+        '<p class="iq-panel-sub" style="text-align:center">Solve it for a bonus star — or skip back to your game.</p>' +
+        _mathPanel() +
+      '</div>';
+  }
+
+  function _mcheck() {
+    if (!_mathActive || _mathActive.answered) return;
+    if (_mathActive.input === '') return;
+    var ok = Number(_mathActive.input) === _mathActive.q.answer;
+    _mathActive.answered = true;
+    _mathActive.correct = ok;
+    if (ok) _sound('correct'); else _sound('wrong');
+
+    if (_mathActive.kind === 'practice') {
+      if (ok) mathState.correct++;
+    } else { // quick
+      state.mathTotal = (state.mathTotal || 0) + 1;
+      if (ok) state.mathCorrect = (state.mathCorrect || 0) + 1;
+      state.lastMathDoneYear = state.year;
+    }
+    // re-render current screen with feedback
+    if (_mathActive.kind === 'practice') _renderMathFeedback();
+    else _renderQuickFeedback();
+  }
+
+  function _renderMathFeedback() {
+    var pct = Math.round((mathState.idx / MATH_ROUND) * 100);
+    _root().innerHTML =
+      '<div class="iq-game">' +
+        _topBar('Math · ' + (mathState.idx + 1) + ' of ' + MATH_ROUND, true) +
+        '<div class="iq-top" style="margin-top:-4px"><div class="iq-progress"><div class="iq-progress-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="iq-score">⭐ ' + mathState.correct + '</div></div>' +
+        _mathPanel() +
+      '</div>';
+  }
+
+  function _renderQuickFeedback() {
+    _root().innerHTML =
+      '<div class="iq-game">' +
+        _topBar('Quick Math · bonus ⭐', true) +
+        _mathPanel() +
+      '</div>';
+  }
+
+  function _mathNext() {
+    if (_mathActive && _mathActive.kind === 'practice') {
+      mathState.idx++;
+      _renderMathQ();
+    } else {
+      _renderYearResult(); // back to the game
+    }
+  }
+
+  function _mskip() {
+    if (!_mathActive || _mathActive.kind !== 'quick') return;
+    state.lastMathDoneYear = state.year;
+    _renderYearResult();
+  }
+
   // ---- expose ------------------------------------------------------
   window.InvestQuest = {
     open: open, home: home, setup: setup, begin: begin,
     adjust: adjust, autoMix: autoMix, runYear: runYear, manage: manage,
-    finish: finish, learn: learn, quiz: quiz, _answer: _answer
+    finish: finish, learn: learn, quiz: quiz, _answer: _answer,
+    openMath: openMath, startMath: startMath, playMath: playMath,
+    _mk: _mk, _mdel: _mdel, _mclr: _mclr, _mcheck: _mcheck,
+    _mskip: _mskip, _mathNext: _mathNext
   };
 
   if (document.readyState === 'loading') {
