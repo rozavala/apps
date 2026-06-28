@@ -2304,6 +2304,7 @@
       state.picks = (saved.picks && typeof saved.picks === 'object') ? saved.picks : {};
       state.uiSelectedMember = saved.uiSelectedMember || null;
       state.koAuto = (saved.koAuto && typeof saved.koAuto === 'object') ? saved.koAuto : {};
+      state.koFeed = (saved.koFeed && typeof saved.koFeed === 'object') ? saved.koFeed : {};
     } catch (e) { console.warn('wc load failed', e); }
     // Re-derive the knockout bracket from whatever results we loaded so
     // resolved teams persist across reloads and self-correct.
@@ -2324,6 +2325,7 @@
         uiSelectedMember: state.uiSelectedMember || null,
       };
       if (state.koAuto && Object.keys(state.koAuto).length) slim.koAuto = state.koAuto;
+      if (state.koFeed && Object.keys(state.koFeed).length) slim.koFeed = state.koFeed;
       const gd = _diffGroups();
       if (gd) slim.groups = gd;
       const md = _diffMatches();
@@ -3422,6 +3424,7 @@
 
   function resolveBracketFromResults() {
     state.koAuto = state.koAuto || {};
+    state.koFeed = state.koFeed || {};
     const top2 = getActualGroupTop2();
     const thirdRank = getThirdPlaceRanking();
     // Map slot "id.side" -> resolved third-place team code (provisional).
@@ -3444,8 +3447,12 @@
       if (!label) return false; // group-stage match, nothing to resolve
       const resolved = /^3[A-L/]+$/.test(label) ? (thirdBySlot[key] || null) : _resolveKoSide(label, ctx);
       const current = m[side];
-      const isOurs = current == null || state.koAuto[key] === current;
-      if (!isOurs) return false;           // manual override — leave it
+      // Resolver owns a side only if it's empty or its own prior auto
+      // value — never a true manual edit, and never an authoritative
+      // feed value (koFeed), so official teams aren't replaced by the
+      // provisional third-place guess.
+      const isOurs = current == null || (state.koAuto[key] === current && !state.koFeed[key]);
+      if (!isOurs) return false;
       if (!resolved) {
         // No longer determinable (e.g. a group result was corrected and
         // the group is incomplete again). Revert our prior auto value.
@@ -5442,8 +5449,9 @@
     // A manual team edit on a KO match overrides auto-resolution for
     // that side — drop its auto flag so the resolver won't clobber it.
     state.koAuto = state.koAuto || {};
-    if (homeEl)  { m.home  = homeEl.value || null; delete state.koAuto[m.id + '.home']; }
-    if (awayEl)  { m.away  = awayEl.value || null; delete state.koAuto[m.id + '.away']; }
+    state.koFeed = state.koFeed || {};
+    if (homeEl)  { m.home  = homeEl.value || null; delete state.koAuto[m.id + '.home']; delete state.koFeed[m.id + '.home']; }
+    if (awayEl)  { m.away  = awayEl.value || null; delete state.koAuto[m.id + '.away']; delete state.koFeed[m.id + '.away']; }
     if (dateEl  && dateEl.value)  m.date  = dateEl.value;
     if (timeEl  && timeEl.value)  m.time  = timeEl.value;
     if (venueEl && venueEl.value) m.venue = venueEl.value;
@@ -6287,66 +6295,114 @@
         return nameToCode[name] || (abbr && abbrToCode[abbr]) || null;
       }
 
+      const isCode = x => COUNTRIES.some(c => c.code === x);
+      state.koAuto = state.koAuto || {};
+      state.koFeed = state.koFeed || {};
+
+      // Fill/override a knockout side from the authoritative feed. The
+      // feed wins over an empty side, a provisional resolver value
+      // (koAuto), or a prior feed value (koFeed) — but never over a true
+      // manual edit. Marks the side koFeed so the local resolver won't
+      // clobber the official team with its provisional guess.
+      function fillKoSide(m, side, code) {
+        if (!isCode(code)) return false;
+        const key = m.id + '.' + side;
+        const cur = m[side];
+        const ours = cur == null || state.koAuto[key] === cur || state.koFeed[key];
+        if (!ours) return false;
+        const wasFeed = state.koFeed[key];
+        state.koFeed[key] = true;
+        delete state.koAuto[key];
+        if (cur === code) return false;
+        m[side] = code;
+        if (side === 'home') m.home_label = null; else m.away_label = null;
+        if (!wasFeed) teamsResolved++;
+        return true;
+      }
+
+      // Locate the local match for a remote fixture and report whether
+      // the feed lists the two teams in our slot's orientation or flipped.
+      // Exact (resolved code or placeholder label) match first; then a
+      // knockout anchor where one already-resolved real side identifies
+      // the fixture (so the OTHER side — e.g. a provisional third — gets
+      // the official team).
+      function matchRemote(rm, rhCode, raCode) {
+        const r1 = rhCode || rm.team1, r2 = raCode || rm.team2;
+        for (const lm of state.matches) {
+          if (lm.date !== rm.date) continue;
+          const lh = lm.home || lm.home_label, la = lm.away || lm.away_label;
+          if (lh === r1 && la === r2) return { local: lm, flipped: false };
+          if (lh === r2 && la === r1) return { local: lm, flipped: true };
+        }
+        if (isCode(rhCode) || isCode(raCode)) {
+          for (const lm of state.matches) {
+            if (lm.stage === 'group' || lm.date !== rm.date) continue;
+            if (isCode(lm.home)) {
+              if (lm.home === rhCode) return { local: lm, flipped: false };
+              if (lm.home === raCode) return { local: lm, flipped: true };
+            }
+            if (isCode(lm.away)) {
+              if (lm.away === raCode) return { local: lm, flipped: false };
+              if (lm.away === rhCode) return { local: lm, flipped: true };
+            }
+          }
+        }
+        return null;
+      }
+
+      const cleanGoals = arr => Array.isArray(arr)
+        ? arr.filter(g => g && g.name).map(g => {
+            const out = { name: g.name };
+            if (typeof g.minute === 'number') out.minute = g.minute;
+            if (g.owngoal) out.owngoal = true;
+            return out;
+          })
+        : null;
+
       for (const rm of remote) {
-        const rh = _resolveCode(rm.team1, rm.team1_abbr) || rm.team1;
-        const ra = _resolveCode(rm.team2, rm.team2_abbr) || rm.team2;
-        // Find local match: same date, and either (codes match) or (labels match)
-        const local = state.matches.find(lm => {
-          if (lm.date !== rm.date) return false;
-          const lh = lm.home || lm.home_label;
-          const la = lm.away || lm.away_label;
-          return lh === rh && la === ra;
-        });
-        if (!local) continue;
+        const rhCode = _resolveCode(rm.team1, rm.team1_abbr);
+        const raCode = _resolveCode(rm.team2, rm.team2_abbr);
+        const match = matchRemote(rm, rhCode, raCode);
+        if (!match) continue;
+        const local = match.local, flip = match.flipped;
+        // Remote teams mapped onto OUR home/away orientation.
+        const homeCode = flip ? raCode : rhCode;
+        const awayCode = flip ? rhCode : raCode;
 
-        // If local has placeholder labels but remote has resolved teams, fill them in
-        if (!local.home) {
-          const code = _resolveCode(rm.team1, rm.team1_abbr);
-          if (code) { local.home = code; local.home_label = null; teamsResolved++; }
-        }
-        if (!local.away) {
-          const code = _resolveCode(rm.team2, rm.team2_abbr);
-          if (code) { local.away = code; local.away_label = null; teamsResolved++; }
+        if (local.stage === 'group') {
+          // Group placeholders are rare; fill if the feed has real teams.
+          if (!local.home && isCode(homeCode)) { local.home = homeCode; local.home_label = null; teamsResolved++; }
+          if (!local.away && isCode(awayCode)) { local.away = awayCode; local.away_label = null; teamsResolved++; }
+        } else {
+          // Knockout: official teams override provisional seeding.
+          if (isCode(homeCode)) fillKoSide(local, 'home', homeCode);
+          if (isCode(awayCode)) fillKoSide(local, 'away', awayCode);
         }
 
-        // Score: OpenFootball uses rm.score.ft = [home, away] (or sometimes top-level rm.score1/rm.score2)
+        // Score (flip-aware): OpenFootball/ESPN ft = [team1, team2].
         let hs = null, as = null;
         if (rm.score && Array.isArray(rm.score.ft)) { hs = rm.score.ft[0]; as = rm.score.ft[1]; }
         else if (typeof rm.score1 === 'number' && typeof rm.score2 === 'number') { hs = rm.score1; as = rm.score2; }
+        if (flip) { const t = hs; hs = as; as = t; }
         if (hs !== null && as !== null) {
-          // Only update if different to avoid spurious "updated" counts
           if (!local.result || local.result.home !== hs || local.result.away !== as) {
-            // Preserve any existing PK winner if the remote score is a draw and we already had one
             const prevPK = local.result && local.result.pkWinner;
-            // Try to read PK from remote (rm.score.p = [h,a] for penalty shootouts)
             let pkWinner = prevPK || null;
             if (rm.score && Array.isArray(rm.score.p)) {
-              if (rm.score.p[0] > rm.score.p[1]) pkWinner = local.home;
-              else if (rm.score.p[1] > rm.score.p[0]) pkWinner = local.away;
+              let p0 = rm.score.p[0], p1 = rm.score.p[1];
+              if (flip) { const t = p0; p0 = p1; p1 = t; }
+              if (p0 > p1) pkWinner = local.home;
+              else if (p1 > p0) pkWinner = local.away;
             }
-            local.result = { home: hs, away: as, pkWinner };
+            // Object.assign preserves goals/cards/eventId already attached.
+            local.result = Object.assign({}, local.result, { home: hs, away: as, pkWinner });
             updated++;
           }
-          // Refresh per-match scorer lists whether or not the score
-          // moved — the remote may have just attached a name to an
-          // existing 1-1. Empty arrays clear stale entries so an
-          // edited-then-cleared scorer doesn't linger.
-          const cleanGoals = arr => Array.isArray(arr)
-            ? arr.filter(g => g && g.name).map(g => {
-                const out = { name: g.name };
-                if (typeof g.minute === 'number') out.minute = g.minute;
-                if (g.owngoal) out.owngoal = true;
-                return out;
-              })
-            : null;
-          const g1 = cleanGoals(rm.goals1);
-          const g2 = cleanGoals(rm.goals2);
+          // Scorer lists, flip-aware. Empty arrays clear stale entries.
+          const gA = cleanGoals(rm.goals1), gB = cleanGoals(rm.goals2);
+          const g1 = flip ? gB : gA, g2 = flip ? gA : gB;
           if (g1 !== null) local.result.goals1 = g1;
           if (g2 !== null) local.result.goals2 = g2;
-          // Persist ESPN's event id so the modal can lazy-fetch the
-          // full per-match summary (cards, lineups, stats) on open
-          // even for older matches whose scoreboard details have
-          // been archived.
           if (rm.eventId) local.result.eventId = rm.eventId;
         }
       }
