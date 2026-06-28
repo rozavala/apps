@@ -2317,11 +2317,24 @@
       state.members = Array.isArray(saved.members) ? saved.members : [];
       state.picks = (saved.picks && typeof saved.picks === 'object') ? saved.picks : {};
       state.uiSelectedMember = saved.uiSelectedMember || null;
-      // koAuto/koFeed are in-session bookkeeping only — KO teams re-derive
-      // from results each load, so these start empty and are rebuilt by
-      // resolveBracketFromResults() / the feed within the session.
+      // koAuto is in-session bookkeeping only (provisional resolver fills).
       state.koAuto = {};
+      // koTeams = CONFIRMED knockout team assignments (official feed or a
+      // manual correction) that persist + sync. Apply them onto the
+      // matches and mirror into koFeed so the provisional resolver won't
+      // overwrite a confirmed team. Provisional teams are NOT stored here
+      // — they re-derive from results each load.
+      state.koTeams = (saved.koTeams && typeof saved.koTeams === 'object') ? saved.koTeams : {};
       state.koFeed = {};
+      for (const key of Object.keys(state.koTeams)) {
+        const dot = key.lastIndexOf('.');
+        const id = key.slice(0, dot), side = key.slice(dot + 1);
+        const m = state.matches.find(x => x.id === id);
+        if (m && (side === 'home' || side === 'away') && state.koTeams[key]) {
+          m[side] = state.koTeams[key];
+          state.koFeed[key] = true;
+        }
+      }
     } catch (e) { console.warn('wc load failed', e); }
     // Re-derive the knockout bracket from whatever results we loaded so
     // resolved teams persist across reloads and self-correct.
@@ -2345,6 +2358,9 @@
       if (gd) slim.groups = gd;
       const md = _diffMatches();
       if (md) slim.matchOverrides = md;
+      // Confirmed knockout teams (feed/manual) persist + sync; provisional
+      // ones are omitted and re-derived from results on load.
+      if (state.koTeams && Object.keys(state.koTeams).length) slim.koTeams = state.koTeams;
 
       try {
         localStorage.setItem(STORE_KEY, JSON.stringify(slim));
@@ -5473,12 +5489,14 @@
     if (!confirm('Reset the knockout bracket?\n\nThis clears any manually-set teams in the Round of 32 onward and re-derives them from results and the official feed. Match scores and your bracket picks are NOT affected.')) return;
     state.koAuto = state.koAuto || {};
     state.koFeed = state.koFeed || {};
+    state.koTeams = state.koTeams || {};
     for (const m of state.matches) {
       if (m.stage === 'group') continue;
       m.home = null;
       m.away = null;
       delete state.koAuto[m.id + '.home']; delete state.koAuto[m.id + '.away'];
       delete state.koFeed[m.id + '.home']; delete state.koFeed[m.id + '.away'];
+      delete state.koTeams[m.id + '.home']; delete state.koTeams[m.id + '.away'];
     }
     resolveBracketFromResults();
     save();
@@ -5495,12 +5513,24 @@
     const dateEl  = document.getElementById('ed-date');
     const timeEl  = document.getElementById('ed-time');
     const venueEl = document.getElementById('ed-venue');
-    // A manual team edit on a KO match overrides auto-resolution for
-    // that side — drop its auto flag so the resolver won't clobber it.
+    // A manual team edit on a KO match is a confirmed assignment: record
+    // it in koTeams so it persists + syncs (and mark koFeed so the
+    // provisional resolver won't overwrite it). Blanking a side clears
+    // the confirmation, letting it re-derive.
     state.koAuto = state.koAuto || {};
     state.koFeed = state.koFeed || {};
-    if (homeEl)  { m.home  = homeEl.value || null; delete state.koAuto[m.id + '.home']; delete state.koFeed[m.id + '.home']; }
-    if (awayEl)  { m.away  = awayEl.value || null; delete state.koAuto[m.id + '.away']; delete state.koFeed[m.id + '.away']; }
+    state.koTeams = state.koTeams || {};
+    const _setKoManual = (side, el) => {
+      if (!el) return;
+      const isKo = m.stage !== 'group';
+      m[side] = el.value || null;
+      const key = m.id + '.' + side;
+      delete state.koAuto[key];
+      if (isKo && el.value) { state.koTeams[key] = el.value; state.koFeed[key] = true; }
+      else { delete state.koTeams[key]; delete state.koFeed[key]; }
+    };
+    _setKoManual('home', homeEl);
+    _setKoManual('away', awayEl);
     if (dateEl  && dateEl.value)  m.date  = dateEl.value;
     if (timeEl  && timeEl.value)  m.time  = timeEl.value;
     if (venueEl && venueEl.value) m.venue = venueEl.value;
@@ -6353,12 +6383,13 @@
       const isCode = x => COUNTRIES.some(c => c.code === x);
       state.koAuto = state.koAuto || {};
       state.koFeed = state.koFeed || {};
+      state.koTeams = state.koTeams || {};
 
       // Fill/override a knockout side from the authoritative feed. The
       // feed wins over an empty side, a provisional resolver value
-      // (koAuto), or a prior feed value (koFeed) — but never over a true
-      // manual edit. Marks the side koFeed so the local resolver won't
-      // clobber the official team with its provisional guess.
+      // (koAuto), or a prior confirmed value (koFeed). Records the team
+      // in koTeams so it persists + syncs to every device, and marks
+      // koFeed so the provisional resolver won't overwrite it.
       function fillKoSide(m, side, code) {
         if (!isCode(code)) return false;
         const key = m.id + '.' + side;
@@ -6368,8 +6399,9 @@
         const wasFeed = state.koFeed[key];
         state.koFeed[key] = true;
         delete state.koAuto[key];
-        if (cur === code) return false;
+        if (cur === code && state.koTeams[key] === code) return false;
         m[side] = code;
+        state.koTeams[key] = code;
         if (side === 'home') m.home_label = null; else m.away_label = null;
         if (!wasFeed) teamsResolved++;
         return true;

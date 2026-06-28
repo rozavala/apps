@@ -248,9 +248,24 @@ var CloudSync = (function() {
     // Groups: take whichever side actually has a draw recorded.
     out.groups = (s.groups && Object.keys(s.groups).length) ? s.groups : (l.groups || {});
 
+    // koTeams: confirmed knockout team assignments (official feed or a
+    // manual correction), keyed "matchId.side" -> team code. Union by
+    // key so an official team confirmed on one device propagates to the
+    // rest; on a direct conflict the newer snapshot wins.
+    out.koTeams = {};
+    var koIds = {};
+    Object.keys(l.koTeams || {}).forEach(function(k) { koIds[k] = 1; });
+    Object.keys(s.koTeams || {}).forEach(function(k) { koIds[k] = 1; });
+    Object.keys(koIds).forEach(function(k) {
+      var lv = (l.koTeams || {})[k], sv = (s.koTeams || {})[k];
+      if (!lv) { out.koTeams[k] = sv; return; }
+      if (!sv) { out.koTeams[k] = lv; return; }
+      out.koTeams[k] = localNewer ? lv : sv;
+    });
+
     // Other top-level fields: server wins on conflict, but keep
     // local-only keys (uiSelectedMember, stickers, scorers, etc.).
-    var skip = { members:1, picks:1, matchOverrides:1, groups:1, _syncedAt:1 };
+    var skip = { members:1, picks:1, matchOverrides:1, groups:1, koTeams:1, _syncedAt:1 };
     Object.keys(l).forEach(function(k) { if (!skip[k]) out[k] = l[k]; });
     Object.keys(s).forEach(function(k) { if (!skip[k]) out[k] = s[k]; });
 
