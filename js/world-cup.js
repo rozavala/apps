@@ -2245,8 +2245,16 @@
     for (const m of state.matches) {
       const base = _scheduleBaseline(m.id);
       if (!base) continue;
+      const ko = m.stage !== 'group';
       const diff = {};
       for (const k of MATCH_OVERRIDE_FIELDS) {
+        // Knockout home/away are DERIVED from results + the official
+        // feed — never persist them. Storing them caused a cross-device
+        // resurrection bug: a reset on one device drops the override,
+        // but a stale value on another device merges back via union.
+        // Persisting only `result` makes the bracket a pure function of
+        // synced results, so it re-derives identically everywhere.
+        if (ko && (k === 'home' || k === 'away')) continue;
         const mv = m[k] === undefined ? null : m[k];
         const bv = base[k] === undefined ? null : base[k];
         if (JSON.stringify(mv) !== JSON.stringify(bv)) diff[k] = m[k];
@@ -2271,6 +2279,12 @@
         state.groups = saved.groups;
       }
 
+      // Ignore any stored knockout home/away — those are derived (see
+      // _diffMatches). Skipping them on load also strips stale values
+      // from older snapshots / the server so the resurrection bug
+      // self-heals: the bracket re-derives from results below.
+      const _skipKoTeam = (m, k) => m.stage !== 'group' && (k === 'home' || k === 'away');
+
       // New slim shape — matchOverrides keyed by match id
       if (saved.matchOverrides && typeof saved.matchOverrides === 'object') {
         for (const id of Object.keys(saved.matchOverrides)) {
@@ -2278,7 +2292,7 @@
           if (!m) continue;
           const diff = saved.matchOverrides[id] || {};
           for (const k of MATCH_OVERRIDE_FIELDS) {
-            if (k in diff) m[k] = diff[k];
+            if (k in diff && !_skipKoTeam(m, k)) m[k] = diff[k];
           }
         }
       }
@@ -2291,7 +2305,7 @@
           if (!m) continue;
           const base = _scheduleBaseline(sm.id);
           for (const k of MATCH_OVERRIDE_FIELDS) {
-            if (k in sm) {
+            if (k in sm && !_skipKoTeam(m, k)) {
               const sv = sm[k] === undefined ? null : sm[k];
               const bv = base && base[k] !== undefined ? base[k] : null;
               if (JSON.stringify(sv) !== JSON.stringify(bv)) m[k] = sm[k];
@@ -2303,8 +2317,11 @@
       state.members = Array.isArray(saved.members) ? saved.members : [];
       state.picks = (saved.picks && typeof saved.picks === 'object') ? saved.picks : {};
       state.uiSelectedMember = saved.uiSelectedMember || null;
-      state.koAuto = (saved.koAuto && typeof saved.koAuto === 'object') ? saved.koAuto : {};
-      state.koFeed = (saved.koFeed && typeof saved.koFeed === 'object') ? saved.koFeed : {};
+      // koAuto/koFeed are in-session bookkeeping only — KO teams re-derive
+      // from results each load, so these start empty and are rebuilt by
+      // resolveBracketFromResults() / the feed within the session.
+      state.koAuto = {};
+      state.koFeed = {};
     } catch (e) { console.warn('wc load failed', e); }
     // Re-derive the knockout bracket from whatever results we loaded so
     // resolved teams persist across reloads and self-correct.
@@ -2324,8 +2341,6 @@
         picks: state.picks,
         uiSelectedMember: state.uiSelectedMember || null,
       };
-      if (state.koAuto && Object.keys(state.koAuto).length) slim.koAuto = state.koAuto;
-      if (state.koFeed && Object.keys(state.koFeed).length) slim.koFeed = state.koFeed;
       const gd = _diffGroups();
       if (gd) slim.groups = gd;
       const md = _diffMatches();
