@@ -3401,15 +3401,40 @@
     return out;
   }
 
-  // Assign each qualifying group to a distinct third-place slot within
-  // its allowed set (most-constrained slot first, backtracking). Returns
-  // { 'matchId.side': group } or null if no valid assignment. This is a
-  // VALID bracket but not guaranteed to match FIFA's official Annex C
-  // table when multiple assignments are possible — flagged provisional
-  // in the UI; the host can correct via the match editor.
+  // Official FIFA third-place allocation (Annex C), keyed by the sorted
+  // set of groups whose third-placed team qualified -> { matchId: group }.
+  // The full 495-row table isn't reproducible offline (every combination
+  // admits many valid matchings), so we encode the rows that actually
+  // occur. 2026: the eight qualifying thirds came from B,D,E,F,I,J,K,L,
+  // and FIFA seated them as below — this is the authoritative slotting,
+  // used in preference to the constraint-matching fallback.
+  const OFFICIAL_THIRD_TABLE = {
+    BDEFIJKL: { m075: 'D', m078: 'F', m079: 'E', m080: 'K', m081: 'I', m082: 'B', m085: 'J', m088: 'L' },
+  };
+
+  // Assign each qualifying group to a distinct third-place slot. Uses the
+  // official table when the qualifying combination is known; otherwise
+  // falls back to constraint matching (most-constrained slot first), which
+  // yields a VALID — but possibly non-official — bracket. Returns
+  // { 'matchId.side': group } or null.
   function _assignThirds(qualGroups) {
     const slots = _thirdSlots();
     if (slots.length !== 8 || qualGroups.length !== 8) return null;
+
+    // Official table fast-path.
+    const comboKey = qualGroups.slice().sort().join('');
+    const official = OFFICIAL_THIRD_TABLE[comboKey];
+    if (official) {
+      const assign = {};
+      let ok = true;
+      for (const slot of slots) {
+        const grp = official[slot.id];
+        if (grp && slot.allowed.includes(grp)) assign[slot.id + '.' + slot.side] = grp;
+        else { ok = false; break; }
+      }
+      if (ok && Object.keys(assign).length === slots.length) return assign;
+    }
+
     const order = slots.slice().sort((a, b) =>
       a.allowed.filter(g => qualGroups.includes(g)).length -
       b.allowed.filter(g => qualGroups.includes(g)).length);
