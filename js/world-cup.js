@@ -6196,17 +6196,23 @@
     ? 'https://all-options-dev.tail57521e.ts.net/api/wc-scores'
     : null;
 
-  // Dates the proxy should query — every distinct match date through today
-  // plus a one-day buffer either side. Tournament size is bounded (~40
-  // match-days), so the URL stays compact.
+  // Dates the proxy should query. Group-stage matches are limited to the
+  // live window (recent + within 24h) so routine polling stays lean —
+  // but EVERY knockout date is always included so the official bracket
+  // resolves the moment ESPN publishes it, instead of trickling in ~24h
+  // before each KO match. The tournament has 34 distinct match-days, so
+  // the union stays under the proxy's 40-date cap; we trim oldest as a
+  // defensive backstop if the schedule ever grows.
   function _vpsQueryDates() {
     const cutoff = Date.now() + 24 * 3600 * 1000;
     const dates = new Set();
     for (const m of state.matches) {
-      const kt = kickoffDate(m).getTime();
-      if (kt <= cutoff) dates.add(m.date.replace(/-/g, ''));
+      if (m.stage !== 'group' || kickoffDate(m).getTime() <= cutoff) {
+        dates.add(m.date.replace(/-/g, ''));
+      }
     }
-    return Array.from(dates).sort();
+    const sorted = Array.from(dates).sort();
+    return sorted.length > 40 ? sorted.slice(sorted.length - 40) : sorted;
   }
 
   async function _fetchEspn() {
