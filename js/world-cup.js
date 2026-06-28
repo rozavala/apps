@@ -4271,9 +4271,20 @@
       </div>`;
     }
 
-    // Knockout bracket (computed)
+    // Knockout bracket (computed). The reset button clears any
+    // manually-set teams (e.g. edits made before auto-resolution
+    // existed) and re-derives the bracket from results + the feed.
+    const koManualCount = state.matches.filter(m =>
+      m.stage !== 'group' &&
+      ((m.home && !(state.koAuto || {})[m.id + '.home'] && !(state.koFeed || {})[m.id + '.home']) ||
+       (m.away && !(state.koAuto || {})[m.id + '.away'] && !(state.koFeed || {})[m.id + '.away']))
+    ).length;
     html += `<div class="bracket-stage">
-      <h2 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:8px;">🏆 Knockout bracket</h2>`;
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+        <h2 style="font-family:var(--font-display);font-size:1.2rem;margin:0;">🏆 Knockout bracket</h2>
+        <button class="btn ghost" style="font-size:0.76rem;padding:5px 10px;" onclick="WC.resetBracket()">↺ Reset to auto</button>
+      </div>
+      ${koManualCount ? `<p class="muted" style="font-size:0.74rem;margin:-4px 0 8px;">${koManualCount} match${koManualCount===1?'':'es'} ${koManualCount===1?'has a':'have'} manually-set team. "Reset to auto" re-derives the whole bracket from results and the official feed.</p>` : ''}`;
     for (const stage of ['R32','R16','QF','SF','3rd','Final']) {
       const stageMatches = state.matches.filter(m => m.stage === stage);
       if (stageMatches.length === 0) continue;
@@ -5438,6 +5449,29 @@
     _hydrateMatchDetail(m);
   }
 
+  // Clear every manually-set knockout team and re-derive the whole
+  // bracket from results + the official feed. Match scores and bracket
+  // pool picks are untouched — only the KO fixtures' home/away teams
+  // revert to placeholders and then refill automatically. Use this to
+  // wipe edits made before auto-resolution existed.
+  function resetBracket() {
+    if (!confirm('Reset the knockout bracket?\n\nThis clears any manually-set teams in the Round of 32 onward and re-derives them from results and the official feed. Match scores and your bracket picks are NOT affected.')) return;
+    state.koAuto = state.koAuto || {};
+    state.koFeed = state.koFeed || {};
+    for (const m of state.matches) {
+      if (m.stage === 'group') continue;
+      m.home = null;
+      m.away = null;
+      delete state.koAuto[m.id + '.home']; delete state.koAuto[m.id + '.away'];
+      delete state.koFeed[m.id + '.home']; delete state.koFeed[m.id + '.away'];
+    }
+    resolveBracketFromResults();
+    save();
+    toast('Bracket reset — tap ⟳ Sync scores to pull official teams');
+    const cur = document.querySelector('.tab.active')?.dataset.tab;
+    if (cur) activateTab(cur);
+  }
+
   function saveResult(matchId) {
     const m = state.matches.find(x => x.id === matchId);
     if (!m) return;
@@ -6470,6 +6504,7 @@
     openCountry,
     renderMatches,
     editResult, editResultNeighbor, saveResult, clearResult, closeModal,
+    resetBracket,
     openGroupEditor, saveGroups,
     startEntry, editEntry, doneEntry, setEntrantName, removeMember,
     setGroupPick, setKoPick, setOutcomePick, setScorePred,
