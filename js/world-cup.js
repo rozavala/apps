@@ -6497,15 +6497,31 @@
         else if (typeof rm.score1 === 'number' && typeof rm.score2 === 'number') { hs = rm.score1; as = rm.score2; }
         if (flip) { const t = hs; hs = as; as = t; }
         if (hs !== null && as !== null) {
-          if (!local.result || local.result.home !== hs || local.result.away !== as) {
-            const prevPK = local.result && local.result.pkWinner;
-            let pkWinner = prevPK || null;
-            if (rm.score && Array.isArray(rm.score.p)) {
+          // Penalty-shootout / advancing-team winner. Only meaningful when
+          // full time is level — for a decisive score the winner is implied
+          // by the goals. Computed every sync (not just when the score
+          // changes) so a draw that later goes to pens still gets its
+          // winner, and re-derives the bracket cascade.
+          let pkWinner = (local.result && local.result.pkWinner) || null;
+          if (hs === as) {
+            if (rm.winner === 'home' || rm.winner === 'away') {
+              // ESPN's definitive winner flag (flip-aware) — source of truth.
+              const winSide = flip ? (rm.winner === 'home' ? 'away' : 'home') : rm.winner;
+              pkWinner = winSide === 'home' ? local.home : local.away;
+            } else if (rm.score && Array.isArray(rm.score.p)) {
+              // Shootout tally fallback (OpenFootball, or ESPN score.p).
               let p0 = rm.score.p[0], p1 = rm.score.p[1];
               if (flip) { const t = p0; p0 = p1; p1 = t; }
               if (p0 > p1) pkWinner = local.home;
               else if (p1 > p0) pkWinner = local.away;
             }
+          } else {
+            pkWinner = null; // decisive result — no shootout
+          }
+          const prev = local.result;
+          const changed = !prev || prev.home !== hs || prev.away !== as ||
+                          (prev.pkWinner || null) !== (pkWinner || null);
+          if (changed) {
             // Object.assign preserves goals/cards/eventId already attached.
             local.result = Object.assign({}, local.result, { home: hs, away: as, pkWinner });
             updated++;
