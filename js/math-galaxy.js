@@ -621,7 +621,7 @@ function genCommander() {
   if (type === 'blackhole_sub') { const a = rand(100, 500), b = rand(50, a - 1); return { label: 'Big Subtraction', text: `${a} 🕳️ - ${b} 🕳️ = ?`, hint: 'Subtract', answer: a - b, options: generateDistractors(a - b, 3, 10, 450), mode: 'choice' }; }
   if (type === 'galaxy_pct_2') { const p = [10, 20, 25, 50][rand(0, 3)]; const base = rand(10, 50) * (100/p); const ans = base * p/100; return { label: 'Percentages', text: `${p}% of ${base} 🌌`, hint: 'Calculate', answer: ans, options: generateDistractors(ans, 3, 5, 200), mode: 'choice' }; }
   if (type === 'gravity_ops') { const a=rand(5,10), b=rand(2,5); const ans=a+(b*b); return { label: 'Gravity Math', text: `${a} + ${b}² = ?`, hint: 'Square first!', answer: ans, options: generateDistractors(ans, 3, 5, 50), mode: 'choice' }; }
-  if (type === 'orbit_dec') { const a=(rand(10,50)/10).toFixed(1); const b=(rand(10,50)/10).toFixed(1); const ans=(parseFloat(a)-parseFloat(b)).toFixed(1); return { label: 'Decimals', text: `${a} - ${b} = ?`, hint: '', answer: ans, options: generateDistractors(ans, 3, -5, 5).map(x=>x.toFixed(1)), mode: 'choice' }; }
+  if (type === 'orbit_dec') { const a=(rand(10,50)/10).toFixed(1); const b=(rand(10,50)/10).toFixed(1); const ans=(parseFloat(a)-parseFloat(b)).toFixed(1); return { label: 'Decimals', text: `${a} - ${b} = ?`, hint: '', answer: ans, options: generateDistractors(parseFloat(ans), 3, -5, 5).map(x=>x.toFixed(1)), mode: 'choice' }; }
   if (type === 'blackhole_div') {
     const b = rand(10, 20), ans = rand(5, 15);
     return { label: 'Black Hole Division', text: `${b * ans} 🕳️ ÷ ${b} = ?`, hint: 'Divide the black holes', answer: ans, options: generateDistractors(ans, 3, 2, 25), mode: 'choice' };

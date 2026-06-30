@@ -450,6 +450,9 @@ const ArtStudio = (() => {
   }
 
   function floodFill(ctx, canvas, startX, startY, fillColor) {
+    // Guard against an unsized/hidden canvas: getImageData with a 0-width or
+    // 0-height rect throws IndexSizeError ("index is not in the allowed range").
+    if (!canvas || canvas.width === 0 || canvas.height === 0) return;
     const dpr = window.devicePixelRatio || 1;
     const x = Math.floor(startX * dpr);
     const y = Math.floor(startY * dpr);
