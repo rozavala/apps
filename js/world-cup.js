@@ -1993,7 +1993,7 @@
     "venue": "nrg",
     "result": null,
     "home_label": "W73",
-    "away_label": "W75"
+    "away_label": "W76"
   },
   {
     "id": "m090",
@@ -2006,8 +2006,8 @@
     "away": null,
     "venue": "lin",
     "result": null,
-    "home_label": "W74",
-    "away_label": "W77"
+    "home_label": "W75",
+    "away_label": "W78"
   },
   {
     "id": "m091",
@@ -2020,8 +2020,8 @@
     "away": null,
     "venue": "met",
     "result": null,
-    "home_label": "W76",
-    "away_label": "W78"
+    "home_label": "W74",
+    "away_label": "W77"
   },
   {
     "id": "m092",
@@ -2077,7 +2077,7 @@
     "venue": "mer",
     "result": null,
     "home_label": "W86",
-    "away_label": "W88"
+    "away_label": "W87"
   },
   {
     "id": "m096",
@@ -2091,7 +2091,7 @@
     "venue": "bc",
     "result": null,
     "home_label": "W85",
-    "away_label": "W87"
+    "away_label": "W88"
   },
   {
     "id": "m097",
@@ -2362,16 +2362,28 @@
       // ones are omitted and re-derived from results on load.
       if (state.koTeams && Object.keys(state.koTeams).length) slim.koTeams = state.koTeams;
 
+      const payload = JSON.stringify(slim);
       try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(slim));
+        localStorage.setItem(STORE_KEY, payload);
       } catch (e) {
-        // Quota exceeded — surface once per minute instead of spamming.
-        const now = Date.now();
-        if (now - _lastQuotaWarn > 60000) {
-          _lastQuotaWarn = now;
-          console.warn('wc save failed', e);
-          if (typeof toast === 'function') {
-            toast('⚠️ Storage full — clear another app\'s data to keep saving picks.');
+        // Quota exceeded would otherwise silently drop the latest scores
+        // and picks — they'd "vanish" on the next open. The squad cache
+        // (wc2026.nominations) is large and fully regenerable, so evict
+        // it (and a couple of other regenerable caches) and retry, so
+        // user data always wins the space.
+        let saved = false;
+        for (const k of ['wc2026.nominations', NOMINATIONS_KEY]) {
+          try { if (k) localStorage.removeItem(k); } catch (e2) {}
+        }
+        try { localStorage.setItem(STORE_KEY, payload); saved = true; } catch (e3) {}
+        if (!saved) {
+          const now = Date.now();
+          if (now - _lastQuotaWarn > 60000) {
+            _lastQuotaWarn = now;
+            console.warn('wc save failed', e);
+            if (typeof toast === 'function') {
+              toast('⚠️ Storage full — clear another app\'s data to keep saving picks.');
+            }
           }
         }
       }
