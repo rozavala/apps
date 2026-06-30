@@ -6533,7 +6533,17 @@
           const prev = local.result;
           const changed = !prev || prev.home !== hs || prev.away !== as ||
                           (prev.pkWinner || null) !== (pkWinner || null);
-          if (changed) {
+          // Guard against a background poll wiping a recorded result. A
+          // quiet auto-sync may ADD a result for a match that has none, or
+          // update one that's genuinely in its live window right now — but
+          // it must NOT rewrite a result whose match is already over. That
+          // was zeroing out completed games on open (e.g. a match the
+          // feed momentarily reports 0-0/in-progress, or the lagging
+          // fallback). Manual "Sync scores" (not quiet) is always allowed.
+          const kt = kickoffDate(local).getTime();
+          const inLiveWindow = Date.now() >= kt - 5 * 60000 && Date.now() <= kt + LIVE_WINDOW_MS;
+          const overwriteOk = !prev || !quiet || inLiveWindow;
+          if (changed && overwriteOk) {
             // Object.assign preserves goals/cards/eventId already attached.
             local.result = Object.assign({}, local.result, { home: hs, away: as, pkWinner });
             updated++;
