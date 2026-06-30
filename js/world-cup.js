@@ -7,6 +7,8 @@
   'use strict';
 
   const STORE_KEY = 'wc2026.v2';
+  // Local-only, CloudSync-immune redundant backup of match results.
+  const RESULTS_BACKUP_KEY = 'wc2026.results';
   const TOURNAMENT_START = '2026-06-11T20:00:00-05:00';
   const TOURNAMENT_END   = '2026-07-19T15:00:00-04:00';
 
@@ -2350,6 +2352,24 @@
         }
       }
     } catch (e) { console.warn('wc load failed', e); }
+
+    // Heal from the redundant results backup: fill any match result the
+    // main bucket is missing (e.g. it was out-flanked by a stale
+    // cross-device pull, or a quota hiccup dropped it). Only FILLS gaps —
+    // never overrides a result the main bucket already has.
+    try {
+      const raw = localStorage.getItem(RESULTS_BACKUP_KEY);
+      if (raw) {
+        const rmap = JSON.parse(raw);
+        for (const id of Object.keys(rmap)) {
+          const m = state.matches.find(x => x.id === id);
+          if (m && !m.result && rmap[id] && typeof rmap[id].home === 'number') {
+            m.result = rmap[id];
+          }
+        }
+      }
+    } catch (e) {}
+
     // Re-derive the knockout bracket from whatever results we loaded so
     // resolved teams persist across reloads and self-correct.
     resolveBracketFromResults();
@@ -2376,31 +2396,56 @@
       // ones are omitted and re-derived from results on load.
       if (state.koTeams && Object.keys(state.koTeams).length) slim.koTeams = state.koTeams;
 
-      const payload = JSON.stringify(slim);
-      try {
-        localStorage.setItem(STORE_KEY, payload);
-      } catch (e) {
-        // Quota exceeded would otherwise silently drop the latest scores
-        // and picks — they'd "vanish" on the next open. The squad cache
-        // (wc2026.nominations) is large and fully regenerable, so evict
-        // it (and a couple of other regenerable caches) and retry, so
-        // user data always wins the space.
-        let saved = false;
-        for (const k of ['wc2026.nominations', NOMINATIONS_KEY]) {
+      // Persist with progressive fallback so a full localStorage can
+      // never silently drop scores (the "vanish on next open" bug). We
+      // try the full payload, then shed regenerable data, and as a last
+      // resort write just the essentials (results + picks + confirmed KO
+      // teams). Whatever survives, the user's scores do.
+      const _try = (obj) => {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); return true; }
+        catch (e) { return false; }
+      };
+      let saved = _try(slim);
+      if (!saved) {
+        // 1) Evict the large, fully-regenerable squad cache and retry.
+        for (const k of ['wc2026.nominations', NOMINATIONS_KEY, 'wc2026.summaryCache']) {
           try { if (k) localStorage.removeItem(k); } catch (e2) {}
         }
-        try { localStorage.setItem(STORE_KEY, payload); saved = true; } catch (e3) {}
-        if (!saved) {
-          const now = Date.now();
-          if (now - _lastQuotaWarn > 60000) {
-            _lastQuotaWarn = now;
-            console.warn('wc save failed', e);
-            if (typeof toast === 'function') {
-              toast('⚠️ Storage full — clear another app\'s data to keep saving picks.');
-            }
+        saved = _try(slim);
+      }
+      if (!saved) {
+        // 2) Drop the optional/UI-only fields; keep scores + picks + KO.
+        const essential = { members: slim.members, picks: slim.picks };
+        if (slim.matchOverrides) essential.matchOverrides = slim.matchOverrides;
+        if (slim.koTeams) essential.koTeams = slim.koTeams;
+        if (slim.groups) essential.groups = slim.groups;
+        saved = _try(essential);
+      }
+      if (!saved) {
+        // 3) Last resort: results only (the thing that keeps disappearing).
+        saved = _try({ matchOverrides: slim.matchOverrides || {}, picks: slim.picks || {} });
+      }
+      if (!saved) {
+        const now = Date.now();
+        if (now - _lastQuotaWarn > 60000) {
+          _lastQuotaWarn = now;
+          console.warn('wc save failed — storage full even after shedding caches');
+          if (typeof toast === 'function') {
+            toast('⚠️ Storage full — clear another app\'s data to keep saving scores.');
           }
         }
       }
+      // Redundant local-only results backup. CloudSync never touches this
+      // key, so even if the main bucket gets out-flanked by a stale
+      // cross-device pull or a quota hiccup, the results survive a refresh
+      // and load() unions them back. Tiny (lean results only), so it saves
+      // even when the full bucket can't.
+      try {
+        const rmap = {};
+        for (const m of state.matches) if (m.result) rmap[m.id] = _leanResult(m.result);
+        if (Object.keys(rmap).length) localStorage.setItem(RESULTS_BACKUP_KEY, JSON.stringify(rmap));
+      } catch (e) {}
+
       // Best-effort cross-device sync (no-op if CloudSync not loaded/online)
       try { if (window.CloudSync && CloudSync.online && CloudSync.push) CloudSync.push(STORE_KEY); } catch (e) {}
     }, 200);
