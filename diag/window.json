@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-28T14:32:08.899Z",
+  "generatedAt": "2026-06-30T13:39:49.173Z",
   "windowHours": 72,
   "days": [
     {
@@ -7,9 +7,9 @@
       "groups": [
         {
           "entry": {
-            "id": "e_mqwela5o_cm2m16",
-            "ts": 1782567376044,
-            "clientTs": 1782567376044,
+            "id": "e_mqwjvcww_6hkl23",
+            "ts": 1782576244256,
+            "clientTs": 1782576244256,
             "kind": "error",
             "app": "math-galaxy",
             "page": "math-galaxy.html",
@@ -24,8 +24,8 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 2,
-          "firstTs": 1782567376044,
+          "count": 1,
+          "firstTs": 1782576244256,
           "lastTs": 1782576244256,
           "users": [
             "u-3bda7c"
