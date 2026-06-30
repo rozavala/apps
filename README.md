@@ -66,10 +66,10 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 
 ## 📜 Filosofía de Contenido (Content Philosophy)
 
-All content in this repository adheres to the [Content Guidelines](content-guidelines.md). We prioritize:
-- **Verifiable Facts**: Geography, history, science, and math.
-- **Classical Skills**: Music theory, chess strategy, and artistic techniques.
-- **Neutral Language**: Factual storytelling without modern social or political agendas.
+Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](content-guidelines.md). Priorizamos (All content in this repository adheres to the [Content Guidelines](content-guidelines.md). We prioritize):
+- **Hechos Verificables (Verifiable Facts)**: Geografía, historia, ciencia y matemáticas. (Geography, history, science, and math.)
+- **Habilidades Clásicas (Classical Skills)**: Teoría musical, estrategia de ajedrez y técnicas artísticas. (Music theory, chess strategy, and artistic techniques.)
+- **Lenguaje Neutral (Neutral Language)**: Narración factual sin agendas sociales o políticas modernas. (Factual storytelling without modern social or political agendas.)
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
@@ -217,10 +217,10 @@ The client talks to it via the `VPS` constant at the top of `js/book-movie-check
 
 ## 📂 Estructura del Proyecto (Project Structure)
 
-- `index.html`: The main app hub and profile selector.
-- `css/`: Stylesheets for the hub and individual apps.
-- `js/`: Core logic, authentication, and app-specific scripts.
-- `little-maestro.html`, `math-galaxy.html`, etc.: Individual application entry points.
+- `index.html`: El centro principal de aplicaciones y selector de perfiles. (The main app hub and profile selector.)
+- `css/`: Hojas de estilo para el centro y aplicaciones individuales. (Stylesheets for the hub and individual apps.)
+- `js/`: Lógica central, autenticación y scripts específicos de aplicaciones. (Core logic, authentication, and app-specific scripts.)
+- `little-maestro.html`, `math-galaxy.html`, etc.: Puntos de entrada para aplicaciones individuales. (Individual application entry points.)
 
 ---
 *Made with ♥ for the Zavala Serra kids.*
