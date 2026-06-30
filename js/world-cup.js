@@ -2362,16 +2362,28 @@
       // ones are omitted and re-derived from results on load.
       if (state.koTeams && Object.keys(state.koTeams).length) slim.koTeams = state.koTeams;
 
+      const payload = JSON.stringify(slim);
       try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(slim));
+        localStorage.setItem(STORE_KEY, payload);
       } catch (e) {
-        // Quota exceeded — surface once per minute instead of spamming.
-        const now = Date.now();
-        if (now - _lastQuotaWarn > 60000) {
-          _lastQuotaWarn = now;
-          console.warn('wc save failed', e);
-          if (typeof toast === 'function') {
-            toast('⚠️ Storage full — clear another app\'s data to keep saving picks.');
+        // Quota exceeded would otherwise silently drop the latest scores
+        // and picks — they'd "vanish" on the next open. The squad cache
+        // (wc2026.nominations) is large and fully regenerable, so evict
+        // it (and a couple of other regenerable caches) and retry, so
+        // user data always wins the space.
+        let saved = false;
+        for (const k of ['wc2026.nominations', NOMINATIONS_KEY]) {
+          try { if (k) localStorage.removeItem(k); } catch (e2) {}
+        }
+        try { localStorage.setItem(STORE_KEY, payload); saved = true; } catch (e3) {}
+        if (!saved) {
+          const now = Date.now();
+          if (now - _lastQuotaWarn > 60000) {
+            _lastQuotaWarn = now;
+            console.warn('wc save failed', e);
+            if (typeof toast === 'function') {
+              toast('⚠️ Storage full — clear another app\'s data to keep saving picks.');
+            }
           }
         }
       }
