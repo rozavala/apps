@@ -109,6 +109,20 @@ function _normalizeEvent(ev) {
   // like a real 0-0 final.
   if (!isNaN(hs) && !isNaN(as) && (completed || live)) {
     out.score = { ft: [hs, as] };
+    // Penalty shootout: ESPN puts the shootout tally on each competitor
+    // as `shootoutScore`. Surface it as score.p = [home, away] so the
+    // client can record the PK winner for a knockout draw.
+    const hp = parseInt(home.shootoutScore, 10);
+    const ap = parseInt(away.shootoutScore, 10);
+    if (!isNaN(hp) && !isNaN(ap) && (hp || ap)) out.score.p = [hp, ap];
+  }
+  // Definitive advancing side — ESPN flags exactly one competitor with
+  // winner:true on a completed knockout match, however it was decided
+  // (regulation, extra time, or penalties). This is the source of truth
+  // the client uses to set the winner even when full-time is level.
+  if (completed) {
+    if (home.winner === true) out.winner = 'home';
+    else if (away.winner === true) out.winner = 'away';
   }
   if (goals1.length) out.goals1 = goals1;
   if (goals2.length) out.goals2 = goals2;
