@@ -2240,6 +2240,19 @@
     }
     return null;
   }
+  // Persisted form of a match result: only the fields that matter for
+  // scoring and the bracket. The scorer/card arrays (goals1/goals2/
+  // cards1/cards2) are large and fully regenerable from the feed/summary,
+  // so they're kept in memory for the session but NOT persisted — storing
+  // them bloated the bucket and could blow the localStorage quota, which
+  // silently dropped saves and made scores vanish on the next open.
+  function _leanResult(r) {
+    if (!r || typeof r !== 'object') return r;
+    const out = { home: r.home, away: r.away, pkWinner: r.pkWinner || null };
+    if (r.eventId) out.eventId = r.eventId; // tiny; lets the modal lazy-fetch detail
+    return out;
+  }
+
   function _diffMatches() {
     const overrides = {};
     for (const m of state.matches) {
@@ -2255,9 +2268,10 @@
         // Persisting only `result` makes the bracket a pure function of
         // synced results, so it re-derives identically everywhere.
         if (ko && (k === 'home' || k === 'away')) continue;
-        const mv = m[k] === undefined ? null : m[k];
+        let mv = m[k] === undefined ? null : m[k];
+        if (k === 'result') mv = _leanResult(mv);
         const bv = base[k] === undefined ? null : base[k];
-        if (JSON.stringify(mv) !== JSON.stringify(bv)) diff[k] = m[k];
+        if (JSON.stringify(mv) !== JSON.stringify(bv)) diff[k] = mv;
       }
       if (Object.keys(diff).length > 0) overrides[m.id] = diff;
     }
