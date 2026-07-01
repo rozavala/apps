@@ -1,0 +1,31 @@
+{
+  "day": "2026-07-01",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mr2dtbn3_gc1nej",
+        "ts": 1782928868655,
+        "clientTs": 1782928868655,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: The operation was aborted. ",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-34d354",
+        "age": 12,
+        "guest": false,
+        "ua": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1782928868655,
+      "lastTs": 1782928868655,
+      "users": [
+        "u-34d354"
+      ]
+    }
+  ]
+}
