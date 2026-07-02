@@ -3677,7 +3677,11 @@
     const { champion, runnerUp } = getChampionAndRunnerUp();
     if (champion && picks.champion && picks.champion === champion) { total += SCORING.champion; breakdown.champion = SCORING.champion; }
     if (runnerUp && picks.runnerUp && picks.runnerUp === runnerUp) { total += SCORING.runnerUp; breakdown.runnerUp = SCORING.runnerUp; }
-    if (picks.goldenBootCorrect) { total += SCORING.goldenBoot; breakdown.goldenBoot = SCORING.goldenBoot; }
+    // Golden Boot is awarded only at the end of the tournament, so its
+    // points can't count until the Final has been played — otherwise the
+    // admin "correct" checkbox (and its OR-merge across devices) awarded
+    // 10 pts prematurely.
+    if (picks.goldenBootCorrect && champion) { total += SCORING.goldenBoot; breakdown.goldenBoot = SCORING.goldenBoot; }
 
     return { total, breakdown };
   }
@@ -5385,7 +5389,15 @@
         // Knockout match: show who they think advances.
         const stagePicks = (picks.ko || {})[m.stage] || {};
         const pickedCode = stagePicks[m.id];
-        if (!pickedCode) {
+        // Only honor a bid if the picked team is actually one of the two
+        // teams in this match. KO picks are keyed by match id, so a pick
+        // made before the bracket wiring was corrected can otherwise show
+        // against the wrong game (e.g. "Brazil" surfacing on a
+        // Paraguay–France tie). Once both sides are resolved, an out-of-
+        // match bid is stale — treat it as no pick rather than mislead.
+        const koSides = [m.home, m.away].filter(Boolean);
+        const bothResolved = koSides.length === 2;
+        if (!pickedCode || (bothResolved && !koSides.includes(pickedCode))) {
           return `<div class="pool-pick"><div>${who}</div><div class="muted" style="font-size:0.8rem;">— no pick —</div><div></div></div>`;
         }
         const c = countryByCode(pickedCode);
@@ -6255,6 +6267,15 @@
       if (document.visibilityState === 'visible') autoSyncTick();
     });
     autoSyncTick();
+    // One-time backfill on open: the interval tick only runs during a
+    // live match window, so a completed result that never persisted (or
+    // was entered on another device) would otherwise need a manual sync
+    // every time. Run one sync ~2s after load — the overwrite gate makes
+    // it add-only for matches that are already over, so it just fills
+    // gaps without touching recorded scores.
+    setTimeout(() => {
+      if (navigator.onLine !== false) syncScores({ quiet: true });
+    }, 2000);
     // refresh countdown every second on home
     setInterval(() => {
       if (document.querySelector('.tab.active')?.dataset.tab === 'home') {
