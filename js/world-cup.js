@@ -2379,6 +2379,9 @@
   // and persist only diffs to keep the payload tiny.
   let _saveTimer = null;
   let _lastQuotaWarn = 0;
+  // Last-save diagnostics, surfaced on the About tab to debug the
+  // disappearing-scores reports.
+  let _saveDiag = { tier: null, ts: null, mainBytes: 0, backupBytes: 0, backupOk: false, results: 0 };
   function save() {
     if (_saveTimer) return;
     _saveTimer = setTimeout(() => {
@@ -2401,17 +2404,23 @@
       // try the full payload, then shed regenerable data, and as a last
       // resort write just the essentials (results + picks + confirmed KO
       // teams). Whatever survives, the user's scores do.
+      let mainBytes = 0;
       const _try = (obj) => {
-        try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); return true; }
-        catch (e) { return false; }
+        try {
+          const s = JSON.stringify(obj);
+          localStorage.setItem(STORE_KEY, s);
+          mainBytes = s.length;
+          return true;
+        } catch (e) { return false; }
       };
+      let tier = 'full';
       let saved = _try(slim);
       if (!saved) {
         // 1) Evict the large, fully-regenerable squad cache and retry.
         for (const k of ['wc2026.nominations', NOMINATIONS_KEY, 'wc2026.summaryCache']) {
           try { if (k) localStorage.removeItem(k); } catch (e2) {}
         }
-        saved = _try(slim);
+        if ((saved = _try(slim))) tier = 'evicted-squads';
       }
       if (!saved) {
         // 2) Drop the optional/UI-only fields; keep scores + picks + KO.
@@ -2419,13 +2428,14 @@
         if (slim.matchOverrides) essential.matchOverrides = slim.matchOverrides;
         if (slim.koTeams) essential.koTeams = slim.koTeams;
         if (slim.groups) essential.groups = slim.groups;
-        saved = _try(essential);
+        if ((saved = _try(essential))) tier = 'essentials';
       }
       if (!saved) {
         // 3) Last resort: results only (the thing that keeps disappearing).
-        saved = _try({ matchOverrides: slim.matchOverrides || {}, picks: slim.picks || {} });
+        if ((saved = _try({ matchOverrides: slim.matchOverrides || {}, picks: slim.picks || {} }))) tier = 'results-only';
       }
       if (!saved) {
+        tier = 'FAILED';
         const now = Date.now();
         if (now - _lastQuotaWarn > 60000) {
           _lastQuotaWarn = now;
@@ -2440,11 +2450,19 @@
       // cross-device pull or a quota hiccup, the results survive a refresh
       // and load() unions them back. Tiny (lean results only), so it saves
       // even when the full bucket can't.
+      let backupOk = false, backupBytes = 0, resultsCount = 0;
       try {
         const rmap = {};
         for (const m of state.matches) if (m.result) rmap[m.id] = _leanResult(m.result);
-        if (Object.keys(rmap).length) localStorage.setItem(RESULTS_BACKUP_KEY, JSON.stringify(rmap));
+        resultsCount = Object.keys(rmap).length;
+        if (resultsCount) {
+          const s = JSON.stringify(rmap);
+          localStorage.setItem(RESULTS_BACKUP_KEY, s);
+          backupOk = true; backupBytes = s.length;
+        }
       } catch (e) {}
+
+      _saveDiag = { tier, ts: Date.now(), mainBytes, backupBytes, backupOk, results: resultsCount };
 
       // Best-effort cross-device sync (no-op if CloudSync not loaded/online)
       try { if (window.CloudSync && CloudSync.online && CloudSync.push) CloudSync.push(STORE_KEY); } catch (e) {}
@@ -5247,7 +5265,60 @@
         <h3>Reset</h3>
         <p>Want to start fresh? <button class="btn danger" onclick="WC.resetAll()">Clear all data</button></p>
       </div>
+      ${_renderStorageDiag()}
     `;
+  }
+
+  // Storage / persistence diagnostics — helps debug the disappearing-
+  // scores reports. Shows what's actually in localStorage right now vs.
+  // what's in memory, and how the last save fared.
+  function _renderStorageDiag() {
+    const bytes = n => n >= 1024 ? (n / 1024).toFixed(1) + ' KB' : n + ' B';
+    let mainRaw = null, backupRaw = null, nomRaw = null;
+    try { mainRaw = localStorage.getItem(STORE_KEY); } catch (e) {}
+    try { backupRaw = localStorage.getItem(RESULTS_BACKUP_KEY); } catch (e) {}
+    try { nomRaw = localStorage.getItem('wc2026.nominations'); } catch (e) {}
+
+    let mainResults = 0;
+    try { const p = JSON.parse(mainRaw || '{}'); mainResults = Object.keys(p.matchOverrides || {}).filter(id => (p.matchOverrides[id] || {}).result).length; } catch (e) {}
+    let backupResults = 0;
+    try { backupResults = Object.keys(JSON.parse(backupRaw || '{}')).length; } catch (e) {}
+    const memResults = state.matches.filter(m => m.result).length;
+
+    // Rough total localStorage footprint across the whole suite.
+    let totalBytes = 0, keyCount = 0;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        totalBytes += (k || '').length + (localStorage.getItem(k) || '').length;
+        keyCount++;
+      }
+    } catch (e) {}
+
+    const d = _saveDiag;
+    const lastSave = d.ts ? fmtAgo(d.ts) : '—';
+    const tierColor = !d.tier ? 'var(--text-muted)'
+      : d.tier === 'full' ? 'var(--wc-green)'
+      : d.tier === 'FAILED' ? 'var(--wc-red)'
+      : 'var(--wc-gold)';
+    const mismatch = memResults !== mainResults;
+
+    return `
+      <div class="card" style="border-left:3px solid ${mismatch ? 'var(--wc-red)' : 'var(--wc-blue)'};">
+        <h2>🩺 Storage diagnostics</h2>
+        <p class="muted" style="font-size:0.8rem;">Share these numbers if scores are still disappearing.</p>
+        <dl class="kv" style="font-size:0.86rem;">
+          <dt>Results in memory</dt><dd>${memResults}</dd>
+          <dt>Results in main store</dt><dd style="${mismatch ? 'color:var(--wc-red);font-weight:800;' : ''}">${mainResults}${mismatch ? ' ⚠️ mismatch' : ''}</dd>
+          <dt>Results in backup</dt><dd>${backupResults} ${backupRaw ? '' : '<span class="muted">(none)</span>'}</dd>
+          <dt>Last save</dt><dd style="color:${tierColor};font-weight:700;">${d.tier || '—'} · ${lastSave}</dd>
+          <dt>Main store size</dt><dd>${mainRaw ? bytes(mainRaw.length) : '—'}</dd>
+          <dt>Backup size</dt><dd>${backupRaw ? bytes(backupRaw.length) : '—'}</dd>
+          <dt>Squad cache</dt><dd>${nomRaw ? bytes(nomRaw.length) : '<span class="muted">evicted / none</span>'}</dd>
+          <dt>All apps total</dt><dd>${bytes(totalBytes)} across ${keyCount} keys</dd>
+        </dl>
+        <button class="btn ghost" style="font-size:0.8rem;" onclick="WC.tab('about')">↻ Refresh readout</button>
+      </div>`;
   }
 
   /* ----------------------------------------------------------------
