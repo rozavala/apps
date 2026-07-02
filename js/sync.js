@@ -162,7 +162,12 @@ var CloudSync = (function() {
       champion:          nonEmpty(newer.champion,   older.champion)   || null,
       runnerUp:          nonEmpty(newer.runnerUp,   older.runnerUp)   || null,
       goldenBoot:        nonEmpty(newer.goldenBoot, older.goldenBoot) || '',
-      goldenBootCorrect: !!(older.goldenBootCorrect || newer.goldenBootCorrect),
+      // Admin "golden boot correct" flag: newer side wins rather than an
+      // OR-merge, so an admin un-checking it (or a stale true from before
+      // the award existed) can actually propagate and clear instead of
+      // being stuck true forever across devices.
+      goldenBootCorrect: (newer.goldenBootCorrect !== undefined
+        ? !!newer.goldenBootCorrect : !!older.goldenBootCorrect),
       mode:              nonEmpty(newer.mode, older.mode) || 'buildup',
       // Score predictions: union by match id. On direct conflict
       // (same match, two predictions), newer side wins so the most
