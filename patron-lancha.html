@@ -59,12 +59,16 @@
     .pl-mod{ background:var(--bg-card); border:1.5px solid var(--border-subtle); border-radius:var(--radius-sm);
       margin-bottom:12px; overflow:hidden; transition:border-color .2s; }
     .pl-mod:hover{ border-color:rgba(14,165,233,.4); }
+    .pl-mod.comp{ border-style:dashed; border-color:rgba(167,139,250,.4); }
     .pl-mod-head{ display:flex; align-items:center; gap:14px; padding:16px; cursor:pointer; }
     .pl-mod-icon{ font-size:30px; width:52px; height:52px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
       background:rgba(14,165,233,.1); border-radius:14px; }
+    .pl-mod.comp .pl-mod-icon{ background:rgba(167,139,250,.12); }
     .pl-mod-info{ flex:1; min-width:0; }
     .pl-mod-title{ font-family:var(--font-display); font-weight:700; font-size:1.02rem; }
     .pl-mod-sub{ font-size:.78rem; color:var(--text-muted); font-weight:600; margin-top:2px; }
+    .pl-badge{ display:inline-block; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+      color:#C4B5FD; background:rgba(167,139,250,.15); padding:2px 7px; border-radius:99px; margin-left:6px; vertical-align:middle; }
     .pl-mod-chev{ color:var(--text-muted); font-size:1.1rem; transition:transform .3s; }
     .pl-mod.open .pl-mod-chev{ transform:rotate(90deg); }
     .pl-mod-body{ display:none; padding:0 16px 6px; }
@@ -75,6 +79,7 @@
 
     .pl-lesson{ border-top:1px solid var(--border-subtle); padding:14px 2px; }
     .pl-lesson h3{ font-family:var(--font-display); font-size:.98rem; color:var(--teal); margin-bottom:8px; display:flex; gap:8px; align-items:center; }
+    .pl-mod.comp .pl-lesson h3{ color:#C4B5FD; }
     .pl-lesson p{ font-size:.9rem; line-height:1.6; color:#D6E4F0; margin-bottom:8px; }
     .pl-lesson ul{ margin:0 0 8px 20px; }
     .pl-lesson li{ font-size:.88rem; line-height:1.55; color:#C4D6E6; margin-bottom:5px; }
@@ -86,6 +91,13 @@
     .pl-mod-quiz-btn{ display:block; width:100%; margin:6px 0 14px; padding:11px; border:none; border-radius:12px;
       background:rgba(14,165,233,.14); color:var(--teal); font-family:var(--font-display); font-weight:700; font-size:.9rem; cursor:pointer; transition:all .2s; }
     .pl-mod-quiz-btn:hover{ background:rgba(14,165,233,.25); }
+
+    /* ---------- Diagrams ---------- */
+    .pl-diagram{ margin:12px auto; text-align:center; background:rgba(4,18,30,.5); border:1px solid var(--border-subtle);
+      border-radius:14px; padding:14px 10px 10px; }
+    .pl-diagram svg{ max-width:100%; height:auto; }
+    .pl-diagram .cap{ font-size:.74rem; color:var(--text-muted); font-weight:700; margin-top:8px; }
+    .pl-diagram text{ font-family:var(--font-body); }
 
     /* ---------- Practice / Exam config ---------- */
     .pl-panel{ background:var(--bg-card); border:1.5px solid var(--border-subtle); border-radius:var(--radius-sm); padding:20px; margin-bottom:16px; }
@@ -167,7 +179,7 @@
 
     @media(max-width:480px){
       .pl-header h1{ font-size:1.7rem; }
-      .pl-tab{ font-size:.74rem; padding:9px 2px; }
+      .pl-tab{ font-size:.72rem; padding:9px 2px; }
       .pl-q{ font-size:1.05rem; }
     }
   </style>
@@ -204,9 +216,12 @@
     <div class="pl-view active" id="view-learn">
       <div id="pl-modules"></div>
       <p class="pl-note">
-        Contenido de estudio para el examen de <b>Patrón de Lancha Deportiva</b>.
-        Es una herramienta de apoyo — confirma siempre los requisitos y el temario vigente
-        en la Autoridad Marítima (<a href="https://www.directemar.cl" target="_blank" rel="noopener">DIRECTEMAR</a>).
+        Contenido de estudio para el examen de <b>Patrón de Lancha Deportiva</b>, basado en el temario y el
+        <b>Manual del Curso de Patrón Deportivo de Bahía</b> (DIRECTEMAR). El módulo de <b>Reglamentación marítima</b>
+        usa las <b>preguntas oficiales del banco de DIRECTEMAR</b>; el resto de los bancos están modelados sobre el manual.
+        El módulo de <b>navegación a vela</b> es complementario (el patrón deportivo completo incluye vela y motor) y no
+        entra en el examen simulado base. Es una herramienta de apoyo — confirma siempre los requisitos y el temario
+        vigente en la Autoridad Marítima (<a href="https://www.directemar.cl" target="_blank" rel="noopener">DIRECTEMAR</a>).
       </p>
     </div>
 
@@ -225,7 +240,7 @@
     <div class="pl-view" id="view-exam">
       <div class="pl-panel" id="exam-config">
         <h2>🎓 Examen Simulado</h2>
-        <p class="lead">20 preguntas al azar de todos los temas, como en el examen real. Necesitas <b>70%</b> para aprobar. Las explicaciones se muestran al final.</p>
+        <p class="lead">20 preguntas al azar de los temas del examen de lancha (sin el módulo de vela). Necesitas <b>70%</b> para aprobar. Las explicaciones se muestran al final.</p>
         <button class="pl-btn" onclick="PL.startExam()">Rendir examen</button>
       </div>
       <div id="exam-runner"></div>
@@ -245,339 +260,592 @@
   <script>
   /* =====================================================================
      PATRÓN DE LANCHA DEPORTIVA — Contenido y motor de estudio
-     Temario DIRECTEMAR (Chile). Herramienta de apoyo al estudio.
+     Basado en el Manual del Curso Patrón Deportivo de Bahía (DIRECTEMAR)
+     y en el temario oficial. Herramienta de apoyo al estudio.
      ===================================================================== */
 
+  /* ---------------- DIAGRAMAS SVG ---------------- */
+  const DIAG = {
+    /* Partes de la embarcación (vista superior, proa arriba) */
+    barco: `<div class="pl-diagram"><svg viewBox="0 0 240 300" width="240" role="img" aria-label="Partes de la embarcación">
+      <defs></defs>
+      <path d="M120,18 C158,58 164,120 158,200 L158,250 Q158,276 120,280 Q82,276 82,250 L82,200 C76,120 82,58 120,18 Z"
+        fill="rgba(14,165,233,.08)" stroke="#67E8F9" stroke-width="2.5"/>
+      <line x1="120" y1="24" x2="120" y2="276" stroke="rgba(255,255,255,.18)" stroke-width="1.5" stroke-dasharray="5,5"/>
+      <!-- costados -->
+      <rect x="70" y="150" width="10" height="34" rx="3" fill="#F87171"/>
+      <rect x="160" y="150" width="10" height="34" rx="3" fill="#34D399"/>
+      <text x="120" y="12" fill="#EAF4FF" font-size="13" font-weight="800" text-anchor="middle">PROA</text>
+      <text x="120" y="296" fill="#EAF4FF" font-size="13" font-weight="800" text-anchor="middle">POPA</text>
+      <text x="40" y="170" fill="#F87171" font-size="12" font-weight="800" text-anchor="middle">BABOR</text>
+      <text x="40" y="184" fill="#F87171" font-size="9" text-anchor="middle">(izq.)</text>
+      <text x="200" y="170" fill="#34D399" font-size="12" font-weight="800" text-anchor="middle">ESTRIBOR</text>
+      <text x="200" y="184" fill="#34D399" font-size="9" text-anchor="middle">(der.)</text>
+      <text x="150" y="70" fill="#8B9BB0" font-size="10" text-anchor="middle">amura</text>
+      <text x="150" y="235" fill="#8B9BB0" font-size="10" text-anchor="middle">aleta</text>
+      <text x="120" y="150" fill="#8B9BB0" font-size="10" text-anchor="middle">través</text>
+      <!-- eslora -->
+      <line x1="18" y1="24" x2="18" y2="276" stroke="#FBBF24" stroke-width="1.5"/>
+      <text x="12" y="155" fill="#FBBF24" font-size="11" font-weight="700" text-anchor="middle" transform="rotate(-90,12,155)">ESLORA (largo)</text>
+      <!-- manga -->
+      <line x1="82" y1="292" x2="158" y2="292" stroke="#FBBF24" stroke-width="1.5"/>
+      <text x="120" y="290" fill="#FBBF24" font-size="10" font-weight="700" text-anchor="middle" display="none">manga</text>
+    </svg><div class="cap">Vista superior: proa, popa, babor (rojo/izq.) y estribor (verde/der.)</div></div>`,
+
+    /* Luces de navegación — sectores de visibilidad */
+    luces: `<div class="pl-diagram"><svg viewBox="0 0 240 250" width="240" role="img" aria-label="Sectores de luces de navegación">
+      <path d="M120,120 L120,30 A90,90 0 0 1 203.2,154.4 Z" fill="rgba(52,211,153,.30)" stroke="#34D399" stroke-width="1"/>
+      <path d="M120,120 L120,30 A90,90 0 0 0 36.8,154.4 Z" fill="rgba(248,113,113,.30)" stroke="#F87171" stroke-width="1"/>
+      <path d="M120,120 L203.2,154.4 A90,90 0 0 1 36.8,154.4 Z" fill="rgba(255,255,255,.16)" stroke="#E5E7EB" stroke-width="1"/>
+      <!-- barco -->
+      <path d="M120,95 C130,105 131,125 128,142 L112,142 C109,125 110,105 120,95 Z" fill="#0B2233" stroke="#67E8F9" stroke-width="2"/>
+      <circle cx="129" cy="120" r="4" fill="#34D399"/>
+      <circle cx="111" cy="120" r="4" fill="#F87171"/>
+      <circle cx="120" cy="142" r="4" fill="#fff"/>
+      <text x="120" y="120" fill="#67E8F9" font-size="9" text-anchor="middle" font-weight="700">tope</text>
+      <text x="215" y="115" fill="#34D399" font-size="11" font-weight="800" text-anchor="middle">verde</text>
+      <text x="212" y="128" fill="#34D399" font-size="9" text-anchor="middle">estribor</text>
+      <text x="25" y="115" fill="#F87171" font-size="11" font-weight="800" text-anchor="middle">rojo</text>
+      <text x="26" y="128" fill="#F87171" font-size="9" text-anchor="middle">babor</text>
+      <text x="120" y="200" fill="#E5E7EB" font-size="10" font-weight="700" text-anchor="middle">luz de alcance (popa, blanca)</text>
+      <text x="120" y="16" fill="#8B9BB0" font-size="10" text-anchor="middle">▲ proa</text>
+      <text x="205" y="60" fill="#34D399" font-size="9" text-anchor="middle">112,5°</text>
+      <text x="35" y="60" fill="#F87171" font-size="9" text-anchor="middle">112,5°</text>
+      <text x="120" y="238" fill="#8B9BB0" font-size="9" text-anchor="middle">135°</text>
+    </svg><div class="cap">Costado verde a estribor y rojo a babor (112,5° c/u); alcance blanca a popa (135°)</div></div>`,
+
+    /* Rosa de los vientos */
+    rosa: `<div class="pl-diagram"><svg viewBox="0 0 220 220" width="200" role="img" aria-label="Rosa de los vientos">
+      <circle cx="110" cy="110" r="86" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"/>
+      <circle cx="110" cy="110" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+      <line x1="110" y1="18" x2="110" y2="202" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+      <line x1="18" y1="110" x2="202" y2="110" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
+      <polygon points="110,22 118,110 102,110" fill="#F87171"/>
+      <polygon points="110,198 118,110 102,110" fill="#93A3B8"/>
+      <text x="110" y="14" fill="#F87171" font-size="14" font-weight="800" text-anchor="middle">N 0°</text>
+      <text x="110" y="216" fill="#EAF4FF" font-size="13" font-weight="800" text-anchor="middle">S 180°</text>
+      <text x="210" y="114" fill="#EAF4FF" font-size="13" font-weight="800" text-anchor="end">E 90°</text>
+      <text x="10" y="114" fill="#EAF4FF" font-size="13" font-weight="800" text-anchor="start">O 270°</text>
+      <text x="168" y="55" fill="#8B9BB0" font-size="10" text-anchor="middle">NE 45°</text>
+      <text x="168" y="170" fill="#8B9BB0" font-size="10" text-anchor="middle">SE 135°</text>
+      <text x="52" y="170" fill="#8B9BB0" font-size="10" text-anchor="middle">SO 225°</text>
+      <text x="52" y="55" fill="#8B9BB0" font-size="10" text-anchor="middle">NO 315°</text>
+    </svg><div class="cap">Se mide de 000° a 360° en sentido horario partiendo del Norte</div></div>`,
+
+    /* Situaciones RIPA */
+    ripa: `<div class="pl-diagram"><svg viewBox="0 0 340 150" width="340" role="img" aria-label="Situaciones RIPA">
+      <!-- Cruce -->
+      <g>
+        <polygon points="40,120 32,138 48,138" fill="#F87171"/>
+        <line x1="40" y1="120" x2="40" y2="95" stroke="#F87171" stroke-width="2" marker-end="url(#a)"/>
+        <polygon points="12,60 30,52 30,68" fill="#34D399"/>
+        <line x1="30" y1="60" x2="58" y2="60" stroke="#34D399" stroke-width="2" marker-end="url(#a)"/>
+        <text x="55" y="132" fill="#F87171" font-size="9" font-weight="800">CEDE</text>
+        <text x="60" y="45" fill="#34D399" font-size="9" font-weight="800">SIGUE</text>
+        <text x="45" y="14" fill="#EAF4FF" font-size="11" font-weight="800" text-anchor="middle">Cruce</text>
+      </g>
+      <!-- Vuelta encontrada -->
+      <g transform="translate(120,0)">
+        <line x1="20" y1="130" x2="20" y2="95" stroke="#8B9BB0" stroke-width="2"/>
+        <path d="M20,95 q14,-8 14,-22" fill="none" stroke="#34D399" stroke-width="2" marker-end="url(#a)"/>
+        <line x1="60" y1="25" x2="60" y2="60" stroke="#8B9BB0" stroke-width="2"/>
+        <path d="M60,60 q14,8 14,22" fill="none" stroke="#34D399" stroke-width="2" marker-end="url(#a)"/>
+        <text x="45" y="14" fill="#EAF4FF" font-size="11" font-weight="800" text-anchor="middle">Vuelta encontrada</text>
+        <text x="45" y="145" fill="#34D399" font-size="8.5" font-weight="700" text-anchor="middle">ambos a estribor</text>
+      </g>
+      <!-- Alcance -->
+      <g transform="translate(250,0)">
+        <polygon points="45,55 37,40 53,40" fill="#93A3B8"/>
+        <polygon points="45,120 37,105 53,105" fill="#F87171"/>
+        <path d="M45,105 q22,-25 0,-50" fill="none" stroke="#F87171" stroke-width="2" marker-end="url(#a)"/>
+        <text x="45" y="14" fill="#EAF4FF" font-size="11" font-weight="800" text-anchor="middle">Alcance</text>
+        <text x="45" y="138" fill="#F87171" font-size="8.5" font-weight="700" text-anchor="middle">el que alcanza CEDE</text>
+      </g>
+      <defs><marker id="a" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+        <path d="M0,0 L7,3.5 L0,7 Z" fill="currentColor"/></marker></defs>
+    </svg><div class="cap">Quién maniobra (CEDE) y quién mantiene rumbo (SIGUE) en cada encuentro</div></div>`,
+
+    /* Rumbos respecto al viento (points of sail) */
+    vela: `<div class="pl-diagram"><svg viewBox="0 0 260 270" width="240" role="img" aria-label="Rumbos respecto al viento">
+      <line x1="130" y1="8" x2="130" y2="52" stroke="#60A5FA" stroke-width="3" marker-end="url(#w)"/>
+      <text x="130" y="66" fill="#60A5FA" font-size="11" font-weight="800" text-anchor="middle">VIENTO</text>
+      <!-- zona muerta -->
+      <path d="M130,140 L59.3,69.3 A100,100 0 0 1 200.7,69.3 Z" fill="rgba(248,113,113,.18)" stroke="rgba(248,113,113,.5)" stroke-width="1"/>
+      <!-- ceñida -->
+      <path d="M130,140 L200.7,69.3 A100,100 0 0 1 228.5,122.6 Z" fill="rgba(34,211,238,.15)" stroke="rgba(34,211,238,.4)" stroke-width="1"/>
+      <path d="M130,140 L59.3,69.3 A100,100 0 0 0 31.5,122.6 Z" fill="rgba(34,211,238,.15)" stroke="rgba(34,211,238,.4)" stroke-width="1"/>
+      <!-- través -->
+      <path d="M130,140 L228.5,122.6 A100,100 0 0 1 228.5,157.4 Z" fill="rgba(52,211,153,.15)" stroke="rgba(52,211,153,.4)" stroke-width="1"/>
+      <path d="M130,140 L31.5,122.6 A100,100 0 0 0 31.5,157.4 Z" fill="rgba(52,211,153,.15)" stroke="rgba(52,211,153,.4)" stroke-width="1"/>
+      <!-- largo -->
+      <path d="M130,140 L228.5,157.4 A100,100 0 0 1 180,226.6 Z" fill="rgba(251,191,36,.13)" stroke="rgba(251,191,36,.4)" stroke-width="1"/>
+      <path d="M130,140 L31.5,157.4 A100,100 0 0 0 80,226.6 Z" fill="rgba(251,191,36,.13)" stroke="rgba(251,191,36,.4)" stroke-width="1"/>
+      <!-- popa -->
+      <path d="M130,140 L180,226.6 A100,100 0 0 1 80,226.6 Z" fill="rgba(167,139,250,.15)" stroke="rgba(167,139,250,.4)" stroke-width="1"/>
+      <!-- barco -->
+      <path d="M130,118 C138,126 139,140 136,152 L124,152 C121,140 122,126 130,118 Z" fill="#0B2233" stroke="#C4B5FD" stroke-width="1.5"/>
+      <text x="130" y="88" fill="#F87171" font-size="9.5" font-weight="800" text-anchor="middle">zona muerta</text>
+      <text x="190" y="106" fill="#22D3EE" font-size="9.5" font-weight="700" text-anchor="middle">ceñida</text>
+      <text x="205" y="143" fill="#34D399" font-size="9.5" font-weight="700" text-anchor="middle">través</text>
+      <text x="188" y="185" fill="#FBBF24" font-size="9.5" font-weight="700" text-anchor="middle">largo</text>
+      <text x="130" y="215" fill="#C4B5FD" font-size="9.5" font-weight="700" text-anchor="middle">popa</text>
+      <defs><marker id="w" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#60A5FA"/></marker></defs>
+    </svg><div class="cap">No se puede navegar contra el viento (zona muerta ±45°); sí ciñendo, de través, a un largo o en popa</div></div>`,
+
+    /* Balizamiento IALA Región B (Chile) */
+    iala: `<div class="pl-diagram"><svg viewBox="0 0 240 170" width="240" role="img" aria-label="Balizamiento IALA Región B">
+      <rect x="0" y="0" width="240" height="170" fill="none"/>
+      <line x1="120" y1="160" x2="120" y2="30" stroke="#38BDF8" stroke-width="2" stroke-dasharray="6,6" marker-end="url(#u)"/>
+      <text x="120" y="20" fill="#38BDF8" font-size="10" font-weight="800" text-anchor="middle">ENTRANDO a puerto ▲</text>
+      <!-- babor: verde cilíndrica (izq) -->
+      <rect x="55" y="70" width="20" height="34" fill="#34D399"/>
+      <text x="65" y="120" fill="#34D399" font-size="10" font-weight="800" text-anchor="middle">BABOR</text>
+      <text x="65" y="133" fill="#34D399" font-size="9" text-anchor="middle">verde (cilindro)</text>
+      <!-- estribor: rojo cónica (der) -->
+      <polygon points="175,70 165,104 185,104" fill="#F87171"/>
+      <text x="175" y="120" fill="#F87171" font-size="10" font-weight="800" text-anchor="middle">ESTRIBOR</text>
+      <text x="175" y="133" fill="#F87171" font-size="9" text-anchor="middle">rojo (cono)</text>
+      <defs><marker id="u" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,8 L4,0 L8,8 Z" fill="#38BDF8"/></marker></defs>
+    </svg><div class="cap">Chile = Región B: al ENTRAR, deja el ROJO a estribor y el VERDE a babor</div></div>`
+  };
+
+  /* ---------------- MÓDULOS ---------------- */
   const MODULES = [
-    /* ---------------------------------------------------------------- */
+    /* ============================ 1. NÁUTICA Y MANIOBRAS ============================ */
     { id:'nautica', icon:'🧭', title:'Náutica y maniobras',
-      sub:'Partes de la embarcación, nomenclatura y maniobras básicas',
+      sub:'Nomenclatura, estructura, nudos, fondeo y maniobras',
       lessons:[
-        { h:'Nomenclatura de a bordo', html:`
-          <p>Conocer el nombre de cada parte y dirección es la base de toda comunicación a bordo.</p>
+        { h:'Dimensiones y partes', html:`
+          <p>Toda comunicación a bordo empieza por nombrar bien las partes y direcciones de la embarcación.</p>
+          ${DIAG.barco}
           <ul>
-            <li><span class="term">Proa</span>: parte delantera de la embarcación. <span class="term">Popa</span>: parte trasera.</li>
-            <li><span class="term">Babor</span>: costado izquierdo mirando hacia proa (se asocia al <b>rojo</b>). <span class="term">Estribor</span>: costado derecho (se asocia al <b>verde</b>).</li>
-            <li><span class="term">Eslora</span>: largo de la nave. <span class="term">Manga</span>: ancho máximo. <span class="term">Calado</span>: parte sumergida, de la línea de flotación a la quilla. <span class="term">Francobordo</span>: del agua a la cubierta.</li>
-            <li><span class="term">Quilla</span>: "columna vertebral" en el fondo. <span class="term">Obra viva</span>: casco bajo el agua; <span class="term">obra muerta</span>: sobre el agua.</li>
-            <li><span class="term">Amura</span> (costado hacia proa), <span class="term">través</span> (medio), <span class="term">aleta</span> (costado hacia popa).</li>
-          </ul>
-          <div class="tip">💡 Truco: <b>b</b>abor = i<b>b</b>quierda no existe… usa "babor tiene las mismas letras que 'barco' empieza igual"; o recuerda: <b>P</b>ort (inglés) y <b>b</b>abor son los cortos = <b>izquierda</b>.</div>`},
-        { h:'Rumbo, barlovento y sotavento', html:`
-          <ul>
-            <li><span class="term">Rumbo</span>: dirección hacia la que apunta la proa (en grados, 000°–360°).</li>
-            <li><span class="term">Barlovento</span>: de donde viene el viento. <span class="term">Sotavento</span>: hacia donde va el viento (lado protegido).</li>
-            <li><span class="term">Abatimiento</span>: desplazamiento lateral por el viento. <span class="term">Deriva</span>: desplazamiento por la corriente.</li>
-            <li><span class="term">Escora</span>: inclinación transversal (de costado). <span class="term">Asiento/trimado</span>: diferencia de calado entre proa y popa.</li>
+            <li><span class="term">Proa</span>: parte delantera. <span class="term">Popa</span>: parte trasera.</li>
+            <li><span class="term">Estribor</span>: costado derecho mirando de popa a proa (color <b>verde</b>). <span class="term">Babor</span>: costado izquierdo (color <b>rojo</b>).</li>
+            <li><span class="term">Eslora</span>: largo. <span class="term">Manga</span>: ancho máximo. <span class="term">Calado</span>: de la flotación a lo más bajo (quilla/orza). <span class="term">Puntal</span>: de la quilla a la cubierta. <span class="term">Guinda</span>: de la flotación al punto más alto del mástil.</li>
+            <li><span class="term">Obra viva</span>: casco sumergido; <span class="term">obra muerta</span>: casco sobre el agua. Los separa la <span class="term">línea de flotación</span>.</li>
+            <li><span class="term">Amura</span> (costado hacia proa, a 45°), <span class="term">través</span> (medio), <span class="term">aleta</span> (costado hacia popa, a 45°).</li>
+            <li><span class="term">Desplazamiento</span>: peso del agua desalojada por la obra viva; por el principio de Arquímedes, igual al peso de la embarcación.</li>
           </ul>`},
-        { h:'Maniobras y fondeo', html:`
+        { h:'Estructura y cubierta', html:`
           <ul>
-            <li>Al maniobrar en puerto, hazlo <b>despacio</b>: "no navegues más rápido de lo que estás dispuesto a chocar".</li>
-            <li>Atraca y desatraca <b>contra</b> el viento o la corriente (el que sea más fuerte) para tener control.</li>
-            <li><span class="term">Fondear</span>: dar ancla. El largo de cadena/cabo (<span class="term">filar</span>) debe ser varias veces la profundidad (regla práctica: 5 a 7 veces).</li>
-            <li>El efecto de la hélice (<span class="term">efecto evolutivo/paso de hélice</span>) tiende a mover la popa hacia un costado; apróvéchalo al maniobrar.</li>
-            <li>Da siempre <b>defensas</b> (fenders) al costado de atraque y ten cabos listos.</li>
+            <li><span class="term">Casco</span>: cuerpo de la nave. <span class="term">Quilla</span>: pieza inferior que corre de proa a popa. <span class="term">Roda</span>: pieza afilada de proa; <span class="term">codaste</span>: continuación de la quilla por popa.</li>
+            <li><span class="term">Cuadernas</span>: "costillas"; <span class="term">baos</span>: piezas transversales que sostienen la cubierta; <span class="term">mamparos</span>: tabiques o paredes.</li>
+            <li><span class="term">Orza / quillote</span>: pieza baja central que da estabilidad y frena la deriva.</li>
+            <li><span class="term">Cornamuza</span> y <span class="term">bitas</span>: piezas para tomar vueltas y hacer firmes los cabos.</li>
+            <li>Partes de un <span class="term">cabo</span>: <b>chicote</b> (extremo con que se trabaja), <b>seno</b> (parte intermedia) y <b>firme</b>. La <span class="term">mena</span> es su grosor (circunferencia, en pulgadas).</li>
+          </ul>`},
+        { h:'Nudos marineros', html:`
+          <p>Los nudos son materia de examen. Debes conocer su nombre y para qué sirven:</p>
+          <ul>
+            <li><span class="term">As de guía</span>: forma una gaza (lazo) fija en el chicote que no se corre. Muy usado y seguro.</li>
+            <li><span class="term">Ballestrinque</span>: sujeta un cabo a un poste o mástil; ideal para empezar y terminar un amarre (con tensión constante).</li>
+            <li><span class="term">Nudo de ocho (lasca)</span>: nudo de tope en el chicote para que el cabo no se escape por un motón, guía u ollao.</li>
+            <li><span class="term">Rizo o llano</span>: dos medios nudos; une dos cabos de igual mena y se usa para tomar rizos de las velas.</li>
+            <li><span class="term">Vuelta de escota</span>: une el chicote de un cabo a una gaza.</li>
+            <li><span class="term">Vuelta de boya</span>: asegura un cabo al arganeo de una boya o a una bita.</li>
           </ul>
-          <div class="tip">⚓ Al fondear elige buen tenedero (arena o fango), verifica que el ancla agarre y vigila que no <b>garree</b> (se arrastre).</div>`}
+          <div class="tip">🪢 Maniobras con cabos: <b>adujar</b> (ordenar en vueltas), <b>cobrar</b> (recoger lo flojo), <b>halar</b> (hacer fuerza), <b>tezar/templar</b> (dejar tirante), <b>hacer firme</b> y <b>tomar vueltas</b> en una cornamuza o bita.</div>`},
+        { h:'Balance, cabeceo y maniobras', html:`
+          <ul>
+            <li><span class="term">Escora</span>: inclinación hacia una banda. <span class="term">Balance</span>: movimiento transversal (de banda a banda) por olas de costado. <span class="term">Cabeceo</span>: movimiento longitudinal (proa-popa) por olas de proa o popa. <span class="term">Adrizar</span>: enderezar la embarcación.</li>
+            <li>Maniobra despacio en puerto: "no navegues más rápido de lo que estás dispuesto a chocar". Ten <b>defensas</b> y cabos listos.</li>
+            <li>Atraca y desatraca <b>contra</b> el viento o la corriente (el más fuerte) para tener control.</li>
+            <li><span class="term">Fondear</span>: dar ancla en buen tenedero (arena o fango). Fila 5 a 7 veces la profundidad y vigila que el ancla no <b>garree</b> (se arrastre).</li>
+          </ul>`}
       ],
       questions:[
-        {q:'¿Cuál es el costado derecho de la embarcación mirando hacia proa?', o:['Babor','Estribor','Popa','Aleta'], a:1, e:'Estribor es el costado derecho (asociado al color verde). Babor es el izquierdo (rojo).'},
-        {q:'El "calado" de una embarcación es:', o:['Su largo total','Su ancho máximo','La profundidad sumergida, de la flotación a la quilla','La altura del mástil'], a:2, e:'El calado es la parte sumergida del casco; determina la profundidad mínima de agua que necesitas para no tocar fondo.'},
-        {q:'"Barlovento" se refiere a:', o:['El lado hacia donde va el viento','La parte trasera de la nave','La dirección desde donde viene el viento','El fondo del casco'], a:2, e:'Barlovento = de donde viene el viento. Sotavento = hacia donde sopla (lado protegido).'},
-        {q:'La "eslora" de una embarcación es:', o:['Su ancho máximo','Su largo','Su peso','Su calado'], a:1, e:'Eslora = largo. Manga = ancho máximo. Puntal = altura del casco.'},
-        {q:'¿Qué color se asocia tradicionalmente a babor?', o:['Verde','Blanco','Rojo','Amarillo'], a:2, e:'Babor = rojo (luz de costado roja). Estribor = verde.'},
-        {q:'Al atracar con viento y corriente, lo recomendable es maniobrar:', o:['A favor del viento para ir más rápido','En contra del elemento más fuerte para tener control','Con el motor apagado','Siempre por babor'], a:1, e:'Maniobrar contra el viento o la corriente (el más fuerte) da control sobre la embarcación y evita ser empujado contra el muelle.'},
-        {q:'"Escora" significa:', o:['Inclinación de costado (transversal)','Inclinación proa-popa','Velocidad de la nave','Largo de la cadena del ancla'], a:0, e:'Escora es la inclinación transversal (hacia un costado). El asiento o trimado es la inclinación longitudinal (proa-popa).'},
-        {q:'Que el ancla "garree" significa que:', o:['Está bien agarrada al fondo','Se arrastra sin sujetar la nave','Está subida a bordo','Se enredó en la hélice'], a:1, e:'Garrear es que el ancla no sujeta y se arrastra por el fondo; hay que vigilarlo y volver a fondear si ocurre.'},
-        {q:'La "obra viva" del casco es:', o:['La parte sobre el agua','La parte sumergida','La cubierta','El interior del motor'], a:1, e:'Obra viva = casco bajo la línea de flotación (sumergido). Obra muerta = por encima del agua.'},
-        {q:'Una regla práctica para el largo de fondeo (cadena/cabo) es filar aproximadamente:', o:['La misma profundidad','El doble de la profundidad','5 a 7 veces la profundidad','20 veces la profundidad'], a:2, e:'Filar unas 5 a 7 veces la profundidad da un ángulo adecuado para que el ancla trabaje horizontalmente y agarre bien.'}
+        {q:'¿Cuál es el costado derecho mirando de popa a proa?', o:['Babor','Estribor','Amura','Aleta'], a:1, e:'Estribor es el costado derecho (color verde). Babor es el izquierdo (color rojo).'},
+        {q:'El "calado" es la distancia entre:', o:['La proa y la popa','La flotación y la parte más baja del casco (quilla/orza)','Los dos costados','La quilla y la cubierta'], a:1, e:'El calado va de la línea de flotación a lo más bajo (quilla u orza); define la profundidad mínima de agua que necesitas.'},
+        {q:'La "eslora" es:', o:['El ancho máximo','El largo de la embarcación','La altura del mástil','La parte sumergida'], a:1, e:'Eslora = largo. Manga = ancho máximo. Puntal = de la quilla a la cubierta.'},
+        {q:'¿Qué color se asocia a babor?', o:['Verde','Rojo','Blanco','Amarillo'], a:1, e:'Babor = rojo. Estribor = verde. Coincide con las luces de costado.'},
+        {q:'La "obra viva" del casco es:', o:['La parte sobre el agua','La parte sumergida','La cubierta','El motor'], a:1, e:'Obra viva = casco bajo la flotación (sumergido). Obra muerta = sobre el agua.'},
+        {q:'El "desplazamiento" de una embarcación es:', o:['Su velocidad máxima','El peso del agua que desaloja su obra viva','La distancia recorrida','El ancho del casco'], a:1, e:'Por el principio de Arquímedes, el peso del agua desalojada por la obra viva es igual al peso de la embarcación.'},
+        {q:'El extremo de un cabo con el que se trabaja se llama:', o:['Seno','Firme','Chicote','Mena'], a:2, e:'Chicote = extremo de trabajo; seno = parte intermedia; firme = extremo fijo. La mena es el grosor del cabo.'},
+        {q:'El nudo que forma una gaza (lazo) fija que no se corre es el:', o:['Ballestrinque','As de guía','Nudo llano','Vuelta de escota'], a:1, e:'El as de guía forma una gaza segura en el chicote; entre otros usos, para afirmar la driza al puño de la vela.'},
+        {q:'El "ballestrinque" sirve principalmente para:', o:['Unir dos cabos de igual grosor','Sujetar un cabo a un poste o mástil','Hacer un tope en el chicote','Improvisar una gaza'], a:1, e:'El ballestrinque sujeta un cabo a un poste o mástil bajo tensión constante; es ideal para empezar y terminar un amarre.'},
+        {q:'El movimiento transversal (de banda a banda) por olas de costado se llama:', o:['Cabeceo','Balance','Escora','Deriva'], a:1, e:'Balance = movimiento transversal por olas de costado. Cabeceo = movimiento longitudinal (proa-popa).'},
+        {q:'Que el ancla "garree" significa que:', o:['Está bien agarrada','Se arrastra sin sujetar','Está a bordo','Se enredó en la hélice'], a:1, e:'Garrear es que el ancla no sujeta y se arrastra por el fondo; hay que vigilarlo y volver a fondear.'},
+        {q:'Al atracar con viento y corriente conviene maniobrar:', o:['A favor del viento','En contra del elemento más fuerte','Con el motor apagado','Siempre por babor'], a:1, e:'Maniobrar contra el viento o la corriente más fuerte da control y evita ser empujado contra el muelle.'},
+        {q:'"Adujar" un cabo significa:', o:['Cortarlo','Ordenarlo en vueltas sucesivas sobre cubierta','Mojarlo','Hacerle un nudo'], a:1, e:'Adujar es recoger y ordenar el cabo en vueltas; los cabos deben estar siempre adujados y limpios.'},
+        {q:'Una regla práctica para el largo de fondeo es filar aproximadamente:', o:['La misma profundidad','5 a 7 veces la profundidad','20 veces la profundidad','El doble solamente'], a:1, e:'Filar unas 5 a 7 veces la profundidad da el ángulo adecuado para que el ancla agarre bien.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
-    { id:'reglamentacion', icon:'📋', title:'Reglamentación marítima básica',
-      sub:'Autoridad Marítima, documentos, zarpe y jurisdicción',
+    /* ============================ 2. REGLAMENTACIÓN ============================ */
+    { id:'reglamentacion', icon:'📋', title:'Reglamentación marítima básica', official:true,
+      sub:'Autoridad Marítima, licencias, matrícula, zarpe y áreas',
       lessons:[
         { h:'La Autoridad Marítima', html:`
           <ul>
-            <li><span class="term">DIRECTEMAR</span> (Dirección General del Territorio Marítimo y de Marina Mercante), dependiente de la Armada, es la Autoridad Marítima en Chile.</li>
-            <li>En cada puerto, la <span class="term">Capitanía de Puerto</span> ejerce el control local: zarpes, matrículas, fiscalización y seguridad.</li>
-            <li>El <span class="term">Patrón Deportivo</span> es la licencia que habilita a gobernar embarcaciones menores de recreo dentro de límites definidos (distancia de la costa y tamaño de la nave según la categoría).</li>
+            <li>La <span class="term">DGTM y MM</span> (Dirección General del Territorio Marítimo y de Marina Mercante, <b>DIRECTEMAR</b>), dependiente de la Armada, es la Autoridad Marítima en Chile.</li>
+            <li>Vela por la <b>seguridad de la navegación y la protección de la vida humana en el mar</b>, atiende la señalización de las costas y otorga títulos, matrículas y licencias.</li>
+            <li>La ejercen el Director General, los Gobernadores Marítimos, los <span class="term">Capitanes de Puerto</span> y los Alcaldes de Mar.</li>
           </ul>`},
-        { h:'Documentos y zarpe', html:`
+        { h:'Licencias deportivas náuticas', html:`
+          <p>El <span class="term">Reglamento General de Deportes Náuticos</span> define las licencias de navegación:</p>
           <ul>
-            <li>La nave debe estar <span class="term">matriculada</span> y con sus documentos vigentes.</li>
-            <li>El <span class="term">zarpe</span> es la autorización de la Capitanía de Puerto para salir a navegar; puede ser individual o permanente según el caso, e indica zona y condiciones.</li>
-            <li>Debes portar tu licencia (carnet), la matrícula de la nave y llevar el equipo de seguridad exigido.</li>
-            <li>No se autoriza el zarpe si las condiciones meteorológicas son adversas o si falta equipo de seguridad.</li>
+            <li><span class="term">Patrón Deportivo de Bahía</span>: al mando en aguas protegidas (puertos, bahías, caletas, ríos y lagos). Edad mínima <b>14 años</b>.</li>
+            <li><span class="term">Capitán Deportivo Costero</span>: navegación próxima a la costa; incluye bahía. Edad mínima <b>17 años</b>.</li>
+            <li><span class="term">Capitán Deportivo de Alta Mar</span>: navegación oceánica; incluye costera y bahía. Edad mínima <b>18 años</b>.</li>
           </ul>
-          <div class="tip">📄 Antes de salir: revisa el pronóstico, informa tu plan de navegación (a quién, ruta y hora estimada de regreso) y verifica el equipo de seguridad.</div>`},
-        { h:'Responsabilidad del patrón', html:`
+          <div class="tip">🪪 Los exámenes se rinden regularmente en la <b>primera quincena de marzo y octubre</b>. Los demás tripulantes no requieren licencia, pero están bajo la autoridad del patrón.</div>`},
+        { h:'Matrícula, zarpe y responsabilidad', html:`
           <ul>
-            <li>El patrón es el <b>responsable</b> de la seguridad de la nave, de las personas a bordo y del cumplimiento de la reglamentación.</li>
-            <li>Está prohibido gobernar bajo la influencia del alcohol o drogas.</li>
-            <li>Debe respetar zonas de baño, velocidad en canales y áreas restringidas, y auxiliar a quien esté en peligro en el mar (deber de auxilio).</li>
-          </ul>`}
+            <li>Las embarcaciones deportivas menores (<b>≤ 50 TRG</b>) se inscriben en el <span class="term">Registro de Matrícula de Naves Menores</span> a cargo del Capitán de Puerto; deben llevar su número de matrícula visible.</li>
+            <li>El <span class="term">Certificado de Seguridad</span> certifica que la nave está "apta para navegar".</li>
+            <li>Requieren <span class="term">autorización de zarpe</span> las navegaciones que exceden de <b>24 horas</b> con destino distinto al de zarpe. En los demás casos conviene igual informar el plan de navegación para búsqueda y salvamento.</li>
+            <li>La <b>seguridad</b> de la embarcación y su tripulación es responsabilidad del <b>operador/patrón</b>, que debe conocer la reglamentación.</li>
+          </ul>`},
+        { h:'Áreas náutico-deportivas', html:`
+          <p>Para separar bañistas de embarcaciones, desde la orilla hacia el agua:</p>
+          <ul>
+            <li><b>0 a 100 m</b>: área de <span class="term">bañistas</span>.</li>
+            <li><b>100 a 200 m</b>: área de embarcaciones a <span class="term">remo y vela</span>.</li>
+            <li><b>Más de 200 m</b>: área de embarcaciones a <span class="term">motor y vela</span>.</li>
+          </ul>
+          <p>El desplazamiento hacia y desde la playa se hace por canales delimitados y a <b>mínima velocidad</b>.</p>`}
       ],
       questions:[
-        {q:'¿Cuál es la Autoridad Marítima en Chile?', o:['La Municipalidad costera','DIRECTEMAR (Armada de Chile)','El Ministerio de Transportes','La Capitanía General'], a:1, e:'DIRECTEMAR, dependiente de la Armada, es la Autoridad Marítima. Localmente actúa a través de las Capitanías de Puerto.'},
-        {q:'El "zarpe" es:', o:['El nombre del ancla','La autorización para salir a navegar','Un tipo de nudo','El documento del motor'], a:1, e:'El zarpe es la autorización que otorga la Capitanía de Puerto para que una nave salga a navegar, indicando zona y condiciones.'},
-        {q:'¿Quién otorga el zarpe en un puerto?', o:['El propio patrón','La Capitanía de Puerto','El club náutico','La aduana'], a:1, e:'La Capitanía de Puerto, en representación de la Autoridad Marítima, controla y autoriza los zarpes.'},
-        {q:'¿Quién es el responsable de la seguridad de las personas a bordo?', o:['El pasajero de más edad','El fabricante de la nave','El patrón (quien gobierna)','La Capitanía'], a:2, e:'El patrón es el responsable de la nave, de las personas a bordo y del cumplimiento de las normas.'},
-        {q:'Gobernar una embarcación bajo la influencia del alcohol está:', o:['Permitido con moderación','Prohibido','Permitido solo de noche','Permitido en alta mar'], a:1, e:'Está prohibido gobernar bajo la influencia de alcohol o drogas; compromete la seguridad de todos.'},
-        {q:'La Capitanía puede NO autorizar el zarpe si:', o:['Hay mal tiempo o falta equipo de seguridad','La nave es nueva','El patrón tiene poca experiencia únicamente','Es fin de semana'], a:0, e:'No se autoriza el zarpe ante condiciones meteorológicas adversas o si la nave no cuenta con el equipo de seguridad exigido.'},
-        {q:'La licencia de "Patrón Deportivo" habilita para:', o:['Cualquier buque mercante','Gobernar embarcaciones de recreo dentro de límites definidos','Solo veleros de competición','Buques de pasajeros'], a:1, e:'Habilita a gobernar embarcaciones menores de recreo dentro de límites de tamaño y distancia de la costa según la categoría.'},
-        {q:'Antes de zarpar, una buena práctica es:', o:['No avisar a nadie para no preocupar','Informar tu plan de navegación y hora estimada de regreso','Salir sin revisar el pronóstico','Cargar el máximo de personas posible'], a:1, e:'Informar a alguien en tierra tu ruta y hora de regreso permite activar una búsqueda si no regresas a tiempo.'}
+        {q:'Indique la normativa que regula las actividades náuticas deportivas en Chile:', o:['Ley de Navegación','Reglamento sobre Formación, Titulación y Carrera Profesional del Personal Embarcado','Reglamento General de Orden, Seguridad y Disciplina en Naves y Litoral de la República','Reglamento General de Deportes Náuticos'], a:3, e:'El Reglamento General de Deportes Náuticos regula las actividades deportivas y recreativas náuticas en aguas de jurisdicción nacional.'},
+        {q:'¿Cuáles son Autoridades Marítimas?', o:['El Director General del Territorio Marítimo y de Marina Mercante','Los Gobernadores Marítimos','Los Capitanes de Puerto','Todas las anteriores'], a:3, e:'Son Autoridad Marítima el Director General, los Gobernadores Marítimos, los Capitanes de Puerto y los Alcaldes de Mar.'},
+        {q:'¿Qué se entiende por Embarcación Deportiva de Bahía?', o:['Aquella apta para dirigirse de un punto a otro del litoral','Aquella cuyo diseño la hace apta para navegar en aguas protegidas','Aquella que puede navegar hasta las 12 M.N.','Aquella sin restricciones de distancia'], a:1, e:'La embarcación deportiva de bahía es apta para navegar exclusivamente en aguas protegidas: puertos, bahías, caletas, ríos y lagos.'},
+        {q:'¿Qué se entiende por Artefacto Náutico?', o:['Embarcación a propulsión mecánica','Embarcación menor propulsada a vela','Aparato no propulsado utilizado para la práctica de deportes náuticos','Embarcación propulsada a remo'], a:2, e:'Es un aparato para deportes náuticos cuyas características no permiten calificarlo como embarcación deportiva.'},
+        {q:'¿Cuál de estas Licencias Deportivas Náuticas de navegación tiene el nombre correcto?', o:['Capitán Deportivo de Alta Mar','Patrón Deportivo Costero','Capitán Deportivo de Bahía','Todas son correctas'], a:0, e:'Las licencias de navegación son: Capitán Deportivo de Alta Mar, Capitán Deportivo Costero y Patrón Deportivo de Bahía.'},
+        {q:'El Director General del Territorio Marítimo otorga por resolución la licencia de:', o:['Patrón Deportivo de Bahía','Buceador Deportivo Autónomo','Capitán Deportivo de Alta Mar','Todas las anteriores'], a:2, e:'La licencia de Capitán Deportivo de Alta Mar la otorga el Director General; las demás las otorga la Capitanía de Puerto.'},
+        {q:'Las Licencias Deportivas Náuticas otorgadas por otros países:', o:['No serán reconocidas en Chile','Serán reconocidas con limitaciones','Sólo con convenios específicos suscritos','Serán reconocidas en Chile de acuerdo a su equivalencia'], a:3, e:'Se reconocen en Chile según su categoría/equivalencia.'},
+        {q:'Indique el requisito de edad correcto:', o:['Patrón Deportivo de Bahía, 14 años','Capitán Deportivo Costero, 18 años','Capitán Deportivo de Alta Mar, 21 años','a y b son correctas'], a:0, e:'Patrón de Bahía: 14 años; Capitán Costero: 17 años; Capitán de Alta Mar: 18 años.'},
+        {q:'El postulante a Patrón Deportivo de Bahía deberá:', o:['Rendir examen teórico y práctico de náutica y maniobra, navegación básica, reglamentación marítima básica y gobierno de una embarcación (examen práctico)','Sólo exámenes teóricos','Sólo examen práctico','Sólo operador de comunicaciones restringido'], a:0, e:'Debe aprobar náutica y maniobra, navegación básica, reglamentación marítima básica y el gobierno de la embarcación (examen práctico).'},
+        {q:'Se entiende por Naves Menores:', o:['Mayor a 50 TRG','Igual o menor a 50 TRG','Todas las deportivas','Todas aquellas propulsadas a vela'], a:1, e:'Naves menores son las de 50 o menos toneladas de registro grueso (TRG).'},
+        {q:'Las naves menores se registran (matriculan) en:', o:['Gobernaciones Marítimas','Dirección General del Territorio Marítimo y de Marina Mercante','Capitanías de Puerto','Cualquiera de las anteriores'], a:2, e:'Las naves menores se inscriben en el Registro de Matrícula de Naves Menores, a cargo de los Capitanes de Puerto.'},
+        {q:'Las embarcaciones deportivas que naveguen menos de 24 horas y cuyo zarpe y recalada sea el mismo puerto:', o:['No requerirán permiso de zarpe','El permiso lo otorga la Capitanía de Puerto o Alcalde de Mar','Deberá ser con 24 horas de anticipación','Deberá ser por escrito o personalmente en la Capitanía'], a:0, e:'Si la navegación dura menos de 24 h y el destino es el mismo puerto de zarpe, no se requiere permiso de zarpe.'},
+        {q:'Las embarcaciones de una vela y monotripuladas del tipo Optimist requerirán:', o:['Licencia Náutica de Patrón de Bahía','Permiso de zarpe','No tienen restricciones','Supervisión de un instructor con Licencia Deportiva Náutica'], a:3, e:'La navegación en embarcaciones de una vela monotripuladas se hace bajo supervisión de un instructor con Licencia Deportiva Náutica.'},
+        {q:'Las embarcaciones a motor tipo motos de agua o jet ski:', o:['Requieren ser inscritas ante la Capitanía de Puerto','No tienen limitación de práctica desde la playa','La edad mínima son 14 años','a y c correctas'], a:3, e:'Deben inscribirse en la Capitanía de Puerto y la edad mínima del operador es 14 años.'},
+        {q:'Indique el equipamiento mínimo de una embarcación deportiva de bahía:', o:['Chaleco salvavidas, pito y un achicador','Bengalas rojas y verdes','Equipo de comunicaciones VHF','Juego de banderas'], a:0, e:'El equipo mínimo en bahía es: chaleco salvavidas por persona, un pito y un achicador.'},
+        {q:'El Certificado de Navegabilidad (Seguridad) tiene una vigencia de:', o:['1 año','4 años','6 años','8 años'], a:2, e:'El Certificado de Seguridad tiene una vigencia de 6 años, salvo cambio estructural o reparación mayor.'},
+        {q:'La navegación en botes a motor bajo 10 HP:', o:['No requieren licencia deportiva','Requieren al menos Patrón Deportivo de Bahía','No tienen restricciones de navegación','No requieren equipamiento de seguridad alguno'], a:0, e:'La navegación en botes con motor de hasta 10 HP no requiere Licencia Deportiva Náutica, pero sí cumplir condiciones de seguridad.'},
+        {q:'Los menores de edad para optar a la Licencia de Patrón Deportivo de Bahía:', o:['No podrán obtener licencia deportiva','Desde los 14 a los 18 años requieren autorización del padre o tutor','No requieren autorización del padre o tutor','Sólo pueden a partir de los 18 años'], a:1, e:'Entre los 14 y los 18 años (menores de edad) se requiere autorización notarial del padre, madre o guardador.'},
+        {q:'Otros antecedentes que deberá presentar el postulante a Patrón Deportivo de Bahía:', o:['Certificado de antecedentes','Certificado médico que acredite las condiciones físicas','Cédula de identidad','b y c correctas'], a:3, e:'Debe presentar certificado médico de aptitud física y su cédula de identidad, entre otros documentos.'},
+        {q:'La Autoridad Marítima, de acuerdo con los resultados de los exámenes o cursos de competencia, podrá:', o:['Otorgar Licencia Deportiva Náutica','No otorgar Licencia Deportiva Náutica','Repetir exámenes','Todas las anteriores'], a:3, e:'Según los resultados puede otorgar o no la licencia, o disponer que se repitan los exámenes.'},
+        {q:'Equipamiento obligatorio para operar una moto de agua es:', o:['Casco','Traje de neopreno','Chaleco salvavidas','No requiere equipamiento'], a:2, e:'El equipamiento obligatorio del operador de una moto de agua es el chaleco salvavidas.'},
+        {q:'La moto de agua debe:', o:['Matricularse en las Capitanías de Puerto','No requiere matrícula','Requiere licencia al operador','a y c correctas'], a:3, e:'La moto de agua debe matricularse en la Capitanía de Puerto y su operador requiere licencia.'},
+        {q:'El sistema de propulsión de una moto de agua es:', o:['Sistema con hélice','Propulsión a chorro de agua','Motor fuera de borda','Sistema mixto'], a:1, e:'La moto de agua se propulsa por chorro de agua (waterjet), no por hélice expuesta.'},
+        {q:'El sistema de seguridad de una moto de agua o lancha cumple el propósito de:', o:['Cortar el motor al ser accionado','Disminuir la velocidad al ser requerido','Se activa en las caídas al agua del operador','a y c correctas'], a:3, e:'El corta-corriente de hombre al agua (kill cord) corta el motor cuando el operador cae al agua.'},
+        {q:'La distancia de costa reservada para bañistas es de:', o:['100 mts','Depende de la playa','200 mts','Depende de la profundidad'], a:0, e:'Desde la orilla hasta los 100 metros es área reservada para bañistas.'},
+        {q:'Para acceder a una playa no demarcada con una embarcación a motor se debe:', o:['Hacerlo perpendicular a la línea de la playa','Navegar a baja velocidad','Verificar la existencia de bañistas','Todas correctas'], a:3, e:'Se accede perpendicular a la playa, a baja velocidad y verificando que no haya bañistas.'},
+        {q:'Para pedir auxilio desde una moto de agua, la señal reconocida es:', o:['Agitar los brazos en alto (subiendo y bajando)','Nadar hacia la playa','Lanzar bengalas rojas','Llamar por canal 16'], a:0, e:'En una moto de agua (sin radio ni pirotecnia) la señal de socorro es mover los brazos extendidos, subiéndolos y bajándolos lentamente.'},
+        {q:'Si hay otras embarcaciones navegando próximas a nuestra moto de agua:', o:['Debo mantenerme al menos 50 mts de distancia','Estar atento a las maniobras de las otras embarcaciones','Las demás embarcaciones deben maniobrar para alejarse','Ninguna de las anteriores'], a:1, e:'La moto de agua, muy maniobrable, debe estar atenta a las maniobras de las demás embarcaciones y mantenerse apartada.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
+    /* ============================ 3. MOTORES ============================ */
     { id:'motores', icon:'⚙️', title:'Operación de motores marinos',
-      sub:'Tipos de motor, refrigeración, combustible y mantención',
+      sub:'2 y 4 tiempos, mezcla, refrigeración, arranque y fallas',
       lessons:[
-        { h:'Tipos de motor', html:`
+        { h:'Motor de 4 y de 2 tiempos', html:`
           <ul>
-            <li><span class="term">Fuera de borda</span>: motor colgado en el espejo de popa, se puede inclinar y retirar. <span class="term">Dentro de borda</span> (intraborda): instalado dentro del casco.</li>
-            <li><span class="term">2 tiempos</span>: más simple y liviano; muchos requieren <b>mezcla de gasolina con aceite</b>. <span class="term">4 tiempos</span>: aceite separado en el cárter, más económico en consumo y menos contaminante.</li>
-            <li>Nunca uses un fueraborda de 2 tiempos sin la proporción correcta de aceite: se agarrota (fundido) por falta de lubricación.</li>
-          </ul>`},
-        { h:'Refrigeración y el "chorro testigo"', html:`
-          <ul>
-            <li>La mayoría de los fueraborda se refrigeran con <b>agua de mar</b>, impulsada por una bomba con <span class="term">rodete/impulsor</span> (pieza de goma).</li>
-            <li>El <span class="term">chorro testigo</span> ("pipí" del motor) confirma que la bomba de agua funciona. Si <b>deja de salir agua</b>, apaga el motor: se está recalentando.</li>
-            <li>El rodete se desgasta; es una pieza de mantención periódica. Nunca arranques un fueraborda "en seco" (fuera del agua sin suministro), porque quemas el rodete.</li>
+            <li>El motor de <span class="term">4 tiempos</span> <b>no</b> necesita mezcla: el aceite va en un depósito y se autolubrica. Sus tiempos son: <b>admisión/aspiración → compresión → combustión (explosión) → escape</b>.</li>
+            <li>El motor de <span class="term">2 tiempos</span> completa el ciclo en dos carreras (combustión-escape / aspiración-compresión). Se lubrica con el aceite mezclado en el combustible.</li>
+            <li>La mezcla típica de 2 tiempos es <b>50:1</b> (1 litro de aceite por 50 de gasolina), con aceite para motor marino.</li>
           </ul>
-          <div class="tip">🌡️ Sobrecalentamiento = detener el motor. Causas típicas: falta de chorro de agua, rodete dañado o toma de agua obstruida (bolsa, algas).</div>`},
-        { h:'Chequeos y buenas prácticas', html:`
+          <div class="tip">⛽ Mezcla <b>muy rica</b> (mucho aceite): el motor pierde fuerza, funciona irregular y ensucia las bujías. Mezcla <b>muy pobre</b> (poco aceite): el motor se <b>sobrecalienta</b> y puede agarrotarse.</div>`},
+        { h:'Refrigeración y protección', html:`
           <ul>
-            <li>Antes de zarpar revisa: <b>combustible</b> suficiente (regla del tercio: ⅓ ida, ⅓ vuelta, ⅓ reserva), <b>aceite</b>, <b>batería</b> y estado del <b>chorro de agua</b>.</li>
-            <li>Ventila la sala de máquinas/pañol antes de arrancar motores a gasolina: los vapores son explosivos.</li>
-            <li>Lleva herramientas básicas, un rodete de repuesto, bujías y cabo. Conoce el <span class="term">corta-corriente</span>/piola de hombre al agua (kill cord): al caer el patrón, el motor se detiene.</li>
+            <li>El fueraborda se refrigera con <b>agua de mar</b> impulsada por una bomba con <span class="term">rodete (rólete)</span> de goma.</li>
+            <li>El <span class="term">chorro testigo</span> (agua que sale por la parte posterior) confirma que la bomba funciona. Si <b>deja de salir agua</b>, apaga el motor: se recalienta.</li>
+            <li>El <span class="term">ánodo de zinc</span> ("ánodo de sacrificio") en la pata protege los metales de la corrosión galvánica.</li>
+            <li>El <span class="term">cebador/ahogador</span> enriquece la mezcla (menos aire) para ayudar a la partida en frío.</li>
+          </ul>`},
+        { h:'Arranque, chequeos y fallas', html:`
+          <ul>
+            <li>Antes de arrancar: motor bien <b>trincado</b> al espejo con pernos y cuerda de seguridad, estanque con combustible y <b>respiradero abierto</b>, palanca de cambio en <b>neutro</b>.</li>
+            <li>Arranque de 2 tiempos: cebar con la <b>pera</b>, cebar el carburador con el ahogador, poner en START, tirar de la piola; dejar calentar unos minutos y <b>verificar el chorro de agua</b>.</li>
+            <li>Combustible: regla del tercio (⅓ ida, ⅓ vuelta, ⅓ reserva). Ventila antes de arrancar motores a gasolina.</li>
+            <li>Fallas comunes: <b>bujía sucia</b> (exceso de aceite), <b>rodete roto o tapado</b> (falla de refrigeración), manguera estrangulada (no llega combustible), agua en el combustible.</li>
           </ul>`}
       ],
       questions:[
-        {q:'El "chorro testigo" (pipí) de un fueraborda sirve para:', o:['Achicar agua del bote','Confirmar que la bomba de refrigeración funciona','Medir la velocidad','Cargar la batería'], a:1, e:'Ese chorro indica que la bomba de agua está circulando refrigerante. Si deja de salir, el motor se recalienta y hay que detenerlo.'},
-        {q:'Si el motor se recalienta y deja de salir agua por el testigo, debes:', o:['Acelerar para enfriarlo','Detener el motor cuanto antes','Echarle más combustible','Ignorarlo si suena bien'], a:1, e:'La falta de chorro indica fallo de refrigeración. Hay que apagar el motor para evitar que se funda.'},
-        {q:'Muchos motores de 2 tiempos requieren:', o:['Agua dulce en el estanque','Mezcla de gasolina con aceite','Diésel obligatoriamente','Gas licuado'], a:1, e:'Los 2 tiempos clásicos se lubrican con aceite mezclado en la gasolina, en la proporción indicada por el fabricante.'},
-        {q:'La pieza de goma de la bomba de agua que suele desgastarse es:', o:['La bujía','El rodete (impulsor)','El carburador','El ánodo'], a:1, e:'El rodete o impulsor bombea el agua de refrigeración; se gasta y es mantención periódica. Arrancar "en seco" lo quema.'},
-        {q:'La "regla del tercio" del combustible significa:', o:['Llenar solo un tercio del estanque','⅓ para ir, ⅓ para volver, ⅓ de reserva','Gastar todo salvo un tercio','Un tercio de aceite y dos de gasolina'], a:1, e:'Reservar un tercio del combustible como margen de seguridad ante corrientes, viento en contra o imprevistos.'},
-        {q:'Antes de arrancar un motor a gasolina interior conviene:', o:['Cerrar todo para no perder calor','Ventilar la sala de máquinas','Vaciar la batería','Desconectar la bomba de achique'], a:1, e:'Los vapores de gasolina son más pesados que el aire y explosivos; ventilar evita una deflagración al arrancar.'},
-        {q:'El "corta-corriente de hombre al agua" (kill cord) sirve para:', o:['Cargar el celular','Detener el motor si el patrón cae al agua','Aumentar la potencia','Medir la profundidad'], a:1, e:'Es una piola unida al patrón; si cae, se desconecta y para el motor, evitando que la lancha siga sola o vuelva sobre la persona.'},
-        {q:'Un fueraborda NO debe arrancarse:', o:['Con combustible en el estanque','En seco, fuera del agua sin suministro de refrigeración','Con la batería cargada','Después de ventilar'], a:1, e:'Sin agua para refrigerar, el rodete se quema en segundos y el motor se recalienta.'}
+        {q:'El "chorro testigo" (pipí) de un fueraborda confirma que:', o:['Hay suficiente combustible','La bomba de refrigeración funciona','La batería está cargada','El motor está en neutro'], a:1, e:'Ese chorro indica que la bomba de agua circula el refrigerante. Si deja de salir, el motor se recalienta y hay que apagarlo.'},
+        {q:'Si el motor se recalienta y no sale agua por el testigo, debes:', o:['Acelerar para enfriarlo','Detener el motor cuanto antes','Echarle más combustible','Seguir si suena bien'], a:1, e:'La falta de chorro indica fallo de refrigeración; hay que apagar el motor para evitar que se funda.'},
+        {q:'La mezcla típica de combustible de un motor de 2 tiempos es:', o:['10:1','25:1','50:1','100:1'], a:2, e:'La proporción habitual es 50:1 (1 litro de aceite por 50 de gasolina), con aceite para motor marino de 2 tiempos.'},
+        {q:'El motor de 4 tiempos se caracteriza por:', o:['Requerir mezcla de gasolina y aceite','No requerir mezcla; se autolubrica con aceite en su depósito','Funcionar con diésel siempre','No necesitar refrigeración'], a:1, e:'El 4 tiempos no necesita mezcla: el aceite va aparte en un depósito y el motor se autolubrica.'},
+        {q:'La pieza de goma de la bomba de agua que se desgasta o rompe es el:', o:['Rodete (rólete)','Bujía','Carburador','Ánodo'], a:0, e:'El rodete o rólete impulsa el agua de refrigeración; se gasta o tapa y es una falla común de recalentamiento.'},
+        {q:'El "ánodo de sacrificio" de zinc en la pata del motor sirve para:', o:['Aumentar la potencia','Proteger los metales de la corrosión galvánica','Enfriar el escape','Cargar la batería'], a:1, e:'El ánodo de zinc absorbe las corrientes galvánicas y se corroe en lugar de las piezas importantes del motor.'},
+        {q:'Una mezcla de combustible "muy pobre" (poco aceite) provoca que el motor:', o:['Funcione mejor','Se sobrecaliente','Consuma menos sin riesgo','Arranque más fácil en frío'], a:1, e:'Con poco aceite falta lubricación: el motor se sobrecalienta y puede dañarse.'},
+        {q:'El cebador o ahogador (choke) sirve para:', o:['Apagar el motor','Enriquecer la mezcla y facilitar la partida en frío','Refrigerar el bloque','Medir el combustible'], a:1, e:'El ahogador reduce el aire para enriquecer la mezcla aire-combustible, ayudando a arrancar el motor frío.'},
+        {q:'Antes de arrancar, la palanca de cambios debe estar en:', o:['Avante','Neutro','Reversa','Cualquier posición'], a:1, e:'Se arranca en neutro (posición central) por seguridad, con el motor trincado y el respiradero del estanque abierto.'},
+        {q:'La "regla del tercio" del combustible significa:', o:['Llenar solo un tercio','⅓ para ir, ⅓ para volver, ⅓ de reserva','Usar un tercio de aceite','Gastar todo menos un tercio de aceite'], a:1, e:'Reservar un tercio del combustible como margen ante viento, corriente o imprevistos.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
+    /* ============================ 4. METEOROLOGÍA ============================ */
     { id:'meteo', icon:'🌦️', title:'Meteorología básica',
-      sub:'Viento, presión, nubes, mareas y estado del mar',
+      sub:'Viento, presión, nubes, frentes, mareas, corrientes y olas',
       lessons:[
         { h:'Viento y presión', html:`
           <ul>
-            <li>La <span class="term">escala Beaufort</span> mide la fuerza del viento (0 = calma; 12 = huracán) por sus efectos en el mar.</li>
-            <li>El <span class="term">barómetro</span> mide la presión. Presión que <b>baja rápido</b> = mal tiempo acercándose; presión que <b>sube</b> = mejora.</li>
-            <li>Baja presión (borrasca) → mal tiempo, viento y nubosidad. Alta presión (anticiclón) → tiempo estable.</li>
-            <li>En la costa de Chile predominan vientos del <b>sur y suroeste</b> ("el sur"), que suelen levantar marejada.</li>
+            <li>El viento nace de una <b>diferencia de presión</b> entre dos puntos (a su vez, por diferencia de temperatura).</li>
+            <li>La presión se mide con el <span class="term">barómetro</span>. La presión media en las costas de Chile es de unos <b>766 mm</b>. Si la presión <b>baja</b> → viento del ecuador y mal tiempo; si <b>sube</b> → viento del polo, tiempo estable.</li>
+            <li>La fuerza del viento se mide con el <span class="term">anemómetro</span> y se clasifica en la <span class="term">escala Beaufort</span> (0 = calma; 12 = huracán).</li>
+            <li>Frente a Chile central está el <b>Anticiclón del Pacífico</b> (altas presiones). Vientos de la zona central: <b>enero a marzo</b> Sur/Suroeste (el "surazo"); abril a agosto calma o Norte de mal tiempo.</li>
           </ul>`},
-        { h:'Brisas costeras y nubes', html:`
+        { h:'Brisas, nubes y frentes', html:`
           <ul>
-            <li><span class="term">Virazón</span>: brisa que entra del mar a la tierra durante el día (la tierra se calienta). <span class="term">Terral</span>: brisa de la tierra al mar por la noche.</li>
-            <li>Nubes <span class="term">cúmulos</span> de gran desarrollo vertical (<span class="term">cumulonimbos</span>) anuncian chubascos, tormentas eléctricas y rachas.</li>
-            <li>Nubes altas y finas (cirros) que aumentan y bajan suelen preceder a un frente y mal tiempo.</li>
-            <li>Niebla: reduce la visibilidad; navega despacio, con luces y señales acústicas.</li>
+            <li><span class="term">Virazón</span>: brisa del mar a la tierra durante el <b>día</b> (la tierra se calienta más rápido). <span class="term">Terral</span>: brisa de la tierra al mar por la <b>noche</b>.</li>
+            <li>Nubes: <span class="term">cirrus</span> (altas, de hielo, filamentos), <span class="term">cúmulos</span> (algodón, blancas), <span class="term">estratus</span> (bajas, grises, como sábana) y <span class="term">nimbus</span> (grises/negras, dan lluvia).</li>
+            <li><span class="term">Frente frío</span>: nubes de gran desarrollo vertical (cumuliformes), chubascos y rachas. <span class="term">Frente cálido</span>: primero cirrus, luego estratos y lluvia progresiva; la presión baja al acercarse.</li>
           </ul>
-          <div class="tip">🌊 "Marejada" es la advertencia típica de la Armada: mar de fondo con olas grandes aunque no haya viento local fuerte. Respeta los avisos de mal tiempo.</div>`},
-        { h:'Mareas y estado del mar', html:`
+          <div class="tip">🌊 Respeta los avisos de <b>marejadas</b> de la Armada (mar de fondo con olas grandes aunque no haya viento local fuerte).</div>`},
+        { h:'Mareas, corrientes y olas', html:`
           <ul>
-            <li><span class="term">Marea</span>: subida (pleamar) y bajada (bajamar) periódica del mar por la atracción de la Luna y el Sol.</li>
-            <li>Las <span class="term">corrientes de marea</span> pueden ser fuertes en canales y bocas; consúltalas antes de navegar.</li>
-            <li>El <span class="term">estado del mar</span> depende del viento, su duración y el fetch (distancia sobre la que sopla).</li>
+            <li><span class="term">Mareas</span>: ascenso (pleamar) y descenso (bajamar) del mar por la atracción de la <b>Luna y el Sol</b>. En Chile son <b>mixtas</b>: 2 altas y 2 bajas al día. Consulta la <span class="term">tabla de mareas del SHOA</span>.</li>
+            <li>La costa de Chile está recorrida por la <span class="term">corriente fría de Humboldt</span>.</li>
+            <li><span class="term">Olas</span>: ondulaciones producidas por el viento; en ellas el agua <b>no se traslada</b>, solo oscila. Partes: cresta, seno, altura y longitud.</li>
           </ul>`}
       ],
       questions:[
-        {q:'Si el barómetro baja rápidamente, lo más probable es que:', o:['Mejore el tiempo','Se aproxime mal tiempo','No cambie nada','Suba la marea'], a:1, e:'Una caída rápida de presión anticipa la llegada de un sistema de mal tiempo con viento y nubosidad.'},
-        {q:'La escala Beaufort mide:', o:['La altura de la marea','La fuerza del viento','La profundidad del mar','La temperatura del agua'], a:1, e:'Beaufort clasifica la fuerza del viento de 0 (calma) a 12 (huracán) según sus efectos observables.'},
-        {q:'Una zona de alta presión (anticiclón) suele traer:', o:['Tormentas','Tiempo estable y despejado','Niebla densa siempre','Marejadas'], a:1, e:'La alta presión se asocia a tiempo estable. La baja presión (borrasca) trae inestabilidad y viento.'},
-        {q:'La "virazón" es:', o:['Una ola gigante','La brisa que entra del mar a la tierra durante el día','Una corriente de fondo','Un tipo de ancla'], a:1, e:'Durante el día la tierra se calienta más que el mar y la brisa entra desde el mar (virazón). De noche se invierte (terral).'},
-        {q:'Las nubes cumulonimbos anuncian:', o:['Tiempo estable','Chubascos, tormentas y rachas de viento','Calma total','Descenso de la marea'], a:1, e:'Los cumulonimbos son nubes de gran desarrollo vertical asociadas a tormentas, lluvia intensa y viento racheado.'},
-        {q:'Un aviso de "marejadas" de la Armada significa:', o:['Habrá poco viento','Se esperan olas grandes / mar de fondo peligroso','Buenas condiciones para navegar','Bajará la temperatura'], a:1, e:'La marejada es un mar de fondo con olas grandes; conviene postergar la salida o extremar precauciones.'},
-        {q:'En la costa de Chile predominan los vientos del:', o:['Norte y noreste','Sur y suroeste','Este','Oeste puro únicamente'], a:1, e:'Predomina "el sur" (sur/suroeste), asociado al anticiclón del Pacífico, que suele levantar marejada.'},
-        {q:'La pleamar y la bajamar son producidas principalmente por:', o:['El viento local','La atracción de la Luna y el Sol','Las corrientes de los ríos','La temperatura del aire'], a:1, e:'Las mareas resultan de la atracción gravitatoria de la Luna y el Sol sobre las masas de agua.'}
+        {q:'Si el barómetro baja rápidamente, lo más probable es que:', o:['Mejore el tiempo','Se aproxime mal tiempo','No cambie nada','Baje la marea'], a:1, e:'Una caída de presión anticipa mal tiempo (viento probable del ecuador). Presión que sube = tiempo estable.'},
+        {q:'La escala Beaufort mide:', o:['La altura de la marea','La fuerza del viento','La profundidad','La temperatura del agua'], a:1, e:'Beaufort clasifica la fuerza del viento de 0 (calma) a 12 (huracán) por sus efectos en el mar.'},
+        {q:'La "virazón" es la brisa que:', o:['Va de la tierra al mar de noche','Entra del mar a la tierra durante el día','Sopla solo en invierno','Viene de la cordillera'], a:1, e:'De día la tierra se calienta más y la brisa entra del mar (virazón). De noche se invierte: terral.'},
+        {q:'Las nubes de gran desarrollo vertical asociadas a chubascos y rachas son típicas de un:', o:['Frente cálido','Frente frío','Anticiclón','Día de calma'], a:1, e:'El frente frío levanta bruscamente el aire cálido y forma nubes cumuliformes con lluvia y viento racheado.'},
+        {q:'En Chile las mareas son de tipo:', o:['Diurnas (1 alta y 1 baja)','Mixtas (2 altas y 2 bajas al día)','Sin mareas','Solo de primavera'], a:1, e:'Las mareas en Chile son mixtas: se producen 2 pleamares y 2 bajamares en un día-marea.'},
+        {q:'La corriente fría que recorre las costas de Chile es la de:', o:['El Niño','Humboldt','El Golfo','Kuroshio'], a:1, e:'La corriente fría de Humboldt recorre fundamentalmente las costas de Chile.'},
+        {q:'En una ola, el agua:', o:['Se traslada con la ola hasta la costa','No se traslada; solo hace un movimiento oscilatorio','Gira en círculos hacia el fondo','Se evapora'], a:1, e:'En mar abierto el agua no se desplaza con la ola, solo oscila; un objeto flotante sube y baja sin avanzar.'},
+        {q:'La presión atmosférica se mide con el:', o:['Anemómetro','Barómetro','Termómetro','Higrómetro'], a:1, e:'El barómetro mide la presión; el anemómetro mide la velocidad del viento y el termómetro la temperatura.'},
+        {q:'La tabla de mareas y las cartas de Chile las publica principalmente el:', o:['Ministerio del Mar','SHOA (Servicio Hidrográfico y Oceanográfico de la Armada)','Club de yates','SERNAGEOMIN'], a:1, e:'El SHOA / Servicio Hidrográfico de la Armada edita las cartas, tablas de mareas y publicaciones náuticas.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
+    /* ============================ 5. SEGURIDAD Y PRIMEROS AUXILIOS ============================ */
     { id:'seguridad', icon:'🦺', title:'Seguridad y primeros auxilios',
-      sub:'Equipo de seguridad, chalecos, hipotermia y RCP',
+      sub:'Equipo, chalecos, hipotermia, hemorragias, quemaduras y RCP',
       lessons:[
-        { h:'Equipo de seguridad exigido', html:`
+        { h:'Equipo de seguridad', html:`
           <ul>
-            <li><span class="term">Chaleco salvavidas</span> para <b>cada persona</b> a bordo (y del talle adecuado para niños). Debe estar accesible, no guardado bajo llave.</li>
-            <li><span class="term">Aro salvavidas</span> con rabiza, <span class="term">extintor</span> vigente, <span class="term">bengalas / señales pirotécnicas</span> dentro de fecha.</li>
-            <li>Medios de achique (<span class="term">bomba o balde</span>), <span class="term">linterna</span>, <span class="term">pito/silbato</span>, <span class="term">espejo de señales</span>, ancla con cabo, remos, botiquín y radio VHF si corresponde.</li>
+            <li><span class="term">Chaleco salvavidas</span> para <b>cada persona</b> a bordo. En bahía se usa el <b>tipo III "Aguas Interiores"</b> (IIIA para niños). Es el elemento más importante y debe usarse en todo momento.</li>
+            <li>Equipo mínimo en bahía: <b>chalecos, un achicador y un pito</b>. Se recomienda VHF para enlace con el club o marina.</li>
+            <li>En navegaciones mayores se suma: aros salvavidas, bengalas/cohetes, extintores, botiquín, bombas de achique, ancla y cabo, linterna, espejo de señales, balsa salvavidas, EPIRB, etc.</li>
           </ul>
-          <div class="tip">🦺 El mejor chaleco es el que llevas puesto. En niños, mal tiempo o navegación de noche, úsalo siempre.</div>`},
-        { h:'Hipotermia y ahogamiento', html:`
+          <div class="tip">🦺 El mejor chaleco es el que llevas <b>puesto</b>. Con niños, mal tiempo o de noche, úsalo siempre.</div>`},
+        { h:'Mareo, hipotermia e insolación', html:`
           <ul>
-            <li><span class="term">Hipotermia</span>: descenso peligroso de la temperatura corporal por el agua fría (el agua enfría ~25 veces más rápido que el aire). Síntomas: tiritar, confusión, somnolencia.</li>
-            <li>En el agua fría esperando rescate: <b>no nades sin rumbo</b>, adopta la posición <span class="term">HELP</span> (encogido, rodillas al pecho) para conservar calor; en grupo, abrázense.</li>
-            <li>Rescatado: retira ropa mojada, abriga en seco, da bebidas tibias (nunca alcohol) y maneja con suavidad.</li>
+            <li><span class="term">Mareo</span> (cinetosis): náuseas, palidez, sudor. Ayuda mirar el horizonte, tomar aire fresco, ir al centro de la nave y mantenerse ocupado. Un mareo persistente deshidrata.</li>
+            <li><span class="term">Hipotermia</span>: temperatura corporal por debajo de lo normal (~26° o menos). En el agua fría <b>no nades</b>: adopta la <b>posición fetal</b> y protege cabeza, cuello, ingles y costados; en grupo, abrázense. Saca del agua en horizontal, quita la ropa mojada, abriga. <b>Nunca frotes</b> los miembros ni des <b>alcohol</b>.</li>
+            <li><span class="term">Insolación</span>: piel seca, roja y caliente; confusión. Hay que <b>bajar la temperatura</b>: sombra, agua fría, paños mojados. Prevención: bloqueador, sombrero y ropa que cubra.</li>
           </ul>`},
-        { h:'RCP y primeros auxilios', html:`
+        { h:'Hemorragias, quemaduras y fracturas', html:`
           <ul>
-            <li>Ante una persona inconsciente que no respira: pide ayuda / VHF 16, y comienza <span class="term">RCP</span> — compresiones torácicas fuertes y rápidas (~100–120 por minuto) en el centro del pecho.</li>
-            <li><span class="term">Hemorragia</span>: presión directa sobre la herida con paño limpio y elevar el miembro.</li>
-            <li><span class="term">Mareo</span> (cinetosis): mirar el horizonte, aire fresco, ir al centro de la nave; hidratarse.</li>
-            <li>Quemaduras de sol/insolación: sombra, hidratación, cubrir del sol. Siempre lleva agua potable.</li>
+            <li><span class="term">Hemorragia</span>: aplicar <b>presión directa</b> con paño limpio durante al menos <b>10 minutos</b> hasta que coagule. La pérdida de más del 50% de la sangre es mortal.</li>
+            <li><span class="term">Quemaduras</span>: enfriar con agua dulce ~15 min. Grados: 1° piel roja (sol); 2° ampollas; 3° piel blanquecina/negruzca (urgente). <b>No revientes las ampollas</b>. La palma de la mano ≈ 1% de la superficie corporal.</li>
+            <li><span class="term">Fracturas</span>: simple (sin herida) o expuesta (con herida). <b>Inmovilizar</b> abarcando desde la articulación superior hasta la inferior; no traccionar fracturas abiertas; cubrir heridas y abrigar.</li>
+          </ul>`},
+        { h:'Urgencias cardio-respiratorias (RCP)', html:`
+          <ul>
+            <li>Evalúa la respiración: <b>mira, escucha, siente</b>. Si no respira, inicia respiración artificial en ambiente ventilado, con la vía aérea abierta (cabeza extendida).</li>
+            <li>Si <b>no hay pulso</b> (carótida), inicia <span class="term">RCP</span>: masaje cardíaco en el esternón, comprimiendo hacia la columna. Ciclo: <b>30 compresiones y 2 ventilaciones</b>. Si hay pulso aunque sea débil, <b>no</b> se hace masaje.</li>
+            <li>Una persona que no respira no está necesariamente muerta, pero está en peligro: actúa rápido.</li>
           </ul>`}
       ],
       questions:[
-        {q:'¿Cuántos chalecos salvavidas debe haber a bordo?', o:['Uno por embarcación','Uno cada dos personas','Uno por cada persona a bordo','Solo para el patrón'], a:2, e:'Debe haber un chaleco por cada persona, del talle adecuado, y accesible en todo momento.'},
-        {q:'El agua fría produce hipotermia porque:', o:['Contiene sal','Enfría el cuerpo mucho más rápido que el aire','Tiene menos oxígeno','Es más densa'], a:1, e:'El agua conduce el calor unas 25 veces más rápido que el aire, por eso la hipotermia es un riesgo real incluso en aguas templadas.'},
-        {q:'Mientras esperas rescate en agua fría, lo recomendable es:', o:['Nadar lo más lejos posible','Quedarte quieto en posición HELP (encogido) para conservar calor','Quitarte el chaleco para nadar mejor','Bucear para calentarte'], a:1, e:'Moverse acelera la pérdida de calor. La posición HELP (fetal, con el chaleco puesto) conserva calor corporal.'},
-        {q:'A una persona rescatada con hipotermia se le debe dar:', o:['Alcohol para calentarla','Bebidas tibias y abrigo seco','Un baño de agua muy caliente inmediato','Ejercicio intenso'], a:1, e:'El alcohol empeora la hipotermia (dilata vasos y aumenta la pérdida de calor). Se abriga en seco y se dan líquidos tibios.'},
-        {q:'La frecuencia recomendada de compresiones en RCP es aproximadamente:', o:['20–30 por minuto','50 por minuto','100–120 por minuto','200 por minuto'], a:2, e:'Se comprime el centro del pecho, fuerte y rápido, a un ritmo de 100 a 120 compresiones por minuto.'},
-        {q:'Ante una hemorragia externa, la primera medida es:', o:['Aplicar presión directa sobre la herida','Dar agua a la persona','Mover el miembro para activar circulación','Esperar a que pare sola'], a:0, e:'La presión directa con un paño limpio y elevar el miembro es la forma básica y efectiva de controlar una hemorragia.'},
-        {q:'El extintor y las bengalas a bordo deben estar:', o:['Guardados bajo llave','Vigentes (dentro de su fecha) y accesibles','En tierra por seguridad','Solo si navegas de noche'], a:1, e:'El equipo de seguridad debe estar vigente y a mano; un extintor vencido o bengalas caducadas no cumplen su función.'},
-        {q:'Contra el mareo (cinetosis) ayuda:', o:['Bajar a la cabina a acostarse','Mirar el horizonte, tomar aire fresco e ir al centro de la nave','Leer para distraerse','Beber alcohol'], a:1, e:'Fijar la vista en el horizonte y estar al aire libre en el centro de la nave (donde menos se mueve) reduce el mareo.'}
+        {q:'¿Cuántos chalecos salvavidas debe haber a bordo?', o:['Uno por embarcación','Uno por cada persona a bordo','Uno cada dos personas','Solo para el patrón'], a:1, e:'Debe haber un chaleco por cada persona, del talle adecuado y accesible; es el elemento más importante de seguridad.'},
+        {q:'El chaleco que se usa en embarcaciones deportivas de bahía es del:', o:['Tipo I Oceánico','Tipo III "Aguas Interiores"','Tipo SOLAS','No se exige chaleco'], a:1, e:'En bahía se usa el tipo III "Aguas Interiores" (IIIA para niños), apto para aguas calmas donde el rescate es rápido.'},
+        {q:'El equipo mínimo de seguridad exigido en bahía incluye chalecos, y además:', o:['Un ancla y un radar','Un achicador y un pito','Dos extintores y una balsa','Un GPS y bengalas'], a:1, e:'Para bahía: chalecos, un achicador y un pito. El equipo más completo se exige en navegaciones costeras o de altura.'},
+        {q:'En agua fría, esperando rescate y solo, lo recomendable es:', o:['Nadar lo más lejos posible','Quedarse quieto en posición fetal para conservar calor','Quitarse el chaleco','Bucear para calentarse'], a:1, e:'Moverse acelera la pérdida de calor. Con el chaleco puesto, la posición fetal conserva el calor corporal.'},
+        {q:'A una persona con hipotermia NUNCA se le debe:', o:['Abrigar en seco','Dar alcohol ni frotar los miembros','Dar bebidas tibias si está consciente','Sacar la ropa mojada'], a:1, e:'El alcohol dilata los vasos y aumenta la pérdida de calor; frotar libera sangre fría al núcleo. Ambos son peligrosos.'},
+        {q:'Ante una hemorragia externa, la primera medida es:', o:['Aplicar presión directa sobre la herida','Dar agua a la persona','Mover el miembro','Esperar a que pare sola'], a:0, e:'Presión directa con paño limpio durante al menos 10 minutos hasta que se forme el coágulo.'},
+        {q:'En una quemadura con ampollas (segundo grado) se debe:', o:['Reventar las ampollas','Enfriar con agua y NO reventar las ampollas','Aplicar hielo directo','Frotar con sal'], a:1, e:'Se enfría con agua dulce ~15 min y no se revientan las ampollas; se cubre con apósito limpio.'},
+        {q:'Al inmovilizar una fractura, el elemento rígido debe abarcar:', o:['Solo el punto del dolor','Desde la articulación superior hasta la inferior de la zona','Todo el cuerpo','Nada, mejor no tocar'], a:1, e:'La inmovilización debe abarcar la articulación por encima y por debajo de la fractura, sin traccionar fracturas abiertas.'},
+        {q:'El ciclo de RCP recomendado es:', o:['15 compresiones y 1 ventilación','30 compresiones y 2 ventilaciones','5 compresiones y 5 ventilaciones','Solo ventilaciones'], a:1, e:'Se realizan 30 compresiones en el esternón seguidas de 2 ventilaciones, verificando el pulso periódicamente.'},
+        {q:'El masaje cardíaco (compresiones) solo se hace si la persona:', o:['Tiene pulso débil','NO tiene pulso','Está consciente','Respira lento'], a:1, e:'Si hay pulso, aunque sea débil, NO se hace masaje. El masaje solo se aplica en ausencia de pulso.'},
+        {q:'Contra el mareo (cinetosis) ayuda:', o:['Bajar a la cabina a leer','Mirar el horizonte, aire fresco e ir al centro de la nave','Beber alcohol','Cerrar los ojos acostado abajo'], a:1, e:'Fijar la vista en el horizonte y estar al aire libre en el centro de la nave, manteniéndose ocupado, reduce el mareo.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
+    /* ============================ 6. NAVEGACIÓN ============================ */
     { id:'navegacion', icon:'🗺️', title:'Navegación básica',
-      sub:'Carta náutica, rumbo, compás, millas y balizamiento',
+      sub:'Cartas, coordenadas, rumbos, compás, instrumentos y balizamiento',
       lessons:[
-        { h:'Unidades y la carta náutica', html:`
+        { h:'La Tierra y las cartas', html:`
           <ul>
-            <li>La <span class="term">milla náutica</span> equivale a <b>1.852 m</b>. El <span class="term">nudo</span> es 1 milla náutica por hora (velocidad).</li>
-            <li>La <span class="term">carta náutica</span> representa la costa, profundidades (<span class="term">sondas</span>), faros, boyas y peligros. Es la herramienta fundamental para planificar.</li>
-            <li>La <span class="term">rosa de los vientos</span> muestra los rumbos en grados (000° = Norte, 090° = Este, 180° = Sur, 270° = Oeste).</li>
-            <li>Posición: <span class="term">latitud</span> (N/S del ecuador) y <span class="term">longitud</span> (E/O del meridiano de Greenwich).</li>
+            <li><span class="term">Ecuador</span>: círculo máximo que divide la Tierra en hemisferios N y S. <span class="term">Meridianos</span>: pasan por los polos (líneas verticales en la carta). <span class="term">Paralelos</span>: paralelos al ecuador (líneas horizontales).</li>
+            <li><span class="term">Latitud</span>: del ecuador al lugar, N o S (0° a 90°). <span class="term">Longitud</span>: del meridiano de <b>Greenwich</b> al lugar, E u O (0° a 180°).</li>
+            <li>La <span class="term">carta náutica</span> representa la costa y el mar a escala e incluye <b>sondas</b> (profundidades), naturaleza del fondo, faros, boyas, veriles y peligros. Las publica el <b>SHOA</b>, junto con derroteros, listas de faros y tablas de mareas.</li>
+          </ul>
+          ${DIAG.rosa}`},
+        { h:'Medidas, rumbos y compás', html:`
+          <ul>
+            <li><span class="term">Milla náutica</span> = <b>1.852 m</b> (un minuto de arco de meridiano). 1 milla = 10 cables; 1 cable ≈ 185 m; 1 braza ≈ 1,83 m. El <span class="term">nudo</span> = 1 milla por hora.</li>
+            <li>Para medir distancia en la carta se usa la <b>escala de latitudes</b> (a los costados): cada minuto = 1 milla.</li>
+            <li><span class="term">Rumbo</span>: ángulo de la línea proa-popa con el norte, de <b>000° a 360°</b> en sentido horario. La <span class="term">rosa de los vientos</span> divide el horizonte en 32 partes.</li>
+            <li>El <span class="term">compás magnético</span> apunta al norte magnético. La <span class="term">declinación magnética</span> (variación) es la diferencia con el norte geográfico; el <span class="term">desvío</span> lo causan los hierros de a bordo.</li>
           </ul>`},
-        { h:'Rumbo, demora y compás', html:`
+        { h:'Instrumentos y comunicaciones', html:`
           <ul>
-            <li><span class="term">Rumbo</span>: dirección en que navegas. <span class="term">Demora</span>: dirección hacia un objeto observado.</li>
-            <li>El <span class="term">compás magnético</span> apunta al norte magnético, que difiere del geográfico por la <span class="term">declinación magnética</span> (variación).</li>
-            <li>Objetos de hierro o equipos a bordo pueden desviar el compás: es el <span class="term">desvío</span>.</li>
-            <li>El <span class="term">GPS</span> da posición precisa, pero siempre lleva carta y compás de respaldo (la electrónica puede fallar).</li>
+            <li><span class="term">GPS</span>: da posición por satélites (dónde estoy, hacia dónde voy y a qué velocidad). Lleva siempre carta y compás de respaldo.</li>
+            <li><span class="term">Ecosonda</span>: mide la profundidad por eco acústico. <span class="term">Corredera</span>: mide la velocidad/distancia navegada.</li>
+            <li><span class="term">VHF</span> (156–174 MHz): comunicaciones de corto alcance. <b>Escucha antes de transmitir</b>. Canal <b>16</b> = socorro y llamada.</li>
           </ul>`},
         { h:'Balizamiento IALA — Región B (Chile)', html:`
-          <p>Chile pertenece a la <b>Región B</b> del sistema IALA. Al <b>entrar</b> a puerto (regresando desde el mar):</p>
+          <p>Chile pertenece a la <b>Región B</b>. Al <b>entrar</b> a puerto (regresando del mar):</p>
+          ${DIAG.iala}
           <ul>
-            <li>Marcas laterales de <span class="term">estribor</span>: <b>ROJAS</b> (cónicas / triángulo). Regla: <i>"rojo a la derecha al regresar"</i>.</li>
+            <li>Marcas laterales de <span class="term">estribor</span>: <b>ROJAS</b> (cónicas). Regla: "<i>rojo a estribor al entrar</i>".</li>
             <li>Marcas laterales de <span class="term">babor</span>: <b>VERDES</b> (cilíndricas).</li>
-            <li>Marcas <span class="term">cardinales</span> (N, S, E, O): indican por qué lado pasar un peligro según los puntos cardinales.</li>
-            <li>Marca de <span class="term">peligro aislado</span>: negra con banda roja y dos esferas negras. Marca de <span class="term">aguas seguras</span>: franjas rojas y blancas verticales.</li>
+            <li><span class="term">Cardinales</span> (N, S, E, O): indican por qué lado pasar un peligro. <span class="term">Aguas seguras</span>: franjas rojas y blancas verticales.</li>
           </ul>
-          <div class="tip">🚨 Ojo: la Región A (Europa) es al revés (rojo a babor). Chile es <b>Región B</b>: <b>rojo a estribor al entrar</b>.</div>`}
+          <div class="tip">🚨 En Europa (Región A) es al revés. Recuerda: en Chile, <b>rojo a estribor al entrar</b>.</div>`}
       ],
       questions:[
-        {q:'Una milla náutica equivale a:', o:['1.000 metros','1.609 metros','1.852 metros','2.000 metros'], a:2, e:'La milla náutica son 1.852 m (corresponde a un minuto de arco de latitud). Un nudo es 1 milla náutica por hora.'},
+        {q:'Una milla náutica equivale a:', o:['1.000 m','1.609 m','1.852 m','2.000 m'], a:2, e:'La milla náutica son 1.852 m (un minuto de arco de meridiano). El nudo es 1 milla náutica por hora.'},
         {q:'Un "nudo" es una unidad de:', o:['Distancia','Velocidad','Profundidad','Presión'], a:1, e:'El nudo es velocidad: 1 milla náutica por hora.'},
-        {q:'En el sistema IALA Región B (Chile), al entrar a puerto las boyas rojas se dejan a:', o:['Babor','Estribor','Ambos lados','No hay boyas rojas'], a:1, e:'Región B: "rojo a estribor al regresar". Las marcas rojas quedan a estribor al entrar; las verdes a babor.'},
-        {q:'La "declinación magnética" (variación) es:', o:['El error del GPS','La diferencia entre el norte magnético y el geográfico','La inclinación de la nave','La marea del día'], a:1, e:'Es el ángulo entre el norte magnético (al que apunta el compás) y el norte geográfico; varía según el lugar y el tiempo.'},
-        {q:'En la rosa de los vientos, 270° corresponde a:', o:['Norte','Este','Sur','Oeste'], a:3, e:'000°=N, 090°=E, 180°=S, 270°=O. Es el sentido horario partiendo del Norte.'},
-        {q:'La "sonda" en una carta náutica indica:', o:['La altura de un faro','La profundidad del agua','La distancia a la costa','La velocidad de la corriente'], a:1, e:'Las sondas son las cifras de profundidad. Son clave para no varar en zonas someras.'},
-        {q:'La latitud mide la posición:', o:['Al Este u Oeste de Greenwich','Al Norte o Sur del ecuador','Respecto al polo magnético','En millas desde la costa'], a:1, e:'La latitud es N/S respecto al ecuador; la longitud es E/O respecto al meridiano de Greenwich.'},
-        {q:'Aunque lleves GPS, conviene tener a bordo:', o:['Solo el GPS, es suficiente','Carta náutica y compás de respaldo','Únicamente el celular','Nada más'], a:1, e:'La electrónica puede fallar o quedarse sin energía; carta y compás son el respaldo imprescindible.'},
-        {q:'Una marca de "aguas seguras" (canal navegable a su alrededor) tiene:', o:['Franjas rojas y blancas verticales','Color negro con esferas','Solo verde','Solo amarillo'], a:0, e:'Las marcas de aguas seguras llevan franjas verticales rojas y blancas; indican que hay agua navegable alrededor.'}
+        {q:'La longitud se mide a partir del:', o:['Ecuador','Meridiano de Greenwich','Polo magnético','Trópico de Capricornio'], a:1, e:'La longitud se cuenta desde el meridiano de Greenwich, E u O (0° a 180°). La latitud se cuenta desde el ecuador.'},
+        {q:'En una carta náutica, las "sondas" indican:', o:['La altura de los faros','La profundidad del agua','La distancia a la costa','La fuerza del viento'], a:1, e:'Las sondas son las cifras de profundidad; una letra debajo indica la naturaleza del fondo (a=arena, f=fango, r=roca).'},
+        {q:'Los rumbos se miden de:', o:['0° a 90°','000° a 360° en sentido horario desde el Norte','0° a 180°','1 a 32'], a:1, e:'El rumbo circular va de 000° a 360° en sentido de las agujas del reloj partiendo del Norte.'},
+        {q:'La "declinación magnética" (variación) es:', o:['El error del GPS','La diferencia entre el norte magnético y el geográfico','La inclinación de la nave','La marea del día'], a:1, e:'Es el ángulo entre el norte al que apunta el compás (magnético) y el norte geográfico; varía según lugar y fecha.'},
+        {q:'En el sistema IALA Región B (Chile), al entrar a puerto las boyas rojas se dejan a:', o:['Babor','Estribor','Ambos lados','No hay boyas rojas'], a:1, e:'Región B: "rojo a estribor al entrar". Las marcas rojas (cónicas) quedan a estribor y las verdes (cilíndricas) a babor.'},
+        {q:'La distancia sobre la carta se mide usando la escala de:', o:['Longitudes (arriba y abajo)','Latitudes (a los costados): cada minuto = 1 milla','El título de la carta','La rosa náutica'], a:1, e:'Se usa la escala de latitudes de los márgenes izquierdo o derecho: cada minuto de latitud equivale a una milla náutica.'},
+        {q:'El instrumento que mide la profundidad por eco acústico es la:', o:['Corredera','Ecosonda','Veleta','Corredera de barquilla'], a:1, e:'La ecosonda mide la profundidad emitiendo pulsos y midiendo el eco. La corredera mide velocidad/distancia.'},
+        {q:'El canal VHF internacional de socorro y llamada es el:', o:['Canal 6','Canal 9','Canal 16','Canal 70'], a:2, e:'El canal 16 de VHF es el de socorro y llamada. El 70 se usa para la Llamada Selectiva Digital (LLSD/DSC).'},
+        {q:'Aunque lleves GPS, siempre conviene tener a bordo:', o:['Solo el GPS','Carta náutica y compás de respaldo','Únicamente el celular','Nada más'], a:1, e:'La electrónica puede fallar o quedarse sin energía; carta y compás son el respaldo imprescindible.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
+    /* ============================ 7. RIPA ============================ */
     { id:'ripa', icon:'🚦', title:'RIPA — Prevención de abordajes',
-      sub:'Reglas de rumbo, luces, marcas y señales acústicas (COLREG)',
+      sub:'Reglas de rumbo, luces, marcas, señales acústicas y de socorro',
       lessons:[
         { h:'Reglas de rumbo y gobierno', html:`
-          <p>El <span class="term">RIPA</span> (Reglamento Internacional para Prevenir Abordajes, 1972 / COLREG) evita colisiones. Reglas clave:</p>
+          <p>El <span class="term">RIPA</span> (Reglamento Internacional para Prevenir Abordajes) se aplica a los buques que se ven uno a otro.</p>
+          ${DIAG.ripa}
           <ul>
-            <li><b>Vuelta encontrada</b> (de frente): ambos buques a motor caen a <b>estribor</b> y se cruzan babor con babor.</li>
-            <li><b>Cruce</b>: el buque que ve al otro por su <b>estribor</b> debe <b>ceder el paso</b> (maniobrar). El otro mantiene rumbo y velocidad.</li>
-            <li><b>Alcance</b>: el buque que <b>alcanza</b> a otro por detrás siempre se aparta y cede el paso.</li>
-            <li>El buque que cede debe hacer una maniobra <b>amplia y a tiempo</b>, evidente para el otro.</li>
-          </ul>
-          <div class="tip">🟢 Regla de oro del cruce: <b>"si lo ves por tu estribor (luz verde de él / roja tuya), tú cedes"</b>. Si lo ves por babor, mantienes rumbo pero vigila.</div>`},
-        { h:'Preferencias entre tipos de buque (Regla 18)', html:`
-          <p>Orden de "quién se aparta de quién" (cada uno cede ante los de más arriba):</p>
+            <li><b>Cruce (Regla 15)</b>: el buque que tiene al otro por su <b>estribor</b> maniobra (cede). Toca <b>1 pitada</b> ("caigo a estribor"). El otro mantiene rumbo y velocidad.</li>
+            <li><b>Vuelta encontrada (Regla 14)</b>: de frente, ambos caen a <b>estribor</b> y se cruzan babor con babor. <i>"Si ambas luces de un vapor por la proa has avistado, has de caer a estribor…"</i></li>
+            <li><b>Alcance (Regla 13)</b>: el que <b>alcanza</b> a otro por detrás se mantiene apartado y cede el paso.</li>
+            <li>El que cede maniobra pronto y de forma clara (Regla 16); el que sigue mantiene rumbo y velocidad (Regla 17), pero actúa si el otro no maniobra.</li>
+          </ul>`},
+        { h:'Preferencias entre buques', html:`
+          <p>Un buque de propulsión mecánica se mantiene apartado de (en este orden):</p>
           <ul>
-            <li>1. Buque <b>sin gobierno</b> (no under command) y <b>con maniobra restringida</b>.</li>
-            <li>2. Buque <b>restringido por su calado</b>.</li>
+            <li>1. Buque <b>sin gobierno</b>.</li>
+            <li>2. Buque con <b>capacidad de maniobra restringida</b>.</li>
             <li>3. Buque <b>dedicado a la pesca</b>.</li>
             <li>4. Buque de <b>vela</b>.</li>
-            <li>5. Buque <b>a motor</b> (el que más maniobrabilidad tiene → cede ante todos los anteriores).</li>
           </ul>
-          <p>Entre dos veleros, cede el que recibe el viento por <b>babor</b>; si ambos lo reciben por el mismo lado, cede el que está a barlovento.</p>`},
+          <p>El velero también cede ante los sin gobierno, restringidos y pesqueros. Entre dos veleros: el que recibe el viento por <b>babor</b> cede; si es por la misma banda, cede el que está a <b>barlovento</b>.</p>
+          <div class="tip">⛵ "Entre un vapor y un velero, gobierna siempre el primero": el buque a motor cede ante el velero.</div>`},
         { h:'Luces de navegación', html:`
+          <p>Se llevan desde la puesta hasta la salida del sol y con visibilidad reducida.</p>
+          ${DIAG.luces}
           <ul>
-            <li><span class="term">Luz de tope</span>: blanca, visible 225°, hacia proa (buques a motor).</li>
-            <li><span class="term">Luces de costado</span>: <b>verde a estribor</b> y <b>roja a babor</b>, 112,5° cada una.</li>
-            <li><span class="term">Luz de alcance</span> (popa): blanca, 135°.</li>
-            <li>Un buque a motor navegando de noche muestra tope, costados y alcance. Un velero a vela muestra solo costados y alcance (sin luz de tope de motor).</li>
-            <li>Ver solo una <b>luz blanca</b> puede ser un buque que se aleja (su luz de alcance) o un buque fondeado.</li>
+            <li><span class="term">Luz de tope</span>: blanca, 225°, hacia proa. <span class="term">Luces de costado</span>: verde a estribor y roja a babor, 112,5° c/u (en naves &lt; 20 m pueden ir combinadas en un farol).</li>
+            <li><span class="term">Luz de alcance</span>: blanca a popa, 135°. <span class="term">Luz de remolque</span>: amarilla. <span class="term">Todo horizonte</span>: 360°.</li>
+            <li>Un buque a motor navegando muestra tope, costados y alcance. Un velero a vela: solo costados y alcance (sin luz de tope de motor).</li>
           </ul>`},
-        { h:'Marcas de día y señales acústicas', html:`
+        { h:'Marcas, señales acústicas y de socorro', html:`
           <ul>
-            <li><span class="term">Bola negra</span>: buque <b>fondeado</b>. <b>Dos bolas</b>: sin gobierno. <span class="term">Cono con vértice abajo</span>: velero que además usa motor. <b>Bola-rombo-bola</b>: maniobra restringida.</li>
-            <li>Señales acústicas de maniobra (buques a la vista):
-              <ul>
-                <li><b>1 pitada corta</b>: "caigo a <b>estribor</b>".</li>
-                <li><b>2 pitadas cortas</b>: "caigo a <b>babor</b>".</li>
-                <li><b>3 pitadas cortas</b>: "doy atrás" (máquina atrás).</li>
-                <li><b>5 o más pitadas cortas</b>: duda / peligro ("no entiendo tus intenciones").</li>
-              </ul>
-            </li>
-            <li>Con niebla, un buque a motor con arrancada emite <b>1 pitada larga cada 2 minutos</b>.</li>
+            <li>Marcas de día: <b>1 esfera</b> = fondeado; <b>2 esferas</b> = sin gobierno; <b>3 esferas</b> = varado; <b>cono con vértice abajo</b> = velero a motor y vela; bola-rombo-bola = maniobra restringida.</li>
+            <li>Señales acústicas (a la vista): <b>1 corta</b> = caigo a estribor; <b>2 cortas</b> = caigo a babor; <b>3 cortas</b> = doy atrás; <b>5 o más cortas</b> = duda/peligro.</li>
+            <li>Niebla: buque a motor <b>navegando</b> = 1 sonido largo cada 2 min; <b>parado</b> = 2 largos. Vela/pesca/sin gobierno/restringido = 1 largo + 2 cortos.</li>
+            <li>Señales de socorro: <b>Mayday</b> (radio), bengala/cohete de luz <b>roja</b>, humo <b>naranja</b>, SOS Morse, bandera con bola encima o debajo, brazos subiendo y bajando lentamente, señal "NC".</li>
           </ul>`}
       ],
       questions:[
-        {q:'En un cruce, ¿quién debe ceder el paso?', o:['El buque que ve al otro por su babor','El buque que ve al otro por su estribor','El más grande','El más rápido'], a:1, e:'El buque que tiene al otro por su estribor cede el paso (ve la luz roja del otro; el otro ve su verde). El que cede maniobra; el otro mantiene rumbo y velocidad.'},
-        {q:'Dos buques a motor se aproximan de frente (vuelta encontrada). Deben:', o:['Caer ambos a babor','Caer ambos a estribor y cruzarse babor con babor','Mantener rumbo y acelerar','Detenerse en seco los dos'], a:1, e:'En vuelta encontrada ambos caen a estribor para pasar babor con babor (rojo con rojo).'},
-        {q:'Un buque que alcanza a otro por detrás:', o:['Tiene preferencia','Debe apartarse y ceder el paso al alcanzado','Debe acelerar para pasar rápido','Toca 3 pitadas y sigue'], a:1, e:'El buque que alcanza siempre se mantiene apartado del alcanzado, sin importar el tipo de buque.'},
-        {q:'La luz de costado de estribor es de color:', o:['Roja','Verde','Blanca','Amarilla'], a:1, e:'Estribor = verde; babor = rojo. Cada luz de costado abarca 112,5°.'},
-        {q:'¿Qué significan "2 pitadas cortas" de otro buque?', o:['Caigo a estribor','Caigo a babor','Doy máquina atrás','Peligro'], a:1, e:'1 corta = caigo a estribor; 2 cortas = caigo a babor; 3 cortas = máquina atrás; 5 o más = duda/peligro.'},
-        {q:'Cinco (o más) pitadas cortas y seguidas indican:', o:['Saludo','Duda o peligro / no entiendo tus intenciones','Que va a fondear','Cambio de tripulación'], a:1, e:'Es la señal de duda o peligro: se usa cuando no se comprenden las intenciones del otro buque o para advertir riesgo de abordaje.'},
-        {q:'Según la Regla 18, un buque a motor debe apartarse de un buque:', o:['Más pequeño','De vela, de pesca o sin gobierno','Del mismo tamaño','Ninguno, siempre tiene preferencia'], a:1, e:'El buque a motor es el más maniobrable, por lo que cede ante velero, pesquero, restringido, sin gobierno, etc.'},
-        {q:'Una bola negra izada durante el día indica que el buque está:', o:['Sin gobierno','Fondeado','Pescando','Remolcando'], a:1, e:'Una bola negra a proa señala buque fondeado. Dos bolas = sin gobierno.'},
-        {q:'Entre dos veleros con el viento por bandas distintas, cede el que:', o:['Recibe el viento por estribor','Recibe el viento por babor','Va más rápido','Es más nuevo'], a:1, e:'El velero que recibe el viento por babor cede el paso al que lo recibe por estribor.'},
-        {q:'Con niebla, un buque a motor con arrancada debe emitir:', o:['Silencio total','1 pitada larga cada 2 minutos','3 pitadas cortas continuas','Una campana constante'], a:1, e:'En visibilidad reducida, un buque de propulsión mecánica con arrancada da una pitada larga a intervalos no mayores de 2 minutos.'},
-        {q:'Si de noche ves acercarse un buque y distingues su luz ROJA de costado, significa que:', o:['Lo tienes por tu estribor y probablemente debas ceder','Se está alejando','Está fondeado','Es un faro'], a:0, e:'Ver su costado rojo (babor de él) implica que lo tienes cruzando por tu estribor: en esa situación normalmente eres tú quien cede.'}
+        {q:'En un cruce, ¿quién cede el paso?', o:['El que ve al otro por su babor','El que ve al otro por su estribor','El más grande','El más rápido'], a:1, e:'El buque que tiene al otro por su estribor maniobra (cede) y toca una pitada corta. El otro mantiene rumbo y velocidad.'},
+        {q:'Dos buques a motor de frente (vuelta encontrada) deben:', o:['Caer ambos a babor','Caer ambos a estribor y cruzarse babor con babor','Mantener rumbo','Detenerse los dos'], a:1, e:'En vuelta encontrada ambos caen a estribor y se cruzan babor con babor (rojo con rojo).'},
+        {q:'Un buque que alcanza a otro por detrás:', o:['Tiene preferencia','Debe apartarse y ceder el paso','Debe acelerar para pasar','Toca 3 pitadas y sigue'], a:1, e:'El que alcanza se mantiene apartado del alcanzado, sea cual sea el tipo de buque.'},
+        {q:'La luz de costado de estribor es de color:', o:['Roja','Verde','Blanca','Amarilla'], a:1, e:'Estribor = verde; babor = rojo. Cada luz de costado cubre 112,5°.'},
+        {q:'¿Qué significan "2 pitadas cortas"?', o:['Caigo a estribor','Caigo a babor','Doy atrás','Peligro'], a:1, e:'1 corta = caigo a estribor; 2 cortas = caigo a babor; 3 cortas = máquina atrás; 5 o más = duda/peligro.'},
+        {q:'Cinco o más pitadas cortas y seguidas indican:', o:['Saludo','Duda o peligro','Que va a fondear','Cambio de tripulación'], a:1, e:'Es la señal de duda o peligro: "no entiendo sus intenciones / gobierne para evitar la colisión".'},
+        {q:'Un buque a motor debe apartarse de un buque:', o:['Más pequeño','De vela, de pesca o sin gobierno','Del mismo tamaño','Ninguno'], a:1, e:'El buque a motor, más maniobrable, cede ante sin gobierno, maniobra restringida, pesca y vela.'},
+        {q:'Una sola esfera negra izada de día indica buque:', o:['Sin gobierno','Fondeado','Varado','Pescando'], a:1, e:'1 esfera = fondeado; 2 esferas = sin gobierno; 3 esferas = varado.'},
+        {q:'Entre dos veleros con el viento por bandas distintas, cede el que:', o:['Recibe el viento por estribor','Recibe el viento por babor','Va más rápido','Es más grande'], a:1, e:'El velero que recibe el viento por babor cede al que lo recibe por estribor.'},
+        {q:'Con niebla, un buque a motor navegando (con arrancada) emite:', o:['Silencio','1 sonido largo cada 2 minutos','3 cortos continuos','Una campana'], a:1, e:'Con visibilidad reducida, un buque de propulsión mecánica con arrancada da un sonido largo a intervalos no mayores de 2 minutos.'},
+        {q:'Un cono negro con el vértice hacia abajo indica:', o:['Buque fondeado','Velero que además usa motor','Buque de pesca','Buque sin gobierno'], a:1, e:'El cono con vértice abajo señala un buque a vela que también propulsa con motor.'},
+        {q:'El color de las bengalas de socorro es:', o:['Verde','Azul','Rojo','Blanco'], a:2, e:'Las bengalas y cohetes de socorro dan luz roja; de día también se usa humo naranja.'}
       ]
     },
 
-    /* ---------------------------------------------------------------- */
+    /* ============================ 8. EMERGENCIAS ============================ */
     { id:'emergencias', icon:'🆘', title:'Emergencias a bordo',
-      sub:'Hombre al agua, incendio, vía de agua, VHF y señales de socorro',
+      sub:'Hombre al agua, incendio, vía de agua, VHF y socorro',
       lessons:[
         { h:'Hombre al agua', html:`
           <ul>
             <li>Grita "<b>¡Hombre al agua!</b>", lanza de inmediato un aro/objeto flotante y <b>no pierdas de vista</b> a la persona; designa a alguien que la señale con el brazo.</li>
-            <li>Maniobra de regreso (p. ej. giro de <span class="term">Williamson</span> o vuelta cerrada) para acercarte por <b>sotavento</b>, con la nave frenada y el motor en punto muerto al recoger.</li>
-            <li><b>Cuidado con la hélice</b>: pon el motor en neutro al aproximarte a la persona.</li>
+            <li>Maniobra de regreso para acercarte por <b>sotavento</b>, con la nave frenada. Antes de virar, comprueba que no haya cabos en el agua que enreden la hélice.</li>
+            <li><b>Cuidado con la hélice</b>: pon el motor en <b>neutro</b> al aproximarte a la persona. Lo importante es recogerla cuanto antes.</li>
           </ul>`},
-        { h:'Incendio y vía de agua', html:`
+        { h:'Incendio, vía de agua y varada', html:`
           <ul>
-            <li><b>Incendio</b>: corta el combustible/energía de la zona, usa el <span class="term">extintor</span> apuntando a la base de las llamas (barriendo), y aleja el fuego del viento. En fuego de motor, no abras de golpe la tapa (entra oxígeno).</li>
-            <li><b>Vía de agua</b> (entrada de agua): localiza y tapona la brecha, achica con bomba/balde y navega hacia el punto seguro más cercano. Reparte a la gente para no desestabilizar.</li>
-            <li><b>Varada</b> (encallar): revisa si hay vía de agua, evalúa la marea; a veces conviene esperar la pleamar. Si hay riesgo, pide ayuda.</li>
+            <li><b>Incendio</b>: corta el combustible/energía de la zona, usa el <span class="term">extintor</span> apuntando a la <b>base</b> de las llamas (barriendo). En fuego de motor, no abras de golpe la tapa (entra oxígeno).</li>
+            <li><b>Vía de agua</b>: localiza y tapona la brecha, achica con bomba o balde y navega al punto seguro más cercano; reparte el peso para no desestabilizar.</li>
+            <li><b>Varada</b> (encallar): revisa si hay vía de agua y evalúa la marea; muchas veces conviene esperar la <b>pleamar</b> para reflotar sin dañar el casco.</li>
           </ul>`},
         { h:'Comunicaciones y señales de socorro', html:`
           <ul>
-            <li>La <span class="term">radio VHF canal 16</span> es el canal internacional de <b>socorro y llamada</b>. Para emergencia con peligro de vida: "<b>MAYDAY, MAYDAY, MAYDAY</b>" + nombre de la nave, posición, naturaleza de la emergencia y personas a bordo.</li>
-            <li><span class="term">PAN-PAN</span>: urgencia sin peligro inmediato de vida. <span class="term">SÉCURITÉ</span>: aviso de seguridad/navegación.</li>
-            <li>Señales de socorro reconocidas: bengalas <b>rojas</b>, humo naranja, llamas a bordo, disparos a intervalos, brazos subiendo y bajando lentamente, señal SOS, bandera con bola, radiobaliza <span class="term">EPIRB</span>.</li>
+            <li>La <span class="term">VHF canal 16</span> es el canal internacional de socorro y llamada. La palabra de socorro es "<b>MAYDAY</b>" (del francés <i>m'aider</i>), transmitida <b>tres veces</b>.</li>
+            <li>El mensaje incluye: MAYDAY x3, "AQUÍ" + nombre de la nave x3, <b>posición</b> (lat. y long.), naturaleza del peligro y auxilio solicitado, y personas a bordo.</li>
+            <li><span class="term">PAN-PAN</span>: urgencia sin peligro inmediato de vida. <span class="term">SÉCURITÉ</span>: aviso de seguridad. La llamada de socorro tiene <b>prioridad absoluta</b>: todos callan y escuchan.</li>
+            <li>Otras señales: cohetes/bengalas rojas, humo naranja, SOS Morse, EPIRB, disparos a intervalos de 1 min, brazos subiendo y bajando.</li>
           </ul>
-          <div class="tip">📻 Memoriza: <b>canal 16 VHF = socorro</b>. Da siempre tu <b>posición</b> primero; sin posición, el rescate es mucho más lento.</div>`}
+          <div class="tip">📻 Memoriza: <b>canal 16 = socorro</b>. Da siempre tu <b>posición</b> primero; sin ella, el rescate es mucho más lento.</div>`}
       ],
       questions:[
-        {q:'Lo PRIMERO al caer una persona al agua es:', o:['Apagar el motor y bajar a buscar chalecos','Lanzar un flotador y no perderla de vista','Llamar por teléfono a la familia','Anotar la hora'], a:1, e:'Se lanza de inmediato un objeto flotante, se grita "hombre al agua" y alguien la señala sin quitarle la vista para no perder su posición.'},
-        {q:'Al aproximarte para recoger a la persona en el agua, el motor debe estar:', o:['A toda potencia','En punto muerto/neutro para evitar la hélice','En marcha atrás fuerte','Apagado y a la deriva siempre'], a:1, e:'Poner el motor en neutro al acercarse evita que la hélice hiera a la persona. Se recoge preferentemente por sotavento.'},
+        {q:'Lo PRIMERO al caer una persona al agua es:', o:['Bajar a buscar chalecos','Lanzar un flotador y no perderla de vista','Llamar a la familia','Anotar la hora'], a:1, e:'Se lanza de inmediato un objeto flotante, se grita "hombre al agua" y alguien la señala sin quitarle la vista.'},
+        {q:'Al aproximarte para recoger a la persona, el motor debe estar:', o:['A toda potencia','En neutro para evitar la hélice','En marcha atrás fuerte','Siempre apagado'], a:1, e:'Poner el motor en neutro al acercarse evita que la hélice hiera a la persona. Se recoge por sotavento.'},
+        {q:'Antes de virar hacia la persona en el agua, hay que comprobar que:', o:['El GPS funcione','No haya cabos en el agua que enreden la hélice','El ancla esté lista','Haya combustible de sobra'], a:1, e:'Cabos sueltos en el agua pueden enredarse en la hélice y dejar sin propulsión justo cuando más se necesita.'},
         {q:'¿Cuál es el canal internacional de socorro en VHF?', o:['Canal 6','Canal 9','Canal 16','Canal 72'], a:2, e:'El canal 16 de VHF es el canal internacional de socorro, urgencia y llamada.'},
-        {q:'La palabra que se transmite ante peligro de vida inminente es:', o:['PAN-PAN','SÉCURITÉ','MAYDAY','ROGER'], a:2, e:'MAYDAY (repetido tres veces) es la señal de socorro por peligro grave e inminente. PAN-PAN es urgencia sin peligro de vida.'},
-        {q:'En un mensaje de socorro, el dato MÁS importante que debes dar es:', o:['El color de la nave','Tu posición','La marca del motor','La hora de zarpe'], a:1, e:'Sin la posición, el rescate es lento. Da nombre de la nave, posición, naturaleza de la emergencia y número de personas a bordo.'},
-        {q:'Con un extintor, se debe apuntar a:', o:['La parte alta de las llamas','La base del fuego, barriendo','El humo','Las paredes cercanas'], a:1, e:'Se dirige el agente a la base de las llamas con movimiento de barrido, atacando el combustible que arde.'},
-        {q:'El color de las bengalas de socorro es:', o:['Verde','Azul','Rojo','Blanco'], a:2, e:'Las bengalas rojas (y el humo naranja de día) son señales de socorro reconocidas internacionalmente.'},
-        {q:'Ante una vía de agua (el bote embarca agua), debes:', o:['Acelerar al máximo hacia mar abierto','Taponar la brecha, achicar y dirigirte al punto seguro más cercano','Ignorarla si es pequeña','Detener todo y esperar'], a:1, e:'Se localiza y tapona la entrada de agua, se achica con bomba o balde y se navega al lugar seguro más próximo, repartiendo el peso.'},
-        {q:'"PAN-PAN" en la radio indica:', o:['Peligro de vida inminente','Una situación de urgencia sin peligro inmediato de vida','Fin de la comunicación','Prueba de radio'], a:1, e:'PAN-PAN señala urgencia (p. ej. avería seria) sin peligro inmediato de vida; MAYDAY es para peligro grave e inminente.'},
-        {q:'Si encallas (varada) sin vía de agua, una opción prudente puede ser:', o:['Acelerar fuerte para zafar siempre','Evaluar la marea y esperar la pleamar si conviene','Saltar todos al agua','Abandonar la nave de inmediato'], a:1, e:'Primero se verifica que no haya vía de agua; muchas veces conviene esperar que suba la marea (pleamar) para reflotar sin dañar el casco.'}
+        {q:'La palabra de socorro ante peligro de vida se transmite:', o:['Una vez','Dos veces','Tres veces (MAYDAY, MAYDAY, MAYDAY)','Cuatro veces'], a:2, e:'MAYDAY se transmite tres veces. Proviene de la expresión francesa «m aider» (ayúdenme).'},
+        {q:'En un mensaje de socorro, el dato MÁS importante es:', o:['El color de la nave','Tu posición','La marca del motor','La hora de zarpe'], a:1, e:'Sin la posición el rescate es lento. Se da nombre, posición, naturaleza de la emergencia y personas a bordo.'},
+        {q:'Con un extintor se apunta a:', o:['La parte alta de las llamas','La base del fuego, barriendo','El humo','Las paredes'], a:1, e:'Se dirige el agente a la base de las llamas con movimiento de barrido, atacando el combustible que arde.'},
+        {q:'Ante una vía de agua debes:', o:['Acelerar mar adentro','Taponar la brecha, achicar y ir al punto seguro más cercano','Ignorarla si es pequeña','Detener todo y esperar'], a:1, e:'Se localiza y tapona la entrada de agua, se achica con bomba o balde y se navega al lugar seguro más próximo.'},
+        {q:'"PAN-PAN" en la radio indica:', o:['Peligro de vida inminente','Urgencia sin peligro inmediato de vida','Fin de comunicación','Prueba de radio'], a:1, e:'PAN-PAN señala urgencia (p. ej. una avería seria) sin peligro inmediato de vida; MAYDAY es peligro grave e inminente.'},
+        {q:'Si encallas (varada) sin vía de agua, una opción prudente es:', o:['Acelerar fuerte siempre','Evaluar la marea y esperar la pleamar','Saltar todos al agua','Abandonar la nave'], a:1, e:'Primero se verifica que no haya vía de agua; a menudo conviene esperar que suba la marea para reflotar sin dañar el casco.'},
+        {q:'La llamada de socorro por radio tiene:', o:['La misma prioridad que otras','Prioridad absoluta: las demás estaciones callan y escuchan','Prioridad solo de noche','Que esperar turno'], a:1, e:'La llamada de socorro tiene prioridad absoluta; todas las estaciones cesan transmisiones que puedan perturbarla.'}
+      ]
+    },
+
+    /* ============================ 9. VELA (COMPLEMENTARIO) ============================ */
+    { id:'vela', icon:'⛵', title:'Navegación a vela', complementary:true,
+      sub:'Complementario · aparejo, rumbos al viento y maniobras',
+      lessons:[
+        { h:'Aparejo, velas y jarcias', html:`
+          <p>El <b>patrón deportivo completo</b> incluye vela y motor. Este módulo es complementario y no entra en el examen simulado base.</p>
+          <ul>
+            <li><span class="term">Vela mayor</span>: vela principal, envergada en el palo mayor. <span class="term">Foque</span>: vela triangular de proa, envergada en el estay.</li>
+            <li>Partes de una vela: <span class="term">grátil</span> (lado de proa/unión al palo), <span class="term">baluma</span> (lado de popa), <span class="term">pujamen</span> (lado inferior) y los <span class="term">puños</span> (driza, amura y escota).</li>
+            <li><span class="term">Jarcia firme</span>: cables fijos que sostienen los palos (obenques, estayes). <span class="term">Jarcia de labor</span>: cabos para izar y orientar (drizas para izar, escotas para bracear las velas).</li>
+            <li><span class="term">Barlovento</span>: de donde viene el viento; <span class="term">sotavento</span>: el lado opuesto.</li>
+          </ul>`},
+        { h:'Rumbos respecto al viento', html:`
+          <p>Un velero no puede navegar directo contra el viento (hay una "zona muerta" de ~45° a cada lado):</p>
+          ${DIAG.vela}
+          <ul>
+            <li><span class="term">Ceñir</span>: rumbo con el menor ángulo posible al viento (fuera de la zona muerta).</li>
+            <li><span class="term">De través</span>: viento por el través (~90°).</li>
+            <li><span class="term">A un largo</span>: viento por la aleta.</li>
+            <li><span class="term">En popa (empopada)</span>: viento por la popa; se abren las velas a cada banda ("orejas de burro").</li>
+          </ul>
+          <div class="tip">💨 <b>Viento real</b>: el debido al desplazamiento de masas de aire. <b>Viento aparente</b>: combinación del real con el que produce el propio movimiento del barco — es el que "sienten" las velas.</div>`},
+        { h:'Maniobras a vela', html:`
+          <ul>
+            <li><span class="term">Cazar</span>: cobrar la escota (la vela forma menor ángulo con la crujía). <span class="term">Lascar</span>: soltar la escota. <span class="term">Portar</span>: la vela bien orientada; <span class="term">flamear</span>: la vela ondea mal orientada.</li>
+            <li><span class="term">Orzar</span>: acercar la proa al viento. <span class="term">Arribar/caer</span>: alejar la proa del viento.</li>
+            <li><span class="term">Virar por avante</span>: la <b>proa</b> pasa por la línea del viento. <span class="term">Virar por redondo (trasluchar)</span>: la <b>popa</b> pasa por el viento (la botavara cambia de banda).</li>
+            <li>Un velero <b>no se detiene bruscamente</b>: para frenar se orza proa al viento o se lascan escotas hasta que las velas flameen.</li>
+          </ul>`}
+      ],
+      questions:[
+        {q:'"Ceñir" significa navegar:', o:['Con el viento por la popa','Con el menor ángulo posible respecto al viento','Con las velas arriadas','A motor'], a:1, e:'Ceñir es navegar formando el menor ángulo posible con la dirección del viento, justo fuera de la zona muerta.'},
+        {q:'La vela triangular de proa envergada en el estay es el:', o:['Mayor','Foque','Spinnaker','Tormentín'], a:1, e:'El foque es la vela triangular colocada a proa, envergada en el estay.'},
+        {q:'Navegar "en popa" (empopada) es recibir el viento por:', o:['La proa','El través','La popa','La quilla'], a:2, e:'En popa el viento entra por detrás; se pueden abrir las velas a cada banda ("orejas de burro").'},
+        {q:'"Cazar" una vela es:', o:['Soltar la escota','Cobrar la escota para reducir el ángulo con la crujía','Arriar la vela','Romper la vela'], a:1, e:'Cazar es cobrar (entrar) la escota; lascar es lo contrario, soltarla.'},
+        {q:'La maniobra en que la PROA pasa por la línea del viento se llama:', o:['Virada por avante','Virada por redondo','Trasluchada','Arribada'], a:0, e:'En la virada por avante la proa cruza el viento; en la virada por redondo lo cruza la popa (trasluchar).'},
+        {q:'El "viento aparente" es:', o:['El viento real sin cambios','La combinación del viento real con el movimiento del barco','El viento de tierra','El viento medido en puerto'], a:1, e:'El viento aparente es el que resulta de sumar el viento real y el generado por el propio desplazamiento del barco; es el que reciben las velas.'},
+        {q:'"Barlovento" es la parte:', o:['Hacia donde va el viento','De donde viene el viento','Trasera del barco','Sumergida'], a:1, e:'Barlovento = de donde viene el viento; sotavento = el lado opuesto (protegido).'},
+        {q:'La jarcia "de labor" está compuesta por los cabos que sirven para:', o:['Sostener fijos los palos','Izar y orientar las velas (drizas, escotas)','Fondear','Amarrar al muelle'], a:1, e:'La jarcia de labor (drizas, escotas) se usa para izar, orientar y arriar el aparejo; la jarcia firme sostiene los palos.'},
+        {q:'Para detener un velero se puede:', o:['Frenar en seco con el timón','Orzar proa al viento o lascar escotas hasta que las velas flameen','Dar marcha atrás con las velas','Soltar el ancla a toda velocidad'], a:1, e:'Un velero no se detiene bruscamente: se orza proa al viento o se sueltan escotas para que las velas dejen de propulsar.'}
       ]
     }
   ];
@@ -591,13 +859,11 @@
   function loadState(){
     try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)); if(s) return s; }catch(e){}
     return { read:{}, best:{}, examBest:0, examCount:0, answered:0, correct:0 };
-    // read: {moduleId:true} lecciones marcadas leídas
-    // best: {moduleId: bestPct} mejor % por módulo en práctica
   }
   function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
 
   /* ===================================================================
-     APP OBJECT
+     APP
      =================================================================== */
   const PL = {
     quiz:null,
@@ -607,7 +873,6 @@
       this.renderPracticeChips();
       this.renderProgress();
       this.updateOverall();
-      // tabs
       document.querySelectorAll('.pl-tab').forEach(t=>{
         t.addEventListener('click',()=>this.showView(t.dataset.view));
       });
@@ -624,12 +889,15 @@
     /* ----------------------- APRENDER ----------------------- */
     renderModules(){
       const wrap = document.getElementById('pl-modules');
-      wrap.innerHTML = MODULES.map((m,i)=>`
-        <div class="pl-mod" id="mod-${m.id}">
+      let core=0;
+      wrap.innerHTML = MODULES.map((m)=>{
+        const num = m.complementary ? '⛵' : (++core)+'.';
+        return `
+        <div class="pl-mod ${m.complementary?'comp':''}" id="mod-${m.id}">
           <div class="pl-mod-head" onclick="PL.toggleMod('${m.id}')">
             <div class="pl-mod-icon">${m.icon}</div>
             <div class="pl-mod-info">
-              <div class="pl-mod-title">${i+1}. ${m.title}</div>
+              <div class="pl-mod-title">${num} ${m.title}${m.complementary?'<span class="pl-badge">Complementario</span>':''}${m.official?'<span class="pl-badge" style="color:#7DD3A8;background:rgba(52,211,153,.15)">Oficial DIRECTEMAR</span>':''}</div>
               <div class="pl-mod-sub">${m.sub}</div>
             </div>
             <div class="pl-check ${state.read[m.id]?'done':''}" id="chk-${m.id}">${state.read[m.id]?'✓':''}</div>
@@ -641,14 +909,13 @@
               ✏️ Practicar este tema (${m.questions.length} preguntas)
             </button>
           </div>
-        </div>`).join('');
+        </div>`;}).join('');
     },
 
     toggleMod(id){
       const el = document.getElementById('mod-'+id);
       const wasOpen = el.classList.contains('open');
       el.classList.toggle('open');
-      // Marcar como leído al abrir por primera vez
       if(!wasOpen && !state.read[id]){
         state.read[id]=true; saveState();
         const chk=document.getElementById('chk-'+id);
@@ -681,7 +948,6 @@
       const m = MODULES.find(x=>x.id===id);
       const qs = shuffle(m.questions.map(q=>({...q, cat:m.title, mod:m.id})));
       this.showView('practice');
-      // Marca solo el chip de este módulo
       document.querySelectorAll('#practice-chips .pl-chip').forEach(c=>c.classList.toggle('on', c.dataset.mod===id));
       this.launch(qs, {mode:'practice', target:'practice-runner', pass:70, title:m.title});
       document.getElementById('practice-config').style.display='none';
@@ -699,7 +965,8 @@
 
     startExam(){
       let pool=[];
-      MODULES.forEach(m=> pool.push(...m.questions.map(q=>({...q,cat:m.title,mod:m.id}))));
+      // El examen simulado usa solo los módulos del examen de lancha (excluye complementarios)
+      MODULES.filter(m=>!m.complementary).forEach(m=> pool.push(...m.questions.map(q=>({...q,cat:m.title,mod:m.id}))));
       pool = shuffle(pool).slice(0, 20);
       document.getElementById('exam-config').style.display='none';
       this.launch(pool, {mode:'exam', target:'exam-runner', pass:70, title:'Examen simulado'});
@@ -707,7 +974,6 @@
 
     /* ----------------------- MOTOR DE QUIZ ----------------------- */
     launch(questions, opts){
-      // Aleatoriza el orden de las opciones de cada pregunta manteniendo el índice correcto
       const prepared = questions.map(q=>{
         const idx = q.o.map((_,i)=>i);
         const sh = shuffle(idx);
@@ -759,7 +1025,6 @@
       saveState();
       Q.answers.push({q:q.q, correct, your:q.o[choice], right:q.o[q.a], e:q.e});
 
-      // Feedback + explicación (solo práctica muestra explicación inmediata)
       if(!isExam){
         this.feedback(correct?'✅':'📚');
         const ex = document.getElementById('pl-explain');
@@ -786,12 +1051,10 @@
       const pass = pct>=Q.opts.pass;
       const isExam = Q.opts.mode==='exam';
 
-      // Guardar mejores puntajes
       if(isExam){
         state.examCount++;
         if(pct>state.examBest) state.examBest=pct;
       }else{
-        // best por módulo si el quiz fue de un solo módulo
         const mods=[...new Set(Q.qs.map(x=>x.mod))];
         if(mods.length===1){
           const id=mods[0];
@@ -863,10 +1126,9 @@
 
     /* ----------------------- PROGRESO ----------------------- */
     updateOverall(){
-      // Ponderación: 50% lecciones leídas, 50% dominio de práctica/examen
       const totalMods = MODULES.length;
       const readCount = MODULES.filter(m=>state.read[m.id]).length;
-      const readScore = readCount/totalMods; // 0..1
+      const readScore = readCount/totalMods;
       const masterySum = MODULES.reduce((s,m)=> s + Math.min((state.best[m.id]||0),100)/100, 0);
       const masteryScore = masterySum/totalMods;
       const overall = Math.round((readScore*0.5 + masteryScore*0.5)*100);
@@ -875,19 +1137,17 @@
     },
 
     renderProgress(){
-      // stats
       const acc = state.answered? Math.round((state.correct/state.answered)*100):0;
       document.getElementById('pl-stats').innerHTML = `
         <div class="pl-stat"><b>${state.answered}</b><span>Preguntas respondidas</span></div>
         <div class="pl-stat"><b>${acc}%</b><span>Aciertos globales</span></div>
         <div class="pl-stat"><b>${state.examBest}%</b><span>Mejor examen</span></div>`;
-      // por módulo
       document.getElementById('pl-modstats').innerHTML = MODULES.map(m=>{
         const best = state.best[m.id]||0;
         const read = state.read[m.id];
         return `<div class="pl-modstat">
           <span class="em">${m.icon}</span>
-          <span class="nm">${m.title} ${read?'<span style="color:var(--green)">·leído</span>':''}</span>
+          <span class="nm">${m.title} ${m.complementary?'<span class="pl-badge">Compl.</span>':''} ${read?'<span style="color:var(--green)">·leído</span>':''}</span>
           <span class="mini"><i style="width:${best}%"></i></span>
           <span class="pc">${best}%</span>
         </div>`;
@@ -901,7 +1161,6 @@
       this.renderModules(); this.renderProgress(); this.updateOverall();
     },
 
-    /* ----------------------- UI helpers ----------------------- */
     feedback(emoji){
       const f=document.getElementById('pl-feedback');
       document.getElementById('pl-feedback-emoji').textContent=emoji;
