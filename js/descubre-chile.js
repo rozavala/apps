@@ -626,6 +626,115 @@ function finishQ(){
   }
 }
 
+// ── MAP DRAG QUIZ ──
+let dragTimer=null, dragTime=60, dragScore=0;
+const dragRegions = [
+  {id:'norte', name:'Norte', color:'#E87040'},
+  {id:'centro', name:'Centro', color:'#D93636'},
+  {id:'sur', name:'Sur', color:'#2CB5A0'},
+  {id:'patagonia', name:'Patagonia', color:'#0039A6'},
+  {id:'pascua', name:'Rapa Nui', color:'#E8A838'}
+];
+let activeDragEl=null, offsetX=0, offsetY=0;
+
+function initDragQuiz(){
+  clearInterval(dragTimer);
+  dragTime=60; dragScore=0;
+  document.getElementById('dragTime').textContent=dragTime;
+  document.getElementById('dragScore').textContent='0';
+  document.getElementById('dragStartBtn').style.display='none';
+
+  const container = document.getElementById('dragTokens');
+  container.innerHTML='';
+  // reset zones
+  document.querySelectorAll('.drop-zone').forEach(z => {
+    z.classList.remove('filled');
+    z.style.fill='';
+  });
+
+  // Create tokens
+  const shuffled = dragRegions.slice().sort(()=>Math.random()-0.5);
+  shuffled.forEach(r => {
+    const t = document.createElement('div');
+    t.className='drag-token';
+    t.textContent=r.name;
+    t.dataset.id=r.id;
+    t.dataset.color=r.color;
+    container.appendChild(t);
+
+    // Pointer events for drag
+    t.addEventListener('pointerdown', e => {
+      activeDragEl=t;
+      t.classList.add('dragging');
+      t.style.width = t.offsetWidth+'px';
+      const rect = t.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      t.style.left = (e.clientX - offsetX)+'px';
+      t.style.top = (e.clientY - offsetY)+'px';
+      t.setPointerCapture(e.pointerId);
+    });
+    t.addEventListener('pointermove', e => {
+      if(activeDragEl!==t) return;
+      t.style.left = (e.clientX - offsetX)+'px';
+      t.style.top = (e.clientY - offsetY)+'px';
+      // hit test
+      document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('active-target'));
+      t.hidden = true;
+      const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+      t.hidden = false;
+      if(elemBelow && elemBelow.classList.contains('drop-zone') && !elemBelow.classList.contains('filled')){
+        elemBelow.classList.add('active-target');
+      }
+    });
+    t.addEventListener('pointerup', e => {
+      if(activeDragEl!==t) return;
+      activeDragEl=null;
+      t.classList.remove('dragging');
+      t.releasePointerCapture(e.pointerId);
+      t.hidden = true;
+      const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+      t.hidden = false;
+
+      document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('active-target'));
+
+      if(elemBelow && elemBelow.classList.contains('drop-zone') && elemBelow.dataset.id === t.dataset.id){
+        elemBelow.classList.add('filled');
+        elemBelow.style.fill = t.dataset.color;
+        t.classList.add('placed');
+        if(typeof playSound==='function') playSound('click');
+        dragScore++;
+        document.getElementById('dragScore').textContent=dragScore;
+
+        if(dragScore===dragRegions.length){
+          clearInterval(dragTimer);
+          showFeedback('🏆');
+          if(typeof playSound==='function') playSound('success');
+          saveTopicProgress('dragquiz', 3, 100);
+          document.getElementById('dragStartBtn').style.display='inline-block';
+          document.getElementById('dragStartBtn').textContent='Jugar de nuevo';
+          if(typeof ActivityLog!=='undefined') ActivityLog.log('Descubre Chile','📍','Completó el Reto de Ubicación');
+        }
+      } else {
+        t.style.left=''; t.style.top=''; t.style.width='';
+        if(typeof playSound==='function') playSound('error');
+      }
+    });
+  });
+
+  dragTimer = setInterval(()=>{
+    dragTime--;
+    document.getElementById('dragTime').textContent=dragTime;
+    if(dragTime<=0){
+      clearInterval(dragTimer);
+      document.getElementById('dragStartBtn').style.display='inline-block';
+      document.getElementById('dragStartBtn').textContent='Intentar de nuevo';
+      container.innerHTML=''; // clear tokens
+      if(typeof playSound==='function') playSound('error');
+    }
+  }, 1000);
+}
+
 // ── INIT (safe — runs after DOM ready) ──
 function dcInit(){
   // Auto-pull sync
@@ -644,6 +753,10 @@ function dcInit(){
       const target=document.getElementById('tab-'+e.target.dataset.tab);
       if(target)target.classList.add('active');
       e.target.classList.add('active');
+
+      if(e.target.dataset.tab === 'mapa-drag' && document.getElementById('dragScore').textContent === '0') {
+        // Ready to start
+      }
     });
   }
 
