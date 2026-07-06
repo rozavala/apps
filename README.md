@@ -73,6 +73,7 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Corrección de Errores en Math Galaxy y Art Studio (Bug Fixes)**: Se solucionaron errores de ejecución en los juegos para asegurar una experiencia más fluida. (Fixed runtime errors in the games to ensure a smoother experience).
 - **Actualización World Cup 2026**: Solucionados problemas con la asignación de la Bota de Oro, agregado relleno de resultados anteriores completados y ocultamiento de predicciones de eliminatorias pasadas. (Fixed premature Golden Boot assignment, backfilled completed scores, and hid stale KO bids.)
 - **¡Nueva App "Invest Quest"!**: Un simulador de mercado amigable para niños. Aprende sobre riesgo y retorno. (A kid-friendly market simulator. Learn about risk and return).
 - **Refresco de Contenido II (Content Refresh II)**: Más apps con contenido nuevo y más difícil — Chess Quest (tácticas: horquillas, clavadas, jaque mate; finales; aperturas), Money Master (compras múltiples, descuentos, problemas), Bible Explorer (historias y versículos), Guitar Jam (acordes y canciones), Art Studio (obras maestras y lecciones) y más matemáticas (media/mediana/moda, fracciones↔decimales↔porcentajes). (More apps with new, harder content — Chess, Money, Bible, Guitar, Art, and more Math.)
