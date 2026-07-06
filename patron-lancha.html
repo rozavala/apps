@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patrón de Lancha ⚓</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0EA5E9">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Patrón">
+  <style>
+    :root{
+      --sea-deep:#0A1B2E;
+      --sea:#0EA5E9;
+      --sea-glow:rgba(14,165,233,0.35);
+      --teal:#22D3EE;
+      --navy:#1E3A5F;
+      --sand:#FBBF24;
+    }
+    body{ background:#07131F; }
+    .app{ max-width:720px; }
+
+    /* ---------- Header ---------- */
+    .pl-header{ text-align:center; margin-bottom:18px; animation:fadeUp .5s ease-out both; }
+    .pl-header .flag{ font-size:52px; display:block; line-height:1; margin-bottom:6px; filter:drop-shadow(0 4px 12px var(--sea-glow)); }
+    .pl-header h1{ font-family:var(--font-display); font-size:2rem; font-weight:800;
+      background:linear-gradient(120deg,#38BDF8,#22D3EE,#67E8F9); -webkit-background-clip:text;
+      background-clip:text; -webkit-text-fill-color:transparent; }
+    .pl-header p{ color:var(--text-muted); font-weight:600; font-size:.9rem; margin-top:2px; }
+
+    /* ---------- Overall progress ---------- */
+    .pl-overall{ background:var(--bg-card); border:1.5px solid var(--border-subtle);
+      border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:16px; animation:fadeUp .5s ease-out both; }
+    .pl-overall-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .pl-overall-top b{ font-family:var(--font-display); font-size:.95rem; }
+    .pl-overall-top span{ font-size:.8rem; color:var(--text-muted); font-weight:700; }
+    .pl-bar{ height:10px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden; }
+    .pl-bar-fill{ height:100%; border-radius:99px; width:0%;
+      background:linear-gradient(90deg,var(--sea),var(--teal)); transition:width .6s cubic-bezier(.34,1.56,.64,1); }
+
+    /* ---------- Tab bar ---------- */
+    .pl-tabs{ display:flex; gap:6px; background:var(--bg-surface); border:1.5px solid var(--border-subtle);
+      border-radius:99px; padding:5px; margin-bottom:20px; position:sticky; top:8px; z-index:20; backdrop-filter:blur(8px); }
+    .pl-tab{ flex:1; border:none; background:transparent; color:var(--text-muted); font-family:var(--font-display);
+      font-weight:700; font-size:.82rem; padding:9px 4px; border-radius:99px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .pl-tab.active{ background:linear-gradient(120deg,var(--sea),var(--teal)); color:#04222E; box-shadow:0 4px 14px var(--sea-glow); }
+
+    .pl-view{ display:none; animation:fadeIn .35s ease-out both; }
+    .pl-view.active{ display:block; }
+
+    /* ---------- Module cards (Aprender) ---------- */
+    .pl-mod{ background:var(--bg-card); border:1.5px solid var(--border-subtle); border-radius:var(--radius-sm);
+      margin-bottom:12px; overflow:hidden; transition:border-color .2s; }
+    .pl-mod:hover{ border-color:rgba(14,165,233,.4); }
+    .pl-mod-head{ display:flex; align-items:center; gap:14px; padding:16px; cursor:pointer; }
+    .pl-mod-icon{ font-size:30px; width:52px; height:52px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+      background:rgba(14,165,233,.1); border-radius:14px; }
+    .pl-mod-info{ flex:1; min-width:0; }
+    .pl-mod-title{ font-family:var(--font-display); font-weight:700; font-size:1.02rem; }
+    .pl-mod-sub{ font-size:.78rem; color:var(--text-muted); font-weight:600; margin-top:2px; }
+    .pl-mod-chev{ color:var(--text-muted); font-size:1.1rem; transition:transform .3s; }
+    .pl-mod.open .pl-mod-chev{ transform:rotate(90deg); }
+    .pl-mod-body{ display:none; padding:0 16px 6px; }
+    .pl-mod.open .pl-mod-body{ display:block; animation:fadeIn .3s; }
+    .pl-check{ width:22px; height:22px; border-radius:50%; border:2px solid var(--border-subtle); flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:.7rem; }
+    .pl-check.done{ background:var(--green); border-color:var(--green); color:#04222E; font-weight:900; }
+
+    .pl-lesson{ border-top:1px solid var(--border-subtle); padding:14px 2px; }
+    .pl-lesson h3{ font-family:var(--font-display); font-size:.98rem; color:var(--teal); margin-bottom:8px; display:flex; gap:8px; align-items:center; }
+    .pl-lesson p{ font-size:.9rem; line-height:1.6; color:#D6E4F0; margin-bottom:8px; }
+    .pl-lesson ul{ margin:0 0 8px 20px; }
+    .pl-lesson li{ font-size:.88rem; line-height:1.55; color:#C4D6E6; margin-bottom:5px; }
+    .pl-lesson b{ color:#EAF4FF; }
+    .pl-lesson .tip{ background:rgba(251,191,36,.08); border-left:3px solid var(--sand); border-radius:8px;
+      padding:9px 12px; font-size:.85rem; line-height:1.5; color:#FDE9B8; margin:8px 0; }
+    .pl-lesson .term{ display:inline-block; background:rgba(34,211,238,.1); color:var(--teal); font-weight:700;
+      padding:1px 7px; border-radius:6px; font-size:.85em; }
+    .pl-mod-quiz-btn{ display:block; width:100%; margin:6px 0 14px; padding:11px; border:none; border-radius:12px;
+      background:rgba(14,165,233,.14); color:var(--teal); font-family:var(--font-display); font-weight:700; font-size:.9rem; cursor:pointer; transition:all .2s; }
+    .pl-mod-quiz-btn:hover{ background:rgba(14,165,233,.25); }
+
+    /* ---------- Practice / Exam config ---------- */
+    .pl-panel{ background:var(--bg-card); border:1.5px solid var(--border-subtle); border-radius:var(--radius-sm); padding:20px; margin-bottom:16px; }
+    .pl-panel h2{ font-family:var(--font-display); font-size:1.2rem; margin-bottom:6px; }
+    .pl-panel .lead{ color:var(--text-muted); font-size:.88rem; font-weight:600; line-height:1.5; margin-bottom:16px; }
+    .pl-mod-select{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .pl-chip{ border:1.5px solid var(--border-subtle); background:var(--bg-surface); color:var(--text-muted);
+      padding:8px 13px; border-radius:99px; font-weight:700; font-size:.82rem; cursor:pointer; transition:all .2s; font-family:var(--font-body); }
+    .pl-chip.on{ background:rgba(14,165,233,.16); border-color:var(--sea); color:var(--teal); }
+    .pl-btn{ display:block; width:100%; padding:15px; border:none; border-radius:14px; cursor:pointer;
+      font-family:var(--font-display); font-weight:800; font-size:1.05rem; color:#04222E;
+      background:linear-gradient(120deg,var(--sea),var(--teal)); box-shadow:0 6px 18px var(--sea-glow); transition:transform .15s; }
+    .pl-btn:hover{ transform:translateY(-2px); }
+    .pl-btn.ghost{ background:transparent; color:var(--text-muted); box-shadow:none; border:1.5px solid var(--border-subtle); }
+    .pl-btn.ghost:hover{ color:var(--teal); border-color:var(--sea); }
+
+    /* ---------- Quiz runner ---------- */
+    .pl-quiz-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-weight:700; font-size:.82rem; color:var(--text-muted); }
+    .pl-quiz-top .score{ color:var(--sand); }
+    .pl-qbar{ height:6px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden; margin-bottom:18px; }
+    .pl-qbar-fill{ height:100%; background:linear-gradient(90deg,var(--sea),var(--teal)); transition:width .4s; }
+    .pl-qcat{ display:inline-block; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+      color:var(--sea); background:rgba(14,165,233,.1); padding:3px 10px; border-radius:99px; margin-bottom:10px; }
+    .pl-q{ font-family:var(--font-display); font-size:1.18rem; line-height:1.4; margin-bottom:18px; }
+    .pl-opts{ display:flex; flex-direction:column; gap:10px; }
+    .pl-opt{ text-align:left; padding:14px 16px; border:1.5px solid var(--border-subtle); background:var(--bg-card);
+      border-radius:14px; color:var(--text); font-size:.95rem; font-weight:600; cursor:pointer; transition:all .18s; font-family:var(--font-body); line-height:1.4; }
+    .pl-opt:hover:not(:disabled){ border-color:var(--sea); transform:translateX(3px); }
+    .pl-opt:disabled{ cursor:default; }
+    .pl-opt.correct{ border-color:var(--green); background:rgba(52,211,153,.14); color:#B6F5D8; }
+    .pl-opt.wrong{ border-color:var(--red); background:rgba(248,113,113,.12); color:#FBC4C4; }
+    .pl-opt .k{ display:inline-block; width:24px; height:24px; line-height:24px; text-align:center; border-radius:7px;
+      background:rgba(255,255,255,.08); font-weight:800; margin-right:10px; font-size:.8rem; }
+    .pl-explain{ margin-top:16px; padding:14px 16px; border-radius:12px; background:rgba(255,255,255,.04);
+      border-left:3px solid var(--sea); font-size:.88rem; line-height:1.55; color:#CFE2F2; display:none; }
+    .pl-explain.show{ display:block; animation:fadeUp .3s; }
+    .pl-explain b{ color:var(--teal); }
+    .pl-next{ margin-top:16px; }
+
+    /* ---------- Result ---------- */
+    .pl-result{ text-align:center; padding:10px 0; }
+    .pl-result .big-emoji{ font-size:70px; animation:popIn .5s; }
+    .pl-result h2{ font-family:var(--font-display); font-size:1.6rem; margin:8px 0 4px; }
+    .pl-ring{ width:150px; height:150px; margin:14px auto; position:relative; }
+    .pl-ring svg{ transform:rotate(-90deg); }
+    .pl-ring .pct{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .pl-ring .pct b{ font-family:var(--font-display); font-size:2rem; }
+    .pl-ring .pct small{ font-size:.72rem; color:var(--text-muted); font-weight:700; }
+    .pl-verdict{ font-weight:800; font-size:1.05rem; margin:6px 0 4px; }
+    .pl-verdict.pass{ color:var(--green); }
+    .pl-verdict.fail{ color:var(--red); }
+    .pl-result .sub{ color:var(--text-muted); font-size:.86rem; font-weight:600; margin-bottom:20px; }
+    .pl-review{ text-align:left; margin-top:8px; }
+    .pl-review h3{ font-family:var(--font-display); font-size:1rem; margin-bottom:10px; }
+    .pl-rev-item{ padding:11px 14px; border-radius:12px; background:var(--bg-card); border:1.5px solid var(--border-subtle);
+      margin-bottom:8px; font-size:.85rem; line-height:1.5; }
+    .pl-rev-item .qq{ font-weight:700; margin-bottom:4px; color:#EAF4FF; }
+    .pl-rev-item .ans{ color:var(--green); font-weight:700; }
+    .pl-rev-item.miss .yours{ color:var(--red); font-weight:700; }
+
+    /* ---------- Progress view ---------- */
+    .pl-stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+    .pl-stat{ background:var(--bg-card); border:1.5px solid var(--border-subtle); border-radius:14px; padding:14px 8px; text-align:center; }
+    .pl-stat b{ display:block; font-family:var(--font-display); font-size:1.5rem; color:var(--teal); }
+    .pl-stat span{ font-size:.72rem; color:var(--text-muted); font-weight:700; }
+    .pl-modstat{ display:flex; align-items:center; gap:12px; padding:11px 14px; background:var(--bg-card);
+      border:1.5px solid var(--border-subtle); border-radius:12px; margin-bottom:8px; }
+    .pl-modstat .em{ font-size:22px; }
+    .pl-modstat .nm{ flex:1; font-weight:700; font-size:.86rem; }
+    .pl-modstat .mini{ width:90px; height:7px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden; }
+    .pl-modstat .mini i{ display:block; height:100%; background:linear-gradient(90deg,var(--sea),var(--teal)); }
+    .pl-modstat .pc{ font-size:.78rem; font-weight:800; color:var(--text-muted); width:38px; text-align:right; }
+
+    .pl-note{ font-size:.76rem; color:var(--text-muted); line-height:1.5; text-align:center; margin:20px 4px 8px; }
+    .pl-note a{ color:var(--sea); }
+    .home-link{ display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); text-decoration:none;
+      font-weight:700; font-size:.82rem; margin-bottom:14px; transition:color .2s; }
+    .home-link:hover{ color:var(--teal); }
+
+    @media(max-width:480px){
+      .pl-header h1{ font-size:1.7rem; }
+      .pl-tab{ font-size:.74rem; padding:9px 2px; }
+      .pl-q{ font-size:1.05rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="atmo" style="width:420px;height:420px;background:rgba(14,165,233,.10);top:-120px;left:-120px;"></div>
+  <div class="atmo" style="width:360px;height:360px;background:rgba(34,211,238,.07);bottom:-90px;right:-90px;animation-delay:-8s;"></div>
+
+  <div class="app">
+    <a class="home-link" href="index.html">← Volver al inicio</a>
+
+    <div class="pl-header">
+      <span class="flag">⚓</span>
+      <h1>Patrón de Lancha</h1>
+      <p>Prepárate para el examen teórico · Chile 🇨🇱 DIRECTEMAR</p>
+    </div>
+
+    <div class="pl-overall">
+      <div class="pl-overall-top">
+        <b>Tu preparación</b>
+        <span id="pl-overall-txt">0% listo</span>
+      </div>
+      <div class="pl-bar"><div class="pl-bar-fill" id="pl-overall-bar"></div></div>
+    </div>
+
+    <div class="pl-tabs">
+      <button class="pl-tab active" data-view="learn">📖 Aprender</button>
+      <button class="pl-tab" data-view="practice">✏️ Practicar</button>
+      <button class="pl-tab" data-view="exam">🎓 Examen</button>
+      <button class="pl-tab" data-view="progress">📊 Progreso</button>
+    </div>
+
+    <!-- APRENDER -->
+    <div class="pl-view active" id="view-learn">
+      <div id="pl-modules"></div>
+      <p class="pl-note">
+        Contenido de estudio para el examen de <b>Patrón de Lancha Deportiva</b>.
+        Es una herramienta de apoyo — confirma siempre los requisitos y el temario vigente
+        en la Autoridad Marítima (<a href="https://www.directemar.cl" target="_blank" rel="noopener">DIRECTEMAR</a>).
+      </p>
+    </div>
+
+    <!-- PRACTICAR -->
+    <div class="pl-view" id="view-practice">
+      <div class="pl-panel" id="practice-config">
+        <h2>✏️ Modo Práctica</h2>
+        <p class="lead">Elige los temas y responde a tu ritmo. Después de cada pregunta verás la respuesta correcta y su explicación.</p>
+        <div class="pl-mod-select" id="practice-chips"></div>
+        <button class="pl-btn" onclick="PL.startPractice()">Comenzar práctica</button>
+      </div>
+      <div id="practice-runner"></div>
+    </div>
+
+    <!-- EXAMEN -->
+    <div class="pl-view" id="view-exam">
+      <div class="pl-panel" id="exam-config">
+        <h2>🎓 Examen Simulado</h2>
+        <p class="lead">20 preguntas al azar de todos los temas, como en el examen real. Necesitas <b>70%</b> para aprobar. Las explicaciones se muestran al final.</p>
+        <button class="pl-btn" onclick="PL.startExam()">Rendir examen</button>
+      </div>
+      <div id="exam-runner"></div>
+    </div>
+
+    <!-- PROGRESO -->
+    <div class="pl-view" id="view-progress">
+      <div class="pl-stat-grid" id="pl-stats"></div>
+      <h3 style="font-family:var(--font-display);font-size:1rem;margin-bottom:10px;">Dominio por tema</h3>
+      <div id="pl-modstats"></div>
+      <button class="pl-btn ghost" style="margin-top:16px;" onclick="PL.resetProgress()">↺ Reiniciar progreso</button>
+    </div>
+  </div>
+
+  <div class="feedback-float" id="pl-feedback"><span id="pl-feedback-emoji"></span></div>
+
+  <script>
+  /* =====================================================================
+     PATRÓN DE LANCHA DEPORTIVA — Contenido y motor de estudio
+     Temario DIRECTEMAR (Chile). Herramienta de apoyo al estudio.
+     ===================================================================== */
+
+  const MODULES = [
+    /* ---------------------------------------------------------------- */
+    { id:'nautica', icon:'🧭', title:'Náutica y maniobras',
+      sub:'Partes de la embarcación, nomenclatura y maniobras básicas',
+      lessons:[
+        { h:'Nomenclatura de a bordo', html:`
+          <p>Conocer el nombre de cada parte y dirección es la base de toda comunicación a bordo.</p>
+          <ul>
+            <li><span class="term">Proa</span>: parte delantera de la embarcación. <span class="term">Popa</span>: parte trasera.</li>
+            <li><span class="term">Babor</span>: costado izquierdo mirando hacia proa (se asocia al <b>rojo</b>). <span class="term">Estribor</span>: costado derecho (se asocia al <b>verde</b>).</li>
+            <li><span class="term">Eslora</span>: largo de la nave. <span class="term">Manga</span>: ancho máximo. <span class="term">Calado</span>: parte sumergida, de la línea de flotación a la quilla. <span class="term">Francobordo</span>: del agua a la cubierta.</li>
+            <li><span class="term">Quilla</span>: "columna vertebral" en el fondo. <span class="term">Obra viva</span>: casco bajo el agua; <span class="term">obra muerta</span>: sobre el agua.</li>
+            <li><span class="term">Amura</span> (costado hacia proa), <span class="term">través</span> (medio), <span class="term">aleta</span> (costado hacia popa).</li>
+          </ul>
+          <div class="tip">💡 Truco: <b>b</b>abor = i<b>b</b>quierda no existe… usa "babor tiene las mismas letras que 'barco' empieza igual"; o recuerda: <b>P</b>ort (inglés) y <b>b</b>abor son los cortos = <b>izquierda</b>.</div>`},
+        { h:'Rumbo, barlovento y sotavento', html:`
+          <ul>
+            <li><span class="term">Rumbo</span>: dirección hacia la que apunta la proa (en grados, 000°–360°).</li>
+            <li><span class="term">Barlovento</span>: de donde viene el viento. <span class="term">Sotavento</span>: hacia donde va el viento (lado protegido).</li>
+            <li><span class="term">Abatimiento</span>: desplazamiento lateral por el viento. <span class="term">Deriva</span>: desplazamiento por la corriente.</li>
+            <li><span class="term">Escora</span>: inclinación transversal (de costado). <span class="term">Asiento/trimado</span>: diferencia de calado entre proa y popa.</li>
+          </ul>`},
+        { h:'Maniobras y fondeo', html:`
+          <ul>
+            <li>Al maniobrar en puerto, hazlo <b>despacio</b>: "no navegues más rápido de lo que estás dispuesto a chocar".</li>
+            <li>Atraca y desatraca <b>contra</b> el viento o la corriente (el que sea más fuerte) para tener control.</li>
+            <li><span class="term">Fondear</span>: dar ancla. El largo de cadena/cabo (<span class="term">filar</span>) debe ser varias veces la profundidad (regla práctica: 5 a 7 veces).</li>
+            <li>El efecto de la hélice (<span class="term">efecto evolutivo/paso de hélice</span>) tiende a mover la popa hacia un costado; apróvéchalo al maniobrar.</li>
+            <li>Da siempre <b>defensas</b> (fenders) al costado de atraque y ten cabos listos.</li>
+          </ul>
+          <div class="tip">⚓ Al fondear elige buen tenedero (arena o fango), verifica que el ancla agarre y vigila que no <b>garree</b> (se arrastre).</div>`}
+      ],
+      questions:[
+        {q:'¿Cuál es el costado derecho de la embarcación mirando hacia proa?', o:['Babor','Estribor','Popa','Aleta'], a:1, e:'Estribor es el costado derecho (asociado al color verde). Babor es el izquierdo (rojo).'},
+        {q:'El "calado" de una embarcación es:', o:['Su largo total','Su ancho máximo','La profundidad sumergida, de la flotación a la quilla','La altura del mástil'], a:2, e:'El calado es la parte sumergida del casco; determina la profundidad mínima de agua que necesitas para no tocar fondo.'},
+        {q:'"Barlovento" se refiere a:', o:['El lado hacia donde va el viento','La parte trasera de la nave','La dirección desde donde viene el viento','El fondo del casco'], a:2, e:'Barlovento = de donde viene el viento. Sotavento = hacia donde sopla (lado protegido).'},
+        {q:'La "eslora" de una embarcación es:', o:['Su ancho máximo','Su largo','Su peso','Su calado'], a:1, e:'Eslora = largo. Manga = ancho máximo. Puntal = altura del casco.'},
+        {q:'¿Qué color se asocia tradicionalmente a babor?', o:['Verde','Blanco','Rojo','Amarillo'], a:2, e:'Babor = rojo (luz de costado roja). Estribor = verde.'},
+        {q:'Al atracar con viento y corriente, lo recomendable es maniobrar:', o:['A favor del viento para ir más rápido','En contra del elemento más fuerte para tener control','Con el motor apagado','Siempre por babor'], a:1, e:'Maniobrar contra el viento o la corriente (el más fuerte) da control sobre la embarcación y evita ser empujado contra el muelle.'},
+        {q:'"Escora" significa:', o:['Inclinación de costado (transversal)','Inclinación proa-popa','Velocidad de la nave','Largo de la cadena del ancla'], a:0, e:'Escora es la inclinación transversal (hacia un costado). El asiento o trimado es la inclinación longitudinal (proa-popa).'},
+        {q:'Que el ancla "garree" significa que:', o:['Está bien agarrada al fondo','Se arrastra sin sujetar la nave','Está subida a bordo','Se enredó en la hélice'], a:1, e:'Garrear es que el ancla no sujeta y se arrastra por el fondo; hay que vigilarlo y volver a fondear si ocurre.'},
+        {q:'La "obra viva" del casco es:', o:['La parte sobre el agua','La parte sumergida','La cubierta','El interior del motor'], a:1, e:'Obra viva = casco bajo la línea de flotación (sumergido). Obra muerta = por encima del agua.'},
+        {q:'Una regla práctica para el largo de fondeo (cadena/cabo) es filar aproximadamente:', o:['La misma profundidad','El doble de la profundidad','5 a 7 veces la profundidad','20 veces la profundidad'], a:2, e:'Filar unas 5 a 7 veces la profundidad da un ángulo adecuado para que el ancla trabaje horizontalmente y agarre bien.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'reglamentacion', icon:'📋', title:'Reglamentación marítima básica',
+      sub:'Autoridad Marítima, documentos, zarpe y jurisdicción',
+      lessons:[
+        { h:'La Autoridad Marítima', html:`
+          <ul>
+            <li><span class="term">DIRECTEMAR</span> (Dirección General del Territorio Marítimo y de Marina Mercante), dependiente de la Armada, es la Autoridad Marítima en Chile.</li>
+            <li>En cada puerto, la <span class="term">Capitanía de Puerto</span> ejerce el control local: zarpes, matrículas, fiscalización y seguridad.</li>
+            <li>El <span class="term">Patrón Deportivo</span> es la licencia que habilita a gobernar embarcaciones menores de recreo dentro de límites definidos (distancia de la costa y tamaño de la nave según la categoría).</li>
+          </ul>`},
+        { h:'Documentos y zarpe', html:`
+          <ul>
+            <li>La nave debe estar <span class="term">matriculada</span> y con sus documentos vigentes.</li>
+            <li>El <span class="term">zarpe</span> es la autorización de la Capitanía de Puerto para salir a navegar; puede ser individual o permanente según el caso, e indica zona y condiciones.</li>
+            <li>Debes portar tu licencia (carnet), la matrícula de la nave y llevar el equipo de seguridad exigido.</li>
+            <li>No se autoriza el zarpe si las condiciones meteorológicas son adversas o si falta equipo de seguridad.</li>
+          </ul>
+          <div class="tip">📄 Antes de salir: revisa el pronóstico, informa tu plan de navegación (a quién, ruta y hora estimada de regreso) y verifica el equipo de seguridad.</div>`},
+        { h:'Responsabilidad del patrón', html:`
+          <ul>
+            <li>El patrón es el <b>responsable</b> de la seguridad de la nave, de las personas a bordo y del cumplimiento de la reglamentación.</li>
+            <li>Está prohibido gobernar bajo la influencia del alcohol o drogas.</li>
+            <li>Debe respetar zonas de baño, velocidad en canales y áreas restringidas, y auxiliar a quien esté en peligro en el mar (deber de auxilio).</li>
+          </ul>`}
+      ],
+      questions:[
+        {q:'¿Cuál es la Autoridad Marítima en Chile?', o:['La Municipalidad costera','DIRECTEMAR (Armada de Chile)','El Ministerio de Transportes','La Capitanía General'], a:1, e:'DIRECTEMAR, dependiente de la Armada, es la Autoridad Marítima. Localmente actúa a través de las Capitanías de Puerto.'},
+        {q:'El "zarpe" es:', o:['El nombre del ancla','La autorización para salir a navegar','Un tipo de nudo','El documento del motor'], a:1, e:'El zarpe es la autorización que otorga la Capitanía de Puerto para que una nave salga a navegar, indicando zona y condiciones.'},
+        {q:'¿Quién otorga el zarpe en un puerto?', o:['El propio patrón','La Capitanía de Puerto','El club náutico','La aduana'], a:1, e:'La Capitanía de Puerto, en representación de la Autoridad Marítima, controla y autoriza los zarpes.'},
+        {q:'¿Quién es el responsable de la seguridad de las personas a bordo?', o:['El pasajero de más edad','El fabricante de la nave','El patrón (quien gobierna)','La Capitanía'], a:2, e:'El patrón es el responsable de la nave, de las personas a bordo y del cumplimiento de las normas.'},
+        {q:'Gobernar una embarcación bajo la influencia del alcohol está:', o:['Permitido con moderación','Prohibido','Permitido solo de noche','Permitido en alta mar'], a:1, e:'Está prohibido gobernar bajo la influencia de alcohol o drogas; compromete la seguridad de todos.'},
+        {q:'La Capitanía puede NO autorizar el zarpe si:', o:['Hay mal tiempo o falta equipo de seguridad','La nave es nueva','El patrón tiene poca experiencia únicamente','Es fin de semana'], a:0, e:'No se autoriza el zarpe ante condiciones meteorológicas adversas o si la nave no cuenta con el equipo de seguridad exigido.'},
+        {q:'La licencia de "Patrón Deportivo" habilita para:', o:['Cualquier buque mercante','Gobernar embarcaciones de recreo dentro de límites definidos','Solo veleros de competición','Buques de pasajeros'], a:1, e:'Habilita a gobernar embarcaciones menores de recreo dentro de límites de tamaño y distancia de la costa según la categoría.'},
+        {q:'Antes de zarpar, una buena práctica es:', o:['No avisar a nadie para no preocupar','Informar tu plan de navegación y hora estimada de regreso','Salir sin revisar el pronóstico','Cargar el máximo de personas posible'], a:1, e:'Informar a alguien en tierra tu ruta y hora de regreso permite activar una búsqueda si no regresas a tiempo.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'motores', icon:'⚙️', title:'Operación de motores marinos',
+      sub:'Tipos de motor, refrigeración, combustible y mantención',
+      lessons:[
+        { h:'Tipos de motor', html:`
+          <ul>
+            <li><span class="term">Fuera de borda</span>: motor colgado en el espejo de popa, se puede inclinar y retirar. <span class="term">Dentro de borda</span> (intraborda): instalado dentro del casco.</li>
+            <li><span class="term">2 tiempos</span>: más simple y liviano; muchos requieren <b>mezcla de gasolina con aceite</b>. <span class="term">4 tiempos</span>: aceite separado en el cárter, más económico en consumo y menos contaminante.</li>
+            <li>Nunca uses un fueraborda de 2 tiempos sin la proporción correcta de aceite: se agarrota (fundido) por falta de lubricación.</li>
+          </ul>`},
+        { h:'Refrigeración y el "chorro testigo"', html:`
+          <ul>
+            <li>La mayoría de los fueraborda se refrigeran con <b>agua de mar</b>, impulsada por una bomba con <span class="term">rodete/impulsor</span> (pieza de goma).</li>
+            <li>El <span class="term">chorro testigo</span> ("pipí" del motor) confirma que la bomba de agua funciona. Si <b>deja de salir agua</b>, apaga el motor: se está recalentando.</li>
+            <li>El rodete se desgasta; es una pieza de mantención periódica. Nunca arranques un fueraborda "en seco" (fuera del agua sin suministro), porque quemas el rodete.</li>
+          </ul>
+          <div class="tip">🌡️ Sobrecalentamiento = detener el motor. Causas típicas: falta de chorro de agua, rodete dañado o toma de agua obstruida (bolsa, algas).</div>`},
+        { h:'Chequeos y buenas prácticas', html:`
+          <ul>
+            <li>Antes de zarpar revisa: <b>combustible</b> suficiente (regla del tercio: ⅓ ida, ⅓ vuelta, ⅓ reserva), <b>aceite</b>, <b>batería</b> y estado del <b>chorro de agua</b>.</li>
+            <li>Ventila la sala de máquinas/pañol antes de arrancar motores a gasolina: los vapores son explosivos.</li>
+            <li>Lleva herramientas básicas, un rodete de repuesto, bujías y cabo. Conoce el <span class="term">corta-corriente</span>/piola de hombre al agua (kill cord): al caer el patrón, el motor se detiene.</li>
+          </ul>`}
+      ],
+      questions:[
+        {q:'El "chorro testigo" (pipí) de un fueraborda sirve para:', o:['Achicar agua del bote','Confirmar que la bomba de refrigeración funciona','Medir la velocidad','Cargar la batería'], a:1, e:'Ese chorro indica que la bomba de agua está circulando refrigerante. Si deja de salir, el motor se recalienta y hay que detenerlo.'},
+        {q:'Si el motor se recalienta y deja de salir agua por el testigo, debes:', o:['Acelerar para enfriarlo','Detener el motor cuanto antes','Echarle más combustible','Ignorarlo si suena bien'], a:1, e:'La falta de chorro indica fallo de refrigeración. Hay que apagar el motor para evitar que se funda.'},
+        {q:'Muchos motores de 2 tiempos requieren:', o:['Agua dulce en el estanque','Mezcla de gasolina con aceite','Diésel obligatoriamente','Gas licuado'], a:1, e:'Los 2 tiempos clásicos se lubrican con aceite mezclado en la gasolina, en la proporción indicada por el fabricante.'},
+        {q:'La pieza de goma de la bomba de agua que suele desgastarse es:', o:['La bujía','El rodete (impulsor)','El carburador','El ánodo'], a:1, e:'El rodete o impulsor bombea el agua de refrigeración; se gasta y es mantención periódica. Arrancar "en seco" lo quema.'},
+        {q:'La "regla del tercio" del combustible significa:', o:['Llenar solo un tercio del estanque','⅓ para ir, ⅓ para volver, ⅓ de reserva','Gastar todo salvo un tercio','Un tercio de aceite y dos de gasolina'], a:1, e:'Reservar un tercio del combustible como margen de seguridad ante corrientes, viento en contra o imprevistos.'},
+        {q:'Antes de arrancar un motor a gasolina interior conviene:', o:['Cerrar todo para no perder calor','Ventilar la sala de máquinas','Vaciar la batería','Desconectar la bomba de achique'], a:1, e:'Los vapores de gasolina son más pesados que el aire y explosivos; ventilar evita una deflagración al arrancar.'},
+        {q:'El "corta-corriente de hombre al agua" (kill cord) sirve para:', o:['Cargar el celular','Detener el motor si el patrón cae al agua','Aumentar la potencia','Medir la profundidad'], a:1, e:'Es una piola unida al patrón; si cae, se desconecta y para el motor, evitando que la lancha siga sola o vuelva sobre la persona.'},
+        {q:'Un fueraborda NO debe arrancarse:', o:['Con combustible en el estanque','En seco, fuera del agua sin suministro de refrigeración','Con la batería cargada','Después de ventilar'], a:1, e:'Sin agua para refrigerar, el rodete se quema en segundos y el motor se recalienta.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'meteo', icon:'🌦️', title:'Meteorología básica',
+      sub:'Viento, presión, nubes, mareas y estado del mar',
+      lessons:[
+        { h:'Viento y presión', html:`
+          <ul>
+            <li>La <span class="term">escala Beaufort</span> mide la fuerza del viento (0 = calma; 12 = huracán) por sus efectos en el mar.</li>
+            <li>El <span class="term">barómetro</span> mide la presión. Presión que <b>baja rápido</b> = mal tiempo acercándose; presión que <b>sube</b> = mejora.</li>
+            <li>Baja presión (borrasca) → mal tiempo, viento y nubosidad. Alta presión (anticiclón) → tiempo estable.</li>
+            <li>En la costa de Chile predominan vientos del <b>sur y suroeste</b> ("el sur"), que suelen levantar marejada.</li>
+          </ul>`},
+        { h:'Brisas costeras y nubes', html:`
+          <ul>
+            <li><span class="term">Virazón</span>: brisa que entra del mar a la tierra durante el día (la tierra se calienta). <span class="term">Terral</span>: brisa de la tierra al mar por la noche.</li>
+            <li>Nubes <span class="term">cúmulos</span> de gran desarrollo vertical (<span class="term">cumulonimbos</span>) anuncian chubascos, tormentas eléctricas y rachas.</li>
+            <li>Nubes altas y finas (cirros) que aumentan y bajan suelen preceder a un frente y mal tiempo.</li>
+            <li>Niebla: reduce la visibilidad; navega despacio, con luces y señales acústicas.</li>
+          </ul>
+          <div class="tip">🌊 "Marejada" es la advertencia típica de la Armada: mar de fondo con olas grandes aunque no haya viento local fuerte. Respeta los avisos de mal tiempo.</div>`},
+        { h:'Mareas y estado del mar', html:`
+          <ul>
+            <li><span class="term">Marea</span>: subida (pleamar) y bajada (bajamar) periódica del mar por la atracción de la Luna y el Sol.</li>
+            <li>Las <span class="term">corrientes de marea</span> pueden ser fuertes en canales y bocas; consúltalas antes de navegar.</li>
+            <li>El <span class="term">estado del mar</span> depende del viento, su duración y el fetch (distancia sobre la que sopla).</li>
+          </ul>`}
+      ],
+      questions:[
+        {q:'Si el barómetro baja rápidamente, lo más probable es que:', o:['Mejore el tiempo','Se aproxime mal tiempo','No cambie nada','Suba la marea'], a:1, e:'Una caída rápida de presión anticipa la llegada de un sistema de mal tiempo con viento y nubosidad.'},
+        {q:'La escala Beaufort mide:', o:['La altura de la marea','La fuerza del viento','La profundidad del mar','La temperatura del agua'], a:1, e:'Beaufort clasifica la fuerza del viento de 0 (calma) a 12 (huracán) según sus efectos observables.'},
+        {q:'Una zona de alta presión (anticiclón) suele traer:', o:['Tormentas','Tiempo estable y despejado','Niebla densa siempre','Marejadas'], a:1, e:'La alta presión se asocia a tiempo estable. La baja presión (borrasca) trae inestabilidad y viento.'},
+        {q:'La "virazón" es:', o:['Una ola gigante','La brisa que entra del mar a la tierra durante el día','Una corriente de fondo','Un tipo de ancla'], a:1, e:'Durante el día la tierra se calienta más que el mar y la brisa entra desde el mar (virazón). De noche se invierte (terral).'},
+        {q:'Las nubes cumulonimbos anuncian:', o:['Tiempo estable','Chubascos, tormentas y rachas de viento','Calma total','Descenso de la marea'], a:1, e:'Los cumulonimbos son nubes de gran desarrollo vertical asociadas a tormentas, lluvia intensa y viento racheado.'},
+        {q:'Un aviso de "marejadas" de la Armada significa:', o:['Habrá poco viento','Se esperan olas grandes / mar de fondo peligroso','Buenas condiciones para navegar','Bajará la temperatura'], a:1, e:'La marejada es un mar de fondo con olas grandes; conviene postergar la salida o extremar precauciones.'},
+        {q:'En la costa de Chile predominan los vientos del:', o:['Norte y noreste','Sur y suroeste','Este','Oeste puro únicamente'], a:1, e:'Predomina "el sur" (sur/suroeste), asociado al anticiclón del Pacífico, que suele levantar marejada.'},
+        {q:'La pleamar y la bajamar son producidas principalmente por:', o:['El viento local','La atracción de la Luna y el Sol','Las corrientes de los ríos','La temperatura del aire'], a:1, e:'Las mareas resultan de la atracción gravitatoria de la Luna y el Sol sobre las masas de agua.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'seguridad', icon:'🦺', title:'Seguridad y primeros auxilios',
+      sub:'Equipo de seguridad, chalecos, hipotermia y RCP',
+      lessons:[
+        { h:'Equipo de seguridad exigido', html:`
+          <ul>
+            <li><span class="term">Chaleco salvavidas</span> para <b>cada persona</b> a bordo (y del talle adecuado para niños). Debe estar accesible, no guardado bajo llave.</li>
+            <li><span class="term">Aro salvavidas</span> con rabiza, <span class="term">extintor</span> vigente, <span class="term">bengalas / señales pirotécnicas</span> dentro de fecha.</li>
+            <li>Medios de achique (<span class="term">bomba o balde</span>), <span class="term">linterna</span>, <span class="term">pito/silbato</span>, <span class="term">espejo de señales</span>, ancla con cabo, remos, botiquín y radio VHF si corresponde.</li>
+          </ul>
+          <div class="tip">🦺 El mejor chaleco es el que llevas puesto. En niños, mal tiempo o navegación de noche, úsalo siempre.</div>`},
+        { h:'Hipotermia y ahogamiento', html:`
+          <ul>
+            <li><span class="term">Hipotermia</span>: descenso peligroso de la temperatura corporal por el agua fría (el agua enfría ~25 veces más rápido que el aire). Síntomas: tiritar, confusión, somnolencia.</li>
+            <li>En el agua fría esperando rescate: <b>no nades sin rumbo</b>, adopta la posición <span class="term">HELP</span> (encogido, rodillas al pecho) para conservar calor; en grupo, abrázense.</li>
+            <li>Rescatado: retira ropa mojada, abriga en seco, da bebidas tibias (nunca alcohol) y maneja con suavidad.</li>
+          </ul>`},
+        { h:'RCP y primeros auxilios', html:`
+          <ul>
+            <li>Ante una persona inconsciente que no respira: pide ayuda / VHF 16, y comienza <span class="term">RCP</span> — compresiones torácicas fuertes y rápidas (~100–120 por minuto) en el centro del pecho.</li>
+            <li><span class="term">Hemorragia</span>: presión directa sobre la herida con paño limpio y elevar el miembro.</li>
+            <li><span class="term">Mareo</span> (cinetosis): mirar el horizonte, aire fresco, ir al centro de la nave; hidratarse.</li>
+            <li>Quemaduras de sol/insolación: sombra, hidratación, cubrir del sol. Siempre lleva agua potable.</li>
+          </ul>`}
+      ],
+      questions:[
+        {q:'¿Cuántos chalecos salvavidas debe haber a bordo?', o:['Uno por embarcación','Uno cada dos personas','Uno por cada persona a bordo','Solo para el patrón'], a:2, e:'Debe haber un chaleco por cada persona, del talle adecuado, y accesible en todo momento.'},
+        {q:'El agua fría produce hipotermia porque:', o:['Contiene sal','Enfría el cuerpo mucho más rápido que el aire','Tiene menos oxígeno','Es más densa'], a:1, e:'El agua conduce el calor unas 25 veces más rápido que el aire, por eso la hipotermia es un riesgo real incluso en aguas templadas.'},
+        {q:'Mientras esperas rescate en agua fría, lo recomendable es:', o:['Nadar lo más lejos posible','Quedarte quieto en posición HELP (encogido) para conservar calor','Quitarte el chaleco para nadar mejor','Bucear para calentarte'], a:1, e:'Moverse acelera la pérdida de calor. La posición HELP (fetal, con el chaleco puesto) conserva calor corporal.'},
+        {q:'A una persona rescatada con hipotermia se le debe dar:', o:['Alcohol para calentarla','Bebidas tibias y abrigo seco','Un baño de agua muy caliente inmediato','Ejercicio intenso'], a:1, e:'El alcohol empeora la hipotermia (dilata vasos y aumenta la pérdida de calor). Se abriga en seco y se dan líquidos tibios.'},
+        {q:'La frecuencia recomendada de compresiones en RCP es aproximadamente:', o:['20–30 por minuto','50 por minuto','100–120 por minuto','200 por minuto'], a:2, e:'Se comprime el centro del pecho, fuerte y rápido, a un ritmo de 100 a 120 compresiones por minuto.'},
+        {q:'Ante una hemorragia externa, la primera medida es:', o:['Aplicar presión directa sobre la herida','Dar agua a la persona','Mover el miembro para activar circulación','Esperar a que pare sola'], a:0, e:'La presión directa con un paño limpio y elevar el miembro es la forma básica y efectiva de controlar una hemorragia.'},
+        {q:'El extintor y las bengalas a bordo deben estar:', o:['Guardados bajo llave','Vigentes (dentro de su fecha) y accesibles','En tierra por seguridad','Solo si navegas de noche'], a:1, e:'El equipo de seguridad debe estar vigente y a mano; un extintor vencido o bengalas caducadas no cumplen su función.'},
+        {q:'Contra el mareo (cinetosis) ayuda:', o:['Bajar a la cabina a acostarse','Mirar el horizonte, tomar aire fresco e ir al centro de la nave','Leer para distraerse','Beber alcohol'], a:1, e:'Fijar la vista en el horizonte y estar al aire libre en el centro de la nave (donde menos se mueve) reduce el mareo.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'navegacion', icon:'🗺️', title:'Navegación básica',
+      sub:'Carta náutica, rumbo, compás, millas y balizamiento',
+      lessons:[
+        { h:'Unidades y la carta náutica', html:`
+          <ul>
+            <li>La <span class="term">milla náutica</span> equivale a <b>1.852 m</b>. El <span class="term">nudo</span> es 1 milla náutica por hora (velocidad).</li>
+            <li>La <span class="term">carta náutica</span> representa la costa, profundidades (<span class="term">sondas</span>), faros, boyas y peligros. Es la herramienta fundamental para planificar.</li>
+            <li>La <span class="term">rosa de los vientos</span> muestra los rumbos en grados (000° = Norte, 090° = Este, 180° = Sur, 270° = Oeste).</li>
+            <li>Posición: <span class="term">latitud</span> (N/S del ecuador) y <span class="term">longitud</span> (E/O del meridiano de Greenwich).</li>
+          </ul>`},
+        { h:'Rumbo, demora y compás', html:`
+          <ul>
+            <li><span class="term">Rumbo</span>: dirección en que navegas. <span class="term">Demora</span>: dirección hacia un objeto observado.</li>
+            <li>El <span class="term">compás magnético</span> apunta al norte magnético, que difiere del geográfico por la <span class="term">declinación magnética</span> (variación).</li>
+            <li>Objetos de hierro o equipos a bordo pueden desviar el compás: es el <span class="term">desvío</span>.</li>
+            <li>El <span class="term">GPS</span> da posición precisa, pero siempre lleva carta y compás de respaldo (la electrónica puede fallar).</li>
+          </ul>`},
+        { h:'Balizamiento IALA — Región B (Chile)', html:`
+          <p>Chile pertenece a la <b>Región B</b> del sistema IALA. Al <b>entrar</b> a puerto (regresando desde el mar):</p>
+          <ul>
+            <li>Marcas laterales de <span class="term">estribor</span>: <b>ROJAS</b> (cónicas / triángulo). Regla: <i>"rojo a la derecha al regresar"</i>.</li>
+            <li>Marcas laterales de <span class="term">babor</span>: <b>VERDES</b> (cilíndricas).</li>
+            <li>Marcas <span class="term">cardinales</span> (N, S, E, O): indican por qué lado pasar un peligro según los puntos cardinales.</li>
+            <li>Marca de <span class="term">peligro aislado</span>: negra con banda roja y dos esferas negras. Marca de <span class="term">aguas seguras</span>: franjas rojas y blancas verticales.</li>
+          </ul>
+          <div class="tip">🚨 Ojo: la Región A (Europa) es al revés (rojo a babor). Chile es <b>Región B</b>: <b>rojo a estribor al entrar</b>.</div>`}
+      ],
+      questions:[
+        {q:'Una milla náutica equivale a:', o:['1.000 metros','1.609 metros','1.852 metros','2.000 metros'], a:2, e:'La milla náutica son 1.852 m (corresponde a un minuto de arco de latitud). Un nudo es 1 milla náutica por hora.'},
+        {q:'Un "nudo" es una unidad de:', o:['Distancia','Velocidad','Profundidad','Presión'], a:1, e:'El nudo es velocidad: 1 milla náutica por hora.'},
+        {q:'En el sistema IALA Región B (Chile), al entrar a puerto las boyas rojas se dejan a:', o:['Babor','Estribor','Ambos lados','No hay boyas rojas'], a:1, e:'Región B: "rojo a estribor al regresar". Las marcas rojas quedan a estribor al entrar; las verdes a babor.'},
+        {q:'La "declinación magnética" (variación) es:', o:['El error del GPS','La diferencia entre el norte magnético y el geográfico','La inclinación de la nave','La marea del día'], a:1, e:'Es el ángulo entre el norte magnético (al que apunta el compás) y el norte geográfico; varía según el lugar y el tiempo.'},
+        {q:'En la rosa de los vientos, 270° corresponde a:', o:['Norte','Este','Sur','Oeste'], a:3, e:'000°=N, 090°=E, 180°=S, 270°=O. Es el sentido horario partiendo del Norte.'},
+        {q:'La "sonda" en una carta náutica indica:', o:['La altura de un faro','La profundidad del agua','La distancia a la costa','La velocidad de la corriente'], a:1, e:'Las sondas son las cifras de profundidad. Son clave para no varar en zonas someras.'},
+        {q:'La latitud mide la posición:', o:['Al Este u Oeste de Greenwich','Al Norte o Sur del ecuador','Respecto al polo magnético','En millas desde la costa'], a:1, e:'La latitud es N/S respecto al ecuador; la longitud es E/O respecto al meridiano de Greenwich.'},
+        {q:'Aunque lleves GPS, conviene tener a bordo:', o:['Solo el GPS, es suficiente','Carta náutica y compás de respaldo','Únicamente el celular','Nada más'], a:1, e:'La electrónica puede fallar o quedarse sin energía; carta y compás son el respaldo imprescindible.'},
+        {q:'Una marca de "aguas seguras" (canal navegable a su alrededor) tiene:', o:['Franjas rojas y blancas verticales','Color negro con esferas','Solo verde','Solo amarillo'], a:0, e:'Las marcas de aguas seguras llevan franjas verticales rojas y blancas; indican que hay agua navegable alrededor.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'ripa', icon:'🚦', title:'RIPA — Prevención de abordajes',
+      sub:'Reglas de rumbo, luces, marcas y señales acústicas (COLREG)',
+      lessons:[
+        { h:'Reglas de rumbo y gobierno', html:`
+          <p>El <span class="term">RIPA</span> (Reglamento Internacional para Prevenir Abordajes, 1972 / COLREG) evita colisiones. Reglas clave:</p>
+          <ul>
+            <li><b>Vuelta encontrada</b> (de frente): ambos buques a motor caen a <b>estribor</b> y se cruzan babor con babor.</li>
+            <li><b>Cruce</b>: el buque que ve al otro por su <b>estribor</b> debe <b>ceder el paso</b> (maniobrar). El otro mantiene rumbo y velocidad.</li>
+            <li><b>Alcance</b>: el buque que <b>alcanza</b> a otro por detrás siempre se aparta y cede el paso.</li>
+            <li>El buque que cede debe hacer una maniobra <b>amplia y a tiempo</b>, evidente para el otro.</li>
+          </ul>
+          <div class="tip">🟢 Regla de oro del cruce: <b>"si lo ves por tu estribor (luz verde de él / roja tuya), tú cedes"</b>. Si lo ves por babor, mantienes rumbo pero vigila.</div>`},
+        { h:'Preferencias entre tipos de buque (Regla 18)', html:`
+          <p>Orden de "quién se aparta de quién" (cada uno cede ante los de más arriba):</p>
+          <ul>
+            <li>1. Buque <b>sin gobierno</b> (no under command) y <b>con maniobra restringida</b>.</li>
+            <li>2. Buque <b>restringido por su calado</b>.</li>
+            <li>3. Buque <b>dedicado a la pesca</b>.</li>
+            <li>4. Buque de <b>vela</b>.</li>
+            <li>5. Buque <b>a motor</b> (el que más maniobrabilidad tiene → cede ante todos los anteriores).</li>
+          </ul>
+          <p>Entre dos veleros, cede el que recibe el viento por <b>babor</b>; si ambos lo reciben por el mismo lado, cede el que está a barlovento.</p>`},
+        { h:'Luces de navegación', html:`
+          <ul>
+            <li><span class="term">Luz de tope</span>: blanca, visible 225°, hacia proa (buques a motor).</li>
+            <li><span class="term">Luces de costado</span>: <b>verde a estribor</b> y <b>roja a babor</b>, 112,5° cada una.</li>
+            <li><span class="term">Luz de alcance</span> (popa): blanca, 135°.</li>
+            <li>Un buque a motor navegando de noche muestra tope, costados y alcance. Un velero a vela muestra solo costados y alcance (sin luz de tope de motor).</li>
+            <li>Ver solo una <b>luz blanca</b> puede ser un buque que se aleja (su luz de alcance) o un buque fondeado.</li>
+          </ul>`},
+        { h:'Marcas de día y señales acústicas', html:`
+          <ul>
+            <li><span class="term">Bola negra</span>: buque <b>fondeado</b>. <b>Dos bolas</b>: sin gobierno. <span class="term">Cono con vértice abajo</span>: velero que además usa motor. <b>Bola-rombo-bola</b>: maniobra restringida.</li>
+            <li>Señales acústicas de maniobra (buques a la vista):
+              <ul>
+                <li><b>1 pitada corta</b>: "caigo a <b>estribor</b>".</li>
+                <li><b>2 pitadas cortas</b>: "caigo a <b>babor</b>".</li>
+                <li><b>3 pitadas cortas</b>: "doy atrás" (máquina atrás).</li>
+                <li><b>5 o más pitadas cortas</b>: duda / peligro ("no entiendo tus intenciones").</li>
+              </ul>
+            </li>
+            <li>Con niebla, un buque a motor con arrancada emite <b>1 pitada larga cada 2 minutos</b>.</li>
+          </ul>`}
+      ],
+      questions:[
+        {q:'En un cruce, ¿quién debe ceder el paso?', o:['El buque que ve al otro por su babor','El buque que ve al otro por su estribor','El más grande','El más rápido'], a:1, e:'El buque que tiene al otro por su estribor cede el paso (ve la luz roja del otro; el otro ve su verde). El que cede maniobra; el otro mantiene rumbo y velocidad.'},
+        {q:'Dos buques a motor se aproximan de frente (vuelta encontrada). Deben:', o:['Caer ambos a babor','Caer ambos a estribor y cruzarse babor con babor','Mantener rumbo y acelerar','Detenerse en seco los dos'], a:1, e:'En vuelta encontrada ambos caen a estribor para pasar babor con babor (rojo con rojo).'},
+        {q:'Un buque que alcanza a otro por detrás:', o:['Tiene preferencia','Debe apartarse y ceder el paso al alcanzado','Debe acelerar para pasar rápido','Toca 3 pitadas y sigue'], a:1, e:'El buque que alcanza siempre se mantiene apartado del alcanzado, sin importar el tipo de buque.'},
+        {q:'La luz de costado de estribor es de color:', o:['Roja','Verde','Blanca','Amarilla'], a:1, e:'Estribor = verde; babor = rojo. Cada luz de costado abarca 112,5°.'},
+        {q:'¿Qué significan "2 pitadas cortas" de otro buque?', o:['Caigo a estribor','Caigo a babor','Doy máquina atrás','Peligro'], a:1, e:'1 corta = caigo a estribor; 2 cortas = caigo a babor; 3 cortas = máquina atrás; 5 o más = duda/peligro.'},
+        {q:'Cinco (o más) pitadas cortas y seguidas indican:', o:['Saludo','Duda o peligro / no entiendo tus intenciones','Que va a fondear','Cambio de tripulación'], a:1, e:'Es la señal de duda o peligro: se usa cuando no se comprenden las intenciones del otro buque o para advertir riesgo de abordaje.'},
+        {q:'Según la Regla 18, un buque a motor debe apartarse de un buque:', o:['Más pequeño','De vela, de pesca o sin gobierno','Del mismo tamaño','Ninguno, siempre tiene preferencia'], a:1, e:'El buque a motor es el más maniobrable, por lo que cede ante velero, pesquero, restringido, sin gobierno, etc.'},
+        {q:'Una bola negra izada durante el día indica que el buque está:', o:['Sin gobierno','Fondeado','Pescando','Remolcando'], a:1, e:'Una bola negra a proa señala buque fondeado. Dos bolas = sin gobierno.'},
+        {q:'Entre dos veleros con el viento por bandas distintas, cede el que:', o:['Recibe el viento por estribor','Recibe el viento por babor','Va más rápido','Es más nuevo'], a:1, e:'El velero que recibe el viento por babor cede el paso al que lo recibe por estribor.'},
+        {q:'Con niebla, un buque a motor con arrancada debe emitir:', o:['Silencio total','1 pitada larga cada 2 minutos','3 pitadas cortas continuas','Una campana constante'], a:1, e:'En visibilidad reducida, un buque de propulsión mecánica con arrancada da una pitada larga a intervalos no mayores de 2 minutos.'},
+        {q:'Si de noche ves acercarse un buque y distingues su luz ROJA de costado, significa que:', o:['Lo tienes por tu estribor y probablemente debas ceder','Se está alejando','Está fondeado','Es un faro'], a:0, e:'Ver su costado rojo (babor de él) implica que lo tienes cruzando por tu estribor: en esa situación normalmente eres tú quien cede.'}
+      ]
+    },
+
+    /* ---------------------------------------------------------------- */
+    { id:'emergencias', icon:'🆘', title:'Emergencias a bordo',
+      sub:'Hombre al agua, incendio, vía de agua, VHF y señales de socorro',
+      lessons:[
+        { h:'Hombre al agua', html:`
+          <ul>
+            <li>Grita "<b>¡Hombre al agua!</b>", lanza de inmediato un aro/objeto flotante y <b>no pierdas de vista</b> a la persona; designa a alguien que la señale con el brazo.</li>
+            <li>Maniobra de regreso (p. ej. giro de <span class="term">Williamson</span> o vuelta cerrada) para acercarte por <b>sotavento</b>, con la nave frenada y el motor en punto muerto al recoger.</li>
+            <li><b>Cuidado con la hélice</b>: pon el motor en neutro al aproximarte a la persona.</li>
+          </ul>`},
+        { h:'Incendio y vía de agua', html:`
+          <ul>
+            <li><b>Incendio</b>: corta el combustible/energía de la zona, usa el <span class="term">extintor</span> apuntando a la base de las llamas (barriendo), y aleja el fuego del viento. En fuego de motor, no abras de golpe la tapa (entra oxígeno).</li>
+            <li><b>Vía de agua</b> (entrada de agua): localiza y tapona la brecha, achica con bomba/balde y navega hacia el punto seguro más cercano. Reparte a la gente para no desestabilizar.</li>
+            <li><b>Varada</b> (encallar): revisa si hay vía de agua, evalúa la marea; a veces conviene esperar la pleamar. Si hay riesgo, pide ayuda.</li>
+          </ul>`},
+        { h:'Comunicaciones y señales de socorro', html:`
+          <ul>
+            <li>La <span class="term">radio VHF canal 16</span> es el canal internacional de <b>socorro y llamada</b>. Para emergencia con peligro de vida: "<b>MAYDAY, MAYDAY, MAYDAY</b>" + nombre de la nave, posición, naturaleza de la emergencia y personas a bordo.</li>
+            <li><span class="term">PAN-PAN</span>: urgencia sin peligro inmediato de vida. <span class="term">SÉCURITÉ</span>: aviso de seguridad/navegación.</li>
+            <li>Señales de socorro reconocidas: bengalas <b>rojas</b>, humo naranja, llamas a bordo, disparos a intervalos, brazos subiendo y bajando lentamente, señal SOS, bandera con bola, radiobaliza <span class="term">EPIRB</span>.</li>
+          </ul>
+          <div class="tip">📻 Memoriza: <b>canal 16 VHF = socorro</b>. Da siempre tu <b>posición</b> primero; sin posición, el rescate es mucho más lento.</div>`}
+      ],
+      questions:[
+        {q:'Lo PRIMERO al caer una persona al agua es:', o:['Apagar el motor y bajar a buscar chalecos','Lanzar un flotador y no perderla de vista','Llamar por teléfono a la familia','Anotar la hora'], a:1, e:'Se lanza de inmediato un objeto flotante, se grita "hombre al agua" y alguien la señala sin quitarle la vista para no perder su posición.'},
+        {q:'Al aproximarte para recoger a la persona en el agua, el motor debe estar:', o:['A toda potencia','En punto muerto/neutro para evitar la hélice','En marcha atrás fuerte','Apagado y a la deriva siempre'], a:1, e:'Poner el motor en neutro al acercarse evita que la hélice hiera a la persona. Se recoge preferentemente por sotavento.'},
+        {q:'¿Cuál es el canal internacional de socorro en VHF?', o:['Canal 6','Canal 9','Canal 16','Canal 72'], a:2, e:'El canal 16 de VHF es el canal internacional de socorro, urgencia y llamada.'},
+        {q:'La palabra que se transmite ante peligro de vida inminente es:', o:['PAN-PAN','SÉCURITÉ','MAYDAY','ROGER'], a:2, e:'MAYDAY (repetido tres veces) es la señal de socorro por peligro grave e inminente. PAN-PAN es urgencia sin peligro de vida.'},
+        {q:'En un mensaje de socorro, el dato MÁS importante que debes dar es:', o:['El color de la nave','Tu posición','La marca del motor','La hora de zarpe'], a:1, e:'Sin la posición, el rescate es lento. Da nombre de la nave, posición, naturaleza de la emergencia y número de personas a bordo.'},
+        {q:'Con un extintor, se debe apuntar a:', o:['La parte alta de las llamas','La base del fuego, barriendo','El humo','Las paredes cercanas'], a:1, e:'Se dirige el agente a la base de las llamas con movimiento de barrido, atacando el combustible que arde.'},
+        {q:'El color de las bengalas de socorro es:', o:['Verde','Azul','Rojo','Blanco'], a:2, e:'Las bengalas rojas (y el humo naranja de día) son señales de socorro reconocidas internacionalmente.'},
+        {q:'Ante una vía de agua (el bote embarca agua), debes:', o:['Acelerar al máximo hacia mar abierto','Taponar la brecha, achicar y dirigirte al punto seguro más cercano','Ignorarla si es pequeña','Detener todo y esperar'], a:1, e:'Se localiza y tapona la entrada de agua, se achica con bomba o balde y se navega al lugar seguro más próximo, repartiendo el peso.'},
+        {q:'"PAN-PAN" en la radio indica:', o:['Peligro de vida inminente','Una situación de urgencia sin peligro inmediato de vida','Fin de la comunicación','Prueba de radio'], a:1, e:'PAN-PAN señala urgencia (p. ej. avería seria) sin peligro inmediato de vida; MAYDAY es para peligro grave e inminente.'},
+        {q:'Si encallas (varada) sin vía de agua, una opción prudente puede ser:', o:['Acelerar fuerte para zafar siempre','Evaluar la marea y esperar la pleamar si conviene','Saltar todos al agua','Abandonar la nave de inmediato'], a:1, e:'Primero se verifica que no haya vía de agua; muchas veces conviene esperar que suba la marea (pleamar) para reflotar sin dañar el casco.'}
+      ]
+    }
+  ];
+
+  /* ===================================================================
+     ESTADO / PERSISTENCIA
+     =================================================================== */
+  const STORE_KEY = 'pl_patron_v1';
+  const state = loadState();
+
+  function loadState(){
+    try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)); if(s) return s; }catch(e){}
+    return { read:{}, best:{}, examBest:0, examCount:0, answered:0, correct:0 };
+    // read: {moduleId:true} lecciones marcadas leídas
+    // best: {moduleId: bestPct} mejor % por módulo en práctica
+  }
+  function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+
+  /* ===================================================================
+     APP OBJECT
+     =================================================================== */
+  const PL = {
+    quiz:null,
+
+    init(){
+      this.renderModules();
+      this.renderPracticeChips();
+      this.renderProgress();
+      this.updateOverall();
+      // tabs
+      document.querySelectorAll('.pl-tab').forEach(t=>{
+        t.addEventListener('click',()=>this.showView(t.dataset.view));
+      });
+    },
+
+    showView(v){
+      document.querySelectorAll('.pl-tab').forEach(t=>t.classList.toggle('active', t.dataset.view===v));
+      document.querySelectorAll('.pl-view').forEach(el=>el.classList.remove('active'));
+      document.getElementById('view-'+v).classList.add('active');
+      if(v==='progress'){ this.renderProgress(); }
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+
+    /* ----------------------- APRENDER ----------------------- */
+    renderModules(){
+      const wrap = document.getElementById('pl-modules');
+      wrap.innerHTML = MODULES.map((m,i)=>`
+        <div class="pl-mod" id="mod-${m.id}">
+          <div class="pl-mod-head" onclick="PL.toggleMod('${m.id}')">
+            <div class="pl-mod-icon">${m.icon}</div>
+            <div class="pl-mod-info">
+              <div class="pl-mod-title">${i+1}. ${m.title}</div>
+              <div class="pl-mod-sub">${m.sub}</div>
+            </div>
+            <div class="pl-check ${state.read[m.id]?'done':''}" id="chk-${m.id}">${state.read[m.id]?'✓':''}</div>
+            <div class="pl-mod-chev">›</div>
+          </div>
+          <div class="pl-mod-body">
+            ${m.lessons.map(l=>`<div class="pl-lesson"><h3>▸ ${l.h}</h3>${l.html}</div>`).join('')}
+            <button class="pl-mod-quiz-btn" onclick="event.stopPropagation();PL.startSingle('${m.id}')">
+              ✏️ Practicar este tema (${m.questions.length} preguntas)
+            </button>
+          </div>
+        </div>`).join('');
+    },
+
+    toggleMod(id){
+      const el = document.getElementById('mod-'+id);
+      const wasOpen = el.classList.contains('open');
+      el.classList.toggle('open');
+      // Marcar como leído al abrir por primera vez
+      if(!wasOpen && !state.read[id]){
+        state.read[id]=true; saveState();
+        const chk=document.getElementById('chk-'+id);
+        chk.classList.add('done'); chk.textContent='✓';
+        this.updateOverall();
+      }
+    },
+
+    /* ----------------------- CONFIG PRÁCTICA ----------------------- */
+    renderPracticeChips(){
+      const wrap = document.getElementById('practice-chips');
+      wrap.innerHTML =
+        `<button class="pl-chip on" data-mod="all" onclick="PL.toggleChip(this)">🌊 Todos los temas</button>` +
+        MODULES.map(m=>`<button class="pl-chip" data-mod="${m.id}" onclick="PL.toggleChip(this)">${m.icon} ${m.title}</button>`).join('');
+    },
+    toggleChip(btn){
+      const all = document.querySelector('.pl-chip[data-mod="all"]');
+      if(btn.dataset.mod==='all'){
+        document.querySelectorAll('#practice-chips .pl-chip').forEach(c=>c.classList.remove('on'));
+        btn.classList.add('on');
+      }else{
+        all.classList.remove('on');
+        btn.classList.toggle('on');
+        if(!document.querySelector('#practice-chips .pl-chip.on')){ all.classList.add('on'); }
+      }
+    },
+
+    /* ----------------------- INICIAR QUIZ ----------------------- */
+    startSingle(id){
+      const m = MODULES.find(x=>x.id===id);
+      const qs = shuffle(m.questions.map(q=>({...q, cat:m.title, mod:m.id})));
+      this.showView('practice');
+      // Marca solo el chip de este módulo
+      document.querySelectorAll('#practice-chips .pl-chip').forEach(c=>c.classList.toggle('on', c.dataset.mod===id));
+      this.launch(qs, {mode:'practice', target:'practice-runner', pass:70, title:m.title});
+      document.getElementById('practice-config').style.display='none';
+    },
+
+    startPractice(){
+      const on = [...document.querySelectorAll('#practice-chips .pl-chip.on')].map(c=>c.dataset.mod);
+      let pool=[];
+      if(on.includes('all')){ MODULES.forEach(m=> pool.push(...m.questions.map(q=>({...q,cat:m.title,mod:m.id})))); }
+      else{ on.forEach(id=>{ const m=MODULES.find(x=>x.id===id); pool.push(...m.questions.map(q=>({...q,cat:m.title,mod:m.id}))); }); }
+      pool = shuffle(pool);
+      document.getElementById('practice-config').style.display='none';
+      this.launch(pool, {mode:'practice', target:'practice-runner', pass:70, title:'Práctica'});
+    },
+
+    startExam(){
+      let pool=[];
+      MODULES.forEach(m=> pool.push(...m.questions.map(q=>({...q,cat:m.title,mod:m.id}))));
+      pool = shuffle(pool).slice(0, 20);
+      document.getElementById('exam-config').style.display='none';
+      this.launch(pool, {mode:'exam', target:'exam-runner', pass:70, title:'Examen simulado'});
+    },
+
+    /* ----------------------- MOTOR DE QUIZ ----------------------- */
+    launch(questions, opts){
+      // Aleatoriza el orden de las opciones de cada pregunta manteniendo el índice correcto
+      const prepared = questions.map(q=>{
+        const idx = q.o.map((_,i)=>i);
+        const sh = shuffle(idx);
+        return { ...q, o: sh.map(i=>q.o[i]), a: sh.indexOf(q.a) };
+      });
+      this.quiz = { qs:prepared, i:0, correct:0, answers:[], opts, answeredCurrent:false };
+      this.renderQuestion();
+    },
+
+    renderQuestion(){
+      const Q = this.quiz;
+      const q = Q.qs[Q.i];
+      const tgt = document.getElementById(Q.opts.target);
+      const isExam = Q.opts.mode==='exam';
+      Q.answeredCurrent=false;
+      tgt.innerHTML = `
+        <div class="pl-panel">
+          <div class="pl-quiz-top">
+            <span>${Q.opts.title} · Pregunta ${Q.i+1} de ${Q.qs.length}</span>
+            <span class="score">✓ ${Q.correct}</span>
+          </div>
+          <div class="pl-qbar"><div class="pl-qbar-fill" style="width:${(Q.i/Q.qs.length)*100}%"></div></div>
+          <div class="pl-qcat">${q.cat}</div>
+          <div class="pl-q">${q.q}</div>
+          <div class="pl-opts" id="pl-opts">
+            ${q.o.map((op,i)=>`<button class="pl-opt" onclick="PL.answer(${i})"><span class="k">${String.fromCharCode(65+i)}</span>${op}</button>`).join('')}
+          </div>
+          ${isExam?'':`<div class="pl-explain" id="pl-explain"></div>`}
+          <div class="pl-next" id="pl-next"></div>
+        </div>`;
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+
+    answer(choice){
+      const Q = this.quiz;
+      if(Q.answeredCurrent) return;
+      Q.answeredCurrent=true;
+      const q = Q.qs[Q.i];
+      const correct = choice===q.a;
+      const isExam = Q.opts.mode==='exam';
+      const opts = document.querySelectorAll('#pl-opts .pl-opt');
+      opts.forEach((b,i)=>{
+        b.disabled=true;
+        if(i===q.a) b.classList.add('correct');
+        else if(i===choice) b.classList.add('wrong');
+      });
+      if(correct){ Q.correct++; state.correct++; }
+      state.answered++;
+      saveState();
+      Q.answers.push({q:q.q, correct, your:q.o[choice], right:q.o[q.a], e:q.e});
+
+      // Feedback + explicación (solo práctica muestra explicación inmediata)
+      if(!isExam){
+        this.feedback(correct?'✅':'📚');
+        const ex = document.getElementById('pl-explain');
+        ex.innerHTML = `<b>${correct?'¡Correcto!':'Respuesta: '+q.o[q.a]}</b><br>${q.e}`;
+        ex.classList.add('show');
+      }else{
+        this.feedback(correct?'✅':'❌');
+      }
+
+      const nx = document.getElementById('pl-next');
+      const last = Q.i===Q.qs.length-1;
+      nx.innerHTML = `<button class="pl-btn" onclick="PL.next()">${last?'Ver resultado 🏁':'Siguiente →'}</button>`;
+    },
+
+    next(){
+      const Q=this.quiz;
+      if(Q.i===Q.qs.length-1){ this.finish(); return; }
+      Q.i++; this.renderQuestion();
+    },
+
+    finish(){
+      const Q = this.quiz;
+      const pct = Math.round((Q.correct/Q.qs.length)*100);
+      const pass = pct>=Q.opts.pass;
+      const isExam = Q.opts.mode==='exam';
+
+      // Guardar mejores puntajes
+      if(isExam){
+        state.examCount++;
+        if(pct>state.examBest) state.examBest=pct;
+      }else{
+        // best por módulo si el quiz fue de un solo módulo
+        const mods=[...new Set(Q.qs.map(x=>x.mod))];
+        if(mods.length===1){
+          const id=mods[0];
+          if(pct>(state.best[id]||0)) state.best[id]=pct;
+        }
+      }
+      saveState();
+      this.updateOverall();
+
+      const C = pass?'var(--green)':'var(--red)';
+      const circumference = 2*Math.PI*65;
+      const off = circumference*(1-pct/100);
+      const emoji = pct>=90?'🏆':pct>=70?'⚓':pct>=50?'💪':'📚';
+      const verdict = isExam
+        ? (pass?'¡APROBADO!':'No aprobado — sigue practicando')
+        : (pass?'¡Muy bien!':'Sigue repasando');
+
+      const misses = Q.answers.filter(a=>!a.correct);
+      const tgt = document.getElementById(Q.opts.target);
+      tgt.innerHTML = `
+        <div class="pl-panel">
+          <div class="pl-result">
+            <div class="big-emoji">${emoji}</div>
+            <h2>${Q.opts.title}</h2>
+            <div class="pl-ring">
+              <svg width="150" height="150">
+                <circle cx="75" cy="75" r="65" stroke="rgba(255,255,255,.08)" stroke-width="12" fill="none"/>
+                <circle cx="75" cy="75" r="65" stroke="${C}" stroke-width="12" fill="none"
+                  stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${off}"/>
+              </svg>
+              <div class="pct"><b>${pct}%</b><small>${Q.correct}/${Q.qs.length}</small></div>
+            </div>
+            <div class="pl-verdict ${pass?'pass':'fail'}">${verdict}</div>
+            <div class="sub">${isExam?`Se necesita ${Q.opts.pass}% para aprobar`:''}</div>
+          </div>
+          ${misses.length?`
+          <div class="pl-review">
+            <h3>📝 Repasa lo que fallaste (${misses.length})</h3>
+            ${misses.map(a=>`
+              <div class="pl-rev-item miss">
+                <div class="qq">${a.q}</div>
+                <div class="yours">Tu respuesta: ${a.your}</div>
+                <div class="ans">Correcta: ${a.right}</div>
+                <div style="margin-top:6px;color:var(--text-muted)">${a.e}</div>
+              </div>`).join('')}
+          </div>`:`<p style="text-align:center;color:var(--green);font-weight:700;margin-top:8px;">¡Todas correctas! 🎉</p>`}
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <button class="pl-btn" onclick="PL.restart('${Q.opts.mode}')">↻ Otra vez</button>
+            <button class="pl-btn ghost" onclick="PL.exitQuiz('${Q.opts.mode}')">Salir</button>
+          </div>
+        </div>`;
+      window.scrollTo({top:0, behavior:'smooth'});
+    },
+
+    restart(mode){
+      if(mode==='exam'){ this.startExam(); }
+      else{ document.getElementById('practice-runner').innerHTML=''; document.getElementById('practice-config').style.display=''; this.showView('practice'); }
+    },
+    exitQuiz(mode){
+      if(mode==='exam'){
+        document.getElementById('exam-runner').innerHTML='';
+        document.getElementById('exam-config').style.display='';
+      }else{
+        document.getElementById('practice-runner').innerHTML='';
+        document.getElementById('practice-config').style.display='';
+      }
+      this.renderProgress();
+    },
+
+    /* ----------------------- PROGRESO ----------------------- */
+    updateOverall(){
+      // Ponderación: 50% lecciones leídas, 50% dominio de práctica/examen
+      const totalMods = MODULES.length;
+      const readCount = MODULES.filter(m=>state.read[m.id]).length;
+      const readScore = readCount/totalMods; // 0..1
+      const masterySum = MODULES.reduce((s,m)=> s + Math.min((state.best[m.id]||0),100)/100, 0);
+      const masteryScore = masterySum/totalMods;
+      const overall = Math.round((readScore*0.5 + masteryScore*0.5)*100);
+      document.getElementById('pl-overall-bar').style.width = overall+'%';
+      document.getElementById('pl-overall-txt').textContent = overall+'% listo';
+    },
+
+    renderProgress(){
+      // stats
+      const acc = state.answered? Math.round((state.correct/state.answered)*100):0;
+      document.getElementById('pl-stats').innerHTML = `
+        <div class="pl-stat"><b>${state.answered}</b><span>Preguntas respondidas</span></div>
+        <div class="pl-stat"><b>${acc}%</b><span>Aciertos globales</span></div>
+        <div class="pl-stat"><b>${state.examBest}%</b><span>Mejor examen</span></div>`;
+      // por módulo
+      document.getElementById('pl-modstats').innerHTML = MODULES.map(m=>{
+        const best = state.best[m.id]||0;
+        const read = state.read[m.id];
+        return `<div class="pl-modstat">
+          <span class="em">${m.icon}</span>
+          <span class="nm">${m.title} ${read?'<span style="color:var(--green)">·leído</span>':''}</span>
+          <span class="mini"><i style="width:${best}%"></i></span>
+          <span class="pc">${best}%</span>
+        </div>`;
+      }).join('');
+    },
+
+    resetProgress(){
+      if(!confirm('¿Reiniciar todo tu progreso de estudio?')) return;
+      localStorage.removeItem(STORE_KEY);
+      Object.assign(state, { read:{}, best:{}, examBest:0, examCount:0, answered:0, correct:0 });
+      this.renderModules(); this.renderProgress(); this.updateOverall();
+    },
+
+    /* ----------------------- UI helpers ----------------------- */
+    feedback(emoji){
+      const f=document.getElementById('pl-feedback');
+      document.getElementById('pl-feedback-emoji').textContent=emoji;
+      f.classList.add('show');
+      setTimeout(()=>f.classList.remove('show'), 650);
+    }
+  };
+
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  PL.init();
+  </script>
+</body>
+</html>
