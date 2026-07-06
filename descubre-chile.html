@@ -29,6 +29,7 @@
     <button class="tab-btn" data-tab="historia">📖 Historia</button>
     <button class="tab-btn" data-tab="juegos">🎮 Juegos</button>
     <button class="tab-btn" data-tab="quiz">⭐ Quiz</button>
+    <button class="tab-btn" data-tab="mapa-drag">📍 Ubica</button>
   </div>
   <!-- MAPA -->
   <div class="tab-content active" id="tab-mapa">
@@ -70,6 +71,23 @@
   </div>
   <!-- QUIZ -->
   <div class="tab-content" id="tab-quiz"><div id="quizArea"></div></div>
+  <!-- DRAG MAPA -->
+  <div class="tab-content" id="tab-mapa-drag">
+    <p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px">📍 Ubica la Región</p>
+    <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;font-weight:600;margin-bottom:12px">Arrastra los nombres al lugar correcto</p>
+    <div class="drag-stats">Tiempo: <span id="dragTime">60</span>s &nbsp;|&nbsp; Zonas: <span id="dragScore">0</span>/5</div>
+    <div class="map-drag-wrap">
+      <svg viewBox="0 0 200 600" class="map-svg" id="dragMapSvg">
+        <path class="drop-zone" id="dz-norte" data-id="norte" d="M70,10 L130,10 L135,50 L140,100 L130,140 L110,150 L90,145 L75,130 L65,90 L60,50 Z"/>
+        <path class="drop-zone" id="dz-centro" data-id="centro" d="M90,145 L110,150 L130,140 L125,200 L120,250 L105,260 L85,255 L80,220 L78,180 Z"/>
+        <path class="drop-zone" id="dz-sur" data-id="sur" d="M85,255 L105,260 L120,250 L115,330 L108,370 L95,380 L80,365 L75,320 L78,280 Z"/>
+        <path class="drop-zone" id="dz-patagonia" data-id="patagonia" d="M80,365 L95,380 L108,370 L105,440 L100,500 L95,540 L85,555 L78,530 L72,480 L70,430 L75,390 Z"/>
+        <ellipse class="drop-zone" id="dz-pascua" data-id="pascua" cx="170" cy="280" rx="22" ry="18"/>
+      </svg>
+      <div class="drag-tokens-container" id="dragTokens"></div>
+    </div>
+    <div style="text-align:center;margin-top:12px"><button class="btn-red" id="dragStartBtn" onclick="initDragQuiz()">▶️ Comenzar Reto</button></div>
+  </div>
 </div>
 <div class="region-modal" id="regionModal" onclick="if(event.target===this)closeRegion()"><div class="region-card"><button class="close-modal" aria-label="Close" onclick="closeRegion()">✕</button><h2 id="rmTitle"></h2><div class="region-sub" id="rmSub"></div><div id="rmFacts"></div><div style="text-align:center;margin-top:16px"><button class="btn-red" onclick="closeRegion()">¡Entendido! ✓</button></div></div></div>
 <div class="feedback-float" id="feedback"><span id="feedbackEmoji"></span></div>
