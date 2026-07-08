@@ -257,6 +257,10 @@
 
   <div class="feedback-float" id="pl-feedback"><span id="pl-feedback-emoji"></span></div>
 
+  <!-- Perfiles y sincronización compartidos del proyecto -->
+  <script src="js/auth.js?v=2"></script>
+  <script src="js/sync.js?v=9"></script>
+
   <script>
   /* =====================================================================
      PATRÓN DE LANCHA DEPORTIVA — Contenido y motor de estudio
@@ -853,14 +857,37 @@
   /* ===================================================================
      ESTADO / PERSISTENCIA
      =================================================================== */
-  const STORE_KEY = 'pl_patron_v1';
-  const state = loadState();
+  const STORE_PREFIX = 'zs_patron_';       // clave por perfil: zs_patron_<usuario>
+  const LEGACY_KEY   = 'pl_patron_v1';     // clave global antigua (se migra 1 vez)
+
+  // Clave del perfil activo (auth.js). Sin perfil → bucket "default".
+  function storageKey(){
+    return (typeof getUserAppKey === 'function' && getUserAppKey(STORE_PREFIX)) || (STORE_PREFIX + 'default');
+  }
+  function defaultState(){ return { read:{}, best:{}, examBest:0, examCount:0, answered:0, correct:0 }; }
 
   function loadState(){
-    try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)); if(s) return s; }catch(e){}
-    return { read:{}, best:{}, examBest:0, examCount:0, answered:0, correct:0 };
+    const key = storageKey();
+    try{ const s = JSON.parse(localStorage.getItem(key)); if(s) return Object.assign(defaultState(), s); }catch(e){}
+    // Migración única: el primer perfil que abra la app hereda el progreso
+    // global antiguo; luego se elimina para que otros perfiles empiecen limpios.
+    try{
+      const old = JSON.parse(localStorage.getItem(LEGACY_KEY));
+      if(old){
+        localStorage.setItem(key, JSON.stringify(old));
+        localStorage.removeItem(LEGACY_KEY);
+        return Object.assign(defaultState(), old);
+      }
+    }catch(e){}
+    return defaultState();
   }
-  function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+  function saveState(){
+    const key = storageKey();
+    try{ localStorage.setItem(key, JSON.stringify(state)); }catch(e){}
+    if(typeof CloudSync !== 'undefined' && CloudSync.online){ try{ CloudSync.push(key); }catch(e){} }
+  }
+
+  let state = loadState();
 
   /* ===================================================================
      APP
@@ -1156,8 +1183,8 @@
 
     resetProgress(){
       if(!confirm('¿Reiniciar todo tu progreso de estudio?')) return;
-      localStorage.removeItem(STORE_KEY);
-      Object.assign(state, { read:{}, best:{}, examBest:0, examCount:0, answered:0, correct:0 });
+      Object.assign(state, defaultState());
+      saveState();
       this.renderModules(); this.renderProgress(); this.updateOverall();
     },
 
@@ -1176,6 +1203,15 @@
   }
 
   PL.init();
+
+  // La sincronización con la nube (sync.js) pudo traer progreso de otro
+  // dispositivo: recarga el estado del perfil activo y re-renderiza.
+  window.addEventListener('zs:synced', function(){
+    state = loadState();
+    PL.renderModules();
+    PL.renderProgress();
+    PL.updateOverall();
+  });
   </script>
 </body>
 </html>
