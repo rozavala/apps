@@ -165,6 +165,7 @@ var Vacation = (function() {
     var end = document.getElementById('vc-new-end').value;
     var icon = document.getElementById('vc-new-icon').value.trim() || '✈️';
     var overview = document.getElementById('vc-new-overview').value.trim();
+    var slidesUrl = document.getElementById('vc-new-slides').value.trim();
     var hidden = document.getElementById('vc-new-hidden').checked;
 
     if (!name || !start) {
@@ -195,6 +196,7 @@ var Vacation = (function() {
       notes: '',
       hidden: hidden,
       overview: overview,
+      slidesUrl: slidesUrl,
       images: [],
       suggestions: [],
       packing: packing,
@@ -261,6 +263,7 @@ var Vacation = (function() {
     trip.endDate = end || start;
     trip.overview = document.getElementById('vc-edit-overview').value.trim();
     trip.hidden = document.getElementById('vc-edit-hidden').checked;
+    trip.slidesUrl = document.getElementById('vc-edit-slides').value.trim();
     trip.images = _parseImages(document.getElementById('vc-edit-images').value);
     trip.suggestions = _parseSuggestions(document.getElementById('vc-edit-suggestions').value);
 
@@ -415,6 +418,7 @@ var Vacation = (function() {
           '<div class="vc-field"><label>Start date</label><input type="date" id="vc-new-start"></div>' +
           '<div class="vc-field"><label>End date (optional)</label><input type="date" id="vc-new-end"></div>' +
           '<div class="vc-field"><label>Overview (optional)</label><textarea id="vc-new-overview" rows="3" placeholder="A short intro to the trip…" maxlength="2000"></textarea></div>' +
+          '<div class="vc-field"><label>Reveal slideshow URL (optional)</label><input type="text" id="vc-new-slides" placeholder="e.g. vacation-reveal.html"></div>' +
           '<label class="vc-check"><input type="checkbox" id="vc-new-hidden">' +
             '<span>🤫 Surprise — hide from the kids until I reveal it</span></label>' +
           '<div class="vc-form-actions">' +
@@ -459,6 +463,8 @@ var Vacation = (function() {
             '<textarea id="vc-edit-images" rows="5" placeholder="https://example.com/photo.jpg | A sunny beach">' + _esc(imagesText) + '</textarea></div>' +
           '<div class="vc-field"><label>Ideas &amp; tips — one per line: <code>icon | title | text</code></label>' +
             '<textarea id="vc-edit-suggestions" rows="5" placeholder="🛂 | Passports | Check they\'re valid 6+ months out">' + _esc(suggText) + '</textarea></div>' +
+          '<div class="vc-field"><label>Reveal slideshow URL (optional)</label>' +
+            '<input type="text" id="vc-edit-slides" placeholder="e.g. vacation-reveal.html" value="' + _esc(trip.slidesUrl || '') + '"></div>' +
           '<label class="vc-check"><input type="checkbox" id="vc-edit-hidden"' + (trip.hidden ? ' checked' : '') + '>' +
             '<span>🤫 Surprise — hide from the kids until I reveal it</span></label>' +
           '<p class="vc-form-hint">Packing and the day-by-day itinerary are edited on the trip page itself.</p>' +
@@ -515,6 +521,9 @@ var Vacation = (function() {
             (trip.endDate && trip.endDate !== trip.startDate ? ' → ' + _esc(trip.endDate) : '') + '</span>' : '') +
           (cd ? '<span class="vc-countdown ' + cd.kind + '">' + _esc(cd.text) + '</span>' : '') +
         '</div>' +
+        (trip.slidesUrl
+          ? '<a class="vc-reveal-btn" href="' + _esc(trip.slidesUrl) + '" target="_blank" rel="noopener">🎉 Reveal slideshow</a>'
+          : '') +
         overviewHtml +
         galleryHtml +
         suggestionsHtml +
