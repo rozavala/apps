@@ -19,6 +19,17 @@ app.use(express.json({ limit: '5mb' }));
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
+// Private static assets (e.g. a surprise-reveal slideshow). Because this
+// server is only reachable over the Tailscale tailnet, anything here is
+// served exclusively to devices on the family VPN — never to the public
+// GitHub Pages site. The folder is gitignored, so private files never
+// reach the repo, and they survive the deploy's `git reset --hard`
+// because they're untracked. Drop files in /opt/zavala-sync/private/ and
+// reach them at https://<vps-tailnet-host>/private/<file>.
+const PRIVATE_DIR = path.join(__dirname, '..', 'private');
+if (!fs.existsSync(PRIVATE_DIR)) fs.mkdirSync(PRIVATE_DIR, { recursive: true });
+app.use('/private', express.static(PRIVATE_DIR));
+
 // Register Book & Movie Check media endpoints
 media.init(app, DATA_DIR);
 
