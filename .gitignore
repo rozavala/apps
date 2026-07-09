@@ -8,3 +8,7 @@ playwright/.cache/
 .env
 .env.local
 vps/.env
+
+# Private, VPN-only assets served by the VPS (e.g. surprise-reveal decks).
+# Never committed to the public repo.
+private/
