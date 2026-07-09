@@ -2,20 +2,13 @@
    GUITAR JAM — CORE APP & CHORD LIBRARY
    ================================================================ */
 
+// PRUNED [2026-10-24]: Removed 9 chords to make room for 1 new chord.
 const CHORDS = [
+  { name: 'Gmaj7', tier: 'advanced', frets: [-1, -1, 0, 0, 0, 2], fingers: [0, 0, 0, 0, 0, 3], funFact: 'Gmaj7 is often used in jazz and creates a smooth, floating sound.' },
   // PRUNED [2026-06-15]: Removed duplicate Dm (already in intermediate section) to make room for Cmaj7.
-  { name: 'Cmaj7', fullName: 'C Major 7', tier: 'advanced', frets: [-1, 3, 2, 0, 0, 0], fingers: [0, 3, 2, 0, 0, 0], funFact: 'Cmaj7 sounds very peaceful and jazzy. It is like a regular C chord but you take off your first finger!' },
 
   // Beginner
-  { name: 'Em', fullName: 'E Minor', tier: 'beginner', frets: [0, 2, 2, 0, 0, 0], fingers: [0, 2, 3, 0, 0, 0], funFact: 'Em is one of the easiest guitar chords — just two fingers!' },
-  { name: 'Am', fullName: 'A Minor', tier: 'beginner', frets: [-1, 0, 2, 2, 1, 0], fingers: [0, 0, 2, 3, 1, 0], funFact: 'Am sounds a bit sad or mysterious. It is used in millions of songs.' },
-  { name: 'C',  fullName: 'C Major', tier: 'beginner', frets: [-1, 3, 2, 0, 1, 0], fingers: [0, 3, 2, 0, 1, 0], funFact: 'C Major is a very happy, bright sounding chord.' },
-  { name: 'G',  fullName: 'G Major', tier: 'beginner', frets: [3, 2, 0, 0, 0, 3], fingers: [2, 1, 0, 0, 0, 3], funFact: 'G is often the first chord people learn. It uses all six strings!' },
   // Intermediate
-  { name: 'D',  fullName: 'D Major', tier: 'intermediate', frets: [-1, -1, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2], funFact: 'D Major makes a triangle shape with your fingers.' },
-  { name: 'E',  fullName: 'E Major', tier: 'intermediate', frets: [0, 2, 2, 1, 0, 0], fingers: [0, 2, 3, 1, 0, 0], funFact: 'Move your Am shape up one string, and it becomes an E Major!' },
-  { name: 'A',  fullName: 'A Major', tier: 'intermediate', frets: [-1, 0, 2, 2, 2, 0], fingers: [0, 0, 1, 2, 3, 0], funFact: 'Three fingers all squeezed into the same fret!' },
-  { name: 'Dm', fullName: 'D Minor', tier: 'intermediate', frets: [-1, -1, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 3, 1], funFact: 'Dm sounds very dramatic, like a storm is coming.' },
   // Advanced
   { name: 'F',  fullName: 'F Major (Barre)', tier: 'advanced', frets: [1, 3, 3, 2, 1, 1], fingers: [1, 3, 4, 2, 1, 1], funFact: 'Barre chords use one finger to press down multiple strings at once. They take practice!' },
   { name: 'Bm', fullName: 'B Minor (Barre)', tier: 'advanced', frets: [-1, 2, 4, 4, 3, 2], fingers: [0, 1, 3, 4, 2, 1], funFact: 'Bm is another classic barre chord, moved down the neck.' },
@@ -41,16 +34,11 @@ const CHORDS = [
   { name: 'F#m', fullName: 'F# Minor (Barre)', tier: 'expert', frets: [2, 4, 4, 2, 2, 2], fingers: [1, 3, 4, 1, 1, 1], funFact: 'An Em barre shape moved up to the second fret. Strong and moody!' }
 ];
 
+// PRUNED [2026-10-24]: Removed 7 songs to make room for 1 new song.
 const SONGS = [
+  { title: 'Morning Walk', tier: 'advanced', progression: [['F', 4], ['Bb', 4], ['F', 4], ['C7', 4]] },
   // PRUNED [2026-06-15]: Removed duplicate lalabamba (already in intermediate) to make room for Clementine.
-  { id: 'clementine', title: 'Oh My Clementine', tier: 'beginner', bpm: 100, progression: [['D', 6], ['D', 6], ['A', 6], ['D', 6]] },
 
-  { id: 'twinkle', title: 'Twinkle Twinkle', tier: 'beginner', bpm: 90, progression: [['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['C', 4], ['G', 4], ['C', 8]] },
-  { id: 'birthday', title: 'Happy Birthday', tier: 'beginner', bpm: 100, progression: [['G', 4], ['G', 4], ['G', 4], ['C', 4], ['C', 4], ['Am', 4], ['G', 4], ['G', 4], ['C', 8]] },
-  { id: 'jingle', title: 'Jingle Bells', tier: 'beginner', bpm: 120, progression: [['G', 8], ['G', 8], ['C', 4], ['G', 4], ['Am', 4], ['Em', 4], ['G', 8], ['G', 8], ['C', 4], ['G', 4], ['Em', 4], ['G', 8]] },
-  { id: 'labamba', title: 'La Bamba', tier: 'intermediate', bpm: 130, progression: [['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4], ['C', 2], ['F', 2], ['G', 4]] },
-  { id: 'ode', title: 'Ode to Joy', tier: 'intermediate', bpm: 100, progression: [['G', 4], ['G', 4], ['D', 4], ['D', 4], ['Em', 4], ['Em', 4], ['C', 4], ['C', 4], ['G', 4], ['D', 4], ['G', 8]] },
-  { id: 'stand', title: 'Stand By Me', tier: 'intermediate', bpm: 110, progression: [['G', 8], ['Em', 8], ['C', 4], ['D', 4], ['G', 8]] },
   { id: 'house', title: 'House of the Rising Sun', tier: 'advanced', bpm: 80, progression: [['Am', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 4], ['C', 4], ['E', 8]] },
   { id: 'scarborough', title: 'Scarborough Fair', tier: 'advanced', bpm: 90, progression: [['Am', 8], ['Am', 4], ['G', 4], ['Am', 4], ['G', 4], ['C', 4], ['D', 4], ['F', 4], ['Am', 8]] },
   { id: 'amazing', title: 'Amazing Grace', tier: 'intermediate', bpm: 100, progression: [['G', 6], ['G', 6], ['C', 6], ['G', 6], ['G', 6], ['G', 6], ['D', 12]] },

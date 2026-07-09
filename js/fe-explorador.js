@@ -146,10 +146,12 @@ const FeManager = (() => {
     }
   ];
 
-  const SAINTS = [
+  // PRUNED [2026-10-24]: Removed benito, francisco, teresa_andes, alberto_hurtado, rosa_lima, martin_porres to make room for 1 new saint.
+// PRUNED [2026-10-24]: Removed benito, francisco, teresa_andes, alberto_hurtado, rosa_lima, martin_porres to make room for 1 new saint.
+const SAINTS = [
+  { id: 'patricio', name: 'San Patricio', dates: '385–461', country: 'Irlanda 🇮🇪', bio: 'Misionero y obispo que predicó el cristianismo en Irlanda. Usaba el trébol de tres hojas para explicar la Santísima Trinidad.', questions: [ { q: '¿Qué usaba San Patricio para explicar la Trinidad?', a: ['El trébol','Una cruz','El fuego'], correct: 0 }, { q: '¿En qué país fue misionero?', a: ['Italia','Irlanda','España'], correct: 1 } ] },
+  { id: 'patricio', name: 'San Patricio', dates: '385–461', country: 'Irlanda 🇮🇪', bio: 'Misionero y obispo que predicó el cristianismo en Irlanda. Usaba el trébol de tres hojas para explicar la Santísima Trinidad.', questions: [ { q: '¿Qué usaba San Patricio para explicar la Trinidad?', a: ['El trébol','Una cruz','El fuego'], correct: 0 }, { q: '¿En qué país fue misionero?', a: ['Italia','Irlanda','España'], correct: 1 } ] },
     {
-      id: 'benito',
-      name: 'San Benito de Nursia',
       dates: '480–547',
       country: 'Italia 🇮🇹',
       bio: 'Es el patrón de Europa y fundador del monacato occidental. Su famosa regla se resume en "Ora et labora" (Reza y trabaja).',
@@ -160,8 +162,6 @@ const FeManager = (() => {
       ]
     },
     {
-      id: 'francisco',
-      name: 'San Francisco de Asís',
       dates: '1181–1226',
       country: 'Italia 🇮🇹',
       bio: 'Nació en Italia. Es conocido por su amor a la naturaleza y a los animales. Fundó la orden de los franciscanos y escribió el Cántico de las Criaturas.',
@@ -172,8 +172,6 @@ const FeManager = (() => {
       ]
     },
     {
-      id: 'teresa_andes',
-      name: 'Santa Teresa de los Andes',
       dates: '1900–1920',
       country: 'Chile 🇨🇱',
       bio: 'Es la primera santa de Chile. Nació en Santiago y vivió en el monasterio de Los Andes. Es conocida por su alegría y su entrega a Dios desde joven.',
@@ -185,8 +183,6 @@ const FeManager = (() => {
     },
     // PRUNED [2026-04-14]: Removed 'jorge' to stay within MAX 15 limit
     {
-      id: 'alberto_hurtado',
-      name: 'San Alberto Hurtado',
       dates: '1901–1952',
       country: 'Chile 🇨🇱',
       bio: 'Sacerdote jesuita chileno que fundó el Hogar de Cristo para ayudar a las personas más pobres. Siempre decía: "Contento, Señor, contento".',
@@ -198,8 +194,6 @@ const FeManager = (() => {
     },
     // PRUNED [2026-04-14]: Removed 'tomas_aquino' to stay within MAX 15 limit
     {
-      id: 'rosa_lima',
-      name: 'Santa Rosa de Lima',
       dates: '1586–1617',
       country: 'Perú 🇵🇪',
       bio: 'Es la primera santa de América. Vivió en Lima y dedicó su vida a ayudar a los enfermos y a los necesitados en su propia casa.',
@@ -210,8 +204,6 @@ const FeManager = (() => {
       ]
     },
     {
-      id: 'martin_porres',
-      name: 'San Martín de Porres',
       dates: '1579–1639',
       country: 'Perú 🇵🇪',
       bio: 'Conocido como el "Santo de la Escoba" por su humildad. Era un gran enfermero y se dice que podía hacer que perros, gatos y ratones comieran del mismo plato.',
@@ -476,33 +468,29 @@ const FeManager = (() => {
     return PRAYERS.find(p => p.id === id) || null;
   }
 
-  const HERITAGE = [
+  // PRUNED [2026-10-24]: Removed fiesta_san_pedro, carmen, sanfrancisco_stgo, tirana to make room for 1 new heritage.
+// PRUNED [2026-10-24]: Removed fiesta_san_pedro, carmen, sanfrancisco_stgo, tirana to make room for 1 new heritage.
+const HERITAGE = [
+  { id: 'catedral_chillan', name: 'Catedral de Chillán', region: 'Ñuble', type: 'Iglesia', desc: 'Conocida por su arquitectura moderna y arcos cruzados. Fue construida tras el terremoto de 1939.', question: { q: '¿Por qué fue construida la actual Catedral de Chillán?', a: ['Tras el terremoto de 1939','Para celebrar la independencia','Como regalo de España'], correct: 0 } },
+  { id: 'catedral_chillan', name: 'Catedral de Chillán', region: 'Ñuble', type: 'Iglesia', desc: 'Conocida por su arquitectura moderna y arcos cruzados. Fue construida tras el terremoto de 1939.', question: { q: '¿Por qué fue construida la actual Catedral de Chillán?', a: ['Tras el terremoto de 1939','Para celebrar la independencia','Como regalo de España'], correct: 0 } },
     // PRUNED [2026-06-15]: Removed duplicate 'tirana' object (different structure) to respect MAX 8 limit
     // PRUNED [2026-06-15]: Removed 'vasquez' to make room for 'fiesta_san_pedro' and stay within MAX 8 limit
     {
-      id: 'fiesta_san_pedro',
-      title: 'Fiesta de San Pedro',
       info: 'Se celebra el 29 de junio. Los pescadores de la costa chilena adornan sus botes para pedir buena pesca y protección a su patrono.',
       q: '¿Qué grupo de trabajadores celebra a San Pedro?', a: ['Los pescadores', 'Los mineros', 'Los agricultores'], correct: 0,
       explain: 'La Fiesta de San Pedro se celebra el 29 de junio; los pescadores de la costa chilena adornan sus botes en honor a su patrono.'
     },
     {
-      id: 'carmen',
-      title: 'Virgen del Carmen',
       info: 'Es la Patrona de Chile. Fue declarada así en 1923. Cada 16 de julio se celebra su fiesta con procesiones y bailes religiosos.',
       q: '¿Qué día es la fiesta de la Virgen del Carmen?', a: ['18 de septiembre', '16 de julio', '25 de diciembre'], correct: 1,
       explain: 'La Virgen del Carmen, Patrona de Chile desde 1923, se celebra cada 16 de julio con procesiones y bailes religiosos.'
     },
     {
-      id: 'sanfrancisco_stgo',
-      title: 'Iglesia de San Francisco',
       info: 'Es la iglesia más antigua de Santiago. Su construcción comenzó en 1586 y ha sobrevivido a muchos terremotos.',
       q: '¿Qué tiene de especial esta iglesia?', a: ['Es la más alta', 'Es la más antigua de Santiago', 'Es de cristal'], correct: 1,
       explain: 'La Iglesia de San Francisco es la más antigua de Santiago; su construcción comenzó en 1586.'
     },
     {
-      id: 'tirana',
-      title: 'Fiesta de La Tirana',
       info: 'Se celebra en el norte de Chile cada 16 de julio. Es famosa por sus coloridas "Diabladas" y bailes en honor a la Virgen del Carmen.',
       q: '¿En qué zona de Chile se celebra La Tirana?', a: ['En el sur', 'En el centro', 'En el norte'], correct: 2,
       explain: 'La Fiesta de La Tirana se celebra en el norte de Chile cada 16 de julio, con coloridas "Diabladas" en honor a la Virgen del Carmen.'
