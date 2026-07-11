@@ -1,47 +1,7 @@
 {
-  "generatedAt": "2026-07-08T01:29:46.009Z",
+  "generatedAt": "2026-07-11T00:23:58.550Z",
   "windowHours": 72,
-  "totalGroups": 3,
-  "totalEvents": 6,
-  "topGroups": [
-    {
-      "app": "world-cup",
-      "kind": "console.error",
-      "page": "world-cup.html",
-      "message": "Sync failed Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1783469468609,
-      "lastTs": 1783469468609,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1783469468607,
-      "lastTs": 1783469468607,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "match detail fetch failed for 760508 Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1783469468606,
-      "lastTs": 1783469468606,
-      "users": 1
-    }
-  ]
+  "totalGroups": 0,
+  "totalEvents": 0,
+  "topGroups": []
 }
