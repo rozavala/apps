@@ -504,6 +504,68 @@
 .vc-quiz-msg { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; margin-bottom: 10px; }
 .vc-quiz .vc-btn-primary { padding: 10px 20px; border-radius: 10px; border: none; }
 
+/* Where we'll stay */
+.vc-stays { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.vc-stay { background: #ffffff; border: 1px solid #e6e6ee; border-radius: 14px; overflow: hidden; }
+.vc-stay-img { width: 100%; aspect-ratio: 16/9; background: #ece9f5; }
+.vc-stay-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vc-stay-body { padding: 10px 12px; }
+.vc-stay-name { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; }
+.vc-stay-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.vc-stay-meta span { background: #ece9f5; border-radius: 99px; padding: 3px 9px; font-size: 0.74rem; font-weight: 700; }
+.vc-stay-feature { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); line-height: 1.4; }
+
+/* How it's governed */
+.vc-govs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.vc-gov { background: #ffffff; border: 1px solid #e6e6ee; border-radius: 14px; padding: 12px 14px; }
+.vc-gov-head { font-family: var(--font-display); font-weight: 800; font-size: 1rem; margin-bottom: 8px; }
+.vc-gov-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.84rem; padding: 4px 0; border-top: 1px solid #f0eef8; }
+.vc-gov-row span { color: var(--text-muted); font-weight: 700; }
+.vc-gov-row b { font-weight: 800; text-align: right; }
+
+/* Cool & new */
+.vc-cools { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.vc-cool { background: linear-gradient(180deg, rgba(251,191,36,0.10), #ffffff); border: 1px solid #f2e6c8; border-radius: 14px; padding: 12px 14px; }
+.vc-cool-head { font-family: var(--font-display); font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
+.vc-cool-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.vc-cool-list li { font-size: 0.84rem; font-weight: 600; color: var(--text); line-height: 1.45; }
+
+/* Money & prices */
+.vc-money-conv { font-weight: 800; font-family: var(--font-display); text-align: center; margin-bottom: 12px; }
+.vc-money-conv input { width: 84px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid #e6e6ee; background: #ece9f5; font-weight: 800; font-size: 1rem; text-align: center; color: var(--text); outline: none; }
+.vc-money-conv input:focus { border-color: #2563EB; }
+.vc-money-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.vc-money-card { background: #ffffff; border: 1px solid #e6e6ee; border-radius: 14px; padding: 12px 14px; text-align: center; }
+.vc-money-headrow { font-family: var(--font-display); font-weight: 800; font-size: 0.9rem; }
+.vc-money-amt { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; color: #059669; margin: 4px 0; }
+.vc-money-sub { font-size: 0.76rem; font-weight: 700; color: var(--text-muted); }
+.vc-money-buys { list-style: none; text-align: left; margin: 8px 0 0; padding: 8px 0 0; border-top: 1px solid #f0eef8; display: grid; gap: 4px; }
+.vc-money-buys li { font-size: 0.8rem; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.vc-money-buys li span { color: var(--text-muted); font-weight: 800; white-space: nowrap; }
+.vc-money-foot { text-align: center; font-size: 0.76rem; color: var(--text-muted); font-weight: 700; margin-top: 8px; }
+
+/* Foods to try */
+.vc-foods { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.vc-food-card { background: #ffffff; border: 1px solid #e6e6ee; border-radius: 14px; padding: 12px 14px; }
+.vc-food-country { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; margin-bottom: 8px; }
+.vc-food { display: flex; gap: 10px; padding: 6px 0; border-top: 1px solid #f0eef8; }
+.vc-food:first-of-type { border-top: none; }
+.vc-food-emoji { font-size: 1.5rem; flex-shrink: 0; line-height: 1.3; }
+.vc-food-name { font-weight: 800; font-size: 0.88rem; }
+.vc-food-dare { font-size: 0.72rem; }
+.vc-food-desc { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); line-height: 1.4; margin-top: 2px; }
+
+/* Local phrases */
+.vc-phrases { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.vc-phrase-card { background: #ffffff; border: 1px solid #e6e6ee; border-radius: 14px; padding: 12px 14px; }
+.vc-phrase-country { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; margin-bottom: 8px; }
+.vc-phrase-country span { font-weight: 700; color: var(--text-muted); font-size: 0.8rem; }
+.vc-phrase { padding: 6px 0; border-top: 1px solid #f0eef8; }
+.vc-phrase:first-of-type { border-top: none; }
+.vc-phrase-word { font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; color: #4338CA; margin-right: 8px; }
+.vc-phrase-say { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); font-style: italic; }
+.vc-phrase-mean { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text); margin-top: 2px; }
+
 @media (max-width: 480px) {
   .vc-pack-cols { grid-template-columns: 1fr; }
 }

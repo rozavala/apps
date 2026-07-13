@@ -489,7 +489,13 @@ var Vacation = (function() {
     var cd = _countdown(trip);
     var overviewHtml = _renderOverview(trip);
     var flightsHtml = _renderFlights(trip);
+    var staysHtml = _renderStays(trip);
     var countriesHtml = _renderCountries(trip);
+    var governHtml = _renderGovern(trip);
+    var coolHtml = _renderCool(trip);
+    var moneyHtml = _renderMoney(trip);
+    var foodsHtml = _renderFoods(trip);
+    var phrasesHtml = _renderPhrases(trip);
     var placesHtml = _renderPlaces(trip);
     var quizHtml = _renderQuiz(trip);
     var galleryHtml = _renderGallery(trip);
@@ -532,8 +538,14 @@ var Vacation = (function() {
           : '') +
         overviewHtml +
         flightsHtml +
+        staysHtml +
         galleryHtml +
         countriesHtml +
+        governHtml +
+        coolHtml +
+        moneyHtml +
+        foodsHtml +
+        phrasesHtml +
         placesHtml +
         quizHtml +
         suggestionsHtml +
@@ -848,6 +860,163 @@ var Vacation = (function() {
     _quizRerender(trip);
   }
 
+  // ── Where we'll stay (hotels / villas) ──
+  function _renderStays(trip) {
+    var s = Array.isArray(trip.stays) ? trip.stays : [];
+    if (s.length === 0) return '';
+    var cards = s.map(function(st) {
+      if (!st) return '';
+      return '<div class="vc-stay">' +
+        (st.image
+          ? '<div class="vc-stay-img"><img src="' + _esc(st.image) + '" alt="' + _esc(st.name || '') + '" ' +
+            'loading="lazy" referrerpolicy="no-referrer" onerror="this.closest(\'.vc-stay-img\').style.display=\'none\'"></div>'
+          : '') +
+        '<div class="vc-stay-body">' +
+          '<div class="vc-stay-name">🏨 ' + _esc(st.name || '') + '</div>' +
+          '<div class="vc-stay-meta">' +
+            (st.place ? '<span>📍 ' + _esc(st.place) + '</span>' : '') +
+            (st.dates ? '<span>📅 ' + _esc(st.dates) + '</span>' : '') +
+            (st.nights ? '<span>🌙 ' + _esc(st.nights) + '</span>' : '') +
+          '</div>' +
+          (st.feature ? '<div class="vc-stay-feature">' + _esc(st.feature) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">🏨 Where we\'ll stay</div>' +
+      '<div class="vc-stays">' + cards + '</div></div>';
+  }
+
+  // ── How it's governed (neutral civics) ──
+  function _renderGovern(trip) {
+    var g = Array.isArray(trip.govern) ? trip.govern : [];
+    if (g.length === 0) return '';
+    var cards = g.map(function(co) {
+      if (!co) return '';
+      function row(label, val) {
+        return val ? '<div class="vc-gov-row"><span>' + label + '</span><b>' + _esc(val) + '</b></div>' : '';
+      }
+      return '<div class="vc-gov">' +
+        '<div class="vc-gov-head">' + _esc(co.flag || '🏳️') + ' ' + _esc(co.country || '') + '</div>' +
+        row('Government', co.type) +
+        row('Led by', co.leader) +
+        row('Capital', co.capital) +
+        row('Size', co.size) +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">🏛️ How it\'s governed</div>' +
+      '<div class="vc-govs">' + cards + '</div></div>';
+  }
+
+  // ── Cool & New: curated, evergreen positive facts (no live feed) ──
+  function _renderCool(trip) {
+    var c = Array.isArray(trip.cool) ? trip.cool : [];
+    if (c.length === 0) return '';
+    var cards = c.map(function(co) {
+      if (!co) return '';
+      var items = Array.isArray(co.items) ? co.items : [];
+      return '<div class="vc-cool">' +
+        '<div class="vc-cool-head">' + _esc(co.flag || '🌟') + ' ' + _esc(co.country || '') + '</div>' +
+        '<ul class="vc-cool-list">' +
+          items.map(function(x) { return '<li>' + _esc(x) + '</li>'; }).join('') +
+        '</ul>' +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">🌟 Cool &amp; new</div>' +
+      '<div class="vc-cools">' + cards + '</div></div>';
+  }
+
+  // ── Money & prices, with a live USD converter ──
+  function _renderMoney(trip) {
+    var m = Array.isArray(trip.money) ? trip.money : [];
+    if (m.length === 0) return '';
+    var cards = m.map(function(co) {
+      if (!co) return '';
+      var rate = Number(co.perUSD) || 0;
+      var sym = co.symbol || '';
+      var buys = Array.isArray(co.buys) ? co.buys : [];
+      return '<div class="vc-money-card">' +
+        '<div class="vc-money-headrow">' + _esc(co.flag || '💰') + ' ' + _esc(co.country || '') + '</div>' +
+        '<div class="vc-money-amt" data-rate="' + rate + '" data-sym="' + _esc(sym) + '">' +
+          _esc(sym) + ' ' + Math.round(20 * rate).toLocaleString() + '</div>' +
+        '<div class="vc-money-sub">1 USD ≈ ' + _esc(sym) + rate + ' ' + _esc(co.code || '') + '</div>' +
+        (buys.length ? '<ul class="vc-money-buys">' +
+          buys.map(function(b) {
+            return '<li>' + _esc(b.emoji || '•') + ' ' + _esc(b.item || '') +
+              (b.usd != null ? ' <span>~$' + _esc(b.usd) + '</span>' : '') + '</li>';
+          }).join('') + '</ul>' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">💱 Money &amp; prices</div>' +
+      '<div class="vc-money-conv">$ <input id="vc-money-usd" type="number" min="0" step="1" value="20" ' +
+        'inputmode="numeric" oninput="Vacation.moneyConvert()"> USD is about…</div>' +
+      '<div class="vc-money-cards">' + cards + '</div>' +
+      '<div class="vc-money-foot">Rates and prices are approximate — just for fun learning.</div></div>';
+  }
+  function moneyConvert() {
+    var inp = document.getElementById('vc-money-usd');
+    if (!inp) return;
+    var usd = parseFloat(inp.value);
+    if (isNaN(usd) || usd < 0) usd = 0;
+    var els = document.querySelectorAll('.vc-money-amt');
+    Array.prototype.forEach.call(els, function(el) {
+      var rate = parseFloat(el.getAttribute('data-rate')) || 0;
+      var sym = el.getAttribute('data-sym') || '';
+      el.textContent = sym + ' ' + Math.round(usd * rate).toLocaleString();
+    });
+  }
+
+  // ── Foods to try, with a playful dare meter ──
+  function _renderFoods(trip) {
+    var f = Array.isArray(trip.foods) ? trip.foods : [];
+    if (f.length === 0) return '';
+    var cards = f.map(function(co) {
+      if (!co) return '';
+      var items = Array.isArray(co.items) ? co.items : [];
+      var rows = items.map(function(it) {
+        var dare = Math.max(0, Math.min(3, Number(it.dare) || 0));
+        var meter = dare ? '<span class="vc-food-dare" title="Adventure level">' +
+          new Array(dare + 1).join('🌶️') + '</span>' : '';
+        return '<div class="vc-food">' +
+          '<span class="vc-food-emoji">' + _esc(it.emoji || '🍽️') + '</span>' +
+          '<div class="vc-food-body">' +
+            '<div class="vc-food-name">' + _esc(it.name || '') + ' ' + meter + '</div>' +
+            (it.desc ? '<div class="vc-food-desc">' + _esc(it.desc) + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="vc-food-card">' +
+        '<div class="vc-food-country">' + _esc(co.flag || '🍴') + ' ' + _esc(co.country || '') + '</div>' +
+        rows +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">🍜 Foods to try</div>' +
+      '<div class="vc-foods">' + cards + '</div></div>';
+  }
+
+  // ── Local phrases ──
+  function _renderPhrases(trip) {
+    var p = Array.isArray(trip.phrases) ? trip.phrases : [];
+    if (p.length === 0) return '';
+    var cards = p.map(function(co) {
+      if (!co) return '';
+      var items = Array.isArray(co.items) ? co.items : [];
+      var rows = items.map(function(it) {
+        return '<div class="vc-phrase">' +
+          '<span class="vc-phrase-word">' + _esc(it.word || '') + '</span>' +
+          (it.say ? '<span class="vc-phrase-say">' + _esc(it.say) + '</span>' : '') +
+          '<span class="vc-phrase-mean">' + _esc(it.mean || '') + '</span>' +
+        '</div>';
+      }).join('');
+      return '<div class="vc-phrase-card">' +
+        '<div class="vc-phrase-country">' + _esc(co.flag || '🗣️') + ' ' + _esc(co.country || '') +
+          (co.language ? ' <span>· ' + _esc(co.language) + '</span>' : '') + '</div>' +
+        rows +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">🗣️ Local phrases</div>' +
+      '<div class="vc-phrases">' + cards + '</div></div>';
+  }
+
   function _renderPacking(trip) {
     var keys = Object.keys(trip.packing || {});
     if (keys.length === 0) return '<div class="vc-empty" style="padding:12px 0;">No packing list yet.</div>';
@@ -943,6 +1112,7 @@ var Vacation = (function() {
     quizStart: quizStart,
     quizAnswer: quizAnswer,
     quizNext: quizNext,
+    moneyConvert: moneyConvert,
     _togglePack: togglePackItem,
     _addPack: addPackItem,
     _delPack: removePackItem,
