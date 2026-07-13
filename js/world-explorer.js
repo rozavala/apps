@@ -614,6 +614,60 @@ const WorldExplorer = (() => {
           { q: 'Which animal is a national symbol of Thailand?', qEs: '¿Qué animal es un símbolo nacional de Tailandia?', options: ['Tiger', 'Elephant', 'Panda', 'Crane'], optionsEs: ['Tigre', 'Elefante', 'Panda', 'Grulla'], answer: 1 },
           { q: 'Which major river borders Thailand?', qEs: '¿Qué río importante bordea Tailandia?', options: ['Ganges', 'Mekong', 'Yangtze', 'Indus'], optionsEs: ['Ganges', 'Mekong', 'Yangtsé', 'Indo'], answer: 1 }
         ]
+      },
+      {
+        id: 'singapore', name: 'Singapore', nameEs: 'Singapur', flag: '🇸🇬',
+        capital: 'Singapore', capitalEs: 'Singapur',
+        facts: [
+          { en: 'Singapore is a city, an island, and a country all at once.', es: 'Singapur es una ciudad, una isla y un país a la vez.' },
+          { en: 'It sits at the southern tip of Southeast Asia, near the equator.', es: 'Está en el extremo sur del sudeste asiático, cerca del ecuador.' },
+          { en: 'Gardens by the Bay has giant solar-powered "Supertrees".', es: 'Gardens by the Bay tiene "Supertrees" gigantes con energía solar.' },
+          { en: 'Its mascot is the Merlion, half lion and half fish.', es: 'Su mascota es el Merlión, mitad león y mitad pez.' }
+        ],
+        landmark: { name: 'Marina Bay Sands', nameEs: 'Marina Bay Sands', emoji: '🏙️' },
+        animal: { name: 'Merlion', nameEs: 'Merlión', emoji: '🦁' },
+        quiz: [
+          { q: 'What is the capital of Singapore?', qEs: '¿Cuál es la capital de Singapur?', options: ['Kuala Lumpur', 'Singapore', 'Jakarta', 'Bangkok'], optionsEs: ['Kuala Lumpur', 'Singapur', 'Yakarta', 'Bangkok'], answer: 1 },
+          { q: 'Singapore is best described as a…', qEs: 'Singapur se describe mejor como…', options: ['City-state', 'Continent', 'Mountain range', 'Desert'], optionsEs: ['Ciudad-estado', 'Continente', 'Cordillera', 'Desierto'], answer: 0 },
+          { q: 'What is Singapore\'s mascot?', qEs: '¿Cuál es la mascota de Singapur?', options: ['Dragon', 'Merlion', 'Phoenix', 'Griffin'], optionsEs: ['Dragón', 'Merlión', 'Fénix', 'Grifo'], answer: 1 },
+          { q: 'What giant structures glow at Gardens by the Bay?', qEs: '¿Qué estructuras gigantes brillan en Gardens by the Bay?', options: ['Pyramids', 'Supertrees', 'Windmills', 'Fountains'], optionsEs: ['Pirámides', 'Supertrees', 'Molinos', 'Fuentes'], answer: 1 }
+        ]
+      },
+      {
+        id: 'indonesia', name: 'Indonesia', nameEs: 'Indonesia', flag: '🇮🇩',
+        capital: 'Jakarta', capitalEs: 'Yakarta',
+        facts: [
+          { en: 'Indonesia is made up of more than 17,000 islands.', es: 'Indonesia está formada por más de 17,000 islas.' },
+          { en: 'Bali and the Gili Islands are part of Indonesia.', es: 'Bali y las islas Gili son parte de Indonesia.' },
+          { en: 'It sits on the "Ring of Fire" and has many volcanoes.', es: 'Está en el "Cinturón de Fuego" y tiene muchos volcanes.' },
+          { en: 'The Komodo dragon, the world\'s largest lizard, lives here.', es: 'El dragón de Komodo, el lagarto más grande del mundo, vive aquí.' }
+        ],
+        landmark: { name: 'Borobudur Temple', nameEs: 'Templo de Borobudur', emoji: '🛕' },
+        animal: { name: 'Komodo Dragon', nameEs: 'Dragón de Komodo', emoji: '🦎' },
+        quiz: [
+          { q: 'What is the capital of Indonesia?', qEs: '¿Cuál es la capital de Indonesia?', options: ['Bali', 'Jakarta', 'Manila', 'Hanoi'], optionsEs: ['Bali', 'Yakarta', 'Manila', 'Hanói'], answer: 1 },
+          { q: 'About how many islands make up Indonesia?', qEs: '¿Aproximadamente cuántas islas forman Indonesia?', options: ['Around 50', 'Around 500', 'More than 17,000', 'Just one'], optionsEs: ['Unas 50', 'Unas 500', 'Más de 17,000', 'Solo una'], answer: 2 },
+          { q: 'Which famous island belongs to Indonesia?', qEs: '¿Qué famosa isla pertenece a Indonesia?', options: ['Bali', 'Sicily', 'Hawaii', 'Crete'], optionsEs: ['Bali', 'Sicilia', 'Hawái', 'Creta'], answer: 0 },
+          { q: 'What giant lizard lives in Indonesia?', qEs: '¿Qué lagarto gigante vive en Indonesia?', options: ['Iguana', 'Komodo dragon', 'Gila monster', 'Nile monitor'], optionsEs: ['Iguana', 'Dragón de Komodo', 'Monstruo de Gila', 'Varano del Nilo'], answer: 1 }
+        ]
+      },
+      {
+        id: 'taiwan', name: 'Taiwan', nameEs: 'Taiwán', flag: '🇹🇼',
+        capital: 'Taipei', capitalEs: 'Taipéi',
+        facts: [
+          { en: 'Taiwan is an island off the southeast coast of Asia.', es: 'Taiwán es una isla frente a la costa sudeste de Asia.' },
+          { en: 'Taipei 101 was the world\'s tallest building from 2004 to 2010.', es: 'El Taipéi 101 fue el edificio más alto del mundo de 2004 a 2010.' },
+          { en: 'Bubble tea (boba) was invented in Taiwan.', es: 'El té de burbujas (boba) se inventó en Taiwán.' },
+          { en: 'Most of the island is covered by mountains and forest.', es: 'La mayor parte de la isla está cubierta de montañas y bosque.' }
+        ],
+        landmark: { name: 'Taipei 101', nameEs: 'Taipéi 101', emoji: '🗼' },
+        animal: { name: 'Formosan Black Bear', nameEs: 'Oso negro de Formosa', emoji: '🐻' },
+        quiz: [
+          { q: 'What is the capital of Taiwan?', qEs: '¿Cuál es la capital de Taiwán?', options: ['Taipei', 'Hong Kong', 'Shanghai', 'Seoul'], optionsEs: ['Taipéi', 'Hong Kong', 'Shanghái', 'Seúl'], answer: 0 },
+          { q: 'What famous tall tower is in Taipei?', qEs: '¿Qué famosa torre alta está en Taipéi?', options: ['Taipei 101', 'Eiffel Tower', 'Willis Tower', 'The Shard'], optionsEs: ['Taipéi 101', 'Torre Eiffel', 'Torre Willis', 'The Shard'], answer: 0 },
+          { q: 'Which popular drink was invented in Taiwan?', qEs: '¿Qué bebida popular se inventó en Taiwán?', options: ['Bubble tea', 'Cola', 'Lemonade', 'Espresso'], optionsEs: ['Té de burbujas', 'Cola', 'Limonada', 'Espresso'], answer: 0 },
+          { q: 'Taiwan is mostly covered by…', qEs: 'Taiwán está cubierto en su mayoría por…', options: ['Desert', 'Mountains and forest', 'Ice', 'Grassland'], optionsEs: ['Desierto', 'Montañas y bosque', 'Hielo', 'Praderas'], answer: 1 }
+        ]
       }
     ] },
     { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
@@ -784,7 +838,22 @@ const WorldExplorer = (() => {
     });
 
     svg += `</svg>`;
-    wrap.innerHTML = svg;
+
+    // Tappable country grid. The SVG map only has drawn shapes for South
+    // America, so without this every other continent would show a blank
+    // ocean with no way to open a country. The grid makes every country
+    // reachable and doubles as a legend where the map does exist.
+    const grid = '<div class="we-country-grid">' +
+      currentContinent.countries.map(c => {
+        const isVisited = visited.includes(c.id);
+        return `<button class="we-country-chip${isVisited ? ' visited' : ''}" onclick="WorldExplorer.openCountry('${c.id}')">` +
+          `<span class="we-chip-flag">${c.flag}</span>` +
+          `<span class="we-chip-name">${lang === 'es' ? c.nameEs : c.name}</span>` +
+          (isVisited ? '<span class="we-chip-check">✓</span>' : '') +
+        `</button>`;
+      }).join('') + '</div>';
+
+    wrap.innerHTML = svg + grid;
   }
 
   function openCountry(id) {
