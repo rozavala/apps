@@ -34,6 +34,7 @@ var Vacation = (function() {
   var _parentUnlocked = false;
   var _viewing = null;  // currently-open trip id, or null
   var _mode = 'list';   // 'list' | 'detail' | 'edit' | 'new'
+  var _quiz = null;     // in-progress quiz: { tripId, idx, score, answered, chosen }
 
   // Default packing categories per kid + shared family items.
   var DEFAULT_PACKING = {
@@ -129,6 +130,7 @@ var Vacation = (function() {
   function openTrip(id) {
     _viewing = id;
     _mode = 'detail';
+    _quiz = null;
     _render();
   }
 
@@ -486,6 +488,10 @@ var Vacation = (function() {
 
     var cd = _countdown(trip);
     var overviewHtml = _renderOverview(trip);
+    var flightsHtml = _renderFlights(trip);
+    var countriesHtml = _renderCountries(trip);
+    var placesHtml = _renderPlaces(trip);
+    var quizHtml = _renderQuiz(trip);
     var galleryHtml = _renderGallery(trip);
     var suggestionsHtml = _renderSuggestions(trip);
     var packingHtml = _renderPacking(trip);
@@ -525,7 +531,11 @@ var Vacation = (function() {
           ? '<a class="vc-reveal-btn" href="' + _esc(trip.slidesUrl) + '" target="_blank" rel="noopener">🎉 Reveal slideshow</a>'
           : '') +
         overviewHtml +
+        flightsHtml +
         galleryHtml +
+        countriesHtml +
+        placesHtml +
+        quizHtml +
         suggestionsHtml +
         '<div class="vc-section">' +
           '<div class="vc-section-head">🧳 Packing</div>' +
@@ -596,6 +606,246 @@ var Vacation = (function() {
       '<div class="vc-section-head">💡 Ideas &amp; tips</div>' +
       '<div class="vc-suggs">' + rows + '</div>' +
     '</div>';
+  }
+
+  // ── Flights board ──
+  function _renderFlights(trip) {
+    var f = Array.isArray(trip.flights) ? trip.flights : [];
+    if (f.length === 0) return '';
+    var rows = f.map(function(fl) {
+      if (!fl) return '';
+      return '<div class="vc-flight">' +
+        '<div class="vc-flight-top">' +
+          '<span class="vc-flight-air">' + _esc(fl.airline || '') +
+            (fl.number ? ' <b>' + _esc(fl.number) + '</b>' : '') + '</span>' +
+          (fl.date ? '<span class="vc-flight-date">' + _esc(fl.date) + '</span>' : '') +
+        '</div>' +
+        '<div class="vc-flight-route">' +
+          '<div class="vc-fl-end">' +
+            '<span class="vc-fl-code">' + _esc(fl.fromCode || '') + '</span>' +
+            '<span class="vc-fl-city">' + _esc(fl.fromCity || '') + '</span>' +
+            (fl.depLocal ? '<span class="vc-fl-time">' + _esc(fl.depLocal) + '</span>' : '') +
+          '</div>' +
+          '<div class="vc-fl-mid">✈️' + (fl.duration ? '<span>' + _esc(fl.duration) + '</span>' : '') + '</div>' +
+          '<div class="vc-fl-end">' +
+            '<span class="vc-fl-code">' + _esc(fl.toCode || '') + '</span>' +
+            '<span class="vc-fl-city">' + _esc(fl.toCity || '') + '</span>' +
+            (fl.arrLocal ? '<span class="vc-fl-time">' + _esc(fl.arrLocal) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        (fl.note ? '<div class="vc-flight-note">' + _esc(fl.note) + '</div>' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">✈️ Flights</div>' +
+      '<div class="vc-flights">' + rows + '</div></div>';
+  }
+
+  // ── Countries & culture ──
+  function _renderCountries(trip) {
+    var c = Array.isArray(trip.countries) ? trip.countries : [];
+    if (c.length === 0) return '';
+    var cards = c.map(function(co) {
+      if (!co) return '';
+      var facts = Array.isArray(co.facts) ? co.facts : [];
+      return '<div class="vc-country">' +
+        '<div class="vc-country-head">' +
+          '<span class="vc-country-flag">' + _esc(co.flag || '🏳️') + '</span>' +
+          '<span class="vc-country-name">' + _esc(co.name || '') + '</span>' +
+        '</div>' +
+        '<div class="vc-country-meta">' +
+          (co.capital ? '<span>🏙️ ' + _esc(co.capital) + '</span>' : '') +
+          (co.language ? '<span>🗣️ ' + _esc(co.language) + '</span>' : '') +
+          (co.currency ? '<span>💰 ' + _esc(co.currency) + '</span>' : '') +
+        '</div>' +
+        (co.blurb ? '<p class="vc-country-blurb">' + _esc(co.blurb) + '</p>' : '') +
+        (facts.length ? '<ul class="vc-country-facts">' +
+          facts.map(function(x) { return '<li>' + _esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">🌏 Countries &amp; culture</div>' +
+      '<div class="vc-countries">' + cards + '</div></div>';
+  }
+
+  // ── Places & landmarks, with a fit-to-route mini map ──
+  function _renderPlaces(trip) {
+    var p = Array.isArray(trip.places) ? trip.places : [];
+    if (p.length === 0) return '';
+    var cards = p.map(function(pl) {
+      if (!pl) return '';
+      return '<div class="vc-place">' +
+        (pl.image
+          ? '<div class="vc-place-img"><img src="' + _esc(pl.image) + '" alt="' + _esc(pl.name || '') + '" ' +
+            'loading="lazy" referrerpolicy="no-referrer" ' +
+            'onerror="this.closest(\'.vc-place-img\').style.display=\'none\'"></div>'
+          : '') +
+        '<div class="vc-place-body">' +
+          '<div class="vc-place-name">' + _esc(pl.emoji || '📍') + ' ' + _esc(pl.name || '') + '</div>' +
+          (pl.blurb ? '<div class="vc-place-blurb">' + _esc(pl.blurb) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="vc-section"><div class="vc-section-head">📍 Places we\'ll visit</div>' +
+      _placesMap(p) +
+      '<div class="vc-places">' + cards + '</div></div>';
+  }
+
+  // Self-contained SVG route map: fits all places with lat/lon into a
+  // padded bounding box, draws the route line, numbered pins and labels.
+  // No external tiles, so it always renders.
+  function _placesMap(places) {
+    var pts = (places || []).filter(function(p) {
+      return p && typeof p.lat === 'number' && typeof p.lon === 'number';
+    });
+    if (pts.length < 2) return '';
+    var lats = pts.map(function(p) { return p.lat; });
+    var lons = pts.map(function(p) { return p.lon; });
+    var minLat = Math.min.apply(null, lats), maxLat = Math.max.apply(null, lats);
+    var minLon = Math.min.apply(null, lons), maxLon = Math.max.apply(null, lons);
+    var padLat = (maxLat - minLat) * 0.25 || 2, padLon = (maxLon - minLon) * 0.25 || 2;
+    minLat -= padLat; maxLat += padLat; minLon -= padLon; maxLon += padLon;
+    var W = 100, H = 60;
+    function fx(lon) { return ((lon - minLon) / (maxLon - minLon) * W).toFixed(2); }
+    function fy(lat) { return ((maxLat - lat) / (maxLat - minLat) * H).toFixed(2); }
+
+    var poly = pts.map(function(p) { return fx(p.lon) + ',' + fy(p.lat); }).join(' ');
+    var dots = '', labels = '';
+    pts.forEach(function(p, i) {
+      var x = fx(p.lon), y = fy(p.lat);
+      dots += '<circle cx="' + x + '" cy="' + y + '" r="1.6" fill="#DB2777" stroke="#fff" stroke-width="0.5"/>' +
+        '<text x="' + x + '" y="' + (parseFloat(y) + 0.55).toFixed(2) + '" text-anchor="middle" ' +
+        'font-size="1.7" font-weight="800" fill="#fff">' + (i + 1) + '</text>';
+      labels += '<div class="vc-map-label" style="left:' + x + '%; top:' + y + '%;">' +
+        (i + 1) + '. ' + _esc(p.name || '') + '</div>';
+    });
+    return '<div class="vc-map">' +
+      '<svg viewBox="0 0 100 60" preserveAspectRatio="none" class="vc-map-svg">' +
+        '<polyline points="' + poly + '" fill="none" stroke="#6366F1" stroke-width="0.7" ' +
+          'stroke-dasharray="1.8 1.4" stroke-linecap="round"/>' + dots +
+      '</svg>' + labels +
+    '</div>';
+  }
+
+  // ── Interactive quiz (per-kid best score, synced) ──
+  function _quizKey() {
+    return typeof getUserAppKey === 'function' ? getUserAppKey('vacquiz') : null;
+  }
+  function _quizLoad() {
+    try {
+      var k = _quizKey();
+      if (!k) return {};
+      return JSON.parse(localStorage.getItem(k)) || {};
+    } catch (e) { return {}; }
+  }
+  function _quizSaveScore(tripId, score, total) {
+    var k = _quizKey();
+    if (!k) return null; // no logged-in kid → play without saving
+    var data = _quizLoad();
+    var prev = data[tripId] || { best: 0, total: total };
+    var best = Math.max(prev.best || 0, score);
+    data[tripId] = { best: best, total: total, lastScore: score };
+    try {
+      localStorage.setItem(k, JSON.stringify(data));
+      if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(k);
+    } catch (e) {}
+    return data[tripId];
+  }
+
+  function _renderQuiz(trip) {
+    var q = Array.isArray(trip.quiz) ? trip.quiz : [];
+    if (q.length === 0) return '';
+    return '<div class="vc-section"><div class="vc-section-head">🧠 Trip quiz</div>' +
+      '<div id="vc-quiz" class="vc-quiz">' + _quizBody(trip) + '</div></div>';
+  }
+
+  // Renders the quiz box for the current _quiz state (intro / question / done).
+  function _quizBody(trip) {
+    var q = Array.isArray(trip.quiz) ? trip.quiz : [];
+    var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    var running = _quiz && _quiz.tripId === trip.id;
+
+    if (!running) {
+      var saved = _quizLoad()[trip.id];
+      var bestLine = saved
+        ? '<div class="vc-quiz-best">🏆 Best: ' + saved.best + ' / ' + (saved.total || q.length) +
+          (user ? ' · ' + _esc(user.name) : '') + '</div>'
+        : '';
+      return '<div class="vc-quiz-intro">' +
+        '<p>' + q.length + ' questions about our trip. Ready?</p>' +
+        bestLine +
+        (user ? '' : '<p class="vc-quiz-hint">Log in as yourself to save your score.</p>') +
+        '<button class="vc-btn-primary" onclick="Vacation.quizStart(\'' + trip.id + '\')">▶ Start quiz</button>' +
+      '</div>';
+    }
+
+    if (_quiz.idx >= q.length) {
+      var pct = Math.round(_quiz.score / q.length * 100);
+      var msg = pct === 100 ? '🌟 Perfect!' : pct >= 60 ? '🎉 Great job!' : '👍 Nice try!';
+      var savedRes = _quizSaveScore(trip.id, _quiz.score, q.length);
+      return '<div class="vc-quiz-done">' +
+        '<div class="vc-quiz-score">' + _quiz.score + ' / ' + q.length + '</div>' +
+        '<div class="vc-quiz-msg">' + msg + '</div>' +
+        (savedRes ? '<div class="vc-quiz-best">🏆 Best: ' + savedRes.best + ' / ' + q.length + '</div>' : '') +
+        '<button class="vc-btn-primary" onclick="Vacation.quizStart(\'' + trip.id + '\')">↻ Play again</button>' +
+      '</div>';
+    }
+
+    var item = q[_quiz.idx] || {};
+    var opts = Array.isArray(item.options) ? item.options : [];
+    var optHtml = opts.map(function(opt, i) {
+      var cls = 'vc-quiz-opt';
+      if (_quiz.answered) {
+        if (i === item.answer) cls += ' correct';
+        else if (i === _quiz.chosen) cls += ' wrong';
+      }
+      return '<button class="' + cls + '" ' + (_quiz.answered ? 'disabled' : '') +
+        ' onclick="Vacation.quizAnswer(\'' + trip.id + '\', ' + i + ')">' + _esc(opt) + '</button>';
+    }).join('');
+
+    return '<div class="vc-quiz-q">' +
+      '<div class="vc-quiz-progress">Question ' + (_quiz.idx + 1) + ' / ' + q.length +
+        ' · Score ' + _quiz.score + '</div>' +
+      '<div class="vc-quiz-question">' + _esc(item.q || '') + '</div>' +
+      '<div class="vc-quiz-opts">' + optHtml + '</div>' +
+      (_quiz.answered
+        ? '<div class="vc-quiz-explain">' +
+            (_quiz.chosen === item.answer ? '✅ Correct! ' : '❌ ') +
+            _esc(item.explain || '') + '</div>' +
+          '<button class="vc-btn-primary" onclick="Vacation.quizNext(\'' + trip.id + '\')">' +
+            (_quiz.idx + 1 >= q.length ? 'See results →' : 'Next →') + '</button>'
+        : '') +
+    '</div>';
+  }
+
+  function _quizRerender(trip) {
+    var box = document.getElementById('vc-quiz');
+    if (box) box.innerHTML = _quizBody(trip);
+  }
+
+  function quizStart(tripId) {
+    var trip = _load().trips.find(function(t) { return t.id === tripId; });
+    if (!trip) return;
+    _quiz = { tripId: tripId, idx: 0, score: 0, answered: false, chosen: -1 };
+    _quizRerender(trip);
+  }
+  function quizAnswer(tripId, i) {
+    if (!_quiz || _quiz.tripId !== tripId || _quiz.answered) return;
+    var trip = _load().trips.find(function(t) { return t.id === tripId; });
+    if (!trip) return;
+    var item = (trip.quiz || [])[_quiz.idx];
+    if (!item) return;
+    _quiz.answered = true;
+    _quiz.chosen = i;
+    if (i === item.answer) _quiz.score++;
+    _quizRerender(trip);
+  }
+  function quizNext(tripId) {
+    if (!_quiz || _quiz.tripId !== tripId) return;
+    var trip = _load().trips.find(function(t) { return t.id === tripId; });
+    if (!trip) return;
+    _quiz.idx++;
+    _quiz.answered = false;
+    _quiz.chosen = -1;
+    _quizRerender(trip);
   }
 
   function _renderPacking(trip) {
@@ -690,6 +940,9 @@ var Vacation = (function() {
     deleteTrip: deleteTrip,
     saveNewTrip: saveNewTrip,
     saveEditTrip: saveEditTrip,
+    quizStart: quizStart,
+    quizAnswer: quizAnswer,
+    quizNext: quizNext,
     _togglePack: togglePackItem,
     _addPack: addPackItem,
     _delPack: removePackItem,
