@@ -1,21 +1,7 @@
 {
-  "generatedAt": "2026-07-14T01:23:32.124Z",
+  "generatedAt": "2026-07-17T01:24:02.090Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 2,
-  "topGroups": [
-    {
-      "app": "book-movie-check",
-      "kind": "console.warn",
-      "page": "book-movie-check.html",
-      "message": "[BMC] Lookup failed: Failed to fetch",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 2,
-      "firstTs": 1783991995238,
-      "lastTs": 1783992098087,
-      "users": 1
-    }
-  ]
+  "totalGroups": 0,
+  "totalEvents": 0,
+  "topGroups": []
 }
