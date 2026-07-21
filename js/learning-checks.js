@@ -40,9 +40,10 @@ var LearningCheck = (function() {
       { q: 'Which piece is placed in the corners at the start?', options: ['Bishop', 'Knight', 'Rook', 'Queen'], answer: 2 },
       { q: 'How many pawns does each player start with?', options: ['6', '8', '10', '12'], answer: 1 }
     ],
+    // PRUNED [2026-06-25]: Removed 2 oldest questions to make room for new ones.
     history: [
-      { q: 'What are the colors of the Chilean flag?', options: ['Red, White, Blue', 'Green, Yellow', 'Blue, White', 'Red, Yellow'], answer: 0 },
-      { q: 'Who discovered America?', options: ['Christopher Columbus', 'Ferdinand Magellan', 'Marco Polo', 'Vasco da Gama'], answer: 0 },
+      { q: 'What title did Pedro de Valdivia hold?', options: ['Governor', 'King', 'President', 'Emperor'], answer: 0 },
+      { q: 'What was the major indigenous group in southern Chile?', options: ['Mapuche', 'Inca', 'Aztec', 'Maya'], answer: 0 },
       { q: 'In what year did World War II end?', options: ['1945', '1939', '1918', '1950'], answer: 0 },
       { q: 'Who founded Santiago in 1541?', options: ['Pedro de Valdivia', 'Bernardo O\'Higgins', 'Arturo Prat', 'Manuel Blanco'], answer: 0 },
       { q: 'In what year did Chile declare independence?', options: ['1818', '1810', '1850', '1900'], answer: 0 },
