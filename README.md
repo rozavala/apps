@@ -40,6 +40,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **✈️ Vacation Planner** | Planifica las próximas aventuras y vacaciones familiares. (Plan upcoming family adventures and vacations.) | [vacation.html](vacation.html) |
 | **🏛️ Civics Lab** | Cómo funciona el gobierno de Chile y otros sistemas del mundo. (How the government of Chile and other world systems work.) | [civics-lab.html](civics-lab.html) |
 | **🏆 World Cup 2026** | Sigue los equipos, partidos y ciudades sede del torneo de la Copa del Mundo. (Follow the teams, matches and host cities of the World Cup tournament.) | [world-cup.html](world-cup.html) |
+| **⚓ Patrón de Lancha** | Estudia para el examen de Patrón de Lancha Deportivo. Aprende maniobras, reglamentación y náutica básica. (Study for the Patrón de Lancha exam. Learn maneuvers, regulations, and basic nautics.) | [patron-lancha.html](patron-lancha.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -73,6 +74,7 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Patrón de Lancha"!**: Prepárate para el examen oficial de DIRECTEMAR aprendiendo náutica, reglamentación y maniobras. (Get ready for the official DIRECTEMAR exam by learning nautics, regulations, and maneuvers).
 - **Corrección de Errores en Math Galaxy y Art Studio (Bug Fixes)**: Se solucionaron errores de ejecución en los juegos para asegurar una experiencia más fluida. (Fixed runtime errors in the games to ensure a smoother experience).
 - **Actualización World Cup 2026**: Solucionados problemas con la asignación de la Bota de Oro, agregado relleno de resultados anteriores completados y ocultamiento de predicciones de eliminatorias pasadas. (Fixed premature Golden Boot assignment, backfilled completed scores, and hid stale KO bids.)
 - **¡Nueva App "Invest Quest"!**: Un simulador de mercado amigable para niños. Aprende sobre riesgo y retorno. (A kid-friendly market simulator. Learn about risk and return).
