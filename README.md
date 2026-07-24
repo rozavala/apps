@@ -12,6 +12,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 
 | Aplicación (App) | Descripción (Description) | Enlace (Link) |
 | --- | --- | --- |
+| **⚓ Patrón de Lancha** | Prepara el examen teórico de Patrón de Lancha Deportiva (Chile): estudia y practica. (Prepare for the theoretical exam of Patrón de Lancha Deportiva (Chile): study and practice.) | [patron-lancha.html](patron-lancha.html) |
 | **🎹 Little Maestro** | Aprende a tocar el piano con lecciones interactivas, canciones reales y desafíos divertidos para pequeños músicos. (Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.) | [little-maestro.html](little-maestro.html) |
 | **🧮 Math Galaxy** | Supera desafíos matemáticos—suma, multiplicación, fracciones y más en una aventura espacial. (Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.) | [math-galaxy.html](math-galaxy.html) |
 | **🤖 Code Cadet** | Resuelve rompecabezas de lógica con programación visual en bloques. (Solve logic puzzles with visual block-based programming.) | [code-cadet.html](code-cadet.html) |
@@ -73,6 +74,7 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Patrón de Lancha"!**: Prepara el examen teórico de Patrón de Lancha Deportiva (Chile): estudia y practica. (Prepare for the theoretical exam of Patrón de Lancha Deportiva (Chile): study and practice.)
 - **Corrección de Errores en Math Galaxy y Art Studio (Bug Fixes)**: Se solucionaron errores de ejecución en los juegos para asegurar una experiencia más fluida. (Fixed runtime errors in the games to ensure a smoother experience).
 - **Actualización World Cup 2026**: Solucionados problemas con la asignación de la Bota de Oro, agregado relleno de resultados anteriores completados y ocultamiento de predicciones de eliminatorias pasadas. (Fixed premature Golden Boot assignment, backfilled completed scores, and hid stale KO bids.)
 - **¡Nueva App "Invest Quest"!**: Un simulador de mercado amigable para niños. Aprende sobre riesgo y retorno. (A kid-friendly market simulator. Learn about risk and return).
