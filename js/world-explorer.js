@@ -672,6 +672,12 @@ const WorldExplorer = (() => {
     ] },
     { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
       {
+        id: 'fiji', name: 'Fiji', nameEs: 'Fiyi', flag: '🇫🇯',
+        capital: 'Suva', capitalEs: 'Suva',
+        facts: [ { en: 'Fiji has more than 300 islands.', es: 'Fiyi tiene más de 300 islas.' }, { en: 'Rugby is the most popular sport.', es: 'El rugby es el deporte más popular.' }, { en: 'They drink kava as a tradition.', es: 'Beben kava como tradición.' }, { en: 'Fiji water comes from there.', es: 'El agua Fiji viene de allí.' } ],
+        quiz: [ { q: 'How many islands does Fiji have?', a: 0, options: ['Over 300', '10', '50', '100'] }, { q: 'What is the capital of Fiji?', a: 1, options: ['Nadi', 'Suva', 'Apia', 'Tonga'] }, { q: 'What sport is very popular in Fiji?', a: 2, options: ['Soccer', 'Tennis', 'Rugby', 'Basketball'] } ]
+      },
+      {
         id: 'australia', name: 'Australia', nameEs: 'Australia', flag: '🇦🇺',
         capital: 'Canberra', capitalEs: 'Canberra',
         facts: [
