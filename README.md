@@ -73,6 +73,7 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Actualización Vacation Planner (Vacation Planner Update)**: Se agregó información de hospedaje, civismo, datos positivos, presupuesto/conversor de moneda, comidas a probar y frases locales. (Added lodging, civics, positive facts, money converter, foods to try, and local phrases.)
 - **Corrección de Errores en Math Galaxy y Art Studio (Bug Fixes)**: Se solucionaron errores de ejecución en los juegos para asegurar una experiencia más fluida. (Fixed runtime errors in the games to ensure a smoother experience).
 - **Actualización World Cup 2026**: Solucionados problemas con la asignación de la Bota de Oro, agregado relleno de resultados anteriores completados y ocultamiento de predicciones de eliminatorias pasadas. (Fixed premature Golden Boot assignment, backfilled completed scores, and hid stale KO bids.)
 - **¡Nueva App "Invest Quest"!**: Un simulador de mercado amigable para niños. Aprende sobre riesgo y retorno. (A kid-friendly market simulator. Learn about risk and return).
