@@ -81,7 +81,12 @@
 
       /* — Layout — */
       --header-h:  64px;
-      --nav-h:     68px;
+      /* Total height, home indicator included. The viewport meta sets
+         `viewport-fit=cover`, so on a notched phone the page runs under the
+         indicator; folding the inset into the token keeps the nav's own
+         height, the `calc(var(--nav-h) + …)` offsets, and the
+         `100dvh - header - nav` content heights all agreeing. */
+      --nav-h:     calc(68px + env(safe-area-inset-bottom, 0px));
     }
 
 
@@ -100,7 +105,16 @@
     }
 
     body {
+      /* Both of these have to agree. On a phone `100vh` is the *large*
+         viewport (as if the URL bar were retracted) while `100dvh` is what
+         is actually on screen, and a `min-height` larger than `height`
+         wins — so `min-height: 100vh` used to make the body taller than the
+         screen and push #bottom-nav below the fold, with `overflow: hidden`
+         here leaving no way to scroll to it. The vh pair is the fallback
+         for browsers without dvh; the dvh pair overrides it where supported. */
       min-height: 100vh;
+      height: 100vh;
+      min-height: 100dvh;
       height: 100dvh;
       width: 100%;
       overflow: hidden;
@@ -646,6 +660,9 @@
       align-items: center;
       justify-content: space-around;
       padding: 6px var(--space-xl);
+      /* Keep the tabs off the home indicator; --nav-h already reserves the
+         room, so the usable strip stays the same 56px it always was. */
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
       z-index: 100;
     }
 
@@ -6383,7 +6400,7 @@ body.theme--light #import-error-toast    { background: #FFFBF0; }
 @media (max-height: 850px) {
   :root {
     --header-h: 48px !important;
-    --nav-h: 52px !important;
+    --nav-h: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
   }
   
   #screen-lesson .screen-content {
@@ -6464,4 +6481,29 @@ body.theme--light #import-error-toast    { background: #FFFBF0; }
     padding-left: 0;
     padding-right: 0;
   }
+}
+
+/* ------------------------------------------------------------------
+   FLOATING BOTTOM-RIGHT WIDGETS — recital mic + cloud sync pill
+
+   Both are injected by shared scripts (js/recital.js, js/sync.js) and both
+   hard-code `bottom: 16px; right: 16px`, so they landed on top of each
+   other AND on top of this app's bottom nav. The sync pill's z-index of
+   9000 beat the mic's 900, hiding the mic behind it.
+
+   Fixed here rather than in the shared scripts so the ~30 other apps —
+   which have no bottom nav to clear — keep the placement they have today.
+   Stacked: mic just above the nav, pill just above the mic.
+
+   `!important` is unavoidable on the pill: sync.js writes its position
+   into the element's inline `style.cssText`, which no ordinary rule beats.
+   The mic only needs the extra `body` for specificity, since recital.js
+   injects its <style> after this file loads.
+   ------------------------------------------------------------------ */
+body .rr-fab {
+  bottom: calc(var(--nav-h) + 16px);
+}
+#zs-sync-pill {
+  /* nav + 16px gap + the 56px mic + 8px between them */
+  bottom: calc(var(--nav-h) + 80px) !important;
 }
