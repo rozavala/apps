@@ -612,6 +612,27 @@
       background: var(--color-purple-subtle);
     }
 
+    /* lm-bridge shows the header with an inline `display: flex`, which beats
+       the grid above, and it injects the 🏠 hub button as a 4th child. Make
+       the flex fallback lay itself out properly instead of running off the
+       right edge (which used to push the MIDI pill and the parent lock
+       button off-screen on phones). */
+    #global-header {
+      gap: var(--space-sm);
+      justify-content: space-between;
+    }
+    .hdr-logo,
+    .hdr-student { min-width: 0; }
+    .hdr-student-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .hdr-right { min-width: 0; }
+    /* The phone sizing for the header and the bottom nav lives in the
+       narrow-screen media query at the end of this file, so it lands after
+       the `.midi-pill` and `#bottom-nav` shorthands further down. */
+
 
     /* ----------------------------------------------------------------
        12. BOTTOM NAVIGATION
@@ -1054,6 +1075,7 @@
     }
     .midi-pill--info:hover {
       background: rgba(14, 165, 233, 0.18);
+    }
 
     /* Permission denied — red-ish */
     .midi-pill--warn {
@@ -6401,5 +6423,45 @@ body.theme--light #import-error-toast    { background: #FFFBF0; }
     z-index: 100 !important;
     display: block !important;
     background: rgba(0,0,0,0.2) !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   NARROW SCREENS — header + bottom nav
+   Kept at the end of the file so these land after the `.midi-pill` and
+   `#bottom-nav` shorthands above; a media query adds no specificity of
+   its own, so source order is what decides.
+
+   Phones: drop the wordmark and the header mascot, let the MIDI pill give
+   up room first, and let the six nav tabs share the row instead of
+   overflowing (Settings used to sit off the right edge).
+   ------------------------------------------------------------------ */
+@media (max-width: 700px) {
+  #global-header {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+  .hdr-logo-text { display: none; }
+  #melody-nav { display: none; }
+  /* Streak and note count are both already on the home screen (the DAY
+     STREAK badge and the NOTES tile), so the header copies are the cheapest
+     thing to drop — that buys the student name and the MIDI pill their
+     room back. */
+  .hdr-right .hdr-stat { display: none; }
+  .hdr-right { gap: var(--space-sm); }
+  /* Keep the identity intact and make the pill yield space instead. */
+  .hdr-student { flex-shrink: 0; }
+  .hdr-student-name { max-width: 96px; }
+  .midi-pill { min-width: 0; }
+
+  #bottom-nav {
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
+  }
+  .nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
 }
