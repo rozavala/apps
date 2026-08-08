@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-08T16:23:51.967Z",
+  "generatedAt": "2026-08-08T16:38:57.260Z",
   "windowHours": 72,
-  "totalGroups": 2,
-  "totalEvents": 4,
+  "totalGroups": 1,
+  "totalEvents": 3,
   "topGroups": [
     {
       "app": "bible-explorer",
@@ -15,19 +15,6 @@
       "count": 3,
       "firstTs": 1786026127855,
       "lastTs": 1786026129886,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "match detail fetch failed for 760517 Load failed",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1785947846957,
-      "lastTs": 1785947846957,
       "users": 1
     }
   ]
