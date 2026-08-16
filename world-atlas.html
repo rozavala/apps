@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Atlas 🗺️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/world-atlas.css">
+  <link rel="stylesheet" href="css/zs-theme.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="atmo" style="width:400px;height:400px;background:rgba(13,148,136,0.08);top:-120px;left:-110px;"></div>
+  <div class="atmo" style="width:340px;height:340px;background:rgba(37,99,235,0.06);bottom:-90px;right:-70px;animation-delay:-8s;"></div>
+
+  <div class="app">
+
+    <!-- ── SCREEN: HOME ─────────────────────────────────────── -->
+    <div class="screen active" id="wa-screen-home">
+      <div class="wa-header">
+        <button class="wa-lang" id="wa-lang-toggle" aria-label="Switch language / Cambiar idioma">
+          <span id="wa-lang-label">EN</span> 🌐
+        </button>
+        <span class="wa-header-icon">🗺️</span>
+        <h1 id="wa-title">World Atlas</h1>
+        <p id="wa-subtitle">Capitals, currencies and populations of all 195 countries.</p>
+      </div>
+
+      <div class="wa-summary" id="wa-summary"></div>
+
+      <div class="wa-modes">
+        <button class="wa-mode wa-mode-browse" id="wa-mode-browse">
+          <span class="wa-mode-icon">📋</span>
+          <span class="wa-mode-text">
+            <span class="wa-mode-title" id="wa-mode-browse-title">All Countries</span>
+            <span class="wa-mode-desc" id="wa-mode-browse-desc">Look up any country — search, filter and sort.</span>
+          </span>
+        </button>
+        <button class="wa-mode wa-mode-study" id="wa-mode-study">
+          <span class="wa-mode-icon">🎴</span>
+          <span class="wa-mode-text">
+            <span class="wa-mode-title" id="wa-mode-study-title">Study Cards</span>
+            <span class="wa-mode-desc" id="wa-mode-study-desc">Flip cards and mark what you know.</span>
+          </span>
+        </button>
+        <button class="wa-mode wa-mode-quiz" id="wa-mode-quiz">
+          <span class="wa-mode-icon">🏆</span>
+          <span class="wa-mode-text">
+            <span class="wa-mode-title" id="wa-mode-quiz-title">Quizzes</span>
+            <span class="wa-mode-desc" id="wa-mode-quiz-desc">10 questions — earn stars for each round.</span>
+          </span>
+        </button>
+      </div>
+
+      <p class="wa-datanote" id="wa-datanote"></p>
+    </div>
+
+    <!-- ── SCREEN: BROWSE (list of all) ─────────────────────── -->
+    <div class="screen" id="wa-screen-browse">
+      <div class="wa-bar">
+        <button class="wa-back" id="wa-browse-back" aria-label="Go back">←</button>
+        <div class="wa-bar-title" id="wa-browse-title">All Countries</div>
+        <div class="wa-bar-count" id="wa-browse-count"></div>
+      </div>
+
+      <label class="wa-sronly" for="wa-search" id="wa-search-label">Search countries</label>
+      <input type="search" id="wa-search" class="wa-search" placeholder="Search country or capital…" autocomplete="off">
+
+      <div class="wa-chips" id="wa-region-chips"></div>
+
+      <div class="wa-sortrow">
+        <span class="wa-sortlabel" id="wa-sort-label">Sort:</span>
+        <div class="wa-chips wa-chips-sort" id="wa-sort-chips"></div>
+      </div>
+
+      <div class="wa-list" id="wa-list"></div>
+      <p class="wa-empty" id="wa-empty" hidden></p>
+    </div>
+
+    <!-- ── SCREEN: COUNTRY DETAIL ───────────────────────────── -->
+    <div class="screen" id="wa-screen-country">
+      <div class="wa-bar">
+        <button class="wa-back" id="wa-country-back" aria-label="Go back">←</button>
+        <div class="wa-bar-title" id="wa-country-bartitle"></div>
+        <div class="wa-bar-count"></div>
+      </div>
+      <div class="wa-detail" id="wa-detail"></div>
+    </div>
+
+    <!-- ── SCREEN: STUDY SETUP ──────────────────────────────── -->
+    <div class="screen" id="wa-screen-study-setup">
+      <div class="wa-bar">
+        <button class="wa-back" id="wa-study-back" aria-label="Go back">←</button>
+        <div class="wa-bar-title" id="wa-study-title">Study Cards</div>
+        <div class="wa-bar-count"></div>
+      </div>
+      <p class="wa-lead" id="wa-study-lead">Pick a deck to study.</p>
+      <div class="wa-decks" id="wa-decks"></div>
+    </div>
+
+    <!-- ── SCREEN: STUDY CARDS ──────────────────────────────── -->
+    <div class="screen" id="wa-screen-study">
+      <div class="wa-bar">
+        <button class="wa-back" id="wa-card-back" aria-label="Go back">←</button>
+        <div class="wa-bar-title" id="wa-card-deckname"></div>
+        <div class="wa-bar-count" id="wa-card-progress"></div>
+      </div>
+      <div class="wa-progressbar"><div class="wa-progressfill" id="wa-card-fill"></div></div>
+
+      <div class="wa-cardwrap">
+        <div class="wa-card" id="wa-card">
+          <div class="wa-card-face wa-card-front" id="wa-card-front"></div>
+          <div class="wa-card-face wa-card-back" id="wa-card-backface"></div>
+        </div>
+      </div>
+
+      <p class="wa-fliphint" id="wa-fliphint">Tap the card to see the answer</p>
+
+      <div class="wa-cardbtns" id="wa-card-btns" hidden>
+        <button class="wa-btn wa-btn-again" id="wa-card-again">🔁 <span id="wa-card-again-label">Practice again</span></button>
+        <button class="wa-btn wa-btn-know" id="wa-card-know">✅ <span id="wa-card-know-label">I know it</span></button>
+      </div>
+    </div>
+
+    <!-- ── SCREEN: QUIZ SETUP ───────────────────────────────── -->
+    <div class="screen" id="wa-screen-quiz-setup">
+      <div class="wa-bar">
+        <button class="wa-back" id="wa-quiz-back" aria-label="Go back">←</button>
+        <div class="wa-bar-title" id="wa-quiz-title">Quizzes</div>
+        <div class="wa-bar-count"></div>
+      </div>
+      <p class="wa-lead" id="wa-quiz-lead-type">Choose what to practise.</p>
+      <div class="wa-decks" id="wa-quiz-types"></div>
+      <p class="wa-lead" id="wa-quiz-lead-region">Choose a region.</p>
+      <div class="wa-chips" id="wa-quiz-regions"></div>
+      <button class="wa-btn wa-btn-start" id="wa-quiz-start">🚀 <span id="wa-quiz-start-label">Start quiz</span></button>
+    </div>
+
+    <!-- ── SCREEN: QUIZ ─────────────────────────────────────── -->
+    <div class="screen" id="wa-screen-quiz">
+      <div class="wa-bar">
+        <button class="wa-back" id="wa-quizplay-back" aria-label="Quit quiz">←</button>
+        <div class="wa-bar-title" id="wa-quiz-qnum"></div>
+        <div class="wa-bar-count" id="wa-quiz-score"></div>
+      </div>
+      <div class="wa-progressbar"><div class="wa-progressfill" id="wa-quiz-fill"></div></div>
+      <div class="wa-quiz" id="wa-quiz"></div>
+    </div>
+
+    <!-- ── SCREEN: RESULTS ──────────────────────────────────── -->
+    <div class="screen" id="wa-screen-results">
+      <div class="wa-results" id="wa-results"></div>
+    </div>
+
+  </div>
+
+  <div class="wa-feedback" id="wa-feedback" aria-live="polite"><span id="wa-feedback-emoji"></span></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/sync.js?v=9"></script>
+  <script src="js/zs-diag.js?v=3"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/learning-checks.js"></script>
+  <script src="js/world-atlas-data.js"></script>
+  <script src="js/world-atlas.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>

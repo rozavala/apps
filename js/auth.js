@@ -177,6 +177,7 @@ function getPlayerStats(userName) {
     { id: 'guess',  prefix: 'zs_guess_' },
     { id: 'lab',    prefix: 'zs_lab_' },
     { id: 'world',  prefix: 'zs_world_' },
+    { id: 'atlas',  prefix: 'zs_atlas_' },
     { id: 'story',  prefix: 'zs_story_' },
     { id: 'quest',  prefix: 'zs_quest_' },
     { id: 'bmcheck', prefix: 'zs_bmcheck_' },

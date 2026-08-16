@@ -20,6 +20,7 @@ var CloudSync = (function() {
     'zs_sports_': 'sports',
     'zs_lab_': 'lab',
     'zs_world_': 'world',
+    'zs_atlas_': 'atlas',
     'zs_story_': 'story',
     'zs_quest_': 'quest',
     'zs_guess_': 'guess',

@@ -13,6 +13,7 @@ const MAJOR_APPS = [
   'sports-arena.html',
   'lab-explorer.html',
   'world-explorer.html',
+  'world-atlas.html',
   'story-explorer.html',
   'quest-adventure.html',
   'guess-quest.html'
