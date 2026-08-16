@@ -562,6 +562,7 @@
     .card-art { --card-accent: #F472B6; --card-glow: rgba(236, 72, 153, 0.3); --card-icon-bg: linear-gradient(135deg, #DB2777, #F472B6); --card-tag-bg: rgba(236, 72, 153, 0.15); }
     .card-lab { --card-accent: #10B981; --card-glow: rgba(16, 185, 129, 0.3); --card-icon-bg: linear-gradient(135deg, #059669, #34D399); --card-tag-bg: rgba(16, 185, 129, 0.15); }
     .card-world { --card-accent: #3B82F6; --card-glow: rgba(59, 130, 246, 0.3); --card-icon-bg: linear-gradient(135deg, #1D4ED8, #60A5FA); --card-tag-bg: rgba(59, 130, 246, 0.15); }
+    .card-atlas { --card-accent: #0D9488; --card-glow: rgba(13, 148, 136, 0.3); --card-icon-bg: linear-gradient(135deg, #0F766E, #2DD4BF); --card-tag-bg: rgba(13, 148, 136, 0.15); }
     .card-story { --card-accent: #8B5CF6; --card-glow: rgba(139, 92, 246, 0.3); --card-icon-bg: linear-gradient(135deg, #6D28D9, #A78BFA); --card-tag-bg: rgba(139, 92, 246, 0.15); }
     .card-quest { --card-accent: #F59E0B; --card-glow: rgba(245, 158, 11, 0.3); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(245, 158, 11, 0.15); }
     .card-guess { --card-accent: #F59E0B; --card-glow: rgba(251, 191, 36, 0.3); --card-icon-bg: linear-gradient(135deg, #D97706, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }

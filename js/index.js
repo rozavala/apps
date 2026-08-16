@@ -463,6 +463,7 @@
       { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: 'zs_sports_' + key, schedId: 'sports' },
       { name: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html', key: 'zs_lab_' + key, schedId: 'lab' },
       { name: 'World Explorer', icon: '🌍', href: 'world-explorer.html', key: 'zs_world_' + key, schedId: 'world' },
+      { name: 'World Atlas', icon: '🗺️', href: 'world-atlas.html', key: 'zs_atlas_' + key, schedId: 'atlas' },
       { name: 'Story Explorer', icon: '📚', href: 'story-explorer.html', key: 'zs_story_' + key, schedId: 'story' }
     ];
 
@@ -490,6 +491,7 @@
         else if (app.name === 'Sports Arena') hasProg = (data.matches || []).length + (data.activities || []).length > 0;
         else if (app.name === 'Lab Explorer') hasProg = (data.totalStars || 0) > 0;
         else if (app.name === 'World Explorer') hasProg = (data.totalStars || 0) > 0;
+        else if (app.name === 'World Atlas') hasProg = (data.totalStars || 0) + (data.cardsStudied || 0) > 0;
         else if (app.name === 'Story Explorer') hasProg = (data.totalStars || 0) > 0;
 
         if (!hasProg) noProgress.push(app);
@@ -519,6 +521,7 @@
         sports: document.getElementById('stats-sports'),
         lab:    document.getElementById('stats-lab'),
         world:  document.getElementById('stats-world'),
+        atlas:  document.getElementById('stats-atlas'),
         story:  document.getElementById('stats-story'),
         quest:  document.getElementById('stats-quest'),
         guess:  document.getElementById('stats-guess'),
@@ -642,6 +645,18 @@
         if (els.world && (we.totalStars || 0) > 0) {
           var visited = we.visited ? we.visited.length : 0;
           els.world.innerHTML = '<span class="cs-item active">⭐ ' + we.totalStars + ' · ' + visited + ' countries</span>';
+        }
+      } catch (e) {}
+
+      try {
+        var wa = appStats.atlas || {};
+        var mastered = 0;
+        for (var iso in (wa.countries || {})) {
+          if (wa.countries[iso] && wa.countries[iso].m) mastered++;
+        }
+        if (els.atlas && ((wa.totalStars || 0) > 0 || mastered > 0)) {
+          els.atlas.innerHTML = '<span class="cs-item active">⭐ ' + (wa.totalStars || 0) +
+                                ' · ' + mastered + ' mastered</span>';
         }
       } catch (e) {}
 

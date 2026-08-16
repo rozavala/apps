@@ -19,6 +19,7 @@ var AppSchedule = (function() {
     { id: 'art',     card: '.card-art' },
     { id: 'lab',     card: '.card-lab' },
     { id: 'world',   card: '.card-world' },
+    { id: 'atlas',   card: '.card-atlas' },
     { id: 'story',   card: '.card-story' },
     { id: 'quest',   card: '.card-quest' },
     { id: 'guess',   card: '.card-guess' },
@@ -28,13 +29,13 @@ var AppSchedule = (function() {
   ];
 
   var SMART_SCHEDULE = {
-    0: ['piano', 'math', 'art', 'world', 'guess'],            // Sunday
+    0: ['piano', 'math', 'art', 'world', 'atlas', 'guess'],            // Sunday
     1: ['piano', 'math', 'chile', 'lab', 'guess', 'money'],   // Monday
     2: ['piano', 'chess', 'guitar', 'story', 'guess'],        // Tuesday
-    3: ['piano', 'math', 'art', 'world', 'guess', 'money'],   // Wednesday
+    3: ['piano', 'math', 'art', 'world', 'atlas', 'guess', 'money'],   // Wednesday
     4: ['piano', 'math', 'chile', 'lab', 'guess'],            // Thursday
     5: ['piano', 'chess', 'guitar', 'story', 'guess', 'money'], // Friday
-    6: ['piano', 'math', 'art', 'world', 'guess']             // Saturday
+    6: ['piano', 'math', 'art', 'world', 'atlas', 'guess']             // Saturday
   };
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
