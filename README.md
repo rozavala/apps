@@ -41,6 +41,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **✈️ Vacation Planner** | Planifica las próximas aventuras y vacaciones familiares. (Plan upcoming family adventures and vacations.) | [vacation.html](vacation.html) |
 | **🏛️ Civics Lab** | Cómo funciona el gobierno de Chile y otros sistemas del mundo. (How the government of Chile and other world systems work.) | [civics-lab.html](civics-lab.html) |
 | **🏆 World Cup 2026** | Sigue los equipos, partidos y ciudades sede del torneo de la Copa del Mundo. (Follow the teams, matches and host cities of the World Cup tournament.) | [world-cup.html](world-cup.html) |
+| **⚓ Patrón de Lancha** | Contenido de estudio para el examen de Patrón de Lancha Deportiva, basado en el temario de DIRECTEMAR. | [patron-lancha.html](patron-lancha.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -74,6 +75,7 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **¡Nueva App "Patrón de Lancha"!**: Contenido de estudio para el examen de Patrón de Lancha Deportiva, basado en el temario y el Manual del Curso de Patrón Deportivo de Bahía (DIRECTEMAR).
 - **¡Nueva App "World Atlas"!**: Capital, moneda y población de los 195 países (193 miembros de la ONU más el Vaticano y Palestina). Tres partes: la lista completa con buscador, filtros por continente y orden por población o superficie; tarjetas de estudio que recuerdan qué países ya domina cada niño; y concursos de 10 preguntas en cinco modalidades (capitales, país por su capital, monedas, población y banderas). Bilingüe y 100% sin conexión. (New "World Atlas" app: capital, currency and population for all 195 countries, with a searchable list, study cards that track mastery, and 10-question quizzes in five modes. Bilingual and fully offline.)
 
 - **Corrección de Errores en Math Galaxy y Art Studio (Bug Fixes)**: Se solucionaron errores de ejecución en los juegos para asegurar una experiencia más fluida. (Fixed runtime errors in the games to ensure a smoother experience).
