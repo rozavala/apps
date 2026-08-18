@@ -189,20 +189,25 @@
     <div class="steps-chart" id="mq-steps-chart"></div>
 
     <div class="section-header" style="margin:28px 0 10px;">
-      <div class="section-title" style="font-size:1.05rem;">Import from a watch export</div>
+      <div class="section-title" style="font-size:1.05rem;">Import from the watch</div>
     </div>
     <div class="note-card">
-      In <b>Google Takeout</b>, tick only <b>Fitbit</b> and download the <b>.zip</b>. Drop the
-      whole zip in here — every month of steps inside it is read at once, and if the export
-      covers more than one child you get to pick whose folder to use. Loose <b>.json</b> or
-      <b>.csv</b> files work too; you can select several at a time. Everything is read on this
-      device and nothing is uploaded anywhere.
-      (En Google Takeout marca solo Fitbit y descarga el .zip: se lee entero, aqui mismo, sin
-      subir nada a ninguna parte.)
+      <b>Easiest: screenshots.</b> In the Fitbit app, open the kid's weekly <b>Movement</b>
+      list and screenshot it — one screenshot per week, several at a time is fine. The
+      pictures are read right here on this device, you get to check the numbers before they
+      are saved, and nothing is uploaded anywhere.
+      (Lo mas facil: capturas de pantalla de la lista Movement semanal. Se leen aqui mismo y
+      revisas los numeros antes de guardar.)
+    </div>
+    <div class="note-card">
+      For a big backfill, a <b>Google Takeout</b> export also works: tick only <b>Fitbit</b>,
+      download the <b>.zip</b> and drop it in whole. Loose <b>.json</b>/<b>.csv</b> steps
+      files work too.
+      (Para el historial completo tambien sirve el .zip de Google Takeout.)
     </div>
     <label class="btn-secondary file-btn" style="margin-top:10px;">
-      📂 Choose the Takeout zip (or steps files)
-      <input type="file" id="mq-steps-file" multiple accept=".zip,.json,.csv,.txt,application/zip,application/json,text/csv" aria-label="Choose a Takeout zip or steps export files">
+      📂 Choose screenshots (or a Takeout zip)
+      <input type="file" id="mq-steps-file" multiple accept="image/*,.png,.jpg,.jpeg,.webp,.zip,.json,.csv,.txt,application/zip,application/json,text/csv" aria-label="Choose screenshots or a steps export">
     </label>
     <div id="mq-steps-import" class="import-result" style="display:none;"></div>
 
@@ -303,6 +308,7 @@
 <script src="js/tts.js"></script>
 <script src="js/sports-arena.js"></script>
 <script src="js/move-quest-moves.js"></script>
+<script src="js/move-quest-scan.js"></script>
 <script src="js/move-quest.js"></script>
 <script src="js/pwa.js"></script>
 

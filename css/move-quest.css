@@ -357,6 +357,27 @@
     .import-result.bad { color: var(--red); border-color: #fca5a5; }
     .import-result.good { color: var(--green); border-color: #6EE7B7; }
 
+    /* Screenshot review rows (inside .import-result) */
+    .scan-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .scan-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-xs, 12px); padding: 8px 10px;
+    }
+    .scan-date { flex: 1; font-weight: 800; font-size: 0.9rem; }
+    .scan-input {
+      width: 110px; padding: 8px 10px; border-radius: 10px; text-align: right;
+      border: 1.5px solid var(--border-subtle); background: var(--bg-sunk);
+      color: var(--text); font-family: var(--font-body); font-weight: 800; font-size: 0.95rem;
+    }
+    .scan-input:focus { outline: none; border-color: var(--green); }
+    .scan-del {
+      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0; cursor: pointer;
+      border: 1.5px solid var(--border-subtle); background: var(--bg-card);
+      color: var(--text-muted); font-weight: 800;
+    }
+    .scan-del:hover { border-color: var(--red); color: var(--red); }
+
     /* File input styled as a button */
     .file-btn { position: relative; overflow: hidden; display: block; }
     .file-btn input[type=file] {
