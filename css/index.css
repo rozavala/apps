@@ -1146,6 +1146,14 @@
   --card-tag-bg: rgba(16, 185, 129, 0.15);
 }
 
+/* Move Quest card */
+.card-move {
+  --card-accent: #F97316;
+  --card-glow: rgba(249, 115, 22, 0.25);
+  --card-icon-bg: linear-gradient(135deg, #C2410C, #FB923C);
+  --card-tag-bg: rgba(249, 115, 22, 0.15);
+}
+
 /* World Cup 2026 card */
 .card-worldcup {
   --card-accent: #16A34A;

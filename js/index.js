@@ -274,7 +274,7 @@
     var prefixes = [
       'zs_mathgalaxy_', 'zs_chile_', 'zs_chess_', 'zs_chess_plays_',
       'zs_timer_', 'zs_chores_', 'zs_fe_', 'zs_guitar_', 'zs_art_',
-      'zs_sports_', 'zs_lab_', 'zs_world_', 'zs_story_', 'zs_quest_',
+      'zs_sports_', 'zs_move_', 'zs_lab_', 'zs_world_', 'zs_story_', 'zs_quest_',
       'zs_lcheck_', 'zs_lastrank_', 'littlemaestro_'
     ];
     prefixes.forEach(function(p) {
@@ -450,7 +450,7 @@
     if (!user) return null;
     var key = user.name.toLowerCase().replace(/\s+/g, '_');
     var todayAppIds = (typeof AppSchedule !== 'undefined') ? AppSchedule.getTodayApps() : [];
-    var alwaysVisible = ['sports', 'quest'];
+    var alwaysVisible = ['sports', 'move', 'quest'];
 
     var apps = [
       { name: 'Math Galaxy', icon: '🧮', href: 'math-galaxy.html', key: 'zs_mathgalaxy_' + key, schedId: 'math' },
@@ -461,6 +461,7 @@
       { name: 'Guitar Jam', icon: '🎸', href: 'guitar-jam.html', key: 'zs_guitar_' + key, schedId: 'guitar' },
       { name: 'Art Studio', icon: '🎨', href: 'art-studio.html', key: 'zs_art_' + key, schedId: 'art' },
       { name: 'Sports Arena', icon: '🏓', href: 'sports-arena.html', key: 'zs_sports_' + key, schedId: 'sports' },
+      { name: 'Move Quest', icon: '💪', href: 'move-quest.html', key: 'zs_move_' + key, schedId: 'move' },
       { name: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html', key: 'zs_lab_' + key, schedId: 'lab' },
       { name: 'World Explorer', icon: '🌍', href: 'world-explorer.html', key: 'zs_world_' + key, schedId: 'world' },
       { name: 'World Atlas', icon: '🗺️', href: 'world-atlas.html', key: 'zs_atlas_' + key, schedId: 'atlas' },
@@ -489,6 +490,7 @@
         else if (app.name === 'Guitar Jam') hasProg = (data.totalStars || 0) > 0;
         else if (app.name === 'Art Studio') hasProg = (data.totalStars || 0) > 0;
         else if (app.name === 'Sports Arena') hasProg = (data.matches || []).length + (data.activities || []).length > 0;
+        else if (app.name === 'Move Quest') hasProg = (data.workoutsDone || 0) > 0;
         else if (app.name === 'Lab Explorer') hasProg = (data.totalStars || 0) > 0;
         else if (app.name === 'World Explorer') hasProg = (data.totalStars || 0) > 0;
         else if (app.name === 'World Atlas') hasProg = (data.totalStars || 0) + (data.cardsStudied || 0) > 0;
@@ -519,6 +521,7 @@
         chile:  document.getElementById('stats-chile'),
         chess:  document.getElementById('stats-chess'),
         sports: document.getElementById('stats-sports'),
+        move:   document.getElementById('stats-move'),
         lab:    document.getElementById('stats-lab'),
         world:  document.getElementById('stats-world'),
         atlas:  document.getElementById('stats-atlas'),
@@ -626,6 +629,15 @@
             '<span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">' +
               '⭐ ' + (sa.totalStars || 0) + ' · ' + matchCount + ' matches · ' + actCount + ' activities' +
             '</span>';
+        }
+      } catch (e) {}
+
+      try {
+        var mq = appStats.move || {};
+        var workouts = mq.workoutsDone || 0;
+        if (els.move && workouts > 0) {
+          els.move.innerHTML = '<span class="cs-item active">💪 ' + workouts + ' workout' +
+                               (workouts === 1 ? '' : 's') + ' · Level ' + (mq.level || 1) + '</span>';
         }
       } catch (e) {}
 
@@ -1156,7 +1168,7 @@
   //     suggest Sports Arena?") when the balance is skewed
   // No writes, no push notifications — nudges live inside this panel.
   var _INSIGHT_CATEGORIES = {
-    physical:       { label: 'Physical', color: '#0D9488', apps: ['Sports Arena'] },
+    physical:       { label: 'Physical', color: '#0D9488', apps: ['Sports Arena', 'Move Quest'] },
     math:           { label: 'Math',     color: '#1D4ED8', apps: ['Math Galaxy'] },
     music:          { label: 'Music',    color: '#6D28D9', apps: ['Little Maestro', 'Guitar Jam'] },
     creative:       { label: 'Creative', color: '#BE185D', apps: ['Art Studio'] },
@@ -1210,7 +1222,7 @@
     var nudges = [];
     var physCount = byCat.physical || 0;
     if (total > 0 && physCount < 2) {
-      nudges.push({ icon: '🏓', text: 'Only ' + physCount + ' physical activit' + (physCount === 1 ? 'y' : 'ies') + ' this week — try Sports Arena.' });
+      nudges.push({ icon: '🏓', text: 'Only ' + physCount + ' physical activit' + (physCount === 1 ? 'y' : 'ies') + ' this week — try Sports Arena or Move Quest.' });
     }
     var topCat = null, topCount = 0;
     Object.keys(byCat).forEach(function(c) {

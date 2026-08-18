@@ -18,6 +18,7 @@ var CloudSync = (function() {
     'zs_guitar_': 'guitar',
     'zs_art_': 'art',
     'zs_sports_': 'sports',
+    'zs_move_': 'move',
     'zs_lab_': 'lab',
     'zs_world_': 'world',
     'zs_atlas_': 'atlas',
