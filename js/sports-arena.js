@@ -30,6 +30,7 @@ const SportsArena = (() => {
     { id: 'walk',        name: 'Walk / Hike',    icon: '🥾', scoreType: 'check',  winScore: null, sets: false },
     { id: 'jumprope',    name: 'Jump Rope',      icon: '🪢', scoreType: 'count',  winScore: null, sets: false },
     { id: 'swimming',    name: 'Swimming',       icon: '🏊', scoreType: 'check',  winScore: null, sets: false },
+    { id: 'workout',     name: 'Home Workout',   icon: '💪', scoreType: 'check',  winScore: null, sets: false },
   ];
 
   // ── Storage helpers ──
@@ -374,7 +375,11 @@ const SportsArena = (() => {
 
     if (typeof ActivityLog !== 'undefined') {
       const sport = getAllSports().find(s => s.id === activity.sportId);
-      ActivityLog.log('Sports Arena', '🏓', `Logged activity: ${sport ? sport.name : 'outdoor activity'}`);
+      ActivityLog.log(
+        activity.appName || 'Sports Arena',
+        activity.appIcon || '🏓',
+        activity.logText || `Logged activity: ${sport ? sport.name : 'outdoor activity'}`
+      );
     }
 
     return activity;

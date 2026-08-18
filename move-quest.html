@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Move Quest 💪</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/move-quest.css">
+  <link rel="stylesheet" href="css/zs-theme.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#059669">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+<div class="field field-1"></div>
+<div class="field field-2"></div>
+
+<div class="app">
+
+  <!-- ============ HOME ============ -->
+  <div class="screen active" id="mq-screen-home">
+    <div class="mq-header">
+      <span class="icon">💪</span>
+      <h1>Move Quest</h1>
+      <p>Seven-minute workouts you can do anywhere. (Entrenamientos de siete minutos.)</p>
+      <div class="tier-pill" id="mq-tier-pill"></div>
+    </div>
+
+    <div class="level-bar"><i id="mq-level-fill" style="width:0%"></i></div>
+    <div class="level-note" id="mq-level-note"></div>
+
+    <div class="mode-grid">
+      <button class="mode-card" id="mq-go-start">
+        <span class="m-icon">▶️</span>
+        <span>
+          <span class="m-title">Start Workout</span>
+          <span class="m-desc" id="mq-start-desc">Today's circuit is ready.</span>
+          <span class="m-badge" id="mq-streak-badge"></span>
+        </span>
+      </button>
+      <button class="mode-card" id="mq-go-library">
+        <span class="m-icon">🖼️</span>
+        <span>
+          <span class="m-title">Move Guide</span>
+          <span class="m-desc">See every exercise drawn step by step before you start.</span>
+        </span>
+      </button>
+      <button class="mode-card" id="mq-go-steps">
+        <span class="m-icon">👟</span>
+        <span>
+          <span class="m-title">Steps</span>
+          <span class="m-desc">Log the steps from your watch and watch the week fill up.</span>
+          <span class="m-badge" id="mq-steps-badge"></span>
+        </span>
+      </button>
+      <button class="mode-card" id="mq-go-progress">
+        <span class="m-icon">📈</span>
+        <span>
+          <span class="m-title">My Progress</span>
+          <span class="m-desc">Workouts, minutes and your day streak.</span>
+        </span>
+      </button>
+      <button class="mode-card" id="mq-go-settings">
+        <span class="m-icon">⚙️</span>
+        <span>
+          <span class="m-title">Settings</span>
+          <span class="m-desc">Age group, coach voice and workout length.</span>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ PREVIEW (today's circuit) ============ -->
+  <div class="screen" id="mq-screen-preview">
+    <div class="section-header">
+      <button class="back-btn" aria-label="Go back" id="mq-preview-back">←</button>
+      <div class="section-title">▶️ Today's Circuit</div>
+    </div>
+
+    <div class="note-card" id="mq-preview-summary"></div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" id="mq-preview-shuffle">🔀 Shuffle</button>
+      <button class="btn-secondary" id="mq-preview-guide">🖼️ Big Pictures</button>
+    </div>
+
+    <div class="lib-list" id="mq-preview-list" style="margin-top:16px;"></div>
+
+    <div style="margin-top:20px;">
+      <button class="btn-primary" id="mq-preview-start">💪 Let's Go</button>
+    </div>
+  </div>
+
+  <!-- ============ PLAYER ============ -->
+  <div class="screen" id="mq-screen-play">
+    <div class="play-top">
+      <span class="play-counter" id="mq-play-counter"></span>
+      <button class="play-quit" id="mq-play-quit">Stop</button>
+    </div>
+
+    <div class="play-progress" id="mq-play-progress"></div>
+
+    <div class="play-stage" id="mq-play-stage">
+      <div class="play-phase" id="mq-play-phase">Get ready</div>
+      <div class="play-name" id="mq-play-name"></div>
+      <div class="play-name-es" id="mq-play-name-es"></div>
+      <div class="play-figure" id="mq-play-figure"></div>
+      <div class="play-clock" id="mq-play-clock">0</div>
+      <div class="play-cue" id="mq-play-cue"></div>
+      <div class="play-next" id="mq-play-next"></div>
+    </div>
+
+    <div class="play-controls">
+      <button class="btn-secondary" id="mq-play-pause">⏸️ Pause</button>
+      <button class="btn-secondary" id="mq-play-skip">⏭️ Skip</button>
+    </div>
+  </div>
+
+  <!-- ============ FINISH ============ -->
+  <div class="screen" id="mq-screen-finish">
+    <div class="section-header" style="margin-bottom:12px;">
+      <div class="section-title">🎉 Workout Complete</div>
+    </div>
+    <div class="finish-card">
+      <span class="big">🏅</span>
+      <h2 id="mq-finish-title">Great work!</h2>
+      <p id="mq-finish-sub"></p>
+      <div class="stat-grid" style="margin-top:18px;">
+        <div class="stat-box"><div class="v" id="mq-finish-mins">0</div><div class="k">Minutes</div></div>
+        <div class="stat-box"><div class="v" id="mq-finish-moves">0</div><div class="k">Moves</div></div>
+        <div class="stat-box"><div class="v" id="mq-finish-streak">0</div><div class="k">Day streak</div></div>
+      </div>
+      <div class="unlock-note" id="mq-finish-unlock" style="display:none;"></div>
+      <p style="margin-top:14px; font-size:0.82rem;" id="mq-finish-logged"></p>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" id="mq-finish-home">🏠 Done</button>
+      <button class="btn-secondary" id="mq-finish-again">🔁 Another round</button>
+    </div>
+  </div>
+
+  <!-- ============ MOVE GUIDE ============ -->
+  <div class="screen" id="mq-screen-library">
+    <div class="section-header">
+      <button class="back-btn" aria-label="Go back" id="mq-library-back">←</button>
+      <div class="section-title">🖼️ Move Guide</div>
+    </div>
+    <div class="note-card" style="margin-bottom:14px;">
+      Look at the pictures first, then put the tablet down. During the workout the
+      <b>coach voice</b> calls out every move, so you never have to watch the screen.
+      (Mira los dibujos primero y deja la tablet: la voz del entrenador dice cada ejercicio.)
+    </div>
+    <div class="lib-filters" id="mq-library-filters"></div>
+    <div class="lib-list" id="mq-library-list"></div>
+  </div>
+
+  <!-- ============ STEPS ============ -->
+  <div class="screen" id="mq-screen-steps">
+    <div class="section-header">
+      <button class="back-btn" aria-label="Go back" id="mq-steps-back">←</button>
+      <div class="section-title">👟 Steps</div>
+    </div>
+
+    <div class="steps-hero">
+      <div class="steps-label">Today</div>
+      <div class="steps-count" id="mq-steps-today">0</div>
+      <div class="steps-goal" id="mq-steps-goal"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="mq-steps-input">Steps on your watch right now</label>
+      <input type="number" class="form-input" id="mq-steps-input" min="0" max="200000" placeholder="e.g. 8420">
+    </div>
+    <button class="btn-primary" id="mq-steps-save">✅ Save today's steps</button>
+    <div id="mq-steps-feedback" style="text-align:center; margin-top:10px; font-weight:800;"></div>
+
+    <div class="section-header" style="margin:28px 0 10px;">
+      <div class="section-title" style="font-size:1.05rem;">This week</div>
+    </div>
+    <div class="steps-chart" id="mq-steps-chart"></div>
+
+    <div class="section-header" style="margin:28px 0 10px;">
+      <div class="section-title" style="font-size:1.05rem;">Import from a watch export</div>
+    </div>
+    <div class="note-card">
+      In <b>Google Takeout</b>, tick only <b>Fitbit</b> and download the <b>.zip</b>. Drop the
+      whole zip in here — every month of steps inside it is read at once, and if the export
+      covers more than one child you get to pick whose folder to use. Loose <b>.json</b> or
+      <b>.csv</b> files work too; you can select several at a time. Everything is read on this
+      device and nothing is uploaded anywhere.
+      (En Google Takeout marca solo Fitbit y descarga el .zip: se lee entero, aqui mismo, sin
+      subir nada a ninguna parte.)
+    </div>
+    <label class="btn-secondary file-btn" style="margin-top:10px;">
+      📂 Choose the Takeout zip (or steps files)
+      <input type="file" id="mq-steps-file" multiple accept=".zip,.json,.csv,.txt,application/zip,application/json,text/csv" aria-label="Choose a Takeout zip or steps export files">
+    </label>
+    <div id="mq-steps-import" class="import-result" style="display:none;"></div>
+
+    <div class="note-card" style="margin-top:16px;">
+      No export? Just read the number off the watch face and type it in above. One tap a
+      day is enough to see the week fill up.
+      (Sin exportacion: lee el numero en el reloj y escribelo arriba.)
+    </div>
+  </div>
+
+  <!-- ============ PROGRESS ============ -->
+  <div class="screen" id="mq-screen-progress">
+    <div class="section-header">
+      <button class="back-btn" aria-label="Go back" id="mq-progress-back">←</button>
+      <div class="section-title">📈 My Progress</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box"><div class="v" id="mq-stat-workouts">0</div><div class="k">Workouts</div></div>
+      <div class="stat-box"><div class="v" id="mq-stat-minutes">0</div><div class="k">Minutes</div></div>
+      <div class="stat-box"><div class="v" id="mq-stat-streak">0</div><div class="k">Day streak</div></div>
+    </div>
+
+    <div class="level-bar"><i id="mq-progress-fill" style="width:0%"></i></div>
+    <div class="level-note" id="mq-progress-note"></div>
+
+    <div class="section-header" style="margin:24px 0 10px;">
+      <div class="section-title" style="font-size:1.05rem;">History</div>
+    </div>
+    <div id="mq-history-list"></div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div class="screen" id="mq-screen-settings">
+    <div class="section-header">
+      <button class="back-btn" aria-label="Go back" id="mq-settings-back">←</button>
+      <div class="section-title">⚙️ Settings</div>
+    </div>
+
+    <div class="form-group">
+      <label>Age group</label>
+      <div class="chip-row" id="mq-tier-chips"></div>
+      <div class="level-note" id="mq-tier-desc" style="text-align:left; margin-top:8px;"></div>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="tr-label">Coach voice</div>
+        <div class="tr-desc">Calls out every move so the screen can stay on the floor. Uses the shared read-aloud setting.</div>
+      </div>
+      <button class="switch" id="mq-toggle-voice" role="switch" aria-label="Coach voice"></button>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="tr-label">Beeps</div>
+        <div class="tr-desc">Countdown ticks and a chime at the end of each move.</div>
+      </div>
+      <button class="switch" id="mq-toggle-beeps" role="switch" aria-label="Beeps"></button>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="tr-label">Double round</div>
+        <div class="tr-desc" id="mq-double-desc">Run the whole circuit twice. Unlocks at Level 6.</div>
+      </div>
+      <button class="switch" id="mq-toggle-double" role="switch" aria-label="Double round"></button>
+    </div>
+
+    <div class="form-group" style="margin-top:18px;">
+      <label for="mq-goal-input">Daily step goal</label>
+      <input type="number" class="form-input" id="mq-goal-input" min="1000" max="50000" step="500">
+    </div>
+    <button class="btn-secondary" id="mq-goal-save">Save step goal</button>
+    <div id="mq-goal-feedback" style="text-align:center; margin-top:10px; font-weight:800;"></div>
+
+    <div class="note-card" style="margin-top:20px;">
+      Every finished workout is also logged in <b>Sports Arena</b> as a Home Workout, so it
+      counts towards the family activity streak.
+      (Cada entrenamiento se registra tambien en Sports Arena.)
+    </div>
+  </div>
+
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/a11y.js"></script>
+<script src="js/sync.js?v=9"></script>
+<script src="js/zs-diag.js?v=3"></script>
+<script src="js/nav.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/activity-log.js"></script>
+<script src="js/tts.js"></script>
+<script src="js/sports-arena.js"></script>
+<script src="js/move-quest-moves.js"></script>
+<script src="js/move-quest.js"></script>
+<script src="js/pwa.js"></script>
+
+</body>
+</html>

@@ -25,7 +25,8 @@ var AppSchedule = (function() {
     { id: 'guess',   card: '.card-guess' },
     { id: 'money',   card: '.card-money' },
     { id: 'bmcheck', card: '.card-bmcheck', alwaysVisible: true },
-    { id: 'trophy',  card: '.card-trophy',  alwaysVisible: true }
+    { id: 'trophy',  card: '.card-trophy',  alwaysVisible: true },
+    { id: 'move',    card: '.card-move',    alwaysVisible: true }
   ];
 
   var SMART_SCHEDULE = {
@@ -85,7 +86,7 @@ var AppSchedule = (function() {
       if (app.id === 'faith' && user && user.faithVisible === false) isVisible = false;
       // Quest is the always-on world map and Sports is the outdoor logger;
       // keep them visible regardless of the rotation.
-      if (app.id === 'sports' || app.id === 'quest') isVisible = true;
+      if (app.id === 'sports' || app.id === 'quest' || app.id === 'move') isVisible = true;
       el.style.display = isVisible ? 'flex' : 'none';
     });
   }
@@ -148,7 +149,7 @@ var AppSchedule = (function() {
     var selected = sched.apps;
     
     // Editable apps (filter out faith/sports/quest as they have special rules)
-    var editableApps = ALL_APPS.filter(function(a) { return a.id !== 'faith' && a.id !== 'sports' && a.id !== 'quest'; });
+    var editableApps = ALL_APPS.filter(function(a) { return a.id !== 'faith' && a.id !== 'sports' && a.id !== 'quest' && a.id !== 'move'; });
 
     var checkboxes = editableApps.map(function(app) {
       var checked = selected.indexOf(app.id) !== -1;

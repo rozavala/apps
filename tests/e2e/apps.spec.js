@@ -11,6 +11,7 @@ const MAJOR_APPS = [
   'guitar-jam.html',
   'art-studio.html',
   'sports-arena.html',
+  'move-quest.html',
   'lab-explorer.html',
   'world-explorer.html',
   'world-atlas.html',

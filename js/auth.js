@@ -174,6 +174,7 @@ function getPlayerStats(userName) {
     { id: 'guitar', prefix: 'zs_guitar_' },
     { id: 'art',    prefix: 'zs_art_' },
     { id: 'sports', prefix: 'zs_sports_' },
+    { id: 'move',   prefix: 'zs_move_' },
     { id: 'guess',  prefix: 'zs_guess_' },
     { id: 'lab',    prefix: 'zs_lab_' },
     { id: 'world',  prefix: 'zs_world_' },
