@@ -791,6 +791,94 @@ var MoveQuest = (function() {
     }).join('');
   }
 
+  /* ── Printable sheet ──────────────────────────────────────────────
+     One page, every time. Rather than hope a flexible layout fits, the
+     column count and figure height are worked out in millimetres from
+     how many moves there are, so a 6-move Sprout circuit and a 29-move
+     wall poster both land on a single sheet.
+     ───────────────────────────────────────────────────────────────── */
+
+  /* Only the grid shape is decided here. The sheet itself is a fixed
+     height in print CSS and the rows divide it evenly, so the figures
+     take whatever space the text leaves rather than pushing the page
+     taller. That keeps it on one sheet whatever the fonts do — which
+     matters, because the display font arrives over the network and a
+     browser print header can eat another centimetre. */
+  function _sheetGeometry(count) {
+    var cols = count > 20 ? 5 : (count > 12 ? 4 : (count <= 6 ? 2 : 3));
+    return { cols: cols, rows: Math.ceil(count / cols) };
+  }
+
+  function _sheetCell(move, index, opts) {
+    var mode = opts.twoFrames ? 'frames' : 'single';
+    return '<div class="sheet-cell">' +
+      '<div class="sheet-name">' +
+        (opts.numbered ? (index + 1) + '. ' : '') + _esc(move.en) +
+        '<div class="sheet-name-es">' + _esc(move.es) + '</div>' +
+      '</div>' +
+      '<div class="sheet-figs' + (opts.twoFrames ? ' two' : '') + '">' +
+        MoveQuestMoves.figureSvg(move, mode) +
+      '</div>' +
+      (opts.cues
+        ? '<div class="sheet-cue">' + (move.hold ? 'Hold. ' : '') + _esc(move.cue) + '</div>'
+        : '<div class="sheet-hold">' + (move.hold ? 'hold still' : '&nbsp;') + '</div>') +
+    '</div>';
+  }
+
+  function buildSheet(moves, opts) {
+    opts = opts || {};
+    var geo = _sheetGeometry(moves.length);
+    var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    return '<div class="sheet-head">' +
+        '<div class="sheet-title">' + _esc(opts.title || 'Move Quest') + '</div>' +
+        '<div class="sheet-meta">' + _esc(opts.meta || '') + '</div>' +
+      '</div>' +
+      '<div class="sheet-rule"></div>' +
+      '<div class="sheet-grid" style="grid-template-columns:repeat(' + geo.cols + ',1fr);' +
+        'grid-template-rows:repeat(' + geo.rows + ',minmax(0,1fr))">' +
+        moves.map(function(m, i) { return _sheetCell(m, i, opts); }).join('') +
+      '</div>' +
+      '<div class="sheet-foot">' +
+        '<span>Move Quest · Zavala Serra Apps</span>' +
+        '<span>' + _esc(user ? user.name : '') + '</span>' +
+      '</div>';
+  }
+
+  function _print(html) {
+    var sheet = $('mq-print');
+    if (!sheet) return;
+    sheet.innerHTML = html;
+    window.print();
+  }
+
+  function printCircuit() {
+    var plan = currentPlan || buildWorkout();
+    currentPlan = plan;
+    var mins = Math.round(plan.totalSec / 60);
+    _print(buildSheet(plan.moves, {
+      title: "Today's Circuit",
+      meta: plan.tierName + ' · Level ' + plan.level + ' · ' + plan.moves.length + ' moves · ' +
+            plan.work + 's on, ' + plan.rest + 's rest' +
+            (plan.rounds > 1 ? ' · 2 rounds' : '') + ' · about ' + mins + ' min',
+      twoFrames: true, numbered: true, cues: true
+    }));
+  }
+
+  function printLibrary() {
+    var moves = MoveQuestMoves.MOVES.filter(function(m) {
+      return libraryFilter === 'all' || m.cat === libraryFilter;
+    });
+    if (!moves.length) return;
+    var what = libraryFilter === 'all'
+      ? 'Every move'
+      : (CATEGORY_LABELS[libraryFilter] || libraryFilter) + ' moves';
+    _print(buildSheet(moves, {
+      title: 'Move Quest — ' + what,
+      meta: moves.length + ' moves · one picture each',
+      twoFrames: false, numbered: false, cues: false
+    }));
+  }
+
   // ── Move guide ──────────────────────────────────────────────────
 
   function renderLibrary() {
@@ -1349,6 +1437,8 @@ var MoveQuest = (function() {
       renderPreview();
     });
     on('mq-preview-guide', function() { renderLibrary(); showScreen('library'); });
+    on('mq-preview-print', printCircuit);
+    on('mq-library-print', printLibrary);
     on('mq-preview-start', startWorkout);
 
     on('mq-play-pause', togglePause);
@@ -1464,6 +1554,9 @@ var MoveQuest = (function() {
     levelProgress: levelProgress,
     planParams: planParams,
     buildWorkout: buildWorkout,
+    buildSheet: buildSheet,
+    printCircuit: printCircuit,
+    printLibrary: printLibrary,
     reshuffle: reshuffle,
     completeWorkout: completeWorkout,
     setTier: setTier,

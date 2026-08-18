@@ -410,3 +410,83 @@
       .play-name { font-size: 1.5rem; }
       .stat-grid { gap: 8px; }
     }
+
+    /* ================================================================
+       PRINT SHEET
+       A wall chart the kids can follow with no screen at all. The grid
+       geometry is set in millimetres from JavaScript so the whole thing
+       always lands on exactly one page, whatever the move count.
+       ================================================================ */
+    .mq-sheet { display: none; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+
+      /* Only the sheet prints — not the app, not the background blobs. */
+      body { display: block !important; background: #fff !important; }
+      body::before { display: none !important; }
+      body > *:not(.mq-sheet) { display: none !important; }
+
+      /* Sized for US Letter, the shorter of the two papers, with room
+         to spare for a browser print header — so it is one page on
+         either paper whether or not those are switched on. */
+      .mq-sheet {
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+        height: 235mm;
+        overflow: hidden;
+        color: #000;
+        font-family: var(--font-body);
+        --fig: #000;
+        --fig-ground: #999;
+      }
+
+      .sheet-head { text-align: center; margin-bottom: 4mm; }
+      .sheet-title {
+        font-family: var(--font-display); font-weight: 800;
+        font-size: 15pt; line-height: 1.1;
+      }
+      .sheet-meta { font-size: 9pt; font-weight: 700; color: #333; margin-top: 1mm; }
+      .sheet-rule { border-top: 0.4mm solid #000; margin: 2mm 0 3mm; }
+
+      /* The grid takes the height left over and splits it evenly, so
+         every cell is the same size and nothing can spill. */
+      .sheet-grid { display: grid; gap: 3mm 4mm; flex: 1 1 auto; min-height: 0; }
+
+      .sheet-cell {
+        display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+        break-inside: avoid; page-break-inside: avoid; text-align: center;
+      }
+      .sheet-name {
+        font-family: var(--font-display); font-weight: 800;
+        font-size: 9.5pt; line-height: 1.15;
+      }
+      .sheet-name-es { font-size: 7.5pt; font-weight: 600; color: #444; }
+      /* Figures absorb whatever the text leaves. The SVG viewBox keeps
+         them in proportion, so capping the width just letterboxes them
+         rather than stretching anything. */
+      .sheet-figs {
+        flex: 1 1 auto; min-height: 0;
+        display: flex; justify-content: center; align-items: flex-end;
+        gap: 2mm; margin: 1mm 0;
+      }
+      .sheet-figs .mq-fig { width: auto; height: 100%; max-width: 100%; min-width: 0; }
+      .sheet-figs.two .mq-fig { max-width: 48%; }
+      /* A hold draws one picture, so it gets the whole cell. */
+      .sheet-figs.two .mq-fig:only-child { max-width: 100%; }
+      .sheet-cue { flex: 0 0 auto; font-size: 7.5pt; font-weight: 600; line-height: 1.25; color: #222; }
+      .sheet-hold { flex: 0 0 auto; font-size: 7.5pt; font-weight: 800; }
+      .sheet-name, .sheet-head, .sheet-rule, .sheet-foot { flex: 0 0 auto; }
+
+      /* Figures print as plain black line art — no colour, no fills. */
+      .mq-sheet .mq-pose { stroke: #000; stroke-width: 5; }
+      .mq-sheet .mq-pose .mq-head { fill: #000; }
+      .mq-sheet .mq-ground { stroke: #999; }
+      .mq-sheet .mq-step { fill: #666; font-size: 17px; }
+
+      .sheet-foot {
+        margin-top: 3mm; padding-top: 2mm; border-top: 0.3mm solid #ccc;
+        font-size: 7.5pt; color: #555; display: flex; justify-content: space-between;
+      }
+    }
