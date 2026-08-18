@@ -784,7 +784,6 @@ var MoveQuest = (function() {
       : '';
 
     renderDashboard(data);
-    renderWm();
   }
 
   // ── Home dashboard ──────────────────────────────────────────────
@@ -808,16 +807,69 @@ var MoveQuest = (function() {
     return days;
   }
 
-  function renderDashboard(data) {
-    data = data || getData();
+  var ACTIVE_TARGET_MIN = 60;   // the daily active-minutes target for kids
+
+  /* One SVG goal ring. pct 0..1; the arc animates via CSS transition.
+     Everything interpolated is app-generated, never user input. */
+  function _ringSvg(pct, opts) {
+    var r = 42, c = 2 * Math.PI * r;
+    var filled = Math.max(0, Math.min(1, pct));
+    var dash = (c * filled).toFixed(1) + ' ' + c.toFixed(1);
+    return '<svg class="ring ' + (opts.cls || '') + (filled >= 1 ? ' full' : '') +
+      '" viewBox="0 0 100 100" role="img" aria-label="' + _esc(opts.aria || '') + '">' +
+      '<circle class="ring-track" cx="50" cy="50" r="' + r + '"/>' +
+      '<circle class="ring-arc" cx="50" cy="50" r="' + r + '" ' +
+        'stroke-dasharray="' + dash + '" transform="rotate(-90 50 50)"/>' +
+      '<text class="ring-icon" x="50" y="' + (opts.value !== undefined ? 40 : 56) + '">' + opts.icon + '</text>' +
+      (opts.value !== undefined
+        ? '<text class="ring-value" x="50" y="63">' + _esc(String(opts.value)) + '</text>'
+        : '') +
+      '</svg>';
+  }
+
+  function _ringBlock(pct, opts) {
+    return _ringSvg(pct, opts) +
+      '<span class="ring-label">' + _esc(opts.label) + '</span>' +
+      (opts.sub ? '<span class="ring-sub">' + _esc(opts.sub) + '</span>' : '');
+  }
+
+  function _todayRings(data) {
     var today = _dayKey();
     var act = getDayActivity(today, data);
     var workouts = _workoutDays(data)[today] || 0;
+    var goal = getStepGoal(data);
+    return {
+      act: act, workouts: workouts, goal: goal,
+      stepsPct: act.steps / goal,
+      activePct: (act.active || 0) / ACTIVE_TARGET_MIN,
+      workoutPct: workouts > 0 ? 1 : 0
+    };
+  }
 
-    el.dashWorkouts.textContent = workouts;
-    el.dashSteps.textContent = act.steps > 0 ? act.steps.toLocaleString() : '–';
-    el.dashActive.textContent = _fmtMins(act.active);
-    el.dashLight.textContent = _fmtMins(act.light);
+  // Rough but honest: a kid's step is around 0.6 m, and a soccer
+  // pitch is about 105 m long. Both stated as "about".
+  function _funFact(steps) {
+    if (!steps) return '';
+    var km = steps * 0.0006;
+    var fields = Math.round((steps * 0.6) / 105);
+    var kmTxt = km >= 1 ? (Math.round(km * 10) / 10) + ' km' : Math.round(km * 1000) + ' m';
+    var out = 'Today\u2019s steps \u2248 ' + kmTxt;
+    if (fields >= 1) out += ' \u2014 about ' + fields + ' soccer field' + (fields === 1 ? '' : 's') + ' end to end! \u26bd';
+    return out;
+  }
+
+  function renderDashboard(data) {
+    data = data || getData();
+    var t = _todayRings(data);
+    el.homeRings.innerHTML =
+      _ringSvg(t.stepsPct, { icon: '👟', cls: 'r-steps', aria: 'Steps today' }) +
+      _ringSvg(t.activePct, { icon: '🏃', cls: 'r-active', aria: 'Active minutes today' }) +
+      _ringSvg(t.workoutPct, { icon: '💪', cls: 'r-workout', aria: 'Workout today' });
+    var bits = [];
+    bits.push(t.act.steps > 0 ? t.act.steps.toLocaleString() + ' steps' : 'No steps yet');
+    if (t.act.active !== null) bits.push(_fmtMins(t.act.active) + ' active');
+    bits.push(t.workouts > 0 ? 'workout done ✔' : 'no workout yet');
+    el.homeRingsHint.textContent = bits.join(' · ') + ' — tap to see it all';
   }
 
   function renderWm() {
@@ -1371,33 +1423,6 @@ var MoveQuest = (function() {
 
   // ── Steps screen ────────────────────────────────────────────────
 
-  function renderSteps() {
-    var data = getData();
-    var today = _dayKey();
-    var todaySteps = getSteps(today, data);
-    var goal = getStepGoal(data);
-
-    el.stepsToday.textContent = todaySteps.toLocaleString();
-    var pct = Math.min(100, Math.round((todaySteps / goal) * 100));
-    el.stepsGoal.innerHTML = todaySteps >= goal
-      ? 'Goal reached — <b class="hit">' + goal.toLocaleString() + ' steps</b> 🎉'
-      : pct + '% of <b>' + goal.toLocaleString() + '</b> steps';
-    el.stepsInput.value = todaySteps > 0 ? todaySteps : '';
-
-    var week = getStepWeek(data);
-    var max = Math.max(goal, week.reduce(function(a, d) { return Math.max(a, d.steps); }, 0));
-    var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    el.stepsChart.innerHTML = week.map(function(d) {
-      var h = max ? Math.round((d.steps / max) * 100) : 0;
-      var cls = d.steps >= goal ? 'hit' : (d.steps > 0 ? 'some' : '');
-      return '<div class="bar-wrap">' +
-        '<div class="val">' + (d.steps ? Math.round(d.steps / 100) / 10 + 'k' : '') + '</div>' +
-        '<div class="bar ' + cls + '" style="height:' + h + '%"></div>' +
-        '<div class="day">' + DAYS[d.date.getDay()] + '</div>' +
-      '</div>';
-    }).join('');
-  }
-
   function saveTodaySteps() {
     var raw = el.stepsInput.value;
     var n = Number(raw);
@@ -1410,7 +1435,7 @@ var MoveQuest = (function() {
     el.stepsFeedback.style.color = 'var(--green)';
     el.stepsFeedback.textContent = '✅ Saved ' + saved.toLocaleString() + ' steps for today.';
     if (typeof SFX !== 'undefined') SFX.star();
-    renderSteps();
+    renderProgress();
   }
 
   // A family archive holds every child, so when more than one folder
@@ -1443,7 +1468,7 @@ var MoveQuest = (function() {
       ActivityLog.log('Move Quest', '👟', 'Imported ' + res.days + ' days of steps');
     }
     if (typeof SFX !== 'undefined') SFX.star();
-    renderSteps();
+    renderProgress();
   }
 
   function handleStepsFiles(input) {
@@ -1647,6 +1672,38 @@ var MoveQuest = (function() {
   function renderProgress() {
     var data = getData();
     var prog = levelProgress(data);
+    var t = _todayRings(data);
+
+    el.ringSteps.innerHTML = _ringBlock(t.stepsPct, {
+      icon: '👟', cls: 'r-steps', aria: 'Steps today',
+      value: t.act.steps > 0 ? t.act.steps.toLocaleString() : '0',
+      label: 'Steps',
+      sub: t.act.steps >= t.goal ? 'Goal! 🎉' : 'of ' + t.goal.toLocaleString()
+    });
+    el.ringActive.innerHTML = _ringBlock(t.activePct, {
+      icon: '🏃', cls: 'r-active', aria: 'Active minutes today',
+      value: _fmtMins(t.act.active === null ? 0 : t.act.active),
+      label: 'Active',
+      sub: (t.act.active || 0) >= ACTIVE_TARGET_MIN ? 'Target! 🎉' : 'of ' + ACTIVE_TARGET_MIN + 'm'
+    });
+    el.ringWorkout.innerHTML = _ringBlock(t.workoutPct, {
+      icon: '💪', cls: 'r-workout', aria: 'Workout today',
+      value: t.workouts,
+      label: 'Workouts',
+      sub: t.workouts > 0 ? 'Done! ⭐' : 'today'
+    });
+
+    var fun = [];
+    if ((data.streak || 0) > 1) fun.push('🔥 ' + data.streak + '-day workout streak');
+    var fact = _funFact(t.act.steps);
+    if (fact) fun.push(fact);
+    el.funStrip.innerHTML = fun.length ? fun.map(function(f) {
+      return '<span>' + _esc(f) + '</span>';
+    }).join('') : '';
+    el.funStrip.style.display = fun.length ? '' : 'none';
+
+    el.stepsInput.value = t.act.steps > 0 ? t.act.steps : '';
+    renderWm();
 
     el.statWorkouts.textContent = data.workoutsDone || 0;
     el.statMinutes.textContent = Math.round((data.totalSeconds || 0) / 60);
@@ -1719,8 +1776,9 @@ var MoveQuest = (function() {
     el = {
       tierPill: $('mq-tier-pill'), levelFill: $('mq-level-fill'), levelNote: $('mq-level-note'),
       startDesc: $('mq-start-desc'), streakBadge: $('mq-streak-badge'), stepsBadge: $('mq-steps-badge'),
-      dashWorkouts: $('mq-dash-workouts'), dashSteps: $('mq-dash-steps'),
-      dashActive: $('mq-dash-active'), dashLight: $('mq-dash-light'),
+      homeRings: $('mq-home-rings-row'), homeRingsHint: $('mq-home-rings-hint'),
+      ringSteps: $('mq-ring-steps'), ringActive: $('mq-ring-active'), ringWorkout: $('mq-ring-workout'),
+      funStrip: $('mq-fun-strip'),
       wmNav: $('mq-wm-nav'), wmLabel: $('mq-wm-label'), wmNext: $('mq-wm-next'), wmView: $('mq-wm-view'),
 
       previewSummary: $('mq-preview-summary'), previewList: $('mq-preview-list'),
@@ -1737,9 +1795,8 @@ var MoveQuest = (function() {
 
       libraryFilters: $('mq-library-filters'), libraryList: $('mq-library-list'),
 
-      stepsToday: $('mq-steps-today'), stepsGoal: $('mq-steps-goal'),
       stepsInput: $('mq-steps-input'), stepsFeedback: $('mq-steps-feedback'),
-      stepsChart: $('mq-steps-chart'), stepsImport: $('mq-steps-import'),
+      stepsImport: $('mq-steps-import'),
 
       statWorkouts: $('mq-stat-workouts'), statMinutes: $('mq-stat-minutes'),
       statStreak: $('mq-stat-streak'), progressFill: $('mq-progress-fill'),
@@ -1754,10 +1811,7 @@ var MoveQuest = (function() {
     function on(id, fn) { var node = $(id); if (node) node.addEventListener('click', fn); }
 
     on('mq-go-start', function() { renderPreview(); showScreen('preview'); });
-    on('mq-dash-steps-box', function() { renderSteps(); showScreen('steps'); });
-    on('mq-dash-active-box', function() { renderSteps(); showScreen('steps'); });
-    on('mq-dash-light-box', function() { renderSteps(); showScreen('steps'); });
-    on('mq-dash-workouts-box', function() { renderProgress(); showScreen('progress'); });
+    on('mq-home-rings', function() { renderProgress(); showScreen('progress'); });
 
     var wmChips = document.querySelectorAll('[data-wm]');
     for (var wi = 0; wi < wmChips.length; wi++) {
@@ -1771,7 +1825,6 @@ var MoveQuest = (function() {
       if (_wmMonthOffset < 0) { _wmMonthOffset++; renderWm(); }
     });
     on('mq-go-library', function() { renderLibrary(); showScreen('library'); });
-    on('mq-go-steps', function() { renderSteps(); showScreen('steps'); });
     on('mq-go-progress', function() { renderProgress(); showScreen('progress'); });
     on('mq-go-settings', function() { renderSettings(); showScreen('settings'); });
 
@@ -1794,7 +1847,6 @@ var MoveQuest = (function() {
     on('mq-finish-again', function() { renderPreview(); showScreen('preview'); });
 
     on('mq-library-back', function() { renderHome(); showScreen('home'); });
-    on('mq-steps-back', function() { renderHome(); showScreen('home'); });
     on('mq-progress-back', function() { renderHome(); showScreen('home'); });
     on('mq-settings-back', function() { renderHome(); showScreen('home'); });
 

@@ -316,31 +316,8 @@
     .lib-lock { font-size: 0.78rem; font-weight: 800; color: var(--gold); margin-top: 8px; }
 
     /* ================================================================
-       STEPS
+       STEPS IMPORT (inside My Progress)
        ================================================================ */
-    .steps-hero {
-      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
-      border-radius: var(--radius); padding: 22px; text-align: center; margin-bottom: 16px;
-    }
-    .steps-count {
-      font-family: var(--font-display); font-weight: 800; font-size: 3rem; line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-    .steps-label { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-    .steps-goal { margin-top: 10px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
-    .steps-goal b.hit { color: var(--green); }
-
-    .steps-chart { display: flex; align-items: flex-end; gap: 6px; height: 130px; margin: 18px 0 8px; }
-    .steps-chart .bar-wrap { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 4px; }
-    .steps-chart .bar {
-      width: 100%; border-radius: 6px 6px 0 0; background: var(--border-subtle);
-      min-height: 3px; transition: height 0.4s ease;
-    }
-    .steps-chart .bar.hit { background: var(--green); }
-    .steps-chart .bar.some { background: #6EE7B7; }
-    .steps-chart .day { text-align: center; font-size: 0.68rem; font-weight: 800; color: var(--text-muted); }
-    .steps-chart .val { text-align: center; font-size: 0.62rem; font-weight: 700; color: var(--text-muted); }
-
     .note-card {
       background: var(--bg-sunk); border: 1.5px dashed var(--border-subtle);
       border-radius: var(--radius-sm); padding: 14px 16px;
@@ -357,19 +334,63 @@
     .import-result.bad { color: var(--red); border-color: #fca5a5; }
     .import-result.good { color: var(--green); border-color: #6EE7B7; }
 
-    /* ---- Home dashboard tiles ---- */
-    .dash-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-      margin-top: 18px;
+    /* ---- Goal rings ---- */
+    .ring { display: block; width: 100%; height: auto; }
+    .ring-track { fill: none; stroke: #e6e2f0; stroke-width: 9; }
+    .ring-arc {
+      fill: none; stroke-width: 9; stroke-linecap: round;
+      transition: stroke-dasharray 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .dash-box {
-      cursor: pointer; font-family: var(--font-body);
-      display: flex; flex-direction: column; gap: 2px;
-      transition: border-color 0.15s;
+    .r-steps .ring-arc { stroke: #059669; }
+    .r-active .ring-arc { stroke: #C2410C; }
+    .r-workout .ring-arc { stroke: #6D28D9; }
+    .ring.full .ring-track { stroke: currentColor; opacity: 1; }
+    .r-steps.full { color: rgba(5,150,105,0.18); }
+    .r-active.full { color: rgba(194,65,12,0.18); }
+    .r-workout.full { color: rgba(109,40,217,0.18); }
+    .ring-icon { font-size: 26px; text-anchor: middle; dominant-baseline: central; }
+    .ring-value {
+      font-family: var(--font-display); font-weight: 800; font-size: 19px;
+      text-anchor: middle; fill: var(--text);
     }
-    .dash-box:hover { border-color: var(--green); }
-    .dash-box .v { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; }
-    .dash-box .k { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .ring-label { display: block; text-align: center; font-weight: 800; font-size: 0.8rem; margin-top: 4px; }
+    .ring-sub { display: block; text-align: center; font-weight: 700; font-size: 0.7rem; color: var(--text-muted); }
+
+    /* Home: one tappable card with three small rings */
+    .rings-card {
+      width: 100%; margin-top: 18px; padding: 16px 18px 12px; cursor: pointer;
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius); font-family: var(--font-body); color: var(--text);
+      transition: all 0.2s;
+    }
+    .rings-card:hover { transform: translateY(-2px); border-color: var(--green); box-shadow: 0 8px 24px rgba(5,150,105,0.10); }
+    .rings-row { display: flex; justify-content: center; gap: 22px; }
+    .rings-row .ring { width: 68px; }
+    .rings-hint { display: block; margin-top: 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); }
+
+    /* Progress: the big hero rings */
+    .rings-hero {
+      display: flex; align-items: center; justify-content: center; gap: 20px;
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 20px;
+    }
+    .ring-block { text-align: center; }
+    .ring-block.big .ring { width: 150px; }
+    .ring-block.big .ring-value { font-size: 21px; }
+    .rings-side { display: flex; flex-direction: column; gap: 14px; }
+    .rings-side .ring { width: 84px; }
+
+    .fun-strip {
+      margin-top: 10px; padding: 12px 16px; border-radius: var(--radius-sm);
+      background: rgba(251,191,36,0.10); border: 1.5px solid rgba(180,83,9,0.22);
+      font-size: 0.86rem; font-weight: 700; color: var(--text); text-align: center;
+    }
+    .fun-strip span { display: block; }
+    .fun-strip span + span { margin-top: 3px; }
+
+    .steps-inline { display: flex; gap: 8px; }
+    .steps-inline .form-input { flex: 1; }
+    .steps-inline-save { width: auto; padding: 14px 20px; flex-shrink: 0; }
 
     /* ---- Week / Month section ---- */
     .wm-section { margin-top: 26px; }
@@ -482,8 +503,8 @@
     }
     .hist-icon { font-size: 1.4rem; }
     .hist-main { flex: 1; }
-    .hist-title { font-weight: 800; font-size: 0.95rem; }
-    .hist-sub { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+    .hist-title { display: block; font-weight: 800; font-size: 0.95rem; }
+    .hist-sub { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
 
     .empty-state {
       text-align: center; padding: 40px 20px; color: var(--text-muted);
