@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/move-quest.css">
+  <link rel="stylesheet" href="css/move-quest.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#059669">
@@ -36,24 +36,10 @@
     <div class="level-bar"><i id="mq-level-fill" style="width:0%"></i></div>
     <div class="level-note" id="mq-level-note"></div>
 
-    <div class="dash-grid" id="mq-dash">
-      <button class="stat-box dash-box" id="mq-dash-workouts-box">
-        <span class="v" id="mq-dash-workouts">0</span>
-        <span class="k">💪 Workouts today</span>
-      </button>
-      <button class="stat-box dash-box" id="mq-dash-steps-box">
-        <span class="v" id="mq-dash-steps">–</span>
-        <span class="k">👟 Steps today</span>
-      </button>
-      <button class="stat-box dash-box" id="mq-dash-active-box">
-        <span class="v" id="mq-dash-active">–</span>
-        <span class="k">🏃 Active</span>
-      </button>
-      <button class="stat-box dash-box" id="mq-dash-light-box">
-        <span class="v" id="mq-dash-light">–</span>
-        <span class="k">🚶 Light</span>
-      </button>
-    </div>
+    <button class="rings-card" id="mq-home-rings" aria-label="Open My Progress">
+      <span class="rings-row" id="mq-home-rings-row"></span>
+      <span class="rings-hint" id="mq-home-rings-hint">Today's rings — tap to see it all</span>
+    </button>
 
     <div class="mode-grid">
       <button class="mode-card" id="mq-go-start">
@@ -71,19 +57,12 @@
           <span class="m-desc">See every exercise drawn step by step before you start.</span>
         </span>
       </button>
-      <button class="mode-card" id="mq-go-steps">
-        <span class="m-icon">👟</span>
-        <span>
-          <span class="m-title">Steps</span>
-          <span class="m-desc">Log the steps from your watch and watch the week fill up.</span>
-          <span class="m-badge" id="mq-steps-badge"></span>
-        </span>
-      </button>
       <button class="mode-card" id="mq-go-progress">
         <span class="m-icon">📈</span>
         <span>
           <span class="m-title">My Progress</span>
-          <span class="m-desc">Workouts, minutes and your day streak.</span>
+          <span class="m-desc">Rings, week and month charts, steps from the watch, and your history.</span>
+          <span class="m-badge" id="mq-steps-badge"></span>
         </span>
       </button>
       <button class="mode-card" id="mq-go-settings">
@@ -95,20 +74,6 @@
       </button>
     </div>
 
-    <div class="wm-section">
-      <div class="wm-head">
-        <div class="chip-row">
-          <button class="chip on" data-wm="week">Week</button>
-          <button class="chip" data-wm="month">Month</button>
-        </div>
-        <div class="wm-nav" id="mq-wm-nav" style="display:none;">
-          <button class="back-btn wm-arrow" id="mq-wm-prev" aria-label="Previous month">‹</button>
-          <span class="wm-label" id="mq-wm-label"></span>
-          <button class="back-btn wm-arrow" id="mq-wm-next" aria-label="Next month">›</button>
-        </div>
-      </div>
-      <div id="mq-wm-view"></div>
-    </div>
   </div>
 
   <!-- ============ PREVIEW (today's circuit) ============ -->
@@ -197,47 +162,69 @@
     <div class="lib-list" id="mq-library-list"></div>
   </div>
 
-  <!-- ============ STEPS ============ -->
-  <div class="screen" id="mq-screen-steps">
+  <!-- ============ PROGRESS (rings + charts + steps + history) ============ -->
+  <div class="screen" id="mq-screen-progress">
     <div class="section-header">
-      <button class="back-btn" aria-label="Go back" id="mq-steps-back">←</button>
-      <div class="section-title">👟 Steps</div>
+      <button class="back-btn" aria-label="Go back" id="mq-progress-back">←</button>
+      <div class="section-title">📈 My Progress</div>
     </div>
 
-    <div class="steps-hero">
-      <div class="steps-label">Today</div>
-      <div class="steps-count" id="mq-steps-today">0</div>
-      <div class="steps-goal" id="mq-steps-goal"></div>
+    <!-- Today: three goal rings -->
+    <div class="rings-hero">
+      <div class="ring-block big" id="mq-ring-steps"></div>
+      <div class="rings-side">
+        <div class="ring-block" id="mq-ring-active"></div>
+        <div class="ring-block" id="mq-ring-workout"></div>
+      </div>
+    </div>
+    <div class="fun-strip" id="mq-fun-strip"></div>
+
+    <!-- Week / Month explorer -->
+    <div class="wm-section" style="margin-top:20px;">
+      <div class="wm-head">
+        <div class="chip-row">
+          <button class="chip on" data-wm="week">Week</button>
+          <button class="chip" data-wm="month">Month</button>
+        </div>
+        <div class="wm-nav" id="mq-wm-nav" style="display:none;">
+          <button class="back-btn wm-arrow" id="mq-wm-prev" aria-label="Previous month">‹</button>
+          <span class="wm-label" id="mq-wm-label"></span>
+          <button class="back-btn wm-arrow" id="mq-wm-next" aria-label="Next month">›</button>
+        </div>
+      </div>
+      <div id="mq-wm-view"></div>
     </div>
 
+    <!-- Lifetime -->
+    <div class="stat-grid" style="margin-top:24px;">
+      <div class="stat-box"><div class="v" id="mq-stat-workouts">0</div><div class="k">Workouts</div></div>
+      <div class="stat-box"><div class="v" id="mq-stat-minutes">0</div><div class="k">Minutes</div></div>
+      <div class="stat-box"><div class="v" id="mq-stat-streak">0</div><div class="k">Day streak</div></div>
+    </div>
+    <div class="level-bar"><i id="mq-progress-fill" style="width:0%"></i></div>
+    <div class="level-note" id="mq-progress-note"></div>
+
+    <!-- Steps from the watch -->
+    <div class="section-header" style="margin:28px 0 10px;">
+      <div class="section-title" style="font-size:1.05rem;">👟 Steps from the watch</div>
+    </div>
     <div class="form-group">
-      <label for="mq-steps-input">Steps on your watch right now</label>
-      <input type="number" class="form-input" id="mq-steps-input" min="0" max="200000" placeholder="e.g. 8420">
+      <label for="mq-steps-input">Steps on the watch right now</label>
+      <div class="steps-inline">
+        <input type="number" class="form-input" id="mq-steps-input" min="0" max="200000" placeholder="e.g. 8420">
+        <button class="btn-primary steps-inline-save" id="mq-steps-save">✅ Save</button>
+      </div>
     </div>
-    <button class="btn-primary" id="mq-steps-save">✅ Save today's steps</button>
-    <div id="mq-steps-feedback" style="text-align:center; margin-top:10px; font-weight:800;"></div>
+    <div id="mq-steps-feedback" style="text-align:center; margin-top:4px; font-weight:800;"></div>
 
-    <div class="section-header" style="margin:28px 0 10px;">
-      <div class="section-title" style="font-size:1.05rem;">This week</div>
-    </div>
-    <div class="steps-chart" id="mq-steps-chart"></div>
-
-    <div class="section-header" style="margin:28px 0 10px;">
-      <div class="section-title" style="font-size:1.05rem;">Import from the watch</div>
-    </div>
-    <div class="note-card">
+    <div class="note-card" style="margin-top:12px;">
       <b>Easiest: screenshots.</b> In the Fitbit app, open the kid's weekly <b>Movement</b>
-      list and screenshot it — one screenshot per week, several at a time is fine. The
-      pictures are read right here on this device, you get to check the numbers before they
-      are saved, and nothing is uploaded anywhere.
-      (Lo mas facil: capturas de pantalla de la lista Movement semanal. Se leen aqui mismo y
-      revisas los numeros antes de guardar.)
-    </div>
-    <div class="note-card">
-      For a big backfill, a <b>Google Takeout</b> export also works: tick only <b>Fitbit</b>,
-      download the <b>.zip</b> and drop it in whole. Loose <b>.json</b>/<b>.csv</b> steps
-      files work too.
-      (Para el historial completo tambien sirve el .zip de Google Takeout.)
+      list and screenshot it — several at a time is fine, and steps <b>and</b> active/light
+      minutes are read together. The pictures are read on this device, you check the numbers
+      before they are saved, and nothing is uploaded anywhere. A <b>Google Takeout</b> .zip
+      or loose .json/.csv files also work for big backfills.
+      (Lo mas facil: capturas de la lista Movement — se leen pasos y minutos aqui mismo, y
+      revisas antes de guardar. Tambien sirve el .zip de Google Takeout.)
     </div>
     <label class="btn-secondary file-btn" style="margin-top:10px;">
       📂 Choose screenshots (or a Takeout zip)
@@ -245,31 +232,9 @@
     </label>
     <div id="mq-steps-import" class="import-result" style="display:none;"></div>
 
-    <div class="note-card" style="margin-top:16px;">
-      No export? Just read the number off the watch face and type it in above. One tap a
-      day is enough to see the week fill up.
-      (Sin exportacion: lee el numero en el reloj y escribelo arriba.)
-    </div>
-  </div>
-
-  <!-- ============ PROGRESS ============ -->
-  <div class="screen" id="mq-screen-progress">
-    <div class="section-header">
-      <button class="back-btn" aria-label="Go back" id="mq-progress-back">←</button>
-      <div class="section-title">📈 My Progress</div>
-    </div>
-
-    <div class="stat-grid">
-      <div class="stat-box"><div class="v" id="mq-stat-workouts">0</div><div class="k">Workouts</div></div>
-      <div class="stat-box"><div class="v" id="mq-stat-minutes">0</div><div class="k">Minutes</div></div>
-      <div class="stat-box"><div class="v" id="mq-stat-streak">0</div><div class="k">Day streak</div></div>
-    </div>
-
-    <div class="level-bar"><i id="mq-progress-fill" style="width:0%"></i></div>
-    <div class="level-note" id="mq-progress-note"></div>
-
-    <div class="section-header" style="margin:24px 0 10px;">
-      <div class="section-title" style="font-size:1.05rem;">History</div>
+    <!-- History -->
+    <div class="section-header" style="margin:28px 0 10px;">
+      <div class="section-title" style="font-size:1.05rem;">💪 Workout history</div>
     </div>
     <div id="mq-history-list"></div>
   </div>
@@ -341,9 +306,9 @@
 <script src="js/activity-log.js"></script>
 <script src="js/tts.js"></script>
 <script src="js/sports-arena.js"></script>
-<script src="js/move-quest-moves.js"></script>
-<script src="js/move-quest-scan.js"></script>
-<script src="js/move-quest.js"></script>
+<script src="js/move-quest-moves.js?v=2"></script>
+<script src="js/move-quest-scan.js?v=2"></script>
+<script src="js/move-quest.js?v=2"></script>
 <script src="js/pwa.js"></script>
 
 </body>
