@@ -36,6 +36,25 @@
     <div class="level-bar"><i id="mq-level-fill" style="width:0%"></i></div>
     <div class="level-note" id="mq-level-note"></div>
 
+    <div class="dash-grid" id="mq-dash">
+      <button class="stat-box dash-box" id="mq-dash-workouts-box">
+        <span class="v" id="mq-dash-workouts">0</span>
+        <span class="k">💪 Workouts today</span>
+      </button>
+      <button class="stat-box dash-box" id="mq-dash-steps-box">
+        <span class="v" id="mq-dash-steps">–</span>
+        <span class="k">👟 Steps today</span>
+      </button>
+      <button class="stat-box dash-box" id="mq-dash-active-box">
+        <span class="v" id="mq-dash-active">–</span>
+        <span class="k">🏃 Active</span>
+      </button>
+      <button class="stat-box dash-box" id="mq-dash-light-box">
+        <span class="v" id="mq-dash-light">–</span>
+        <span class="k">🚶 Light</span>
+      </button>
+    </div>
+
     <div class="mode-grid">
       <button class="mode-card" id="mq-go-start">
         <span class="m-icon">▶️</span>
@@ -74,6 +93,21 @@
           <span class="m-desc">Age group, coach voice and workout length.</span>
         </span>
       </button>
+    </div>
+
+    <div class="wm-section">
+      <div class="wm-head">
+        <div class="chip-row">
+          <button class="chip on" data-wm="week">Week</button>
+          <button class="chip" data-wm="month">Month</button>
+        </div>
+        <div class="wm-nav" id="mq-wm-nav" style="display:none;">
+          <button class="back-btn wm-arrow" id="mq-wm-prev" aria-label="Previous month">‹</button>
+          <span class="wm-label" id="mq-wm-label"></span>
+          <button class="back-btn wm-arrow" id="mq-wm-next" aria-label="Next month">›</button>
+        </div>
+      </div>
+      <div id="mq-wm-view"></div>
     </div>
   </div>
 
