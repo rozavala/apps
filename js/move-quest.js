@@ -1272,15 +1272,29 @@ var MoveQuest = (function() {
   function handleStepsFiles(input) {
     var files = Array.prototype.slice.call(input.files || []);
     if (!files.length) return;
+    input.value = '';
     var box = el.stepsImport;
     box.style.display = '';
     box.className = 'import-result';
+
+    // Screenshots go through OCR and a review step; everything else
+    // through the file importer. When a selection mixes both, the
+    // screenshots win the screen — data files save silently first
+    // would risk hiding the owner picker, so we ask for them alone.
+    var images = files.filter(MoveQuestScan.isImageFile);
+    var rest = files.filter(function(f) { return !MoveQuestScan.isImageFile(f); });
+    if (images.length) {
+      _importScreenshots(images,
+        rest.length ? 'The other ' + rest.length + ' file' + (rest.length === 1 ? '' : 's') +
+                      ' were skipped — import data files separately from screenshots.' : '');
+      return;
+    }
+
     box.textContent = files.length === 1
       ? 'Reading ' + _esc(files[0].name) + '…'
       : 'Reading ' + files.length + ' files…';
 
     gatherStepTotals(files).then(function(res) {
-      input.value = '';
       var keys = Object.keys(res.owners);
       var problems = res.report.problems.length
         ? '<br>' + _esc(res.report.problems.join(' ')) : '';
@@ -1314,6 +1328,77 @@ var MoveQuest = (function() {
       box.className = 'import-result bad';
       box.textContent = '⚠️ Those files could not be read.';
     });
+  }
+
+  /* ── Screenshots → review → save ──────────────────────────────────
+     OCR is good on these screens but not infallible, so nothing is
+     stored until the parent has seen the numbers and had the chance
+     to fix or drop a row. */
+
+  function _fmtDayKey(key) {
+    var d = new Date(key + 'T12:00:00');
+    if (isNaN(d.getTime())) return key;
+    try {
+      return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    } catch (e) { return key; }
+  }
+
+  function _importScreenshots(images, extraNote) {
+    var box = el.stepsImport;
+    var firstRun = typeof Tesseract === 'undefined';
+    box.className = 'import-result';
+    box.textContent = 'Reading ' + images.length + ' screenshot' + (images.length === 1 ? '' : 's') + '…' +
+      (firstRun ? ' (first time loads the picture reader — give it a moment)' : '');
+
+    MoveQuestScan.scanImages(images, function(i, n) {
+      box.textContent = 'Reading screenshot ' + i + ' of ' + n + '…' +
+        (firstRun ? ' (first time loads the picture reader — give it a moment)' : '');
+    }).then(function(res) {
+      var keys = Object.keys(res.totals).sort();
+      var problems = res.report.problems.length
+        ? '<br>' + _esc(res.report.problems.join(' ')) : '';
+      var note = extraNote ? '<br>' + _esc(extraNote) : '';
+      if (!keys.length) {
+        box.className = 'import-result bad';
+        box.innerHTML = '⚠️ No step counts could be read.' + problems + note +
+          '<br>Screenshot the <b>Movement</b> list in the Fitbit app — the weekly view ' +
+          'with the Steps column — and make sure the rows are visible.';
+        return;
+      }
+      box.className = 'import-result';
+      box.innerHTML =
+        'Read <b>' + keys.length + ' day' + (keys.length === 1 ? '' : 's') + '</b> from ' +
+        res.report.scanned + ' screenshot' + (res.report.scanned === 1 ? '' : 's') +
+        '. Check the numbers against the pictures, fix anything misread, then save.' +
+        problems + note +
+        '<div class="scan-list">' +
+        keys.map(function(k) {
+          return '<div class="scan-row" data-key="' + k + '">' +
+            '<span class="scan-date">' + _esc(_fmtDayKey(k)) + '</span>' +
+            '<input type="number" class="scan-input" min="0" max="200000" value="' + res.totals[k] +
+              '" aria-label="Steps for ' + _esc(_fmtDayKey(k)) + '">' +
+            '<button class="scan-del" aria-label="Remove ' + _esc(_fmtDayKey(k)) + '">✕</button>' +
+          '</div>';
+        }).join('') +
+        '</div>' +
+        '<div class="btn-row">' +
+          '<button class="btn-primary" data-scan="save">💾 Save for ' + _esc(_activeName()) + '</button>' +
+          '<button class="btn-secondary" data-scan="cancel">Cancel</button>' +
+        '</div>';
+    });
+  }
+
+  function _saveScanReview() {
+    var box = el.stepsImport;
+    var totals = {};
+    var rows = box.querySelectorAll('.scan-row');
+    for (var i = 0; i < rows.length; i++) {
+      var key = rows[i].getAttribute('data-key');
+      var input = rows[i].querySelector('.scan-input');
+      var n = input ? Math.round(Number(input.value)) : 0;
+      if (key && isFinite(n) && n > 0) totals[key] = Math.min(200000, n);
+    }
+    _finishImport(totals, null);
   }
 
   // ── Progress screen ─────────────────────────────────────────────
@@ -1466,7 +1551,20 @@ var MoveQuest = (function() {
 
     if (el.stepsImport) {
       el.stepsImport.addEventListener('click', function(ev) {
-        var btn = ev.target.closest ? ev.target.closest('[data-owner]') : null;
+        var t = ev.target;
+        var del = t.closest ? t.closest('.scan-del') : null;
+        if (del) {
+          var row = del.closest('.scan-row');
+          if (row) row.parentNode.removeChild(row);
+          return;
+        }
+        var scanBtn = t.closest ? t.closest('[data-scan]') : null;
+        if (scanBtn) {
+          if (scanBtn.getAttribute('data-scan') === 'save') _saveScanReview();
+          else { el.stepsImport.style.display = 'none'; el.stepsImport.innerHTML = ''; }
+          return;
+        }
+        var btn = t.closest ? t.closest('[data-owner]') : null;
         if (!btn || !_pendingOwners) return;
         var owner = _pendingOwners[_pendingKeys[Number(btn.getAttribute('data-owner'))]];
         var report = _pendingReport;
