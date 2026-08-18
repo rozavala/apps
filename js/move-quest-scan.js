@@ -62,9 +62,61 @@ var MoveQuestScan = (function() {
 
   function _pad(n) { return (n < 10 ? '0' : '') + n; }
 
+  /* Duration tokens in OCR text come glued as often as spaced —
+     "4 h 40 m", "4h40 m" and "3h33m" are all the same reading — so
+     the pattern must not lean on word boundaries. Each token records
+     the span it covered so the caller can blank durations out of the
+     line before looking for the steps number. */
+  function _durTokens(tail) {
+    var out = [];
+    var re = /(\d+)\s*h\s*(?:(\d+)\s*m)?|(\d+)\s*m/gi;
+    var m;
+    while ((m = re.exec(tail)) !== null) {
+      out.push({
+        h: m[1] !== undefined ? parseInt(m[1], 10) : null,
+        m: m[1] !== undefined
+          ? (m[2] !== undefined ? parseInt(m[2], 10) : null)
+          : parseInt(m[3], 10),
+        start: m.index,
+        end: m.index + m[0].length
+      });
+    }
+    return out;
+  }
+
+  /* The Light and Active minutes of one row. */
+  function _durationsFrom(tail) {
+    // The Active column wraps on narrow phones, leaving "2 h 17" with
+    // its "m" on the next OCR line — restore it before scanning.
+    tail = tail.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m');
+    var out = _durTokens(tail);
+
+    function total(t) { return (t.h || 0) * 60 + (t.m || 0); }
+    function clamp(n) { return (n === null || !isFinite(n) || n < 0 || n > 1440) ? null : n; }
+
+    // Two columns flatten into one line of text, which makes
+    // "3 h" (light) + "15 m" (active) read exactly like the single
+    // duration "3 h 15 m". Rows always carry both columns, so a lone
+    // h+m token is treated as that pair, split back apart.
+    var light = null, active = null;
+    if (out.length >= 2) {
+      light = total(out[0]);
+      active = total(out[1]);
+    } else if (out.length === 1) {
+      if (out[0].h !== null && out[0].m !== null) {
+        light = out[0].h * 60;
+        active = out[0].m;
+      } else {
+        light = total(out[0]);
+      }
+    }
+    return { light: clamp(light), active: clamp(active) };
+  }
+
   /* Parse the OCR text of one screenshot into rows of
-     { key: 'YYYY-MM-DD', steps }. Pure — `today` is injectable so
-     the year inference is testable.
+     { key: 'YYYY-MM-DD', steps, light, active } — light and active
+     are minutes, null when unreadable. Pure — `today` is injectable
+     so the year inference is testable.
 
      A Movement row reads like:
        "Sat, Aug 8   14,026   4 h 40 m   28 m"
@@ -102,11 +154,16 @@ var MoveQuestScan = (function() {
       }
       if (!month || !day || day > 31) return;
 
-      // Steps is the first number left once the durations are gone.
-      var tail = rest.slice(dateEnd)
-        .replace(/\b\d+\s*h\b(\s*\d+\s*m\b)?/gi, ' ')
-        .replace(/\b\d+\s*m\b/gi, ' ');
-      var stepTok = /\d[\d.,]*/.exec(tail);
+      // Steps is the first number left once the durations are gone;
+      // the durations themselves become the Light and Active minutes.
+      var tail = rest.slice(dateEnd);
+      var mins = _durationsFrom(tail);
+      var chars = tail.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m').split('');
+      _durTokens(chars.join('')).forEach(function(t) {
+        for (var c = t.start; c < t.end; c++) chars[c] = ' ';
+      });
+      var stripped = chars.join('');
+      var stepTok = /\d[\d.,]*/.exec(stripped);
       if (!stepTok) return;
       var steps = _num(stepTok[0]);
       if (steps === null || steps === 0) return;
@@ -118,7 +175,9 @@ var MoveQuestScan = (function() {
 
       rows.push({
         key: d.getFullYear() + '-' + _pad(d.getMonth() + 1) + '-' + _pad(d.getDate()),
-        steps: steps
+        steps: steps,
+        light: mins.light,
+        active: mins.active
       });
     });
 
@@ -189,15 +248,16 @@ var MoveQuestScan = (function() {
       var px = img.data;
       var sum = 0;
       for (var i = 0; i < px.length; i += 40) sum += px[i] * 0.3 + px[i + 1] * 0.6 + px[i + 2] * 0.1;
-      var mean = sum / (px.length / 40);
-      if (mean < 128) {
-        for (var j = 0; j < px.length; j += 4) {
-          px[j] = 255 - px[j];
-          px[j + 1] = 255 - px[j + 1];
-          px[j + 2] = 255 - px[j + 2];
-        }
-        ctx.putImageData(img, 0, 0);
+      var invert = (sum / (px.length / 40)) < 128;
+      // Grayscale everything: the Active column is coloured, and after
+      // a plain inversion it lands as odd purples that OCR misreads.
+      // Luminance keeps every column plain dark-on-light text.
+      for (var j = 0; j < px.length; j += 4) {
+        var y = px[j] * 0.299 + px[j + 1] * 0.587 + px[j + 2] * 0.114;
+        if (invert) y = 255 - y;
+        px[j] = px[j + 1] = px[j + 2] = y;
       }
+      ctx.putImageData(img, 0, 0);
       return canvas;
     });
   }
@@ -232,7 +292,16 @@ var MoveQuestScan = (function() {
           } else {
             report.scanned++;
             rows.forEach(function(r) {
-              totals[r.key] = Math.max(totals[r.key] || 0, r.steps);
+              var cur = totals[r.key];
+              if (!cur) {
+                totals[r.key] = { steps: r.steps, light: r.light, active: r.active };
+              } else {
+                // Overlapping weeks repeat a day, and a day's counts
+                // only ever grow — the larger reading wins per field.
+                cur.steps = Math.max(cur.steps, r.steps);
+                if (r.light !== null) cur.light = cur.light === null ? r.light : Math.max(cur.light, r.light);
+                if (r.active !== null) cur.active = cur.active === null ? r.active : Math.max(cur.active, r.active);
+              }
             });
           }
           return worker;

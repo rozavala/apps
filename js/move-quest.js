@@ -11,7 +11,8 @@
    Data: {
      level, workoutsDone, totalSeconds, totalStars,
      lastWorkout, streak, history: [...],
-     steps: { 'YYYY-MM-DD': n }, stepGoal,
+     steps:   { 'YYYY-MM-DD': n }, stepGoal,
+     minutes: { 'YYYY-MM-DD': { a: activeMin, l: lightMin } },
      tier, voice, beeps, doubleRound
    }
 
@@ -111,7 +112,7 @@ var MoveQuest = (function() {
     return {
       level: 1, workoutsDone: 0, totalSeconds: 0, totalStars: 0,
       lastWorkout: null, streak: 0, history: [],
-      steps: {}, stepGoal: 10000,
+      steps: {}, minutes: {}, stepGoal: 10000,
       tier: null, voice: true, beeps: true, doubleRound: false
     };
   }
@@ -128,6 +129,7 @@ var MoveQuest = (function() {
       }
       if (!Array.isArray(base.history)) base.history = [];
       if (!base.steps || typeof base.steps !== 'object') base.steps = {};
+      if (!base.minutes || typeof base.minutes !== 'object') base.minutes = {};
       base.lastWorkout = raw.lastWorkout || null;
       return base;
     } catch (e) { return _empty(); }
@@ -506,18 +508,39 @@ var MoveQuest = (function() {
     return totals || {};
   }
 
-  // Write a collected map to storage. Each date is replaced rather than
-  // added to, so importing the same export twice is a no-op.
+  /* Write imported days to storage. Values are either a plain step
+     count (Takeout files) or { steps, light, active } (screenshots).
+     Each date is replaced rather than added to, so importing the same
+     export twice is a no-op. */
   function mergeStepTotals(totals) {
     var keys = Object.keys(totals || {}).sort();
     if (!keys.length) return { ok: false, error: 'No dates and step counts were found.' };
     var data = getData();
     keys.forEach(function(key) {
-      var n = Math.min(200000, totals[key]);
-      if (n > 0) data.steps[key] = n;
+      var v = totals[key];
+      var stepsN = typeof v === 'number' ? v : (v && v.steps) || 0;
+      stepsN = Math.min(200000, stepsN);
+      if (stepsN > 0) data.steps[key] = stepsN;
+      if (v && typeof v === 'object') {
+        var entry = data.minutes[key] || {};
+        if (typeof v.active === 'number' && v.active >= 0 && v.active <= 1440) entry.a = Math.round(v.active);
+        if (typeof v.light === 'number' && v.light >= 0 && v.light <= 1440) entry.l = Math.round(v.light);
+        if (entry.a !== undefined || entry.l !== undefined) data.minutes[key] = entry;
+      }
     });
     saveData(data);
     return { ok: true, days: keys.length, from: keys[0], to: keys[keys.length - 1] };
+  }
+
+  // Everything known about one day, from every source.
+  function getDayActivity(key, data) {
+    data = data || getData();
+    var mins = (data.minutes || {})[key] || {};
+    return {
+      steps: (data.steps || {})[key] || 0,
+      active: typeof mins.a === 'number' ? mins.a : null,
+      light: typeof mins.l === 'number' ? mins.l : null
+    };
   }
 
   function importSteps(text) {
@@ -759,6 +782,160 @@ var MoveQuest = (function() {
     el.stepsBadge.textContent = todaySteps > 0
       ? '👟 ' + todaySteps.toLocaleString() + ' steps today'
       : '';
+
+    renderDashboard(data);
+    renderWm();
+  }
+
+  // ── Home dashboard ──────────────────────────────────────────────
+
+  var _wmMode = 'week';
+  var _wmMonthOffset = 0;   // 0 = current month, -1 = last month…
+
+  function _fmtMins(n) {
+    if (n === null || n === undefined) return '–';
+    if (n < 60) return n + 'm';
+    var h = Math.floor(n / 60), m = n % 60;
+    return h + 'h' + (m ? ' ' + m + 'm' : '');
+  }
+
+  function _workoutDays(data) {
+    var days = {};
+    (data.history || []).forEach(function(h) {
+      var d = new Date(h.date);
+      if (!isNaN(d.getTime())) days[_dayKey(d)] = (days[_dayKey(d)] || 0) + 1;
+    });
+    return days;
+  }
+
+  function renderDashboard(data) {
+    data = data || getData();
+    var today = _dayKey();
+    var act = getDayActivity(today, data);
+    var workouts = _workoutDays(data)[today] || 0;
+
+    el.dashWorkouts.textContent = workouts;
+    el.dashSteps.textContent = act.steps > 0 ? act.steps.toLocaleString() : '–';
+    el.dashActive.textContent = _fmtMins(act.active);
+    el.dashLight.textContent = _fmtMins(act.light);
+  }
+
+  function renderWm() {
+    var data = getData();
+    if (_wmMode === 'week') {
+      el.wmNav.style.display = 'none';
+      _renderWeekView(data);
+    } else {
+      el.wmNav.style.display = '';
+      _renderMonthView(data);
+    }
+    var chips = document.querySelectorAll('[data-wm]');
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].classList.toggle('on', chips[i].getAttribute('data-wm') === _wmMode);
+    }
+  }
+
+  // The week is a small table — three measures of different scales
+  // (steps, active minutes, light minutes) share a row, and only the
+  // steps column carries a bar so no two scales share an axis.
+  function _renderWeekView(data) {
+    var goal = getStepGoal(data);
+    var workouts = _workoutDays(data);
+    var now = new Date();
+    var days = [];
+    var maxSteps = goal;
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      var key = _dayKey(d);
+      var act = getDayActivity(key, data);
+      maxSteps = Math.max(maxSteps, act.steps);
+      days.push({ d: d, key: key, act: act, workouts: workouts[key] || 0 });
+    }
+    var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    el.wmView.innerHTML =
+      '<div class="wm-row wm-headrow" aria-hidden="true">' +
+        '<span class="wm-day"></span>' +
+        '<span class="wm-steps">👟</span>' +
+        '<span class="wm-min">🏃</span>' +
+        '<span class="wm-min">🚶</span>' +
+        '<span class="wm-w">💪</span>' +
+      '</div>' +
+      days.map(function(row) {
+        var pct = Math.min(100, Math.round((row.act.steps / maxSteps) * 100));
+        var isToday = row.key === _dayKey();
+        return '<div class="wm-row' + (isToday ? ' today' : '') + '">' +
+          '<span class="wm-day">' + DAYS[row.d.getDay()] + ' ' + row.d.getDate() + '</span>' +
+          '<span class="wm-steps">' +
+            '<i class="wm-bar' + (row.act.steps >= goal ? ' hit' : '') + '" style="width:' + pct + '%"></i>' +
+            '<b>' + (row.act.steps ? row.act.steps.toLocaleString() : '–') + '</b>' +
+          '</span>' +
+          '<span class="wm-min">' + _fmtMins(row.act.active) + '</span>' +
+          '<span class="wm-min">' + _fmtMins(row.act.light) + '</span>' +
+          '<span class="wm-w">' + (row.workouts ? '●' : '') + '</span>' +
+        '</div>';
+      }).join('') +
+      '<div class="wm-legend">👟 steps (bar fills at ' + goal.toLocaleString() +
+      ') · 🏃 active · 🚶 light · <span class="wm-dot-legend">●</span> workout done</div>';
+  }
+
+  // Month = calendar heatmap. One hue, light→dark, by share of the
+  // step goal; a dot marks workout days so it is never color alone.
+  function _renderMonthView(data) {
+    var goal = getStepGoal(data);
+    var workouts = _workoutDays(data);
+    var now = new Date();
+    var first = new Date(now.getFullYear(), now.getMonth() + _wmMonthOffset, 1);
+    var daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    var todayKey = _dayKey();
+
+    var label = '';
+    try {
+      label = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    } catch (e) { label = (first.getMonth() + 1) + '/' + first.getFullYear(); }
+    el.wmLabel.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    el.wmNext.disabled = _wmMonthOffset >= 0;
+
+    var cells = ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(function(d) {
+      return '<div class="cal-head">' + d + '</div>';
+    });
+    for (var b = 0; b < first.getDay(); b++) cells.push('<div class="cal-cell blank"></div>');
+
+    var monthSteps = 0, monthActive = 0, monthWorkouts = 0, goalDays = 0;
+    for (var day = 1; day <= daysInMonth; day++) {
+      var d = new Date(first.getFullYear(), first.getMonth(), day);
+      var key = _dayKey(d);
+      var act = getDayActivity(key, data);
+      var w = workouts[key] || 0;
+      monthSteps += act.steps;
+      if (act.active) monthActive += act.active;
+      monthWorkouts += w;
+
+      var cls = 'cal-cell';
+      if (act.steps >= goal) { cls += ' g3'; goalDays++; }
+      else if (act.steps >= goal / 2) cls += ' g2';
+      else if (act.steps > 0) cls += ' g1';
+      if (key === todayKey) cls += ' today';
+      var tip = _fmtDayKey(key) + ' — ' +
+        (act.steps ? act.steps.toLocaleString() + ' steps' : 'no steps logged') +
+        (act.active !== null ? ' · ' + _fmtMins(act.active) + ' active' : '') +
+        (w ? ' · ' + w + ' workout' + (w === 1 ? '' : 's') : '');
+      cells.push('<div class="' + cls + '" title="' + _esc(tip) + '">' + day +
+        (w ? '<i class="cal-dot"></i>' : '') + '</div>');
+    }
+
+    el.wmView.innerHTML =
+      '<div class="cal-grid">' + cells.join('') + '</div>' +
+      '<div class="wm-legend">' +
+        '<span class="cal-swatch g1"></span> some · ' +
+        '<span class="cal-swatch g2"></span> half goal · ' +
+        '<span class="cal-swatch g3"></span> goal hit · ' +
+        '<span class="wm-dot-legend">●</span> workout' +
+      '</div>' +
+      '<div class="wm-summary">' +
+        monthSteps.toLocaleString() + ' steps · ' + goalDays + ' goal day' + (goalDays === 1 ? '' : 's') +
+        ' · ' + _fmtMins(monthActive) + ' active · ' + monthWorkouts + ' workout' + (monthWorkouts === 1 ? '' : 's') +
+      '</div>';
   }
 
   // ── Circuit preview ─────────────────────────────────────────────
@@ -1343,9 +1520,25 @@ var MoveQuest = (function() {
     } catch (e) { return key; }
   }
 
+  // Days waiting in the review table. Kept between imports so a parent
+  // can add screenshots one at a time and save the whole pile once.
+  var _scanPending = null;
+
+  function _mergeScan(into, add) {
+    Object.keys(add).forEach(function(k) {
+      var cur = into[k], v = add[k];
+      if (!cur) { into[k] = { steps: v.steps, light: v.light, active: v.active }; return; }
+      cur.steps = Math.max(cur.steps, v.steps);
+      if (v.light !== null) cur.light = cur.light === null || cur.light === undefined ? v.light : Math.max(cur.light, v.light);
+      if (v.active !== null) cur.active = cur.active === null || cur.active === undefined ? v.active : Math.max(cur.active, v.active);
+    });
+  }
+
   function _importScreenshots(images, extraNote) {
     var box = el.stepsImport;
     var firstRun = typeof Tesseract === 'undefined';
+    // Any edits made in the open review survive a follow-up import.
+    _collectScanEdits();
     box.className = 'import-result';
     box.textContent = 'Reading ' + images.length + ' screenshot' + (images.length === 1 ? '' : 's') + '…' +
       (firstRun ? ' (first time loads the picture reader — give it a moment)' : '');
@@ -1354,50 +1547,98 @@ var MoveQuest = (function() {
       box.textContent = 'Reading screenshot ' + i + ' of ' + n + '…' +
         (firstRun ? ' (first time loads the picture reader — give it a moment)' : '');
     }).then(function(res) {
-      var keys = Object.keys(res.totals).sort();
+      var found = Object.keys(res.totals).length;
       var problems = res.report.problems.length
         ? '<br>' + _esc(res.report.problems.join(' ')) : '';
       var note = extraNote ? '<br>' + _esc(extraNote) : '';
-      if (!keys.length) {
+      if (!found && !_scanPending) {
         box.className = 'import-result bad';
         box.innerHTML = '⚠️ No step counts could be read.' + problems + note +
           '<br>Screenshot the <b>Movement</b> list in the Fitbit app — the weekly view ' +
           'with the Steps column — and make sure the rows are visible.';
         return;
       }
-      box.className = 'import-result';
-      box.innerHTML =
-        'Read <b>' + keys.length + ' day' + (keys.length === 1 ? '' : 's') + '</b> from ' +
-        res.report.scanned + ' screenshot' + (res.report.scanned === 1 ? '' : 's') +
-        '. Check the numbers against the pictures, fix anything misread, then save.' +
-        problems + note +
-        '<div class="scan-list">' +
-        keys.map(function(k) {
-          return '<div class="scan-row" data-key="' + k + '">' +
-            '<span class="scan-date">' + _esc(_fmtDayKey(k)) + '</span>' +
-            '<input type="number" class="scan-input" min="0" max="200000" value="' + res.totals[k] +
-              '" aria-label="Steps for ' + _esc(_fmtDayKey(k)) + '">' +
-            '<button class="scan-del" aria-label="Remove ' + _esc(_fmtDayKey(k)) + '">✕</button>' +
-          '</div>';
-        }).join('') +
-        '</div>' +
-        '<div class="btn-row">' +
-          '<button class="btn-primary" data-scan="save">💾 Save for ' + _esc(_activeName()) + '</button>' +
-          '<button class="btn-secondary" data-scan="cancel">Cancel</button>' +
-        '</div>';
+      if (!_scanPending) _scanPending = {};
+      _mergeScan(_scanPending, res.totals);
+      _renderScanReview(res.report.scanned, problems + note);
     });
   }
 
-  function _saveScanReview() {
+  function _renderScanReview(scannedNow, extraHtml) {
     var box = el.stepsImport;
-    var totals = {};
-    var rows = box.querySelectorAll('.scan-row');
+    var keys = Object.keys(_scanPending || {}).sort();
+    box.className = 'import-result';
+    box.innerHTML =
+      '<b>' + keys.length + ' day' + (keys.length === 1 ? '' : 's') + '</b> ready to save' +
+      (scannedNow ? ' (' + scannedNow + ' screenshot' + (scannedNow === 1 ? '' : 's') + ' just read)' : '') +
+      '. Check the numbers, fix anything misread — you can add more screenshots and ' +
+      'they join this list — then save.' +
+      (extraHtml || '') +
+      '<div class="scan-list">' +
+      '<div class="scan-row scan-head" aria-hidden="true">' +
+        '<span class="scan-date"></span>' +
+        '<span class="scan-col">👟 Steps</span>' +
+        '<span class="scan-col">🚶 Light</span>' +
+        '<span class="scan-col">🏃 Active</span>' +
+        '<span class="scan-gap"></span>' +
+      '</div>' +
+      keys.map(function(k) {
+        var v = _scanPending[k];
+        var label = _esc(_fmtDayKey(k));
+        function cell(cls, val, what, max) {
+          return '<input type="number" class="scan-input ' + cls + '" min="0" max="' + max +
+            '" value="' + (val === null || val === undefined ? '' : val) +
+            '" placeholder="–" aria-label="' + what + ' for ' + label + '">';
+        }
+        return '<div class="scan-row" data-key="' + k + '">' +
+          '<span class="scan-date">' + label + '</span>' +
+          cell('scan-steps', v.steps, 'Steps', 200000) +
+          cell('scan-light', v.light, 'Light minutes', 1440) +
+          cell('scan-active', v.active, 'Active minutes', 1440) +
+          '<button class="scan-del" aria-label="Remove ' + label + '">✕</button>' +
+        '</div>';
+      }).join('') +
+      '</div>' +
+      '<div class="level-note" style="text-align:left; margin-top:6px;">Light and Active are minutes.</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn-primary" data-scan="save">💾 Save for ' + _esc(_activeName()) + '</button>' +
+        '<button class="btn-secondary" data-scan="cancel">Cancel</button>' +
+      '</div>';
+  }
+
+  // Pull the current input values (and row deletions) back into
+  // _scanPending, so edits are not lost when more screenshots arrive.
+  function _collectScanEdits() {
+    var box = el.stepsImport;
+    if (!_scanPending || !box) return;
+    var rows = box.querySelectorAll('.scan-row[data-key]');
+    if (!rows.length) return;
+    var next = {};
     for (var i = 0; i < rows.length; i++) {
       var key = rows[i].getAttribute('data-key');
-      var input = rows[i].querySelector('.scan-input');
-      var n = input ? Math.round(Number(input.value)) : 0;
-      if (key && isFinite(n) && n > 0) totals[key] = Math.min(200000, n);
+      function val(cls, max) {
+        var input = rows[i].querySelector('.' + cls);
+        if (!input || input.value === '') return null;
+        var n = Math.round(Number(input.value));
+        return (isFinite(n) && n >= 0 && n <= max) ? n : null;
+      }
+      next[key] = {
+        steps: val('scan-steps', 200000) || 0,
+        light: val('scan-light', 1440),
+        active: val('scan-active', 1440)
+      };
     }
+    _scanPending = next;
+  }
+
+  function _saveScanReview() {
+    _collectScanEdits();
+    var totals = {};
+    Object.keys(_scanPending || {}).forEach(function(k) {
+      var v = _scanPending[k];
+      if (v.steps > 0 || v.light !== null || v.active !== null) totals[k] = v;
+    });
+    _scanPending = null;
     _finishImport(totals, null);
   }
 
@@ -1478,6 +1719,9 @@ var MoveQuest = (function() {
     el = {
       tierPill: $('mq-tier-pill'), levelFill: $('mq-level-fill'), levelNote: $('mq-level-note'),
       startDesc: $('mq-start-desc'), streakBadge: $('mq-streak-badge'), stepsBadge: $('mq-steps-badge'),
+      dashWorkouts: $('mq-dash-workouts'), dashSteps: $('mq-dash-steps'),
+      dashActive: $('mq-dash-active'), dashLight: $('mq-dash-light'),
+      wmNav: $('mq-wm-nav'), wmLabel: $('mq-wm-label'), wmNext: $('mq-wm-next'), wmView: $('mq-wm-view'),
 
       previewSummary: $('mq-preview-summary'), previewList: $('mq-preview-list'),
 
@@ -1510,6 +1754,22 @@ var MoveQuest = (function() {
     function on(id, fn) { var node = $(id); if (node) node.addEventListener('click', fn); }
 
     on('mq-go-start', function() { renderPreview(); showScreen('preview'); });
+    on('mq-dash-steps-box', function() { renderSteps(); showScreen('steps'); });
+    on('mq-dash-active-box', function() { renderSteps(); showScreen('steps'); });
+    on('mq-dash-light-box', function() { renderSteps(); showScreen('steps'); });
+    on('mq-dash-workouts-box', function() { renderProgress(); showScreen('progress'); });
+
+    var wmChips = document.querySelectorAll('[data-wm]');
+    for (var wi = 0; wi < wmChips.length; wi++) {
+      wmChips[wi].addEventListener('click', function(ev) {
+        _wmMode = ev.currentTarget.getAttribute('data-wm');
+        renderWm();
+      });
+    }
+    on('mq-wm-prev', function() { _wmMonthOffset--; renderWm(); });
+    on('mq-wm-next', function() {
+      if (_wmMonthOffset < 0) { _wmMonthOffset++; renderWm(); }
+    });
     on('mq-go-library', function() { renderLibrary(); showScreen('library'); });
     on('mq-go-steps', function() { renderSteps(); showScreen('steps'); });
     on('mq-go-progress', function() { renderProgress(); showScreen('progress'); });
@@ -1561,7 +1821,11 @@ var MoveQuest = (function() {
         var scanBtn = t.closest ? t.closest('[data-scan]') : null;
         if (scanBtn) {
           if (scanBtn.getAttribute('data-scan') === 'save') _saveScanReview();
-          else { el.stepsImport.style.display = 'none'; el.stepsImport.innerHTML = ''; }
+          else {
+            _scanPending = null;
+            el.stepsImport.style.display = 'none';
+            el.stepsImport.innerHTML = '';
+          }
           return;
         }
         var btn = t.closest ? t.closest('[data-owner]') : null;
@@ -1661,6 +1925,7 @@ var MoveQuest = (function() {
     getSteps: getSteps,
     setSteps: setSteps,
     getStepWeek: getStepWeek,
+    getDayActivity: getDayActivity,
     getStepGoal: getStepGoal,
     setStepGoal: setStepGoal,
     importSteps: importSteps,

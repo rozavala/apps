@@ -357,6 +357,77 @@
     .import-result.bad { color: var(--red); border-color: #fca5a5; }
     .import-result.good { color: var(--green); border-color: #6EE7B7; }
 
+    /* ---- Home dashboard tiles ---- */
+    .dash-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+      margin-top: 18px;
+    }
+    .dash-box {
+      cursor: pointer; font-family: var(--font-body);
+      display: flex; flex-direction: column; gap: 2px;
+      transition: border-color 0.15s;
+    }
+    .dash-box:hover { border-color: var(--green); }
+    .dash-box .v { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; }
+    .dash-box .k { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ---- Week / Month section ---- */
+    .wm-section { margin-top: 26px; }
+    .wm-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .wm-nav { display: flex; align-items: center; gap: 8px; }
+    .wm-arrow { width: 34px; height: 34px; font-size: 1.1rem; }
+    .wm-arrow:disabled { opacity: 0.35; cursor: default; }
+    .wm-label { font-weight: 800; font-size: 0.92rem; min-width: 110px; text-align: center; }
+
+    /* Week: a table row per day; only the steps column carries a bar */
+    .wm-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-xs, 12px); padding: 9px 12px; margin-bottom: 6px;
+    }
+    .wm-row.today { border-color: var(--green); }
+    .wm-headrow { background: none; border: none; padding: 2px 12px; margin-bottom: 2px; font-size: 0.85rem; }
+    .wm-day { flex: 0 0 58px; font-weight: 800; font-size: 0.82rem; }
+    .wm-steps { flex: 1; position: relative; display: flex; align-items: center; min-height: 20px; }
+    .wm-steps .wm-bar {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: #D1FAE5; border-radius: 6px; min-width: 0;
+    }
+    .wm-steps .wm-bar.hit { background: #6EE7B7; }
+    .wm-steps b { position: relative; font-size: 0.85rem; font-weight: 800; padding-left: 6px; }
+    .wm-min { flex: 0 0 58px; text-align: right; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+    .wm-w { flex: 0 0 20px; text-align: center; color: var(--purple); font-size: 0.7rem; }
+    .wm-legend { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-align: center; margin-top: 8px; }
+    .wm-dot-legend { color: var(--purple); }
+    .wm-summary { font-size: 0.82rem; font-weight: 800; text-align: center; margin-top: 8px; }
+
+    /* Month: calendar heat grid — one green, light to dark */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .cal-head { text-align: center; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); padding: 2px 0; }
+    .cal-cell {
+      position: relative; aspect-ratio: 1; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; color: var(--text);
+      background: var(--bg-card); border: 1.5px solid var(--border-subtle);
+    }
+    .cal-cell.blank { background: none; border: none; }
+    .cal-cell.g1 { background: #D1FAE5; border-color: #D1FAE5; }
+    .cal-cell.g2 { background: #6EE7B7; border-color: #6EE7B7; }
+    .cal-cell.g3 { background: #059669; border-color: #059669; color: #fff; }
+    .cal-cell.today { outline: 2px solid var(--purple); outline-offset: 1px; }
+    .cal-dot {
+      position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+      width: 5px; height: 5px; border-radius: 50%; background: var(--purple);
+    }
+    .cal-cell.g3 .cal-dot { background: #fff; }
+    .cal-swatch {
+      display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px;
+      border: 1px solid var(--border-subtle);
+    }
+    .cal-swatch.g1 { background: #D1FAE5; }
+    .cal-swatch.g2 { background: #6EE7B7; }
+    .cal-swatch.g3 { background: #059669; }
+
     /* Screenshot review rows (inside .import-result) */
     .scan-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
     .scan-row {
@@ -364,12 +435,21 @@
       background: var(--bg-card); border: 1.5px solid var(--border-subtle);
       border-radius: var(--radius-xs, 12px); padding: 8px 10px;
     }
-    .scan-date { flex: 1; font-weight: 800; font-size: 0.9rem; }
+    .scan-date { flex: 1; min-width: 74px; font-weight: 800; font-size: 0.85rem; }
+    .scan-head { background: none; border: none; padding: 0 10px; }
+    .scan-col { width: 64px; text-align: center; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); }
+    .scan-col:first-of-type { width: 84px; }
+    .scan-gap { width: 32px; }
     .scan-input {
-      width: 110px; padding: 8px 10px; border-radius: 10px; text-align: right;
+      width: 64px; padding: 8px 6px; border-radius: 10px; text-align: right;
       border: 1.5px solid var(--border-subtle); background: var(--bg-sunk);
-      color: var(--text); font-family: var(--font-body); font-weight: 800; font-size: 0.95rem;
+      color: var(--text); font-family: var(--font-body); font-weight: 800; font-size: 0.85rem;
     }
+    .scan-input.scan-steps { width: 84px; }
+    .scan-input::placeholder { color: var(--text-muted); }
+    /* number spinners steal too much of the narrow inputs */
+    .scan-input::-webkit-outer-spin-button, .scan-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .scan-input { -moz-appearance: textfield; appearance: textfield; }
     .scan-input:focus { outline: none; border-color: var(--green); }
     .scan-del {
       width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0; cursor: pointer;
