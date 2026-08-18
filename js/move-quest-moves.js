@@ -459,6 +459,15 @@ var MoveQuestMoves = (function() {
                '</svg>';
       }).join('');
     }
+    if (mode === 'single') {
+      // One picture per move, for a wall poster. The last frame is the
+      // one that names the move — feet apart, chest down, knees bent.
+      return '<svg class="mq-fig" viewBox="0 0 100 124" role="img" aria-hidden="true">' +
+             '<line class="mq-ground" x1="2" y1="115" x2="98" y2="115"/>' +
+             poseGroup(frames[frames.length - 1], 'mq-pose') +
+             '</svg>';
+    }
+
     var tempo = (move.tempo || 1000) * 2; // one full there-and-back cycle
     var svg = '<svg class="mq-fig' + (frames.length > 1 ? ' mq-anim' : '') +
               '" viewBox="0 0 100 124" role="img" aria-hidden="true"' +
