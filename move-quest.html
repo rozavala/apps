@@ -190,14 +190,17 @@
       <div class="section-title" style="font-size:1.05rem;">Import from a watch export</div>
     </div>
     <div class="note-card">
-      Got a data export from the watch app? Pick the <b>steps</b> file here (<b>.json</b> or
-      <b>.csv</b>) and every day in it is filled in at once. The file is read on this device
-      only — nothing is uploaded anywhere.
-      (Elige el archivo de pasos exportado: se lee solo en este dispositivo.)
+      In <b>Google Takeout</b>, tick only <b>Fitbit</b> and download the <b>.zip</b>. Drop the
+      whole zip in here — every month of steps inside it is read at once, and if the export
+      covers more than one child you get to pick whose folder to use. Loose <b>.json</b> or
+      <b>.csv</b> files work too; you can select several at a time. Everything is read on this
+      device and nothing is uploaded anywhere.
+      (En Google Takeout marca solo Fitbit y descarga el .zip: se lee entero, aqui mismo, sin
+      subir nada a ninguna parte.)
     </div>
     <label class="btn-secondary file-btn" style="margin-top:10px;">
-      📂 Choose a steps file
-      <input type="file" id="mq-steps-file" accept=".json,.csv,.txt,application/json,text/csv" aria-label="Choose a steps export file">
+      📂 Choose the Takeout zip (or steps files)
+      <input type="file" id="mq-steps-file" multiple accept=".zip,.json,.csv,.txt,application/zip,application/json,text/csv" aria-label="Choose a Takeout zip or steps export files">
     </label>
     <div id="mq-steps-import" class="import-result" style="display:none;"></div>
 

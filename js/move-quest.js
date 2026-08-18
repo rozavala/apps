@@ -481,44 +481,234 @@ var MoveQuest = (function() {
     return totals;
   }
 
-  // Returns { ok, days, from, to, error }. Importing the same file
-  // twice is harmless: each date is replaced, never added to.
-  function importSteps(text) {
-    var totals = null;
+  // Parse one file's text into { 'YYYY-MM-DD': steps }. Throws with a
+  // readable message when the file cannot be parsed at all.
+  function collectStepTotals(text) {
     var trimmed = String(text || '').trim();
-    if (!trimmed) return { ok: false, error: 'That file is empty.' };
+    if (!trimmed) throw new Error('that file is empty.');
 
+    var totals = null;
     if (trimmed.charAt(0) === '{' || trimmed.charAt(0) === '[') {
-      try {
-        var parsed = JSON.parse(trimmed);
-        var records = null;
-        if (Array.isArray(parsed)) {
-          records = parsed;
-        } else if (parsed && typeof parsed === 'object') {
-          for (var k in parsed) {
-            if (Array.isArray(parsed[k])) { records = parsed[k]; break; }
-          }
+      var parsed;
+      try { parsed = JSON.parse(trimmed); }
+      catch (e) { throw new Error('that JSON file could not be read.'); }
+      var records = null;
+      if (Array.isArray(parsed)) {
+        records = parsed;
+      } else if (parsed && typeof parsed === 'object') {
+        for (var k in parsed) {
+          if (Array.isArray(parsed[k])) { records = parsed[k]; break; }
         }
-        if (records) totals = _collectFromRecords(records);
-      } catch (e) {
-        return { ok: false, error: 'That JSON file could not be read.' };
       }
+      if (records) totals = _collectFromRecords(records);
     }
     if (!totals || !Object.keys(totals).length) totals = _collectFromCsv(trimmed);
+    return totals || {};
+  }
 
-    var keys = Object.keys(totals).sort();
-    if (!keys.length) {
-      return { ok: false, error: 'No dates and step counts were found in that file.' };
-    }
-
+  // Write a collected map to storage. Each date is replaced rather than
+  // added to, so importing the same export twice is a no-op.
+  function mergeStepTotals(totals) {
+    var keys = Object.keys(totals || {}).sort();
+    if (!keys.length) return { ok: false, error: 'No dates and step counts were found.' };
     var data = getData();
     keys.forEach(function(key) {
       var n = Math.min(200000, totals[key]);
       if (n > 0) data.steps[key] = n;
     });
     saveData(data);
-
     return { ok: true, days: keys.length, from: keys[0], to: keys[keys.length - 1] };
+  }
+
+  function importSteps(text) {
+    var totals;
+    try { totals = collectStepTotals(text); }
+    catch (e) {
+      var msg = e.message;
+      return { ok: false, error: msg.charAt(0).toUpperCase() + msg.slice(1) };
+    }
+    var res = mergeStepTotals(totals);
+    if (!res.ok) res.error = 'No dates and step counts were found in that file.';
+    return res;
+  }
+
+  /* ── Google Takeout archives ──────────────────────────────────────
+     Takeout hands back one .zip holding
+
+       Takeout/Fitbit/Global Export Data/steps-YYYY-MM-DD.json
+
+     — one file per month of minute-level samples, and a folder per
+     child on a family account. Only the bytes we need are read (the
+     directory at the tail of the archive, then the steps entries
+     themselves), so a large archive never lands in memory whole.
+     Inflating uses the browser's own DecompressionStream: no library,
+     nothing downloaded, works with the wifi off.
+     ───────────────────────────────────────────────────────────────── */
+
+  var ZIP_EOCD_SIG = 0x06054b50;
+  var ZIP_CD_SIG = 0x02014b50;
+  var MAX_ENTRY_BYTES = 20 * 1024 * 1024;
+  var MAX_ZIP_ENTRIES = 400;
+
+  // Folder names that belong to the export's own structure rather than
+  // to a person — whatever is left above them names the child.
+  var _EXPORT_FOLDERS = /^(takeout|fitbit|google health|global export data|physical activity|user site export data|other|sleep|activity)$/i;
+
+  function _zipOwner(path) {
+    var parts = path.split('/');
+    parts.pop();
+    while (parts.length && _EXPORT_FOLDERS.test(parts[parts.length - 1])) parts.pop();
+    return {
+      key: parts.join('/') || 'fitbit',
+      label: parts.length ? parts[parts.length - 1] : 'Fitbit'
+    };
+  }
+
+  function _isStepsEntry(name) {
+    if (/\/$/.test(name)) return false;
+    var base = name.split('/').pop().toLowerCase();
+    if (!base || base.charAt(0) === '.') return false;
+    if (!/\.(json|csv)$/.test(base)) return false;
+    return base.indexOf('step') !== -1;
+  }
+
+  function _sliceBuffer(file, start, end) {
+    return file.slice(Math.max(0, start), end).arrayBuffer();
+  }
+
+  function _readFileText(file) {
+    if (file.text) return file.text();
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function() { resolve(String(reader.result || '')); };
+      reader.onerror = function() { reject(new Error('unreadable')); };
+      reader.readAsText(file);
+    });
+  }
+
+  async function _readZipDirectory(file) {
+    // The end-of-central-directory record lives in the last 22 bytes
+    // plus up to 64KB of archive comment.
+    var tailLen = Math.min(file.size, 66000);
+    var tail = new DataView(await _sliceBuffer(file, file.size - tailLen, file.size));
+    var eocd = -1;
+    for (var i = tail.byteLength - 22; i >= 0; i--) {
+      if (tail.getUint32(i, true) === ZIP_EOCD_SIG) { eocd = i; break; }
+    }
+    if (eocd === -1) throw new Error('not-a-zip');
+
+    var count = tail.getUint16(eocd + 10, true);
+    var cdSize = tail.getUint32(eocd + 12, true);
+    var cdOffset = tail.getUint32(eocd + 16, true);
+    // Zip64 parks the real values elsewhere; rather than grow a second
+    // parser, tell the parent to export a smaller archive.
+    if (count === 0xFFFF || cdSize === 0xFFFFFFFF || cdOffset === 0xFFFFFFFF) throw new Error('zip64');
+
+    var cd = new DataView(await _sliceBuffer(file, cdOffset, cdOffset + cdSize));
+    var decoder = new TextDecoder('utf-8');
+    var entries = [];
+    var p = 0;
+    while (p + 46 <= cd.byteLength && cd.getUint32(p, true) === ZIP_CD_SIG) {
+      var nameLen = cd.getUint16(p + 28, true);
+      var extraLen = cd.getUint16(p + 30, true);
+      var commentLen = cd.getUint16(p + 32, true);
+      entries.push({
+        name: decoder.decode(new Uint8Array(cd.buffer, p + 46, nameLen)),
+        method: cd.getUint16(p + 10, true),
+        compressedSize: cd.getUint32(p + 20, true),
+        size: cd.getUint32(p + 24, true),
+        localOffset: cd.getUint32(p + 42, true)
+      });
+      p += 46 + nameLen + extraLen + commentLen;
+    }
+    return entries;
+  }
+
+  async function _readZipEntry(file, entry) {
+    // The local header repeats the name and extra fields, and its own
+    // lengths are the only trustworthy ones.
+    var head = new DataView(await _sliceBuffer(file, entry.localOffset, entry.localOffset + 30));
+    var start = entry.localOffset + 30 + head.getUint16(26, true) + head.getUint16(28, true);
+    var buf = await _sliceBuffer(file, start, start + entry.compressedSize);
+    if (entry.method === 0) return new TextDecoder('utf-8').decode(new Uint8Array(buf));
+    if (entry.method !== 8) throw new Error('unsupported-compression');
+    if (typeof DecompressionStream === 'undefined') throw new Error('no-inflate');
+    var stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return await new Response(stream).text();
+  }
+
+  function _ingestZip(file, add, report) {
+    return _readZipDirectory(file).then(function(entries) {
+      var wanted = entries.filter(function(e) { return _isStepsEntry(e.name); });
+      if (!wanted.length) {
+        report.problems.push(file.name + ': no steps files inside — in Takeout, tick Fitbit.');
+        return null;
+      }
+      if (wanted.length > MAX_ZIP_ENTRIES) {
+        report.skipped += wanted.length - MAX_ZIP_ENTRIES;
+        wanted = wanted.slice(0, MAX_ZIP_ENTRIES);
+      }
+      var chain = Promise.resolve();
+      wanted.forEach(function(entry) {
+        chain = chain.then(function() {
+          if (entry.size > MAX_ENTRY_BYTES) { report.skipped++; return null; }
+          return _readZipEntry(file, entry).then(function(text) {
+            var owner = _zipOwner(entry.name);
+            try {
+              add(owner.key, owner.label, collectStepTotals(text));
+              report.scanned++;
+            } catch (e) { report.skipped++; }
+          }, function() { report.skipped++; });
+        });
+      });
+      return chain;
+    }, function(err) {
+      var why = err && err.message === 'zip64'
+        ? 'that archive is too big to read here — in Takeout, tick only Fitbit.'
+        : (err && err.message === 'no-inflate'
+            ? 'this browser cannot unzip. Unzip it first and pick the steps files.'
+            : 'that is not a readable .zip.');
+      report.problems.push(file.name + ': ' + why);
+      return null;
+    });
+  }
+
+  /* Read every chosen file — plain exports or Takeout archives — and
+     group the totals by whose folder they came from. Resolves to
+     { owners: { key: { label, totals } }, report }. Nothing is saved
+     here: a family archive holds every child, so the caller picks. */
+  function gatherStepTotals(files) {
+    var owners = {};
+    var report = { scanned: 0, skipped: 0, problems: [] };
+
+    function add(key, label, totals) {
+      var dates = Object.keys(totals || {});
+      if (!dates.length) return;
+      if (!owners[key]) owners[key] = { label: label, totals: {} };
+      var bucket = owners[key].totals;
+      // Takeout's monthly files run mid-month to mid-month, so one date
+      // can legitimately appear in two of them: sum within an import.
+      dates.forEach(function(d) { bucket[d] = (bucket[d] || 0) + totals[d]; });
+    }
+
+    var chain = Promise.resolve();
+    (files || []).forEach(function(file) {
+      chain = chain.then(function() {
+        if (/\.zip$/i.test(file.name)) return _ingestZip(file, add, report);
+        if (/\.(tgz|gz|tar)$/i.test(file.name)) {
+          report.problems.push(file.name + ': choose the .zip version of the export.');
+          return null;
+        }
+        return _readFileText(file).then(function(text) {
+          try {
+            add('fitbit', 'Fitbit', collectStepTotals(text));
+            report.scanned++;
+          } catch (e) { report.problems.push(file.name + ': ' + e.message); }
+        }, function() { report.problems.push(file.name + ': could not be read.'); });
+      });
+    });
+
+    return chain.then(function() { return { owners: owners, report: report }; });
   }
 
   /* ================================================================
@@ -958,38 +1148,84 @@ var MoveQuest = (function() {
     renderSteps();
   }
 
-  function handleStepsFile(input) {
-    var file = input.files && input.files[0];
-    if (!file) return;
+  // A family archive holds every child, so when more than one folder
+  // turns up the parent has to say which one is this profile.
+  var _pendingOwners = null;
+  var _pendingKeys = null;
+  var _pendingReport = null;
+
+  function _activeName() {
+    var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    return user ? user.name : 'this explorer';
+  }
+
+  function _finishImport(totals, report) {
+    var box = el.stepsImport;
+    var res = mergeStepTotals(totals);
+    if (!res.ok) {
+      box.className = 'import-result bad';
+      box.textContent = '⚠️ ' + res.error;
+      return;
+    }
+    box.className = 'import-result good';
+    box.innerHTML = '✅ Imported ' + res.days + ' day' + (res.days === 1 ? '' : 's') +
+      ' of steps (' + res.from + ' to ' + res.to + ').' +
+      (report && report.skipped
+        ? '<br>Skipped ' + report.skipped + ' file' + (report.skipped === 1 ? '' : 's') +
+          ' that were too big or unreadable.'
+        : '');
+    if (typeof ActivityLog !== 'undefined') {
+      ActivityLog.log('Move Quest', '👟', 'Imported ' + res.days + ' days of steps');
+    }
+    if (typeof SFX !== 'undefined') SFX.star();
+    renderSteps();
+  }
+
+  function handleStepsFiles(input) {
+    var files = Array.prototype.slice.call(input.files || []);
+    if (!files.length) return;
     var box = el.stepsImport;
     box.style.display = '';
     box.className = 'import-result';
-    box.textContent = 'Reading ' + _esc(file.name) + '…';
+    box.textContent = files.length === 1
+      ? 'Reading ' + _esc(files[0].name) + '…'
+      : 'Reading ' + files.length + ' files…';
 
-    var reader = new FileReader();
-    reader.onload = function() {
-      var res = importSteps(String(reader.result || ''));
-      if (res.ok) {
-        box.className = 'import-result good';
-        box.textContent = '✅ Imported ' + res.days + ' day' + (res.days === 1 ? '' : 's') +
-          ' (' + res.from + ' to ' + res.to + ').';
-        if (typeof ActivityLog !== 'undefined') {
-          ActivityLog.log('Move Quest', '👟', 'Imported ' + res.days + ' days of steps');
-        }
-        renderSteps();
-      } else {
+    gatherStepTotals(files).then(function(res) {
+      input.value = '';
+      var keys = Object.keys(res.owners);
+      var problems = res.report.problems.length
+        ? '<br>' + _esc(res.report.problems.join(' ')) : '';
+
+      if (!keys.length) {
         box.className = 'import-result bad';
-        box.textContent = '⚠️ ' + res.error + ' Expected a .json or .csv export with a date ' +
-          'column and a steps column.';
+        box.innerHTML = '⚠️ No dates and step counts were found.' + problems +
+          '<br>Expected a Takeout <b>.zip</b>, or the <b>.json</b>/<b>.csv</b> steps files from inside one.';
+        return;
       }
+
+      if (keys.length > 1) {
+        _pendingOwners = res.owners;
+        _pendingKeys = keys;
+        _pendingReport = res.report;
+        box.className = 'import-result';
+        box.innerHTML = 'That export holds more than one person. Which folder is <b>' +
+          _esc(_activeName()) + '</b>?' +
+          '<div class="chip-row" style="margin-top:10px;">' +
+          keys.map(function(k, i) {
+            var days = Object.keys(res.owners[k].totals).length;
+            return '<button class="chip" data-owner="' + i + '">' + _esc(res.owners[k].label) +
+                   ' · ' + days + ' day' + (days === 1 ? '' : 's') + '</button>';
+          }).join('') + '</div>' + problems;
+        return;
+      }
+
+      _finishImport(res.owners[keys[0]].totals, res.report);
+    }, function() {
       input.value = '';
-    };
-    reader.onerror = function() {
       box.className = 'import-result bad';
-      box.textContent = '⚠️ That file could not be read.';
-      input.value = '';
-    };
-    reader.readAsText(file);
+      box.textContent = '⚠️ Those files could not be read.';
+    });
   }
 
   // ── Progress screen ─────────────────────────────────────────────
@@ -1135,7 +1371,18 @@ var MoveQuest = (function() {
     }
     var fileInput = $('mq-steps-file');
     if (fileInput) {
-      fileInput.addEventListener('change', function() { handleStepsFile(fileInput); });
+      fileInput.addEventListener('change', function() { handleStepsFiles(fileInput); });
+    }
+
+    if (el.stepsImport) {
+      el.stepsImport.addEventListener('click', function(ev) {
+        var btn = ev.target.closest ? ev.target.closest('[data-owner]') : null;
+        if (!btn || !_pendingOwners) return;
+        var owner = _pendingOwners[_pendingKeys[Number(btn.getAttribute('data-owner'))]];
+        var report = _pendingReport;
+        _pendingOwners = _pendingKeys = _pendingReport = null;
+        if (owner) _finishImport(owner.totals, report);
+      });
     }
 
     if (el.libraryFilters) {
@@ -1226,6 +1473,9 @@ var MoveQuest = (function() {
     getStepGoal: getStepGoal,
     setStepGoal: setStepGoal,
     importSteps: importSteps,
+    collectStepTotals: collectStepTotals,
+    mergeStepTotals: mergeStepTotals,
+    gatherStepTotals: gatherStepTotals,
     showScreen: showScreen,
     _dayKey: _dayKey,
     _normDate: _normDate
