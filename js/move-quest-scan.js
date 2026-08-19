@@ -124,8 +124,8 @@ var MoveQuestScan = (function() {
   function _durationsFrom(tail) {
     // The Active column wraps on narrow phones, leaving "2 h 17" with
     // its "m" on the next OCR line — restore it before scanning.
-    tail = tail.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m');
-    var out = _durTokens(tail);
+    tail = _repairDigits(tail).replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m');
+    var out = _validTokens(_durTokens(tail));
 
     function total(t) { return (t.h || 0) * 60 + (t.m || 0); }
     function clamp(n) { return (n === null || !isFinite(n) || n < 0 || n > 1440) ? null : n; }
@@ -149,12 +149,51 @@ var MoveQuestScan = (function() {
     return { light: clamp(light), active: clamp(active) };
   }
 
+  /* OCR trades digits for lookalike letters constantly — the digit 1
+     in "1 h 9 m" comes back as "l h 9 m", killing the hour and leaving
+     "9 m". Inside text known to be numeric, repair the classic swaps.
+     A [letter][digit] pair like "l1" is a split stroke of one digit:
+     drop the letter rather than doubling it. */
+  function _repairDigits(str) {
+    return String(str)
+      .replace(/[lI|í](?=\d)/g, '')
+      .replace(/(\d)[lI|í]/g, '$1' + '1')
+      .replace(/[lI|í]/g, '1')
+      .replace(/[Oo]/g, '0')
+      .replace(/é/g, '6');
+  }
+
+  /* Impossible readings become null instead of numbers: on these
+     screens minutes past the hour are 0-59 (an hour or more always
+     shows as "N h M m") and hours are 0-23. */
+  function _validTokens(toks) {
+    var out = [];
+    toks.forEach(function(t) {
+      var h = t.h, m = t.m;
+      if (h !== null && (h < 0 || h > 23)) return;
+      if (h !== null && m !== null && (m < 0 || m > 59)) m = null;
+      if (h === null && (m === null || m < 0 || m > 59)) return;
+      out.push({ h: h, m: m, start: t.start, end: t.end });
+    });
+    return out;
+  }
+
   /* All duration tokens in one COLUMN, summed — inside a single
      column "1 h 42 m" is one reading, never two. Null when nothing
-     in the field parses as a duration. */
+     in the field parses as a duration. The field is known to hold
+     only a duration, so repair is aggressive: lookalike letters
+     become digits ("é" was a 6), a lone T hugging the h is a lost 1,
+     and anything else that is not digit/h/m becomes a space. */
   function _fieldDuration(field) {
-    var fixed = field.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m');
-    var toks = _durTokens(fixed);
+    var fixed = _repairDigits(field)
+      .replace(/[Ss]/g, '5')
+      .replace(/B/g, '8')
+      .replace(/M/g, 'm')
+      .replace(/H/g, 'h')
+      .replace(/[Tt](?=\s*h\b)/g, '1')
+      .replace(/[^0-9hm\s]/g, ' ')
+      .replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m');
+    var toks = _validTokens(_durTokens(fixed));
     if (!toks.length) return null;
     var total = 0;
     toks.forEach(function(t) { total += (t.h || 0) * 60 + (t.m || 0); });
@@ -171,8 +210,9 @@ var MoveQuestScan = (function() {
     for (var i = 1; i < fields.length; i++) {
       var f = fields[i];
       var isDuration = /\d\s*[hm]/i.test(f);
-      if (steps === null && !isDuration && /^\d[\d.,\s]*$/.test(f)) {
-        steps = _num(f);
+      var fNum = _repairDigits(f);
+      if (steps === null && !isDuration && /^\d[\d.,\s]*$/.test(fNum)) {
+        steps = _num(fNum);
       } else if (durations.length < 2) {
         var d = _fieldDuration(f);
         if (d !== null) durations.push(d);
