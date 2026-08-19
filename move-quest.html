@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/move-quest.css?v=2">
+  <link rel="stylesheet" href="css/move-quest.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#059669">
@@ -204,18 +204,26 @@
     <div class="level-bar"><i id="mq-progress-fill" style="width:0%"></i></div>
     <div class="level-note" id="mq-progress-note"></div>
 
-    <!-- Steps from the watch -->
+    <!-- Today's numbers from the watch -->
     <div class="section-header" style="margin:28px 0 10px;">
-      <div class="section-title" style="font-size:1.05rem;">👟 Steps from the watch</div>
+      <div class="section-title" style="font-size:1.05rem;">⌚ Today from the watch</div>
     </div>
-    <div class="form-group">
-      <label for="mq-steps-input">Steps on the watch right now</label>
-      <div class="steps-inline">
-        <input type="number" class="form-input" id="mq-steps-input" min="0" max="200000" placeholder="e.g. 8420">
-        <button class="btn-primary steps-inline-save" id="mq-steps-save">✅ Save</button>
+    <div class="today-grid">
+      <div class="today-field">
+        <label for="mq-steps-input">👟 Steps</label>
+        <input type="number" class="form-input" id="mq-steps-input" min="0" max="200000" placeholder="8420">
+      </div>
+      <div class="today-field">
+        <label for="mq-active-input">🏃 Active min</label>
+        <input type="number" class="form-input" id="mq-active-input" min="0" max="1440" placeholder="35">
+      </div>
+      <div class="today-field">
+        <label for="mq-light-input">🚶 Light min</label>
+        <input type="number" class="form-input" id="mq-light-input" min="0" max="1440" placeholder="120">
       </div>
     </div>
-    <div id="mq-steps-feedback" style="text-align:center; margin-top:4px; font-weight:800;"></div>
+    <button class="btn-primary" id="mq-steps-save" style="margin-top:10px;">✅ Save today</button>
+    <div id="mq-steps-feedback" style="text-align:center; margin-top:8px; font-weight:800;"></div>
 
     <div class="note-card" style="margin-top:12px;">
       <b>Easiest: screenshots.</b> In the Fitbit app, open the kid's weekly <b>Movement</b>
@@ -307,8 +315,8 @@
 <script src="js/tts.js"></script>
 <script src="js/sports-arena.js"></script>
 <script src="js/move-quest-moves.js?v=2"></script>
-<script src="js/move-quest-scan.js?v=2"></script>
-<script src="js/move-quest.js?v=2"></script>
+<script src="js/move-quest-scan.js?v=3"></script>
+<script src="js/move-quest.js?v=3"></script>
 <script src="js/pwa.js"></script>
 
 </body>

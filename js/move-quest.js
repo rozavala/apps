@@ -1423,17 +1423,33 @@ var MoveQuest = (function() {
 
   // ── Steps screen ────────────────────────────────────────────────
 
+  // Save whichever of today's three numbers were typed. Untouched
+  // fields leave the stored value alone, so a kid can top up just the
+  // steps without wiping minutes imported earlier.
   function saveTodaySteps() {
-    var raw = el.stepsInput.value;
-    var n = Number(raw);
-    if (raw === '' || !isFinite(n) || n < 0) {
+    function read(input, max) {
+      if (!input || input.value === '') return null;
+      var n = Math.round(Number(input.value));
+      return (isFinite(n) && n >= 0 && n <= max) ? n : null;
+    }
+    var steps = read(el.stepsInput, 200000);
+    var active = read(el.activeInput, 1440);
+    var light = read(el.lightInput, 1440);
+    if (steps === null && active === null && light === null) {
       el.stepsFeedback.style.color = 'var(--red)';
-      el.stepsFeedback.textContent = 'Type the number shown on the watch.';
+      el.stepsFeedback.textContent = 'Type at least one number from the watch.';
       return;
     }
-    var saved = setSteps(_dayKey(), n);
+    var entry = {};
+    entry[_dayKey()] = { steps: steps || 0, active: active, light: light };
+    mergeStepTotals(entry);
+    if (steps !== null && steps === 0) setSteps(_dayKey(), 0);
+    var bits = [];
+    if (steps !== null) bits.push(steps.toLocaleString() + ' steps');
+    if (active !== null) bits.push(active + 'm active');
+    if (light !== null) bits.push(light + 'm light');
     el.stepsFeedback.style.color = 'var(--green)';
-    el.stepsFeedback.textContent = '✅ Saved ' + saved.toLocaleString() + ' steps for today.';
+    el.stepsFeedback.textContent = '✅ Saved ' + bits.join(' · ') + ' for today.';
     if (typeof SFX !== 'undefined') SFX.star();
     renderProgress();
   }
@@ -1703,6 +1719,8 @@ var MoveQuest = (function() {
     el.funStrip.style.display = fun.length ? '' : 'none';
 
     el.stepsInput.value = t.act.steps > 0 ? t.act.steps : '';
+    el.activeInput.value = t.act.active !== null ? t.act.active : '';
+    el.lightInput.value = t.act.light !== null ? t.act.light : '';
     renderWm();
 
     el.statWorkouts.textContent = data.workoutsDone || 0;
@@ -1795,7 +1813,8 @@ var MoveQuest = (function() {
 
       libraryFilters: $('mq-library-filters'), libraryList: $('mq-library-list'),
 
-      stepsInput: $('mq-steps-input'), stepsFeedback: $('mq-steps-feedback'),
+      stepsInput: $('mq-steps-input'), activeInput: $('mq-active-input'),
+      lightInput: $('mq-light-input'), stepsFeedback: $('mq-steps-feedback'),
       stepsImport: $('mq-steps-import'),
 
       statWorkouts: $('mq-stat-workouts'), statMinutes: $('mq-stat-minutes'),

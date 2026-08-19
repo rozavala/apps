@@ -45,6 +45,42 @@ var MoveQuestScan = (function() {
 
   var DAY_PREFIX = /^\s*(today|hoy|sun|mon|tue|wed|thu|fri|sat|dom|lun|mar|mi[eé]|jue|vie|s[aá]b)[a-zá-úñ]*[.,:]?\s+/i;
 
+  // Column separator injected between words whose horizontal gap is
+  // wide enough to be a table column, not word spacing. Any character
+  // that can never come out of OCR text works.
+  var COL = '\u00a6';
+
+  /* Rebuild the page text from word boxes, marking column gaps.
+     "Sat, Aug 8   14,026   3 h 52 m   1 h 1 m" becomes
+     "Sat, Aug 8 ¦ 14,026 ¦ 3 h 52 m ¦ 1 h 1 m", which removes the
+     one real ambiguity of flat text: whether "1 h 42 m" is a single
+     duration or two columns. Falls back to null when the engine
+     returned no block data. */
+  function structuredText(data) {
+    if (!data || !data.blocks) return null;
+    var out = [];
+    data.blocks.forEach(function(block) {
+      (block.paragraphs || []).forEach(function(par) {
+        (par.lines || []).forEach(function(line) {
+          var words = line.words || [];
+          if (!words.length) return;
+          var lineH = Math.max(8, line.bbox ? (line.bbox.y1 - line.bbox.y0) : 20);
+          var gapMin = Math.max(12, lineH * 0.7);
+          var parts = [];
+          for (var i = 0; i < words.length; i++) {
+            if (i > 0) {
+              var gap = words[i].bbox.x0 - words[i - 1].bbox.x1;
+              parts.push(gap > gapMin ? ' ' + COL + ' ' : ' ');
+            }
+            parts.push(words[i].text);
+          }
+          out.push(parts.join(''));
+        });
+      });
+    });
+    return out.length ? out.join('\n') : null;
+  }
+
   function _monthFrom(word) {
     var w = String(word || '').toLowerCase();
     for (var i = 0; i < MONTHS.length; i++) {
@@ -113,6 +149,44 @@ var MoveQuestScan = (function() {
     return { light: clamp(light), active: clamp(active) };
   }
 
+  /* All duration tokens in one COLUMN, summed — inside a single
+     column "1 h 42 m" is one reading, never two. Null when nothing
+     in the field parses as a duration. */
+  function _fieldDuration(field) {
+    var fixed = field.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m');
+    var toks = _durTokens(fixed);
+    if (!toks.length) return null;
+    var total = 0;
+    toks.forEach(function(t) { total += (t.h || 0) * 60 + (t.m || 0); });
+    return (total >= 0 && total <= 1440) ? total : null;
+  }
+
+  /* Parse one column-marked row: date ¦ steps ¦ light ¦ active. */
+  function _parseFieldRow(line) {
+    var fields = line.split(COL).map(function(f) { return f.trim(); }).filter(Boolean);
+    if (fields.length < 2) return null;
+    if (!DAY_PREFIX.test(fields[0])) return null;
+
+    var steps = null, durations = [];
+    for (var i = 1; i < fields.length; i++) {
+      var f = fields[i];
+      var isDuration = /\d\s*[hm]/i.test(f);
+      if (steps === null && !isDuration && /^\d[\d.,\s]*$/.test(f)) {
+        steps = _num(f);
+      } else if (durations.length < 2) {
+        var d = _fieldDuration(f);
+        if (d !== null) durations.push(d);
+      }
+    }
+    if (steps === null) return null;
+    return {
+      datePart: fields[0],
+      steps: steps,
+      light: durations.length > 0 ? durations[0] : null,
+      active: durations.length > 1 ? durations[1] : null
+    };
+  }
+
   /* Parse the OCR text of one screenshot into rows of
      { key: 'YYYY-MM-DD', steps, light, active } — light and active
      are minutes, null when unreadable. Pure — `today` is injectable
@@ -131,9 +205,16 @@ var MoveQuestScan = (function() {
     var rows = [];
 
     String(text || '').split(/\n+/).forEach(function(line) {
-      var m = DAY_PREFIX.exec(line);
+      // Column-marked lines (from word boxes) parse by field — exact
+      // for every duration. Flat lines keep the heuristic path.
+      var fieldRow = line.indexOf(COL) !== -1 ? _parseFieldRow(line) : null;
+      if (line.indexOf(COL) !== -1 && !fieldRow) line = line.split(COL).join(' ');
+
+      var m = DAY_PREFIX.exec(fieldRow ? fieldRow.datePart : line);
       if (!m) return;
-      var rest = line.slice(m[0].length);
+      var rest = fieldRow
+        ? fieldRow.datePart.slice(m[0].length)
+        : line.slice(m[0].length);
 
       // "Aug 8" (EN) or "8 ago" / "8 de ago" (ES). Both are anchored
       // to the start of the row — searching further in would let the
@@ -154,18 +235,24 @@ var MoveQuestScan = (function() {
       }
       if (!month || !day || day > 31) return;
 
-      // Steps is the first number left once the durations are gone;
-      // the durations themselves become the Light and Active minutes.
-      var tail = rest.slice(dateEnd);
-      var mins = _durationsFrom(tail);
-      var chars = tail.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m').split('');
-      _durTokens(chars.join('')).forEach(function(t) {
-        for (var c = t.start; c < t.end; c++) chars[c] = ' ';
-      });
-      var stripped = chars.join('');
-      var stepTok = /\d[\d.,]*/.exec(stripped);
-      if (!stepTok) return;
-      var steps = _num(stepTok[0]);
+      var steps, mins;
+      if (fieldRow) {
+        steps = fieldRow.steps;
+        mins = { light: fieldRow.light, active: fieldRow.active };
+      } else {
+        // Flat text: steps is the first number left once the durations
+        // are gone; the durations become the Light and Active minutes.
+        var tail = rest.slice(dateEnd);
+        mins = _durationsFrom(tail);
+        var chars = tail.replace(/(\d+\s*h\s*\d+)\s*$/, '$1 m').split('');
+        _durTokens(chars.join('')).forEach(function(t) {
+          for (var c = t.start; c < t.end; c++) chars[c] = ' ';
+        });
+        var stripped = chars.join('');
+        var stepTok = /\d[\d.,]*/.exec(stripped);
+        if (!stepTok) return;
+        steps = _num(stepTok[0]);
+      }
       if (steps === null || steps === 0) return;
 
       var d = new Date(today.getFullYear(), month - 1, day);
@@ -284,9 +371,10 @@ var MoveQuestScan = (function() {
       chain = chain.then(function(worker) {
         if (onProgress) onProgress(i + 1, list.length);
         return _prepare(file).then(function(canvas) {
-          return worker.recognize(canvas);
+          return worker.recognize(canvas, {}, { text: true, blocks: true });
         }).then(function(result) {
-          var rows = parseMovementText(result.data.text);
+          var text = structuredText(result.data) || result.data.text;
+          var rows = parseMovementText(text);
           if (!rows.length) {
             report.problems.push(file.name + ': no Movement rows found — screenshot the weekly list with the Steps column visible.');
           } else {
@@ -325,6 +413,7 @@ var MoveQuestScan = (function() {
   return {
     isImageFile: isImageFile,
     parseMovementText: parseMovementText,
+    structuredText: structuredText,
     scanImages: scanImages
   };
 })();
