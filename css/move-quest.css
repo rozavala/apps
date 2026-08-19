@@ -388,9 +388,13 @@
     .fun-strip span { display: block; }
     .fun-strip span + span { margin-top: 3px; }
 
-    .steps-inline { display: flex; gap: 8px; }
-    .steps-inline .form-input { flex: 1; }
-    .steps-inline-save { width: auto; padding: 14px 20px; flex-shrink: 0; }
+    .today-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; }
+    .today-field label {
+      display: block; font-weight: 800; font-size: 0.72rem;
+      color: var(--text-muted); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;
+    }
+    .today-field .form-input { padding: 12px 10px; text-align: right; }
 
     /* ---- Week / Month section ---- */
     .wm-section { margin-top: 26px; }
