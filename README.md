@@ -42,6 +42,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **✈️ Vacation Planner** | Planifica las próximas aventuras y vacaciones familiares. (Plan upcoming family adventures and vacations.) | [vacation.html](vacation.html) |
 | **🏛️ Civics Lab** | Cómo funciona el gobierno de Chile y otros sistemas del mundo. (How the government of Chile and other world systems work.) | [civics-lab.html](civics-lab.html) |
 | **🏆 World Cup 2026** | Sigue los equipos, partidos y ciudades sede del torneo de la Copa del Mundo. (Follow the teams, matches and host cities of the World Cup tournament.) | [world-cup.html](world-cup.html) |
+| **⚓ Patrón de Lancha** | Prepárate para el examen teórico · Chile 🇨🇱 DIRECTEMAR. (Prepare for the theoretical exam.) | [patron-lancha.html](patron-lancha.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
@@ -74,6 +75,8 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 - **Lenguaje Neutral (Neutral Language)**: Narración factual sin agendas sociales o políticas modernas. (Factual storytelling without modern social or political agendas.)
 
 ## 🆕 Novedades de la Semana (What's New This Week)
+
+- **¡Nueva App "Patrón de Lancha"!**: Prepárate para el examen teórico de Patrón de Lancha Deportiva de DIRECTEMAR en Chile. (New "Patrón de Lancha" app: Prepare for the DIRECTEMAR theoretical exam in Chile.)
 
 - **¡Nueva App "Move Quest"!**: Entrenamientos de siete minutos para hacer en casa. Cada ejercicio se muestra dibujado paso a paso, así que los niños pueden mirar las figuras primero, dejar la pantalla en el suelo y seguir el circuito con la voz del entrenador y los pitidos de cuenta regresiva. Cuatro grupos de edad (Brote 4-6, Explorador 7-9, Atleta 10-12, Campeón 13+) y diez niveles que alargan el trabajo, acortan el descanso y van desbloqueando ejercicios nuevos. Cada entrenamiento terminado se registra en Sports Arena como "Home Workout". La portada muestra los tres anillos del dia (pasos, minutos activos y entrenamiento) y "Mi Progreso" reune todo el rendimiento: anillos con metas, datos curiosos (¡tus pasos en canchas de futbol!), vista de semana y de mes (calendario), registro de pasos e historial. El registro del reloj acepta: numeros escritos a mano, **capturas de pantalla** de la app Fitbit (varias a la vez; se reconocen pasos y minutos activos/ligeros en el dispositivo con OCR local y se revisan antes de guardar), o **Google Takeout** — se marca solo Fitbit, se descarga el `.zip` y la app lo lee entero, mes por mes; si la exportacion trae una carpeta por hijo, pregunta cual usar. Todo se lee en el dispositivo, sin subir nada. (New "Move Quest" app: seven-minute home workouts with a drawn guide for every exercise, a coach voice so the screen can stay on the floor, four age groups, ten levels, automatic logging into Sports Arena, and daily goal rings (steps, active minutes, workout) with a consolidated My Progress screen — rings, fun distance facts, week and month-calendar views, step logging and history — and a step log that reads Fitbit-app screenshots — steps and minutes, several at once, on-device OCR, reviewed before saving — or a Google Takeout export.)
 
