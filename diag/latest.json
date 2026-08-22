@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-08-20T22:40:20.043Z",
+  "generatedAt": "2026-08-22T20:35:50.105Z",
   "windowHours": 72,
-  "totalGroups": 9,
-  "totalEvents": 12,
+  "totalGroups": 10,
+  "totalEvents": 13,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "match detail fetch failed for 760517 HTTP 502",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1787430648013,
+      "lastTs": 1787430648013,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
