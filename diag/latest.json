@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-08-23T22:34:29.989Z",
+  "generatedAt": "2026-08-24T13:28:19.880Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 1,
+  "totalGroups": 2,
+  "totalEvents": 6,
   "topGroups": [
+    {
+      "app": "bible-explorer",
+      "kind": "error",
+      "page": "bible-explorer.html",
+      "message": "RangeError: String.prototype.repeat argument must be greater than or equal to 0 and not be Infinity",
+      "filename": "https://rozavala.github.io/apps/js/bible-explorer.js",
+      "lineno": 974,
+      "colno": 43,
+      "count": 5,
+      "firstTs": 1787577786467,
+      "lastTs": 1787577998016,
+      "users": 1
+    },
     {
       "app": "world-cup",
       "kind": "console.warn",
