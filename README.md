@@ -42,6 +42,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **✈️ Vacation Planner** | Planifica las próximas aventuras y vacaciones familiares. (Plan upcoming family adventures and vacations.) | [vacation.html](vacation.html) |
 | **🏛️ Civics Lab** | Cómo funciona el gobierno de Chile y otros sistemas del mundo. (How the government of Chile and other world systems work.) | [civics-lab.html](civics-lab.html) |
 | **🏆 World Cup 2026** | Sigue los equipos, partidos y ciudades sede del torneo de la Copa del Mundo. (Follow the teams, matches and host cities of the World Cup tournament.) | [world-cup.html](world-cup.html) |
+| **⚓ Patrón de Lancha** | Contenido de estudio para el examen de Patrón de Lancha Deportiva, basado en el temario oficial. (Study content for the Patrón de Lancha Deportiva exam, based on the official syllabus.) | [patron-lancha.html](patron-lancha.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
