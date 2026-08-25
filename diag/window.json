@@ -1,38 +1,7 @@
 {
-  "generatedAt": "2026-08-24T13:28:19.880Z",
+  "generatedAt": "2026-08-25T20:44:10.218Z",
   "windowHours": 72,
   "days": [
-    {
-      "day": "2026-08-22",
-      "groups": [
-        {
-          "entry": {
-            "id": "e_mt4u22tp_nvccqd",
-            "ts": 1787430648013,
-            "clientTs": 1787430648013,
-            "kind": "console.warn",
-            "app": "world-cup",
-            "page": "world-cup.html",
-            "message": "match detail fetch failed for 760517 HTTP 502",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-9b4aef",
-            "age": 9,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1787430648013,
-          "lastTs": 1787430648013,
-          "users": [
-            "u-9b4aef"
-          ]
-        }
-      ]
-    },
     {
       "day": "2026-08-24",
       "groups": [

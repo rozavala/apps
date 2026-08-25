@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-24T13:28:19.880Z",
+  "generatedAt": "2026-08-25T20:44:10.218Z",
   "windowHours": 72,
-  "totalGroups": 2,
-  "totalEvents": 6,
+  "totalGroups": 1,
+  "totalEvents": 5,
   "topGroups": [
     {
       "app": "bible-explorer",
@@ -15,19 +15,6 @@
       "count": 5,
       "firstTs": 1787577786467,
       "lastTs": 1787577998016,
-      "users": 1
-    },
-    {
-      "app": "world-cup",
-      "kind": "console.warn",
-      "page": "world-cup.html",
-      "message": "match detail fetch failed for 760517 HTTP 502",
-      "filename": null,
-      "lineno": null,
-      "colno": null,
-      "count": 1,
-      "firstTs": 1787430648013,
-      "lastTs": 1787430648013,
       "users": 1
     }
   ]
