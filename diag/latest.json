@@ -1,21 +1,7 @@
 {
-  "generatedAt": "2026-08-25T20:44:10.218Z",
+  "generatedAt": "2026-08-27T13:32:39.994Z",
   "windowHours": 72,
-  "totalGroups": 1,
-  "totalEvents": 5,
-  "topGroups": [
-    {
-      "app": "bible-explorer",
-      "kind": "error",
-      "page": "bible-explorer.html",
-      "message": "RangeError: String.prototype.repeat argument must be greater than or equal to 0 and not be Infinity",
-      "filename": "https://rozavala.github.io/apps/js/bible-explorer.js",
-      "lineno": 974,
-      "colno": 43,
-      "count": 5,
-      "firstTs": 1787577786467,
-      "lastTs": 1787577998016,
-      "users": 1
-    }
-  ]
+  "totalGroups": 0,
+  "totalEvents": 0,
+  "topGroups": []
 }
