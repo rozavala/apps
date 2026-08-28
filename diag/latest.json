@@ -1,7 +1,34 @@
 {
-  "generatedAt": "2026-08-27T13:32:39.994Z",
+  "generatedAt": "2026-08-28T02:39:19.944Z",
   "windowHours": 72,
-  "totalGroups": 0,
-  "totalEvents": 0,
-  "topGroups": []
+  "totalGroups": 2,
+  "totalEvents": 4,
+  "topGroups": [
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Evaluate failed: Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 3,
+      "firstTs": 1787884471816,
+      "lastTs": 1787884471816,
+      "users": 1
+    },
+    {
+      "app": "book-movie-check",
+      "kind": "console.warn",
+      "page": "book-movie-check.html",
+      "message": "[BMC] Evaluate failed: HTTP 500",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1787884430891,
+      "lastTs": 1787884430891,
+      "users": 1
+    }
+  ]
 }
