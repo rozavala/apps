@@ -154,6 +154,13 @@ function updateMenuBadges(){
   const total=wins+losses+draws;
   const playEl=document.getElementById('playBadge');
   if(playEl) playEl.textContent=total>0?`${wins}W ${losses}L ${draws}D`:'';
+
+  const trainerEl=document.getElementById('trainerBadge');
+  if(trainerEl){
+    const tb=prog.trainerBest;
+    trainerEl.textContent=tb&&tb>1?`Level ${tb}`:'New!';
+    trainerEl.className='m-badge '+(tb&&tb>1?'prog':'rec');
+  }
 }
 
 /* ================================================================

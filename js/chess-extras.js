@@ -481,5 +481,81 @@
     };
   })();
 
-  window.ChessExtras = { Rush: Rush, Openings: Openings };
+  var Trainer = (function() {
+    var state = null;
+    function open() {
+      state = { piece: 'N', r: 7, c: 1, tr: 0, tc: 6, moves: 0, level: 1 };
+      var rushWrap = document.getElementById('rush-wrap');
+      if (rushWrap) rushWrap.innerHTML = '';
+      var opWrap = document.getElementById('openings-wrap');
+      if (opWrap) opWrap.innerHTML = '';
+      var wrap = document.getElementById('trainer-wrap');
+      if (!wrap) return;
+      wrap.innerHTML = '<div class="learn-header"><button class="back-btn" onclick="ChessExtras.Trainer._back()">←</button><div class="learn-title">Movement Trainer</div></div>' +
+        '<div class="puzzle-top"><div class="puzzle-badge" id="trainerLabel">Level 1</div><div style="color:var(--gold);font-family:var(--font-display);font-weight:700" id="trainerScore">Moves: 0</div></div>' +
+        '<div class="board-wrap"><div class="board" id="trainerBoard"></div></div>' +
+        '<div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>' +
+        '<div class="puzzle-hint" style="margin-top:10px;text-align:center;">Move the piece to the target square!</div>';
+      if (typeof window.showScreen === 'function') window.showScreen('trainer');
+      _render();
+    }
+    function _render() {
+      var b = Array(8).fill(null).map(function() { return Array(8).fill(null); });
+      b[state.r][state.c] = { piece: state.piece, color: 'w' };
+      var moves = typeof window.getMoves === 'function' ? window.getMoves(b, state.r, state.c, false) : [];
+      var moveDots = moves.map(function(m) { return [m.tr, m.tc]; });
+      var el = document.getElementById('trainerBoard');
+      if (typeof window.renderBoard === 'function') {
+        window.renderBoard(el, b, {
+          selected: [state.r, state.c],
+          moveDots: moveDots,
+          hintSquares: [[state.tr, state.tc]],
+          onClick: function(r, c) {
+            if (moves.some(function(m) { return m.tr === r && m.tc === c; })) {
+              state.r = r;
+              state.c = c;
+              state.moves++;
+              var scoreEl = document.getElementById('trainerScore');
+              if (scoreEl) scoreEl.textContent = 'Moves: ' + state.moves;
+              if (typeof window.SFX !== 'undefined' && window.SFX.click) window.SFX.click();
+
+              if (r === state.tr && c === state.tc) {
+                if (typeof window.showFeedback === 'function') window.showFeedback('✨');
+                if (typeof window.SFX !== 'undefined' && window.SFX.correct) window.SFX.correct();
+                state.level++;
+                var lblEl = document.getElementById('trainerLabel');
+                if (lblEl) lblEl.textContent = 'Level ' + state.level;
+                var pieces = ['N', 'B', 'R', 'Q', 'K'];
+                state.piece = pieces[Math.floor(Math.random() * pieces.length)];
+                state.r = Math.floor(Math.random() * 8);
+                state.c = Math.floor(Math.random() * 8);
+                do {
+                  state.tr = Math.floor(Math.random() * 8);
+                  state.tc = Math.floor(Math.random() * 8);
+                } while (state.tr === state.r && state.tc === state.c);
+
+                var d = _load();
+                var best = d.trainerBest || 0;
+                if (state.level > best) {
+                  d.trainerBest = state.level;
+                  _save(d);
+                }
+              }
+              _render();
+            }
+          }
+        });
+      }
+    }
+    function _back() {
+      if (typeof ActivityLog !== 'undefined' && ActivityLog.log && state && state.level > 1) {
+        ActivityLog.log('Chess Quest', '🎯', 'Played Piece Movement Trainer (Level ' + state.level + ')');
+      }
+      state = null;
+      if (typeof window.goMenu === 'function') window.goMenu();
+    }
+    return { open: open, _back: _back, _start: open, _render: _render };
+  })();
+
+  window.ChessExtras = { Rush: Rush, Openings: Openings, Trainer: Trainer };
 })();
