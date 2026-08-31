@@ -672,6 +672,28 @@ const WorldExplorer = (() => {
     ] },
     { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
       {
+        id: 'fiji',
+        name: 'Fiji',
+        nameEs: 'Fiyi',
+        flag: '🇫🇯',
+        capital: 'Suva',
+        capitalEs: 'Suva',
+        landmark: 'Coral Coast',
+        animal: 'Banded Iguana',
+        color: '#60A5FA',
+        facts: [
+          { en: 'Fiji is an island country made up of more than 300 islands.', es: 'Fiyi es un país insular formado por más de 300 islas.' },
+          { en: 'Rugby is the most popular sport in Fiji.', es: 'El rugby es el deporte más popular en Fiyi.' },
+          { en: 'The Great Astrolabe Reef in Fiji is one of the largest coral reefs in the world.', es: 'El Gran Arrecife Astrolabio en Fiyi es uno de los arrecifes de coral más grandes del mundo.' },
+          { en: 'Traditional Fijian villages have a central meeting house called a bure.', es: 'Las aldeas tradicionales de Fiyi tienen una casa de reuniones central llamada bure.' }
+        ],
+        quiz: [
+          { q: 'How many islands make up Fiji?', options: ['More than 300', 'Exactly 10', 'Only 1', 'About 50'], a: 0 },
+          { q: 'What is a popular sport in Fiji?', options: ['Rugby', 'Ice Hockey', 'Baseball', 'Skiing'], a: 0 },
+          { q: 'What is the capital of Fiji?', options: ['Suva', 'Nadi', 'Sydney', 'Auckland'], a: 0 }
+        ]
+      },
+      {
         id: 'australia', name: 'Australia', nameEs: 'Australia', flag: '🇦🇺',
         capital: 'Canberra', capitalEs: 'Canberra',
         facts: [

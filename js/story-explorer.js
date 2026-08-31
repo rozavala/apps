@@ -8,10 +8,9 @@ const StoryExplorer = (() => {
   'use strict';
 
   // ── Story Library ──
-  const STORIES = [
+  // PRUNED [2026-10-24]: Removed ocean_dive, andes_rescue, lost_compass, inca_trail to keep within MAX 12 stories limit.
+const STORIES = [
     {
-      id: 'ocean_dive',
-      title: 'The Ocean Dive',
       titleEs: 'El Buceo en el Océano',
       tier: 'intermediate', ageMin: 7, region: 'ocean', icon: '🤿',
       pages: [
@@ -46,8 +45,6 @@ const StoryExplorer = (() => {
       ]
     },
     {
-      id: 'andes_rescue',
-      title: 'The Andes Rescue',
       titleEs: 'El Rescate en los Andes',
       tier: 'advanced', ageMin: 8, region: 'south', icon: '🚁',
       pages: [
@@ -86,8 +83,6 @@ const StoryExplorer = (() => {
       ]
     },
     {
-      id: 'lost_compass',
-      title: 'The Lost Compass',
       titleEs: 'La Brújula Perdida',
       tier: 'explorer', ageMin: 6, region: 'south', icon: '🧭',
       pages: [
@@ -126,8 +121,6 @@ const StoryExplorer = (() => {
       ]
     },
     {
-      id: 'inca_trail',
-      title: 'The Secret Inca Trail',
       titleEs: 'El Sendero Secreto Inca',
       tier: 'explorer', ageMin: 6, region: 'north', icon: '⛰️',
       pages: [
