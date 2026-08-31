@@ -12,6 +12,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 
 | Aplicación (App) | Descripción (Description) | Enlace (Link) |
 | --- | --- | --- |
+| **⚓ Patrón de Lancha** | Prepara el examen teórico de Patrón de Lancha Deportiva (Chile): estudia y practica. (Prepare for the theoretical exam of Sports Motorboat Skipper (Chile): study and practice.) | [patron-lancha.html](patron-lancha.html) |
 | **🎹 Little Maestro** | Aprende a tocar el piano con lecciones interactivas, canciones reales y desafíos divertidos para pequeños músicos. (Learn to play piano with interactive lessons, real songs, and fun challenges for little musicians.) | [little-maestro.html](little-maestro.html) |
 | **🧮 Math Galaxy** | Supera desafíos matemáticos—suma, multiplicación, fracciones y más en una aventura espacial. (Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.) | [math-galaxy.html](math-galaxy.html) |
 | **🤖 Code Cadet** | Resuelve rompecabezas de lógica con programación visual en bloques. (Solve logic puzzles with visual block-based programming.) | [code-cadet.html](code-cadet.html) |
