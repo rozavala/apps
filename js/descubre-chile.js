@@ -485,6 +485,8 @@ const QB={
     {q:'¿Qué columna de material puede subir kilómetros en el aire durante una erupción?',a:'Columna eruptiva de ceniza',o:['Columna eruptiva de ceniza','Columna de agua','Columna de hielo','Columna de arena'], tier:'advanced'}
   ],
   animales:[
+    {q:'¿Qué ave chilena es enorme y vuela en la cordillera?',a:'Cóndor',o:['Cóndor','Águila','Loro','Flamenco'], tier:'beginner'},
+    {q:'¿Qué animal es el ciervo más pequeño de Chile?',a:'Pudú',o:['Pudú','Huemul','Guanaco','Zorro'], tier:'beginner'},
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
     {q:'¿Dónde habita principalmente la vicuña?',a:'A gran altitud en los Andes',o:['A gran altitud en los Andes','En la costa del Pacífico','En los bosques del sur','En la selva lluviosa'], tier:'intermediate'},
     {q:'¿Qué animal tiene una de las lanas más finas y valiosas?',a:'La vicuña',o:['La vicuña','La oveja común','El guanaco','El zorro'], tier:'advanced', explain:'La fibra de la vicuña es una de las más finas y caras del mundo, por eso este animal está protegido.'},
@@ -521,6 +523,8 @@ const QB={
     {q:'¿Qué instrumento de viento andino se fabrica con cañas de distinto largo?',a:'La zampoña',o:['La zampoña','El charango','El bombo','El guitarrón'], tier:'advanced'}
   ],
   fiestas_patrias:[
+    {q:'¿Qué baile se baila en Fiestas Patrias?',a:'Cueca',o:['Cueca','Salsa','Tango','Cumbia'], tier:'beginner'},
+    {q:'¿Qué comida típica se come en el 18 de septiembre?',a:'Empanada de pino',o:['Empanada de pino','Pizza','Hamburguesa','Sushi'], tier:'beginner'},
     {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},
     {q:'¿Qué baile tradicional se baila en las fondas?',a:'La Cueca',o:['La Cueca','La Cumbia','El Tango','El Reggaetón'], tier:'beginner'},
     {q:'¿En qué año se declaró a la Cueca como baile nacional?',a:'1979',o:['1979','1810','1990','2000'], tier:'expert', explain:'La cueca fue declarada baile nacional de Chile en 1979 por decreto oficial.'},
