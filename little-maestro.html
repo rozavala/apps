@@ -8936,6 +8936,64 @@ const SONGS = [
 
 
 // ================================================================
+// PART A2 — SONG ORDER
+// One shared answer to "which song comes next?".
+//
+// SONGS is stored in the order songs were written, so worlds are not
+// monotonic in it: the original curriculum runs 1→13, then later
+// batches append more songs back into worlds 4–13. The quest map has
+// always grouped by world (worlds ascending, array order inside a
+// world), which is the order a kid actually walks. The Continue
+// button and the parent dashboard used to scan raw SONGS order
+// instead, so once a kid got past the first batch the three screens
+// disagreed about which song was current. Everything now walks
+// questOrder().
+// ================================================================
+
+let _questOrderCache = null;
+function questOrder() {
+  if (_questOrderCache) return _questOrderCache;
+  const main   = SONGS.filter(s => !s.isBonus && s.world);
+  const worlds = [...new Set(main.map(s => s.world))].sort((a, b) => a - b);
+  _questOrderCache = [];
+  worlds.forEach(w => main.forEach(s => { if (s.world === w) _questOrderCache.push(s); }));
+  return _questOrderCache;
+}
+
+// A song counts as done once it has stars, in either the current
+// progress[id].stars shape or the legacy progress.songStars map.
+function completedSongIds(progress) {
+  const done = new Set();
+  const prog = progress || {};
+  Object.entries(prog).forEach(([sid, val]) => {
+    const numId = parseInt(sid, 10);
+    if (!isNaN(numId) && val && typeof val === 'object' && val.stars > 0) done.add(numId);
+  });
+  Object.entries(prog.songStars || {}).forEach(([sid, s]) => {
+    if (s > 0) done.add(parseInt(sid, 10));
+  });
+  return done;
+}
+
+// The song they're on: first one in quest order without stars.
+function currentSongFrom(progress) {
+  const done = completedSongIds(progress);
+  return questOrder().find(s => !done.has(s.id)) || null;
+}
+
+// Progress for the signed-in student, straight off localStorage.
+function activeProgress() {
+  try {
+    const active = typeof UserManager !== 'undefined' ? UserManager.getCurrentUser() : null;
+    if (!active) return {};
+    const key    = `littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g, '_')}`;
+    const stored = JSON.parse(localStorage.getItem(key) || '{}');
+    return stored.progress || {};
+  } catch (e) { return {}; }
+}
+
+
+// ================================================================
 // PART B — NOTE FREQUENCIES
 // Equal temperament, C2-C6, all chromatic notes + enharmonic aliases
 // Formula: freq = 440 * 2^((midiNote - 69) / 12)
@@ -12296,32 +12354,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!container) return;
 
       // Determine progress from active user's data
-      let completedSongs = new Set();
-      let currentSongId  = null;
-
-      try {
-        const active = UserManager ? UserManager.getCurrentUser() : null;
-        if (active) {
-          const stored = localStorage.getItem(`littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g,'_')}`);
-          if (stored) {
-            const data = JSON.parse(stored);
-            if (data.progress) {
-              // Primary format: GamificationManager.awardStars writes progress[songId].stars
-              Object.entries(data.progress).forEach(([sid, val]) => {
-                const numId = parseInt(sid, 10);
-                if (!isNaN(numId) && typeof val === 'object' && val !== null && val.stars > 0) {
-                  completedSongs.add(numId);
-                }
-              });
-              // Legacy fallback: songStars sub-object (from original UserManager schema)
-              const songStars = data.progress.songStars || {};
-              Object.entries(songStars).forEach(([sid, s]) => {
-                if (s && s > 0) completedSongs.add(parseInt(sid, 10));
-              });
-            }
-          }
-        }
-      } catch(e) { /* use defaults */ }
+      const progress       = activeProgress();
+      const completedSongs = completedSongIds(progress);
+      const currentSong    = currentSongFrom(progress);
+      const currentSongId  = currentSong ? currentSong.id : null;
 
       // Group songs by world (exclude bonus songs and world 0 from main progression)
       const worlds = [];
@@ -12351,17 +12387,6 @@ document.addEventListener('DOMContentLoaded', () => {
         world.songs.push(song);
       });
 
-      // Find current song (first incomplete song)
-      let foundCurrent = false;
-      worlds.forEach(world => {
-        world.songs.forEach(song => {
-          if (!foundCurrent && !completedSongs.has(song.id)) {
-            currentSongId = song.id;
-            foundCurrent  = true;
-          }
-        });
-      });
-
       // Build HTML
       let html = `
         <div class="questmap-precurr-banner">
@@ -12385,7 +12410,8 @@ document.addEventListener('DOMContentLoaded', () => {
         world.songs.forEach((song, i) => {
           const isCompleted = completedSongs.has(song.id);
           const isCurrent   = song.id === currentSongId;
-          const isLocked    = !isCompleted && !isCurrent && !song.alwaysUnlocked;
+          const isLocked    = !isCompleted && !isCurrent && !song.alwaysUnlocked &&
+                              !(progress[song.id] && progress[song.id].unlocked);
 
           // Winding pattern: alternate left/right
           const side = nodeCount % 2 === 0 ? 'left' : 'right';
@@ -12654,45 +12680,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const song = typeof SONGS !== 'undefined' ? SONGS.find(s => s.id === songId) : null;
         if (!song) return;
 
-        // Check if locked — read from progress[songId].stars (GamificationManager format)
-        let completedSongs = new Set();
-        try {
-          const active = UserManager ? UserManager.getCurrentUser() : null;
-          if (active) {
-            const stored = localStorage.getItem(`littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g,'_')}`);
-            if (stored) {
-              const data = JSON.parse(stored);
-              if (data.progress) {
-                // Primary: GamificationManager.awardStars writes progress[songId].stars
-                Object.entries(data.progress).forEach(([sid, val]) => {
-                  const numId = parseInt(sid, 10);
-                  if (!isNaN(numId) && typeof val === 'object' && val !== null && val.stars > 0) {
-                    completedSongs.add(numId);
-                  }
-                });
-                // Legacy fallback: songStars sub-object
-                const songStars = data.progress.songStars || {};
-                Object.entries(songStars).forEach(([sid, s]) => {
-                  if (s && s > 0) completedSongs.add(parseInt(sid, 10));
-                });
-              }
-            }
-          }
-        } catch(e) {}
+        // Check if locked
+        const progress       = activeProgress();
+        const completedSongs = completedSongIds(progress);
+        const current        = currentSongFrom(progress);
+        const currentSongId  = current ? current.id : null;
 
-        // Determine current song (first incomplete, non-bonus)
-        let currentSongId = null;
-        let found = false;
-        (typeof SONGS !== 'undefined' ? SONGS : []).forEach(s => {
-          if (!found && !s.isBonus && !completedSongs.has(s.id)) {
-            currentSongId = s.id;
-            found = true;
-          }
-        });
-
-        // Bonus/always-unlocked songs skip the lock check entirely
+        // Bonus/always-unlocked songs skip the lock check entirely, and
+        // so does an explicit progress[id].unlocked — the flag the
+        // lesson-complete path writes for the next song, and the one a
+        // grown-up sets from Parents Corner → Progress Manager.
         const isBonusSong = song.isBonus || song.alwaysUnlocked;
-        const isLocked = !isBonusSong && !completedSongs.has(songId) && songId !== currentSongId;
+        const isUnlocked  = !!(progress[songId] && progress[songId].unlocked);
+        const isLocked = !isBonusSong && !isUnlocked &&
+                         !completedSongs.has(songId) && songId !== currentSongId;
         if (isLocked) {
           Melody.speak('Finish earlier songs first! 🔒', 2000);
           Melody.setState('thinking');
@@ -14548,18 +14549,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function _startNewWork() {
         // Find current (first incomplete) song
-        let currentSongId = null;
-        try {
-          const active = UserManager.getCurrentUser();
-          if (active) {
-            const stored = JSON.parse(localStorage.getItem(`littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g,'_')}`) || '{}');
-            const prog   = stored.progress || {};
-            for (const song of SONGS) {
-              const p = prog[song.id];
-              if (!p || !p.stars || p.stars === 0) { currentSongId = song.id; break; }
-            }
-          }
-        } catch(e) {}
+        const current = currentSongFrom(activeProgress());
+        let currentSongId = current ? current.id : null;
 
         if (!currentSongId && SONGS.length > 0) currentSongId = SONGS[0].id;
         if (!currentSongId) return;
@@ -15321,7 +15312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const notes          = stats.notes || 0;
 
         // "Ready to move on?" — practiced 3+ times on current song
-        const currentSong  = SONGS.find(s => !prog[s.id] || !prog[s.id].stars);
+        const currentSong  = currentSongFrom(prog);
         const currentProg  = currentSong ? (prog[currentSong.id] || {}) : {};
         const practiceRuns = currentProg.sessionCount || 0;
         const readyToMove  = practiceRuns >= 3;

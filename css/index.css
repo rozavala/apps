@@ -994,6 +994,70 @@
     .pk-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .pk-toggle input { width: 18px; height: 18px; accent-color: var(--purple); }
 
+    /* Progress Manager (Parents Corner → Set / Reset Progress) */
+    .pg-intro {
+      font-size: 0.85rem; color: var(--text-muted);
+      line-height: 1.5; margin-bottom: 16px;
+    }
+    .pg-kid-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .pg-kid-tab {
+      padding: 8px 14px; border-radius: 99px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      color: var(--text-muted);
+      font-family: var(--font-body); font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .pg-kid-tab:hover { color: var(--text-primary); border-color: rgba(167,139,250,0.4); }
+    .pg-kid-tab.active {
+      background: rgba(167,139,250,0.15); border-color: var(--purple); color: var(--text-primary);
+    }
+
+    .pg-app-list { display: flex; flex-direction: column; gap: 14px; }
+    .pg-app-card {
+      padding: 16px; border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .pg-app-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .pg-app-icon { font-size: 1.2rem; }
+    .pg-app-name {
+      font-family: var(--font-display); font-weight: 800; font-size: 1.05rem;
+      color: var(--text-primary); text-decoration: none;
+    }
+    .pg-app-name:hover { color: var(--purple); }
+    .pg-status { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+    .pg-status strong { color: var(--text-primary); }
+    .pg-note { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+    .pg-label {
+      display: block; font-size: 0.78rem; font-weight: 700;
+      color: var(--text-muted); margin-bottom: 6px;
+    }
+    .pg-select {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      background: rgba(0,0,0,0.25); color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-family: var(--font-body); font-size: 0.9rem;
+    }
+    .pg-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .pg-actions .hub-action-btn { margin: 0; padding: 8px 16px; font-size: 0.8rem; }
+
+    .pg-reset-btn {
+      margin-left: auto; padding: 6px 14px; border-radius: 10px;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3);
+      color: #F87171; font-family: var(--font-body); font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .pg-reset-btn:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
+    .pg-reset-btn:disabled { opacity: 0.35; cursor: default; }
+    .pg-reset-btn.wide { margin: 0; width: 100%; padding: 12px; font-size: 0.85rem; }
+    .pg-danger {
+      margin-top: 24px; padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
     .a11y-scale-row {
       display: flex; gap: 6px; flex-wrap: wrap;
     }
