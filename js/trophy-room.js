@@ -23,7 +23,13 @@ var TrophyRoom = (function() {
     { id: 'world',   name: 'World Explorer',  emoji: '🌍', color: '#3B82F6', threshold: 1 },
     { id: 'story',   name: 'Story Explorer',  emoji: '📚', color: '#8B5CF6', threshold: 1 },
     { id: 'guess',   name: 'Guess Quest',     emoji: '🎯', color: '#FBBF24', threshold: 1 },
-    { id: 'worldcup', name: 'World Cup 2026', emoji: '🏆', color: '#16A34A', threshold: 1 }
+    { id: 'worldcup', name: 'World Cup 2026', emoji: '🏆', color: '#16A34A', threshold: 1 },
+    { id: 'money',   name: 'Money Master',    emoji: '💰', color: '#FBBF24', threshold: 1 },
+    { id: 'invest',  name: 'Invest Quest',    emoji: '📈', color: '#22C55E', threshold: 1 },
+    { id: 'bible',   name: 'Bible Explorer',  emoji: '📖', color: '#C084FC', threshold: 1 },
+    { id: 'civics',  name: 'Civics Lab',      emoji: '🏛️',  color: '#38BDF8', threshold: 1 },
+    { id: 'codecadet', name: 'Code Cadet',    emoji: '🤖', color: '#94A3B8', threshold: 1 },
+    { id: 'vocab',   name: 'Vocabulario Vivo', emoji: '📚', color: '#FB923C', threshold: 1 }
   ];
 
   // Mirror of RANKS in auth.js so we can show the progression strip.
@@ -38,29 +44,12 @@ var TrophyRoom = (function() {
     { minStars: 500, icon: '👑', name: 'Grand Master' }
   ];
 
+  // Star rules live in auth.js next to getPlayerStats. This used to
+  // keep its own copy, which meant a new app could be added there and
+  // silently score zero here.
   function _appStars(appId, appStats) {
     var data = appStats[appId] || {};
-    if (appId === 'math') {
-      var s = 0; for (var k in data) { s += (data[k].bestStars || 0); } return s;
-    }
-    if (appId === 'chile') {
-      var s2 = 0;
-      for (var k2 in data) {
-        if (k2 !== 'vr' && k2 !== 'memBest') s2 += (data[k2].bestStars || 0);
-      }
-      return s2;
-    }
-    if (appId === 'chess') return (data.puzzlesSolved || 0) + (data.wins || 0);
-    if (appId === 'piano') {
-      var s3 = 0;
-      if (data.progress) {
-        for (var k3 in data.progress) {
-          var v = data.progress[k3];
-          if (v && typeof v === 'object' && v.stars) s3 += v.stars;
-        }
-      }
-      return s3;
-    }
+    if (typeof getAppStars === 'function') return getAppStars(appId, data);
     return data.totalStars || 0;
   }
 
