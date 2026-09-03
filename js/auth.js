@@ -162,11 +162,10 @@ function getUserAppKey(prefix) {
 // own tour goals, and Parents Corner's Progress Manager.
 //
 // The apps now ask for the right prefix and call this on load to carry
-// any old blob across. Cheap and idempotent: memoised per key, and it
-// only moves data when the new key holds nothing worth keeping, so a
-// re-run can never overwrite real progress.
-var _adoptedKeys = {};
-
+// any old blob across. It is safe to call on every read: the common
+// case costs one localStorage lookup that finds nothing, and it only
+// moves data when the new key holds nothing worth keeping, so a re-run
+// can never overwrite real progress.
 function adoptLegacyAppKey(legacyPrefix, prefix, userName) {
   var name = userName;
   if (!name) {
@@ -177,8 +176,6 @@ function adoptLegacyAppKey(legacyPrefix, prefix, userName) {
 
   var suffix = name.toLowerCase().replace(/\s+/g, '_');
   var legacyKey = legacyPrefix + suffix;
-  if (_adoptedKeys[legacyKey]) return false;
-  _adoptedKeys[legacyKey] = true;
 
   try {
     var legacy = localStorage.getItem(legacyKey);
@@ -210,6 +207,114 @@ function _isEmptyRecord(raw) {
 
 // ── Player Stats ──────────────────────────────────────────────────
 
+// Sum one numeric field across a map of records — the shape most apps
+// use for "how did they do on each unit". `skip` names sibling keys in
+// the same object that are not units (Descubre Chile keeps its visited
+// list and memory best in there too).
+function _sumField(field, skip) {
+  return function(map) {
+    var n = 0;
+    for (var k in map) {
+      if (skip && skip.indexOf(k) !== -1) continue;
+      var rec = map[k];
+      if (rec && typeof rec === 'object') n += rec[field] || 0;
+    }
+    return n;
+  };
+}
+
+// Each app says how many stars a kid has earned in it. The rule is
+// the app's own: where an app records stars, we sum those; where it
+// only records what got finished, we count completed units. Anything
+// without a `stars` function falls back to a plain totalStars field.
+//
+// `legacy` names the bare, un-prefixed key an app used to save to —
+// see adoptLegacyAppKey above.
+var APP_STAR_CONFIGS = [
+  { id: 'math',   prefix: 'zs_mathgalaxy_', stars: _sumField('bestStars') },
+  { id: 'chile',  prefix: 'zs_chile_',      stars: _sumField('bestStars', ['vr', 'memBest']) },
+  { id: 'chess',  prefix: 'zs_chess_', stars: function(d) {
+      return (d.puzzlesSolved || 0) + (d.wins || 0);
+    } },
+  { id: 'piano',  prefix: 'littlemaestro_', stars: function(d) {
+      return _sumField('stars')(d.progress || {});
+    } },
+  { id: 'faith',  prefix: 'zs_fe_' },
+  { id: 'guitar', prefix: 'zs_guitar_' },
+  { id: 'art',    prefix: 'zs_art_' },
+  { id: 'sports', prefix: 'zs_sports_' },
+  { id: 'move',   prefix: 'zs_move_' },
+  { id: 'guess',  prefix: 'zs_guess_' },
+  { id: 'lab',    prefix: 'zs_lab_',   legacy: 'lab' },
+  { id: 'world',  prefix: 'zs_world_', legacy: 'world' },
+  { id: 'atlas',  prefix: 'zs_atlas_' },
+  { id: 'story',  prefix: 'zs_story_', legacy: 'story' },
+  { id: 'quest',  prefix: 'zs_quest_', legacy: 'quest' },
+  { id: 'bmcheck', prefix: 'zs_bmcheck_' },
+  { id: 'worldcup', prefix: 'zs_worldcup_' },
+
+  // Money Master keeps {currency: {mode: {score, stars}}}.
+  { id: 'money', prefix: 'zs_money_', stars: function(d) {
+      var n = 0;
+      for (var cur in d) {
+        if (!d[cur] || typeof d[cur] !== 'object') continue;
+        for (var mode in d[cur]) n += (d[cur][mode] && d[cur][mode].stars) || 0;
+      }
+      return n;
+    } },
+
+  // Invest Quest scores its portfolio game out of 3, then the
+  // concept quiz (9 questions) and each math topic practised.
+  { id: 'invest', prefix: 'zs_invest_', stars: function(d) {
+      return (d.bestStars || 0) +
+             ((d.quizBest || 0) >= 7 ? 1 : 0) +
+             Object.keys(d.mathBest || {}).length;
+    } },
+
+  // Bible Explorer stars stories, memorised verses and book quizzes.
+  { id: 'bible', prefix: 'zs_bible_', stars: function(d) {
+      var n = 0;
+      for (var s1 in (d.storyStars || {})) n += d.storyStars[s1] || 0;
+      return n + _sumField('stars')(d.verses || {}) + _sumField('stars')(d.books || {});
+    } },
+
+  // Civics Lab records no stars, only what was finished: each branch
+  // and institution quiz cleared, the law walkthrough, and a strong
+  // comparative round (8+ of 10).
+  { id: 'civics', prefix: 'zs_civics_', stars: function(d) {
+      return (d.branches || []).length +
+             (d.institutions || []).length +
+             (d.lawCompleted ? 1 : 0) +
+             ((d.comparativeBest || 0) >= 8 ? 1 : 0);
+    } },
+
+  // Code Cadet stars every solved puzzle out of 3.
+  { id: 'codecadet', prefix: 'zs_codecadet_', stars: _sumField('stars') },
+
+  // Vocabulario Vivo: the match and dictation games are scored, and
+  // each word build is a finished exercise. Browsing a root is not an
+  // achievement, so seenRoots does not count.
+  { id: 'vocab', prefix: 'zs_vocab_', stars: function(d) {
+      return (d.matchStars || 0) + (d.dictationStars || 0) + (d.builds || []).length;
+    } }
+];
+
+var _starConfigById = {};
+for (var _c = 0; _c < APP_STAR_CONFIGS.length; _c++) {
+  _starConfigById[APP_STAR_CONFIGS[_c].id] = APP_STAR_CONFIGS[_c];
+}
+
+// How many stars one app's saved blob is worth. The single place that
+// answers this — getPlayerStats and the Trophy Room both call it, so a
+// new app's rule cannot land in one and go missing from the other.
+function getAppStars(appId, data) {
+  var cfg = _starConfigById[appId];
+  var d = data || {};
+  try {
+    return (cfg && cfg.stars) ? (cfg.stars(d) || 0) : (d.totalStars || 0);
+  } catch (e) { return 0; }
+}
+
 function getPlayerStats(userName) {
   var name = userName;
   if (!name) {
@@ -223,52 +328,15 @@ function getPlayerStats(userName) {
   var appsWithStars = 0;
   var appStats = {};
 
-  var appConfigs = [
-    { id: 'math',   prefix: 'zs_mathgalaxy_' },
-    { id: 'chile',  prefix: 'zs_chile_' },
-    { id: 'chess',  prefix: 'zs_chess_' },
-    { id: 'piano',  prefix: 'littlemaestro_' },
-    { id: 'faith',  prefix: 'zs_fe_' },
-    { id: 'guitar', prefix: 'zs_guitar_' },
-    { id: 'art',    prefix: 'zs_art_' },
-    { id: 'sports', prefix: 'zs_sports_' },
-    { id: 'move',   prefix: 'zs_move_' },
-    { id: 'guess',  prefix: 'zs_guess_' },
-    { id: 'lab',    prefix: 'zs_lab_' },
-    { id: 'world',  prefix: 'zs_world_' },
-    { id: 'atlas',  prefix: 'zs_atlas_' },
-    { id: 'story',  prefix: 'zs_story_' },
-    { id: 'quest',  prefix: 'zs_quest_' },
-    { id: 'bmcheck', prefix: 'zs_bmcheck_' },
-    { id: 'worldcup', prefix: 'zs_worldcup_' }
-  ];
-
-  for (var i = 0; i < appConfigs.length; i++) {
-    var cfg = appConfigs[i];
+  for (var i = 0; i < APP_STAR_CONFIGS.length; i++) {
+    var cfg = APP_STAR_CONFIGS[i];
     try {
+      if (cfg.legacy) adoptLegacyAppKey(cfg.legacy, cfg.prefix, name);
       var raw = localStorage.getItem(cfg.prefix + key);
       var data = raw ? JSON.parse(raw) : {};
       appStats[cfg.id] = data;
 
-      var appStars = 0;
-      if (cfg.id === 'math') {
-        for (var k in data) { appStars += (data[k].bestStars || 0); }
-      } else if (cfg.id === 'chile') {
-        for (var k2 in data) { if (k2 !== 'vr' && k2 !== 'memBest') appStars += (data[k2].bestStars || 0); }
-      } else if (cfg.id === 'chess') {
-        appStars = (data.puzzlesSolved || 0) + (data.wins || 0);
-      } else if (cfg.id === 'piano') {
-        if (data.progress) {
-          for (var k3 in data.progress) {
-            var val = data.progress[k3];
-            if (val && typeof val === 'object' && val.stars) appStars += val.stars;
-          }
-        }
-      } else if (cfg.id === 'guess') {
-        appStars = data.totalStars || 0;
-      } else {
-        appStars = data.totalStars || 0;
-      }
+      var appStars = getAppStars(cfg.id, data);
 
       if (appStars > 0) {
         totalStars += appStars;

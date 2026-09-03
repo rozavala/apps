@@ -73,7 +73,7 @@ test.describe('legacy storage keys', () => {
     expect(after.now.totalStars).toBe(4);
   });
 
-  test('adoption is idempotent and leaves untouched kids alone', async ({ page }) => {
+  test('adoption is safe to repeat', async ({ page }) => {
     const out = await page.evaluate(() => {
       localStorage.setItem('worldrepeat', JSON.stringify({ totalStars: 2 }));
       // @ts-ignore
@@ -85,7 +85,7 @@ test.describe('legacy storage keys', () => {
     });
 
     expect(out.first).toBe(true);
-    expect(out.second, 'memoised — no second move').toBe(false);
+    expect(out.second, 'the new key now holds real progress — refuse').toBe(false);
     expect(out.value).toBe(2);
   });
 
