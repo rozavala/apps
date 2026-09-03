@@ -263,6 +263,17 @@ body::before { display: none !important; }
 .a11y-scale-btn { background:#f4f3f8; border:1px solid #e2def0; color:var(--text-primary); }
 .a11y-scale-btn.active { background:rgba(109,40,217,0.14); border-color:#6D28D9; color:#6D28D9; }
 
+/* In-page confirm + toast (js/dialog.js) on the light hub */
+.zsd-panel { background:#ffffff; border:1px solid var(--border-subtle); box-shadow:var(--mod-shadow); }
+.zsd-title { color: var(--text-primary); }
+.zsd-message { color: var(--text-muted); }
+.zsd-btn { background:#ffffff; border:1px solid var(--border-subtle); color:#3a3850; }
+.zsd-btn:hover { border-color:#c9c5e0; }
+.zsd-ok { background:#4338CA; border-color:#4338CA; color:#ffffff; }
+.zsd-ok:hover { background:#3730a3; border-color:#3730a3; }
+.zsd-ok.zsd-danger { background:#DC2626; border-color:#DC2626; color:#ffffff; }
+.zsd-ok.zsd-danger:hover { background:#b91c1c; border-color:#b91c1c; }
+
 /* Progress Manager — white app cards on the grey panel */
 .pg-intro, .pg-status, .pg-note, .pg-label { color: var(--text-muted); }
 .pg-status strong { color: var(--text-primary); }

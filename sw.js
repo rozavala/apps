@@ -13,7 +13,7 @@
 
 'use strict';
 
-const CACHE_VERSION = 'zs-suite-v11';
+const CACHE_VERSION = 'zs-suite-v12';
 const CORE_CACHE = CACHE_VERSION + '-core';
 const ASSETS_CACHE = CACHE_VERSION + '-assets';
 const FONTS_CACHE = CACHE_VERSION + '-fonts';
@@ -28,6 +28,7 @@ const CORE_ASSETS = [
   './js/auth.js',
   './js/sync.js',
   './js/index.js',
+  './js/dialog.js',
   './js/progress-catalog.js',
   './js/progress-admin.js',
   './js/nav.js',

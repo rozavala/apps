@@ -1364,8 +1364,9 @@
   };
   window.deleteRecital = function(id) {
     if (typeof RecitalRecorder === 'undefined') return;
-    if (!confirm('Delete this recital?')) return;
-    RecitalRecorder.remove(Number(id)).then(_renderRecitals);
+    _ask({ title: 'Delete this recital?', confirmLabel: 'Delete', danger: true }, function() {
+      RecitalRecorder.remove(Number(id)).then(_renderRecitals);
+    });
   };
 
   window.flushDiagnostics = function(btn) {
@@ -1462,7 +1463,7 @@
   function redeemForTime() {
     if (ChoresManager.redeemTokens(3)) {
       if (typeof showConfetti === 'function') showConfetti();
-      alert('¡Genial! Has ganado 15 minutos extra de juego. 🚀');
+      _say('¡Genial! Has ganado 15 minutos extra de juego. 🚀');
     }
   }
 
@@ -1609,11 +1610,16 @@
     var app = ProgressAdmin.getApp(appId);
     var units = ProgressAdmin.unitsFor(app);
     var label = units[idx] ? units[idx].l : '';
-    if (!confirm('Set ' + name + ' to "' + label + '" in ' + app.label + '?\n\n' +
-                 'The ' + idx + ' ' + app.noun + (idx === 1 ? '' : 's') + ' before it will count as done, ' +
-                 'and anything after it will not.')) return;
-    ProgressAdmin.setPosition(name, appId, idx);
-    _afterProgressChange(app.label + ' set to "' + label + '" for ' + name + '.');
+    _ask({
+      title: 'Set ' + name + "'s place in " + app.label + '?',
+      message: 'They will be working on "' + label + '". The ' + idx + ' ' +
+               app.noun + (idx === 1 ? '' : 's') + ' before it will count as done, ' +
+               'and anything after it will not.',
+      confirmLabel: 'Set'
+    }, function() {
+      ProgressAdmin.setPosition(name, appId, idx);
+      _afterProgressChange(app.label + ' set to "' + label + '" for ' + name + '.');
+    });
   }
 
   function completeProgressApp(appId) {
@@ -1621,27 +1627,68 @@
     var app = ProgressAdmin.getApp(appId);
     if (!name || !app) return;
     var total = ProgressAdmin.unitsFor(app).length;
-    if (!confirm('Mark all ' + total + ' ' + app.noun + 's in ' + app.label + ' as done for ' + name + '?')) return;
-    ProgressAdmin.setPosition(name, appId, total);
-    _afterProgressChange(app.label + ' marked complete for ' + name + '.');
+    _ask({
+      title: 'Mark ' + app.label + ' complete?',
+      message: 'All ' + total + ' ' + app.noun + 's will count as done for ' + name + '.',
+      confirmLabel: 'Mark all done'
+    }, function() {
+      ProgressAdmin.setPosition(name, appId, total);
+      _afterProgressChange(app.label + ' marked complete for ' + name + '.');
+    });
   }
 
   function resetProgressApp(appId) {
     var name = _progressKidName();
     var app = ProgressAdmin.getApp(appId);
     if (!name || !app) return;
-    if (!confirm('Erase ' + name + "'s progress in " + app.label + '? This cannot be undone.')) return;
-    ProgressAdmin.reset(name, appId);
-    _afterProgressChange(app.label + ' reset for ' + name + '.');
+    _ask({
+      title: 'Erase ' + name + "'s progress in " + app.label + '?',
+      message: 'This cannot be undone.',
+      confirmLabel: 'Erase',
+      danger: true
+    }, function() {
+      ProgressAdmin.reset(name, appId);
+      _afterProgressChange(app.label + ' reset for ' + name + '.');
+    });
   }
 
   function resetProgressAllApps() {
     var name = _progressKidName();
     if (!name) return;
-    if (!confirm('Erase ' + name + "'s progress in EVERY app? This cannot be undone.")) return;
-    if (!confirm('Really wipe every app for ' + name + '? Last chance.')) return;
-    var n = ProgressAdmin.resetAll(name);
-    _afterProgressChange('Reset ' + n + ' apps for ' + name + '.');
+    _ask({
+      title: 'Erase every app for ' + name + '?',
+      message: 'Every app\u2019s saved progress for ' + name + ' will be wiped. This cannot be undone.',
+      confirmLabel: 'Erase everything',
+      danger: true
+    }, function() {
+      _ask({
+        title: 'Last chance',
+        message: 'Really wipe every app for ' + name + '?',
+        confirmLabel: 'Yes, wipe it all',
+        danger: true
+      }, function() {
+        var n = ProgressAdmin.resetAll(name);
+        _afterProgressChange('Reset ' + n + ' apps for ' + name + '.');
+      });
+    });
+  }
+
+  // Ask, then act. Falls back to window.confirm only where ZsDialog is
+  // missing — the in-page dialog exists because some iOS webviews never
+  // show the native one, and there confirm() answers "no" on its own.
+  function _ask(opts, onYes) {
+    if (typeof ZsDialog === 'undefined') {
+      if (window.confirm(opts.title + (opts.message ? '\n\n' + opts.message : ''))) onYes();
+      return;
+    }
+    ZsDialog.confirm(opts).then(function(yes) { if (yes) onYes(); });
+  }
+
+  // Say something to the parent without a native alert(), for the same
+  // reason _ask exists.
+  function _say(message) {
+    if (typeof ZsDialog !== 'undefined') ZsDialog.toast(message);
+    else window.alert(message);
   }
 
   function _afterProgressChange(message) {
@@ -1654,7 +1701,7 @@
     if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
       try { ActivityLog.log('Parents Corner', '📈', message); } catch (e) {}
     }
-    alert(message);
+    _say(message);
   }
 
   function renderParentsCorner() {
@@ -1744,10 +1791,15 @@
   }
 
   function resetKidTimer(name) {
-    if (confirm('Reset timer for ' + name + '?')) {
+    _ask({
+      title: 'Reset today\u2019s timer for ' + name + '?',
+      message: 'Their screen time for today goes back to zero.',
+      confirmLabel: 'Reset'
+    }, function() {
       TimerManager.reset(name);
       renderParentsCorner();
-    }
+      if (typeof ZsDialog !== 'undefined') ZsDialog.toast('Timer reset for ' + name + '.');
+    });
   }
   function addKidBonus(name, mins) {
     TimerManager.addBonusForKid(name, mins);
@@ -1951,7 +2003,7 @@
     if (!name) return;
     var tpl = Routines.getTemplates(name)[which];
     if (!tpl[j]) return;
-    if (tpl.length <= 1) { alert('Keep at least one task in this routine.'); return; }
+    if (tpl.length <= 1) { _say('Keep at least one task in this routine.'); return; }
     tpl.splice(j, 1);
     Routines.setTemplate(which, tpl, name);
     renderParentsCorner();
@@ -1962,17 +2014,26 @@
     var profiles = getProfiles();
     var name = profiles[idx] && profiles[idx].name;
     if (!name) return;
-    if (!confirm('Restore the ' + (which === 'morning' ? 'morning' : 'night') + ' routine to defaults?')) return;
-    Routines.resetTemplate(which, name);
-    renderParentsCorner();
+    _ask({
+      title: 'Restore the ' + (which === 'morning' ? 'morning' : 'night') + ' routine?',
+      message: 'The tasks go back to the defaults for ' + name + '.',
+      confirmLabel: 'Restore'
+    }, function() {
+      Routines.resetTemplate(which, name);
+      renderParentsCorner();
+    });
   }
 
   function updateParentPin() {
     var input = document.getElementById('new-parent-pin');
-    if (input && input.value.length === 4 && typeof saveParentPin === 'function') {
-      saveParentPin(input.value);
-      alert('PIN updated! ✅');
+    if (!input) return;
+    if (input.value.length !== 4 || !/^\d{4}$/.test(input.value)) {
+      _say('The PIN needs to be 4 digits.');
+      return;
     }
+    if (typeof saveParentPin !== 'function') return;
+    saveParentPin(input.value);
+    _say('PIN updated! ✅');
   }
 
   function renderAppCards(user) {

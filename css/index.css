@@ -994,6 +994,93 @@
     .pk-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .pk-toggle input { width: 18px; height: 18px; accent-color: var(--purple); }
 
+    /* ── Layering ──
+       .dash-overlay is 999 and .modal-overlay 1000. The Progress
+       Manager opens from inside Parents Corner, so it has to sit above
+       it — with both at 999 it was DOM order deciding, and the panel
+       rendered behind the one that opened it. Its own confirm dialog
+       sits above everything. */
+    #progress-overlay { z-index: 1000; }
+
+    /* In-page confirm + toast (js/dialog.js), standing in for
+       window.confirm / window.alert, which some iOS webviews never
+       show. */
+    .zsd-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.15s ease-out;
+    }
+    .zsd-panel {
+      background: var(--bg-surface);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 400px;
+      animation: popIn 0.2s ease-out;
+    }
+    .zsd-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .zsd-message {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+    .zsd-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+    .zsd-btn {
+      padding: 11px 20px;
+      border-radius: var(--radius-xs);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      /* Comfortable for a kid-sized tap, and for a parent in a hurry. */
+      min-width: 96px;
+      min-height: 44px;
+    }
+    .zsd-btn:hover { border-color: var(--purple); }
+    .zsd-ok { background: var(--purple); border-color: var(--purple); color: #1A1A3E; }
+    .zsd-ok.zsd-danger { background: #EF4444; border-color: #EF4444; color: #fff; }
+
+    .zsd-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translate(-50%, 16px);
+      z-index: 1100;
+      max-width: min(90vw, 460px);
+      padding: 13px 20px;
+      border-radius: 999px;
+      background: rgba(20,20,32,0.96);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .zsd-toast--on { opacity: 1; transform: translate(-50%, 0); }
+
     /* Progress Manager (Parents Corner → Set / Reset Progress) */
     .pg-intro {
       font-size: 0.85rem; color: var(--text-muted);
