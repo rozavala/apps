@@ -390,6 +390,14 @@
     </div>
   </div>
 
+  <!-- Progress Manager Overlay -->
+  <div class="dash-overlay" id="progress-overlay" onclick="if(event.target===this)closeProgressManager()">
+    <div class="dash-panel">
+      <h2>📈 Progress Manager <button class="dash-close" aria-label="Close Progress Manager" onclick="closeProgressManager()">✕</button></h2>
+      <div id="progress-content"></div>
+    </div>
+  </div>
+
   <!-- Parents Corner Overlay -->
   <div class="dash-overlay" id="parents-overlay" onclick="if(event.target===this)closeParentsCorner()">
     <div class="dash-panel">
@@ -505,6 +513,8 @@
   <script src="js/routines.js?v=3"></script>
   <script src="js/family-calendar.js?v=3"></script>
   <script src="js/pwa.js?v=1"></script>
-  <script src="js/index.js?v=6"></script>
+  <script src="js/progress-catalog.js?v=1"></script>
+  <script src="js/progress-admin.js?v=1"></script>
+  <script src="js/index.js?v=7"></script>
 </body>
 </html>

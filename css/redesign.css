@@ -263,6 +263,20 @@ body::before { display: none !important; }
 .a11y-scale-btn { background:#f4f3f8; border:1px solid #e2def0; color:var(--text-primary); }
 .a11y-scale-btn.active { background:rgba(109,40,217,0.14); border-color:#6D28D9; color:#6D28D9; }
 
+/* Progress Manager — white app cards on the grey panel */
+.pg-intro, .pg-status, .pg-note, .pg-label { color: var(--text-muted); }
+.pg-status strong { color: var(--text-primary); }
+.pg-kid-tab { background:#ffffff; border:1px solid var(--border-subtle); color:#3a3850; }
+.pg-kid-tab:hover { border-color:#c9c5e0; color: var(--text-primary); }
+.pg-kid-tab.active { background:#4338CA; border-color:#4338CA; color:#ffffff; }
+.pg-app-card { background:#ffffff; border:1px solid var(--border-subtle); box-shadow:var(--mod-shadow); }
+.pg-app-name { color: var(--text-primary); }
+.pg-app-name:hover { color: var(--ink-title); }
+.pg-select { background:#ffffff; color: var(--text-primary); border:1px solid var(--border-subtle); }
+.pg-reset-btn { background:#fdf2f2; border:1px solid #f0cccc; color:#B91C1C; }
+.pg-reset-btn:hover:not(:disabled) { background:#fbe3e3; border-color:#e5b0b0; }
+.pg-danger { border-top-color: var(--border-subtle); }
+
 /* ================================================================
    FAMILY WALL  (family.html) — light bento
    ================================================================ */

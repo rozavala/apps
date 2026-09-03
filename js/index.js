@@ -134,6 +134,16 @@
     renderParentsCorner();
   };
   window.updateParentPin = function() { updateParentPin(); };
+  window.openProgressManager = function() { openProgressManager(); };
+  window.closeProgressManager = function() {
+    var p = document.getElementById('progress-overlay');
+    if (p) p.classList.remove('active');
+  };
+  window.selectProgressKid = function(name) { selectProgressKid(name); };
+  window.applyProgressPosition = function(appId) { applyProgressPosition(appId); };
+  window.completeProgressApp = function(appId) { completeProgressApp(appId); };
+  window.resetProgressApp = function(appId) { resetProgressApp(appId); };
+  window.resetProgressAllApps = function() { resetProgressAllApps(); };
   window.renderChoresList = function() { renderChoresList(); };
   window.completeChore = function(id) { if (typeof ChoresManager !== 'undefined') ChoresManager.completeChore(id); };
 
@@ -1456,6 +1466,197 @@
     }
   }
 
+  /* ──────────────────────────────────────────────────────────────
+     PROGRESS MANAGER
+
+     Parents Corner → "Set / Reset Progress". Two jobs:
+
+       • put a kid at a specific point in an app — pick the song
+         they're practising and everything before it counts as done;
+       • wipe an app (or every app) for a kid whose saved progress
+         was lost, or who is starting over.
+
+     All the storage logic lives in js/progress-admin.js; this is the
+     screen on top of it.
+     ────────────────────────────────────────────────────────────── */
+
+  var _progressKid = null;
+
+  function _progressKidName() {
+    var profiles = getProfiles();
+    if (!profiles.length) return null;
+    for (var i = 0; i < profiles.length; i++) {
+      if (profiles[i].name === _progressKid) return _progressKid;
+    }
+    return profiles[0].name;
+  }
+
+  function openProgressManager() {
+    _progressKid = _progressKidName();
+    renderProgressManager();
+    var o = document.getElementById('progress-overlay');
+    if (o) o.classList.add('active');
+  }
+
+  function selectProgressKid(name) {
+    _progressKid = name;
+    renderProgressManager();
+  }
+
+  function _progressAppRow(state) {
+    var app = state.app;
+    var body;
+
+    if (state.mode === 'reset') {
+      body =
+        '<div class="pg-note">' +
+          (state.hasData
+            ? 'Stars and history are a running tally here, so there is no place to set — only a reset.'
+            : 'Nothing saved yet.') +
+        '</div>';
+    } else if (!state.total) {
+      body = '<div class="pg-note">No lesson list available.</div>';
+    } else {
+      var done = state.doneCount;
+      var current = state.current;
+      var options = '';
+      var group = null;
+      state.units.forEach(function(u, idx) {
+        if (u.g !== group) {
+          if (group !== null) options += '</optgroup>';
+          group = u.g;
+          options += '<optgroup label="' + escHtml(group) + '">';
+        }
+        options += '<option value="' + idx + '"' + (idx === state.index ? ' selected' : '') + '>' +
+                     escHtml(u.l) +
+                   '</option>';
+      });
+      if (group !== null) options += '</optgroup>';
+
+      body =
+        '<div class="pg-status">' +
+          (current
+            ? 'Working on <strong>' + escHtml(current.l) + '</strong> — ' + done + ' of ' + state.total + ' done'
+            : 'All ' + state.total + ' done 🎉') +
+        '</div>' +
+        '<label class="pg-label" for="pg-sel-' + app.id + '">' +
+          'Set the ' + app.noun + ' they are on (everything before it counts as done):' +
+        '</label>' +
+        '<select class="pg-select" id="pg-sel-' + app.id + '">' + options + '</select>' +
+        '<div class="pg-actions">' +
+          '<button class="hub-action-btn" onclick="applyProgressPosition(\'' + app.id + '\')">Set</button>' +
+          '<button class="hub-action-btn secondary" onclick="completeProgressApp(\'' + app.id + '\')">Mark all done</button>' +
+        '</div>';
+    }
+
+    return '<div class="pg-app-card">' +
+        '<div class="pg-app-head">' +
+          '<span class="pg-app-icon">' + app.icon + '</span>' +
+          '<a class="pg-app-name" href="' + app.href + '">' + escHtml(app.label) + '</a>' +
+          '<button class="pg-reset-btn" onclick="resetProgressApp(\'' + app.id + '\')"' +
+                  (state.hasData ? '' : ' disabled') + '>Reset</button>' +
+        '</div>' +
+        body +
+      '</div>';
+  }
+
+  function renderProgressManager() {
+    var container = document.getElementById('progress-content');
+    if (!container) return;
+
+    if (typeof ProgressAdmin === 'undefined') {
+      container.innerHTML = '<p style="color:var(--text-muted);">Progress Manager could not load.</p>';
+      return;
+    }
+
+    var profiles = getProfiles();
+    if (!profiles.length) {
+      container.innerHTML = '<p style="color:var(--text-muted);">Add a player first.</p>';
+      return;
+    }
+
+    var name = _progressKidName();
+    _progressKid = name;
+
+    var tabs = profiles.map(function(p) {
+      return '<button class="pg-kid-tab' + (p.name === name ? ' active' : '') + '" ' +
+                'onclick="selectProgressKid(' + escHtml(JSON.stringify(p.name)) + ')">' +
+               escHtml(p.avatar) + ' ' + escHtml(p.name) +
+             '</button>';
+    }).join('');
+
+    var rows = ProgressAdmin.summary(name).map(_progressAppRow).join('');
+
+    container.innerHTML =
+      '<p class="pg-intro">' +
+        'Pick where <strong>' + escHtml(name) + '</strong> is in each app. Handy when a device was ' +
+        'wiped, or when they already play a piece the app has not seen them finish.' +
+      '</p>' +
+      '<div class="pg-kid-tabs">' + tabs + '</div>' +
+      '<div class="pg-app-list">' + rows + '</div>' +
+      '<div class="pg-danger">' +
+        '<button class="pg-reset-btn wide" onclick="resetProgressAllApps()">' +
+          '⚠️ Reset every app for ' + escHtml(name) +
+        '</button>' +
+      '</div>';
+  }
+
+  function applyProgressPosition(appId) {
+    var name = _progressKidName();
+    var sel = document.getElementById('pg-sel-' + appId);
+    if (!name || !sel) return;
+    var idx = parseInt(sel.value, 10);
+    var app = ProgressAdmin.getApp(appId);
+    var units = ProgressAdmin.unitsFor(app);
+    var label = units[idx] ? units[idx].l : '';
+    if (!confirm('Set ' + name + ' to "' + label + '" in ' + app.label + '?\n\n' +
+                 'The ' + idx + ' ' + app.noun + (idx === 1 ? '' : 's') + ' before it will count as done, ' +
+                 'and anything after it will not.')) return;
+    ProgressAdmin.setPosition(name, appId, idx);
+    _afterProgressChange(app.label + ' set to "' + label + '" for ' + name + '.');
+  }
+
+  function completeProgressApp(appId) {
+    var name = _progressKidName();
+    var app = ProgressAdmin.getApp(appId);
+    if (!name || !app) return;
+    var total = ProgressAdmin.unitsFor(app).length;
+    if (!confirm('Mark all ' + total + ' ' + app.noun + 's in ' + app.label + ' as done for ' + name + '?')) return;
+    ProgressAdmin.setPosition(name, appId, total);
+    _afterProgressChange(app.label + ' marked complete for ' + name + '.');
+  }
+
+  function resetProgressApp(appId) {
+    var name = _progressKidName();
+    var app = ProgressAdmin.getApp(appId);
+    if (!name || !app) return;
+    if (!confirm('Erase ' + name + "'s progress in " + app.label + '? This cannot be undone.')) return;
+    ProgressAdmin.reset(name, appId);
+    _afterProgressChange(app.label + ' reset for ' + name + '.');
+  }
+
+  function resetProgressAllApps() {
+    var name = _progressKidName();
+    if (!name) return;
+    if (!confirm('Erase ' + name + "'s progress in EVERY app? This cannot be undone.")) return;
+    if (!confirm('Really wipe every app for ' + name + '? Last chance.')) return;
+    var n = ProgressAdmin.resetAll(name);
+    _afterProgressChange('Reset ' + n + ' apps for ' + name + '.');
+  }
+
+  function _afterProgressChange(message) {
+    renderProgressManager();
+    // The hub's own stat cards read the same storage, so refresh them.
+    try {
+      var user = getActiveUser();
+      if (user) updateStatsCards(user);
+    } catch (e) {}
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      try { ActivityLog.log('Parents Corner', '📈', message); } catch (e) {}
+    }
+    alert(message);
+  }
+
   function renderParentsCorner() {
     if (typeof Debug !== 'undefined') Debug.log('Opening Parents Corner...');
     var profiles = getProfiles();
@@ -1469,6 +1670,9 @@
           '<input type="checkbox" ' + (isPaused ? 'checked' : '') + ' onchange="toggleAllTimers(this.checked)">' +
           ' ⏸ Pause All Timers' +
         '</label>' +
+        '<button class="hub-action-btn secondary" style="margin:0;" onclick="openProgressManager()">' +
+          '📈 Set / Reset Progress' +
+        '</button>' +
         '<div style="display:flex; gap:12px; align-items:center; justify-content:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">' +
           '<span style="font-size:0.9rem; font-weight:700;">Parent PIN:</span>' +
           '<input type="password" id="new-parent-pin" maxlength="4" value="' + getParentPin() + '" ' +
