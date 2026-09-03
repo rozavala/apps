@@ -40,7 +40,8 @@ test.describe('legacy storage keys', () => {
 
     for (const r of results) {
       expect(r.moved, r.prefix + ' reported a move').toBe(true);
-      expect(r.adopted, r.prefix + ' carries the old progress').toEqual({ totalStars: 7 });
+      // (plus a fresh _syncedAt, so a stale cloud copy cannot outrank it)
+      expect(r.adopted, r.prefix + ' carries the old progress').toMatchObject({ totalStars: 7 });
       expect(r.legacyGone, r.prefix + ' cleaned up the old key').toBe(true);
     }
   });
