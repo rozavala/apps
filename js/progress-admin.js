@@ -42,7 +42,15 @@ var ProgressAdmin = (function() {
 
   function _storageKey(app, name) {
     var k = kidKey(name);
-    return k ? app.prefix + k : null;
+    if (!k) return null;
+    // Four of these apps used to save to a bare, un-prefixed key. A
+    // parent may well open Parents Corner before the kid next opens
+    // the app, so adopt the old blob here too rather than showing
+    // "Nothing saved yet" over a kid's real progress.
+    if (app.legacyPrefix && typeof adoptLegacyAppKey === 'function') {
+      adoptLegacyAppKey(app.legacyPrefix, app.prefix, name);
+    }
+    return app.prefix + k;
   }
 
   function _read(app, name) {
@@ -184,7 +192,7 @@ var ProgressAdmin = (function() {
 
     {
       id: 'story', label: 'Story Explorer', icon: '📚', href: 'story-explorer.html',
-      prefix: 'zs_story_', catalog: 'story', mode: 'sequence', noun: 'story',
+      prefix: 'zs_story_', legacyPrefix: 'story', catalog: 'story', mode: 'sequence', noun: 'story',
       done: function(data, u) { return (data.storiesRead || []).indexOf(u.i) !== -1; },
       apply: function(data, units, count) {
         data.storiesRead = _idsUpTo(units, count);
@@ -235,7 +243,7 @@ var ProgressAdmin = (function() {
 
     {
       id: 'lab', label: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html',
-      prefix: 'zs_lab_', catalog: 'lab', mode: 'sequence', noun: 'lab',
+      prefix: 'zs_lab_', legacyPrefix: 'lab', catalog: 'lab', mode: 'sequence', noun: 'lab',
       done: function(data, u) { return !!(data[u.i] && data[u.i].stars > 0); },
       apply: function(data, units, count) {
         _applyMap(data, units, count, function(prev, u) {
@@ -283,7 +291,7 @@ var ProgressAdmin = (function() {
 
     {
       id: 'world', label: 'World Explorer', icon: '🌍', href: 'world-explorer.html',
-      prefix: 'zs_world_', catalog: 'world', mode: 'sequence', noun: 'country',
+      prefix: 'zs_world_', legacyPrefix: 'world', catalog: 'world', mode: 'sequence', noun: 'country',
       done: function(data, u) { return (data.visited || []).indexOf(u.i) !== -1; },
       apply: function(data, units, count) {
         data.visited = _idsUpTo(units, count);
@@ -311,7 +319,7 @@ var ProgressAdmin = (function() {
     { id: 'atlas',    label: 'World Atlas',      icon: '🗺️',  href: 'world-atlas.html',      prefix: 'zs_atlas_',    mode: 'reset' },
     { id: 'money',    label: 'Money Master',     icon: '💰',  href: 'money-master.html',     prefix: 'zs_money_',    mode: 'reset' },
     { id: 'invest',   label: 'Invest Quest',     icon: '📈',  href: 'invest-quest.html',     prefix: 'zs_invest_',   mode: 'reset' },
-    { id: 'quest',    label: 'Quest Adventure',  icon: '🧗',  href: 'quest-adventure.html',  prefix: 'zs_quest_',    mode: 'reset' },
+    { id: 'quest',    label: 'Quest Adventure',  icon: '🧗',  href: 'quest-adventure.html',  prefix: 'zs_quest_',    mode: 'reset', legacyPrefix: 'quest' },
     { id: 'bmcheck',  label: 'Book & Movie Check', icon: '🔍', href: 'book-movie-check.html', prefix: 'zs_bmcheck_', mode: 'reset' },
     { id: 'worldcup', label: 'World Cup 2026',   icon: '🏆',  href: 'world-cup.html',        prefix: 'zs_worldcup_', mode: 'reset' },
     { id: 'sports',   label: 'Sports Arena',     icon: '🏓',  href: 'sports-arena.html',     prefix: 'zs_sports_',   mode: 'reset' },

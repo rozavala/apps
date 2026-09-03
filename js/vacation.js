@@ -739,7 +739,11 @@ var Vacation = (function() {
 
   // ── Interactive quiz (per-kid best score, synced) ──
   function _quizKey() {
-    return typeof getUserAppKey === 'function' ? getUserAppKey('vacquiz') : null;
+    if (typeof getUserAppKey !== 'function') return null;
+    // Saves used to land on a bare `vacquiz<kid>` key — see
+    // adoptLegacyAppKey in auth.js for what that cost.
+    if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('vacquiz', 'zs_vacquiz_');
+    return getUserAppKey('zs_vacquiz_');
   }
   function _quizLoad() {
     try {

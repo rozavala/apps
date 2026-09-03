@@ -1,7 +1,7 @@
 /* ================================================================
    STORY EXPLORER — story-explorer.js
    Reading library with comprehension and vocabulary.
-   Storage key: zs_story_[username] via getUserAppKey('story')
+   Storage key: zs_story_[username] via getUserAppKey('zs_story_')
    ================================================================ */
 
 const StoryExplorer = (() => {
@@ -722,7 +722,13 @@ const StoryExplorer = (() => {
   let currentTier = 'cadet';
 
   // ── Storage ──
-  function _key() { return typeof getUserAppKey === 'function' ? getUserAppKey('story') : null; }
+  function _key() {
+    if (typeof getUserAppKey !== 'function') return null;
+    // Saves used to land on a bare `story<kid>` key — see
+    // adoptLegacyAppKey in auth.js for what that cost.
+    if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('story', 'zs_story_');
+    return getUserAppKey('zs_story_');
+  }
   function _load() { try { return JSON.parse(localStorage.getItem(_key())) || {}; } catch { return {}; } }
   function _save(data) { 
     const k = _key(); 

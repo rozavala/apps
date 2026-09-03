@@ -2,7 +2,7 @@
    LAB EXPLORER — lab-explorer.js
    Virtual science lab for kids.
    Requires: auth.js, sounds.js, timer.js, learning-checks.js
-   Storage key: zs_lab_[username] via getUserAppKey('lab')
+   Storage key: zs_lab_[username] via getUserAppKey('zs_lab_')
    ================================================================ */
 
 const LabExplorer = (() => {
@@ -160,7 +160,11 @@ const LabExplorer = (() => {
 
   // ── Storage ──
   function _key() {
-    return typeof getUserAppKey === 'function' ? getUserAppKey('lab') : null;
+    if (typeof getUserAppKey !== 'function') return null;
+    // Saves used to land on a bare `lab<kid>` key — see
+    // adoptLegacyAppKey in auth.js for what that cost.
+    if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('lab', 'zs_lab_');
+    return getUserAppKey('zs_lab_');
   }
 
   function _load() {

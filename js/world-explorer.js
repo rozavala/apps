@@ -1,7 +1,7 @@
 /* ================================================================
    WORLD EXPLORER — world-explorer.js
    Interactive geography with SVG maps and travel quests.
-   Storage key: zs_world_[username] via getUserAppKey('world')
+   Storage key: zs_world_[username] via getUserAppKey('zs_world_')
    ================================================================ */
 
 const WorldExplorer = (() => {
@@ -721,7 +721,13 @@ const WorldExplorer = (() => {
   let quizCountryId = null;
 
   // ── Storage ──
-  function _key() { return typeof getUserAppKey === 'function' ? getUserAppKey('world') : null; }
+  function _key() {
+    if (typeof getUserAppKey !== 'function') return null;
+    // Saves used to land on a bare `world<kid>` key — see
+    // adoptLegacyAppKey in auth.js for what that cost.
+    if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('world', 'zs_world_');
+    return getUserAppKey('zs_world_');
+  }
   function _load() { 
     const k = _key();
     if (!k) return {};
