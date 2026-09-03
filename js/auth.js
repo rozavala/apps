@@ -166,6 +166,8 @@ function getUserAppKey(prefix) {
 // case costs one localStorage lookup that finds nothing, and it only
 // moves data when the new key holds nothing worth keeping, so a re-run
 // can never overwrite real progress.
+var LEGACY_ARCHIVE_PREFIX = 'zs_premigration_';
+
 function adoptLegacyAppKey(legacyPrefix, prefix, userName) {
   var name = userName;
   if (!name) {
@@ -182,9 +184,39 @@ function adoptLegacyAppKey(legacyPrefix, prefix, userName) {
     if (!legacy) return false;
     if (!_isEmptyRecord(localStorage.getItem(prefix + suffix))) return false;
 
-    localStorage.setItem(prefix + suffix, legacy);
+    // Stamp the recovered blob as fresh before storing it. A legacy key
+    // was never in CloudSync's KEY_MAP, so what it holds has never been
+    // stamped — and CloudSync.pull keeps whichever side is newer, with
+    // an unstamped record reading as epoch 0. That let a stale server
+    // copy overwrite the progress we just rescued, including the empty
+    // {_syncedAt} husk a Progress Manager reset had pushed up.
+    var stamped = legacy;
+    try {
+      var parsed = JSON.parse(legacy);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        parsed._syncedAt = Date.now();
+        stamped = JSON.stringify(parsed);
+      }
+    } catch (e) { /* not JSON — store it back untouched */ }
+
+    localStorage.setItem(prefix + suffix, stamped);
+
+    // Keep a copy rather than dropping the only one. This migration
+    // moves a kid's real progress; the first version of it deleted the
+    // legacy key and a stale cloud pull then overwrote the new one,
+    // which lost the lot. The archive is never read back automatically
+    // — restoring it on an empty record would undo a deliberate reset
+    // from Parents Corner — it is here so the data can be recovered by
+    // hand if anything else goes wrong.
+    try { localStorage.setItem(LEGACY_ARCHIVE_PREFIX + legacyKey, legacy); } catch (e) {}
     localStorage.removeItem(legacyKey);
     if (typeof Debug !== 'undefined') Debug.log('[Auth] Adopted ' + legacyKey + ' as ' + prefix + suffix);
+
+    // Replace whatever the server is holding for this app, so the other
+    // devices stop pulling the record this one just superseded.
+    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
+      try { CloudSync.push(prefix + suffix); } catch (e) {}
+    }
     return true;
   } catch (e) {
     if (typeof Debug !== 'undefined') Debug.error('[Auth] Key adoption failed', legacyKey + ': ' + e.message);
