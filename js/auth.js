@@ -150,6 +150,64 @@ function getUserAppKey(prefix) {
   return prefix + u.name.toLowerCase().replace(/\s+/g, '_');
 }
 
+// ── Legacy un-prefixed storage keys ───────────────────────────────
+//
+// getUserAppKey just concatenates, so getUserAppKey('world') saves to
+// `worlddiego`, not `zs_world_diego`. Five apps shipped that way —
+// World Explorer, Story Explorer, Lab Explorer, Quest Adventure and
+// the vacation quiz — while everything that reads across apps looks
+// for the zs_ form: getPlayerStats below (so their stars never counted
+// toward the Explorer Rank or lit a Trophy Room badge), CloudSync's
+// KEY_MAP (so they never synced between devices), Quest Adventure's
+// own tour goals, and Parents Corner's Progress Manager.
+//
+// The apps now ask for the right prefix and call this on load to carry
+// any old blob across. Cheap and idempotent: memoised per key, and it
+// only moves data when the new key holds nothing worth keeping, so a
+// re-run can never overwrite real progress.
+var _adoptedKeys = {};
+
+function adoptLegacyAppKey(legacyPrefix, prefix, userName) {
+  var name = userName;
+  if (!name) {
+    var u = getActiveUser();
+    name = u ? u.name : null;
+  }
+  if (!name) return false;
+
+  var suffix = name.toLowerCase().replace(/\s+/g, '_');
+  var legacyKey = legacyPrefix + suffix;
+  if (_adoptedKeys[legacyKey]) return false;
+  _adoptedKeys[legacyKey] = true;
+
+  try {
+    var legacy = localStorage.getItem(legacyKey);
+    if (!legacy) return false;
+    if (!_isEmptyRecord(localStorage.getItem(prefix + suffix))) return false;
+
+    localStorage.setItem(prefix + suffix, legacy);
+    localStorage.removeItem(legacyKey);
+    if (typeof Debug !== 'undefined') Debug.log('[Auth] Adopted ' + legacyKey + ' as ' + prefix + suffix);
+    return true;
+  } catch (e) {
+    if (typeof Debug !== 'undefined') Debug.error('[Auth] Key adoption failed', legacyKey + ': ' + e.message);
+    return false;
+  }
+}
+
+// A missing record, or one carrying nothing but sync bookkeeping — the
+// shape Progress Manager's reset leaves behind. Either way there is no
+// progress here to protect.
+function _isEmptyRecord(raw) {
+  if (!raw) return true;
+  try {
+    var d = JSON.parse(raw);
+    if (!d || typeof d !== 'object') return true;
+    var keys = Object.keys(d);
+    return keys.length === 0 || (keys.length === 1 && keys[0] === '_syncedAt');
+  } catch (e) { return false; }
+}
+
 // ── Player Stats ──────────────────────────────────────────────────
 
 function getPlayerStats(userName) {

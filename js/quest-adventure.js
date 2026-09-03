@@ -1,7 +1,7 @@
 /* ================================================================
    QUEST ADVENTURE — quest-adventure.js
    RPG-style adventure map that connects all apps.
-   Storage key: zs_quest_[username] via getUserAppKey('quest')
+   Storage key: zs_quest_[username] via getUserAppKey('zs_quest_')
    Reads (but never writes to) all other app storage keys.
    ================================================================ */
 
@@ -234,7 +234,13 @@ const QuestAdventure = (() => {
   }
 
   // ── Storage ──
-  function _key() { return typeof getUserAppKey === 'function' ? getUserAppKey('quest') : null; }
+  function _key() {
+    if (typeof getUserAppKey !== 'function') return null;
+    // Saves used to land on a bare `quest<kid>` key — see
+    // adoptLegacyAppKey in auth.js for what that cost.
+    if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('quest', 'zs_quest_');
+    return getUserAppKey('zs_quest_');
+  }
   function _load() { try { return JSON.parse(localStorage.getItem(_key())) || {}; } catch { return {}; } }
   function _save(data) { 
     const k = _key(); 
