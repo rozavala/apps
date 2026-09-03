@@ -14,7 +14,8 @@ test.describe('Parents Corner → Progress Manager', () => {
     // mid-test.
     await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20000 });
     await page.waitForFunction(() => !!window.ProgressAdmin);
-    // Accept the confirm() the Set and Reset buttons raise.
+    // Set and Reset now ask through an in-page dialog (js/dialog.js)
+    // rather than window.confirm, which some iOS webviews never show.
     page.on('dialog', d => d.accept());
   });
 
@@ -30,6 +31,7 @@ test.describe('Parents Corner → Progress Manager', () => {
     const target = await page.evaluate(() => window.ZSProgressCatalog.piano[30]);
     await card.locator('select').selectOption('30');
     await card.getByRole('button', { name: 'Set', exact: true }).click();
+    await page.locator('.zsd-overlay').getByRole('button', { name: 'Set' }).click();
 
     await expect(card.locator('.pg-status')).toContainText('30 of');
     await expect(card.locator('.pg-status')).toContainText(target.l);
@@ -74,6 +76,7 @@ test.describe('Parents Corner → Progress Manager', () => {
 
     const piano = page.locator('.pg-app-card').filter({ hasText: 'Little Maestro' });
     await piano.getByRole('button', { name: 'Reset' }).click();
+    await page.locator('.zsd-overlay').getByRole('button', { name: 'Erase' }).click();
 
     await expect(piano.locator('.pg-status')).toContainText('0 of');
     const cadet = page.locator('.pg-app-card').filter({ hasText: 'Code Cadet' });
