@@ -785,6 +785,25 @@ body {
 .fw-re-del:hover { border-color: var(--fw-red); color: var(--fw-red); }
 .fw-re-add { margin-top: 10px; }
 .fw-re-add-btn { background: rgba(167,139,250,0.16); border-color: var(--fw-accent); }
+.fw-re-apply {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 12px;
+  background: transparent;
+  border: 1px dashed var(--fw-border);
+  border-radius: 10px;
+  color: var(--fw-muted);
+  font-family: var(--font-body, sans-serif);
+  font-weight: 800; font-size: 0.8rem;
+  cursor: pointer;
+}
+.fw-re-apply:hover { color: var(--fw-text); border-color: var(--fw-accent); }
+.fw-re-note {
+  margin-top: 6px;
+  color: var(--fw-green);
+  font-weight: 800; font-size: 0.78rem;
+}
 
 .fw-modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
 .fw-btn {

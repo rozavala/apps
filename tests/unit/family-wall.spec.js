@@ -110,4 +110,52 @@ test.describe('Family Wall — routines, order and Summer Quest', () => {
     expect(tpls.mid).toContain('Feed the dog 🐶');
     expect(tpls.eldest).not.toContain('Feed the dog 🐶');
   });
+  test('routines.js: ticks for tasks no longer on the list stop counting', async ({ page }) => {
+    const status = await page.evaluate(() => {
+      // Tick every default afternoon task, then replace the list.
+      window.Routines.getTemplates('Young').afternoon.forEach(function(it) {
+        window.Routines.toggleFor('Young', 'afternoon', it.id);
+      });
+      window.Routines.setTemplate('afternoon', [
+        { id: 'walk_dog', label: 'Walk the dog' },
+        { id: 'read_pm', label: 'Read' }
+      ], 'Young');
+      const s = window.Routines.getStatusFor('Young').afternoon;
+      return { doneCount: s.doneCount, total: s.total, complete: s.complete };
+    });
+    // The five stale ticks must not read as 5/2 done.
+    expect(status.doneCount).toBe(0);
+    expect(status.total).toBe(2);
+    expect(status.complete).toBe(false);
+  });
+
+  test('a parent can copy one list to every other kid', async ({ page }) => {
+    page.on('dialog', (d) => d.accept());
+
+    await page.locator('.fw-r-kid', { hasText: 'Eldest' }).locator('.fw-r-edit').click();
+    await page.locator('#fw-pin-input').fill('1234');
+    await page.locator('#fw-pin-modal button[type="submit"]').click();
+
+    await page.locator('#fw-re-add-afternoon').fill('Walk the dog 🐶');
+    await page.locator('.fw-re-block', { hasText: 'Afternoon' }).locator('.fw-re-add-btn').click();
+    await page.locator('.fw-re-block', { hasText: 'Afternoon' }).locator('.fw-re-apply').click();
+
+    await expect(page.locator('.fw-re-note')).toContainText('Copied to Mid, Young');
+
+    const after = await page.evaluate(() => {
+      const labels = (kid, which) =>
+        window.Routines.getTemplates(kid)[which].map(function(i) { return i.label; });
+      return {
+        eldestPm: labels('Eldest', 'afternoon'),
+        midPm: labels('Mid', 'afternoon'),
+        youngPm: labels('Young', 'afternoon'),
+        // Only the afternoon list was copied — mornings are untouched.
+        midAm: labels('Mid', 'morning')
+      };
+    });
+    expect(after.midPm).toEqual(after.eldestPm);
+    expect(after.youngPm).toEqual(after.eldestPm);
+    expect(after.midPm).toContain('Walk the dog 🐶');
+    expect(after.midAm).not.toContain('Walk the dog 🐶');
+  });
 });

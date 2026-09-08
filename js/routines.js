@@ -35,29 +35,42 @@ var Routines = (function() {
     evening:   { icon: '🌙', short: 'Night',     title: 'Night routine',     greeting: 'Good night' }
   };
 
-  // Default morning/afternoon/night templates. Kid-authored text only.
-  // Labels are English by default; parents can edit (and translate)
-  // via the Routines editor in Parents Corner or on the Family Wall.
+  // Default morning/afternoon/night templates, transcribed from the
+  // family's paper checklists. Labels are deliberately short — they
+  // render as chips in a row per kid on the Family Wall, and long text
+  // wraps the grid. Parents edit (and translate) them per kid via the
+  // Routines editor in Parents Corner or on the Family Wall; "↻ Default"
+  // brings a kid back to this list.
   var DEFAULTS = {
     morning: [
+      { id: 'dressed',   label: 'Dressed + shoes 👟' },
+      { id: 'breakfast', label: 'Breakfast 🥣' },
       { id: 'bed',       label: 'Make the bed 🛏️' },
-      { id: 'teeth',     label: 'Brush teeth 🦷' },
-      { id: 'dressed',   label: 'Get dressed 👕' },
-      { id: 'breakfast', label: 'Eat breakfast 🥣' },
-      { id: 'backpack',  label: 'Pack the backpack 🎒' }
+      { id: 'tidy_am',   label: 'Tidy the room 🧸' },
+      { id: 'backpack',  label: 'Lunchbox + water 🎒' },
+      { id: 'wash_am',   label: 'Teeth, face, hair 🦷' },
+      { id: 'lotion_am', label: 'Lotion 🧴' },
+      { id: 'ready',     label: 'Ready by 7:45 ⏰' }
     ],
     afternoon: [
-      { id: 'snack',      label: 'Snack + clear the plate 🍎' },
+      { id: 'hands',      label: 'Wash hands 🧼' },
+      { id: 'unpack',     label: 'Unpack backpack 🎒' },
+      { id: 'tea',        label: 'Tea time 🫖' },
       { id: 'homework',   label: 'Homework ✏️' },
-      { id: 'practice',   label: 'Practice music 🎹' },
-      { id: 'outside',    label: 'Play outside 🏃' },
-      { id: 'unpack',     label: 'Empty the backpack 🎒' }
+      { id: 'piano',      label: 'Piano 20 min 🎹' },
+      { id: 'football',   label: 'Football kit ⚽' },
+      { id: 'clothes_pm', label: 'Clothes away 👕' },
+      { id: 'lotion_pm',  label: 'Lotion 🧴' }
     ],
     evening: [
-      { id: 'tidy',      label: 'Tidy the room 🧸' },
-      { id: 'laundry',   label: 'Put laundry away 🧦' },
-      { id: 'teeth_pm',  label: 'Brush teeth 🦷' },
-      { id: 'read',      label: 'Read for a bit 📖' }
+      { id: 'dinner',   label: 'Dinner 🍽️' },
+      { id: 'table',    label: 'Clear the table 🧽' },
+      { id: 'shower',   label: 'Shower 🚿' },
+      { id: 'laundry',  label: 'Laundry basket 🧺' },
+      { id: 'towel',    label: 'Towel on chair 🪑' },
+      { id: 'teeth_pm', label: 'Teeth + floss 🦷' },
+      { id: 'cleats',   label: 'Cleats away ⚽' },
+      { id: 'read',     label: 'Read in bed 📖' }
     ]
   };
 
@@ -150,23 +163,32 @@ var Routines = (function() {
 
   // One routine's slice of the status object: the items with their
   // done flags, plus the counts the progress bars need.
+  //
+  // Only ticks whose id is still in the template count. Editing a list
+  // part-way through the day (or copying one kid's list to everyone)
+  // strands the ids of tasks that are gone; counting those would show
+  // "5 / 3" and hand out a streak nobody earned.
   function _block(data, day, which) {
     var tpl = _getTemplate(data, which);
     var ticked = day[which] || [];
+    var doneCount = 0;
+    var items = tpl.map(function(c) {
+      var done = ticked.indexOf(c.id) !== -1;
+      if (done) doneCount++;
+      return { id: c.id, label: c.label, done: done };
+    });
     return {
-      items: tpl.map(function(c) {
-        return { id: c.id, label: c.label, done: ticked.indexOf(c.id) !== -1 };
-      }),
-      doneCount: ticked.length,
+      items: items,
+      doneCount: doneCount,
       total: tpl.length,
-      complete: ticked.length >= tpl.length
+      complete: doneCount >= tpl.length
     };
   }
 
   // A day counts for the streak once every routine is fully ticked.
   function _allComplete(data, day) {
     return ROUTINE_IDS.every(function(which) {
-      return (day[which] || []).length >= _getTemplate(data, which).length;
+      return _block(data, day, which).complete;
     });
   }
 

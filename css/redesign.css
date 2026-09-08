@@ -391,6 +391,9 @@ body { background: var(--fw-bg) !important; }
 .fw-re-reset { color: var(--fw-muted); border-color: var(--fw-border); }
 .fw-re-reset:hover { color: var(--fw-text); border-color:#c9c5e0; }
 .fw-re-block { border-bottom-color: var(--fw-border); }
+.fw-re-apply { border:1px dashed #cfcbe4; color: var(--fw-muted); background:transparent; }
+.fw-re-apply:hover { color: var(--fw-text); border-color:#8b83c7; background:#faf9fd; }
+.fw-re-note { color:#0D9488; }
 .fw-pin-error { color:#B91C1C; }
 .fw-quick button:hover { border-color:#c9c5e0; }
 
