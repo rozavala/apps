@@ -11,6 +11,12 @@ const KIDS = [
 
 test.describe('Family Wall — routines, order and Summer Quest', () => {
 
+  // The app registers a service worker that reloads the page once when a
+  // new version activates. Harmless in the wild, but mid-test it throws
+  // away whatever the test just set up.
+  test.use({ serviceWorkers: 'block' });
+
+
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((kids) => {
       localStorage.setItem('zs_profiles', JSON.stringify(kids));

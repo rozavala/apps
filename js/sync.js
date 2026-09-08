@@ -290,6 +290,45 @@ var CloudSync = (function() {
     return out;
   }
 
+  // Union-merge two routines records. The Family Wall pulls every
+  // kid's routines now (it shows every kid), and a straight
+  // last-write-wins would let a device that has been asleep since
+  // breakfast wipe a morning of ticks the moment it syncs. So the
+  // ticked ids of every day are unioned from both sides; everything
+  // else — templates, streak, lastFullDay — takes the newer side,
+  // except bestStreak, which is a high-water mark and takes the max.
+  function _mergeRoutines(server, local) {
+    var s = server || {};
+    var l = local || {};
+    var localNewer = _parseTs(l._syncedAt) >= _parseTs(s._syncedAt);
+    var out = Object.assign({}, localNewer ? s : l, localNewer ? l : s);
+
+    var days = {};
+    [l.days || {}, s.days || {}].forEach(function(src) {
+      Object.keys(src).forEach(function(dayKey) {
+        var day = src[dayKey];
+        if (!day || typeof day !== 'object') return;
+        if (!days[dayKey]) days[dayKey] = {};
+        Object.keys(day).forEach(function(which) {
+          if (!Array.isArray(day[which])) return;
+          if (!Array.isArray(days[dayKey][which])) days[dayKey][which] = [];
+          var into = days[dayKey][which];
+          day[which].forEach(function(id) {
+            if (into.indexOf(id) === -1) into.push(id);
+          });
+        });
+      });
+    });
+    out.days = days;
+
+    var lBest = typeof l.bestStreak === 'number' ? l.bestStreak : 0;
+    var sBest = typeof s.bestStreak === 'number' ? s.bestStreak : 0;
+    out.bestStreak = Math.max(lBest, sBest);
+
+    out._syncedAt = Math.max(_parseTs(s._syncedAt), _parseTs(l._syncedAt), Date.now());
+    return out;
+  }
+
   state.push = function(key) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var info = _getAppInfo(key);
@@ -407,6 +446,28 @@ var CloudSync = (function() {
         // device whose _syncedAt got out-flanked by a stale push still
         // picks up the missing members / results, and one that has
         // unique local additions keeps them.
+        // Routines union-merge for the same reason, so a pull can
+        // never cost a kid the ticks they already made today.
+        if (info.appName === 'routines') {
+          var mergedRt = _mergeRoutines(serverData, localData);
+          var nextRaw = JSON.stringify(mergedRt);
+          // Only write (and report a change) when it really differs,
+          // so the Family Wall doesn't repaint on every poll.
+          var prevRaw = localStorage.getItem(key);
+          var prevCmp = null, nextCmp = null;
+          try {
+            prevCmp = prevRaw ? JSON.stringify(Object.assign({}, JSON.parse(prevRaw), { _syncedAt: 0 })) : null;
+            nextCmp = JSON.stringify(Object.assign({}, mergedRt, { _syncedAt: 0 }));
+          } catch (e) {}
+          if (prevCmp !== null && prevCmp === nextCmp) return false;
+          try { localStorage.setItem(key, nextRaw); }
+          catch (e) {
+            if (typeof Debug !== 'undefined') Debug.error('[Sync] Quota Exceeded', key + ' size: ' + nextRaw.length);
+            throw e;
+          }
+          return true;
+        }
+
         if (info.appName === 'worldcup') {
           var mergedWc = _mergeWorldCup(serverData, localData);
           try { localStorage.setItem(key, JSON.stringify(mergedWc)); }

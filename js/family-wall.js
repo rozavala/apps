@@ -1147,6 +1147,50 @@ var FamilyWall = (function() {
     return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
   }
 
+  // ---- Keeping every kid's routines in step across devices ----
+  // CloudSync's own boot pulls the household bucket (Summer Quest
+  // included) plus the SIGNED-IN kid's keys. The wall shows every kid,
+  // so it pulls each kid's routines itself — otherwise a tick made on
+  // a parent's phone never reaches the iPad on the fridge, and the
+  // fridge sits open all day without a reload to fix it.
+  var REFRESH_MS = 5 * 60 * 1000;
+  var _refreshTimer = null;
+
+  function _routinesKeyFor(name) {
+    return 'zs_routines_' + String(name).toLowerCase().replace(/\s+/g, '_');
+  }
+
+  function pullRoutines() {
+    if (typeof CloudSync === 'undefined' || !CloudSync.pull || !CloudSync.online) {
+      return Promise.resolve(false);
+    }
+    var profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
+    if (!profiles.length) return Promise.resolve(false);
+    var jobs = profiles.map(function(p) {
+      return CloudSync.pull(_routinesKeyFor(p.name)).catch(function() { return false; });
+    });
+    return Promise.all(jobs).then(function(results) {
+      return results.some(function(changed) { return changed === true; });
+    });
+  }
+
+  function _pullThenPaint() {
+    return pullRoutines().then(function(changed) {
+      if (changed) _paint();
+      return changed;
+    }).catch(function() { return false; });
+  }
+
+  // Poll only while the wall is actually on screen — no point waking
+  // the VPS every five minutes for a backgrounded tab.
+  function _startRefresh() {
+    _stopRefresh();
+    _refreshTimer = setInterval(_pullThenPaint, REFRESH_MS);
+  }
+  function _stopRefresh() {
+    if (_refreshTimer) { clearInterval(_refreshTimer); _refreshTimer = null; }
+  }
+
   // ---- Init ----
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _paint);
@@ -1161,6 +1205,21 @@ var FamilyWall = (function() {
       // Wipe the local weather cache so the new location's forecast loads.
       try { localStorage.removeItem(WEATHER_KEY); } catch (e) {}
       _paint();
+      // The household pull means we're online: catch up on every kid's
+      // routines and keep doing so while the wall stays open.
+      _pullThenPaint();
+      _startRefresh();
+    });
+
+    // Someone walking up to the iPad shouldn't see this morning's stale
+    // ticks: refresh the moment the wall comes back to the foreground.
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        _pullThenPaint();
+        _startRefresh();
+      } else {
+        _stopRefresh();
+      }
     });
     // syncProfiles fires zs:synced when the merged profile list changed.
     // Repaint so things like routinesEnabled toggles reflect immediately.
@@ -1169,6 +1228,7 @@ var FamilyWall = (function() {
 
   return {
     paint: _paint,
+    pullRoutines: pullRoutines,
     loginAs: loginAs,
     toggleRoutine: toggleRoutine,
     pickRoutine: pickRoutine,
