@@ -252,6 +252,10 @@ var FamilyWall = (function() {
   function _paint() {
     var root = document.getElementById('fw-root');
     if (!root) return;
+    // Re-read the weather and calendar conditions: the calendar lands
+    // after the first paint, and a task must not stay hidden because
+    // the first paint asked before the data arrived.
+    if (typeof Routines !== 'undefined' && Routines.refreshConditions) Routines.refreshConditions();
     var profiles = _byAgeDesc((typeof getProfiles === 'function') ? getProfiles() : []);
     var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
 
@@ -908,8 +912,11 @@ var FamilyWall = (function() {
   // zs_routines_<kid>), so what one kid does in the afternoon has
   // nothing to do with what the others do.
   var _editKid = null;
+  // Set by "apply to all"; shown under that block until the next edit.
+  var _applyNote = null;
 
   function editRoutines(name) {
+    _applyNote = null;
     if (!name || typeof Routines === 'undefined' || !Routines.getTemplates) return;
     _requireParent('Enter the parent PIN to edit ' + name + '’s checklists.', function() {
       _editKid = name;
@@ -938,6 +945,9 @@ var FamilyWall = (function() {
       var items = tpls[which] || [];
       var rows = items.map(function(it, j) {
         var id = 'fw-re-' + which + '-' + j;
+        // Tasks that only show on some days, or for some kids, say so —
+        // otherwise a parent wonders why sunscreen vanished.
+        var cond = (Routines.conditionLabel ? Routines.conditionLabel(it) : '');
         return '<div class="fw-re-row">' +
           '<label class="fw-sr-only" for="' + id + '">' + _esc(info.short) + ' task ' + (j + 1) + '</label>' +
           '<input type="text" id="' + id + '" class="fw-re-input" maxlength="80" ' +
@@ -945,9 +955,21 @@ var FamilyWall = (function() {
                  'oninput="FamilyWall.updateRoutineTask(\'' + which + '\', ' + j + ', this.value)" />' +
           '<button type="button" class="fw-re-del" aria-label="Remove this task" ' +
                   'onclick="FamilyWall.removeRoutineTask(\'' + which + '\', ' + j + ')">✕</button>' +
-        '</div>';
+        '</div>' +
+        (cond ? '<div class="fw-re-cond">' + _esc(cond) + '</div>' : '');
       }).join('');
       var addId = 'fw-re-add-' + which;
+      // Only worth offering when there's somebody to copy to.
+      var others = _otherRoutineKids();
+      var applyBlock = others.length
+        ? '<button type="button" class="fw-re-apply" ' +
+                  'onclick="FamilyWall.applyRoutineToAll(\'' + which + '\')">' +
+            '👨‍👩‍👧‍👦 Apply this list to all kids' +
+          '</button>' +
+          (_applyNote && _applyNote.which === which
+            ? '<div class="fw-re-note">' + _esc(_applyNote.text) + '</div>'
+            : '')
+        : '';
       return '<div class="fw-re-block">' +
         '<div class="fw-re-head">' +
           '<span>' + info.icon + ' ' + _esc(info.short) + '</span>' +
@@ -962,12 +984,42 @@ var FamilyWall = (function() {
           '<button type="button" class="fw-re-add-btn" ' +
                   'onclick="FamilyWall.addRoutineTask(\'' + which + '\')">＋ Add</button>' +
         '</div>' +
+        applyBlock +
       '</div>';
     }).join('');
   }
 
+  // Kids with routines enabled, minus the one being edited.
+  function _otherRoutineKids() {
+    var profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
+    return _routineKids(_byAgeDesc(profiles)).filter(function(p) {
+      return p.name !== _editKid;
+    });
+  }
+
+  // Copy the list on screen to every other kid. Nine lists is a lot to
+  // type when the family does the same thing; this makes it one tap
+  // per list, and it stays per-list so one kid can still differ.
+  function applyRoutineToAll(which) {
+    if (!_editKid) return;
+    var others = _otherRoutineKids();
+    if (!others.length) return;
+    var info = _routineLabel(which);
+    var label = info.short.toLowerCase();
+    var names = others.map(function(p) { return p.name; }).join(', ');
+    if (typeof confirm === 'function' &&
+        !confirm('Give ' + names + ' the same ' + label + ' list as ' + _editKid + '?\n\n' +
+                 'Their current ' + label + ' tasks are replaced. Anything they already ' +
+                 'ticked off today stays ticked if the task is still on the list.')) return;
+    var tpl = Routines.getTemplates(_editKid)[which] || [];
+    others.forEach(function(p) { Routines.setTemplate(which, tpl, p.name); });
+    _applyNote = { which: which, text: '✓ Copied to ' + names };
+    _renderRoutineEditor();
+  }
+
   function addRoutineTask(which) {
     if (!_editKid) return;
+    _applyNote = null;
     var input = document.getElementById('fw-re-add-' + which);
     if (!input) return;
     var val = input.value.trim();
@@ -997,6 +1049,7 @@ var FamilyWall = (function() {
 
   function removeRoutineTask(which, j) {
     if (!_editKid) return;
+    _applyNote = null;
     var tpl = Routines.getTemplates(_editKid)[which] || [];
     if (!tpl[j]) return;
     // An empty list falls back to the built-in defaults, so keep one.
@@ -1011,6 +1064,7 @@ var FamilyWall = (function() {
 
   function resetRoutineList(which) {
     if (!_editKid) return;
+    _applyNote = null;
     var info = _routineLabel(which);
     if (typeof confirm === 'function' &&
         !confirm('Restore the default ' + info.short.toLowerCase() + ' tasks for ' + _editKid + '?')) return;
@@ -1124,6 +1178,7 @@ var FamilyWall = (function() {
     updateRoutineTask: updateRoutineTask,
     removeRoutineTask: removeRoutineTask,
     resetRoutineList: resetRoutineList,
+    applyRoutineToAll: applyRoutineToAll,
     submitParentPin: submitParentPin,
     closeParentGate: closeParentGate,
     summerPickKid: summerPickKid,
