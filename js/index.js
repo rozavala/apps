@@ -1921,7 +1921,10 @@
         ' Show routines for ' + escHtml(profile.name) +
       '</label>' +
       (enabled
-        ? block('morning', '🌅', 'Morning') + block('evening', '🌙', 'Night')
+        ? Routines.ROUTINE_IDS.map(function(which) {
+            var info = Routines.labelFor(which);
+            return block(which, info.icon, info.short);
+          }).join('')
         : '<div class="pk-hint" style="font-size:0.82rem; color:var(--text-muted); font-weight:600;">Routines hidden from the hub and Family Wall for ' + escHtml(profile.name) + '.</div>') +
     '</div>';
   }
@@ -1991,6 +1994,10 @@
     if (!name) return;
     var tpl = Routines.getTemplates(name)[which];
     if (!tpl[j]) return;
+    // A blank label is dropped on save, which would shift the rows after
+    // it out from under the indexes already rendered. Wait for real
+    // text; ✕ is how a task gets removed.
+    if (!String(val).trim()) return;
     tpl[j].label = String(val).slice(0, 80);
     Routines.setTemplate(which, tpl, name);
     // Don't re-render on every keystroke — the input is already live.
@@ -2014,8 +2021,9 @@
     var profiles = getProfiles();
     var name = profiles[idx] && profiles[idx].name;
     if (!name) return;
+    var routineLabel = Routines.labelFor(which).short.toLowerCase();
     _ask({
-      title: 'Restore the ' + (which === 'morning' ? 'morning' : 'night') + ' routine?',
+      title: 'Restore the ' + routineLabel + ' routine?',
       message: 'The tasks go back to the defaults for ' + name + '.',
       confirmLabel: 'Restore'
     }, function() {

@@ -137,7 +137,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 .fw-card-head {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   font-family: var(--font-display, sans-serif);
   font-weight: 800; font-size: 1.05rem;
   margin-bottom: 12px;
@@ -197,9 +197,67 @@ body {
   padding-bottom: 6px;
   border-bottom: 1px solid var(--fw-border);
 }
+/* Screen-reader-only labels (the routine editor's inputs). */
+.fw-sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Morning / Afternoon / Night switcher in the card head. */
+.fw-r-tabs {
+  display: inline-flex; flex-wrap: wrap; gap: 6px;
+  margin-left: auto;
+}
+.fw-r-tab {
+  padding: 5px 11px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--fw-border);
+  border-radius: 99px;
+  color: var(--fw-muted);
+  font-family: var(--font-body, sans-serif);
+  font-weight: 800; font-size: 0.76rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.fw-r-tab:hover { background: var(--fw-card-strong); color: var(--fw-text); }
+.fw-r-tab.active {
+  background: rgba(167,139,250,0.18);
+  border-color: var(--fw-accent);
+  color: var(--fw-text);
+}
+
+/* Small header button (eg. "Hide" on Summer Quest). */
+.fw-card-action {
+  margin-left: auto;
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--fw-border);
+  border-radius: 99px;
+  color: var(--fw-muted);
+  font-family: var(--font-body, sans-serif);
+  font-weight: 800; font-size: 0.74rem;
+  cursor: pointer;
+}
+.fw-card-action:hover { color: var(--fw-text); border-color: var(--fw-accent); }
+
 .fw-r-kid {
   display: flex; align-items: center; gap: 10px;
 }
+.fw-r-kid-meta { min-width: 0; }
+.fw-r-edit {
+  margin-left: auto;
+  width: 30px; height: 30px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--fw-border);
+  border-radius: 9px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.fw-r-edit:hover { opacity: 1; border-color: var(--fw-accent); }
 .fw-r-kid-avatar {
   width: 36px; height: 36px; border-radius: 50%;
   background: var(--fw-card-strong);
@@ -528,7 +586,8 @@ body {
 .fw-quick {
   display: flex; flex-wrap: wrap; gap: 8px;
 }
-.fw-quick a {
+.fw-quick a,
+.fw-quick button {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 14px;
   background: var(--fw-card-strong);
@@ -541,8 +600,11 @@ body {
   cursor: pointer;
   transition: transform 0.15s, border-color 0.15s;
 }
-.fw-quick a:hover { transform: translateY(-2px); border-color: var(--fw-accent); }
-.fw-quick a span.icon { font-size: 1.1rem; }
+.fw-quick a:hover,
+.fw-quick button:hover { transform: translateY(-2px); border-color: var(--fw-accent); }
+.fw-quick a span.icon,
+.fw-quick button span.icon { font-size: 1.1rem; }
+.fw-quick button { font-family: var(--font-body, sans-serif); }
 
 /* ---- Modal (location picker) ---- */
 .fw-modal {
@@ -645,6 +707,85 @@ body {
   color: var(--fw-text);
 }
 .fw-loc-city:hover { border-color: var(--fw-accent); }
+.fw-modal-wide { max-width: 560px; max-height: 88vh; overflow-y: auto; }
+
+/* ---- Parent PIN gate ---- */
+.fw-pin-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--fw-card);
+  border: 1px solid var(--fw-border);
+  border-radius: 10px;
+  color: var(--fw-text);
+  font-family: var(--font-body, sans-serif);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+.fw-pin-input:focus { outline: none; border-color: var(--fw-accent); }
+.fw-pin-error {
+  color: var(--fw-red);
+  font-size: 0.82rem; font-weight: 800;
+  margin-bottom: 10px;
+}
+.fw-modal-card .fw-modal-btns .fw-btn-primary { width: auto; padding: 10px 18px; }
+
+/* ---- Per-kid routine editor ---- */
+.fw-re-block {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--fw-border);
+}
+.fw-re-block:last-child { border-bottom: none; margin-bottom: 8px; }
+.fw-re-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 800; font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+.fw-re-reset {
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--fw-border);
+  border-radius: 99px;
+  color: var(--fw-muted);
+  font-family: var(--font-body, sans-serif);
+  font-weight: 800; font-size: 0.72rem;
+  cursor: pointer;
+}
+.fw-re-reset:hover { color: var(--fw-text); border-color: var(--fw-accent); }
+.fw-re-row { display: flex; gap: 8px; margin-bottom: 6px; }
+.fw-re-input {
+  flex: 1; min-width: 0;
+  padding: 9px 12px;
+  background: var(--fw-card);
+  border: 1px solid var(--fw-border);
+  border-radius: 10px;
+  color: var(--fw-text);
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.fw-re-input:focus { outline: none; border-color: var(--fw-accent); }
+.fw-re-del,
+.fw-re-add-btn {
+  flex-shrink: 0;
+  padding: 0 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--fw-border);
+  border-radius: 10px;
+  color: var(--fw-text);
+  font-family: var(--font-body, sans-serif);
+  font-weight: 800; font-size: 0.8rem;
+  cursor: pointer;
+}
+.fw-re-del:hover { border-color: var(--fw-red); color: var(--fw-red); }
+.fw-re-add { margin-top: 10px; }
+.fw-re-add-btn { background: rgba(167,139,250,0.16); border-color: var(--fw-accent); }
+
 .fw-modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
 .fw-btn {
   padding: 10px 18px; border-radius: 10px;

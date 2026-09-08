@@ -17,8 +17,13 @@
      zs_summer_todos = {
        items:  [ { id, label, done, doneBy, doneAt(YYYY-MM-DD), createdAt } ],
        target: 2,
+       hidden: false,
        credit: { "<kidkey>": { streak, bestStreak, lastTargetDay } }
      }
+
+   `hidden` parks the whole card off the Family Wall once the season is
+   over WITHOUT touching the list — flip it back next summer and every
+   to-do, credit and streak is exactly where the kids left it.
    ================================================================ */
 
 var SummerTodos = (function() {
@@ -53,9 +58,10 @@ var SummerTodos = (function() {
       if (!Array.isArray(data.items)) data.items = [];
       if (typeof data.target !== 'number' || data.target < 1) data.target = DEFAULT_TARGET;
       if (!data.credit || typeof data.credit !== 'object') data.credit = {};
+      data.hidden = data.hidden === true;
       return data;
     } catch (e) {
-      return { items: [], target: DEFAULT_TARGET, credit: {} };
+      return { items: [], target: DEFAULT_TARGET, hidden: false, credit: {} };
     }
   }
 
@@ -70,6 +76,7 @@ var SummerTodos = (function() {
   function getData() { return _load(); }
   function getItems() { return _load().items; }
   function getTarget() { return _load().target; }
+  function isHidden() { return _load().hidden === true; }
 
   function getProgress() {
     var items = _load().items;
@@ -112,6 +119,14 @@ var SummerTodos = (function() {
     data.target = n;
     _save(data);
     return n;
+  }
+
+  // Park (or bring back) the card. The list itself is never touched.
+  function setHidden(flag) {
+    var data = _load();
+    data.hidden = !!flag;
+    _save(data);
+    return data.hidden;
   }
 
   function addItem(label) {
@@ -178,6 +193,8 @@ var SummerTodos = (function() {
     getProgress: getProgress,
     getTarget: getTarget,
     setTarget: setTarget,
+    isHidden: isHidden,
+    setHidden: setHidden,
     doneTodayFor: doneTodayFor,
     getCreditFor: getCreditFor,
     addItem: addItem,
