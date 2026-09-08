@@ -3,9 +3,9 @@
    - Avatar strip up top (tap to log in as that kid)
    - Today's date + greeting
    - Weather card with morning/afternoon clothing suggestion
-   - Routines grid: rows = kids, columns = morning + evening tasks
-     with checkable chips (trust-based; PIN gate optional via parent
-     settings — out of scope for v1)
+   - Routines grid: rows = kids (eldest first), columns = the tasks of
+     the routine on show — morning, afternoon or night — with checkable
+     chips (trust-based). Editing a kid's checklists is PIN-gated.
    - Today's calendar (FamilyCalendar.getUpcoming filtered to today)
    - Today's menu (zs_menu)
    - Active shopping list summary (zs_shopping_list)
@@ -56,6 +56,20 @@ var FamilyWall = (function() {
 
   function _todayDayId() {
     return ['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
+  }
+
+  // Kids read the wall top-to-bottom in birth order: eldest first.
+  // Profiles without an age keep their existing order at the bottom
+  // (Array.prototype.sort is stable), so nobody disappears.
+  function _byAgeDesc(profiles) {
+    return (profiles || []).slice().sort(function(a, b) {
+      var aAge = (a && typeof a.age === 'number') ? a.age : null;
+      var bAge = (b && typeof b.age === 'number') ? b.age : null;
+      if (aAge === bAge) return 0;
+      if (aAge === null) return 1;
+      if (bAge === null) return -1;
+      return bAge - aAge;
+    });
   }
 
   function _greeting() {
@@ -238,7 +252,7 @@ var FamilyWall = (function() {
   function _paint() {
     var root = document.getElementById('fw-root');
     if (!root) return;
-    var profiles = (typeof getProfiles === 'function') ? getProfiles() : [];
+    var profiles = _byAgeDesc((typeof getProfiles === 'function') ? getProfiles() : []);
     var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
 
     var avatars = profiles.map(function(p) {
@@ -334,6 +348,49 @@ var FamilyWall = (function() {
     '</div>';
   }
 
+  // The routine on show. `null` follows the clock (morning until noon,
+  // afternoon until 18:00, night after that); tapping a tab pins one
+  // for the rest of the visit so a parent can set up tonight's list at
+  // breakfast without waiting for the evening.
+  var _routineTab = null;
+
+  function _routineIds() {
+    if (typeof Routines !== 'undefined' && Array.isArray(Routines.ROUTINE_IDS)) {
+      return Routines.ROUTINE_IDS;
+    }
+    return ['morning', 'afternoon', 'evening'];
+  }
+
+  function _routineLabel(which) {
+    if (typeof Routines !== 'undefined' && Routines.labelFor) return Routines.labelFor(which);
+    return { icon: '📋', short: which, title: which };
+  }
+
+  function _activeRoutine() {
+    if (_routineTab && _routineIds().indexOf(_routineTab) !== -1) return _routineTab;
+    if (typeof Routines !== 'undefined' && Routines.getActiveRoutine) return Routines.getActiveRoutine();
+    var hour = new Date().getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 18) return 'afternoon';
+    return 'evening';
+  }
+
+  function pickRoutine(which) {
+    if (_routineIds().indexOf(which) === -1) return;
+    _routineTab = which;
+    _paint();
+  }
+
+  // Kids with routines turned on, eldest first (the list arrives sorted).
+  function _routineKids(profiles) {
+    return (profiles || []).filter(function(p) {
+      if (typeof Routines !== 'undefined' && typeof Routines.isEnabledFor === 'function') {
+        return Routines.isEnabledFor(p.name);
+      }
+      return p && p.routinesEnabled !== false;
+    });
+  }
+
   function _renderRoutinesCard(profiles) {
     if (!profiles.length || typeof Routines === 'undefined' || !Routines.getStatusFor) {
       return '<div class="fw-card fw-card-routines">' +
@@ -342,27 +399,34 @@ var FamilyWall = (function() {
       '</div>';
     }
     // Hide profiles that opted out of routines (eg. parent profiles).
-    var withRoutines = profiles.filter(function(p) {
-      if (typeof Routines.isEnabledFor === 'function') return Routines.isEnabledFor(p.name);
-      return p && p.routinesEnabled !== false;
-    });
+    var withRoutines = _routineKids(profiles);
     if (!withRoutines.length) {
       return '<div class="fw-card fw-card-routines">' +
         '<div class="fw-card-head"><span class="fw-card-icon">📋</span> Routines</div>' +
         '<div class="fw-card-empty">No profiles have routines enabled.</div>' +
       '</div>';
     }
-    // Show only the routine that matches the current time of day:
-    //  - before 14:00  → morning
-    //  - 14:00 onwards → evening
-    var hour = new Date().getHours();
-    var which = hour < 14 ? 'morning' : 'evening';
-    var sectionLabel = which === 'morning' ? '🌅 Morning' : '🌙 Night';
+
+    var which = _activeRoutine();
+    var info = _routineLabel(which);
+    var sectionLabel = info.icon + ' ' + info.short;
+
+    // One tab per checklist: morning, afternoon, night.
+    var tabs = _routineIds().map(function(id) {
+      var t = _routineLabel(id);
+      var on = id === which;
+      return '<button class="fw-r-tab' + (on ? ' active' : '') + '" ' +
+               'aria-pressed="' + (on ? 'true' : 'false') + '" ' +
+               'onclick="FamilyWall.pickRoutine(\'' + id + '\')">' +
+        t.icon + ' ' + _esc(t.short) +
+      '</button>';
+    }).join('');
 
     var rows = withRoutines.map(function(p) {
       var status = Routines.getStatusFor(p.name);
       if (!status) return '';
       var bucket = status[which];
+      if (!bucket) return '';
       var chips = bucket.items.map(function(it) {
         return '<button class="fw-r-task ' + (it.done ? 'done' : '') + '" ' +
                  'onclick="FamilyWall.toggleRoutine(\'' + _escAttr(p.name) + '\', \'' + which + '\', \'' + _escAttr(it.id) + '\')">' +
@@ -372,20 +436,25 @@ var FamilyWall = (function() {
       }).join('');
       return '<div class="fw-r-kid" style="--avatar-color:' + _esc(p.color || '#A78BFA') + '">' +
           '<div class="fw-r-kid-avatar">' + _esc(p.avatar || '🦊') + '</div>' +
-          '<div>' +
+          '<div class="fw-r-kid-meta">' +
             '<div class="fw-r-kid-name">' + _esc(p.name) + '</div>' +
             (status.streak > 0 ? '<div class="fw-r-streak">🔥 ' + status.streak + ' day streak</div>' : '') +
           '</div>' +
+          '<button class="fw-r-edit" title="Edit ' + _esc(p.name) + '\u2019s checklists" ' +
+                  'aria-label="Edit the checklists for ' + _esc(p.name) + '" ' +
+                  'onclick="FamilyWall.editRoutines(\'' + _escAttr(p.name) + '\')">✏️</button>' +
         '</div>' +
         '<div class="fw-r-tasks">' +
           (chips
             ? '<div class="fw-r-section"><span class="fw-r-section-label">' + sectionLabel + '</span>' + chips + '</div>'
-            : '<div class="fw-r-empty">No ' + which + ' tasks set.</div>') +
+            : '<div class="fw-r-empty">No ' + _esc(info.short.toLowerCase()) + ' tasks yet — tap ✏️ to add some.</div>') +
         '</div>';
     }).join('');
 
     return '<div class="fw-card fw-card-routines">' +
-      '<div class="fw-card-head"><span class="fw-card-icon">📋</span> Routines · ' + sectionLabel + '</div>' +
+      '<div class="fw-card-head"><span class="fw-card-icon">📋</span> Routines' +
+        '<span class="fw-r-tabs" role="group" aria-label="Which checklist to show">' + tabs + '</span>' +
+      '</div>' +
       '<div class="fw-routines">' +
         '<div class="fw-routines-head"><div>Kid</div><div>Tasks</div></div>' +
         rows +
@@ -402,12 +471,7 @@ var FamilyWall = (function() {
   function _summerKidsList(profiles) {
     // Same set of profiles the Routines card shows (parents who opt out
     // of routines don't clutter the wall with a summer chip either).
-    return (profiles || []).filter(function(p) {
-      if (typeof Routines !== 'undefined' && typeof Routines.isEnabledFor === 'function') {
-        return Routines.isEnabledFor(p.name);
-      }
-      return p && p.routinesEnabled !== false;
-    });
+    return _routineKids(profiles);
   }
 
   function _summerActiveKid(profiles) {
@@ -418,8 +482,17 @@ var FamilyWall = (function() {
     return kids.length ? kids[0].name : null;
   }
 
+  function _summerHidden() {
+    return typeof SummerTodos !== 'undefined' &&
+           typeof SummerTodos.isHidden === 'function' &&
+           SummerTodos.isHidden();
+  }
+
   function _renderSummerCard(profiles) {
     if (typeof SummerTodos === 'undefined') return '';
+    // Parked for the season: the card goes away, the list stays put and
+    // "Jump in" keeps a link to bring it back.
+    if (_summerHidden()) return '';
 
     var prog = SummerTodos.getProgress();
     var target = SummerTodos.getTarget();
@@ -497,7 +570,10 @@ var FamilyWall = (function() {
 
     return '<div class="fw-card fw-card-summer">' +
       '<div class="fw-card-head"><span class="fw-card-icon">🏖️</span> Summer Quest · ' +
-        prog.done + '/' + prog.total + '</div>' +
+        prog.done + '/' + prog.total +
+        '<button class="fw-card-action" onclick="FamilyWall.hideSummer()" ' +
+                'aria-label="Hide Summer Quest until next season">Hide</button>' +
+      '</div>' +
       '<div class="fw-sq-bar"><div class="fw-sq-bar-fill" style="width:' + pct + '%"></div></div>' +
       chipsBlock +
       addForm +
@@ -533,6 +609,20 @@ var FamilyWall = (function() {
   function summerTarget(delta) {
     if (typeof SummerTodos === 'undefined') return;
     SummerTodos.setTarget(SummerTodos.getTarget() + delta);
+    _paint();
+  }
+  // Off-season parking. Nothing is deleted: every to-do, who did it and
+  // each kid's streak sit exactly where they were until it comes back.
+  function hideSummer() {
+    if (typeof SummerTodos === 'undefined' || !SummerTodos.setHidden) return;
+    _requireParent('Hide the Summer Quest card?', function() {
+      SummerTodos.setHidden(true);
+      _paint();
+    });
+  }
+  function showSummer() {
+    if (typeof SummerTodos === 'undefined' || !SummerTodos.setHidden) return;
+    SummerTodos.setHidden(false);
     _paint();
   }
 
@@ -735,6 +825,10 @@ var FamilyWall = (function() {
         '<a href="home-timer.html"><span class="icon">⏱</span> Home timer</a>' +
         '<a href="vacation.html"><span class="icon">✈️</span> Vacation</a>' +
         '<a href="index.html"><span class="icon">🏠</span> All apps</a>' +
+        (_summerHidden()
+          ? '<button type="button" onclick="FamilyWall.showSummer()">' +
+              '<span class="icon">🏖️</span> Show Summer Quest</button>'
+          : '') +
       '</div>' +
     '</div>';
   }
@@ -755,6 +849,173 @@ var FamilyWall = (function() {
     if (typeof Routines === 'undefined' || !Routines.toggleFor) return;
     Routines.toggleFor(name, routine, itemId);
     _paint();
+  }
+
+  // ---- Parent gate ----------------------------------------------
+  // The wall itself stays trust-based — kids tick their own chips —
+  // but changing what the checklists SAY, or parking Summer Quest, is
+  // a parent job. Same 4-digit PIN as Parents Corner on the hub; one
+  // unlock covers the rest of the visit so setting up three kids in a
+  // row doesn't mean typing it three times.
+  var _parentUnlocked = false;
+  var _pendingParentAction = null;
+
+  function _requireParent(why, action) {
+    if (typeof action !== 'function') return;
+    var modal = document.getElementById('fw-pin-modal');
+    // No PIN modal in the page (older cached HTML) — don't lose the
+    // feature over it, just run the action.
+    if (_parentUnlocked || !modal || typeof getParentPin !== 'function') {
+      action();
+      return;
+    }
+    _pendingParentAction = action;
+    var whyEl = document.getElementById('fw-pin-why');
+    if (whyEl) whyEl.textContent = why || 'Enter the parent PIN to continue.';
+    var err = document.getElementById('fw-pin-error');
+    if (err) err.style.display = 'none';
+    var input = document.getElementById('fw-pin-input');
+    if (input) input.value = '';
+    modal.classList.add('active');
+    if (input) input.focus();
+  }
+
+  function submitParentPin(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    var input = document.getElementById('fw-pin-input');
+    var err = document.getElementById('fw-pin-error');
+    var entered = input ? input.value : '';
+    if (typeof getParentPin === 'function' && entered === getParentPin()) {
+      _parentUnlocked = true;
+      var action = _pendingParentAction;
+      closeParentGate();
+      if (action) action();
+    } else {
+      if (err) err.style.display = 'block';
+      if (input) { input.value = ''; input.focus(); }
+    }
+    return false;
+  }
+
+  function closeParentGate() {
+    var modal = document.getElementById('fw-pin-modal');
+    if (modal) modal.classList.remove('active');
+    _pendingParentAction = null;
+  }
+
+  // ---- Per-kid routine editor -------------------------------------
+  // Every kid owns their own three checklists (stored per kid under
+  // zs_routines_<kid>), so what one kid does in the afternoon has
+  // nothing to do with what the others do.
+  var _editKid = null;
+
+  function editRoutines(name) {
+    if (!name || typeof Routines === 'undefined' || !Routines.getTemplates) return;
+    _requireParent('Enter the parent PIN to edit ' + name + '’s checklists.', function() {
+      _editKid = name;
+      _renderRoutineEditor();
+      var modal = document.getElementById('fw-routines-modal');
+      if (modal) modal.classList.add('active');
+    });
+  }
+
+  function closeRoutineEditor() {
+    var modal = document.getElementById('fw-routines-modal');
+    if (modal) modal.classList.remove('active');
+    _editKid = null;
+    _paint();
+  }
+
+  function _renderRoutineEditor() {
+    var body = document.getElementById('fw-re-body');
+    if (!body || !_editKid) return;
+    var title = document.getElementById('fw-re-title');
+    if (title) title.textContent = _editKid + '’s checklists';
+
+    var tpls = Routines.getTemplates(_editKid);
+    body.innerHTML = _routineIds().map(function(which) {
+      var info = _routineLabel(which);
+      var items = tpls[which] || [];
+      var rows = items.map(function(it, j) {
+        var id = 'fw-re-' + which + '-' + j;
+        return '<div class="fw-re-row">' +
+          '<label class="fw-sr-only" for="' + id + '">' + _esc(info.short) + ' task ' + (j + 1) + '</label>' +
+          '<input type="text" id="' + id + '" class="fw-re-input" maxlength="80" ' +
+                 'value="' + _esc(it.label) + '" ' +
+                 'oninput="FamilyWall.updateRoutineTask(\'' + which + '\', ' + j + ', this.value)" />' +
+          '<button type="button" class="fw-re-del" aria-label="Remove this task" ' +
+                  'onclick="FamilyWall.removeRoutineTask(\'' + which + '\', ' + j + ')">✕</button>' +
+        '</div>';
+      }).join('');
+      var addId = 'fw-re-add-' + which;
+      return '<div class="fw-re-block">' +
+        '<div class="fw-re-head">' +
+          '<span>' + info.icon + ' ' + _esc(info.short) + '</span>' +
+          '<button type="button" class="fw-re-reset" ' +
+                  'onclick="FamilyWall.resetRoutineList(\'' + which + '\')">↻ Default</button>' +
+        '</div>' +
+        rows +
+        '<div class="fw-re-row fw-re-add">' +
+          '<label class="fw-sr-only" for="' + addId + '">New ' + _esc(info.short.toLowerCase()) + ' task</label>' +
+          '<input type="text" id="' + addId + '" class="fw-re-input" maxlength="80" placeholder="New task…" ' +
+                 'onkeydown="if(event.key===\'Enter\'){event.preventDefault();FamilyWall.addRoutineTask(\'' + which + '\');}" />' +
+          '<button type="button" class="fw-re-add-btn" ' +
+                  'onclick="FamilyWall.addRoutineTask(\'' + which + '\')">＋ Add</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function addRoutineTask(which) {
+    if (!_editKid) return;
+    var input = document.getElementById('fw-re-add-' + which);
+    if (!input) return;
+    var val = input.value.trim();
+    if (!val) return;
+    var tpl = Routines.getTemplates(_editKid)[which] || [];
+    tpl.push({
+      id: 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 5),
+      label: val
+    });
+    Routines.setTemplate(which, tpl, _editKid);
+    input.value = '';
+    _renderRoutineEditor();
+  }
+
+  function updateRoutineTask(which, j, val) {
+    if (!_editKid) return;
+    var tpl = Routines.getTemplates(_editKid)[which] || [];
+    if (!tpl[j]) return;
+    // Blank labels are dropped on save, which would shift every row
+    // after this one out from under the indexes already in the DOM.
+    // Wait for real text; ✕ is how a task gets removed.
+    if (!String(val).trim()) return;
+    tpl[j].label = String(val).slice(0, 80);
+    Routines.setTemplate(which, tpl, _editKid);
+    // No re-render — the input the parent is typing in is already live.
+  }
+
+  function removeRoutineTask(which, j) {
+    if (!_editKid) return;
+    var tpl = Routines.getTemplates(_editKid)[which] || [];
+    if (!tpl[j]) return;
+    // An empty list falls back to the built-in defaults, so keep one.
+    if (tpl.length <= 1) {
+      alert('Keep at least one task in this list, or tap ↻ Default to restore it.');
+      return;
+    }
+    tpl.splice(j, 1);
+    Routines.setTemplate(which, tpl, _editKid);
+    _renderRoutineEditor();
+  }
+
+  function resetRoutineList(which) {
+    if (!_editKid) return;
+    var info = _routineLabel(which);
+    if (typeof confirm === 'function' &&
+        !confirm('Restore the default ' + info.short.toLowerCase() + ' tasks for ' + _editKid + '?')) return;
+    Routines.resetTemplate(which, _editKid);
+    _renderRoutineEditor();
   }
 
   // ---- Location modal ----
@@ -856,11 +1117,22 @@ var FamilyWall = (function() {
     paint: _paint,
     loginAs: loginAs,
     toggleRoutine: toggleRoutine,
+    pickRoutine: pickRoutine,
+    editRoutines: editRoutines,
+    closeRoutineEditor: closeRoutineEditor,
+    addRoutineTask: addRoutineTask,
+    updateRoutineTask: updateRoutineTask,
+    removeRoutineTask: removeRoutineTask,
+    resetRoutineList: resetRoutineList,
+    submitParentPin: submitParentPin,
+    closeParentGate: closeParentGate,
     summerPickKid: summerPickKid,
     summerAdd: summerAdd,
     summerToggle: summerToggle,
     summerRemove: summerRemove,
     summerTarget: summerTarget,
+    hideSummer: hideSummer,
+    showSummer: showSummer,
     openLocationModal: openLocationModal,
     closeLocationModal: closeLocationModal,
     requestGeo: requestGeo,

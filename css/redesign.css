@@ -367,4 +367,31 @@ body { background: var(--fw-bg) !important; }
 .fw-btn { border:1px solid var(--fw-border); }
 .fw-btn-primary { background:linear-gradient(135deg,#4338CA,#6366F1); border-color:transparent; }
 .fw-btn-ghost { background:transparent; color:var(--fw-text); }
+/* Routine tabs, per-kid edit pencil, card actions and the PIN /
+   checklist editor — same light-bento treatment as the rest. */
+.fw-r-tab,
+.fw-card-action,
+.fw-r-edit,
+.fw-re-input,
+.fw-re-del,
+.fw-re-add-btn,
+.fw-pin-input,
+.fw-quick button {
+  background:#f4f3f8;
+  border:1px solid var(--fw-border);
+  color: var(--fw-text);
+}
+.fw-r-tab, .fw-card-action { color: var(--fw-muted); }
+.fw-r-tab:hover, .fw-card-action:hover { background:#ece9f5; color: var(--fw-text); }
+.fw-r-tab.active,
+.fw-r-tab.active:hover { background:#4338CA; border-color:#4338CA; color:#ffffff; }
+.fw-r-edit { background:#ffffff; }
+.fw-r-edit:hover { background:#f4f3f8; }
+.fw-re-add-btn { background:#e8e6f8; border-color:#c9c5e0; }
+.fw-re-reset { color: var(--fw-muted); border-color: var(--fw-border); }
+.fw-re-reset:hover { color: var(--fw-text); border-color:#c9c5e0; }
+.fw-re-block { border-bottom-color: var(--fw-border); }
+.fw-pin-error { color:#B91C1C; }
+.fw-quick button:hover { border-color:#c9c5e0; }
+
 .fw-week-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }

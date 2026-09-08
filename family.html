@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/family-wall.css">
-  <link rel="stylesheet" href="css/redesign.css">
+  <link rel="stylesheet" href="css/family-wall.css?v=2">
+  <link rel="stylesheet" href="css/redesign.css?v=2">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
@@ -46,6 +46,34 @@
     </div>
   </div>
 
+  <div id="fw-pin-modal" class="fw-modal" onclick="if(event.target===this)FamilyWall.closeParentGate()">
+    <div class="fw-modal-card">
+      <h2>Parents only 🔒</h2>
+      <p id="fw-pin-why">Enter the parent PIN to continue.</p>
+      <form onsubmit="return FamilyWall.submitParentPin(event)">
+        <label class="fw-sr-only" for="fw-pin-input">Parent PIN</label>
+        <input type="password" id="fw-pin-input" class="fw-pin-input" inputmode="numeric"
+               maxlength="4" autocomplete="off" placeholder="••••" />
+        <div id="fw-pin-error" class="fw-pin-error" role="alert" style="display:none;">Incorrect PIN</div>
+        <div class="fw-modal-btns">
+          <button type="button" class="fw-btn fw-btn-ghost" onclick="FamilyWall.closeParentGate()">Cancel</button>
+          <button type="submit" class="fw-btn fw-btn-primary">Unlock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="fw-routines-modal" class="fw-modal" onclick="if(event.target===this)FamilyWall.closeRoutineEditor()">
+    <div class="fw-modal-card fw-modal-wide">
+      <h2 id="fw-re-title">Checklists</h2>
+      <p>Morning, afternoon and night — each kid has their own three lists. Changes save as you type.</p>
+      <div id="fw-re-body"></div>
+      <div class="fw-modal-btns">
+        <button type="button" class="fw-btn fw-btn-ghost" onclick="FamilyWall.closeRoutineEditor()">Done</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/auth.js?v=2"></script>
   <script src="js/a11y.js?v=2"></script>
   <script src="js/sync.js?v=9"></script>
@@ -53,10 +81,10 @@
   <script src="js/timer.js?v=2"></script>
   <script src="js/activity-log.js?v=2"></script>
   <script src="js/chilean-calendar.js?v=2"></script>
-  <script src="js/routines.js?v=3"></script>
-  <script src="js/summer-todos.js?v=1"></script>
+  <script src="js/routines.js?v=4"></script>
+  <script src="js/summer-todos.js?v=2"></script>
   <script src="js/family-calendar.js?v=6"></script>
-  <script src="js/family-wall.js?v=5"></script>
+  <script src="js/family-wall.js?v=6"></script>
   <script src="js/pwa.js?v=2"></script>
 </body>
 </html>
