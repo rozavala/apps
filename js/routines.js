@@ -69,7 +69,7 @@ var Routines = (function() {
       { id: 'laundry',  label: 'Laundry basket 🧺' },
       { id: 'towel',    label: 'Towel on chair 🪑' },
       { id: 'teeth_pm', label: 'Teeth + floss 🦷' },
-      { id: 'cleats',   label: 'Cleats away ⚽' },
+      { id: 'cleats',   label: 'Cleats away ⚽', when: 'football' },
       { id: 'tidy_pm',  label: 'Tidy the room 🧸' },
       { id: 'read',     label: 'Read in bed 📖' }
     ]
@@ -92,11 +92,16 @@ var Routines = (function() {
   var TEMP_SUNSCREEN = 24;
 
   // Calendar events are written the way the family talks ("futbol
-  // Rorro"), not the way the profiles are named — map the nicknames on.
-  var KID_ALIASES = {
-    rodrigo: ['rorro'],
-    emilia:  ['pilita']
-  };
+  // Rorro"), not the way the profiles are named. Each row lists the
+  // names that mean the same kid, so it doesn't matter which one the
+  // profile carries or which one the event uses.
+  var KID_NAMES = [
+    ['rodrigo jr', 'rodrigo', 'rorro'],
+    ['emilia', 'pilita'],
+    ['pablo'],
+    ['ignacio'],
+    ['isabel']
+  ];
 
   var FOOTBALL_WORDS = ['futbol', 'football', 'soccer'];
 
@@ -107,8 +112,9 @@ var Routines = (function() {
     return s.trim();
   }
 
-  // Everything an event might call this kid: the profile name, each
-  // word of it, and any nickname mapped to those.
+  // Everything a calendar event (or an `only` list) might call this
+  // kid: the name as written, each word of it, and every other name on
+  // the same roster row.
   function _kidTokens(userName) {
     var raw = _norm(userName);
     if (!raw) return [];
@@ -117,9 +123,11 @@ var Routines = (function() {
       if (part.length >= 3 && tokens.indexOf(part) === -1) tokens.push(part);
     });
     tokens.slice().forEach(function(t) {
-      (KID_ALIASES[t] || []).forEach(function(alias) {
-        var n = _norm(alias);
-        if (tokens.indexOf(n) === -1) tokens.push(n);
+      KID_NAMES.forEach(function(row) {
+        if (row.indexOf(t) === -1) return;
+        row.forEach(function(name) {
+          if (tokens.indexOf(name) === -1) tokens.push(name);
+        });
       });
     });
     return tokens;
@@ -184,8 +192,9 @@ var Routines = (function() {
     if (Array.isArray(item.only) && item.only.length) {
       var tokens = _kidTokens(userName);
       var mine = item.only.some(function(n) {
-        var want = _norm(n);
-        return want && tokens.some(function(t) { return t.indexOf(want) !== -1; });
+        return _kidTokens(n).some(function(want) {
+          return want && tokens.indexOf(want) !== -1;
+        });
       });
       if (!mine) return false;
     }

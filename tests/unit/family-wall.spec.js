@@ -209,25 +209,45 @@ test.describe('Family Wall — routines, order and Summer Quest', () => {
       // Stand in for the subscribed family calendar.
       const today = new Date();
       window.FamilyCalendar.getUpcoming = function() {
-        return [{ summary: 'Futbol Rorro', start: today, allDay: false }];
+        return [{ summary: 'Fútbol Rorro', start: today, allDay: false }];
       };
       window.Routines.refreshConditions();
-      const pm = (kid) => window.Routines.getStatusFor(kid).afternoon
+      const list = (kid, which) => window.Routines.getStatusFor(kid)[which]
         .items.map(function(i) { return i.label; }).join(' ');
-      return { rodrigo: pm('Rodrigo JR'), pablo: pm('Pablo'), young: pm('Young') };
+      return {
+        // Whichever name the profile carries, the roster ties them together.
+        rodrigoPm: list('Rodrigo JR', 'afternoon'),
+        rorroPm: list('Rorro', 'afternoon'),
+        pablopm: list('Pablo', 'afternoon'),
+        emiliaPm: list('Pilita', 'afternoon'),
+        isabelPm: list('Isabel', 'afternoon'),
+        // Cleats belong to the same football day.
+        rodrigoNight: list('Rodrigo JR', 'evening'),
+        pabloNight: list('Pablo', 'evening')
+      };
     });
-    // "Futbol Rorro" is Rodrigo's practice — nobody else's.
-    expect(seen.rodrigo).toContain('Football kit');
-    expect(seen.pablo).not.toContain('Football kit');
-    expect(seen.young).not.toContain('Football kit');
+    // "Fútbol Rorro" is Rodrigo's practice — nobody else's, accent and
+    // nickname notwithstanding.
+    expect(seen.rodrigoPm).toContain('Football kit');
+    expect(seen.rorroPm).toContain('Football kit');
+    expect(seen.pablopm).not.toContain('Football kit');
+    expect(seen.emiliaPm).not.toContain('Football kit');
+    expect(seen.isabelPm).not.toContain('Football kit');
+    expect(seen.rodrigoNight).toContain('Cleats away');
+    expect(seen.pabloNight).not.toContain('Cleats away');
   });
 
   test('homework is Rodrigo\'s and piano is Pablo\'s', async ({ page }) => {
     const seen = await page.evaluate(() => {
       const pm = (kid) => window.Routines.getStatusFor(kid).afternoon
         .items.map(function(i) { return i.label; }).join(' ');
-      return { rodrigo: pm('Rodrigo JR'), pablo: pm('Pablo'), young: pm('Young') };
+      return {
+        rodrigo: pm('Rodrigo JR'), rorro: pm('Rorro'),
+        pablo: pm('Pablo'), young: pm('Ignacio'), isabel: pm('Isabel')
+      };
     });
+    expect(seen.rorro).toContain('Homework');
+    expect(seen.isabel).not.toContain('Homework');
     expect(seen.rodrigo).toContain('Homework');
     expect(seen.rodrigo).not.toContain('Piano');
     expect(seen.pablo).toContain('Piano');
