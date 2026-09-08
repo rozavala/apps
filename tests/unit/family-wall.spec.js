@@ -158,4 +158,105 @@ test.describe('Family Wall — routines, order and Summer Quest', () => {
     expect(after.midPm).toContain('Walk the dog 🐶');
     expect(after.midAm).not.toContain('Walk the dog 🐶');
   });
+  test('sunscreen only shows when the day earns it', async ({ page }) => {
+    const morningFor = (uv, maxT) => page.evaluate(([uv, maxT]) => {
+      localStorage.setItem('zs_fw_weather', JSON.stringify({
+        fetchedAt: Date.now(),
+        payload: { daily: { uv_index_max: [uv], temperature_2m_max: [maxT] } }
+      }));
+      window.Routines.refreshConditions();
+      return window.Routines.getStatusFor('Young').morning
+        .items.map(function(i) { return i.label; }).join(' ');
+    }, [uv, maxT]);
+
+    // Grey and cold: no sunscreen chip.
+    expect(await morningFor(1, 12)).not.toContain('Sunscreen');
+    // High UV: back on the list.
+    expect(await morningFor(9, 28)).toContain('Sunscreen');
+    // Mild but hot enough on temperature alone.
+    expect(await morningFor(0, 30)).toContain('Sunscreen');
+    // No forecast at all — show it rather than risk a burn.
+    expect(await page.evaluate(() => {
+      localStorage.removeItem('zs_fw_weather');
+      window.Routines.refreshConditions();
+      return window.Routines.getStatusFor('Young').morning
+        .items.map(function(i) { return i.label; }).join(' ');
+    })).toContain('Sunscreen');
+  });
+
+  test('a hidden task is not needed to complete the routine', async ({ page }) => {
+    const done = await page.evaluate(() => {
+      localStorage.setItem('zs_fw_weather', JSON.stringify({
+        fetchedAt: Date.now(),
+        payload: { daily: { uv_index_max: [1], temperature_2m_max: [10] } }
+      }));
+      window.Routines.refreshConditions();
+      const status = window.Routines.getStatusFor('Young').morning;
+      status.items.forEach(function(it) {
+        window.Routines.toggleFor('Young', 'morning', it.id);
+      });
+      const after = window.Routines.getStatusFor('Young').morning;
+      return { complete: after.complete, hasSunscreen: after.items.some(function(i) {
+        return i.label.indexOf('Sunscreen') !== -1;
+      }) };
+    });
+    expect(done.hasSunscreen).toBe(false);
+    expect(done.complete).toBe(true);
+  });
+
+  test('football only shows on a kid\'s own practice day', async ({ page }) => {
+    const seen = await page.evaluate(() => {
+      // Stand in for the subscribed family calendar.
+      const today = new Date();
+      window.FamilyCalendar.getUpcoming = function() {
+        return [{ summary: 'Futbol Rorro', start: today, allDay: false }];
+      };
+      window.Routines.refreshConditions();
+      const pm = (kid) => window.Routines.getStatusFor(kid).afternoon
+        .items.map(function(i) { return i.label; }).join(' ');
+      return { rodrigo: pm('Rodrigo JR'), pablo: pm('Pablo'), young: pm('Young') };
+    });
+    // "Futbol Rorro" is Rodrigo's practice — nobody else's.
+    expect(seen.rodrigo).toContain('Football kit');
+    expect(seen.pablo).not.toContain('Football kit');
+    expect(seen.young).not.toContain('Football kit');
+  });
+
+  test('homework is Rodrigo\'s and piano is Pablo\'s', async ({ page }) => {
+    const seen = await page.evaluate(() => {
+      const pm = (kid) => window.Routines.getStatusFor(kid).afternoon
+        .items.map(function(i) { return i.label; }).join(' ');
+      return { rodrigo: pm('Rodrigo JR'), pablo: pm('Pablo'), young: pm('Young') };
+    });
+    expect(seen.rodrigo).toContain('Homework');
+    expect(seen.rodrigo).not.toContain('Piano');
+    expect(seen.pablo).toContain('Piano');
+    expect(seen.pablo).not.toContain('Homework');
+    expect(seen.young).not.toContain('Homework');
+    expect(seen.young).not.toContain('Piano');
+  });
+
+  test('editing a label keeps the task conditional', async ({ page }) => {
+    const kept = await page.evaluate(() => {
+      const tpl = window.Routines.getTemplates('Young').morning;
+      const i = tpl.findIndex(function(t) { return t.when === 'sunny'; });
+      tpl[i].label = 'Sun cream 🧴';
+      window.Routines.setTemplate('morning', tpl, 'Young');
+      const after = window.Routines.getTemplates('Young').morning[i];
+      return { label: after.label, when: after.when };
+    });
+    expect(kept.label).toBe('Sun cream 🧴');
+    expect(kept.when).toBe('sunny');
+  });
+
+  test('editing one kid cannot rewrite the shared defaults', async ({ page }) => {
+    const other = await page.evaluate(() => {
+      const tpl = window.Routines.getTemplates('Young').morning;
+      tpl[0].label = 'CHANGED';
+      window.Routines.setTemplate('morning', tpl, 'Young');
+      // Mid has no override, so it must still read the untouched default.
+      return window.Routines.getTemplates('Mid').morning[0].label;
+    });
+    expect(other).not.toBe('CHANGED');
+  });
 });

@@ -49,18 +49,18 @@ var Routines = (function() {
       { id: 'tidy_am',   label: 'Tidy the room 🧸' },
       { id: 'backpack',  label: 'Lunchbox + water 🎒' },
       { id: 'wash_am',   label: 'Teeth, face, hair 🦷' },
-      { id: 'lotion_am', label: 'Lotion 🧴' },
-      { id: 'ready',     label: 'Ready by 7:45 ⏰' }
+      { id: 'lotion_am', label: 'Sunscreen 🧴', when: 'sunny' },
+      { id: 'ready',     label: 'Ready by 7:45 → mint 🍬' }
     ],
     afternoon: [
       { id: 'hands',      label: 'Wash hands 🧼' },
       { id: 'unpack',     label: 'Unpack backpack 🎒' },
       { id: 'tea',        label: 'Tea time 🫖' },
-      { id: 'homework',   label: 'Homework ✏️' },
-      { id: 'piano',      label: 'Piano 20 min 🎹' },
-      { id: 'football',   label: 'Football kit ⚽' },
+      { id: 'homework',   label: 'Homework ✏️', only: ['Rodrigo'] },
+      { id: 'piano',      label: 'Piano 20 min 🎹', only: ['Pablo'] },
+      { id: 'football',   label: 'Football kit ⚽', when: 'football' },
       { id: 'clothes_pm', label: 'Clothes away 👕' },
-      { id: 'lotion_pm',  label: 'Lotion 🧴' }
+      { id: 'lotion_pm',  label: 'Sunscreen 🧴', when: 'sunny' }
     ],
     evening: [
       { id: 'dinner',   label: 'Dinner 🍽️' },
@@ -70,9 +70,141 @@ var Routines = (function() {
       { id: 'towel',    label: 'Towel on chair 🪑' },
       { id: 'teeth_pm', label: 'Teeth + floss 🦷' },
       { id: 'cleats',   label: 'Cleats away ⚽' },
+      { id: 'tidy_pm',  label: 'Tidy the room 🧸' },
       { id: 'read',     label: 'Read in bed 📖' }
     ]
   };
+
+  // ── Conditional tasks ───────────────────────────────────────────
+  // A task shows every day for everybody unless it carries:
+  //   when: 'sunny'     → only when the day earns sunscreen
+  //   when: 'football'  → only on days that kid has football on the
+  //                       family calendar
+  //   only: ['Rodrigo'] → only for the kid(s) whose name matches
+  // A hidden task is not shown, not tickable, and not counted, so a
+  // rainy day's routine is complete without the sunscreen chip.
+
+  var WEATHER_KEY = 'zs_fw_weather';   // written by the Family Wall
+
+  // WHO puts sun protection at UV 3 and up. The temperature is a
+  // backstop for a hot day whose UV forecast is missing.
+  var UV_SUNSCREEN = 3;
+  var TEMP_SUNSCREEN = 24;
+
+  // Calendar events are written the way the family talks ("futbol
+  // Rorro"), not the way the profiles are named — map the nicknames on.
+  var KID_ALIASES = {
+    rodrigo: ['rorro'],
+    emilia:  ['pilita']
+  };
+
+  var FOOTBALL_WORDS = ['futbol', 'football', 'soccer'];
+
+  // Lowercase and strip accents so "Fútbol" matches "futbol".
+  function _norm(s) {
+    s = String(s == null ? '' : s).toLowerCase();
+    try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+    return s.trim();
+  }
+
+  // Everything an event might call this kid: the profile name, each
+  // word of it, and any nickname mapped to those.
+  function _kidTokens(userName) {
+    var raw = _norm(userName);
+    if (!raw) return [];
+    var tokens = [raw];
+    raw.split(/\s+/).forEach(function(part) {
+      if (part.length >= 3 && tokens.indexOf(part) === -1) tokens.push(part);
+    });
+    tokens.slice().forEach(function(t) {
+      (KID_ALIASES[t] || []).forEach(function(alias) {
+        var n = _norm(alias);
+        if (tokens.indexOf(n) === -1) tokens.push(n);
+      });
+    });
+    return tokens;
+  }
+
+  // Conditions are read once per paint rather than once per kid per
+  // task — expanding the calendar is not free. The cache is cleared at
+  // the start of every render (refreshConditions), so a forecast or a
+  // calendar that lands after the first paint is picked up straight
+  // away; the TTL is only a backstop for a page left open all day.
+  var _memo = {};
+
+  function refreshConditions() { _memo = {}; }
+  function _memoized(key, ttlMs, fn) {
+    var now = Date.now();
+    var today = _today();
+    var hit = _memo[key];
+    if (hit && hit.day === today && (now - hit.ts) < ttlMs) return hit.val;
+    var val = fn();
+    _memo[key] = { day: today, ts: now, val: val };
+    return val;
+  }
+
+  function _sunnyEnough() {
+    return _memoized('sunny', 10 * 60 * 1000, function() {
+      var daily = null;
+      try {
+        var w = JSON.parse(localStorage.getItem(WEATHER_KEY) || 'null');
+        daily = w && w.payload && w.payload.daily;
+      } catch (e) { daily = null; }
+      if (!daily) return true;   // no forecast — a spare chip beats a burn
+      var uv = daily.uv_index_max && daily.uv_index_max[0];
+      var maxT = daily.temperature_2m_max && daily.temperature_2m_max[0];
+      if (typeof uv !== 'number' && typeof maxT !== 'number') return true;
+      if (typeof uv === 'number' && uv >= UV_SUNSCREEN) return true;
+      if (typeof maxT === 'number' && maxT >= TEMP_SUNSCREEN) return true;
+      return false;
+    });
+  }
+
+  function _hasFootballToday(userName) {
+    var tokens = _kidTokens(userName);
+    if (!tokens.length) return false;
+    return _memoized('football:' + tokens[0], 60 * 1000, function() {
+      if (typeof FamilyCalendar === 'undefined' || !FamilyCalendar.getUpcoming) return false;
+      var events;
+      try { events = FamilyCalendar.getUpcoming(300); } catch (e) { return false; }
+      var todayStr = new Date().toDateString();
+      return events.some(function(ev) {
+        if (!ev || !ev.start || typeof ev.start.toDateString !== 'function') return false;
+        if (ev.start.toDateString() !== todayStr) return false;
+        var text = _norm(ev.summary);
+        var isFootball = FOOTBALL_WORDS.some(function(w) { return text.indexOf(w) !== -1; });
+        if (!isFootball) return false;
+        return tokens.some(function(t) { return text.indexOf(t) !== -1; });
+      });
+    });
+  }
+
+  function _taskVisible(item, userName) {
+    if (!item) return false;
+    if (Array.isArray(item.only) && item.only.length) {
+      var tokens = _kidTokens(userName);
+      var mine = item.only.some(function(n) {
+        var want = _norm(n);
+        return want && tokens.some(function(t) { return t.indexOf(want) !== -1; });
+      });
+      if (!mine) return false;
+    }
+    if (item.when === 'sunny') return _sunnyEnough();
+    if (item.when === 'football') return _hasFootballToday(userName);
+    return true;
+  }
+
+  // What a parent sees next to a conditional task in the editor.
+  function conditionLabel(item) {
+    if (!item) return '';
+    var bits = [];
+    if (Array.isArray(item.only) && item.only.length) {
+      bits.push('👤 ' + item.only.join(', ') + ' only');
+    }
+    if (item.when === 'sunny') bits.push('🌡 hot or sunny days');
+    if (item.when === 'football') bits.push('📅 football days');
+    return bits.join(' · ');
+  }
 
   function _isRoutine(which) {
     return ROUTINE_IDS.indexOf(which) !== -1;
@@ -161,6 +293,23 @@ var Routines = (function() {
     return DEFAULTS[which] || [];
   }
 
+  // The tasks actually on show for this kid today, after the weather,
+  // the calendar and the per-kid conditions have had their say.
+  function _visibleTemplate(data, which, userName) {
+    return _getTemplate(data, which).filter(function(it) {
+      return _taskVisible(it, userName);
+    });
+  }
+
+  // Copy, so an editor mutating a label can't reach back into DEFAULTS
+  // — a shared object — and change it for every other kid on the page.
+  function _copyItem(it) {
+    var out = { id: it.id, label: it.label };
+    if (it.when) out.when = it.when;
+    if (Array.isArray(it.only) && it.only.length) out.only = it.only.slice();
+    return out;
+  }
+
   // One routine's slice of the status object: the items with their
   // done flags, plus the counts the progress bars need.
   //
@@ -168,8 +317,8 @@ var Routines = (function() {
   // part-way through the day (or copying one kid's list to everyone)
   // strands the ids of tasks that are gone; counting those would show
   // "5 / 3" and hand out a streak nobody earned.
-  function _block(data, day, which) {
-    var tpl = _getTemplate(data, which);
+  function _block(data, day, which, userName) {
+    var tpl = _visibleTemplate(data, which, userName);
     var ticked = day[which] || [];
     var doneCount = 0;
     var items = tpl.map(function(c) {
@@ -186,15 +335,15 @@ var Routines = (function() {
   }
 
   // A day counts for the streak once every routine is fully ticked.
-  function _allComplete(data, day) {
+  function _allComplete(data, day, userName) {
     return ROUTINE_IDS.every(function(which) {
-      return _block(data, day, which).complete;
+      return _block(data, day, which, userName).complete;
     });
   }
 
-  function _bumpStreak(data, day) {
+  function _bumpStreak(data, day, userName) {
     var today = _today();
-    if (!_allComplete(data, day) || data.lastFullDay === today) return false;
+    if (!_allComplete(data, day, userName) || data.lastFullDay === today) return false;
     data.streak = (data.lastFullDay === _yesterday()) ? (data.streak || 0) + 1 : 1;
     data.lastFullDay = today;
     if (data.streak > (data.bestStreak || 0)) data.bestStreak = data.streak;
@@ -211,7 +360,7 @@ var Routines = (function() {
       bestStreak: data.bestStreak
     };
     ROUTINE_IDS.forEach(function(which) {
-      status[which] = _block(data, day, which);
+      status[which] = _block(data, day, which, userName);
     });
     return status;
   }
@@ -221,7 +370,7 @@ var Routines = (function() {
     var data = userName ? _read(_keyForName(userName)) : (_load() || {});
     var out = {};
     ROUTINE_IDS.forEach(function(which) {
-      out[which] = _getTemplate(data, which).slice();
+      out[which] = _getTemplate(data, which).map(_copyItem);
     });
     return out;
   }
@@ -233,10 +382,14 @@ var Routines = (function() {
     var data = _read(k);
     if (!data.templates) data.templates = {};
     data.templates[which] = items.map(function(it, i) {
-      return {
+      var out = {
         id: it && it.id ? String(it.id) : 'custom_' + i + '_' + Date.now().toString(36),
         label: String(it && it.label ? it.label : '').slice(0, 80)
       };
+      // Keep "sunny days only" / "Pablo only" through a label edit.
+      if (it && it.when) out.when = String(it.when);
+      if (it && Array.isArray(it.only) && it.only.length) out.only = it.only.map(String);
+      return out;
     }).filter(function(it) { return it.label.length > 0; });
     _write(k, data);
   }
@@ -253,7 +406,8 @@ var Routines = (function() {
   function getStatus() {
     var data = _load();
     if (!data) return null;
-    return _statusFrom(data);
+    var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+    return _statusFrom(data, active && active.name);
   }
 
   function toggle(routine, itemId) {
@@ -262,11 +416,13 @@ var Routines = (function() {
     if (!data) return null;
     var today = _today();
     var day = _getDay(data, today);
+    var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+    var activeName = active && active.name;
     var list = day[routine];
     var idx = list.indexOf(itemId);
-    var tpl = _getTemplate(data, routine);
+    var tpl = _visibleTemplate(data, routine, activeName);
     if (idx === -1) {
-      // Don't add ids that aren't in the active template (defence).
+      // Don't add ids that aren't on show today (defence).
       var isKnown = tpl.some(function(c) { return c.id === itemId; });
       if (!isKnown) return getStatus();
       list.push(itemId);
@@ -275,7 +431,7 @@ var Routines = (function() {
     }
 
     // Update the streak when EVERY routine hits 100% for the day.
-    if (_bumpStreak(data, day)) {
+    if (_bumpStreak(data, day, activeName)) {
       if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
         ActivityLog.log('Routines', '✅', 'Day complete (streak ' + data.streak + ')');
       }
@@ -316,6 +472,7 @@ var Routines = (function() {
   function renderHubWidget(containerId) {
     var el = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
     if (!el) return;
+    refreshConditions();
     var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
     if (active && !isEnabledFor(active.name)) {
       el.innerHTML = '';
@@ -455,7 +612,7 @@ var Routines = (function() {
     var today = _today();
     var day = _getDay(data, today);
     var list = day[routine];
-    var tpl = _getTemplate(data, routine);
+    var tpl = _visibleTemplate(data, routine, userName);
     var idx = list.indexOf(itemId);
     if (idx === -1) {
       var isKnown = tpl.some(function(c) { return c.id === itemId; });
@@ -465,7 +622,7 @@ var Routines = (function() {
       list.splice(idx, 1);
     }
 
-    _bumpStreak(data, day);
+    _bumpStreak(data, day, userName);
     _write(k, data);
     return getStatusFor(userName);
   }
@@ -476,6 +633,8 @@ var Routines = (function() {
     toggleFor: toggleFor,
     getActiveRoutine: getActiveRoutine,
     labelFor: labelFor,
+    conditionLabel: conditionLabel,
+    refreshConditions: refreshConditions,
     toggle: toggle,
     renderHubWidget: renderHubWidget,
     getTemplates: getTemplates,

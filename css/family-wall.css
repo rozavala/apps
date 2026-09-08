@@ -783,6 +783,11 @@ body {
   cursor: pointer;
 }
 .fw-re-del:hover { border-color: var(--fw-red); color: var(--fw-red); }
+.fw-re-cond {
+  margin: -2px 0 8px 12px;
+  font-size: 0.72rem; font-weight: 800;
+  color: var(--fw-muted);
+}
 .fw-re-add { margin-top: 10px; }
 .fw-re-add-btn { background: rgba(167,139,250,0.16); border-color: var(--fw-accent); }
 .fw-re-apply {

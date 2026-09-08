@@ -252,6 +252,10 @@ var FamilyWall = (function() {
   function _paint() {
     var root = document.getElementById('fw-root');
     if (!root) return;
+    // Re-read the weather and calendar conditions: the calendar lands
+    // after the first paint, and a task must not stay hidden because
+    // the first paint asked before the data arrived.
+    if (typeof Routines !== 'undefined' && Routines.refreshConditions) Routines.refreshConditions();
     var profiles = _byAgeDesc((typeof getProfiles === 'function') ? getProfiles() : []);
     var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
 
@@ -941,6 +945,9 @@ var FamilyWall = (function() {
       var items = tpls[which] || [];
       var rows = items.map(function(it, j) {
         var id = 'fw-re-' + which + '-' + j;
+        // Tasks that only show on some days, or for some kids, say so —
+        // otherwise a parent wonders why sunscreen vanished.
+        var cond = (Routines.conditionLabel ? Routines.conditionLabel(it) : '');
         return '<div class="fw-re-row">' +
           '<label class="fw-sr-only" for="' + id + '">' + _esc(info.short) + ' task ' + (j + 1) + '</label>' +
           '<input type="text" id="' + id + '" class="fw-re-input" maxlength="80" ' +
@@ -948,7 +955,8 @@ var FamilyWall = (function() {
                  'oninput="FamilyWall.updateRoutineTask(\'' + which + '\', ' + j + ', this.value)" />' +
           '<button type="button" class="fw-re-del" aria-label="Remove this task" ' +
                   'onclick="FamilyWall.removeRoutineTask(\'' + which + '\', ' + j + ')">✕</button>' +
-        '</div>';
+        '</div>' +
+        (cond ? '<div class="fw-re-cond">' + _esc(cond) + '</div>' : '');
       }).join('');
       var addId = 'fw-re-add-' + which;
       // Only worth offering when there's somebody to copy to.
