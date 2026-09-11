@@ -248,10 +248,37 @@ var Routines = (function() {
 
   // Mirror to the family server so the fridge iPad and the phones agree
   // on both the checklists and what's already ticked off today.
+  var _pushTimers = {};
   function _push(key) {
     if (!key) return;
-    if (typeof CloudSync !== 'undefined' && CloudSync.push) {
+    if (typeof CloudSync === 'undefined' || !CloudSync.push) return;
+    // Debounced: ticking five boxes in a row is one PUT, not five, and
+    // each push now costs a read-merge-write round trip on the server.
+    if (_pushTimers[key]) clearTimeout(_pushTimers[key]);
+    _pushTimers[key] = setTimeout(function() {
+      delete _pushTimers[key];
       try { CloudSync.push(key); } catch (e) {}
+    }, 600);
+  }
+
+  // Per-item mark log: marks[YYYY-MM-DD][routine][itemId] = {done, ts}.
+  // The `days` arrays stay the source of truth for every reader; marks
+  // exist purely so two devices can be merged item-by-item instead of
+  // one whole-object snapshot clobbering the other (sync.js
+  // _mergeRoutines). An item with no mark is legacy data and loses to
+  // an explicit mark from the other side.
+  var MARK_KEEP_DAYS = 30;
+  function _setMark(data, dayKey, routine, itemId, done) {
+    if (!data.marks) data.marks = {};
+    if (!data.marks[dayKey]) data.marks[dayKey] = {};
+    if (!data.marks[dayKey][routine]) data.marks[dayKey][routine] = {};
+    data.marks[dayKey][routine][itemId] = { done: !!done, ts: Date.now() };
+    var days = Object.keys(data.marks);
+    if (days.length > MARK_KEEP_DAYS) {
+      days.sort();
+      days.slice(0, days.length - MARK_KEEP_DAYS).forEach(function(d) {
+        delete data.marks[d];
+      });
     }
   }
 
@@ -435,8 +462,10 @@ var Routines = (function() {
       var isKnown = tpl.some(function(c) { return c.id === itemId; });
       if (!isKnown) return getStatus();
       list.push(itemId);
+      _setMark(data, today, routine, itemId, true);
     } else {
       list.splice(idx, 1);
+      _setMark(data, today, routine, itemId, false);
     }
 
     // Update the streak when EVERY routine hits 100% for the day.
@@ -627,8 +656,10 @@ var Routines = (function() {
       var isKnown = tpl.some(function(c) { return c.id === itemId; });
       if (!isKnown) return getStatusFor(userName);
       list.push(itemId);
+      _setMark(data, today, routine, itemId, true);
     } else {
       list.splice(idx, 1);
+      _setMark(data, today, routine, itemId, false);
     }
 
     _bumpStreak(data, day, userName);

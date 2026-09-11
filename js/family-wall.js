@@ -1165,6 +1165,22 @@ var FamilyWall = (function() {
     // syncProfiles fires zs:synced when the merged profile list changed.
     // Repaint so things like routinesEnabled toggles reflect immediately.
     window.addEventListener('zs:synced', function() { _paint(); });
+
+    // The wall is the one screen that lives on a shared device and stays
+    // open for hours (the fridge iPad), while the ticks happen on
+    // phones. Poll every kid's bucket so those land without a manual
+    // reload. pullAll fires zs:synced when something actually changed,
+    // which repaints via the listener above.
+    var REFRESH_MS = 90000;
+    function _refreshFromCloud() {
+      if (typeof CloudSync === 'undefined' || !CloudSync.online || !CloudSync.pullAllKids) return;
+      if (document.visibilityState === 'hidden') return;
+      CloudSync.pullAllKids().then(function() { _paint(); }).catch(function() {});
+    }
+    setInterval(_refreshFromCloud, REFRESH_MS);
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') _refreshFromCloud();
+    });
   }
 
   return {
