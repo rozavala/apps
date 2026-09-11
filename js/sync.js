@@ -649,13 +649,19 @@ var CloudSync = (function() {
               // who aren't the active user on this device.
               try {
                 var rtMerged = _mergeRoutines(serverData, localData);
-                var rtBefore = localStorage.getItem(key);
-                var rtAfter = JSON.stringify(rtMerged);
-                localStorage.setItem(key, rtAfter);
-                if (rtBefore !== rtAfter) changed = true;
+                // Compare CONTENT, not the serialized object: the merge
+                // restamps _syncedAt every time, so a raw string compare
+                // called every poll a change and had the wall rebuild
+                // itself once per kid with nothing new to show.
+                var rtSigLocal = _routineSignature(localData);
+                var rtSigMerged = _routineSignature(rtMerged);
+                if (rtSigMerged !== rtSigLocal || localMissing) {
+                  localStorage.setItem(key, JSON.stringify(rtMerged));
+                  changed = true;
+                }
                 // If this device knew something the server didn't, send
                 // the merge back so every device converges on one copy.
-                if (_routineSignature(rtMerged) !== _routineSignature(serverData)) {
+                if (rtSigMerged !== _routineSignature(serverData)) {
                   promises.push(state.push(key));
                 }
               } catch (e) {
@@ -675,13 +681,23 @@ var CloudSync = (function() {
               }
               
               try {
+                var nextRaw;
                 if (appName === 'art' && !Array.isArray(toStore)) {
                   var merged = Object.assign({}, toStore, { gallery: localData.gallery || [] });
-                  localStorage.setItem(key, JSON.stringify(merged));
+                  nextRaw = JSON.stringify(merged);
                 } else {
-                  localStorage.setItem(key, JSON.stringify(toStore));
+                  nextRaw = JSON.stringify(toStore);
                 }
-                changed = true;
+                // Only write and announce when the content actually
+                // moved. The activity branch re-stores on every pull by
+                // design (it always merges), which meant every pull
+                // reported a change for every kid — and the Family Wall
+                // rebuilt itself once per kid, every poll, showing
+                // exactly the same thing each time.
+                if (nextRaw !== localStorage.getItem(key)) {
+                  localStorage.setItem(key, nextRaw);
+                  changed = true;
+                }
               } catch (storageError) {
                 if (typeof Debug !== 'undefined') {
                   Debug.warn('[Sync] Quota Exceeded for ' + key + ' skipping pull.');
