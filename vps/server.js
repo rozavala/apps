@@ -10,6 +10,8 @@ const ical = require('./ical');
 const wcScores = require('./wc-scores');
 const wcMatch = require('./wc-match');
 
+const mergeRoutines = require('./routines-merge');
+
 const app = express();
 const PORT = 3333;
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -84,7 +86,18 @@ app.put('/api/kids/:kid/:app', (req, res) => {
   let existing = null;
   try { existing = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch {}
 
-  const incoming = { ...req.body, _syncedAt: new Date().toISOString() };
+  // Routines are ticked on whichever device is nearest, so two clients
+  // regularly read the same copy before either writes. Clients merge
+  // before pushing, but that read-merge-write can still interleave and
+  // lose a tick. This handler is synchronous, so merging here is the
+  // one place the race can't happen.
+  let body = req.body;
+  if (req.params.app === 'routines' && existing) {
+    try { body = mergeRoutines(existing, req.body); }
+    catch (e) { console.warn('[routines] merge failed, storing as sent:', e.message); }
+  }
+
+  const incoming = { ...body, _syncedAt: new Date().toISOString() };
 
   if (existing && existing._syncedAt && incoming._syncedAt &&
       new Date(existing._syncedAt) > new Date(incoming._syncedAt)) {

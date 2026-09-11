@@ -290,6 +290,146 @@ var CloudSync = (function() {
     return out;
   }
 
+  // ── Routines merge ────────────────────────────────────────────
+  // Routines get ticked on whichever device is nearest (the fridge
+  // iPad, a phone, the hub), so a whole-object "newest _syncedAt wins"
+  // pull silently dropped the other device's ticks. Merge item by item
+  // instead, using the per-item mark log routines.js writes
+  // (marks[day][routine][id] = {done, ts}). An explicit mark always
+  // beats a side with no mark, so un-ticking still propagates; when
+  // neither side has a mark (data written before marks existed) a tick
+  // wins over a blank, which is the safe direction for a checklist.
+  //
+  // Routine ids come from Routines.ROUTINE_IDS when it's loaded, so
+  // adding a fourth checklist doesn't need a matching edit here.
+  function _routineIds(a, b) {
+    var ids = {};
+    if (typeof Routines !== 'undefined' && Array.isArray(Routines.ROUTINE_IDS)) {
+      Routines.ROUTINE_IDS.forEach(function(r) { ids[r] = 1; });
+    } else {
+      ['morning', 'afternoon', 'evening'].forEach(function(r) { ids[r] = 1; });
+    }
+    // Anything either side actually stored, in case a device is running
+    // a newer build than this one.
+    [a, b].forEach(function(days) {
+      Object.keys(days || {}).forEach(function(day) {
+        Object.keys(days[day] || {}).forEach(function(r) {
+          if (Array.isArray(days[day][r])) ids[r] = 1;
+        });
+      });
+    });
+    return Object.keys(ids);
+  }
+
+  function _routineMark(data, day, routine, id) {
+    var m = data && data.marks && data.marks[day] && data.marks[day][routine];
+    var entry = m && m[id];
+    if (!entry || typeof entry.ts !== 'number') return null;
+    return entry;
+  }
+
+  function _mergeRoutines(server, local) {
+    var s = server || {}, l = local || {};
+    var localNewer = _parseTs(l._syncedAt) > _parseTs(s._syncedAt);
+    var out = Object.assign({}, s, l);
+
+    // Parent-edited checklists: newer side wins as a unit, so removing
+    // an item doesn't come back from the other device.
+    var sT = s.templates, lT = l.templates;
+    out.templates = (sT && lT) ? (localNewer ? lT : sT) : (lT || sT);
+    if (!out.templates) delete out.templates;
+
+    var sDays = s.days || {}, lDays = l.days || {};
+    var routines = _routineIds(sDays, lDays);
+    var dayKeys = {};
+    Object.keys(sDays).forEach(function(d) { dayKeys[d] = 1; });
+    Object.keys(lDays).forEach(function(d) { dayKeys[d] = 1; });
+
+    out.days = {};
+    Object.keys(dayKeys).forEach(function(day) {
+      var sDay = sDays[day] || {}, lDay = lDays[day] || {};
+      out.days[day] = {};
+      routines.forEach(function(routine) {
+        var sList = Array.isArray(sDay[routine]) ? sDay[routine] : [];
+        var lList = Array.isArray(lDay[routine]) ? lDay[routine] : [];
+
+        var ids = {};
+        sList.forEach(function(id) { ids[id] = 1; });
+        lList.forEach(function(id) { ids[id] = 1; });
+        var sMarks = (s.marks && s.marks[day] && s.marks[day][routine]) || {};
+        var lMarks = (l.marks && l.marks[day] && l.marks[day][routine]) || {};
+        Object.keys(sMarks).forEach(function(id) { ids[id] = 1; });
+        Object.keys(lMarks).forEach(function(id) { ids[id] = 1; });
+
+        out.days[day][routine] = Object.keys(ids).filter(function(id) {
+          var sDone = sList.indexOf(id) !== -1;
+          var lDone = lList.indexOf(id) !== -1;
+          if (sDone === lDone) return sDone;
+          var sMark = _routineMark(s, day, routine, id);
+          var lMark = _routineMark(l, day, routine, id);
+          if (sMark && lMark) return (lMark.ts > sMark.ts ? lMark.done : sMark.done);
+          if (lMark) return lMark.done;
+          if (sMark) return sMark.done;
+          return true; // legacy data on both sides: keep the tick.
+        });
+      });
+    });
+
+    // Mark log: keep the newer entry per item, trimmed to the same
+    // 30-day window routines.js prunes to so it can't grow forever.
+    out.marks = {};
+    var markDays = {};
+    Object.keys(s.marks || {}).forEach(function(d) { markDays[d] = 1; });
+    Object.keys(l.marks || {}).forEach(function(d) { markDays[d] = 1; });
+    Object.keys(markDays).forEach(function(day) {
+      out.marks[day] = {};
+      routines.forEach(function(routine) {
+        var sM = (s.marks && s.marks[day] && s.marks[day][routine]) || {};
+        var lM = (l.marks && l.marks[day] && l.marks[day][routine]) || {};
+        var merged = {};
+        Object.keys(sM).forEach(function(id) { merged[id] = sM[id]; });
+        Object.keys(lM).forEach(function(id) {
+          var cur = merged[id];
+          if (!cur || (lM[id] && lM[id].ts > cur.ts)) merged[id] = lM[id];
+        });
+        if (Object.keys(merged).length) out.marks[day][routine] = merged;
+      });
+      if (!Object.keys(out.marks[day]).length) delete out.marks[day];
+    });
+    var keptDays = Object.keys(out.marks).sort();
+    if (keptDays.length > 30) {
+      keptDays.slice(0, keptDays.length - 30).forEach(function(d) { delete out.marks[d]; });
+    }
+
+    // Streak counters: the best either device saw. lastFullDay is a
+    // YYYY-MM-DD string, so a plain compare picks the later day.
+    out.streak = Math.max(Number(s.streak) || 0, Number(l.streak) || 0);
+    out.bestStreak = Math.max(Number(s.bestStreak) || 0, Number(l.bestStreak) || 0, out.streak);
+    var sFull = s.lastFullDay || '', lFull = l.lastFullDay || '';
+    if (sFull || lFull) out.lastFullDay = (lFull > sFull ? lFull : sFull);
+
+    out._syncedAt = Math.max(_parseTs(s._syncedAt), _parseTs(l._syncedAt), Date.now());
+    return out;
+  }
+
+  // Everything in a routines snapshot that isn't bookkeeping, order
+  // independent. Used to tell "this merge has something the server
+  // lacks" apart from "only _syncedAt moved".
+  function _routineSignature(data) {
+    if (!data) return '';
+    var days = data.days || {};
+    var routines = _routineIds(days, null).sort();
+    var parts = Object.keys(days).sort().map(function(day) {
+      return day + ':' + routines.map(function(routine) {
+        var list = Array.isArray(days[day][routine]) ? days[day][routine].slice().sort() : [];
+        return list.join(',');
+      }).join('|');
+    });
+    return parts.join(';') +
+      '#' + (data.streak || 0) + '/' + (data.bestStreak || 0) + '/' + (data.lastFullDay || '') +
+      '#' + JSON.stringify(data.templates || null);
+  }
+
   state.push = function(key) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var info = _getAppInfo(key);
@@ -317,6 +457,21 @@ var CloudSync = (function() {
             });
           }
           return data;
+        })
+        .catch(function() { return data; });
+    } else if (info.appName === 'routines') {
+      // Same read-merge-write as World Cup: pull the server's copy and
+      // merge before PUTting, so a device that's been open all day
+      // can't overwrite ticks another device made in the meantime.
+      mergeStep = _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + info.kidKey + '/' + info.appName)
+        .then(function(res) {
+          if (!res.ok) return data;
+          return res.json().then(function(serverData) {
+            if (!serverData) return data;
+            var mergedR = _mergeRoutines(serverData, data);
+            try { localStorage.setItem(key, JSON.stringify(mergedR)); } catch (e) {}
+            return mergedR;
+          });
         })
         .catch(function() { return data; });
     } else if (info.appName === 'worldcup') {
@@ -407,6 +562,16 @@ var CloudSync = (function() {
         // device whose _syncedAt got out-flanked by a stale push still
         // picks up the missing members / results, and one that has
         // unique local additions keeps them.
+        if (info.appName === 'routines') {
+          var mergedRt = _mergeRoutines(serverData, localData);
+          try { localStorage.setItem(key, JSON.stringify(mergedRt)); }
+          catch (e) {
+            if (typeof Debug !== 'undefined') Debug.error('[Sync] Quota Exceeded', key + ' size: ' + JSON.stringify(mergedRt).length);
+            throw e;
+          }
+          return true;
+        }
+
         if (info.appName === 'worldcup') {
           var mergedWc = _mergeWorldCup(serverData, localData);
           try { localStorage.setItem(key, JSON.stringify(mergedWc)); }
@@ -477,6 +642,27 @@ var CloudSync = (function() {
             var sTime = _parseTs(serverData._syncedAt);
             var lTime = _parseTs(localData._syncedAt);
             var localMissing = !localStorage.getItem(key);
+
+            if (appName === 'routines') {
+              // Item-by-item merge, never a timestamp-gated overwrite.
+              // The Family Wall shows every kid, so this runs for kids
+              // who aren't the active user on this device.
+              try {
+                var rtMerged = _mergeRoutines(serverData, localData);
+                var rtBefore = localStorage.getItem(key);
+                var rtAfter = JSON.stringify(rtMerged);
+                localStorage.setItem(key, rtAfter);
+                if (rtBefore !== rtAfter) changed = true;
+                // If this device knew something the server didn't, send
+                // the merge back so every device converges on one copy.
+                if (_routineSignature(rtMerged) !== _routineSignature(serverData)) {
+                  promises.push(state.push(key));
+                }
+              } catch (e) {
+                if (typeof Debug !== 'undefined') Debug.warn('[Sync] routines merge failed for ' + key);
+              }
+              continue;
+            }
 
             if (sTime > lTime || localMissing || appName === 'activity') {
               var toStore = serverData;
@@ -723,10 +909,16 @@ var CloudSync = (function() {
     _initialSynced = true;
     var path = window.location.pathname;
     var isHub = path.indexOf('index.html') !== -1 || path === '/' || (path.length > 0 && path[path.length - 1] === '/');
+    // The Family Wall renders every kid's routines side by side, not
+    // just the signed-in profile's, so pulling only the active user
+    // left every other row showing whatever this device last saw.
+    var isWall = path.indexOf('family.html') !== -1;
     state.pullHousehold().then(function() {
       try { window.dispatchEvent(new CustomEvent('zs:household-synced')); } catch (e) {}
       state.pushHousehold();
-      if (isHub) {
+      if (isWall) {
+        state.pullAllKids().catch(function() { _updatePill('offline'); });
+      } else if (isHub) {
         state.syncProfiles()
           .then(function() {
             var loginScr = document.getElementById('login-screen');
