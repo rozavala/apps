@@ -101,7 +101,7 @@ var FamilyWall = (function() {
     if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(LOCATION_KEY);
     // Force a fresh weather fetch
     localStorage.removeItem(WEATHER_KEY);
-    fetchWeather().then(_paint).catch(_paint);
+    fetchWeather().then(_schedulePaint).catch(_schedulePaint);
   }
 
   // Open-Meteo geocoding — no API key, CORS-friendly. Pass a place
@@ -249,6 +249,14 @@ var FamilyWall = (function() {
   }
 
   // ---- Render ----
+  // Last markup we actually wrote. A repaint that would produce exactly
+  // the same wall skips the DOM write entirely: rebuilding root.innerHTML
+  // tears down and re-creates every card, which is what made the wall
+  // flicker through its checkboxes on load, and it also wipes the
+  // calendar/week cards back to their placeholders until the async
+  // refresh below refills them.
+  var _lastHtml = null;
+
   function _paint() {
     var root = document.getElementById('fw-root');
     if (!root) return;
@@ -269,7 +277,7 @@ var FamilyWall = (function() {
       '</div>';
     }).join('');
 
-    root.innerHTML =
+    var html =
       '<div class="fw-top">' +
         '<div class="fw-top-left">' +
           '<a class="fw-back" href="index.html" aria-label="Back to hub">←</a>' +
@@ -291,6 +299,10 @@ var FamilyWall = (function() {
         _renderShoppingCard() +
         _renderQuickCard() +
       '</div>';
+
+    if (html === _lastHtml) return;
+    _lastHtml = html;
+    root.innerHTML = html;
 
     // After paint, populate location modal cities and lazy-fetch calendar.
     _populateCityList();
@@ -316,7 +328,7 @@ var FamilyWall = (function() {
     try { cached = JSON.parse(localStorage.getItem(WEATHER_KEY) || 'null'); } catch (e) {}
     if (!cached || cached.error) {
       // Fire fetch and render placeholder; _paint will re-run when it returns.
-      fetchWeather().then(_paint).catch(_paint);
+      fetchWeather().then(_schedulePaint).catch(_schedulePaint);
       return '<div class="fw-card fw-card-weather">' +
         '<div class="fw-card-head"><span class="fw-card-icon">⛅</span> Weather</div>' +
         '<div class="fw-card-empty">Loading…</div>' +
@@ -1147,6 +1159,19 @@ var FamilyWall = (function() {
     return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
   }
 
+  // A wall load fires a burst of repaint triggers — the household pull,
+  // profile sync, and one per kid's routines pull — within a second or
+  // two of each other. Collapse a burst into a single paint on the next
+  // frame instead of rebuilding the wall once per event.
+  var _paintQueued = false;
+  function _schedulePaint() {
+    if (_paintQueued) return;
+    _paintQueued = true;
+    var run = function() { _paintQueued = false; _paint(); };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
+    else setTimeout(run, 16);
+  }
+
   // ---- Init ----
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _paint);
@@ -1157,14 +1182,22 @@ var FamilyWall = (function() {
   // Repaint when another device pushes a household update (eg. shared
   // home location changed on the iPad while we're looking at the laptop).
   if (typeof window !== 'undefined') {
+    var _lastLocationSig = JSON.stringify(getLocation());
     window.addEventListener('zs:household-synced', function() {
-      // Wipe the local weather cache so the new location's forecast loads.
-      try { localStorage.removeItem(WEATHER_KEY); } catch (e) {}
-      _paint();
+      // Only wipe the weather cache when the household location actually
+      // moved. This fires on every wall load, so clearing it blindly
+      // meant every open flashed "Loading…" in the weather card and
+      // refetched a forecast we already had.
+      var sig = JSON.stringify(getLocation());
+      if (sig !== _lastLocationSig) {
+        _lastLocationSig = sig;
+        try { localStorage.removeItem(WEATHER_KEY); } catch (e) {}
+      }
+      _schedulePaint();
     });
     // syncProfiles fires zs:synced when the merged profile list changed.
     // Repaint so things like routinesEnabled toggles reflect immediately.
-    window.addEventListener('zs:synced', function() { _paint(); });
+    window.addEventListener('zs:synced', function() { _schedulePaint(); });
 
     // The wall is the one screen that lives on a shared device and stays
     // open for hours (the fridge iPad), while the ticks happen on
@@ -1175,7 +1208,7 @@ var FamilyWall = (function() {
     function _refreshFromCloud() {
       if (typeof CloudSync === 'undefined' || !CloudSync.online || !CloudSync.pullAllKids) return;
       if (document.visibilityState === 'hidden') return;
-      CloudSync.pullAllKids().then(function() { _paint(); }).catch(function() {});
+      CloudSync.pullAllKids().then(function() { _schedulePaint(); }).catch(function() {});
     }
     setInterval(_refreshFromCloud, REFRESH_MS);
     document.addEventListener('visibilitychange', function() {
