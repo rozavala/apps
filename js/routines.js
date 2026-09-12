@@ -47,16 +47,16 @@ var Routines = (function() {
       { id: 'breakfast', label: 'Breakfast 🥣' },
       { id: 'bed',       label: 'Make the bed 🛏️' },
       { id: 'tidy_am',   label: 'Tidy the room 🧸' },
-      { id: 'backpack',  label: 'Lunchbox + water 🎒' },
+      { id: 'backpack',  label: 'Lunchbox + water 🎒', when: 'school' },
       { id: 'wash_am',   label: 'Teeth, face, hair 🦷' },
       { id: 'lotion_am', label: 'Sunscreen 🧴', when: 'sunny' },
-      { id: 'ready',     label: 'Ready by 7:45 → mint 🍬' }
+      { id: 'ready',     label: 'Ready by 7:45 → mint 🍬', when: 'school' }
     ],
     afternoon: [
       { id: 'hands',      label: 'Wash hands 🧼' },
-      { id: 'unpack',     label: 'Unpack backpack 🎒' },
+      { id: 'unpack',     label: 'Unpack backpack 🎒', when: 'school' },
       { id: 'tea',        label: 'Tea time 🫖' },
-      { id: 'homework',   label: 'Homework ✏️', only: ['Rodrigo'] },
+      { id: 'homework',   label: 'Homework ✏️', only: ['Rodrigo'], when: 'school' },
       { id: 'piano',      label: 'Piano 20 min 🎹', only: ['Pablo'] },
       { id: 'football',   label: 'Football kit ⚽', when: 'football' },
       { id: 'clothes_pm', label: 'Clothes away 👕' },
@@ -151,6 +151,148 @@ var Routines = (function() {
     return val;
   }
 
+  // ── School calendars ──────────────────────────────────────────
+  // The three kids are at three different schools, so "is there school
+  // today?" has three different answers. Tasks tagged `when: 'school'`
+  // only show on a day that kid's school is actually in session.
+  //
+  // UPDATE ME EACH AUGUST from each school's calendar.
+  var SCHOOLS = [
+    {
+      id: 'wo',
+      label: 'Washington Open \u00b7 Santa Clara Unified (2026\u201327)',
+      kids: ['emilia', 'ignacio', 'pablo'],
+      // Words that tie a calendar event to this school and no other.
+      tags: ['wo', 'washington open', 'scusd'],
+      // Verified twice: the district calendar (board approved 11/12/25)
+      // and the family's own calendar, which marks every one of these.
+      firstDay: '2026-08-10',
+      lastDay:  '2027-06-04',
+      off: [
+        ['2026-09-07'],                // Labor Day
+        ['2026-09-08'],                // Professional development
+        ['2026-10-12', '2026-10-13'],  // School not in session
+        ['2026-11-11'],                // Veterans Day
+        ['2026-11-23', '2026-11-27'],  // Thanksgiving week
+        ['2026-12-21', '2027-01-04'],  // Winter break, incl. the Jan 4 PD day
+        ['2027-01-18'],                // Martin Luther King Jr. Day
+        ['2027-02-15', '2027-02-19'],  // Presidents' week
+        ['2027-03-18', '2027-03-19'],  // Professional development
+        ['2027-04-12', '2027-04-16'],  // Spring break
+        ['2027-05-31']                 // Memorial Day
+      ]
+    },
+    {
+      id: 'qofa',
+      label: 'Queen of Apostles (2026\u201327)',
+      kids: ['rodrigo jr', 'rodrigo', 'rorro'],
+      tags: ['qofa', 'queen of apostles'],
+      // From the school's own public Google Calendar, linked in the
+      // principal's summer newsletter:
+      //   qofa-school.org_vpeusdh6qnnd7o1ouupgiapcec@group.calendar.google.com
+      // Subscribing to that feed directly would keep this current by
+      // itself; these dates are a snapshot of it.
+      firstDay: '2026-08-19',
+      lastDay:  '2027-06-11',
+      off: [
+        ['2026-09-07'],                // Labor Day
+        ['2026-10-09'],                // Teacher in-service
+        ['2026-11-09'],                // Veterans Day observance
+        ['2026-11-23', '2026-11-27'],  // Thanksgiving break
+        ['2026-12-21', '2027-01-04'],  // Christmas break, incl. the Jan 4 in-service
+        ['2027-01-18'],                // Martin Luther King Jr. Day
+        ['2027-02-15', '2027-02-19'],  // Winter break
+        ['2027-03-12'],                // Teacher in-service
+        ['2027-03-26', '2027-04-02'],  // Easter vacation
+        ['2027-05-31']                 // Memorial Day
+        // Not included: "No School for 7th Grade" on 2027-06-03.
+        // Rodrigo is in 6th this year, so it's a school day for him —
+        // worth revisiting when he moves up.
+      ]
+    },
+    {
+      id: 'cabrillo',
+      label: 'Cabrillo Montessori',
+      kids: ['isabel'],
+      tags: ['isa', 'isabel', 'cabrillo', 'montessori'],
+      // Still no dates. Montessori School of Silicon Valley publishes
+      // the shape of its year ("Thanksgiving whole week", "Winter Break
+      // Dec 23 - Jan 1") but not dated closures, and announces each one
+      // by email a few days ahead instead. First day this year was
+      // 2026-08-17. Falls back to "weekdays, unless the family calendar
+      // says otherwise".
+      firstDay: null,
+      lastDay:  null,
+      off: []
+    }
+  ];
+
+  function _schoolFor(userName) {
+    var tokens = _kidTokens(userName);
+    for (var i = 0; i < SCHOOLS.length; i++) {
+      var hit = SCHOOLS[i].kids.some(function(k) { return tokens.indexOf(k) !== -1; });
+      if (hit) return SCHOOLS[i];
+    }
+    return null;
+  }
+
+  // Closure wording, in both the languages this family writes in. Note
+  // what is deliberately absent: "primer/ultimo dia clases" marks a
+  // school day, and "clases de tenis" is not school at all.
+  var NO_SCHOOL_WORDS = [
+    'no tiene clases', 'no hay clases', 'sin clases',
+    'no school', 'non-student', 'non student', 'school holiday',
+    'teacher work day', 'staff development', 'pupil free',
+    'winter break', 'spring break', 'thanksgiving break', 'summer break'
+  ];
+
+  function _hasWord(text, word) {
+    if (word.indexOf(' ') !== -1) return text.indexOf(word) !== -1;
+    return new RegExp('(^|[^a-z0-9])' + word + '([^a-z0-9]|$)').test(text);
+  }
+
+  // A closure event applies to a school if it names that school, or
+  // names no school at all. "WO no tiene clases" must not send Rodrigo
+  // to the wall without his homework.
+  function _calendarSaysNoSchool(school) {
+    if (typeof FamilyCalendar === 'undefined' || !FamilyCalendar.getUpcoming) return false;
+    var events;
+    try { events = FamilyCalendar.getUpcoming(300); } catch (e) { return false; }
+    var todayStr = new Date().toDateString();
+    return events.some(function(ev) {
+      if (!ev || !ev.start || typeof ev.start.toDateString !== 'function') return false;
+      if (ev.start.toDateString() !== todayStr) return false;
+      var text = _norm(ev.summary);
+      var closure = NO_SCHOOL_WORDS.some(function(w) { return text.indexOf(w) !== -1; });
+      if (!closure) return false;
+      var mine = school && school.tags.some(function(t) { return _hasWord(text, t); });
+      if (mine) return true;
+      // Named someone else's school? Then it isn't about this kid.
+      var others = SCHOOLS.some(function(s) {
+        if (school && s.id === school.id) return false;
+        return s.tags.some(function(t) { return _hasWord(text, t); });
+      });
+      return !others;
+    });
+  }
+
+  function _isSchoolDay(userName) {
+    var school = _schoolFor(userName);
+    var key = 'school:' + (school ? school.id : 'none');
+    return _memoized(key, 60 * 1000, function() {
+      var day = new Date().getDay();
+      if (day === 0 || day === 6) return false;            // weekend
+      var today = _today();                                // YYYY-MM-DD sorts as text
+      if (school && school.firstDay && today < school.firstDay) return false;
+      if (school && school.lastDay  && today > school.lastDay)  return false;
+      var off = school && school.off.some(function(range) {
+        return today >= range[0] && today <= (range[1] || range[0]);
+      });
+      if (off) return false;
+      return !_calendarSaysNoSchool(school);
+    });
+  }
+
   function _sunnyEnough() {
     return _memoized('sunny', 10 * 60 * 1000, function() {
       var daily = null;
@@ -200,6 +342,7 @@ var Routines = (function() {
     }
     if (item.when === 'sunny') return _sunnyEnough();
     if (item.when === 'football') return _hasFootballToday(userName);
+    if (item.when === 'school') return _isSchoolDay(userName);
     return true;
   }
 
@@ -684,6 +827,8 @@ var Routines = (function() {
     ROUTINE_IDS: ROUTINE_IDS,
     LABELS: ROUTINE_LABELS,
     DEFAULTS: DEFAULTS,
+    SCHOOLS: SCHOOLS,
+    isSchoolDay: _isSchoolDay,
     _open: _open,
     _close: _close,
     _toggle: _toggle
