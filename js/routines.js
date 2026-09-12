@@ -184,24 +184,43 @@ var Routines = (function() {
     },
     {
       id: 'qofa',
-      label: 'Queen of Apostles',
+      label: 'Queen of Apostles (2026\u201327)',
       kids: ['rodrigo jr', 'rodrigo', 'rorro'],
       tags: ['qofa', 'queen of apostles'],
-      // No dates yet: Queen of Apostles publishes its calendar behind
-      // the parent portal, so until it's added here this falls back to
-      // "weekdays, unless the family calendar says otherwise".
-      firstDay: null,
-      lastDay:  null,
-      off: []
+      // From the school's own public Google Calendar, linked in the
+      // principal's summer newsletter:
+      //   qofa-school.org_vpeusdh6qnnd7o1ouupgiapcec@group.calendar.google.com
+      // Subscribing to that feed directly would keep this current by
+      // itself; these dates are a snapshot of it.
+      firstDay: '2026-08-19',
+      lastDay:  '2027-06-11',
+      off: [
+        ['2026-09-07'],                // Labor Day
+        ['2026-10-09'],                // Teacher in-service
+        ['2026-11-09'],                // Veterans Day observance
+        ['2026-11-23', '2026-11-27'],  // Thanksgiving break
+        ['2026-12-21', '2027-01-04'],  // Christmas break, incl. the Jan 4 in-service
+        ['2027-01-18'],                // Martin Luther King Jr. Day
+        ['2027-02-15', '2027-02-19'],  // Winter break
+        ['2027-03-12'],                // Teacher in-service
+        ['2027-03-26', '2027-04-02'],  // Easter vacation
+        ['2027-05-31']                 // Memorial Day
+        // Not included: "No School for 7th Grade" on 2027-06-03.
+        // Rodrigo is in 6th this year, so it's a school day for him —
+        // worth revisiting when he moves up.
+      ]
     },
     {
       id: 'cabrillo',
       label: 'Cabrillo Montessori',
       kids: ['isabel'],
       tags: ['isa', 'isabel', 'cabrillo', 'montessori'],
-      // Same: Montessori School of Silicon Valley publishes the shape of
-      // its year ("Thanksgiving whole week", "Winter Break Dec 23 - Jan
-      // 1") but not dated closures.
+      // Still no dates. Montessori School of Silicon Valley publishes
+      // the shape of its year ("Thanksgiving whole week", "Winter Break
+      // Dec 23 - Jan 1") but not dated closures, and announces each one
+      // by email a few days ahead instead. First day this year was
+      // 2026-08-17. Falls back to "weekdays, unless the family calendar
+      // says otherwise".
       firstDay: null,
       lastDay:  null,
       off: []
