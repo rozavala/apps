@@ -76,9 +76,18 @@ var FamilyCalendar = (function() {
     _saveCache(newCache);
   }
 
+  // Parsing the cache means JSON.parse of ~100KB plus re-hydrating a
+  // Date on every event, and the routines conditions call through here
+  // once per kid per render. Keep the parsed copy in memory and reuse
+  // it while the stored string is unchanged — comparing the raw string
+  // is a memcmp, the parse was ~160ms.
+  var _parsedCache = { raw: null, val: null };
+
   function _getCache() {
     try {
-      var raw = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') || {};
+      var rawStr = localStorage.getItem(CACHE_KEY) || '{}';
+      if (_parsedCache.raw === rawStr && _parsedCache.val) return _parsedCache.val;
+      var raw = JSON.parse(rawStr) || {};
       // Re-hydrate Date fields after JSON round-trip — saved events
       // store start/end/rrule.until as Dates but JSON serializes them
       // to ISO strings. Without this, _expand throws when calling
@@ -94,6 +103,8 @@ var FamilyCalendar = (function() {
           }
         });
       });
+      _parsedCache.raw = rawStr;
+      _parsedCache.val = raw;
       return raw;
     }
     catch (e) { return {}; }
@@ -388,10 +399,25 @@ var FamilyCalendar = (function() {
     });
   }
 
+  // Expanding every recurrence over the next 30 days costs ~140ms with
+  // a real family calendar, and the routines conditions ask once per
+  // kid per render. Memoize the expanded list; it can only change when
+  // the cached feed, the subscribed urls, or the day changes.
+  var _upcoming = { raw: null, urls: null, from: 0, list: null };
+
   function getUpcoming(maxCount) {
     var urls = getUrls();
-    var cache = _getCache();
+    var rawCache = localStorage.getItem(CACHE_KEY) || '{}';
+    var urlSig = urls.map(function(u) { return u.url; }).join('\n');
     var from = new Date(); from.setHours(0, 0, 0, 0);
+    var fromTs = from.getTime();
+
+    if (_upcoming.list && _upcoming.raw === rawCache &&
+        _upcoming.urls === urlSig && _upcoming.from === fromTs) {
+      return _sliceUpcoming(_upcoming.list, maxCount);
+    }
+
+    var cache = _getCache();
     var to = new Date(from.getTime() + EXPAND_DAYS * 86400000);
     var out = [];
     urls.forEach(function(u) {
@@ -404,7 +430,15 @@ var FamilyCalendar = (function() {
       });
     });
     out.sort(function(a, b) { return a.start - b.start; });
-    return out.slice(0, maxCount || 100);
+    _upcoming = { raw: rawCache, urls: urlSig, from: fromTs, list: out };
+    return _sliceUpcoming(out, maxCount);
+  }
+
+  // Hand out copies: callers must not be able to edit the memo.
+  function _sliceUpcoming(list, maxCount) {
+    return list.slice(0, maxCount || 100).map(function(ev) {
+      return Object.assign({}, ev);
+    });
   }
 
   // ---- Hub widget ----

@@ -101,7 +101,7 @@ var FamilyWall = (function() {
     if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(LOCATION_KEY);
     // Force a fresh weather fetch
     localStorage.removeItem(WEATHER_KEY);
-    fetchWeather().then(_schedulePaint).catch(_schedulePaint);
+    fetchWeather().then(_afterWeather).catch(_afterWeather);
   }
 
   // Open-Meteo geocoding — no API key, CORS-friendly. Pass a place
@@ -260,10 +260,12 @@ var FamilyWall = (function() {
   function _paint() {
     var root = document.getElementById('fw-root');
     if (!root) return;
-    // Re-read the weather and calendar conditions: the calendar lands
-    // after the first paint, and a task must not stay hidden because
-    // the first paint asked before the data arrived.
-    if (typeof Routines !== 'undefined' && Routines.refreshConditions) Routines.refreshConditions();
+    // NB: the weather/calendar conditions are NOT invalidated here.
+    // Doing that on every render made each paint re-scan the calendar
+    // once per kid — ~160ms each — which is what made a tap on the wall
+    // take about a second to show its tick. _refreshConditions() is
+    // called instead at the two moments the answer can actually change:
+    // when a calendar refresh lands, and when a forecast does.
     var profiles = _byAgeDesc((typeof getProfiles === 'function') ? getProfiles() : []);
     var active = (typeof getActiveUser === 'function') ? getActiveUser() : null;
 
@@ -308,6 +310,7 @@ var FamilyWall = (function() {
     _populateCityList();
     if (typeof FamilyCalendar !== 'undefined' && FamilyCalendar.refresh) {
       FamilyCalendar.refresh(false).then(function() {
+        _refreshConditions();
         _paintCalendar();
         _paintWeek();
       }).catch(function() {});
@@ -328,7 +331,7 @@ var FamilyWall = (function() {
     try { cached = JSON.parse(localStorage.getItem(WEATHER_KEY) || 'null'); } catch (e) {}
     if (!cached || cached.error) {
       // Fire fetch and render placeholder; _paint will re-run when it returns.
-      fetchWeather().then(_schedulePaint).catch(_schedulePaint);
+      fetchWeather().then(_afterWeather).catch(_afterWeather);
       return '<div class="fw-card fw-card-weather">' +
         '<div class="fw-card-head"><span class="fw-card-icon">⛅</span> Weather</div>' +
         '<div class="fw-card-empty">Loading…</div>' +
@@ -445,7 +448,7 @@ var FamilyWall = (function() {
       if (!bucket) return '';
       var chips = bucket.items.map(function(it) {
         return '<button class="fw-r-task ' + (it.done ? 'done' : '') + '" ' +
-                 'onclick="FamilyWall.toggleRoutine(\'' + _escAttr(p.name) + '\', \'' + which + '\', \'' + _escAttr(it.id) + '\')">' +
+                 'onclick="FamilyWall.toggleRoutine(\'' + _escAttr(p.name) + '\', \'' + which + '\', \'' + _escAttr(it.id) + '\', this)">' +
           '<span class="fw-r-check">' + (it.done ? '✓' : '') + '</span>' +
           _esc(it.label) +
         '</button>';
@@ -860,11 +863,43 @@ var FamilyWall = (function() {
     window.location.href = 'index.html';
   }
 
+  // A forecast just landed (or failed to): the sunscreen task may need
+  // to appear or go away, so let the conditions recompute before the
+  // repaint that follows.
+  function _afterWeather() {
+    _refreshConditions();
+    _schedulePaint();
+  }
+
+  // Let the routines conditions (sunscreen if it's sunny, cleats if
+  // there's football) recompute. Only worth doing when the forecast or
+  // the calendar has actually moved — see the note in _paint.
+  function _refreshConditions() {
+    // Just drop the memo. If recomputing actually changes which tasks
+    // are on show, the next render's markup differs and the paint lands
+    // on its own; forcing one here would defeat the identical-render
+    // guard and put the wall back to rebuilding itself on every event.
+    if (typeof Routines !== 'undefined' && Routines.refreshConditions) {
+      Routines.refreshConditions();
+    }
+  }
+
   // ---- Routine toggle ----
-  function toggleRoutine(name, routine, itemId) {
+  function toggleRoutine(name, routine, itemId, el) {
     if (typeof Routines === 'undefined' || !Routines.toggleFor) return;
+    // Show the tick straight away on the button that was tapped. The
+    // full repaint below rebuilds the wall, and waiting for it is what
+    // made the kids think the tap hadn't registered.
+    if (el && el.classList) {
+      var nowDone = !el.classList.contains('done');
+      if (nowDone) el.classList.add('done'); else el.classList.remove('done');
+      var check = el.querySelector ? el.querySelector('.fw-r-check') : null;
+      if (check) check.textContent = nowDone ? '\u2713' : '';
+    }
     Routines.toggleFor(name, routine, itemId);
-    _paint();
+    // Deferred past the next frame so the tick the browser just drew
+    // isn't held back by the rebuild.
+    _schedulePaint(true);
   }
 
   // ---- Parent gate ----------------------------------------------
@@ -1164,12 +1199,17 @@ var FamilyWall = (function() {
   // two of each other. Collapse a burst into a single paint on the next
   // frame instead of rebuilding the wall once per event.
   var _paintQueued = false;
-  function _schedulePaint() {
+  function _schedulePaint(afterFrame) {
     if (_paintQueued) return;
     _paintQueued = true;
     var run = function() { _paintQueued = false; _paint(); };
-    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
-    else setTimeout(run, 16);
+    if (typeof requestAnimationFrame === 'function') {
+      // afterFrame lets the browser display a hand-applied change (the
+      // tick on a tapped task) before we spend time rebuilding.
+      requestAnimationFrame(afterFrame ? function() { setTimeout(run, 0); } : run);
+    } else {
+      setTimeout(run, afterFrame ? 32 : 16);
+    }
   }
 
   // ---- Init ----
