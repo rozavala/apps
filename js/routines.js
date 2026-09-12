@@ -47,16 +47,16 @@ var Routines = (function() {
       { id: 'breakfast', label: 'Breakfast 🥣' },
       { id: 'bed',       label: 'Make the bed 🛏️' },
       { id: 'tidy_am',   label: 'Tidy the room 🧸' },
-      { id: 'backpack',  label: 'Lunchbox + water 🎒' },
+      { id: 'backpack',  label: 'Lunchbox + water 🎒', when: 'school' },
       { id: 'wash_am',   label: 'Teeth, face, hair 🦷' },
       { id: 'lotion_am', label: 'Sunscreen 🧴', when: 'sunny' },
-      { id: 'ready',     label: 'Ready by 7:45 → mint 🍬' }
+      { id: 'ready',     label: 'Ready by 7:45 → mint 🍬', when: 'school' }
     ],
     afternoon: [
       { id: 'hands',      label: 'Wash hands 🧼' },
-      { id: 'unpack',     label: 'Unpack backpack 🎒' },
+      { id: 'unpack',     label: 'Unpack backpack 🎒', when: 'school' },
       { id: 'tea',        label: 'Tea time 🫖' },
-      { id: 'homework',   label: 'Homework ✏️', only: ['Rodrigo'] },
+      { id: 'homework',   label: 'Homework ✏️', only: ['Rodrigo'], when: 'school' },
       { id: 'piano',      label: 'Piano 20 min 🎹', only: ['Pablo'] },
       { id: 'football',   label: 'Football kit ⚽', when: 'football' },
       { id: 'clothes_pm', label: 'Clothes away 👕' },
@@ -151,6 +151,75 @@ var Routines = (function() {
     return val;
   }
 
+  // ── School calendar ───────────────────────────────────────────
+  // Santa Clara Unified, 2026-27 (board approved 11/12/25). Tasks
+  // tagged `when: 'school'` only show on days school is actually in
+  // session: weekdays, inside the school year, minus every holiday,
+  // break and non-student day below.
+  //
+  // UPDATE ME EACH AUGUST: when the year rolls over, replace these
+  // dates from the district calendar at santaclarausd.org/calendar.
+  // Until then, every day after `lastDay` counts as "no school",
+  // which is right for the summer and wrong from the moment the next
+  // year starts.
+  var SCHOOL_YEAR = {
+    label: 'Santa Clara Unified 2026\u201327',
+    firstDay: '2026-08-10',
+    lastDay:  '2027-06-04',
+    // [from, to] inclusive; a single date may be given on its own.
+    off: [
+      ['2026-09-07'],                // Labor Day
+      ['2026-09-08'],                // Professional development
+      ['2026-10-12', '2026-10-13'],  // School not in session
+      ['2026-11-11'],                // Veterans Day
+      ['2026-11-23', '2026-11-27'],  // Thanksgiving week
+      ['2026-12-21', '2027-01-04'],  // Winter break, incl. the Jan 4 PD day
+      ['2027-01-18'],                // Martin Luther King Jr. Day
+      ['2027-02-15', '2027-02-19'],  // Presidents' week
+      ['2027-03-18', '2027-03-19'],  // Professional development
+      ['2027-04-12', '2027-04-16'],  // Spring break
+      ['2027-05-31']                 // Memorial Day
+    ]
+  };
+
+  // A one-off day the district calls off (teacher training, a smoke
+  // day, an early closure) shows up on the family calendar long before
+  // anyone edits the table above, so an event saying so wins.
+  var NO_SCHOOL_WORDS = [
+    'no school', 'non-student', 'non student', 'school holiday',
+    'teacher work day', 'staff development', 'pupil free',
+    'sin clases', 'no hay clases',
+    'winter break', 'spring break', 'thanksgiving break', 'summer break'
+  ];
+
+  function _calendarSaysNoSchool() {
+    if (typeof FamilyCalendar === 'undefined' || !FamilyCalendar.getUpcoming) return false;
+    var events;
+    try { events = FamilyCalendar.getUpcoming(300); } catch (e) { return false; }
+    var todayStr = new Date().toDateString();
+    return events.some(function(ev) {
+      if (!ev || !ev.start || typeof ev.start.toDateString !== 'function') return false;
+      if (ev.start.toDateString() !== todayStr) return false;
+      var text = _norm(ev.summary);
+      return NO_SCHOOL_WORDS.some(function(w) { return text.indexOf(w) !== -1; });
+    });
+  }
+
+  function _isSchoolDay() {
+    return _memoized('school', 60 * 1000, function() {
+      var day = new Date().getDay();
+      if (day === 0 || day === 6) return false;          // weekend
+      var today = _today();                              // YYYY-MM-DD, sorts as text
+      if (today < SCHOOL_YEAR.firstDay) return false;    // before the year starts
+      if (today > SCHOOL_YEAR.lastDay) return false;     // summer, or a stale table
+      var off = SCHOOL_YEAR.off.some(function(range) {
+        return today >= range[0] && today <= (range[1] || range[0]);
+      });
+      if (off) return false;
+      return !_calendarSaysNoSchool();
+    });
+  }
+
   function _sunnyEnough() {
     return _memoized('sunny', 10 * 60 * 1000, function() {
       var daily = null;
@@ -200,6 +269,7 @@ var Routines = (function() {
     }
     if (item.when === 'sunny') return _sunnyEnough();
     if (item.when === 'football') return _hasFootballToday(userName);
+    if (item.when === 'school') return _isSchoolDay();
     return true;
   }
 
@@ -684,6 +754,8 @@ var Routines = (function() {
     ROUTINE_IDS: ROUTINE_IDS,
     LABELS: ROUTINE_LABELS,
     DEFAULTS: DEFAULTS,
+    SCHOOL_YEAR: SCHOOL_YEAR,
+    isSchoolDay: _isSchoolDay,
     _open: _open,
     _close: _close,
     _toggle: _toggle
