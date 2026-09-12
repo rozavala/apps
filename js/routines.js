@@ -151,48 +151,91 @@ var Routines = (function() {
     return val;
   }
 
-  // ── School calendar ───────────────────────────────────────────
-  // Santa Clara Unified, 2026-27 (board approved 11/12/25). Tasks
-  // tagged `when: 'school'` only show on days school is actually in
-  // session: weekdays, inside the school year, minus every holiday,
-  // break and non-student day below.
+  // ── School calendars ──────────────────────────────────────────
+  // The three kids are at three different schools, so "is there school
+  // today?" has three different answers. Tasks tagged `when: 'school'`
+  // only show on a day that kid's school is actually in session.
   //
-  // UPDATE ME EACH AUGUST: when the year rolls over, replace these
-  // dates from the district calendar at santaclarausd.org/calendar.
-  // Until then, every day after `lastDay` counts as "no school",
-  // which is right for the summer and wrong from the moment the next
-  // year starts.
-  var SCHOOL_YEAR = {
-    label: 'Santa Clara Unified 2026\u201327',
-    firstDay: '2026-08-10',
-    lastDay:  '2027-06-04',
-    // [from, to] inclusive; a single date may be given on its own.
-    off: [
-      ['2026-09-07'],                // Labor Day
-      ['2026-09-08'],                // Professional development
-      ['2026-10-12', '2026-10-13'],  // School not in session
-      ['2026-11-11'],                // Veterans Day
-      ['2026-11-23', '2026-11-27'],  // Thanksgiving week
-      ['2026-12-21', '2027-01-04'],  // Winter break, incl. the Jan 4 PD day
-      ['2027-01-18'],                // Martin Luther King Jr. Day
-      ['2027-02-15', '2027-02-19'],  // Presidents' week
-      ['2027-03-18', '2027-03-19'],  // Professional development
-      ['2027-04-12', '2027-04-16'],  // Spring break
-      ['2027-05-31']                 // Memorial Day
-    ]
-  };
+  // UPDATE ME EACH AUGUST from each school's calendar.
+  var SCHOOLS = [
+    {
+      id: 'wo',
+      label: 'Washington Open \u00b7 Santa Clara Unified (2026\u201327)',
+      kids: ['emilia', 'ignacio', 'pablo'],
+      // Words that tie a calendar event to this school and no other.
+      tags: ['wo', 'washington open', 'scusd'],
+      // Verified twice: the district calendar (board approved 11/12/25)
+      // and the family's own calendar, which marks every one of these.
+      firstDay: '2026-08-10',
+      lastDay:  '2027-06-04',
+      off: [
+        ['2026-09-07'],                // Labor Day
+        ['2026-09-08'],                // Professional development
+        ['2026-10-12', '2026-10-13'],  // School not in session
+        ['2026-11-11'],                // Veterans Day
+        ['2026-11-23', '2026-11-27'],  // Thanksgiving week
+        ['2026-12-21', '2027-01-04'],  // Winter break, incl. the Jan 4 PD day
+        ['2027-01-18'],                // Martin Luther King Jr. Day
+        ['2027-02-15', '2027-02-19'],  // Presidents' week
+        ['2027-03-18', '2027-03-19'],  // Professional development
+        ['2027-04-12', '2027-04-16'],  // Spring break
+        ['2027-05-31']                 // Memorial Day
+      ]
+    },
+    {
+      id: 'qofa',
+      label: 'Queen of Apostles',
+      kids: ['rodrigo jr', 'rodrigo', 'rorro'],
+      tags: ['qofa', 'queen of apostles'],
+      // No dates yet: Queen of Apostles publishes its calendar behind
+      // the parent portal, so until it's added here this falls back to
+      // "weekdays, unless the family calendar says otherwise".
+      firstDay: null,
+      lastDay:  null,
+      off: []
+    },
+    {
+      id: 'cabrillo',
+      label: 'Cabrillo Montessori',
+      kids: ['isabel'],
+      tags: ['isa', 'isabel', 'cabrillo', 'montessori'],
+      // Same: Montessori School of Silicon Valley publishes the shape of
+      // its year ("Thanksgiving whole week", "Winter Break Dec 23 - Jan
+      // 1") but not dated closures.
+      firstDay: null,
+      lastDay:  null,
+      off: []
+    }
+  ];
 
-  // A one-off day the district calls off (teacher training, a smoke
-  // day, an early closure) shows up on the family calendar long before
-  // anyone edits the table above, so an event saying so wins.
+  function _schoolFor(userName) {
+    var tokens = _kidTokens(userName);
+    for (var i = 0; i < SCHOOLS.length; i++) {
+      var hit = SCHOOLS[i].kids.some(function(k) { return tokens.indexOf(k) !== -1; });
+      if (hit) return SCHOOLS[i];
+    }
+    return null;
+  }
+
+  // Closure wording, in both the languages this family writes in. Note
+  // what is deliberately absent: "primer/ultimo dia clases" marks a
+  // school day, and "clases de tenis" is not school at all.
   var NO_SCHOOL_WORDS = [
+    'no tiene clases', 'no hay clases', 'sin clases',
     'no school', 'non-student', 'non student', 'school holiday',
     'teacher work day', 'staff development', 'pupil free',
-    'sin clases', 'no hay clases',
     'winter break', 'spring break', 'thanksgiving break', 'summer break'
   ];
 
-  function _calendarSaysNoSchool() {
+  function _hasWord(text, word) {
+    if (word.indexOf(' ') !== -1) return text.indexOf(word) !== -1;
+    return new RegExp('(^|[^a-z0-9])' + word + '([^a-z0-9]|$)').test(text);
+  }
+
+  // A closure event applies to a school if it names that school, or
+  // names no school at all. "WO no tiene clases" must not send Rodrigo
+  // to the wall without his homework.
+  function _calendarSaysNoSchool(school) {
     if (typeof FamilyCalendar === 'undefined' || !FamilyCalendar.getUpcoming) return false;
     var events;
     try { events = FamilyCalendar.getUpcoming(300); } catch (e) { return false; }
@@ -201,22 +244,33 @@ var Routines = (function() {
       if (!ev || !ev.start || typeof ev.start.toDateString !== 'function') return false;
       if (ev.start.toDateString() !== todayStr) return false;
       var text = _norm(ev.summary);
-      return NO_SCHOOL_WORDS.some(function(w) { return text.indexOf(w) !== -1; });
+      var closure = NO_SCHOOL_WORDS.some(function(w) { return text.indexOf(w) !== -1; });
+      if (!closure) return false;
+      var mine = school && school.tags.some(function(t) { return _hasWord(text, t); });
+      if (mine) return true;
+      // Named someone else's school? Then it isn't about this kid.
+      var others = SCHOOLS.some(function(s) {
+        if (school && s.id === school.id) return false;
+        return s.tags.some(function(t) { return _hasWord(text, t); });
+      });
+      return !others;
     });
   }
 
-  function _isSchoolDay() {
-    return _memoized('school', 60 * 1000, function() {
+  function _isSchoolDay(userName) {
+    var school = _schoolFor(userName);
+    var key = 'school:' + (school ? school.id : 'none');
+    return _memoized(key, 60 * 1000, function() {
       var day = new Date().getDay();
-      if (day === 0 || day === 6) return false;          // weekend
-      var today = _today();                              // YYYY-MM-DD, sorts as text
-      if (today < SCHOOL_YEAR.firstDay) return false;    // before the year starts
-      if (today > SCHOOL_YEAR.lastDay) return false;     // summer, or a stale table
-      var off = SCHOOL_YEAR.off.some(function(range) {
+      if (day === 0 || day === 6) return false;            // weekend
+      var today = _today();                                // YYYY-MM-DD sorts as text
+      if (school && school.firstDay && today < school.firstDay) return false;
+      if (school && school.lastDay  && today > school.lastDay)  return false;
+      var off = school && school.off.some(function(range) {
         return today >= range[0] && today <= (range[1] || range[0]);
       });
       if (off) return false;
-      return !_calendarSaysNoSchool();
+      return !_calendarSaysNoSchool(school);
     });
   }
 
@@ -269,7 +323,7 @@ var Routines = (function() {
     }
     if (item.when === 'sunny') return _sunnyEnough();
     if (item.when === 'football') return _hasFootballToday(userName);
-    if (item.when === 'school') return _isSchoolDay();
+    if (item.when === 'school') return _isSchoolDay(userName);
     return true;
   }
 
@@ -754,7 +808,7 @@ var Routines = (function() {
     ROUTINE_IDS: ROUTINE_IDS,
     LABELS: ROUTINE_LABELS,
     DEFAULTS: DEFAULTS,
-    SCHOOL_YEAR: SCHOOL_YEAR,
+    SCHOOLS: SCHOOLS,
     isSchoolDay: _isSchoolDay,
     _open: _open,
     _close: _close,
