@@ -823,9 +823,14 @@ var FamilyWall = (function() {
       '</div>';
     }
     var top = pending.slice(0, 6).map(function(it) {
+      // shopping-list.js stores the item under `text`. Reading only
+      // name/label left every row blank, so the wall showed a column of
+      // bare category labels — "hardware" where "Bater\u00edas LR1130"
+      // should be.
+      var label = it.text || it.name || it.label || '';
       return '<div class="fw-shop-row">' +
         '<div class="fw-shop-cat">' + _esc(it.category || 'Other') + '</div>' +
-        '<div class="fw-summary">' + _esc(it.name || it.label || '') + '</div>' +
+        '<div class="fw-summary">' + _esc(label) + '</div>' +
       '</div>';
     }).join('');
     var more = pending.length > 6 ? '<div class="fw-shop-more">+ ' + (pending.length - 6) + ' more</div>' : '';

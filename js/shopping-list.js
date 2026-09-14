@@ -18,6 +18,80 @@ var ShoppingList = (function() {
     other:     { label: '📦 Other',     order: 6 }
   };
 
+  // ── Amazon lookup (parents only) ──────────────────────────────
+  // A per-item link that opens an Amazon search for that item, so the
+  // weekly order doesn't mean retyping "Bater\u00edas LR1130" by hand.
+  // It is a plain search link: nothing is bought, nothing is added to a
+  // cart, and no account or API is involved.
+  //
+  // Two gates, because neither is enough alone:
+  //   1. The signed-in profile must be marked as a parent. Profiles
+  //      named Papa/Mama count unless a profile says otherwise, so this
+  //      works before anyone touches Parents Corner.
+  //   2. The Parent PIN must have been entered on this device in this
+  //      browser session. Picking a profile isn't authenticated — any
+  //      kid can tap Papa's avatar — so the profile check on its own
+  //      would only be a curtain.
+  // The unlock lives in sessionStorage, so it dies with the tab and
+  // never syncs anywhere.
+  var UNLOCK_KEY = 'zs_parent_unlocked';
+  var PARENT_NAMES = ['papa', 'mama', 'mam\u00e1', 'dad', 'mom', 'mum'];
+
+  function _activeIsParent() {
+    var user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+    if (!user || user.isGuest) return false;
+    if (user.isParent === true) return true;
+    if (user.isParent === false) return false;
+    return PARENT_NAMES.indexOf(String(user.name || '').trim().toLowerCase()) !== -1;
+  }
+
+  function _isUnlocked() {
+    try { return sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function _amazonVisible() {
+    return _activeIsParent() && _isUnlocked();
+  }
+
+  function _amazonUrl(text) {
+    return 'https://www.amazon.com/s?k=' + encodeURIComponent(String(text || '').trim());
+  }
+
+  // Called from the "Shop" button in the header.
+  function unlockShopping() {
+    if (!_activeIsParent()) {
+      alert('Sign in as a parent first to use Amazon lookup.');
+      return;
+    }
+    if (_isUnlocked()) {
+      try { sessionStorage.removeItem(UNLOCK_KEY); } catch (e) {}
+      _render();
+      return;
+    }
+    var expected = (typeof getParentPin === 'function') ? String(getParentPin()) : '1234';
+    var entered = window.prompt('Parent PIN to show Amazon links:');
+    if (entered === null) return;
+    if (String(entered).trim() !== expected) {
+      alert('That PIN is not right.');
+      return;
+    }
+    try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
+    _render();
+  }
+
+  // Reflects state in the header button, and hides it entirely from
+  // anyone who isn't a parent so the kids never see the affordance.
+  function _renderShopToggle() {
+    var btn = document.getElementById('sl-shop-toggle');
+    if (!btn) return;
+    if (!_activeIsParent()) { btn.style.display = 'none'; return; }
+    btn.style.display = '';
+    btn.textContent = _isUnlocked() ? '\ud83d\uded2 Amazon: on' : '\ud83d\udd12 Amazon';
+    btn.title = _isUnlocked()
+      ? 'Hide the Amazon lookup links'
+      : 'Enter the parent PIN to show Amazon lookup links';
+  }
+
   function _load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -56,6 +130,7 @@ var ShoppingList = (function() {
     if (!listEl) return;
 
     if (items.length === 0) {
+      _renderShopToggle();
       listEl.innerHTML = '';
       if (emptyEl) emptyEl.style.display = '';
       if (archiveBtn) archiveBtn.disabled = true;
@@ -78,6 +153,9 @@ var ShoppingList = (function() {
       return (CATEGORIES[a] ? CATEGORIES[a].order : 99) - (CATEGORIES[b] ? CATEGORIES[b].order : 99);
     });
 
+    var showShop = _amazonVisible();
+    _renderShopToggle();
+
     var html = '';
     orderedCats.forEach(function(cat) {
       var catItems = groups[cat];
@@ -88,9 +166,16 @@ var ShoppingList = (function() {
 
       html += '<div class="sl-group-label">' + _escape(CATEGORIES[cat].label) + '</div>';
       catItems.forEach(function(item) {
+        var shopLink = showShop
+          ? '<a class="sl-item-shop" href="' + _escape(_amazonUrl(item.text)) + '" ' +
+              'target="_blank" rel="noopener noreferrer" ' +
+              'aria-label="Search Amazon for ' + _escape(item.text) + '" ' +
+              'title="Search Amazon for ' + _escape(item.text) + '">\ud83d\udd0d</a>'
+          : '';
         html += '<div class="sl-item ' + (item.checked ? 'checked' : '') + '" data-id="' + _escape(item.id) + '">' +
           '<button class="sl-check" onclick="ShoppingList.toggle(\'' + _escape(item.id) + '\')" aria-label="Toggle ' + _escape(item.text) + '">✓</button>' +
           '<div class="sl-item-text">' + _escape(item.text) + '</div>' +
+          shopLink +
           '<button class="sl-item-delete" onclick="ShoppingList.remove(\'' + _escape(item.id) + '\')" aria-label="Delete ' + _escape(item.text) + '">✕</button>' +
         '</div>';
       });
@@ -211,6 +296,9 @@ var ShoppingList = (function() {
     toggle: toggle,
     remove: remove,
     archiveChecked: archiveChecked,
-    share: share
+    share: share,
+    unlockShopping: unlockShopping,
+    _amazonVisible: _amazonVisible,
+    _amazonUrl: _amazonUrl
   };
 })();

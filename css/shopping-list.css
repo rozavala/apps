@@ -221,3 +221,21 @@
   .sl-add select { max-width: 90px; font-size: 0.8rem; padding: 12px 6px; }
   .sl-add-btn { width: 42px; font-size: 1.4rem; }
 }
+
+/* Amazon lookup link on a row. Only rendered for a signed-in parent
+   who has entered the PIN this session — see shopping-list.js. */
+.sl-item-shop {
+  flex-shrink: 0;
+  text-decoration: none;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.sl-item-shop:hover, .sl-item-shop:focus-visible {
+  opacity: 1;
+  background: rgba(255, 153, 0, 0.16);
+}
+.sl-item.checked .sl-item-shop { opacity: 0.35; }
