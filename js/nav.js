@@ -8,7 +8,14 @@
    - Does NOT run on index.html (hub has its own nav)
    - Does NOT run on little-maestro.html (LM has its own header)
    - On all other app pages: creates nav inside .app container
-   - If no user is logged in, redirects to index.html
+   - If no user is logged in, redirects to index.html — EXCEPT on
+     pages that declare themselves household-scoped with
+     <body data-household>. The shopping list and the weekly menu are
+     shared family data (zs_shopping_list / zs_menu live in the
+     household bucket, not under a kid), and they're linked straight
+     from the Family Wall, which nobody is signed in to. Bouncing
+     those to a login screen asked for a password to see the list
+     already displayed on the wall behind it.
    ================================================================ */
 
 (function() {
@@ -21,6 +28,37 @@
     return false;
   }
 
+  // Shared family data, readable and editable without signing in.
+  function _isHousehold() {
+    return !!(document.body && document.body.hasAttribute('data-household'));
+  }
+
+  // A nav for nobody in particular: a way back to the wall and to the
+  // hub, and no user badge or star count, because there's no user.
+  function _renderHouseholdNav() {
+    var appContainer = document.querySelector('.app') || document.body;
+    if (document.getElementById('zs-nav')) return;
+
+    var nav = document.createElement('div');
+    nav.id = 'zs-nav';
+
+    var wallBtn = document.createElement('a');
+    wallBtn.className = 'home-btn';
+    wallBtn.href = 'family.html';
+    wallBtn.title = 'Back to the family wall';
+    wallBtn.textContent = '\u2190';
+
+    var homeBtn = document.createElement('a');
+    homeBtn.className = 'home-btn';
+    homeBtn.href = 'index.html';
+    homeBtn.title = 'Back to apps';
+    homeBtn.textContent = '\ud83c\udfe0';
+
+    nav.appendChild(wallBtn);
+    nav.appendChild(homeBtn);
+    appContainer.prepend(nav);
+  }
+
   function renderNav() {
     if (shouldSkip()) return;
     if (typeof getActiveUser !== 'function') {
@@ -30,7 +68,11 @@
 
     var user = getActiveUser();
     if (!user) {
-      window.location.href = 'index.html';
+      if (!_isHousehold()) {
+        window.location.href = 'index.html';
+        return;
+      }
+      _renderHouseholdNav();
       return;
     }
 
