@@ -1,37 +1,5 @@
 {
-  "generatedAt": "2026-09-13T13:57:54.136Z",
+  "generatedAt": "2026-09-16T14:06:20.737Z",
   "windowHours": 72,
-  "days": [
-    {
-      "day": "2026-09-13",
-      "groups": [
-        {
-          "entry": {
-            "id": "e_mtzvjktk_f1bcua",
-            "ts": 1789307595560,
-            "clientTs": 1789307595560,
-            "kind": "error",
-            "app": "art-studio",
-            "page": "art-studio.html",
-            "message": "TypeError: null is not an object (evaluating 'currentLesson.id')",
-            "filename": "https://rozavala.github.io/apps/js/art-studio.js",
-            "lineno": 625,
-            "colno": 51,
-            "stack": "finishLesson@https://rozavala.github.io/apps/js/art-studio.js:625:51",
-            "user": "u-46a6e4",
-            "age": 7,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 1,
-          "firstTs": 1789307595560,
-          "lastTs": 1789307595560,
-          "users": [
-            "u-46a6e4"
-          ]
-        }
-      ]
-    }
-  ]
+  "days": []
 }
