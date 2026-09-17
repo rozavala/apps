@@ -436,7 +436,13 @@ var Routines = (function() {
 
   // Caches that can be thrown away and rebuilt from the network. When
   // the device is out of room these go first — never a kid's data.
-  var DISPOSABLE_KEYS = ['zs_fcal_cache', 'zs_fw_weather', 'zs_diag_buf'];
+  var DISPOSABLE_KEYS = [
+    'zs_fcal_cache',          // calendar feed, refetched
+    'zs_fw_weather',          // forecast, refetched
+    'zs_diag_buf',            // diagnostics buffer
+    'wc2026.nominations',     // World Cup squads — world-cup.js calls this
+    'wc2026.summaryCache'     // "fully-regenerable" and evicts it itself
+  ];
 
   // Days older than this are history nobody reads. Trimming keeps a
   // year of ticking from slowly filling a shared iPad.

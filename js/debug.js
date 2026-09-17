@@ -216,7 +216,8 @@ var Debug = (function() {
     
     var html = '<div style="background:#1a1a2e; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #3b82f655;">' +
       '<h3 style="margin-top:0">📊 Storage Manager</h3>' +
-      '<p style="font-size:12px; color:#aaa;">Total Usage: ' + (total / (1024 * 1024)).toFixed(2) + ' MB / 5.00 MB</p>' +
+      '<p style="font-size:12px; color:#aaa;">localStorage: ' + (total / (1024 * 1024)).toFixed(2) + ' MB' +
+        '<span id="debug-origin-usage"></span></p>' +
       '<button onclick="Debug.render()" style="background:#333; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px;">Back to Logs</button>' +
       '<div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">';
     
@@ -234,6 +235,30 @@ var Debug = (function() {
     
     html += '</div></div>';
     list.innerHTML = html;
+    _reportOriginUsage();
+  }
+
+  // localStorage is only part of what Safari counts. The origin budget
+  // also covers IndexedDB (Little Maestro recordings) and the service
+  // worker's cache, so a device can be out of room while this panel
+  // reads well under a megabyte — which is exactly how the routines
+  // failure got misread as a routines bug. Show the real number.
+  function _reportOriginUsage() {
+    var el = document.getElementById('debug-origin-usage');
+    if (!el) return;
+    if (!navigator.storage || !navigator.storage.estimate) {
+      el.textContent = '  ·  (this browser won\u2019t report the total origin usage)';
+      return;
+    }
+    navigator.storage.estimate().then(function(est) {
+      var el2 = document.getElementById('debug-origin-usage');
+      if (!el2 || !est) return;
+      var used = (est.usage || 0) / (1024 * 1024);
+      var quota = (est.quota || 0) / (1024 * 1024);
+      el2.textContent = '  \u00b7  whole site: ' + used.toFixed(2) + ' MB' +
+        (quota ? ' of ' + quota.toFixed(0) + ' MB' : '') +
+        ' (includes recordings and cached pages)';
+    }).catch(function() {});
   }
 
   function render() {
