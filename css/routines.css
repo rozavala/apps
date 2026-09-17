@@ -227,3 +227,17 @@
   flex-shrink: 0;
 }
 .rn-ed-add-btn:hover { background: rgba(52,211,153,0.18); }
+
+/* Shown in the routine modal when the device is out of storage, so a
+   tick that didn't save can't pass for one that did. */
+.rn-storage-warning {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  color: var(--text, #fff);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
