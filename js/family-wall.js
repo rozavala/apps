@@ -876,6 +876,17 @@ var FamilyWall = (function() {
     _schedulePaint();
   }
 
+  // Shown once per page view, not once per tap: a full device fails
+  // every write, and a stack of alerts helps nobody.
+  var _storageNoticeShown = false;
+  function _storageFullNotice() {
+    if (_storageNoticeShown) return;
+    _storageNoticeShown = true;
+    alert('This device is out of storage, so the tick didn\u2019t save.\n\n' +
+          'Freeing space fixes it \u2014 the Art Studio galleries are usually ' +
+          'what fills it up. Ticks made on a phone still sync here.');
+  }
+
   // Let the routines conditions (sunscreen if it's sunny, cleats if
   // there's football) recompute. Only worth doing when the forecast or
   // the calendar has actually moved — see the note in _paint.
@@ -902,6 +913,21 @@ var FamilyWall = (function() {
       if (check) check.textContent = nowDone ? '\u2713' : '';
     }
     Routines.toggleFor(name, routine, itemId);
+
+    // If the device is out of storage the tick didn't persist, and the
+    // optimistic one above is a lie that survives until the next
+    // reload. Put it back and say so.
+    if (typeof Routines.lastWriteOk === 'function' && !Routines.lastWriteOk()) {
+      if (el && el.classList) {
+        var wasDone = el.classList.contains('done');
+        if (wasDone) el.classList.remove('done'); else el.classList.add('done');
+        var undo = el.querySelector ? el.querySelector('.fw-r-check') : null;
+        if (undo) undo.textContent = wasDone ? '' : '\u2713';
+      }
+      _storageFullNotice();
+      return;
+    }
+
     // Deferred past the next frame so the tick the browser just drew
     // isn't held back by the rebuild.
     _schedulePaint(true);

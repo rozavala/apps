@@ -434,10 +434,75 @@ var Routines = (function() {
     return data;
   }
 
+  // Caches that can be thrown away and rebuilt from the network. When
+  // the device is out of room these go first — never a kid's data.
+  var DISPOSABLE_KEYS = ['zs_fcal_cache', 'zs_fw_weather', 'zs_diag_buf'];
+
+  // Days older than this are history nobody reads. Trimming keeps a
+  // year of ticking from slowly filling a shared iPad.
+  var KEEP_DAYS = 120;
+
+  var _writeOk = true;
+  function lastWriteOk() { return _writeOk; }
+
+  function _trimHistory(data) {
+    if (!data || !data.days) return false;
+    var days = Object.keys(data.days);
+    if (days.length <= KEEP_DAYS) return false;
+    days.sort();
+    days.slice(0, days.length - KEEP_DAYS).forEach(function(d) { delete data.days[d]; });
+    return true;
+  }
+
+  function _reclaim() {
+    var freed = false;
+    DISPOSABLE_KEYS.forEach(function(k) {
+      try {
+        if (localStorage.getItem(k) !== null) { localStorage.removeItem(k); freed = true; }
+      } catch (e) {}
+    });
+    return freed;
+  }
+
+  // Writing used to swallow every error, so a full device showed a tick
+  // that vanished on reload and a checkbox that wouldn't stay checked.
+  // Now a failed write is reported: the caller can put the UI back, and
+  // _renderModal says so out loud.
   function _write(key, data) {
-    if (!key) return;
-    try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+    if (!key) return false;
+    _trimHistory(data);
+    var payload = JSON.stringify(data);
+    try {
+      localStorage.setItem(key, payload);
+    } catch (e) {
+      // Out of room: drop rebuildable caches and try once more.
+      if (_reclaim()) {
+        try {
+          localStorage.setItem(key, payload);
+        } catch (e2) {
+          _writeOk = false;
+          _reportFull(key, e2);
+          return false;
+        }
+      } else {
+        _writeOk = false;
+        _reportFull(key, e);
+        return false;
+      }
+    }
+    _writeOk = true;
     _push(key);
+    return true;
+  }
+
+  function _reportFull(key, err) {
+    var msg = (err && err.message) ? err.message : 'storage full';
+    if (typeof Debug !== 'undefined' && Debug.error) {
+      Debug.error('[Routines] save failed', key + ': ' + msg);
+    }
+    try {
+      window.dispatchEvent(new CustomEvent('zs:storage-full', { detail: { key: key, message: msg } }));
+    } catch (e) {}
   }
 
   function _load() {
@@ -738,6 +803,12 @@ var Routines = (function() {
     var body = document.getElementById('routines-body');
     if (!body) return;
 
+    // A tick that didn't save must not look like one that did.
+    var warning = _writeOk ? '' :
+      '<div class="rn-storage-warning">\u26a0\ufe0f This device is out of storage, so ticks ' +
+      'aren\u2019t being saved. Free some space (the Art Studio galleries are ' +
+      'the usual culprit) and try again.</div>';
+
     var progressPct = block.total ? Math.round((block.doneCount / block.total) * 100) : 0;
     var streakLine = status.streak > 0
       ? '<div class="rn-streak">🔥 ' + status.streak + '-day streak' +
@@ -762,6 +833,7 @@ var Routines = (function() {
       }).join('');
 
     body.innerHTML =
+      warning +
       streakLine +
       '<div class="rn-progress">' +
         '<div class="rn-progress-text">' + block.doneCount + ' / ' + block.total + '</div>' +
@@ -829,6 +901,7 @@ var Routines = (function() {
     DEFAULTS: DEFAULTS,
     SCHOOLS: SCHOOLS,
     isSchoolDay: _isSchoolDay,
+    lastWriteOk: lastWriteOk,
     _open: _open,
     _close: _close,
     _toggle: _toggle
