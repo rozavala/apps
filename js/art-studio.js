@@ -687,15 +687,39 @@ const ArtStudio = (() => {
 
 
   // ── Gallery & Saving ──────────────────────────────────────────
+  // A ceiling in bytes, not just in count. Ten small sketches and ten
+  // full-canvas paintings are very different amounts of storage, and
+  // only the second kind fills a shared iPad. Newest art always wins;
+  // the oldest is dropped until the gallery fits.
+  const GALLERY_BUDGET_BYTES = 250 * 1024;
+
+  function _galleryBytes(gallery) {
+    return gallery.reduce(function(n, art) {
+      return n + ((art && art.dataUrl) ? art.dataUrl.length : 0);
+    }, 0);
+  }
+
+  function _trimGalleryToBudget(gallery) {
+    const dropped = [];
+    while (gallery.length > 1 && _galleryBytes(gallery) > GALLERY_BUDGET_BYTES) {
+      dropped.push(gallery.pop());
+    }
+    return dropped;
+  }
+
   function openSaveDialog() { document.getElementById('save-dialog').classList.add('active'); document.getElementById('art-title').focus(); }
   function closeSaveDialog() { document.getElementById('save-dialog').classList.remove('active'); }
   function confirmSave() {
     const title = document.getElementById('art-title').value.trim() || 'My Masterpiece';
     
     // ── Downscale for storage ──
-    // Create a temporary canvas to resize the drawing to max 1024px.
-    // This prevents QuotaExceededError in localStorage (especially on high-DPI iPads).
-    const maxDim = 1024;
+    // These live in localStorage as base64, on a device shared by seven
+    // profiles, competing with the routines and the shopping list for
+    // one 5MB budget. At 1024px they ran 100-250KB each, so ten of them
+    // per kid filled the device and everything else silently stopped
+    // saving. 720px is still sharper than the gallery thumbnails and
+    // the viewer, and costs about half as much.
+    const maxDim = 720;
     const saveCanvas = document.createElement('canvas');
     let sw = mainCanvas.width;
     let sh = mainCanvas.height;
@@ -710,8 +734,8 @@ const ArtStudio = (() => {
     const saveCtx = saveCanvas.getContext('2d');
     saveCtx.drawImage(mainCanvas, 0, 0, sw, sh);
     
-    // Use JPEG 0.7 for much better compression than PNG
-    const dataUrl = saveCanvas.toDataURL('image/jpeg', 0.7);
+    // Use JPEG 0.6 for much better compression than PNG
+    const dataUrl = saveCanvas.toDataURL('image/jpeg', 0.6);
     
     const p = getProgress();
     if (p.gallery.length >= 10) {
@@ -723,9 +747,13 @@ const ArtStudio = (() => {
     
     p.gallery.unshift({ id: Date.now(), title, dataUrl, date: new Date().toISOString() });
     if (p.gallery.length > 10) p.gallery.pop();
+    const droppedForSpace = _trimGalleryToBudget(p.gallery);
     
     try {
       saveProgress({ gallery: p.gallery });
+      if (droppedForSpace.length) {
+        alert('Saved! To make room, your oldest artwork was removed.');
+      }
     } catch (e) {
       // If still fails, try removing one more
       if (p.gallery.length > 1) {
