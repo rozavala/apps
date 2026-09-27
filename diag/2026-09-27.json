@@ -1,0 +1,395 @@
+{
+  "day": "2026-09-27",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mujvk0hs_25mgw9",
+        "ts": 1790516939392,
+        "clientTs": 1790516939392,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760486 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1790516939392,
+      "lastTs": 1790516948524,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvh700_6m14uk",
+        "ts": 1790516807856,
+        "clientTs": 1790516807856,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760508 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1790516807856,
+      "lastTs": 1790516838745,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvhlcf_1f1yg2",
+        "ts": 1790516826447,
+        "clientTs": 1790516826447,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760499 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1790516826447,
+      "lastTs": 1790516830308,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvfl1b_hh8zwv",
+        "ts": 1790516732735,
+        "clientTs": 1790516732735,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760456 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1790516732735,
+      "lastTs": 1790516736344,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvjxo3_8q9qn9",
+        "ts": 1790516935731,
+        "clientTs": 1790516935731,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760487 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516935731,
+      "lastTs": 1790516935731,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvjvlv_z1mz44",
+        "ts": 1790516933059,
+        "clientTs": 1790516933059,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760489 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516933059,
+      "lastTs": 1790516933059,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvjdam_4c87ah",
+        "ts": 1790516909326,
+        "clientTs": 1790516909326,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760495 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516909326,
+      "lastTs": 1790516909326,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvj3i5_rvgqo1",
+        "ts": 1790516896637,
+        "clientTs": 1790516896637,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760493 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516896637,
+      "lastTs": 1790516896637,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvirv4_a0krak",
+        "ts": 1790516881552,
+        "clientTs": 1790516881552,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760497 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516881552,
+      "lastTs": 1790516881552,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvie90_8clot7",
+        "ts": 1790516863908,
+        "clientTs": 1790516863908,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760500 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516863908,
+      "lastTs": 1790516863908,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvi2go_uun5c3",
+        "ts": 1790516848632,
+        "clientTs": 1790516848632,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760502 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516848632,
+      "lastTs": 1790516848632,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvgtge_399xe1",
+        "ts": 1790516790302,
+        "clientTs": 1790516790302,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760514 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516790302,
+      "lastTs": 1790516790302,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvgmm6_2hoa91",
+        "ts": 1790516781438,
+        "clientTs": 1790516781438,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760515 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516781438,
+      "lastTs": 1790516781438,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvgd0r_1zz0f4",
+        "ts": 1790516769003,
+        "clientTs": 1790516769003,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760516 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516769003,
+      "lastTs": 1790516769003,
+      "users": [
+        "u-3bda7c"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mujvd784_5y6fn1",
+        "ts": 1790516621524,
+        "clientTs": 1790516621524,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "match detail fetch failed for 760496 HTTP 502",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1790516621524,
+      "lastTs": 1790516621524,
+      "users": [
+        "u-3bda7c"
+      ]
+    }
+  ]
+}
