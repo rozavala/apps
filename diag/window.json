@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T13:49:19.966Z",
+  "generatedAt": "2026-09-27T14:04:20.251Z",
   "windowHours": 72,
   "days": [
     {
@@ -105,6 +105,58 @@
           "count": 2,
           "firstTs": 1790516732735,
           "lastTs": 1790516736344,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mujvl613_q6ltg8",
+            "ts": 1790516993223,
+            "clientTs": 1790516993223,
+            "kind": "console.warn",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "match detail fetch failed for 760475 HTTP 502",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1790516993223,
+          "lastTs": 1790516993223,
+          "users": [
+            "u-3bda7c"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mujvl0ib_d47sb7",
+            "ts": 1790516986067,
+            "clientTs": 1790516986067,
+            "kind": "console.warn",
+            "app": "world-cup",
+            "page": "world-cup.html",
+            "message": "match detail fetch failed for 760474 HTTP 502",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1790516986067,
+          "lastTs": 1790516986067,
           "users": [
             "u-3bda7c"
           ]
