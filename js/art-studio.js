@@ -621,6 +621,11 @@ const ArtStudio = (() => {
   }
 
   function finishLesson() {
+    // currentLesson is cleared when a lesson is exited, and the last
+    // step's callback can still arrive afterwards — that threw
+    // "null is not an object (evaluating 'currentLesson.id')" and lost
+    // the completion, so the kid finished the lesson and got nothing.
+    if (!currentLesson) return;
     const p = getProgress();
     if (!p.lessonsCompleted.includes(currentLesson.id)) {
       p.lessonsCompleted.push(currentLesson.id);

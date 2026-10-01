@@ -28,6 +28,12 @@ const path = require('path');
 const { execFile } = require('child_process');
 
 const MAX_ENTRIES_PER_BATCH = 200;
+// The log appends forever. One bad deploy in April produced 19,620
+// entries in a month — 97% of the file — so a single incident can add
+// megabytes to the VPS disk with nothing to stop it. Roll over at 8MB
+// and keep one previous file: enough history to investigate, bounded
+// at ~16MB total.
+const MAX_JSONL_BYTES = 8 * 1024 * 1024;
 const MAX_STACK_CHARS = 4000;
 const MAX_MESSAGE_CHARS = 2000;
 
@@ -36,9 +42,20 @@ function init(app, dataDir) {
   if (!fs.existsSync(DIAG_DIR)) fs.mkdirSync(DIAG_DIR, { recursive: true });
   const JSONL_PATH = path.join(DIAG_DIR, 'diag.jsonl');
 
+  function _rotateIfLarge() {
+    try {
+      if (fs.statSync(JSONL_PATH).size < MAX_JSONL_BYTES) return;
+      fs.renameSync(JSONL_PATH, JSONL_PATH + '.1');   // replaces any previous
+      console.log('[diag] rotated diag.jsonl');
+    } catch (e) {
+      if (e.code !== 'ENOENT') console.warn('[diag] rotate failed:', e.message);
+    }
+  }
+
   function _append(entry) {
     // One line of JSON per entry. Crash-safe: partial writes produce
     // one malformed line which the reader skips.
+    _rotateIfLarge();
     fs.appendFileSync(JSONL_PATH, JSON.stringify(entry) + '\n');
   }
 
