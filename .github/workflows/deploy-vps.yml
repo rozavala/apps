@@ -10,6 +10,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # The target is a home machine with no public address: join the tailnet as tag:ci so the
+      # ssh below reaches DROPLET_IP (its 100.x tailnet IP).
+      - name: Connect to tailnet
+        uses: tailscale/github-action@v4.2.0
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
       - name: SSH and pull
         uses: appleboy/ssh-action@v1.0.0
         with:
