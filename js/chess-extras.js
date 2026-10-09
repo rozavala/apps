@@ -532,7 +532,9 @@
                 do {
                   state.tr = Math.floor(Math.random() * 8);
                   state.tc = Math.floor(Math.random() * 8);
-                } while (state.tr === state.r && state.tc === state.c);
+                } while ((state.tr === state.r && state.tc === state.c) ||
+                         // A bishop never leaves its square colour, so keep its target on the same colour
+                         (state.piece === 'B' && (state.tr + state.tc) % 2 !== (state.r + state.c) % 2));
 
                 var d = _load();
                 var best = d.trainerBest || 0;
