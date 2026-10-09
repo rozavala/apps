@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-06T13:36:58.215Z",
+  "generatedAt": "2026-10-09T13:26:30.121Z",
   "windowHours": 72,
   "totalGroups": 1,
-  "totalEvents": 7,
+  "totalEvents": 1,
   "topGroups": [
     {
       "app": "bible-explorer",
@@ -12,8 +12,8 @@
       "filename": "https://rozavala.github.io/apps/js/bible-explorer.js",
       "lineno": 974,
       "colno": 43,
-      "count": 7,
-      "firstTs": 1791292756683,
+      "count": 1,
+      "firstTs": 1791293251084,
       "lastTs": 1791293251084,
       "users": 1
     }
