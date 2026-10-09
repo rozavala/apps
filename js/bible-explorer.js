@@ -726,7 +726,7 @@ const BibleExplorer = (() => {
     { ref: 'Mt 11:28', tier: 3,
       en: 'Come to me, all you that [labour] and are [burdened], and I will [refresh] you.',
       es: 'Venid a mí todos los que estáis [trabajados] y [cargados], y yo os haré [descansar].' },
-    { ref: 'Rev 21:4', tier: 4,
+    { ref: 'Rev 21:4', tier: 3,
       en: 'God shall wipe away all [tears] from their eyes: and [death] shall be no more, nor [mourning], nor crying, nor [sorrow].',
       es: 'Dios enjugará toda [lágrima] de los ojos de ellos; y ya no habrá [muerte], ni habrá más [llanto], ni clamor, ni [dolor].' }
   ];
