@@ -75,6 +75,14 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 - **Habilidades Clásicas (Classical Skills)**: Teoría musical, estrategia de ajedrez y técnicas artísticas. (Music theory, chess strategy, and artistic techniques.)
 - **Lenguaje Neutral (Neutral Language)**: Narración factual sin agendas sociales o políticas modernas. (Factual storytelling without modern social or political agendas.)
 
+```text
+ ,___,
+ (O,O)
+ /)_)
+ "" "
+```
+*¡Aprende con sabiduría! (Learn with wisdom!)*
+
 ## 🆕 Novedades de la Semana (What's New This Week)
 
 - **Actualización Family Wall**: Ahora hay **tres listas de tareas por hijo** — 🌅 mañana, ☀️ tarde y 🌙 noche — con pestañas para cambiar entre ellas (por defecto se muestra la que corresponde a la hora del día). Cada hijo tiene sus propias listas y se editan desde el muro tocando ✏️ junto a su nombre (pide el PIN de padres), o como siempre desde el Rincón de Padres. Un botón **"Apply this list to all kids"** copia la lista que estás editando al resto, así no hay que escribir nueve listas. Las listas por defecto son las de los checklists de papel de la familia, en inglés y cortas para que quepan en la fila. Algunas tareas aparecen solas cuando corresponde: el **bloqueador solar** solo los días de sol o calor (según el pronóstico), el **equipo de fútbol** (y guardar los toperoles) solo los días que ese hijo tiene fútbol en el calendario familiar, y las tareas de un solo hijo (tareas del colegio, piano) solo para él. Los hijos aparecen ordenados **del mayor al menor**. Y "Summer Quest" ahora se puede guardar cuando termina el verano: la tarjeta desaparece del muro sin borrar nada — las tareas, quién las hizo y las rachas quedan intactas — y vuelve con un toque en "Jump in". (Family Wall update: three checklists per kid — morning, afternoon and night — with tabs to switch between them, defaulting to the time of day. Each kid's lists are their own and can be edited right on the wall behind the parent PIN, or in Parents Corner as before. An "Apply this list to all kids" button copies the list you're editing to everyone else, so nobody types nine lists. The built-in defaults are the family's paper checklists, in short English that fits the row. Some tasks appear only when they apply: sunscreen on sunny or hot days (from the forecast), the football kit (and putting the cleats away) only on days that kid has football on the family calendar, and one-kid tasks (homework, piano) only for that kid. Kids are listed eldest to youngest. And Summer Quest can now be parked when the season ends: the card leaves the wall without deleting anything — to-dos, credit and streaks all stay put — and one tap in "Jump in" brings it back.)
