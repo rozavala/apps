@@ -92,7 +92,9 @@ function _extract(summary) {
 
   for (const ev of sources) {
     if (!ev || !ev.type) continue;
-    const ath = (ev.athletesInvolved || ev.athlete || [])[0] || ev.athlete || null;
+    // keyEvents and competition.details carry the player as participants[].athlete
+    const part = Array.isArray(ev.participants) && ev.participants[0] ? ev.participants[0].athlete : null;
+    const ath = (ev.athletesInvolved || ev.athlete || [])[0] || ev.athlete || part || null;
     const name = ath && (ath.displayName || ath.fullName || ath.name) ? (ath.displayName || ath.fullName || ath.name) : null;
     if (!name) continue;
     const teamId = ev.team && ev.team.id ? String(ev.team.id) : null;
