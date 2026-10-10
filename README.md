@@ -68,6 +68,17 @@ Una característica principal de la suite Zavala Serra Apps es ayudar a los niñ
 - **Enfoque Histórico y Factual (Historical & Factual Focus)**: Contenido enfocado en hechos demostrables, patrimonio cultural y habilidades clásicas, manteniendo la estricta neutralidad. (Content focuses on demonstrable facts, cultural heritage, and classical skills, maintaining strict neutrality.)
 - **Patrimonio Católico (Catholic Heritage)**: "Fe Explorador" enseña oraciones clásicas y biografías de santos chilenos enfocándose puramente en la historia y los hechos demostrables. (Teaches classic prayers and biographies of Chilean saints focusing purely on history and demonstrable facts.)
 
+## ⛪ Fe Explorador: Patrimonio y Cultura (Heritage and Culture)
+
+La aplicación **Fe Explorador** permite a los niños descubrir la herencia católica de Chile de manera interactiva y factual. (The **Fe Explorador** app allows kids to discover Chile's Catholic heritage in an interactive and factual way). Sus características principales incluyen (Its main features include):
+
+- **Oraciones Comunes (Common Prayers)**: Aprende oraciones clásicas como el Padre Nuestro, Ave María y Gloria. (Learn classic prayers like Our Father, Hail Mary, and Glory Be).
+- **Biografías de Santos (Saint Biographies)**: Historias basadas en hechos reales (fechas, lugares, eventos históricos) sobre los santos. (Factual stories based on real events, dates, and historical facts about saints).
+- **Patrimonio de Chile (Chilean Heritage)**: Conoce las iglesias, santos patronos y festivales religiosos como elementos histórico-culturales. (Learn about churches, patron saints, and religious festivals as cultural-historical elements).
+- **Rosario Interactivo (Interactive Rosary)**: Una guía para contar las cuentas y conocer los nombres de los misterios. (A guide to count the beads and know the names of the mysteries).
+
+Todo el contenido de Fe Explorador es puramente histórico y factual. (All content in Fe Explorador is purely historical and factual).
+
 ## 📜 Filosofía de Contenido (Content Philosophy)
 
 Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](content-guidelines.md). Priorizamos (All content in this repository adheres to the [Content Guidelines](content-guidelines.md). We prioritize):
