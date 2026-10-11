@@ -127,6 +127,10 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 / |    | \
   |____|
   /    \
+
+   /\_/\
+  ( o.o )
+   > ^ <
 ```
 ¡Bienvenidos, exploradores! Tu misión es aprender nuevas habilidades, descubrir hechos asombrosos y completar desafíos para subir de rango, de Cadete a Grand Master. ¡Aprende jugando! (Welcome, explorers! Your mission is to learn new skills, discover amazing facts, and complete challenges to rank up from Cadet to Grand Master. Learn by playing!)
 
