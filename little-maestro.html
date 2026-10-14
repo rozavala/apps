@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/little-maestro.css?v=2">
+  <link rel="stylesheet" href="css/little-maestro.css?v=4">
   <link rel="stylesheet" href="css/zs-theme.css">
   <script src="js/debug.js?v=2"></script>
 
@@ -8945,28 +8945,83 @@ if (typeof LMScore !== 'undefined') LMScore.attach(SONGS);
 
 
 // ================================================================
-// PART A2 — SONG ORDER
+// PART A2 — PATHS & SONG ORDER
 // One shared answer to "which song comes next?".
 //
+// The map is a set of paths, each a run of worlds walked in order:
+//   Primer (worlds 1–3) · Level 1 (20–22) · Level 2 (23–25)
+// Inside a path, songs unlock one after another; every path's first
+// song is open, so a student who already reads both clefs can start
+// at Level 1. A student works in one path at a time — the "active"
+// path, saved in settings.path — and that is what Continue, the
+// parent dashboard and the map open to.
+//
+// Every other song (the first-generation worlds 4–13 and the 300s)
+// sits in the Song Library: always open, never "current". Songs in
+// LM_RETIRED are duplicates of a better version and stay hidden; any
+// stars already earned on them are kept.
+//
 // SONGS is stored in the order songs were written, so worlds are not
-// monotonic in it: the original curriculum runs 1→13, then later
-// batches append more songs back into worlds 4–13. The quest map has
-// always grouped by world (worlds ascending, array order inside a
-// world), which is the order a kid actually walks. The Continue
-// button and the parent dashboard used to scan raw SONGS order
-// instead, so once a kid got past the first batch the three screens
-// disagreed about which song was current. Everything now walks
-// questOrder().
+// monotonic in it. Paths group by world (ascending), array order
+// inside a world. tools/build-progress-catalog.js reads LM_PATHS and
+// LM_RETIRED from this file, so keep them plain data.
 // ================================================================
 
+const LM_PATHS = [
+  { id: 'primer', icon: '🎀', title: 'Primer',  worlds: [1, 2, 3],    blurb: 'First steps in C position' },
+  { id: 'level1', icon: '📘', title: 'Level 1', worlds: [20, 21, 22], blurb: 'Hands together, G position, 3/4 and eighth notes' },
+  { id: 'level2', icon: '📙', title: 'Level 2', worlds: [23, 24, 25], blurb: 'Minor keys, sharps and flats, and real classics' },
+];
+
+const LM_WORLDS = {
+  1:  { icon: '🎀', title: 'World 1',  subtitle: 'Primer Basics' },
+  2:  { icon: '🎈', title: 'World 2',  subtitle: 'Primer Two Hands' },
+  3:  { icon: '🎠', title: 'World 3',  subtitle: 'Primer Skills' },
+  20: { icon: '🙌', title: 'World 1',  subtitle: 'Hands Together in C' },
+  21: { icon: '🎻', title: 'World 2',  subtitle: 'Middle C, G Position & 3/4' },
+  22: { icon: '🚂', title: 'World 3',  subtitle: 'Eighth Notes & 6/8' },
+  23: { icon: '🌙', title: 'World 1',  subtitle: 'Minor Keys, Sharps & Flats' },
+  24: { icon: '🏛️', title: 'World 2',  subtitle: 'Classics' },
+  25: { icon: '🌎', title: 'World 3',  subtitle: 'Around the World' },
+};
+
+// Duplicates of a song that has a better version elsewhere
+const LM_RETIRED = [
+  3, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16, 18, 20, 21, 22, 23, 24, 26,
+  30, 32, 317, 319, 322, 330, 336, 337, 338, 339, 340,
+];
+const _retired = new Set(LM_RETIRED);
+
+function pathOf(song) {
+  const p = song && LM_PATHS.find(p => p.worlds.includes(song.world));
+  return p ? p.id : 'library';
+}
+
+const _pathOrderCache = {};
+function pathOrder(pathId) {
+  if (_pathOrderCache[pathId]) return _pathOrderCache[pathId];
+  const path = LM_PATHS.find(p => p.id === pathId);
+  const out = [];
+  if (path) {
+    path.worlds.forEach(w => SONGS.forEach(s => {
+      if (s.world === w && !s.isBonus && !_retired.has(s.id)) out.push(s);
+    }));
+  }
+  return (_pathOrderCache[pathId] = out);
+}
+
+// The whole journey: every path, in order
 let _questOrderCache = null;
 function questOrder() {
   if (_questOrderCache) return _questOrderCache;
-  const main   = SONGS.filter(s => !s.isBonus && s.world);
-  const worlds = [...new Set(main.map(s => s.world))].sort((a, b) => a - b);
   _questOrderCache = [];
-  worlds.forEach(w => main.forEach(s => { if (s.world === w) _questOrderCache.push(s); }));
+  LM_PATHS.forEach(p => _questOrderCache.push(...pathOrder(p.id)));
   return _questOrderCache;
+}
+
+// Song Library: everything off the paths, minus duplicates and empty songs
+function librarySongs() {
+  return SONGS.filter(s => pathOf(s) === 'library' && !_retired.has(s.id) && s.notes && s.notes.length);
 }
 
 // A song counts as done once it has stars, in either the current
@@ -8984,12 +9039,28 @@ function completedSongIds(progress) {
   return done;
 }
 
-// The song they're on: first one in quest order without stars.
-function currentSongFrom(progress) {
+// The song they're on: first one without stars in the given path
+// (the student's active path when none is given).
+function currentSongFrom(progress, pathId) {
   const done = completedSongIds(progress);
-  return questOrder().find(s => !done.has(s.id)) || null;
+  return pathOrder(pathId || activePathId()).find(s => !done.has(s.id)) || null;
 }
 
+// Locked = in a path, not done, not the path's current song, and
+// not opened early (alwaysUnlocked, or progress[id].unlocked — the
+// flag the lesson writes for the next song and that Parents Corner
+// sets). Library songs are never locked.
+function isSongLocked(song, progress) {
+  const pid = pathOf(song);
+  if (pid === 'library' || song.isBonus || song.alwaysUnlocked) return false;
+  const prog = progress || {};
+  if (prog[song.id] && prog[song.id].unlocked) return false;
+  if (completedSongIds(prog).has(song.id)) return false;
+  const cur = currentSongFrom(prog, pid);
+  return !(cur && cur.id === song.id);
+}
+
+// Progress for the signed-in student, straight off localStorage.
 // Progress for the signed-in student, straight off localStorage.
 function activeProgress() {
   try {
@@ -8999,6 +9070,45 @@ function activeProgress() {
     const stored = JSON.parse(localStorage.getItem(key) || '{}');
     return stored.progress || {};
   } catch (e) { return {}; }
+}
+
+function _activeStore() {
+  const active = typeof UserManager !== 'undefined' ? UserManager.getCurrentUser() : null;
+  if (!active) return null;
+  const key = `littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g, '_')}`;
+  return { key, data: JSON.parse(localStorage.getItem(key) || '{}') };
+}
+
+// The path the student works in: settings.path if they picked one,
+// else the furthest path they have stars in, else the Primer. A path
+// with every song passed hands over to the next one.
+function activePathId() {
+  try {
+    const st = _activeStore();
+    if (!st) return LM_PATHS[0].id;
+    const done = completedSongIds(st.data.progress);
+    const chosen = st.data.settings && st.data.settings.path;
+    let i = LM_PATHS.findIndex(p => p.id === chosen);
+    if (i < 0) {
+      i = 0;
+      for (let j = LM_PATHS.length - 1; j > 0; j--) {
+        if (pathOrder(LM_PATHS[j].id).some(s => done.has(s.id))) { i = j; break; }
+      }
+    }
+    while (i < LM_PATHS.length - 1 && pathOrder(LM_PATHS[i].id).every(s => done.has(s.id))) i++;
+    return LM_PATHS[i].id;
+  } catch (e) {}
+  return LM_PATHS[0].id;
+}
+
+function setActivePath(pathId) {
+  try {
+    const st = _activeStore();
+    if (!st || !LM_PATHS.some(p => p.id === pathId)) return;
+    st.data.settings = st.data.settings || {};
+    st.data.settings.path = pathId;
+    localStorage.setItem(st.key, JSON.stringify(st.data));
+  } catch (e) {}
 }
 
 
@@ -12165,57 +12275,60 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ────────────────────────────────────────────────────────────
        QUEST MAP — Winding path with song nodes
        ──────────────────────────────────────────────────────────── */
+    // Map tab on screen: a path id or 'library' (null = the active path)
+    let _mapTab = null;
+
+    function _starsFor(progress, id) {
+      const p = progress[id];
+      const n = (p && p.stars) || (progress.songStars || {})[id] || 0;
+      return '★'.repeat(n) + '☆'.repeat(3 - n);
+    }
+
     function renderQuestMap() {
       const container = document.getElementById('questmap-path-container');
       if (!container) return;
 
-      // Determine progress from active user's data
-      const progress       = activeProgress();
-      const completedSongs = completedSongIds(progress);
-      const currentSong    = currentSongFrom(progress);
-      const currentSongId  = currentSong ? currentSong.id : null;
+      const progress = activeProgress();
+      const tab      = _mapTab || activePathId();
 
-      // Group songs by world (exclude bonus songs and world 0 from main progression)
-      const worlds = [];
-      SONGS.forEach(song => {
-        if (song.isBonus || song.world === 0 || song.world == null) return; // bonus handled separately
-        let world = worlds.find(w => w.id === song.world);
-        if (!world) {
-          const WORLD_META = {
-            1:  { icon: '🎀', title: 'World 1',  subtitle: 'Primer Basics',      color: '--world-1'  },
-            2:  { icon: '🎈', title: 'World 2',  subtitle: 'Primer Two Hands',   color: '--world-2'  },
-            3:  { icon: '🎠', title: 'World 3',  subtitle: 'Primer Skills',      color: '--world-3'  },
-            4:  { icon: '🌱', title: 'World 4',  subtitle: 'First Notes',        color: '--world-4'  },
-            5:  { icon: '⭐', title: 'World 5',  subtitle: 'Simple Melodies',    color: '--world-5'  },
-            6:  { icon: '🎵', title: 'World 6',  subtitle: 'Growing Range',      color: '--world-6'  },
-            7:  { icon: '🥁', title: 'World 7',  subtitle: 'Two Hands',          color: '--world-7'  },
-            8:  { icon: '🎶', title: 'World 8',  subtitle: 'Harmony',            color: '--world-8'  },
-            9:  { icon: '🎹', title: 'World 9',  subtitle: 'Maestro',            color: '--world-9'  },
-            10: { icon: '🎸', title: 'World 10', subtitle: 'Rock Star',          color: '--world-10' },
-            11: { icon: '⚔️', title: 'World 11', subtitle: 'Legend',             color: '--world-11' },
-            12: { icon: '🏆', title: 'World 12', subtitle: 'Grandmaster',        color: '--world-12' },
-            13: { icon: '💎', title: 'World 13', subtitle: 'Virtuoso',           color: '--world-13' },
-          };
-          const meta = WORLD_META[song.world] || { icon: '🎵', title: `World ${song.world}`, subtitle: '' };
-          world = { id: song.world, ...meta, songs: [] };
-          worlds.push(world);
-        }
-        world.songs.push(song);
-      });
+      const tabs = LM_PATHS.map(p => ({ id: p.id, icon: p.icon, title: p.title }))
+        .concat([{ id: 'library', icon: '📚', title: 'Library' }]);
+      let html = `<div class="qm-tabs" role="tablist">` + tabs.map(t => `
+          <button class="qm-tab${t.id === tab ? ' qm-tab--active' : ''}" role="tab"
+                  aria-selected="${t.id === tab}" onclick="QuestMap.showTab('${t.id}')">
+            <span aria-hidden="true">${t.icon}</span> ${t.title}
+          </button>`).join('') + `</div>`;
 
-      // Build HTML
+      html += tab === 'library' ? _libraryHtml(progress) : _pathHtml(tab, progress);
+      container.innerHTML = html;
+
+      // Bring the song they're on into view
+      const cur = container.querySelector('.qm-node--current:not(.qm-node--bonus)');
+      if (cur && cur.scrollIntoView) setTimeout(() => cur.scrollIntoView({ block: 'center', behavior: 'smooth' }), 60);
+    }
+
+    function _pathHtml(pathId, progress) {
+      const path      = LM_PATHS.find(p => p.id === pathId) || LM_PATHS[0];
+      const songs     = pathOrder(path.id);
+      const completed = completedSongIds(progress);
+      const current   = currentSongFrom(progress, path.id);
+      const doneCount = songs.filter(s => completed.has(s.id)).length;
+
       let html = `
         <div class="questmap-precurr-banner">
           <span class="banner-stars">✦ ✦ ✦</span>
-          <span>Your Musical Journey</span>
+          <span>${path.icon} ${path.title} — ${path.blurb}</span>
           <span class="banner-stars">✦ ✦ ✦</span>
-        </div>`;
+        </div>
+        <div class="qm-path-progress">${doneCount} of ${songs.length} songs passed</div>`;
 
       let nodeCount = 0;
-
-      worlds.forEach(world => {
+      path.worlds.forEach(w => {
+        const worldSongs = songs.filter(s => s.world === w);
+        if (!worldSongs.length) return;
+        const world = LM_WORLDS[w] || { icon: '🎵', title: `World ${w}`, subtitle: '' };
         html += `
-          <div class="questmap-world-banner world-banner--${world.id}">
+          <div class="questmap-world-banner world-banner--${w}">
             <span class="world-banner-icon">${world.icon}</span>
             <div>
               <div class="world-banner-title">${world.title}</div>
@@ -12223,11 +12336,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>`;
 
-        world.songs.forEach((song, i) => {
-          const isCompleted = completedSongs.has(song.id);
-          const isCurrent   = song.id === currentSongId;
-          const isLocked    = !isCompleted && !isCurrent && !song.alwaysUnlocked &&
-                              !(progress[song.id] && progress[song.id].unlocked);
+        // Theory lessons that open the world (js/lm-lessons.js)
+        if (typeof LMLessons !== 'undefined') {
+          LMLessons.forWorld(w).forEach(l => {
+            const st = LMLessons.status(l.id);
+            html += `
+            <div class="questmap-connector"></div>
+            <button class="qm-lesson${st && st.done ? ' qm-lesson--done' : ''}" onclick="LMLessons.open('${l.id}', () => QuestMap.render())">
+              <span class="qm-lesson-icon">${l.icon}</span>
+              <span class="qm-lesson-text"><span class="qm-lesson-kicker">Lesson</span>${l.title}</span>
+              <span class="qm-lesson-state">${st && st.done ? '✓' : '▶'}</span>
+            </button>`;
+          });
+        }
+
+        worldSongs.forEach(song => {
+          const isCompleted = completed.has(song.id);
+          const isCurrent   = !!current && song.id === current.id;
+          const isLocked    = isSongLocked(song, progress);
 
           // Winding pattern: alternate left/right
           const side = nodeCount % 2 === 0 ? 'left' : 'right';
@@ -12235,25 +12361,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           let stateClass = 'qm-node--locked';
           if (isCompleted) stateClass = 'qm-node--completed';
-          else if (isCurrent) stateClass = 'qm-node--current';
+          else if (isCurrent || !isLocked) stateClass = 'qm-node--current';
 
-          // Star display
-          let stars = '☆☆☆';
-          try {
-            const active = UserManager ? UserManager.getCurrentUser() : null;
-            if (active && isCompleted) {
-              const stored = localStorage.getItem(`littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g,'_')}`);
-              if (stored) {
-                const data = JSON.parse(stored);
-                const prog = data.progress && data.progress[song.id];
-                if (prog && prog.stars) {
-                  stars = '★'.repeat(prog.stars) + '☆'.repeat(3 - prog.stars);
-                }
-              }
-            }
-          } catch(e) {}
-
-          const nodeIcon = isCompleted ? '✓' : isCurrent ? song.emoji || '🎵' : '🔒';
+          const nodeIcon = isCompleted ? '✓' : !isLocked ? song.emoji || '🎵' : '🔒';
 
           html += `
             <div class="questmap-connector ${isCompleted ? 'questmap-connector--active' : ''}"></div>
@@ -12266,7 +12376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                    onclick="QuestMap.nodeClick('${song.id}')">
                 <div class="qm-node-circle">
                   <span class="qm-node-icon">${nodeIcon}</span>
-                  ${isCompleted ? `<span class="qm-node-stars">${stars}</span>` : ''}
+                  ${isCompleted ? `<span class="qm-node-stars">${_starsFor(progress, song.id)}</span>` : ''}
                   ${isLocked ? '<span class="qm-node-lock">🔒</span>' : ''}
                 </div>
                 <div class="qm-node-label">${song.title}</div>
@@ -12274,57 +12384,46 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
         });
       });
+      return html;
+    }
 
-      // ── Bonus Songs section (always unlocked, displayed separately) ──
-      const bonusSongs = SONGS.filter(s => s.isBonus);
-      if (bonusSongs.length) {
-        html += `
-          <div class="questmap-world-banner world-banner--bonus questmap-bonus-section">
-            <span class="world-banner-icon">⭐</span>
-            <div>
-              <div class="world-banner-title">Special Unlocks</div>
-              <div class="world-banner-subtitle">Play any time — no lock required</div>
-            </div>
-          </div>`;
+    // Library shelves, matched on composer (first match wins)
+    const LIB_SHELVES = [
+      { icon: '🎻', title: 'Classical',            test: /Bach|Beethoven|Mozart|Chopin|Liszt|Debussy|Satie|Pachelbel|Tchaikovsky|Grieg|Joplin|Bizet|Petzold|Haydn|Dvo|Offenbach|Brahms|Handel|Schubert|Schumann/i },
+      { icon: '🎬', title: 'Movies & Pop',         test: /Williams|Zimmer|Menken|Lopez|Horner|Hisaishi|Tiersen|Djawadi|Yiruma|Coldplay|Badelt|Arlen/i },
+      { icon: '🧩', title: 'Practice & Originals', test: /Practice|Zavala Serra|original|You!/i },
+      { icon: '🌎', title: 'Folk & World',         test: /./ },
+    ];
 
-        bonusSongs.forEach(song => {
-          const isCompleted = completedSongs.has(song.id);
-          let stars = '☆☆☆';
-          try {
-            const active = UserManager ? UserManager.getCurrentUser() : null;
-            if (active && isCompleted) {
-              const stored = localStorage.getItem(`littlemaestro_${active.profile.name.toLowerCase().replace(/\s+/g,'_')}`);
-              if (stored) {
-                const data = JSON.parse(stored);
-                const prog = data.progress && data.progress[song.id];
-                if (prog && prog.stars) stars = '★'.repeat(prog.stars) + '☆'.repeat(3 - prog.stars);
-              }
-            }
-          } catch(e) {}
+    function _libraryHtml(progress) {
+      const shelves = LIB_SHELVES.map(sh => ({ ...sh, songs: [] }));
+      librarySongs().forEach(s => shelves.find(sh => sh.test.test(s.composer || '')).songs.push(s));
+      const dots = d => '●'.repeat(Math.min(5, Math.ceil((d || 1) / 2))) + '○'.repeat(5 - Math.min(5, Math.ceil((d || 1) / 2)));
 
-          const nodeIcon = isCompleted ? '✓' : '⭐';
-          const side = nodeCount % 2 === 0 ? 'left' : 'right';
-          nodeCount++;
-
+      let html = `
+        <div class="questmap-precurr-banner">
+          <span class="banner-stars">✦ ✦ ✦</span>
+          <span>📚 Song Library — play any song, any time</span>
+          <span class="banner-stars">✦ ✦ ✦</span>
+        </div>`;
+      shelves.forEach(sh => {
+        if (!sh.songs.length) return;
+        sh.songs.sort((a, b) => (a.difficulty || 0) - (b.difficulty || 0) || a.title.localeCompare(b.title));
+        html += `<div class="lib-shelf-title">${sh.icon} ${sh.title}</div><div class="lib-grid">`;
+        sh.songs.forEach(s => {
+          const c = LMScore.compile(s);
+          const hands = c.hasLH && c.hasRH ? 'Both hands' : 'One hand';
           html += `
-            <div class="questmap-connector questmap-connector--active"></div>
-            <div class="questmap-row questmap-row--${side}">
-              <div class="qm-node qm-node--current qm-node--bonus"
-                   role="button" tabindex="0"
-                   aria-label="${song.title} — Special Unlocked"
-                   data-song-id="${song.id}"
-                   onclick="QuestMap.nodeClick('${song.id}')">
-                <div class="qm-node-circle">
-                  <span class="qm-node-icon">${nodeIcon}</span>
-                  ${isCompleted ? `<span class="qm-node-stars">${stars}</span>` : ''}
-                </div>
-                <div class="qm-node-label">${song.title}</div>
-              </div>
-            </div>`;
+            <button class="lib-card" onclick="QuestMap.nodeClick('${s.id}')" aria-label="${s.title}">
+              <span class="lib-card-title">${s.title}</span>
+              <span class="lib-card-sub">${s.composer || ''}</span>
+              <span class="lib-card-meta"><span class="lib-card-level" title="Difficulty">${dots(s.difficulty)}</span> · ${hands}</span>
+              <span class="lib-card-stars">${_starsFor(progress, s.id)}</span>
+            </button>`;
         });
-      }
-
-      container.innerHTML = html;
+        html += `</div>`;
+      });
+      return html;
     }
 
     // Quest map public interface
@@ -12364,14 +12463,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const completedCount = Object.values(songProgress).filter(s => s > 0).length;
 
-      // ── Determine "continue" song (first incomplete, skip bonus songs) ──
-      const mainSongs = songs.filter(s => !s.isBonus);
-      let continueSong = mainSongs[0];
-      for (const s of mainSongs) {
-        if (!songProgress[s.id] || songProgress[s.id] === 0) { continueSong = s; break; }
-      }
-      // If all complete, show last song
-      if (!continueSong) continueSong = mainSongs[mainSongs.length - 1];
+      // ── "Continue" = the song they're on in their active path ──
+      const activePath = LM_PATHS.find(p => p.id === activePathId()) || LM_PATHS[0];
+      const pathSongs  = pathOrder(activePath.id);
+      const continueSong = currentSongFrom(progressData, activePath.id) || pathSongs[pathSongs.length - 1];
 
       // ── Time-of-day greeting ────────────────────────────────────
       const hour = new Date().getHours();
@@ -12460,14 +12555,12 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
         </div>
 
-        <!-- Song progress -->
-        <div class="home-section-title">Songs Progress</div>
+        <!-- Song progress (active path) -->
+        <div class="home-section-title">${activePath.icon} ${activePath.title} Songs</div>
         <div class="home-songs-list">
-          ${mainSongs.map((song, idx) => {
+          ${pathSongs.map((song, idx) => {
             const stars = songProgress[song.id] || 0;
-            // Song is unlocked if first song, OR previous song was completed
-            const prevStars = idx > 0 ? (songProgress[songs[idx-1]?.id] || 0) : 1;
-            const isLocked = idx > 0 && prevStars === 0;
+            const isLocked = isSongLocked(song, progressData);
             return `
             <div class="home-song-row">
               <span class="home-song-emoji">${song.emoji || (idx===0?'🎵':idx===1?'🐑':idx===2?'⭐':'🎶')}</span>
@@ -12490,27 +12583,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const QuestMap = window.QuestMap;
     Object.assign(QuestMap, {
       render: renderQuestMap,
+      showTab(tabId) {
+        _mapTab = tabId;
+        // Picking a path makes it the one Continue and the dashboard follow
+        if (tabId !== 'library') setActivePath(tabId);
+        renderQuestMap();
+      },
       nodeClick(songId) {
         if (!songId) return;
         songId = parseInt(songId, 10); // ensure number (HTML attrs arrive as strings)
         const song = typeof SONGS !== 'undefined' ? SONGS.find(s => s.id === songId) : null;
         if (!song) return;
 
-        // Check if locked
-        const progress       = activeProgress();
-        const completedSongs = completedSongIds(progress);
-        const current        = currentSongFrom(progress);
-        const currentSongId  = current ? current.id : null;
-
-        // Bonus/always-unlocked songs skip the lock check entirely, and
-        // so does an explicit progress[id].unlocked — the flag the
-        // lesson-complete path writes for the next song, and the one a
-        // grown-up sets from Parents Corner → Progress Manager.
-        const isBonusSong = song.isBonus || song.alwaysUnlocked;
-        const isUnlocked  = !!(progress[songId] && progress[songId].unlocked);
-        const isLocked = !isBonusSong && !isUnlocked &&
-                         !completedSongs.has(songId) && songId !== currentSongId;
-        if (isLocked) {
+        // Check if locked (see isSongLocked: per path, Library always open)
+        if (isSongLocked(song, activeProgress())) {
           Melody.speak('Finish earlier songs first! 🔒', 2000);
           Melody.setState('thinking');
           setTimeout(() => Melody.setState('idle'), 2500);
@@ -12989,8 +13075,16 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // ── Utility: get song metadata ────────────────────────────
+      // Fact and icon for the "Meet the Song" card: the hand-written ones
+      // above for the first songs, else the song's own funFact.
       function _meta(songId) {
-        return SONG_META[songId] || { era: '🎵', fact: 'Every note you play is a step on your musical journey!' };
+        const song = SONGS.find(s => s.id === songId) || {};
+        const m = SONG_META[songId] || {};
+        return {
+          era:  m.era  || song.emoji || '🎵',
+          fact: m.fact || song.funFact || 'Every note you play is a step on your musical journey!',
+          concept: song.concept || '',
+        };
       }
 
       // ── Score helpers (js/lm-score.js) ────────────────────────
@@ -13048,9 +13142,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {}
       }
 
-      // Next song along the quest map (null at the end, or for songs off the map)
+      // Next song along this song's path (null at the end, or for Library songs)
       function _nextSong() {
-        const order = questOrder();
+        const order = pathOrder(pathOf(_s.song));
         const i = order.findIndex(s => s.id === _s.songId);
         return i >= 0 ? (order[i + 1] || null) : null;
       }
@@ -13212,6 +13306,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="meet-card-title">${_s.song.title}</div>
             <div class="meet-card-composer">${_s.song.composer || 'Traditional'}</div>
             <div class="meet-card-fact">${meta.fact}</div>
+            ${meta.concept ? `<div class="meet-card-concept"><strong>New in this song:</strong> ${meta.concept}</div>` : ''}
             <button class="lesson-btn lesson-btn--primary" style="margin-top:8px;" onclick="LessonEngine._endPhase1()">
               Start Listening →
             </button>
@@ -13938,8 +14033,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (typeof QuestMap !== 'undefined') QuestMap.render();
         };
 
-        // Songs off the quest map (bonus songs) just go back to the map
-        if (!next && !questOrder().some(s => s.id === _s.songId)) {
+        // Library and bonus songs just go back to the map
+        if (!next && pathOf(_s.song) === 'library') {
+
           if (typeof LearningCheck !== 'undefined') LearningCheck.maybePrompt('music', returnToMap);
           else returnToMap();
           return;
@@ -16132,6 +16228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/activity-log.js?v=2"></script>
 <script src="js/lm-bridge.js?v=2"></script>
 <script src="js/recital.js?v=1"></script>
+<script src="js/lm-lessons.js?v=1"></script>
 <script>
   window.addEventListener('load', function() {
     if (typeof RecitalRecorder !== 'undefined') {

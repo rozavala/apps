@@ -519,7 +519,7 @@
       var inRow = c.measures.slice(first, first + perRow);
       // Opening bars carry clef/key/time, so give them more room.
       var keyN = Math.abs(KEY_COUNT[c.key] || 0);
-      var decor = 38 + keyN * 10 + (row === 0 ? 26 : 0);
+      var decor = 38 + keyN * 10 + (row === 0 && !opts.noTime ? 26 : 0);
       var barW = (usable - decor) / perRow;
       var x = left;
 
@@ -533,7 +533,7 @@
           if (mi === 0) {
             st.addClef(h === 'rh' ? 'treble' : 'bass');
             if (keyN) st.addKeySignature(c.key.replace(/m$/, '') === c.key ? c.key : relativeMajor(c.key));
-            if (row === 0) st.addTimeSignature(c.time.str);
+            if (row === 0 && !opts.noTime) st.addTimeSignature(c.time.str);
           }
           if (m.index === c.measures.length - 1) st.setEndBarType(VF.Barline.type.END);
           st.setContext(ctx).draw();

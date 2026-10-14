@@ -70,20 +70,21 @@ function unit(id, label, group, kind) {
 
 // ── One builder per app that has an ordered progression ───────────
 const BUILDERS = {
-  // Little Maestro. The quest map groups songs by world (worlds
-  // ascending, array order within a world), and "the song you're on"
-  // is the first uncompleted node walking that same order — so the
-  // catalog has to be in quest-map order, not raw array order.
+  // Little Maestro. The map is a set of paths (LM_PATHS: Primer, Level 1,
+  // Level 2), each a run of worlds; inside a world songs keep array
+  // order. "The song you're on" walks that same order, so the catalog
+  // lists the paths' songs in it. Library songs and retired duplicates
+  // (LM_RETIRED) aren't part of the progression.
   piano() {
     // Score-format songs in js/lm-songs.js are appended to SONGS at load
-    const songs = arr('little-maestro.html', 'SONGS').concat(arr('js/lm-songs.js', 'LM_SONGS'))
-      .filter(s => !s.isBonus && s.world);
-    const worlds = [...new Set(songs.map(s => s.world))].sort((a, b) => a - b);
+    const songs = arr('little-maestro.html', 'SONGS').concat(arr('js/lm-songs.js', 'LM_SONGS'));
+    const paths = arr('little-maestro.html', 'LM_PATHS');
+    const retired = new Set(arr('little-maestro.html', 'LM_RETIRED'));
     const out = [];
-    worlds.forEach(w => {
-      songs.filter(s => s.world === w)
-           .forEach(s => out.push(unit(s.id, s.title, 'World ' + w)));
-    });
+    paths.forEach(p => p.worlds.forEach(w => {
+      songs.filter(s => s.world === w && !s.isBonus && !retired.has(s.id))
+           .forEach(s => out.push(unit(s.id, s.title, p.title + ' · World ' + (p.worlds.indexOf(w) + 1))));
+    }));
     return out;
   },
 
