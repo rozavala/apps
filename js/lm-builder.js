@@ -14,6 +14,10 @@
    left hand is entered the same way on its own tab. "Edit as text"
    shows the js/lm-score.js notation for quick fixes.
 
+   Or take a photo of the page: the sync server reads it (vps/omr.js,
+   Gemini) and the editor opens with the notes filled in, bars the
+   reads disagreed on tinted, for the student to check with ▶ Listen.
+
    Custom songs get ids from 9000 and world 90, and are put into SONGS
    for the current student by LMBuilder.syncSongs().
    ================================================================ */
@@ -180,7 +184,7 @@ var LMBuilder = (function () {
 
   // ── Editor state ───────────────────────────────────────────────
   var _d = null;            // draft: { id, title, book, tip, time, key, pickup, bpm, rh:[], lh:[] }
-  var _ui = { hand: 'rh', dur: 'q', dots: 0, chord: false, lastAt: 0, active: false, player: null };
+  var _ui = { hand: 'rh', dur: 'q', dots: 0, chord: false, lastAt: 0, active: false, player: null, unsure: [], fromPhoto: null };
 
   function open(id) {
     syncSongs();
@@ -200,7 +204,7 @@ var LMBuilder = (function () {
       while (used.indexOf(nid) >= 0) nid++;
       _d = { id: nid, title: '', book: '', tip: '', time: '4/4', key: 'C', pickup: 0, bpm: 80, rh: [], lh: [] };
     }
-    _ui.hand = 'rh'; _ui.dur = 'q'; _ui.dots = 0; _ui.chord = false;
+    _ui.hand = 'rh'; _ui.dur = 'q'; _ui.dots = 0; _ui.chord = false; _ui.unsure = []; _ui.fromPhoto = null;
     _overlay();
     _details();
   }
@@ -265,6 +269,12 @@ var LMBuilder = (function () {
       del.onclick = _delete;
       foot.appendChild(del);
     }
+    var photo = document.createElement('button');
+    photo.className = 'lesson-btn';
+    photo.textContent = '📷 Read it from a photo';
+    photo.onclick = function () { _readDetails(); _pickPhoto(); };
+    foot.appendChild(photo);
+
     var next = document.createElement('button');
     next.className = 'lesson-btn lesson-btn--primary';
     next.textContent = 'Enter the notes →';
@@ -272,9 +282,7 @@ var LMBuilder = (function () {
       var hadNotes = _d.rh.length || _d.lh.length;
       var t = document.getElementById('lmb-time').value, p = parseFloat(document.getElementById('lmb-pickup').value) || 0;
       if (hadNotes && (t !== _d.time || p !== _d.pickup) && !confirm('Changing the time signature or pickup re-flows the bars you entered. Continue?')) return;
-      _d.title = document.getElementById('lmb-title').value.trim();
-      _d.book = document.getElementById('lmb-book').value.trim();
-      _d.tip = document.getElementById('lmb-tip').value.trim();
+      _readDetails();
       _d.time = t;
       _d.key = document.getElementById('lmb-key').value;
       _d.pickup = p >= LMScore.parseTime(t).barBeats ? 0 : p;
@@ -282,6 +290,113 @@ var LMBuilder = (function () {
       _notes();
     };
     foot.appendChild(next);
+  }
+
+  function _readDetails() {
+    var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    if (document.getElementById('lmb-title')) {
+      _d.title = v('lmb-title'); _d.book = v('lmb-book'); _d.tip = v('lmb-tip');
+      _d.bpm = parseInt(v('lmb-bpm'), 10) || _d.bpm;
+    }
+  }
+
+  // ── Photo → notes (vps/omr.js) ─────────────────────────────────
+  var KEYS_OK = { C: 1, G: 1, D: 1, A: 1, E: 1, F: 1, Bb: 1, Eb: 1, Am: 1, Em: 1, Bm: 1, Dm: 1, Gm: 1, Cm: 1 };
+  var _omrAbort = null;
+
+  function _pickPhoto() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.setAttribute('capture', 'environment');   // iPad/phone: open the camera
+    input.onchange = function () { if (input.files && input.files[0]) _readPhoto(input.files[0]); };
+    input.click();
+  }
+
+  // Shrink to ~2000 px on the long side: plenty for notes, quick to send
+  function _shrink(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var scale = Math.min(1, 2000 / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('That file is not a picture I can open.')); };
+      img.src = url;
+    });
+  }
+
+  function _readPhoto(file) {
+    var body = document.getElementById('lmb-body'), foot = document.getElementById('lmb-foot');
+    var server = typeof CloudSync !== 'undefined' && CloudSync.server;
+    if (!server) { alert('Reading photos needs the family sync server.'); return; }
+    body.innerHTML = '<div class="lml-done"><div class="lml-done-icon lmb-reading">📷</div>' +
+      '<div class="lml-done-title">Reading the music…</div>' +
+      '<div class="lml-done-sub" id="lmb-omr-time">Usually under 30 seconds. Keep the app open.</div></div>';
+    foot.innerHTML = '';
+    var cancel = document.createElement('button');
+    cancel.className = 'lesson-btn';
+    cancel.textContent = 'Cancel';
+    foot.appendChild(cancel);
+    var started = Date.now();
+    var tick = setInterval(function () {
+      var el = document.getElementById('lmb-omr-time');
+      if (el) el.textContent = Math.round((Date.now() - started) / 1000) + ' s — reading every bar three times to be sure…';
+    }, 1000);
+    var done = function () { clearInterval(tick); _omrAbort = null; };
+    _omrAbort = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    cancel.onclick = function () { if (_omrAbort) _omrAbort.abort(); done(); _details(); };
+
+    _shrink(file).then(function (dataUrl) {
+      return fetch(server + '/api/omr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl, hint: [_d.title, _d.book].filter(Boolean).join(' — ') }),
+        signal: _omrAbort ? _omrAbort.signal : undefined,
+      });
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      done();
+      if (!res.piece) throw new Error(res.error || 'Could not read the photo.');
+      _applyPhoto(res);
+    }).catch(function (e) {
+      done();
+      if (e && e.name === 'AbortError') return;
+      _details();
+      alert((e && e.message) || 'Could not read the photo. Check the internet connection and try again.');
+    });
+  }
+
+  function _applyPhoto(res) {
+    var p = res.piece;
+    if (!_d.title && p.title) _d.title = p.title;
+    if (p.time) _d.time = p.time;
+    if (p.key && KEYS_OK[p.key]) _d.key = p.key;
+    _d.pickup = p.pickup || 0;
+    var problem = res.ok ? null : res.error;
+    try {
+      _d.rh = p.rh ? parseVoice(p.rh) : [];
+      _d.lh = p.lh ? parseVoice(p.lh) : [];
+    } catch (e) {
+      problem = e.message;
+      _d.rh = []; _d.lh = [];
+    }
+    _ui.unsure = res.unsure || [];
+    _ui.followEnd = false;
+    _ui.fromPhoto = { problem: problem, notes: res.notes || '', rh: p.rh, lh: p.lh };
+    _notes();
+    if (problem) {
+      // Leave the raw reading in the text boxes to fix by hand
+      var det = document.querySelector('.lmb-text');
+      if (det) det.open = true;
+      if (!_d.rh.length && p.rh) document.getElementById('lmb-rh-text').value = p.rh;
+      if (!_d.lh.length && p.lh) document.getElementById('lmb-lh-text').value = p.lh;
+    }
   }
 
   // ── Step 2: notes ──────────────────────────────────────────────
@@ -307,6 +422,7 @@ var LMBuilder = (function () {
       '<div class="lmb-fingers">Finger for the last note: ' +
         [1, 2, 3, 4, 5].map(function (f) { return '<button class="lmb-finger" data-finger="' + f + '">' + f + '</button>'; }).join('') +
         '<button class="lmb-finger" data-finger="0" title="Clear fingers">✕</button></div>' +
+      (_ui.fromPhoto ? '<div class="lmb-photo-note" id="lmb-photo-note"></div>' : '') +
       '<div class="lml-feedback" id="lmb-status"></div>' +
       '<div class="lmb-preview" id="lmb-preview"></div>' +
       '<details class="lmb-text"><summary>Edit as text</summary>' +
@@ -339,6 +455,15 @@ var LMBuilder = (function () {
     body.querySelector('[data-act=undo]').onclick = _undo;
     body.querySelectorAll('[data-finger]').forEach(function (b) { b.onclick = function () { _finger(+b.dataset.finger); }; });
     document.getElementById('lmb-apply-text').onclick = _applyText;
+    if (_ui.fromPhoto) {
+      var fp = _ui.fromPhoto;
+      document.getElementById('lmb-photo-note').innerHTML =
+        '📷 <b>Read from the photo.</b> Now check it against the book: press <b>▶ Listen</b> and follow along bar by bar. ' +
+        (fp.problem ? '<br><b>One thing to fix:</b> ' + _esc(fp.problem) + ' (see "Edit as text").'
+          : _ui.unsure.length ? '<br>Look hardest at the <span class="lmb-unsure-swatch">tinted</span> bar' + (_ui.unsure.length > 1 ? 's' : '') + ' (' + _ui.unsure.join(', ') + ') — the reads disagreed there.'
+          : '') +
+        (fp.notes ? '<br><small>' + _esc(fp.notes) + '</small>' : '');
+    }
     _refresh();
   }
 
@@ -370,13 +495,23 @@ var LMBuilder = (function () {
     try {
       var song = _song(_d);
       var c = LMScore.compile(song);
-      LMScore.render(Vex.Flow, prev, c, { names: true, fingers: true, grand: true });
+      var out = LMScore.render(Vex.Flow, prev, c, { names: true, fingers: true, grand: true });
+      // Bars the photo reads disagreed on
+      if (_ui.unsure.length && out && out.svg) {
+        out.bars.filter(function (b) { return _ui.unsure.indexOf(b.index + 1) >= 0; }).forEach(function (b) {
+          var r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          r.setAttribute('x', b.x); r.setAttribute('y', b.y - 6); r.setAttribute('width', b.w); r.setAttribute('height', b.h + 12);
+          r.setAttribute('rx', 6); r.setAttribute('fill', 'rgba(245,158,11,0.18)');
+          out.svg.insertBefore(r, out.svg.firstChild);
+        });
+      }
       // Ink colour, and mark the bar being entered
       prev.querySelectorAll('path, rect, text').forEach(function (p) {
         if (!p.getAttribute('fill') || p.getAttribute('fill') === 'black') p.setAttribute('fill', '#3D3555');
         if (p.getAttribute('stroke') === 'black') p.setAttribute('stroke', '#3D3555');
       });
-      prev.scrollTop = prev.scrollHeight;
+      // Follow the end while entering notes; start at the top when checking a photo
+      prev.scrollTop = _ui.followEnd ? prev.scrollHeight : 0;
     } catch (e) {
       prev.innerHTML = '<div class="lmp-muted">' + _esc(e.message) + '</div>';
     }
@@ -419,6 +554,7 @@ var LMBuilder = (function () {
       return;
     }
     evs.push(ev);
+    _ui.followEnd = true;
     _ui.lastAt = now;
     _ui.dots = 0;          // a dot is usually a one-off
     _refresh();

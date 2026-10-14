@@ -11,6 +11,7 @@ const wcScores = require('./wc-scores');
 const wcMatch = require('./wc-match');
 
 const mergeRoutines = require('./routines-merge');
+const omr = require('./omr');
 
 const app = express();
 const PORT = 3333;
@@ -34,6 +35,7 @@ app.use('/private', express.static(PRIVATE_DIR));
 
 // Register Book & Movie Check media endpoints
 media.init(app, DATA_DIR);
+omr.init(app);
 
 // Register diag endpoints (error capture from browsers)
 diag.init(app, DATA_DIR);

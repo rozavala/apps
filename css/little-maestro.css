@@ -6938,3 +6938,19 @@ body .rr-fab {
 .lmb-text textarea { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
 .lmb-help { font-size: 11px; color: var(--color-text-muted); margin-top: 6px; }
 .lmb-week { display: flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-weight: 700; }
+
+/* My Book: reading a photo of the page */
+.lmb-reading { animation: lmb-pulse 1.4s ease-in-out infinite; }
+@keyframes lmb-pulse { 50% { transform: scale(1.12); } }
+.lmb-photo-note {
+  align-self: stretch;
+  padding: 10px 12px;
+  background: rgba(20,184,166,0.08);
+  border: 1px solid rgba(20,184,166,0.35);
+  border-radius: 12px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+.lmb-unsure-swatch { background: rgba(245,158,11,0.3); padding: 0 4px; border-radius: 4px; }
