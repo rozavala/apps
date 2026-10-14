@@ -251,7 +251,8 @@ var LMBuilder = (function () {
       }).join('');
     };
     body.innerHTML =
-      '<div class="lml-text">Copy a piece from the lesson book, one note at a time. It stays private to this student and syncs to your family\'s devices.</div>' +
+      '<div class="lml-text">Copy a piece from the lesson book: take a photo of the page, or enter it one note at a time. It stays private to this student and syncs to your family\'s devices.</div>' +
+      '<div class="lmb-help">📷 Tip: if the camera screen stays black, take the picture with the iPad\'s Camera app first, then choose it under <b>Photo Library</b>.</div>' +
       '<div class="lmb-form">' +
         '<label>Title<input id="lmb-title" class="lmp-pm-input" value="' + _esc(_d.title) + '" placeholder="e.g. Sonatina"></label>' +
         '<label>Book &amp; page<input id="lmb-book" class="lmp-pm-input" value="' + _esc(_d.book) + '" placeholder="e.g. Alfred\'s Lesson Book 1B, p. 44"></label>' +
@@ -304,30 +305,72 @@ var LMBuilder = (function () {
   var KEYS_OK = { C: 1, G: 1, D: 1, A: 1, E: 1, F: 1, Bb: 1, Eb: 1, Am: 1, Em: 1, Bm: 1, Dm: 1, Gm: 1, Cm: 1 };
   var _omrAbort = null;
 
+  function _log(msg) { if (typeof Debug !== 'undefined' && Debug.log) Debug.log('[MyBook photo] ' + msg); }
+
+  // No `capture` attribute on purpose: forcing the camera leaves no way out
+  // when the browser app has no camera permission (iPadOS then shows a black
+  // camera). Without it, iOS offers Take Photo / Photo Library / Choose File,
+  // so a photo taken with the Camera app works too.
+  // The input is attached to the page: on iOS WebKit a detached file input
+  // can open the picker and then never fire `change`.
   function _pickPhoto() {
+    var old = document.getElementById('lmb-photo-input');
+    if (old) old.remove();
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.setAttribute('capture', 'environment');   // iPad/phone: open the camera
-    input.onchange = function () { if (input.files && input.files[0]) _readPhoto(input.files[0]); };
+    input.id = 'lmb-photo-input';
+    input.style.cssText = 'position:fixed;left:-1000px;top:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(input);
+    var handled = false;
+    var onPick = function () {
+      if (handled) return;
+      var f = input.files && input.files[0];
+      if (!f) return;
+      handled = true;
+      _log('picked ' + (f.type || 'unknown type') + ', ' + Math.round(f.size / 1024) + ' KB');
+      _readPhoto(f);
+      setTimeout(function () { input.remove(); }, 1000);
+    };
+    input.addEventListener('change', onPick);
+    input.addEventListener('input', onPick);
+    _log('opening picker');
     input.click();
   }
 
-  // Shrink to ~2000 px on the long side: plenty for notes, quick to send
+  // Shrink to ~2000 px on the long side: plenty for notes, quick to send.
+  // Older iPads can hand back an empty canvas when memory is tight, so
+  // step down in size until the JPEG comes out.
   function _shrink(file) {
     return new Promise(function (resolve, reject) {
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function () {
-        var scale = Math.min(1, 2000 / Math.max(img.width, img.height));
-        var c = document.createElement('canvas');
-        c.width = Math.round(img.width * scale);
-        c.height = Math.round(img.height * scale);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        _log('decoded ' + img.width + '×' + img.height);
+        var sizes = [2000, 1600, 1200];
+        for (var i = 0; i < sizes.length; i++) {
+          var scale = Math.min(1, sizes[i] / Math.max(img.width, img.height));
+          var c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale);
+          c.height = Math.round(img.height * scale);
+          try {
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            var data = c.toDataURL('image/jpeg', 0.85);
+            if (data && data.length > 5000) {
+              URL.revokeObjectURL(url);
+              _log('jpeg ' + c.width + '×' + c.height + ', ' + Math.round(data.length / 1024) + ' KB');
+              return resolve(data);
+            }
+          } catch (e) { _log('canvas failed at ' + sizes[i] + ': ' + e.message); }
+        }
         URL.revokeObjectURL(url);
-        resolve(c.toDataURL('image/jpeg', 0.85));
+        reject(new Error('This picture is too big for the iPad to process. Try a photo from the Camera app.'));
       };
-      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('That file is not a picture I can open.')); };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        _log('decode failed for ' + (file.type || 'unknown type'));
+        reject(new Error('That file is not a picture I can open. Take the photo with the Camera app and choose it from Photos.'));
+      };
       img.src = url;
     });
   }
@@ -360,13 +403,17 @@ var LMBuilder = (function () {
         body: JSON.stringify({ image: dataUrl, hint: [_d.title, _d.book].filter(Boolean).join(' — ') }),
         signal: _omrAbort ? _omrAbort.signal : undefined,
       });
-    }).then(function (r) { return r.json(); }).then(function (res) {
+    }).then(function (r) {
+      _log('server answered ' + r.status);
+      return r.json();
+    }).then(function (res) {
       done();
       if (!res.piece) throw new Error(res.error || 'Could not read the photo.');
       _applyPhoto(res);
     }).catch(function (e) {
       done();
       if (e && e.name === 'AbortError') return;
+      _log('failed: ' + (e && e.message));
       _details();
       alert((e && e.message) || 'Could not read the photo. Check the internet connection and try again.');
     });
