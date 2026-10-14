@@ -270,10 +270,10 @@ var LMLessons = (function () {
       PianoKeyboard.setClickCallback(function (note) { if (_s.active && _onKey) _onKey(LMScore.canonical(note)); });
       PianoKeyboard.setClickEnabled(true);
     }
-    if (typeof MIDIManager !== 'undefined' && !_wireInput.midi) {
-      // MIDIManager has no "off"; one listener, guarded by _s.active
+    if (typeof MIDIManager !== 'undefined' && MIDIManager.listen && !_wireInput.midi) {
+      // One persistent listener (lessons clear the ordinary ones), guarded by _s.active
       _wireInput.midi = true;
-      MIDIManager.onNoteOn(function (e) { if (_s.active && _onKey) _onKey(LMScore.canonical(e.fullNote), true); });
+      MIDIManager.listen(function (e) { if (_s.active && _onKey) _onKey(LMScore.canonical(e.fullNote), true); });
     }
   }
 

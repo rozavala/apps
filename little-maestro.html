@@ -9611,6 +9611,9 @@ const MIDIManager = (() => {
 
   const _noteOnCallbacks  = [];
   const _noteOffCallbacks = [];
+  // listen(): note-on listeners that clearCallbacks() leaves alone, for
+  // things that outlive a lesson (practice timer, theory lessons, games)
+  const _persistentOn = [];
   const _statusChangeCallbacks = [];
 
   // MIDI test log — rolling array of last 10 events
@@ -9628,6 +9631,7 @@ const MIDIManager = (() => {
       const payload = { ...noteInfo, velocity };
       if (typeof Debug !== 'undefined') Debug.log('[MIDI] Note On: ' + noteInfo.fullNote + ' vel:' + velocity);
       _noteOnCallbacks.forEach(cb => { try { cb(payload); } catch(e) {} });
+      _persistentOn.forEach(cb => { try { cb(payload); } catch(e) {} });
       _logEvent(`${noteInfo.fullNote} ON  vel:${velocity}`);
     } else if (command === 0x80 || (command === 0x90 && velocity === 0)) {
       const payload = { ...noteInfo, velocity: 0 };
@@ -9992,7 +9996,11 @@ const MIDIManager = (() => {
     _noteOffCallbacks.length = 0;
   }
 
-  return { init, onNoteOn, onNoteOff, onStatusChange, getStatus, getDeviceName, disconnect, getLog, forceRetry, clearCallbacks };
+  function listen(callback) {
+    if (typeof callback === 'function') _persistentOn.push(callback);
+  }
+
+  return { init, onNoteOn, onNoteOff, onStatusChange, getStatus, getDeviceName, disconnect, getLog, forceRetry, clearCallbacks, listen };
 })();
 
 
