@@ -3,6 +3,42 @@
    Plain REST sync for VPS + Tailscale. No dependencies.
    ================================================================ */
 
+/* ── Automated browsers never reach the live server ─────────────
+   Playwright, Puppeteer and WebDriver all set navigator.webdriver.
+   The test suite expects to run with no route to the family server,
+   but a run from a machine on the tailnet reached it: it pushed fake
+   profiles and copied a test routine onto every kid. So under
+   automation, any request to the server host (fetch, XHR, beacon)
+   is refused here, for every script on the page. Tests that stub
+   window.fetch themselves are unaffected. Set
+   window.ZS_ALLOW_LIVE_SERVER = true before this script to opt out. */
+(function() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+  if (!navigator.webdriver || window.ZS_ALLOW_LIVE_SERVER) return;
+  var LIVE_HOST = 'tail57521e.ts.net';
+  function isLive(target) {
+    try { return String((target && target.url) || target).indexOf(LIVE_HOST) !== -1; } catch (e) { return false; }
+  }
+  var realFetch = window.fetch;
+  if (realFetch) {
+    window.fetch = function(input) {
+      if (isLive(input)) return Promise.reject(new TypeError('Blocked: automated browser must not reach the live sync server'));
+      return realFetch.apply(this, arguments);
+    };
+  }
+  if (navigator.sendBeacon) {
+    var realBeacon = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = function(url) { return isLive(url) ? false : realBeacon.apply(null, arguments); };
+  }
+  if (typeof XMLHttpRequest !== 'undefined') {
+    var realOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url) {
+      if (isLive(url)) throw new Error('Blocked: automated browser must not reach the live sync server');
+      return realOpen.apply(this, arguments);
+    };
+  }
+})();
+
 var CloudSync = (function() {
   'use strict';
 
