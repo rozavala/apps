@@ -359,7 +359,10 @@ window.ZSProgressCatalog = {
     {"i":47,"l":"Moonlight Sonata (Extended)","g":"World 13"},
     {"i":48,"l":"La Campanella","g":"World 13"},
     {"i":49,"l":"Clair de Lune (Extended)","g":"World 13"},
-    {"i":50,"l":"Liebestraum No. 3","g":"World 13"}
+    {"i":50,"l":"Liebestraum No. 3","g":"World 13"},
+    {"i":400,"l":"Ode to Joy (Hands Together)","g":"World 20"},
+    {"i":401,"l":"Minuet in G (Theme)","g":"World 20"},
+    {"i":402,"l":"Row, Row, Row Your Boat","g":"World 20"}
   ],
 
   story: [

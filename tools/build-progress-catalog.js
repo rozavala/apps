@@ -75,7 +75,9 @@ const BUILDERS = {
   // is the first uncompleted node walking that same order — so the
   // catalog has to be in quest-map order, not raw array order.
   piano() {
-    const songs = arr('little-maestro.html', 'SONGS').filter(s => !s.isBonus && s.world);
+    // Score-format songs in js/lm-songs.js are appended to SONGS at load
+    const songs = arr('little-maestro.html', 'SONGS').concat(arr('js/lm-songs.js', 'LM_SONGS'))
+      .filter(s => !s.isBonus && s.world);
     const worlds = [...new Set(songs.map(s => s.world))].sort((a, b) => a - b);
     const out = [];
     worlds.forEach(w => {
