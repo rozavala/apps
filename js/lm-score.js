@@ -519,7 +519,7 @@
       var inRow = c.measures.slice(first, first + perRow);
       // Opening bars carry clef/key/time, so give them more room.
       var keyN = Math.abs(KEY_COUNT[c.key] || 0);
-      var decor = 38 + keyN * 10 + (row === 0 ? 26 : 0);
+      var decor = 38 + keyN * 10 + (row === 0 && !opts.noTime ? 26 : 0);
       var barW = (usable - decor) / perRow;
       var x = left;
 
@@ -533,7 +533,7 @@
           if (mi === 0) {
             st.addClef(h === 'rh' ? 'treble' : 'bass');
             if (keyN) st.addKeySignature(c.key.replace(/m$/, '') === c.key ? c.key : relativeMajor(c.key));
-            if (row === 0) st.addTimeSignature(c.time.str);
+            if (row === 0 && !opts.noTime) st.addTimeSignature(c.time.str);
           }
           if (m.index === c.measures.length - 1) st.setEndBarType(VF.Barline.type.END);
           st.setContext(ctx).draw();
@@ -585,12 +585,19 @@
         fmt.format(voices.map(function (vv) { return vv.v; }), Math.max(40, endX - startX - 12));
 
         voices.forEach(function (vv) {
+          // Beam each run of notes between rests, so a beam never reaches over a rest.
+          // Eighth-note meters (3/8, 6/8, 9/8) beam in threes; the rest by the quarter.
           var beams = [];
-          try {
-            beams = VF.Beam.generateBeams(tickables[vv.h].filter(function (n) { return !n.isRest(); }), {
-              groups: c.time.compound ? [new VF.Fraction(3, 8)] : [new VF.Fraction(2, 8)],
-            });
-          } catch (e) { beams = []; }
+          var groups = c.time.den === 8 ? [new VF.Fraction(3, 8)] : [new VF.Fraction(2, 8)];
+          var run = [];
+          var flush = function () {
+            if (run.length > 1) {
+              try { beams = beams.concat(VF.Beam.generateBeams(run, { groups: groups })); } catch (e) { /* unbeamed is fine */ }
+            }
+            run = [];
+          };
+          tickables[vv.h].forEach(function (n) { if (n.isRest()) flush(); else run.push(n); });
+          flush();
           vv.v.draw(ctx, vv.stave);
           beams.forEach(function (b) { b.setContext(ctx).draw(); });
 
@@ -608,9 +615,10 @@
             e.pitches.forEach(function (p, pi) {
               var k = vv.h + '|' + canonical(p);
               if (lastByHandPitch[k] && lastByHandPitch[k].tie) {
-                tieQueue.push({ from: lastByHandPitch[k].sn, fromIdx: lastByHandPitch[k].pi, to: sn, toIdx: pi });
+                var lp = lastByHandPitch[k];
+                tieQueue.push({ from: lp.sn, fromIdx: lp.pi, to: sn, toIdx: pi, split: lp.row !== row });
               }
-              lastByHandPitch[k] = { sn: sn, pi: pi, tie: e.tie };
+              lastByHandPitch[k] = { sn: sn, pi: pi, tie: e.tie, row: row };
             });
           });
         });
@@ -625,8 +633,12 @@
 
     tieQueue.forEach(function (tq) {
       try {
-        new VF.StaveTie({ first_note: tq.from, last_note: tq.to, first_indices: [tq.fromIdx], last_indices: [tq.toIdx] })
-          .setContext(ctx).draw();
+        // Across a line break: half a tie off the end of one line, half onto the next
+        var ties = tq.split
+          ? [{ first_note: tq.from, last_note: null, first_indices: [tq.fromIdx], last_indices: [tq.fromIdx] },
+             { first_note: null, last_note: tq.to, first_indices: [tq.toIdx], last_indices: [tq.toIdx] }]
+          : [{ first_note: tq.from, last_note: tq.to, first_indices: [tq.fromIdx], last_indices: [tq.toIdx] }];
+        ties.forEach(function (t) { new VF.StaveTie(t).setContext(ctx).draw(); });
       } catch (e) { /* a tie VexFlow can't place is only cosmetic */ }
     });
 
