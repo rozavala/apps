@@ -484,8 +484,9 @@
   function render(VF, container, c, opts) {
     opts = opts || {};
     container.innerHTML = '';
-    var showRH = c.hasRH;
-    var showLH = c.hasLH;
+    // opts.grand: always both staves (reading games, where a rest-only staff still matters)
+    var showRH = c.hasRH || !!opts.grand;
+    var showLH = c.hasLH || !!opts.grand;
     if (!showRH && !showLH) showRH = true;
     var grand = showRH && showLH;
 

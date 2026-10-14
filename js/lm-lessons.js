@@ -215,7 +215,7 @@ var LMLessons = (function () {
       // One row, sized to the bars it holds, centred in the card
       var bars = Math.min(4, c.measures.length);
       el.style.width = Math.min(560, 150 * bars + (c.hasLH && c.hasRH ? 130 : 110)) + 'px';
-      LMScore.render(Vex.Flow, el, c, { noTime: !spec.time, barNumbers: false, fingers: true, perRow: bars });
+      LMScore.render(Vex.Flow, el, c, { noTime: !spec.time, barNumbers: false, fingers: true, perRow: bars, grand: !!spec.grand });
       // Ink colour to match the sheet music
       el.querySelectorAll('path, rect, text').forEach(function (p) {
         if (!p.getAttribute('fill') || p.getAttribute('fill') === 'black') p.setAttribute('fill', '#3D3555');
@@ -232,7 +232,7 @@ var LMLessons = (function () {
     var useBass = clef === 'bass' || (clef === 'grand' && low < LMScore.midiOf('C4'));
     var tok = notes.join('+') + 'w';
     var spec = clef === 'grand'
-      ? (useBass ? { rh: 'Rw', lh: tok } : { rh: tok, lh: 'Rw' })
+      ? (useBass ? { rh: 'Rw', lh: tok, grand: true } : { rh: tok, lh: 'Rw', grand: true })
       : (useBass ? { clef: 'bass', notes: tok } : { clef: 'treble', notes: tok });
     _staff(el, spec, key);
   }
