@@ -26,6 +26,18 @@
    Pitches are absolute (F#4, Bb3); key signatures and naturals are
    worked out for display, so write what sounds.
 
+   Bar marks (in either hand's bar; both hands share them):
+     [:  … :]   repeat start / end      {1} {2}   1st / 2nd ending
+     Fine  DC  DS  Segno                D.C. / D.S. al Fine
+   The sheet shows each bar once; listening, learning and play-along
+   follow the performance order (repeats taken, endings chosen).
+
+   Optional extras on `score`:
+     tempo: 'Moderately'                        shown above bar 1
+     marks: [{ bar: 5, kind: 'tip'|'teacher'|'dynamic', text: '…' }]
+       tips and teacher's notes show over their bar (and in practice);
+       dynamics (pp p mp mf f ff) also set how loud the app plays.
+
    compile() checks that every bar adds up to the time signature in
    both hands and throws with the bar number when one doesn't.
 
@@ -142,13 +154,30 @@
 
   // ── Token parsing ─────────────────────────────────────────────
   var TOKEN_RE = /^((?:[A-G][#b]?\d\+)*[A-G][#b]?\d|R)(w|h|q|e|s)(\.?)(~?)(?::([1-5](?:,[1-5])*))?$/;
+  var VOLTA_RE = /^\{([1-4])\}$/;
+
+  // A bar mark token, or null. Sets the flag on `flags`.
+  function barMark(tok, flags) {
+    var v = VOLTA_RE.exec(tok);
+    if (v) { flags.volta = +v[1]; return true; }
+    switch (tok.toLowerCase()) {
+      case '[:': flags.start = true; return true;
+      case ':]': flags.end = true; return true;
+      case 'fine': flags.fine = true; return true;
+      case 'dc': flags.dc = true; return true;
+      case 'ds': flags.ds = true; return true;
+      case 'segno': flags.segno = true; return true;
+    }
+    return false;
+  }
 
   function parseVoice(src, hand, songLabel) {
     var bars = String(src || '').split('|').map(function (b) { return b.trim(); });
     if (bars.length && bars[bars.length - 1] === '') bars.pop();
     return bars.map(function (bar, bi) {
-      if (!bar) return [];
-      return bar.split(/\s+/).map(function (tok) {
+      var flags = {};
+      if (!bar) { var empty = []; empty.flags = flags; return empty; }
+      var evs = bar.split(/\s+/).filter(function (tok) { return !barMark(tok, flags); }).map(function (tok) {
         var m = TOKEN_RE.exec(tok);
         if (!m) throw new Error(songLabel + ': ' + hand + ' bar ' + (bi + 1) + ': cannot read "' + tok + '"');
         var rest = m[1] === 'R';
@@ -171,7 +200,15 @@
           fingers: fingers,
         };
       });
+      evs.flags = flags;
+      return evs;
     });
+  }
+
+  function mergeFlags(a, b) {
+    var out = {};
+    [a || {}, b || {}].forEach(function (f) { Object.keys(f).forEach(function (k) { if (f[k]) out[k] = f[k]; }); });
+    return out;
   }
 
   // ── Compile a `score` spec ────────────────────────────────────
@@ -192,7 +229,8 @@
     for (var i = 0; i < nBars; i++) {
       var expect = time.barBeats;
       if (i === 0 && pickup) expect = pickup;
-      var m = { index: i, start: start, len: expect, rh: rhBars[i] || null, lh: lhBars[i] || null };
+      var m = { index: i, start: start, len: expect, rh: rhBars[i] || null, lh: lhBars[i] || null,
+                flags: mergeFlags(rhBars[i] && rhBars[i].flags, lhBars[i] && lhBars[i].flags) };
       ['rh', 'lh'].forEach(function (h) {
         var evs = m[h];
         if (!evs) return;
@@ -212,7 +250,9 @@
       start += m.len;
       measures.push(m);
     }
-    return finish(song, time, spec.key || 'C', pickup, measures);
+    var c = finish(song, time, spec.key || 'C', pickup, measures, spec.marks);
+    c.tempo = spec.tempo || '';
+    return c;
   }
 
   // ── Adapt an old flat `notes` song ────────────────────────────
@@ -251,7 +291,7 @@
     var measures = [];
     var start = 0;
     for (var i = 0; i < nBars; i++) {
-      var m = { index: i, start: start, len: time.barBeats, rh: rhBars[i] || null, lh: lhAligned ? (lhBars[i] || []) : null };
+      var m = { index: i, start: start, len: time.barBeats, rh: rhBars[i] || null, lh: lhAligned ? (lhBars[i] || []) : null, flags: {} };
       var longest = 0;
       ['rh', 'lh'].forEach(function (h) {
         if (!m[h]) return;
@@ -281,18 +321,90 @@
     return c;
   }
 
+  // ── Performance order ─────────────────────────────────────────
+  // Which bars are played, in what order: repeats taken once, the
+  // ending for each pass, then D.C./D.S. back to the top (or segno)
+  // without repeats, stopping at Fine.
+  function voltaSpans(measures) {
+    // Ending n runs from its {n} bar up to and including the next :]
+    // (stopping early at another {..}); an ending with no :] after it
+    // (the last one) covers just the bars marked {n}.
+    var n = measures.length, volta = [];
+    for (var i = 0; i < n; i++) volta[i] = volta[i] || 0;
+    for (var j = 0; j < n; j++) {
+      var k = measures[j].flags.volta;
+      if (!k) continue;
+      var endAt = -1;
+      for (var q = j; q < n; q++) {
+        if (q > j && measures[q].flags.volta) break;
+        if (measures[q].flags.end) { endAt = q; break; }
+      }
+      for (var r = j; r <= (endAt >= 0 ? endAt : j); r++) volta[r] = k;
+    }
+    return volta;
+  }
+
+  function performance(measures) {
+    var n = measures.length;
+    var volta = voltaSpans(measures);
+    var lastEnding = Math.max.apply(null, [0].concat(volta));
+    var segno = 0;
+    measures.forEach(function (m, i) { if (m.flags.segno) segno = i; });
+    var order = [];
+    var repStart = 0, pass = 1, taken = {}, jumped = false, cameBack = false;
+    var i = 0, guard = 0;
+    while (i < n && guard++ < n * 10) {
+      var f = measures[i].flags;
+      // Walking into a new repeat section (not landing on it from a :])
+      if (f.start && !cameBack) { repStart = i; pass = 1; }
+      cameBack = false;
+      // Endings: this pass's ending only; after D.C./D.S., the last ending
+      if (volta[i] && volta[i] !== (jumped ? lastEnding : pass)) { i++; continue; }
+      order.push(i);
+      if (jumped && f.fine) break;
+      if (f.end && !jumped && !taken[i]) {
+        taken[i] = true;
+        pass++;
+        i = repStart;
+        cameBack = true;
+        continue;
+      }
+      if (f.end) pass = 1;
+      if ((f.dc || f.ds) && !jumped) {
+        jumped = true;
+        i = f.ds ? segno : 0;
+        cameBack = true;
+        continue;
+      }
+      i++;
+    }
+    return { order: order, volta: volta };
+  }
+
   // ── Shared tail: sounding notes, onset events, ranges ─────────
-  function finish(song, time, key, pickup, measures) {
+  // Staff events keep their written place (e.t, e.m); notes and onset
+  // events are laid out on the performance timeline, one copy per pass.
+  function finish(song, time, key, pickup, measures, marks) {
+    var perf = performance(measures);
+    var occ = [];      // [{ m, start }] in performance time
+    var T = 0;
+    perf.order.forEach(function (mi) {
+      occ.push({ m: mi, start: T });
+      T += measures[mi].len;
+    });
+
     var notes = [];   // one per sounding note, ties merged
     var open = {};    // hand|pitch → note still sounding through a tie
-    measures.forEach(function (m) {
+    occ.forEach(function (o, oi) {
+      var m = measures[o.m];
       ['rh', 'lh'].forEach(function (h) {
         (m[h] || []).forEach(function (e) {
           e.hand = h;
           if (e.rest) return;
+          var off = e.t - m.start;
           e.pitches.forEach(function (p, pi) {
             var k = h + '|' + canonical(p);
-            if (open[k]) {
+            if (open[k] && Math.abs(open[k].t + open[k].beats - (o.start + off)) < EPS) {
               // Tied over: the earlier note just lasts longer.
               open[k].beats += e.beats;
               e.tiedFrom = true;
@@ -301,11 +413,11 @@
             }
             var n = {
               note: canonical(p), spelled: p, hand: h === 'rh' ? 'right' : 'left',
-              t: e.t, beats: e.beats, m: e.m, finger: e.fingers[pi] || null,
+              t: o.start + off, off: off, occ: oi, beats: e.beats, m: o.m, finger: e.fingers[pi] || null,
               duration: legacyName(e.dur, e.dots), gameSkip: !!e.gameSkip,
             };
             notes.push(n);
-            if (e.tie) open[k] = n;
+            if (e.tie) open[k] = n; else delete open[k];
           });
         });
       });
@@ -318,7 +430,7 @@
     notes.forEach(function (n) {
       var k = n.t.toFixed(4);
       var ev = byT[k];
-      if (!ev) { ev = byT[k] = { t: n.t, m: n.m, rh: [], lh: [] }; events.push(ev); }
+      if (!ev) { ev = byT[k] = { t: n.t, m: n.m, off: n.off, occ: n.occ, rh: [], lh: [] }; events.push(ev); }
       ev[n.hand === 'right' ? 'rh' : 'lh'].push(n);
     });
     events.sort(function (a, b) { return a.t - b.t; });
@@ -327,20 +439,38 @@
       ev.rh.concat(ev.lh).forEach(function (n) { n.ev = i; });
     });
 
+    // Dynamics: a playback loudness per written bar, carried forward
+    var DYN = { ppp: 0.45, pp: 0.55, p: 0.7, mp: 0.85, mf: 1, f: 1.15, ff: 1.3, fff: 1.4 };
+    var cleanMarks = (Array.isArray(marks) ? marks : []).filter(function (mk) {
+      return mk && mk.bar >= 1 && mk.bar <= measures.length && mk.text;
+    }).map(function (mk) { return { bar: +mk.bar, kind: mk.kind || 'tip', text: String(mk.text).slice(0, 120) }; });
+    var dyn = [], level = 1;
+    measures.forEach(function (m, i) {
+      cleanMarks.forEach(function (mk) {
+        var d = DYN[String(mk.text).trim().toLowerCase()];
+        if (mk.kind === 'dynamic' && mk.bar === i + 1 && d) level = d;
+      });
+      dyn[i] = level;
+    });
+
     var hasRH = measures.some(function (m) { return m.rh && m.rh.some(function (e) { return !e.rest; }); });
     var hasLH = measures.some(function (m) { return m.lh && m.lh.some(function (e) { return !e.rest; }); });
-    var last = measures[measures.length - 1];
     return {
       songId: song.id,
       time: time,
       key: key,
       pickup: pickup,
       measures: measures,
+      order: perf.order,
+      volta: perf.volta,
+      occ: occ,
       notes: notes,
       events: events,
+      marks: cleanMarks,
+      dyn: dyn,
       hasRH: hasRH,
       hasLH: hasLH,
-      totalBeats: last ? last.start + last.len : 0,
+      totalBeats: T,
     };
   }
 
@@ -379,11 +509,10 @@
   // The steps a student plays, in order: each one is the set of keys
   // that start together in the chosen hand(s).
   function steps(c, hands, fromBar, toBar) {
-    var lo = fromBar == null ? 0 : fromBar;
-    var hi = toBar == null ? c.measures.length - 1 : toBar;
+    var span = barSpan(c, fromBar, toBar);
     var out = [];
     c.events.forEach(function (ev) {
-      if (ev.m < lo || ev.m > hi) return;
+      if (ev.t < span.start - EPS || ev.t >= span.end - EPS) return;
       var ns = ev.rh.concat(ev.lh).filter(function (n) { return wants(hands, n); });
       if (!ns.length) return;
       out.push({ ev: ev.index, t: ev.t, m: ev.m, notes: ns, keys: uniq(ns.map(function (n) { return n.note; })) });
@@ -397,10 +526,21 @@
   }
 
   // ── Range helpers ─────────────────────────────────────────────
+  // A bar range in performance time: from the first time bar `fromBar`
+  // is played to the end of the next time `toBar` is played after it.
+  // No range = the whole performance.
   function barSpan(c, fromBar, toBar) {
-    var lo = c.measures[fromBar == null ? 0 : fromBar];
-    var hi = c.measures[toBar == null ? c.measures.length - 1 : toBar];
-    return { start: lo.start, end: hi.start + hi.len };
+    if (fromBar == null && toBar == null) return { start: 0, end: c.totalBeats };
+    var lo = fromBar == null ? 0 : fromBar, hi = toBar == null ? c.measures.length - 1 : toBar;
+    var a = -1, b = -1;
+    for (var i = 0; i < c.occ.length; i++) {
+      if (a < 0 && c.occ[i].m === lo) a = i;
+      if (a >= 0 && c.occ[i].m === hi) { b = i; break; }
+    }
+    if (a < 0) a = 0;
+    if (b < 0) b = c.occ.length - 1;
+    var last = c.occ[b];
+    return { start: c.occ[a].start, end: last.start + c.measures[last.m].len };
   }
 
   // ── Player ────────────────────────────────────────────────────
@@ -448,7 +588,8 @@
         ev.rh.concat(ev.lh).forEach(function (n) {
           if (!wants(hands, n) && !n.gameSkip) return;
           var len = Math.min(n.beats, span.end - n.t) * qMs;
-          if (audio && audio.playNote) audio.playNote(n.note, len * 0.95, n.hand === 'left' ? 62 : 80);
+          var vel = Math.min(120, Math.round((n.hand === 'left' ? 62 : 80) * (c.dyn[n.m] || 1)));
+          if (audio && audio.playNote) audio.playNote(n.note, len * 0.95, vel);
         });
         if (opts.onEvent) opts.onEvent(ev.index);
       });
@@ -466,12 +607,12 @@
   }
 
   function barOffset(c, beat) {
-    for (var i = c.measures.length - 1; i >= 0; i--) {
-      var m = c.measures[i];
-      if (beat >= m.start - EPS) {
+    for (var i = c.occ.length - 1; i >= 0; i--) {
+      var o = c.occ[i];
+      if (beat >= o.start - EPS) {
         // In a pickup bar, count from where the full bar would have begun.
-        var off = beat - m.start;
-        if (i === 0 && c.pickup) off += c.time.barBeats - c.pickup;
+        var off = beat - o.start;
+        if (o.m === 0 && c.pickup) off += c.time.barBeats - c.pickup;
         return off;
       }
     }
@@ -510,6 +651,8 @@
 
     var keyAlts = keyAlterations(c.key);
     var evEls = {};
+    var byPos = {};          // 'bar|offset' → staff note groups (one per staff)
+    var texts = [];          // text to lay over the staves once drawn
     var bars = [];
     var tieQueue = [];       // [{from: StaveNote, idx, hand, pitch}]
     var lastByHandPitch = {};
@@ -529,6 +672,9 @@
         var staves = {};
         if (showRH) staves.rh = new VF.Stave(x, y, w);
         if (showLH) staves.lh = new VF.Stave(x, y + (grand ? staffGap : 0), w);
+        var f = m.flags || {};
+        var topStave = staves.rh || staves.lh;
+        var vk = c.volta && c.volta[m.index];    // ending number over this bar, if any
         Object.keys(staves).forEach(function (h) {
           var st = staves[h];
           if (mi === 0) {
@@ -536,8 +682,37 @@
             if (keyN) st.addKeySignature(c.key.replace(/m$/, '') === c.key ? c.key : relativeMajor(c.key));
             if (row === 0 && !opts.noTime) st.addTimeSignature(c.time.str);
           }
-          if (m.index === c.measures.length - 1) st.setEndBarType(VF.Barline.type.END);
+          if (f.start) st.setBegBarType(VF.Barline.type.REPEAT_BEGIN);
+          if (f.end) st.setEndBarType(VF.Barline.type.REPEAT_END);
+          else if (m.index === c.measures.length - 1) st.setEndBarType(VF.Barline.type.END);
+          // 1st / 2nd ending bracket over the top staff
+          var k = vk;
+          if (k && st === topStave && VF.Volta) {
+            var prevSame = c.volta[m.index - 1] === k && mi > 0;
+            var nextSame = c.volta[m.index + 1] === k && mi < inRow.length - 1;
+            var type = prevSame ? (nextSame ? VF.Volta.type.MID : VF.Volta.type.END)
+                                : (nextSame ? VF.Volta.type.BEGIN : VF.Volta.type.BEGIN_END);
+            try { st.setVoltaType(type, prevSame ? '' : k + '.', -8); } catch (e) { /* cosmetic */ }
+          }
           st.setContext(ctx).draw();
+        });
+        // Words over the staff: tempo, Fine / D.C., bar notes, dynamics
+        var line0 = topStave.getYForLine(0);
+        var under = staves.rh ? staves.rh.getYForLine(4) + (grand ? 34 : 22) : null;
+        if (row === 0 && mi === 0 && c.tempo) texts.push({ x: x + 20, y: line0 - 26, t: c.tempo, size: 12, weight: 'bold' });
+        if (f.segno) texts.push({ x: x + 6, y: line0 - 6, t: '𝄋', size: 18 });
+        if (f.fine) texts.push({ x: x + w - 4, y: line0 - 6, t: 'Fine', size: 12, style: 'italic', weight: 'bold', anchor: 'end' });
+        if (f.dc || f.ds) texts.push({ x: x + w - 4, y: line0 - 6, t: (f.ds ? 'D.S.' : 'D.C.') + ' al Fine', size: 12, style: 'italic', weight: 'bold', anchor: 'end' });
+        var noteY = line0 - (vk ? 30 : 18);
+        (c.marks || []).filter(function (mk) { return mk.bar === m.index + 1; }).forEach(function (mk) {
+          if (mk.kind === 'dynamic') {
+            if (under != null) texts.push({ x: x + (mi === 0 ? decor : 8), y: under, t: mk.text, size: 15, style: 'italic', weight: 'bold', family: 'Georgia, serif' });
+            return;
+          }
+          var label = mk.text.length > 34 ? mk.text.slice(0, 33) + '…' : mk.text;
+          texts.push({ x: x + (mi === 0 ? decor : 6), y: noteY, t: (mk.kind === 'teacher' ? '✎ ' : '') + label, size: 10, weight: 'bold',
+                       style: mk.kind === 'teacher' ? 'italic' : '', fill: mk.kind === 'teacher' ? '#B45309' : '#0F766E', cls: 'lm-bar-mark' });
+          noteY -= 12;
         });
         if (grand) {
           if (mi === 0) {
@@ -606,11 +781,10 @@
             var sn = tickables[vv.h][i];
             if (!sn || e.rest) return;
             var el = sn.attrs && sn.attrs.el;
-            // Highlight against the onset this note belongs to (ties point back to the original).
-            var evIdx = noteEventIndex(c, e);
-            if (el && evIdx != null) {
-              el.setAttribute('data-ev', evIdx);
-              (evEls[evIdx] = evEls[evIdx] || []).push(el);
+            // Indexed by place in the bar; every pass through the bar lights the same notes
+            if (el) {
+              var pos = m.index + '|' + (e.t - m.start).toFixed(4);
+              (byPos[pos] = byPos[pos] || []).push(el);
             }
             // Ties
             e.pitches.forEach(function (p, pi) {
@@ -632,6 +806,29 @@
       });
     }
 
+    c.events.forEach(function (ev) {
+      var els = byPos[ev.m + '|' + ev.off.toFixed(4)];
+      if (els) evEls[ev.index] = els;
+    });
+
+    // Text goes on last, over the music
+    var NS = 'http://www.w3.org/2000/svg';
+    if (svg && svg.ownerDocument) {
+      texts.forEach(function (tx) {
+        var el = svg.ownerDocument.createElementNS(NS, 'text');
+        el.setAttribute('x', tx.x); el.setAttribute('y', tx.y);
+        el.setAttribute('font-family', tx.family || 'Arial, sans-serif');
+        el.setAttribute('font-size', tx.size || 10);
+        if (tx.weight) el.setAttribute('font-weight', tx.weight);
+        if (tx.style) el.setAttribute('font-style', tx.style);
+        if (tx.anchor) el.setAttribute('text-anchor', tx.anchor);
+        el.setAttribute('fill', tx.fill || '#3D3555');
+        if (tx.cls) el.setAttribute('class', tx.cls);
+        el.textContent = tx.t;
+        svg.appendChild(el);
+      });
+    }
+
     tieQueue.forEach(function (tq) {
       try {
         // Across a line break: half a tie off the end of one line, half onto the next
@@ -649,18 +846,6 @@
   function relativeMajor(minor) {
     var map = { Am: 'C', Em: 'G', Bm: 'D', 'F#m': 'A', 'C#m': 'E', 'G#m': 'B', Dm: 'F', Gm: 'Bb', Cm: 'Eb', Fm: 'Ab', Bbm: 'Db', Ebm: 'Gb' };
     return map[minor] || 'C';
-  }
-
-  function noteEventIndex(c, e) {
-    if (e.rest || !e.pitches.length) return null;
-    // Find the onset event for this staff event's time.
-    for (var i = 0; i < c.events.length; i++) {
-      if (Math.abs(c.events[i].t - e.t) < EPS) return i;
-    }
-    // A tied-over note has no onset of its own; it lights with its start.
-    var best = null;
-    for (var j = 0; j < c.events.length; j++) if (c.events[j].t < e.t) best = j;
-    return best;
   }
 
   function makeNote(VF, e, clef, keyAlts, accState, opts, barLen, time) {
