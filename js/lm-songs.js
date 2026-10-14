@@ -246,6 +246,27 @@ var LM_SONGS = [
     },
   },
 
+  {
+    id: 421,
+    title: 'Position Hop',
+    composer: 'Little Maestro original',
+    world: 21,
+    difficulty: 4,
+    alwaysUnlocked: false,
+    isBonus: false,
+    funFact: 'Pianists move their hands all the time. The trick is to move during a long note or a rest, and to look ahead to where the thumb lands next.',
+    concept: 'Two right-hand positions: C position, then the thumb hops up to G in bar 5, and back home to C in bar 9.',
+    bpm: { turtle: 56, normal: 80, rabbit: 100, rocket: 116 },
+    score: {
+      time: '4/4', key: 'C',
+      rh: 'C4q:1 D4q:2 E4q:3 F4q:4 | G4h:5 E4h:3 | F4q:4 E4q:3 D4q:2 E4q:3 | C4w:1 | ' +
+          'G4q:1 A4q:2 B4q:3 C5q:4 | D5h:5 B4h:3 | C5q:4 B4q:3 A4q:2 B4q:3 | G4w:1 | ' +
+          'E4q:3 F4q:4 G4h:5 | F4q:4 E4q:3 D4h:2 | E4q:3 D4q:2 C4q:1 D4q:2 | C4w:1',
+      lh: 'C3w:5 | C3+G3w:5,1 | B2+F3+G3w:5,2,1 | C3+E3+G3w:5,3,1 | ' +
+          'G3w:1 | G3h:1 D3h:4 | E3h:3 D3h:4 | G3w:1 | ' +
+          'C3+E3+G3w:5,3,1 | B2+F3+G3w:5,2,1 | C3h:5 G3h:1 | C3+E3+G3w:5,3,1',
+    },
+  },
   // ── Level 1 · World 3 · Eighth Notes & 6/8 ────────────────────────
   {
     id: 402,

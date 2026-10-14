@@ -172,6 +172,19 @@ var LMPractice = (function () {
     if (changed) _save(data);
   }
 
+  // Used by My Book (js/lm-builder.js) when a piece is saved
+  function addSong(id, hands, text) {
+    var data = _load();
+    if (!data) return;
+    var a = _assign(data);
+    a.items.push({ kind: 'song', ref: id, hands: hands || null, text: text || '' });
+    data.assignments = a;
+    _save(data);
+  }
+  function hasSong(id) {
+    return _assign().items.some(function (it) { return it.kind === 'song' && it.ref === id; });
+  }
+
   function toggleDone(idx) {
     var data = _load();
     if (!data || !data.assignments) return;
@@ -641,7 +654,7 @@ var LMPractice = (function () {
   return {
     start: start, ping: ping, flush: _flush, minutesOn: minutesOn, recentDays: recentDays,
     homeHtml: homeHtml, parentHtml: parentHtml, notePlayed: notePlayed,
-    toggleDone: toggleDone, playItem: playItem,
+    toggleDone: toggleDone, playItem: playItem, addSong: addSong, hasSong: hasSong,
     noteRush: noteRush, echo: echo, closeGame: _closeGame,
     _saveMeta: _saveMeta, _addSong: _addSong, _addLesson: _addLesson, _addCustom: _addCustom,
     _remove: _remove, _newWeek: _newWeek,

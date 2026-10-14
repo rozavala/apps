@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/little-maestro.css?v=5">
+  <link rel="stylesheet" href="css/little-maestro.css?v=6">
   <link rel="stylesheet" href="css/zs-theme.css">
   <script src="js/debug.js?v=2"></script>
 
@@ -9023,7 +9023,7 @@ function questOrder() {
 
 // Song Library: everything off the paths, minus duplicates and empty songs
 function librarySongs() {
-  return SONGS.filter(s => pathOf(s) === 'library' && !_retired.has(s.id) && s.notes && s.notes.length);
+  return SONGS.filter(s => pathOf(s) === 'library' && !s.custom && !_retired.has(s.id) && s.notes && s.notes.length);
 }
 
 // A song counts as done once it has stars, in either the current
@@ -12336,18 +12336,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('questmap-path-container');
       if (!container) return;
 
+      if (typeof LMBuilder !== 'undefined') LMBuilder.syncSongs();
       const progress = activeProgress();
       const tab      = _mapTab || activePathId();
 
       const tabs = LM_PATHS.map(p => ({ id: p.id, icon: p.icon, title: p.title }))
-        .concat([{ id: 'library', icon: '📚', title: 'Library' }]);
+        .concat([{ id: 'mybook', icon: '📒', title: 'My Book' }, { id: 'library', icon: '📚', title: 'Library' }]);
       let html = `<div class="qm-tabs" role="tablist">` + tabs.map(t => `
           <button class="qm-tab${t.id === tab ? ' qm-tab--active' : ''}" role="tab"
                   aria-selected="${t.id === tab}" onclick="QuestMap.showTab('${t.id}')">
             <span aria-hidden="true">${t.icon}</span> ${t.title}
           </button>`).join('') + `</div>`;
 
-      html += tab === 'library' ? _libraryHtml(progress) : _pathHtml(tab, progress);
+      html += tab === 'library' ? _libraryHtml(progress)
+            : tab === 'mybook'  ? _myBookHtml(progress)
+            : _pathHtml(tab, progress);
       container.innerHTML = html;
 
       // Bring the song they're on into view
@@ -12435,6 +12438,38 @@ document.addEventListener('DOMContentLoaded', () => {
       return html;
     }
 
+    // My Book: pieces copied in from the student's own lesson book (js/lm-builder.js)
+    function _myBookHtml(progress) {
+      const mine = SONGS.filter(s => s.custom);
+      const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      let html = `
+        <div class="questmap-precurr-banner">
+          <span class="banner-stars">✦ ✦ ✦</span>
+          <span>📒 My Book — pieces from your lesson book</span>
+          <span class="banner-stars">✦ ✦ ✦</span>
+        </div>
+        <button class="qm-lesson qm-add-piece" onclick="LMBuilder.open()">
+          <span class="qm-lesson-icon">＋</span>
+          <span class="qm-lesson-text"><span class="qm-lesson-kicker">Homework</span>Add a piece from the book</span>
+        </button>`;
+      if (!mine.length) {
+        html += `<div class="qm-path-progress" style="margin-top:12px;">Copy this week's piece in, one note at a time, and it gets the whole lesson: hands, falling notes, loop bars.</div>`;
+        return html;
+      }
+      html += `<div class="lib-grid" style="margin-top:12px;">` + mine.map(s => {
+        const c = LMScore.compile(s);
+        return `
+          <div class="lib-card" role="button" tabindex="0" onclick="QuestMap.nodeClick('${s.id}')" aria-label="${esc(s.title)}">
+            <span class="lib-card-title">${esc(s.title)}</span>
+            <span class="lib-card-sub">${esc(s.composer || '')}</span>
+            <span class="lib-card-meta">${c.measures.length} bars · ${c.hasLH && c.hasRH ? 'Both hands' : 'One hand'}</span>
+            <span class="lib-card-stars">${_starsFor(progress, s.id)}</span>
+            <button class="lesson-btn lib-card-edit" onclick="event.stopPropagation(); LMBuilder.open(${s.id})">✏️ Edit</button>
+          </div>`;
+      }).join('') + `</div>`;
+      return html;
+    }
+
     // Library shelves, matched on composer (first match wins)
     const LIB_SHELVES = [
       { icon: '🎻', title: 'Classical',            test: /Bach|Beethoven|Mozart|Chopin|Liszt|Debussy|Satie|Pachelbel|Tchaikovsky|Grieg|Joplin|Bizet|Petzold|Haydn|Dvo|Offenbach|Brahms|Handel|Schubert|Schumann/i },
@@ -12481,6 +12516,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderHomeScreen() {
       const container = document.getElementById('home-screen-content');
       if (!container) return;
+      if (typeof LMBuilder !== 'undefined') LMBuilder.syncSongs();
 
       // ── Load user data ──────────────────────────────────────────
       let userName = 'Student', userAvatar = '🎹';
@@ -12641,6 +12677,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       nodeClick(songId) {
         if (!songId) return;
+        if (typeof LMBuilder !== 'undefined') LMBuilder.syncSongs();
         songId = parseInt(songId, 10); // ensure number (HTML attrs arrive as strings)
         const song = typeof SONGS !== 'undefined' ? SONGS.find(s => s.id === songId) : null;
         if (!song) return;
@@ -14205,6 +14242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // ════════════════════════════════════════════════════════
       // opts: { hands, tempo } preselected in "Ready to play?" (from an assignment)
       function startLesson(songId, opts) {
+        if (typeof LMBuilder !== 'undefined') LMBuilder.syncSongs();
         // Stop any in-progress lesson
         _stopPlayback();
         _clearMIDI();
@@ -16365,6 +16403,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/recital.js?v=1"></script>
 <script src="js/lm-lessons.js?v=1"></script>
 <script src="js/lm-practice.js?v=1"></script>
+<script src="js/lm-builder.js?v=1"></script>
 <script>if (typeof LMPractice !== 'undefined') LMPractice.start();</script>
 <script>
   window.addEventListener('load', function() {
