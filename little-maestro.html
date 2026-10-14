@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/little-maestro.css?v=4">
+  <link rel="stylesheet" href="css/little-maestro.css?v=5">
   <link rel="stylesheet" href="css/zs-theme.css">
   <script src="js/debug.js?v=2"></script>
 
@@ -11092,17 +11092,34 @@ document.addEventListener('DOMContentLoaded', () => {
       _ctx.beginPath(); _ctx.moveTo(0, hitY); _ctx.lineTo(cw, hitY); _ctx.stroke();
 
       // ── Falling notes ──
+      // A tile is as long as its note: the bottom edge reaches the line
+      // when it's time to press, the top edge when it's time to let go.
+      const travel = ch - HIT_ZONE_H;
       _schedule.forEach(n => {
-        if (n.state === 'hit') return;  // don't draw hit notes
         const progress = (songTime - n.hitTime + FALL_DURATION) / FALL_DURATION;
-        if (progress < -0.1 || progress > 1.35) return;
+        const h = Math.max(NOTE_H, (n.durMs / FALL_DURATION) * travel - 4);
+        if (progress < -0.1 || progress > 1.35 + h / travel) return;
 
-        const y   = progress * (ch - HIT_ZONE_H) - NOTE_H;
+        const bottom = progress * travel;
+        const y   = bottom - h;
         const xf  = _xFrac(n.note);
         const w   = _noteWidth(n.note, cw);
         const x   = xf * cw - w / 2;
         const letter  = _norm(n.note).replace(/\d/, '');
         const color   = NOTE_COLORS[letter] || '#8B5CF6';
+
+        // A hit note keeps a faint tail above the line: hold it this long
+        if (n.state === 'hit') {
+          const tail = Math.min(h, travel - y) ;
+          if (y < travel && tail > 2) {
+            _ctx.globalAlpha = 0.28;
+            _ctx.fillStyle = color;
+            _roundRect(_ctx, x, y, w, Math.min(h, travel - y), 5);
+            _ctx.fill();
+            _ctx.globalAlpha = 1;
+          }
+          return;
+        }
 
         const nearHit = Math.max(0, 1 - Math.abs(songTime - n.hitTime) / 400);
 
@@ -11120,7 +11137,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           _ctx.fillStyle = color;
         }
-        _roundRect(_ctx, x, y, w, NOTE_H, 5);
+        _roundRect(_ctx, x, y, w, h, 5);
         _ctx.fill();
         _ctx.shadowBlur = 0;
 
@@ -11128,19 +11145,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (n.hand === 'left' && n.state !== 'miss') {
           _ctx.strokeStyle = 'rgba(255,255,255,0.9)';
           _ctx.lineWidth = 2;
-          _roundRect(_ctx, x + 1, y + 1, w - 2, NOTE_H - 2, 5);
+          _roundRect(_ctx, x + 1, y + 1, w - 2, h - 2, 5);
           _ctx.stroke();
         }
 
-
-        // Letter label
+        // Letter label, at the leading (bottom) end of the tile
         if (n.state !== 'miss') {
           _ctx.fillStyle = 'rgba(0,0,0,0.75)';
           const fs = Math.max(9, Math.min(13, w * 0.45));
           _ctx.font = `bold ${fs}px Nunito, sans-serif`;
           _ctx.textAlign = 'center';
           _ctx.textBaseline = 'middle';
-          _ctx.fillText(letter, x + w/2, y + NOTE_H/2);
+          _ctx.fillText(letter, x + w/2, bottom - NOTE_H/2);
         }
       });
 
@@ -11792,7 +11808,9 @@ document.addEventListener('DOMContentLoaded', () => {
         svgEl:        null,
         songId:       null,
         song:         null,
+        loopBars:     null,   // { from, to } tinted for loop practice
         compiled:     null,   // LMScore.compile(song)
+
         evEls:        {},     // onset event index → [svg <g> per staff]
         bars:         [],     // bar boxes from LMScore.render
         corrects:     new Set(),
@@ -11960,6 +11978,7 @@ document.addEventListener('DOMContentLoaded', () => {
         _s.bars     = out.bars;
 
         _colorAll();
+        if (_s.loopBars) markBars(_s.loopBars);
 
         // Apply options-provided highlight
         if (options.highlightIndex != null && options.highlightIndex >= 0) {
@@ -12018,6 +12037,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
       }
 
+      // Tint the bars being looped. range: { from, to } or null to clear.
+      function markBars(range) {
+        _s.loopBars = range || null;
+        if (!_s.svgEl) return;
+        _s.svgEl.querySelectorAll('.lm-loop-band').forEach(el => el.remove());
+        if (!range) return;
+        const NS = 'http://www.w3.org/2000/svg';
+        _s.bars.filter(b => b.index >= range.from && b.index <= range.to).forEach(b => {
+          const r = document.createElementNS(NS, 'rect');
+          r.setAttribute('class', 'lm-loop-band');
+          r.setAttribute('x', b.x); r.setAttribute('y', b.y - 6);
+          r.setAttribute('width', b.w); r.setAttribute('height', b.h + 12);
+          r.setAttribute('rx', 6);
+          r.setAttribute('fill', 'rgba(20,184,166,0.12)');
+          _s.svgEl.insertBefore(r, _s.svgEl.firstChild);
+        });
+      }
+
       // Clear green/gold marks without re-rendering (new pass through the song)
       function resetMarks() {
         _s.corrects.forEach(i => _colorEvent(i, GREY_COLOR));
@@ -12052,6 +12089,7 @@ document.addEventListener('DOMContentLoaded', () => {
         markCorrect,
         markIncorrect,
         resetMarks,
+        markBars,
         elFor,
         setMode,
         showNoteNamesBelow,
@@ -12515,6 +12553,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="home-continue-arrow">▶</div>
         </button>
+
+        ${typeof LMPractice !== 'undefined' ? LMPractice.homeHtml() : ''}
 
         <!-- Stats row -->
         <div class="home-stats">
@@ -13038,6 +13078,10 @@ document.addEventListener('DOMContentLoaded', () => {
         _phase4AudioTimer: null,        // setTimeout handle for LEAD_MS audio delay
         _phase4MetroTimer: null,        // setTimeout handle for LEAD_MS metronome delay
         _readyFallbackTimer: null,      // setTimeout handle for Phase 2 fallback
+        loop:         null,             // { from, to } bar range being practised, or null
+        loopPass:     0,                // play-along passes through the loop so far
+        loopBoost:    1,                // tempo multiplier, nudged up after clean passes
+        loopBoostOn:  false,
         hands:        'rh',             // 'rh' | 'lh' | 'both' — what the student plays
         guide:        true,             // Phase 4: app also plays the student's part
         steps:        [],               // Phase 3: LMScore.steps() for the chosen hands
@@ -13100,12 +13144,64 @@ document.addEventListener('DOMContentLoaded', () => {
       // ── Score helpers (js/lm-score.js) ────────────────────────
       function _compiled() { return LMScore.compile(_s.song); }
 
-      // What the student plays, step by step, in the chosen hand(s)
-      function _steps() { return LMScore.steps(_compiled(), _s.hands); }
+      // What the student plays, step by step, in the chosen hand(s) and bars
+      function _steps() {
+        return LMScore.steps(_compiled(), _s.hands, _s.loop ? _s.loop.from : null, _s.loop ? _s.loop.to : null);
+      }
 
       function _bpm() {
         const b = (_s.song && _s.song.bpm) || {};
-        return b[_s.tempo] || b.normal || 80;
+        return Math.round((b[_s.tempo] || b.normal || 80) * (_s.loop ? _s.loopBoost : 1));
+      }
+
+      // ── Loop a few bars ───────────────────────────────────────
+      function _loopLabel() {
+        return _s.loop ? `🔁 Bars ${_s.loop.from + 1}–${_s.loop.to + 1}` : '🔁 Loop bars';
+      }
+
+      function _loopBtn() {
+        return `<button class="lesson-btn${_s.loop ? ' lesson-btn--loop-on' : ''}" id="loop-btn" onclick="LessonEngine._openLoopPicker()">${_loopLabel()}</button>`;
+      }
+
+      function _openLoopPicker() {
+        document.getElementById('loop-picker')?.remove();
+        const n   = _compiled().measures.length;
+        const cur = _s.loop || { from: 0, to: Math.min(n - 1, 3) };
+        const opts = sel => Array.from({ length: n }, (_, i) =>
+          `<option value="${i}"${i === sel ? ' selected' : ''}>${i + 1}</option>`).join('');
+        const el = document.createElement('div');
+        el.id = 'loop-picker';
+        el.className = 'loop-picker';
+        el.innerHTML = `
+          <div class="loop-picker-title">🔁 Practise just a few bars</div>
+          <div class="loop-picker-row">Bars <select id="loop-from">${opts(cur.from)}</select> to <select id="loop-to">${opts(cur.to)}</select></div>
+          <label class="loop-picker-row"><input type="checkbox" id="loop-boost"${_s.loopBoostOn ? ' checked' : ''}> A little faster after each clean pass</label>
+          <div class="loop-picker-row">
+            <button class="lesson-btn lesson-btn--primary" onclick="LessonEngine._setLoop(true)">Loop these bars</button>
+            <button class="lesson-btn" onclick="LessonEngine._setLoop(false)">${_s.loop ? 'Whole song' : 'Cancel'}</button>
+          </div>`;
+        document.body.appendChild(el);
+      }
+
+      function _setLoop(on) {
+        if (on) {
+          let a = +document.getElementById('loop-from').value;
+          let b = +document.getElementById('loop-to').value;
+          if (b < a) [a, b] = [b, a];
+          _s.loop = { from: a, to: b };
+          _s.loopBoostOn = document.getElementById('loop-boost').checked;
+        } else {
+          _s.loop = null;
+        }
+        _s.loopBoost = 1;
+        _s.loopPass  = 0;
+        document.getElementById('loop-picker')?.remove();
+        if (typeof SheetMusic !== 'undefined') SheetMusic.markBars(_s.loop);
+        const btn = document.getElementById('loop-btn');
+        if (btn) { btn.textContent = _loopLabel(); btn.classList.toggle('lesson-btn--loop-on', !!_s.loop); }
+        // Start the current step over on the new range
+        if (_s.phase === 3) _startPhase3();
+        else if (_s.phase === 4) _doPlayAlong();
       }
 
       // What the app plays while the student plays their part
@@ -13354,9 +13450,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const midiConnected = (typeof MIDIManager !== 'undefined') &&
                               MIDIManager.getStatus() === 'connected';
 
+        const presetTempo = (_s.preset && _s.preset.tempo) || 'normal';
+
         // Hands picker, only when the song has a part for each hand
         const compiled = _compiled();
-        let selectedHands = _defaultHands();
+        let selectedHands = (_s.preset && _s.preset.hands) || _defaultHands();
         const handsRow = (compiled.hasRH && compiled.hasLH) ? `
             <div class="input-mode-divider"></div>
             <div class="input-mode-section-label">Which hands?</div>
@@ -13395,16 +13493,16 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="input-mode-divider"></div>
             <div class="input-mode-section-label">Speed</div>
             <div class="input-mode-tempo-row">
-              <button class="input-mode-tempo-btn" data-tempo="turtle">🐢<br><span>Slow</span></button>
-              <button class="input-mode-tempo-btn input-mode-tempo-btn--active" data-tempo="normal">▶<br><span>Normal</span></button>
-              <button class="input-mode-tempo-btn" data-tempo="rabbit">🚀<br><span>Fast</span></button>
+              <button class="input-mode-tempo-btn${presetTempo === 'turtle' ? ' input-mode-tempo-btn--active' : ''}" data-tempo="turtle">🐢<br><span>Slow</span></button>
+              <button class="input-mode-tempo-btn${presetTempo === 'normal' ? ' input-mode-tempo-btn--active' : ''}" data-tempo="normal">▶<br><span>Normal</span></button>
+              <button class="input-mode-tempo-btn${presetTempo === 'rabbit' ? ' input-mode-tempo-btn--active' : ''}" data-tempo="rabbit">🚀<br><span>Fast</span></button>
             </div>
           </div>`;
 
         document.body.appendChild(overlay);
 
         // Tempo button selection
-        let selectedTempo = 'normal';
+        let selectedTempo = presetTempo;
         overlay.querySelectorAll('.input-mode-tempo-btn[data-tempo]').forEach(btn => {
           btn.addEventListener('click', () => {
             overlay.querySelectorAll('.input-mode-tempo-btn[data-tempo]')
@@ -13608,7 +13706,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof SheetMusic !== 'undefined') SheetMusic.resetMarks();
 
         _setPhaseUI('Phase 3 · Learn the Notes', false,
-          `<button class="lesson-btn lesson-btn--danger" onclick="LessonEngine._triggerStuck()">I'm Stuck 🆘</button>`);
+          `${_loopBtn()}
+           <button class="lesson-btn lesson-btn--danger" onclick="LessonEngine._triggerStuck()">I'm Stuck 🆘</button>`);
         _setProgress(0, _s.totalCount, 'Notes');
 
         // Note instruction banner
@@ -13772,7 +13871,8 @@ document.addEventListener('DOMContentLoaded', () => {
            </button>
            <button class="metro-btn${_s.guide ? ' metro-btn--on' : ''}" id="guide-toggle-btn" title="Play your part along with you" onclick="LessonEngine._toggleGuide()">
              <span class="metro-label">🎧 Guide: ${_s.guide ? 'On' : 'Off'}</span>
-           </button>`);
+           </button>
+           ${_loopBtn()}`);
         _setProgress(3, 5, 'Lesson');
 
         // Show the falling notes highway
@@ -13799,7 +13899,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const c         = _compiled();
         const steps     = _steps();
-        const playNotes = steps.reduce((a, st) => a.concat(st.notes), []);
+        // Falling-note times count from the start of the looped bars
+        const span      = LMScore.barSpan(c, _s.loop ? _s.loop.from : null, _s.loop ? _s.loop.to : null);
+        const playNotes = steps.reduce((a, st) => a.concat(st.notes), [])
+          .map(n => (span.start ? { ...n, t: n.t - span.start } : n));
         const bpm       = _bpm();
         const handlerId = _s.midiHandlerId;
         const LEAD_MS   = 1600; // match FallingNotes FALL_DURATION
@@ -13823,7 +13926,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Store accuracy for Phase 5 parent review
             _s.correctCount = results.hits;
             _s.totalCount   = results.hits + results.misses;
+            // Looping: go round again (a touch faster after a clean pass)
+            if (_s.loop) {
+              _s.loopPass++;
+              if (typeof LMPractice !== 'undefined') LMPractice.notePlayed(_s.songId, _s.hands);
+              if (_s.loopBoostOn && results.accuracy >= 0.9) _s.loopBoost = Math.min(1.5, _s.loopBoost + 0.05);
+              Melody.speak(`Pass ${_s.loopPass}: ${Math.round((results.accuracy || 0) * 100)}%` +
+                (_s.loopBoost > 1 ? ` · speed ${Math.round(_s.loopBoost * 100)}%` : '') + ' 🔁', 2500);
+              setTimeout(() => { if (_s.phase === 4 && _s.loop) _doPlayAlong(); }, 2200);
+              return;
+            }
             _saveHandResult(Math.round((results.accuracy || 0) * 100));
+            if (typeof LMPractice !== 'undefined') LMPractice.notePlayed(_s.songId, _s.hands);
             setTimeout(() => Melody.setState('idle'), 3500);
           });
         }
@@ -13860,6 +13974,7 @@ document.addEventListener('DOMContentLoaded', () => {
           _createBall();
           _s.playHandle = LMScore.play(c, _metroAudio(), {
             bpm, hands: _accompaniment(), metronome: true,
+            fromBar: _s.loop ? _s.loop.from : null, toBar: _s.loop ? _s.loop.to : null,
             onBeat: (inBar, down) => { if (_s.metronomeEnabled) _pulseMetronomeDot(down); },
             onEvent: (ev) => {
               if (typeof SheetMusic !== 'undefined') SheetMusic.highlightNote(ev);
@@ -14088,7 +14203,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // ════════════════════════════════════════════════════════
       //  PUBLIC API
       // ════════════════════════════════════════════════════════
-      function startLesson(songId) {
+      // opts: { hands, tempo } preselected in "Ready to play?" (from an assignment)
+      function startLesson(songId, opts) {
         // Stop any in-progress lesson
         _stopPlayback();
         _clearMIDI();
@@ -14121,7 +14237,13 @@ document.addEventListener('DOMContentLoaded', () => {
         _s.songId = songId;
         _s.song   = song;
         _s.tempo  = 'normal';
-        _s.hands  = _defaultHands();
+        _s.preset = opts || {};
+        _s.loop = null;
+        _s.loopPass = 0;
+        _s.loopBoost = 1;
+        document.getElementById('loop-picker')?.remove();
+        if (typeof SheetMusic !== 'undefined') SheetMusic.markBars(null);
+        _s.hands  = _s.preset.hands || _defaultHands();
 
 
         // Ensure control bar exists
@@ -14289,6 +14411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         _toggleMetronome,
         _toggleGuide,
         _toggleNames, _toggleFingers,
+        _openLoopPicker, _setLoop,
         _confirmExit, _doExit,
         _showPlayAgainModal,
         _toggleSheetBg, _togglePiano,
@@ -15354,17 +15477,19 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="pm-dashboard" id="pm-dashboard">
             <div class="pm-tabs" id="pm-tabs">
               <button class="pm-tab active" onclick="ParentDashboard._tab(0)">Overview</button>
-              <button class="pm-tab" onclick="ParentDashboard._tab(1)">History</button>
-              <button class="pm-tab" onclick="ParentDashboard._tab(2)">Notes</button>
-              <button class="pm-tab" onclick="ParentDashboard._tab(3)">Settings</button>
-              <button class="pm-tab" onclick="ParentDashboard._tab(4)">Data</button>
+              <button class="pm-tab" onclick="ParentDashboard._tab(1)">This Week</button>
+              <button class="pm-tab" onclick="ParentDashboard._tab(2)">History</button>
+              <button class="pm-tab" onclick="ParentDashboard._tab(3)">Notes</button>
+              <button class="pm-tab" onclick="ParentDashboard._tab(4)">Settings</button>
+              <button class="pm-tab" onclick="ParentDashboard._tab(5)">Data</button>
             </div>
             <div class="pm-panels">
               <div class="pm-panel panel--active" id="pm-panel-0">${_buildOverview()}</div>
-              <div class="pm-panel" id="pm-panel-1">${_buildHistory()}</div>
-              <div class="pm-panel" id="pm-panel-2">${_buildNotes()}</div>
-              <div class="pm-panel" id="pm-panel-3">${_buildSettings()}</div>
-              <div class="pm-panel" id="pm-panel-4">${_buildData()}</div>
+              <div class="pm-panel" id="pm-panel-1"><div id="lmp-pm-panel" style="display:flex;flex-direction:column;gap:8px;">${typeof LMPractice !== 'undefined' ? LMPractice.parentHtml() : ''}</div></div>
+              <div class="pm-panel" id="pm-panel-2">${_buildHistory()}</div>
+              <div class="pm-panel" id="pm-panel-3">${_buildNotes()}</div>
+              <div class="pm-panel" id="pm-panel-4">${_buildSettings()}</div>
+              <div class="pm-panel" id="pm-panel-5">${_buildData()}</div>
             </div>
           </div>`;
       }
@@ -16239,6 +16364,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/lm-bridge.js?v=2"></script>
 <script src="js/recital.js?v=1"></script>
 <script src="js/lm-lessons.js?v=1"></script>
+<script src="js/lm-practice.js?v=1"></script>
+<script>if (typeof LMPractice !== 'undefined') LMPractice.start();</script>
 <script>
   window.addEventListener('load', function() {
     if (typeof RecitalRecorder !== 'undefined') {
