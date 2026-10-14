@@ -29,6 +29,12 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const MODEL = process.env.OMR_MODEL || 'gemini-4-argon';
 const READS = Math.max(1, Math.min(5, parseInt(process.env.OMR_READS, 10) || 3));
 const THINKING = process.env.OMR_THINKING || null;    // Gemini 3 thinking level; null = the model's default
+// A read occasionally stalls at the API. Without a limit Node waits out its
+// own 300 s header timeout (a kid once waited 5 minutes for a page). So each
+// read gets READ_LIMIT_MS, and once all but one are back the last one gets
+// STRAGGLER_MS more — a majority of reads is enough to vote.
+const READ_LIMIT_MS = 75000;
+const STRAGGLER_MS = 15000;
 
 const PROMPT = `You are an expert music engraver. Transcribe the piano piece in this photo into the notation below.
 
@@ -65,9 +71,10 @@ function _extractJson(text) {
   return JSON.parse(t);
 }
 
-async function _ask(parts, model, thinking) {
+async function _ask(parts, model, thinking, signal) {
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + GEMINI_KEY;
   const r = await fetch(url, {
+    signal,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -148,9 +155,30 @@ async function transcribe(imageB64, opts) {
   const image = { inlineData: { mimeType: opts.mime || 'image/jpeg', data: imageB64 } };
   const hint = opts.hint ? '\nThe student says this is: ' + String(opts.hint).slice(0, 120) : '';
 
-  const settled = await Promise.allSettled(Array.from({ length: reads }, () => _ask([{ text: PROMPT + hint }, image], model, thinking)));
-  const answers = settled.filter(r => r.status === 'fulfilled').map(r => r.value);
-  if (!answers.length) throw settled[0].reason;
+  const started = Date.now();
+  const timings = [];
+  const answers = [];
+  let lastError = null;
+  await new Promise(resolve => {
+    let pending = reads, graceTimer = null;
+    const ctrls = Array.from({ length: reads }, () => new AbortController());
+    const finish = () => { clearTimeout(graceTimer); ctrls.forEach(c => c.abort()); resolve(); };
+    ctrls.forEach((ctrl, i) => {
+      const limit = setTimeout(() => ctrl.abort(), READ_LIMIT_MS);
+      _ask([{ text: PROMPT + hint }, image], model, thinking, ctrl.signal)
+        .then(a => { answers.push(a); timings[i] = ((Date.now() - started) / 1000).toFixed(1) + 's'; })
+        .catch(e => { lastError = e; timings[i] = ctrl.signal.aborted ? 'cut off' : 'failed'; })
+        .finally(() => {
+          clearTimeout(limit);
+          pending--;
+          if (pending === 0) return finish();
+          // All but one back: give the straggler a little longer, then vote without it
+          if (pending === 1 && answers.length >= 2 && !graceTimer) graceTimer = setTimeout(finish, STRAGGLER_MS);
+        });
+    });
+  });
+  if (opts.log) opts.log('reads: ' + Array.from({ length: reads }, (_, i) => timings[i] || 'cut off').join(', '));
+  if (!answers.length) throw lastError || new Error('No reads came back');
   // Prefer reads that compile; fall back to all of them
   const pieces = answers.map(a => _clean(a.json));
   const valid = pieces.filter(p => !_check(p));
@@ -164,7 +192,8 @@ async function transcribe(imageB64, opts) {
       { text: PROMPT + hint }, image,
       { text: 'Your previous answer was:\n' + JSON.stringify(piece) + '\n\nIt is invalid: ' + err +
               '\nLook at the photo again, fix that bar (and any others like it), and return the full corrected JSON.' },
-    ], model, thinking);
+    ], model, thinking, AbortSignal.timeout(READ_LIMIT_MS)).catch(() => null);
+    if (!fix) return Object.assign({ ok: false, error: err }, { piece, unsure: voted.unsure, notes: notes.slice(0, 400), model, reads: voted.reads, agreed: voted.agreed });
     const piece2 = _clean(fix.json);
     const err2 = _check(piece2);
     if (!err2 || err2 !== err) { piece = piece2; err = err2; }
@@ -180,7 +209,7 @@ function init(app) {
     const b64 = img.replace(/^data:image\/\w+;base64,/, '');
     const started = Date.now();
     try {
-      const out = await transcribe(b64, { hint: req.body.hint });
+      const out = await transcribe(b64, { hint: req.body.hint, log: m => console.log('[omr] ' + m) });
       console.log('[omr] ' + (out.ok ? 'ok' : 'invalid: ' + out.error) + ' in ' + (Date.now() - started) + ' ms (' + out.model + ')');
       res.json(out);
     } catch (e) {
