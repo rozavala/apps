@@ -280,6 +280,7 @@ window.ZSProgressCatalog = {
     {"i":413,"l":"Happy Birthday to You","g":"Level 1 · World 2"},
     {"i":414,"l":"Old MacDonald Had a Farm","g":"Level 1 · World 2"},
     {"i":415,"l":"Michael, Row the Boat Ashore","g":"Level 1 · World 2"},
+    {"i":421,"l":"Position Hop","g":"Level 1 · World 2"},
     {"i":402,"l":"Row, Row, Row Your Boat","g":"Level 1 · World 3"},
     {"i":416,"l":"Yankee Doodle","g":"Level 1 · World 3"},
     {"i":417,"l":"Oh! Susanna","g":"Level 1 · World 3"},
