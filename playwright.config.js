@@ -10,7 +10,7 @@ module.exports = defineConfig({
   reporter: 'html',
   use: {
     trace: 'on-first-retry',
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://127.0.0.1:8080',
   },
   projects: [
     {
@@ -19,8 +19,9 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: 'npx http-server -p 8080',
-    port: 8080,
+    // Loopback only: never bind 0.0.0.0 (see CLAUDE.md).
+    command: 'npx http-server -a 127.0.0.1 -p 8080 -c-1',
+    url: 'http://127.0.0.1:8080',
     reuseExistingServer: !process.env.CI,
   },
 });

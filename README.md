@@ -159,15 +159,15 @@ git clone <repository-url>
 open index.html
 ```
 
-Para compartir en la red local (ej. para iPads en casa), puedes iniciar un servidor local: (To share on the local network, e.g. for iPads at home, you can start a local server:)
+Para una vista previa local, usa el script incluido. Escucha solo en `127.0.0.1` y nunca sirve la raíz del repositorio. (For a local preview, use the bundled script. It listens on `127.0.0.1` only and never serves the repo root.)
 
 ```bash
-# Usando Node.js (Using Node.js)
-npx http-server . -p 8080
-
-# O usando Python (Or using Python)
-python3 -m http.server 8080
+npm install
+tools/preview.sh             # http://127.0.0.1:8091
+tools/preview.sh --tailnet   # también por Tailscale, solo tailnet (also over Tailscale, tailnet only)
 ```
+
+Para los iPads de la casa, usa GitHub Pages (Opción 2). No inicies servidores en `0.0.0.0`: quedan abiertos a toda la red local. (For the iPads at home, use GitHub Pages (Option 2). Don't start servers on `0.0.0.0`: they are open to the whole home network.)
 
 ### Opción 2: Teléfonos y Tablets (Phones & Tablets)
 
