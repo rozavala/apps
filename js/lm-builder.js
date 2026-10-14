@@ -104,11 +104,24 @@ var LMBuilder = (function () {
   }
 
   var TOKEN_RE = /^((?:[A-G][#b]?\d\+)*[A-G][#b]?\d|R)(w|h|q|e|s)(\.?)(~?)(?::([1-5](?:,[1-5])*))?$/;
-  function parseVoice(src) {
+  // Bar marks (see js/lm-score.js): written before or after a bar's notes
+  var START_MARKS = { '[:': 'start', 'segno': 'segno' };
+  var END_MARKS = { ':]': 'end', 'fine': 'fine', 'dc': 'dc', 'ds': 'ds' };
+
+  // Events of one hand; bar marks found go into `marks[barIndex]` (optional)
+  function parseVoice(src, marks) {
     var evs = [];
-    String(src || '').split('|').forEach(function (bar) {
+    String(src || '').split('|').forEach(function (bar, bi) {
       bar.trim().split(/\s+/).forEach(function (tok) {
         if (!tok) return;
+        var low = tok.toLowerCase(), v = /^\{([1-4])\}$/.exec(tok);
+        if (v || START_MARKS[low] || END_MARKS[low]) {
+          if (marks) {
+            var f = marks[bi] = marks[bi] || {};
+            if (v) f.volta = +v[1]; else f[START_MARKS[low] || END_MARKS[low]] = true;
+          }
+          return;
+        }
         var m = TOKEN_RE.exec(tok);
         if (!m) throw new Error('Cannot read "' + tok + '"');
         evs.push({
@@ -145,7 +158,9 @@ var LMBuilder = (function () {
     var rh = layout(d.rh, d), lh = layout(d.lh, d);
     var n = Math.max(rh.length, lh.length);
     var hasLH = d.lh.length > 0, hasRH = d.rh.length > 0;
-    function voice(bars) {
+    var bm = d.barMarks || {};
+    Object.keys(bm).forEach(function (k) { if (+k + 1 > n) n = +k + 1; });
+    function voice(bars, withMarks) {
       var out = [];
       for (var i = 0; i < n; i++) {
         var b = bars[i];
@@ -158,16 +173,53 @@ var LMBuilder = (function () {
         if (last && d.pickup && Math.abs(used - (time.barBeats - d.pickup)) < EPS) target = used;
         if (used < target - EPS) toks = toks.concat(restTokens(target - used));
         if (!toks.length) toks = restTokens(cap);
+        var f = withMarks && bm[i];
+        if (f) {
+          var pre = [], post = [];
+          if (f.segno) pre.push('Segno');
+          if (f.start) pre.push('[:');
+          if (f.volta) pre.push('{' + f.volta + '}');
+          if (f.end) post.push(':]');
+          if (f.fine) post.push('Fine');
+          if (f.dc) post.push('DC');
+          if (f.ds) post.push('DS');
+          toks = pre.concat(toks, post);
+        }
         out.push(toks.join(' '));
       }
       return out.join(' | ');
     }
     var spec = { time: d.time, key: d.key };
     if (d.pickup) spec.pickup = d.pickup;
-    if (hasRH || !hasLH) spec.rh = voice(rh);
-    if (hasLH) spec.lh = voice(lh);
-    if (!hasRH && hasLH) spec.rh = voice([]);
+    spec.rh = voice(rh, true);
+    if (hasLH) spec.lh = voice(lh, false);
+    if (d.tempo) spec.tempo = d.tempo;
+    if (d.marks && d.marks.length) spec.marks = d.marks.slice();
     return spec;
+  }
+
+  // Bars written so far (the longer hand)
+  function barCount(d) {
+    var a = d.rh.length ? layout(d.rh, d).length : 0, b = d.lh.length ? layout(d.lh, d).length : 0;
+    return Math.max(a, b);
+  }
+
+  // Fill both hands with rests to the end of bar n (so new music starts a fresh bar)
+  function padTo(d, n) {
+    var time = LMScore.parseTime(d.time);
+    ['rh', 'lh'].forEach(function (h) {
+      if (!d[h].length && h === 'lh') return;
+      var bars = layout(d[h], d);
+      var last = bars[bars.length - 1];
+      if (d[h].length && last.used < last.cap - EPS) {
+        restTokens(last.cap - last.used).forEach(function (t) { d[h] = d[h].concat(parseVoice(t)); });
+      }
+      var have = d[h].length ? layout(d[h], d).length : 0;
+      for (var i = have; i < n; i++) {
+        var cap = (i === 0 && d.pickup) ? d.pickup : time.barBeats;
+        restTokens(cap).forEach(function (t) { d[h] = d[h].concat(parseVoice(t)); });
+      }
+    });
   }
 
   function _song(d) {
@@ -176,7 +228,7 @@ var LMBuilder = (function () {
       id: d.id, title: d.title || 'My piece', composer: d.book || 'From my lesson book',
       world: WORLD, difficulty: 3, custom: true, alwaysUnlocked: true, isBonus: false,
       funFact: d.book ? 'This piece is from ' + d.book + '. Practise it a little every day!' : 'This piece is from your own lesson book.',
-      concept: d.tip || '',
+      concept: d.tip || (d.tempo ? 'Tempo: ' + d.tempo : ''),
       bpm: { turtle: Math.round(b * 0.7), normal: b, rabbit: Math.round(b * 1.2), rocket: Math.round(b * 1.4) },
       score: toSpec(d),
     };
@@ -194,15 +246,18 @@ var LMBuilder = (function () {
         id: existing.id, title: existing.title, book: existing.composer === 'From my lesson book' ? '' : existing.composer,
         tip: existing.concept || '', time: existing.score.time, key: existing.score.key,
         pickup: existing.score.pickup || 0, bpm: existing.bpm.normal,
-        rh: parseVoice(existing.score.rh), lh: existing.score.lh ? parseVoice(existing.score.lh) : [],
+        barMarks: {}, marks: (existing.score.marks || []).slice(), tempo: existing.score.tempo || '',
       };
+      _d.rh = parseVoice(existing.score.rh, _d.barMarks);
+      _d.lh = existing.score.lh ? parseVoice(existing.score.lh, _d.barMarks) : [];
       // An all-rest hand counts as empty
       ['rh', 'lh'].forEach(function (h) { if (_d[h].every(function (e) { return e.rest; })) _d[h] = []; });
     } else {
       var used = list().map(function (s) { return s.id; });
       var nid = ID_BASE + 1;
       while (used.indexOf(nid) >= 0) nid++;
-      _d = { id: nid, title: '', book: '', tip: '', time: '4/4', key: 'C', pickup: 0, bpm: 80, rh: [], lh: [] };
+      _d = { id: nid, title: '', book: '', tip: '', time: '4/4', key: 'C', pickup: 0, bpm: 80, rh: [], lh: [],
+             barMarks: {}, marks: [], tempo: '' };
     }
     _ui.hand = 'rh'; _ui.dur = 'q'; _ui.dots = 0; _ui.chord = false; _ui.unsure = []; _ui.fromPhoto = null;
     _overlay();
@@ -260,6 +315,7 @@ var LMBuilder = (function () {
         '<label>Key<select id="lmb-key" class="lmp-pm-input">' + opt([['C', 'C major (no sharps or flats)'], ['G', 'G major (F♯)'], ['F', 'F major (B♭)'], ['D', 'D major (F♯ C♯)'], ['Am', 'A minor'], ['Dm', 'D minor (B♭)'], ['Em', 'E minor (F♯)']], _d.key) + '</select></label>' +
         '<label>Starts with a pickup?<select id="lmb-pickup" class="lmp-pm-input">' + opt([[0, 'No — starts on beat 1'], [0.5, '½ beat'], [1, '1 beat'], [1.5, '1½ beats'], [2, '2 beats'], [3, '3 beats']], _d.pickup) + '</select></label>' +
         '<label>Speed (beats per minute)<input id="lmb-bpm" class="lmp-pm-input" type="number" min="30" max="200" step="4" value="' + _d.bpm + '"></label>' +
+        '<label>Tempo marking (optional)<input id="lmb-tempo" class="lmp-pm-input" value="' + _esc(_d.tempo) + '" placeholder="e.g. Moderately"></label>' +
         '<label class="lmb-wide">Teacher\'s tip (optional)<input id="lmb-tip" class="lmp-pm-input" value="' + _esc(_d.tip) + '" placeholder="e.g. Two right-hand positions — move your thumb up to G in bar 5"></label>' +
       '</div>';
     foot.innerHTML = '';
@@ -272,8 +328,9 @@ var LMBuilder = (function () {
     }
     var photo = document.createElement('button');
     photo.className = 'lesson-btn';
-    photo.textContent = '📷 Read it from a photo';
-    photo.onclick = function () { _readDetails(); _pickPhoto(); };
+    photo.textContent = '📷 Read it from photos';
+    photo.title = 'One page or several (up to 4) — pick them in order';
+    photo.onclick = function () { _readDetails(); _pickPhoto('new'); };
     foot.appendChild(photo);
 
     var next = document.createElement('button');
@@ -296,7 +353,7 @@ var LMBuilder = (function () {
   function _readDetails() {
     var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
     if (document.getElementById('lmb-title')) {
-      _d.title = v('lmb-title'); _d.book = v('lmb-book'); _d.tip = v('lmb-tip');
+      _d.title = v('lmb-title'); _d.book = v('lmb-book'); _d.tip = v('lmb-tip'); _d.tempo = v('lmb-tempo');
       _d.bpm = parseInt(v('lmb-bpm'), 10) || _d.bpm;
     }
   }
@@ -313,23 +370,27 @@ var LMBuilder = (function () {
   // so a photo taken with the Camera app works too.
   // The input is attached to the page: on iOS WebKit a detached file input
   // can open the picker and then never fire `change`.
-  function _pickPhoto() {
+  // mode: 'new' (the piece starts here) or 'append' (pages that follow what's entered)
+  function _pickPhoto(mode) {
     var old = document.getElementById('lmb-photo-input');
     if (old) old.remove();
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
+    input.multiple = true;               // several pages from the Photo Library
     input.id = 'lmb-photo-input';
     input.style.cssText = 'position:fixed;left:-1000px;top:0;width:1px;height:1px;opacity:0;';
     document.body.appendChild(input);
     var handled = false;
     var onPick = function () {
       if (handled) return;
-      var f = input.files && input.files[0];
-      if (!f) return;
+      var files = input.files ? Array.prototype.slice.call(input.files) : [];
+      if (!files.length) return;
       handled = true;
-      _log('picked ' + (f.type || 'unknown type') + ', ' + Math.round(f.size / 1024) + ' KB');
-      _readPhoto(f);
+      _log('picked ' + files.length + ' file(s): ' + files.map(function (f) { return (f.type || '?') + ' ' + Math.round(f.size / 1024) + ' KB'; }).join(', '));
+      if (files.length > 4) { alert('Up to 4 pages at a time. Read the first 4, then use "Add next page" for the rest.'); files = files.slice(0, 4); }
+      if (files.length > 1) _pageOrder(files, mode);
+      else _readPhotos(files, mode);
       setTimeout(function () { input.remove(); }, 1000);
     };
     input.addEventListener('change', onPick);
@@ -375,12 +436,49 @@ var LMBuilder = (function () {
     });
   }
 
-  function _readPhoto(file) {
+  // Several pages: show them in order with ↑ ↓ before reading
+  function _pageOrder(files, mode) {
     var body = document.getElementById('lmb-body'), foot = document.getElementById('lmb-foot');
+    document.getElementById('lmb-kb').style.display = 'none';
+    var urls = files.map(function (f) { return URL.createObjectURL(f); });
+    var order = files.map(function (_, i) { return i; });
+    function draw() {
+      body.innerHTML = '<div class="lml-text"><b>Put the pages in order</b> — page 1 first.</div>' +
+        '<div class="lmb-pages">' + order.map(function (fi, pos) {
+          return '<div class="lmb-page"><img src="' + urls[fi] + '" alt="Page ' + (pos + 1) + '">' +
+            '<div class="lmb-page-bar"><b>Page ' + (pos + 1) + '</b>' +
+            '<button class="lesson-btn" data-up="' + pos + '"' + (pos ? '' : ' disabled') + ' aria-label="Move earlier">↑</button>' +
+            '<button class="lesson-btn" data-down="' + pos + '"' + (pos < order.length - 1 ? '' : ' disabled') + ' aria-label="Move later">↓</button></div></div>';
+        }).join('') + '</div>';
+      body.querySelectorAll('[data-up]').forEach(function (b) { b.onclick = function () { var i = +b.dataset.up; order.splice(i - 1, 0, order.splice(i, 1)[0]); draw(); }; });
+      body.querySelectorAll('[data-down]').forEach(function (b) { b.onclick = function () { var i = +b.dataset.down; order.splice(i + 1, 0, order.splice(i, 1)[0]); draw(); }; });
+    }
+    draw();
+    foot.innerHTML = '';
+    var back = document.createElement('button');
+    back.className = 'lesson-btn';
+    back.textContent = 'Cancel';
+    back.onclick = function () { urls.forEach(URL.revokeObjectURL); if (mode === 'append') _notes(); else _details(); };
+    var go = document.createElement('button');
+    go.className = 'lesson-btn lesson-btn--primary';
+    go.textContent = '📷 Read ' + files.length + ' pages';
+    go.onclick = function () { urls.forEach(URL.revokeObjectURL); _readPhotos(order.map(function (i) { return files[i]; }), mode); };
+    foot.appendChild(back); foot.appendChild(go);
+  }
+
+  // The last written bar of a hand, for telling the reader where to carry on
+  function _lastBar(spec, h) {
+    var bars = String(spec[h] || '').split('|');
+    return (bars[bars.length - 1] || '').trim();
+  }
+
+  function _readPhotos(files, mode) {
+    var body = document.getElementById('lmb-body'), foot = document.getElementById('lmb-foot');
+    document.getElementById('lmb-kb').style.display = 'none';
     var server = typeof CloudSync !== 'undefined' && CloudSync.server;
     if (!server) { alert('Reading photos needs the family sync server.'); return; }
     body.innerHTML = '<div class="lml-done"><div class="lml-done-icon lmb-reading">📷</div>' +
-      '<div class="lml-done-title">Reading the music…</div>' +
+      '<div class="lml-done-title">Reading ' + (files.length > 1 ? files.length + ' pages' : 'the music') + '…</div>' +
       '<div class="lml-done-sub" id="lmb-omr-time">Usually under 30 seconds. Keep the app open.</div></div>';
     foot.innerHTML = '';
     var cancel = document.createElement('button');
@@ -394,13 +492,23 @@ var LMBuilder = (function () {
     }, 1000);
     var done = function () { clearInterval(tick); _omrAbort = null; };
     _omrAbort = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    cancel.onclick = function () { if (_omrAbort) _omrAbort.abort(); done(); _details(); };
+    var back = function () { if (mode === 'append') _notes(); else _details(); };
+    cancel.onclick = function () { if (_omrAbort) _omrAbort.abort(); done(); back(); };
 
-    _shrink(file).then(function (dataUrl) {
+    var payload = { title: _d.title, hint: [_d.title, _d.book].filter(Boolean).join(' — ') };
+    if (mode === 'append') {
+      var spec = toSpec(_d);
+      payload.continueFrom = { bars: barCount(_d), time: _d.time, key: _d.key, rh: _lastBar(spec, 'rh'), lh: _lastBar(spec, 'lh') };
+    }
+    // Shrink the pages one after another (older iPads run out of memory doing them at once)
+    files.reduce(function (p, f) {
+      return p.then(function (list) { return _shrink(f).then(function (d) { return list.concat([d]); }); });
+    }, Promise.resolve([])).then(function (images) {
+      payload.images = images;
       return fetch(server + '/api/omr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: dataUrl, hint: [_d.title, _d.book].filter(Boolean).join(' — ') }),
+        body: JSON.stringify(payload),
         signal: _omrAbort ? _omrAbort.signal : undefined,
       });
     }).then(function (r) {
@@ -409,40 +517,63 @@ var LMBuilder = (function () {
     }).then(function (res) {
       done();
       if (!res.piece) throw new Error(res.error || 'Could not read the photo.');
-      _applyPhoto(res);
+      _applyPhoto(res, mode, files.length);
     }).catch(function (e) {
       done();
       if (e && e.name === 'AbortError') return;
       _log('failed: ' + (e && e.message));
-      _details();
+      back();
       alert((e && e.message) || 'Could not read the photo. Check the internet connection and try again.');
     });
   }
 
-  function _applyPhoto(res) {
+  function _applyPhoto(res, mode, pages) {
     var p = res.piece;
-    if (!_d.title && p.title) _d.title = p.title;
-    if (p.time) _d.time = p.time;
-    if (p.key && KEYS_OK[p.key]) _d.key = p.key;
-    _d.pickup = p.pickup || 0;
     var problem = res.ok ? null : res.error;
+    var newMarks = {}, rh = [], lh = [];
     try {
-      _d.rh = p.rh ? parseVoice(p.rh) : [];
-      _d.lh = p.lh ? parseVoice(p.lh) : [];
-    } catch (e) {
-      problem = e.message;
-      _d.rh = []; _d.lh = [];
+      rh = p.rh ? parseVoice(p.rh, newMarks) : [];
+      lh = p.lh ? parseVoice(p.lh, newMarks) : [];
+    } catch (e) { problem = e.message; rh = []; lh = []; }
+    if (rh.length && rh.every(function (e) { return e.rest; })) rh = [];
+    if (lh.length && lh.every(function (e) { return e.rest; })) lh = [];
+    var offset = 0;
+    if (mode === 'append') {
+      // New pages start on a fresh bar after everything entered so far
+      offset = barCount(_d);
+      padTo(_d, offset);
+      // A left hand that only starts on the new pages: rests until then
+      if (lh.length && !_d.lh.length) {
+        var time = LMScore.parseTime(_d.time);
+        for (var i = 0; i < offset; i++) restTokens((i === 0 && _d.pickup) ? _d.pickup : time.barBeats).forEach(function (t) { _d.lh = _d.lh.concat(parseVoice(t)); });
+      }
+      // (A hand missing from the new pages is filled with rests by toSpec)
+      _d.rh = _d.rh.concat(rh);
+      _d.lh = _d.lh.concat(lh);
+    } else {
+      if (!_d.title && p.title) _d.title = p.title;
+      if (p.time) _d.time = p.time;
+      if (p.key && KEYS_OK[p.key]) _d.key = p.key;
+      _d.pickup = p.pickup || 0;
+      _d.rh = rh; _d.lh = lh;
+      _d.barMarks = {}; _d.marks = [];
+      if (p.tempo && !_d.tempo) _d.tempo = p.tempo;
+      if (p.bpm) _d.bpm = p.bpm;
     }
-    _ui.unsure = res.unsure || [];
+    Object.keys(newMarks).forEach(function (k) { _d.barMarks[+k + offset] = newMarks[k]; });
+    var found = (p.marks || []).map(function (m) { return { bar: m.bar + offset, kind: m.kind, text: m.text, fromPhoto: true }; });
+    _d.marks = (_d.marks || []).concat(found);
+    _ui.unsure = (mode === 'append' ? _ui.unsure : []).concat((res.unsure || []).map(function (b) { return b + offset; }));
     _ui.followEnd = false;
-    _ui.fromPhoto = { problem: problem, notes: res.notes || '', rh: p.rh, lh: p.lh };
+    _ui.fromPhoto = { problem: problem, notes: res.notes || '', rh: p.rh, lh: p.lh, pages: pages || 1, appended: mode === 'append',
+                      from: offset + 1, marks: found.length };
     _notes();
     if (problem) {
       // Leave the raw reading in the text boxes to fix by hand
       var det = document.querySelector('.lmb-text');
       if (det) det.open = true;
-      if (!_d.rh.length && p.rh) document.getElementById('lmb-rh-text').value = p.rh;
-      if (!_d.lh.length && p.lh) document.getElementById('lmb-lh-text').value = p.lh;
+      if (!rh.length && p.rh) document.getElementById('lmb-rh-text').value = p.rh;
+      if (!lh.length && p.lh) document.getElementById('lmb-lh-text').value = p.lh;
     }
   }
 
@@ -469,14 +600,29 @@ var LMBuilder = (function () {
       '<div class="lmb-fingers">Finger for the last note: ' +
         [1, 2, 3, 4, 5].map(function (f) { return '<button class="lmb-finger" data-finger="' + f + '">' + f + '</button>'; }).join('') +
         '<button class="lmb-finger" data-finger="0" title="Clear fingers">✕</button></div>' +
+      '<div class="lmb-barmarks">Bar: ' +
+        '<button class="lmb-mark" data-mark="start" title="Repeat starts at the bar you are entering">𝄆 Repeat start</button>' +
+        '<button class="lmb-mark" data-mark="end" title="Repeat ends after the last note">𝄇 Repeat end</button>' +
+        '<button class="lmb-mark" data-mark="v1" title="The bar you are entering starts the 1st ending">1st ending</button>' +
+        '<button class="lmb-mark" data-mark="v2" title="The bar you are entering starts the 2nd ending">2nd ending</button>' +
+        '<button class="lmb-mark" data-mark="fine" title="Fine after the last note">Fine</button>' +
+        '<button class="lmb-mark" data-mark="dc" title="D.C. al Fine after the last note">D.C.</button>' +
+      '</div>' +
       (_ui.fromPhoto ? '<div class="lmb-photo-note" id="lmb-photo-note"></div>' : '') +
       '<div class="lml-feedback" id="lmb-status"></div>' +
       '<div class="lmb-preview" id="lmb-preview"></div>' +
+      '<div class="lmb-notes"><div class="lmb-notes-head"><b>Bar notes</b> <small>tips from the book, the teacher\'s notes, p / f</small></div>' +
+        '<div id="lmb-notes-list"></div>' +
+        '<div class="lmb-notes-add">Bar <input id="lmb-note-bar" class="lmp-pm-input" type="number" min="1" style="width:64px">' +
+          '<select id="lmb-note-kind" class="lmp-pm-input"><option value="tip">Tip</option><option value="teacher">Teacher\'s note</option><option value="dynamic">Dynamic (p, f…)</option></select>' +
+          '<input id="lmb-note-text" class="lmp-pm-input" placeholder="e.g. Move thumb up to G" style="flex:1;min-width:140px">' +
+          '<button class="lesson-btn" id="lmb-note-add">+ Add</button></div>' +
+      '</div>' +
       '<details class="lmb-text"><summary>Edit as text</summary>' +
         '<label>Right hand<textarea id="lmb-rh-text" class="pm-teacher-notes-area" rows="3"></textarea></label>' +
         '<label>Left hand<textarea id="lmb-lh-text" class="pm-teacher-notes-area" rows="3"></textarea></label>' +
         '<button class="lesson-btn" id="lmb-apply-text">Apply text</button>' +
-        '<div class="lmb-help">Notes like <code>C4q</code>, <code>G4h.</code> (dotted), <code>E4q~</code> (tie), <code>C3+E3+G3w</code> (chord), <code>Rq</code> (rest), <code>:3</code> finger; bars split with <code>|</code>.</div>' +
+        '<div class="lmb-help">Notes like <code>C4q</code>, <code>G4h.</code> (dotted), <code>E4q~</code> (tie), <code>C3+E3+G3w</code> (chord), <code>Rq</code> (rest), <code>:3</code> finger; bars split with <code>|</code>. Repeats <code>[:</code> <code>:]</code>, endings <code>{1}</code> <code>{2}</code>, <code>Fine</code>, <code>DC</code>.</div>' +
       '</details>';
     foot.innerHTML = '';
     var back = document.createElement('button');
@@ -487,11 +633,16 @@ var LMBuilder = (function () {
     listen.className = 'lesson-btn';
     listen.textContent = '▶ Listen';
     listen.onclick = _listen;
+    var more = document.createElement('button');
+    more.className = 'lesson-btn';
+    more.textContent = '📷 ＋ Add next page';
+    more.title = 'Read the following page(s) and add them after the last bar';
+    more.onclick = function () { _stop(); _pickPhoto('append'); };
     var save = document.createElement('button');
     save.className = 'lesson-btn lesson-btn--primary';
     save.textContent = 'Save piece ✓';
     save.onclick = _finish;
-    foot.appendChild(back); foot.appendChild(listen); foot.appendChild(save);
+    foot.appendChild(back); foot.appendChild(more); foot.appendChild(listen); foot.appendChild(save);
 
     body.querySelectorAll('[data-hand]').forEach(function (b) { b.onclick = function () { _ui.hand = b.dataset.hand; _refresh(); }; });
     body.querySelectorAll('[data-dur]').forEach(function (b) { b.onclick = function () { _ui.dur = b.dataset.dur; _refresh(); }; });
@@ -502,10 +653,15 @@ var LMBuilder = (function () {
     body.querySelector('[data-act=undo]').onclick = _undo;
     body.querySelectorAll('[data-finger]').forEach(function (b) { b.onclick = function () { _finger(+b.dataset.finger); }; });
     document.getElementById('lmb-apply-text').onclick = _applyText;
+    body.querySelectorAll('[data-mark]').forEach(function (b) { b.onclick = function () { _barMark(b.dataset.mark); }; });
+    document.getElementById('lmb-note-add').onclick = _addNote;
     if (_ui.fromPhoto) {
       var fp = _ui.fromPhoto;
       document.getElementById('lmb-photo-note').innerHTML =
-        '📷 <b>Read from the photo.</b> Now check it against the book: press <b>▶ Listen</b> and follow along bar by bar. ' +
+        '📷 <b>' + (fp.appended ? 'Added ' + (fp.pages > 1 ? fp.pages + ' pages' : 'the next page') + ' from bar ' + fp.from + '.'
+                                : 'Read from ' + (fp.pages > 1 ? fp.pages + ' photos' : 'the photo') + '.') + '</b> ' +
+        'Now check it against the book: press <b>▶ Listen</b> and follow along bar by bar. ' +
+        (fp.marks ? '<br>Found ' + fp.marks + ' bar note' + (fp.marks > 1 ? 's' : '') + ' — check them under <b>Bar notes</b> and remove any that are wrong.' : '') +
         (fp.problem ? '<br><b>One thing to fix:</b> ' + _esc(fp.problem) + ' (see "Edit as text").'
           : _ui.unsure.length ? '<br>Look hardest at the <span class="lmb-unsure-swatch">tinted</span> bar' + (_ui.unsure.length > 1 ? 's' : '') + ' (' + _ui.unsure.join(', ') + ') — the reads disagreed there.'
           : '') +
@@ -564,9 +720,66 @@ var LMBuilder = (function () {
     }
     var spec = toSpec(_d);
     var rt = document.getElementById('lmb-rh-text'), lt = document.getElementById('lmb-lh-text');
-    if (rt && document.activeElement !== rt) rt.value = _d.rh.map(token).join(' ');
-    if (lt && document.activeElement !== lt) lt.value = _d.lh.map(token).join(' ');
+    if (rt && document.activeElement !== rt) rt.value = spec.rh || '';
+    if (lt && document.activeElement !== lt) lt.value = _d.lh.length ? spec.lh : '';
+    _drawNotes();
+    var nb = document.getElementById('lmb-note-bar');
+    if (nb && !nb.value) nb.value = Math.max(1, barNo);
     return spec;
+  }
+
+  // ── Bar marks and bar notes ────────────────────────────────────
+  // Marks that open a bar go on the bar about to be entered; marks that
+  // close one go on the bar of the last note.
+  function _barMark(kind) {
+    var evs = _d[_ui.hand].length ? _d[_ui.hand] : _d.rh;
+    var bars = layout(evs, _d);
+    var cur = bars[bars.length - 1];
+    var curIdx = bars.length - 1;
+    var nextIdx = evs.length && cur.used >= cur.cap - EPS ? bars.length : curIdx;
+    var opening = kind === 'start' || kind === 'v1' || kind === 'v2';
+    var idx = opening ? nextIdx : curIdx;
+    var f = _d.barMarks[idx] = _d.barMarks[idx] || {};
+    var label;
+    if (kind === 'v1' || kind === 'v2') {
+      var n = kind === 'v1' ? 1 : 2;
+      f.volta = f.volta === n ? 0 : n;
+      label = n + (n === 1 ? 'st' : 'nd') + ' ending';
+      if (!f.volta) delete f.volta;
+    } else {
+      f[kind] = !f[kind];
+      if (!f[kind]) delete f[kind];
+      label = { start: 'Repeat start', end: 'Repeat end', fine: 'Fine', dc: 'D.C. al Fine' }[kind];
+    }
+    var on = kind === 'v1' || kind === 'v2' ? !!f.volta : !!f[kind];
+    if (!Object.keys(f).length) delete _d.barMarks[idx];
+    _refresh(label + (on ? ' set on bar ' : ' removed from bar ') + (idx + 1) + '.');
+  }
+
+  function _drawNotes() {
+    var el = document.getElementById('lmb-notes-list');
+    if (!el) return;
+    var KIND = { tip: '📝 Tip', teacher: '✎ Teacher', dynamic: '🔊 Dynamic' };
+    el.innerHTML = (_d.marks || []).map(function (m, i) {
+      return '<div class="lmb-note-row' + (m.fromPhoto ? ' lmb-note-row--photo' : '') + '">' +
+        '<span class="lmb-note-bar">Bar ' + m.bar + '</span><span class="lmb-note-kind">' + (KIND[m.kind] || m.kind) + '</span>' +
+        '<span class="lmb-note-text">' + _esc(m.text) + (m.fromPhoto ? ' <small>(from the photo — check it)</small>' : '') + '</span>' +
+        '<button class="lmb-finger" data-del-note="' + i + '" aria-label="Remove">✕</button></div>';
+    }).join('') || '<div class="lmp-muted">None yet.</div>';
+    el.querySelectorAll('[data-del-note]').forEach(function (b) {
+      b.onclick = function () { _d.marks.splice(+b.dataset.delNote, 1); _refresh(); };
+    });
+  }
+
+  function _addNote() {
+    var bar = parseInt(document.getElementById('lmb-note-bar').value, 10);
+    var kind = document.getElementById('lmb-note-kind').value;
+    var text = document.getElementById('lmb-note-text').value.trim();
+    if (!bar || bar < 1 || !text) { _status('Pick a bar number and write the note first.', true); return; }
+    _d.marks.push({ bar: bar, kind: kind, text: text.slice(0, 120) });
+    _d.marks.sort(function (a, b) { return a.bar - b.bar; });
+    document.getElementById('lmb-note-text').value = '';
+    _refresh('Note added to bar ' + bar + '.');
   }
 
   function _fmtBeats(b) {
@@ -636,10 +849,12 @@ var LMBuilder = (function () {
 
   function _applyText() {
     try {
-      var rh = parseVoice(document.getElementById('lmb-rh-text').value);
-      var lh = parseVoice(document.getElementById('lmb-lh-text').value);
-      LMScore.compile({ id: 'check', title: 'check', score: toSpec(Object.assign({}, _d, { rh: rh, lh: lh })) });
-      _d.rh = rh; _d.lh = lh;
+      var marks = {};
+      var rh = parseVoice(document.getElementById('lmb-rh-text').value, marks);
+      var lh = parseVoice(document.getElementById('lmb-lh-text').value, marks);
+      if (lh.length && lh.every(function (e) { return e.rest; })) lh = [];
+      LMScore.compile({ id: 'check', title: 'check', score: toSpec(Object.assign({}, _d, { rh: rh, lh: lh, barMarks: marks })) });
+      _d.rh = rh; _d.lh = lh; _d.barMarks = marks;
       _refresh('Text applied.');
     } catch (e) {
       _status(e.message, true);
@@ -660,6 +875,7 @@ var LMBuilder = (function () {
     _stop();
     if (!_d.rh.length && !_d.lh.length) { _status('Enter some notes first.', true); return; }
     var song;
+    _d.marks = (_d.marks || []).map(function (m) { return { bar: m.bar, kind: m.kind, text: m.text }; });
     try { song = _song(_d); LMScore.compile(JSON.parse(JSON.stringify(song))); }
     catch (e) { _status(e.message, true); return; }
     var data = _load();

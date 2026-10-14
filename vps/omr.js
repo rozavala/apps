@@ -1,8 +1,11 @@
 /* ================================================================
    OMR — read a photo of sheet music into Little Maestro's notation
 
-   POST /api/omr  { image: <base64 JPEG>, hint?: "Alfred 1B p.44" }
-     → { ok: true,  piece: { title, time, key, pickup, rh, lh }, unsure: [bar…], notes, model }
+   POST /api/omr  { images: [<base64 JPEG>, …up to 4 pages, in order] (or image: one),
+                    title?: "Sonatina"     only that piece, if a page has several
+                    hint?: "Alfred 1B p.44",
+                    continueFrom?: { bars, time, key, rh, lh }   pages that follow bar `bars` }
+     → { ok: true,  piece: { title, time, key, pickup, rh, lh, tempo, bpm, marks }, unsure: [bar…], notes, model }
      → { ok: false, error, piece?, ... }   (piece = best effort to fix by hand)
 
    Little Maestro's My Book editor (js/lm-builder.js) sends the photo a
@@ -38,7 +41,7 @@ const THINKING = process.env.OMR_THINKING || null;    // Gemini 3 thinking level
 const READ_LIMIT_MS = 150000;
 const VOTE_WINDOW_MS = 12000;
 
-const PROMPT = `You are an expert music engraver. Transcribe the piano piece in this photo into the notation below.
+const PROMPT = `You are an expert music engraver. Transcribe the piano piece in the photo(s) into the notation below.
 
 NOTATION (one string per hand; bars separated by " | "; tokens separated by spaces):
 - Note: pitch + octave + duration letter. Middle C is C4. Durations: w=whole h=half q=quarter e=eighth s=sixteenth.
@@ -50,6 +53,10 @@ NOTATION (one string per hand; bars separated by " | "; tokens separated by spac
 - Finger number printed above/below a note: add ":n" (chords: comma list, lowest note first): C4q:1  C3+E3+G3h:5,3,1
 - Write every pitch as it SOUNDS. Apply the key signature and any accidentals yourself: in G major write F#4, not F4.
   An accidental lasts to the end of its bar.
+- Bar marks, written as extra tokens inside the RIGHT-HAND bar they belong to:
+  [: (repeat starts at this bar)   :] (repeat ends at this bar)   {1} {2} (this bar begins the 1st / 2nd ending)
+  Fine   DC (D.C. al Fine at the end of this bar)   DS (D.S. al Fine)   Segno
+  Example: "[: C4q D4q E4q F4q | {1} G4w :] | {2} C4w Fine"
 
 RULES:
 - "rh" = the treble-clef (top) staff, "lh" = the bass-clef (bottom) staff, bar by bar, even when the melody passes between staves.
@@ -58,13 +65,42 @@ RULES:
   Exception: a pickup (anacrusis) first bar — give its length in beats as "pickup" — and the final bar may then be short to complete it.
 - Both hands must have the same number of bars.
 - Read the clef of each staff carefully, and count ledger lines; octave mistakes are the most common error.
-- Ignore lyrics, titles of sections, dynamics (p, f), slurs, chord symbols, teacher pencil marks and illustrations.
-- Repeat signs: write the music once, as printed.
+- Staff positions, to check every note against (bottom to top):
+  treble clef lines E4 G4 B4 D5 F5, spaces F4 A4 C5 E5; middle C (C4) is one ledger line below; G5 sits just above the top line, A5 on the first ledger line above.
+  bass clef lines G2 B2 D3 F3 A3, spaces A2 C3 E3 G3; middle C (C4) is one ledger line above, B3 just above the top line.
+  Reading a note one line or space too high or too low (a whole bar shifted by a third) is the second most common error: check the first note of every bar against this list.
+- Write the music once, as printed, and mark repeats, endings, Fine and D.C. with the bar marks above.
+- Ignore lyrics, slurs, chord symbols and illustrations.
+- Bar notes ("marks"), each tied to the bar where it appears:
+  kind "tip": printed instructions that help practising, e.g. hand-position cues ("RH: G position", "move thumb to C"),
+              "Two RH positions", "hands together", "count aloud".
+  kind "teacher": HANDWRITTEN notes (pencil or pen) such as "slow!", "practise 3x", a circled bar, a star — write what it says
+              or what it marks. A handwritten finger number above a note goes into that note's ":n" instead.
+  kind "dynamic": p, mp, mf, f, ff, pp, cresc., dim. — exactly as printed, at the bar where it starts.
+- "tempo": the printed tempo word (e.g. "Moderately", "Allegro", "With spirit") and a sensible beats-per-minute for it.
 
 Return ONLY a JSON object, no markdown:
 {"title": "...", "time": "4/4", "key": "C", "pickup": 0, "rh": "...", "lh": "...",
+ "tempo": {"text": "Moderately", "bpm": 92},
+ "marks": [{"bar": 5, "kind": "tip", "text": "Move thumb to G"}],
  "unsure": [bar numbers you could not read confidently], "notes": "anything the student should check"}
 Key names: C G D A E F Bb Eb Am Em Bm Dm Gm Cm.`;
+
+// Extra instructions for several pages, a chosen piece, or a continuation
+function _context(opts) {
+  const out = [];
+  if (opts.pages > 1) out.push('There are ' + opts.pages + ' photos: pages 1 to ' + opts.pages + ' of ONE piece, in order. ' +
+    'Transcribe them as one continuous piece; bar numbers (in "marks" and "unsure") count from the first bar of page 1.');
+  if (opts.title) out.push('If a page shows more than one piece, transcribe ONLY the piece titled "' + String(opts.title).slice(0, 80) + '".');
+  const cf = opts.continueFrom;
+  if (cf && cf.bars > 0) out.push('These photos CONTINUE a piece already transcribed up to bar ' + (cf.bars | 0) +
+    ' (time ' + String(cf.time).slice(0, 5) + ', key ' + String(cf.key).slice(0, 4) + '). Its last bar was: RH "' +
+    String(cf.rh || '').slice(0, 200) + '", LH "' + String(cf.lh || '').slice(0, 200) + '". ' +
+    'Transcribe only the music AFTER that bar (skip it if the photo repeats it), with "pickup": 0, and number bars in "marks" ' +
+    'and "unsure" from 1 for the new part. Use the same time signature and key unless the music changes them.');
+  if (opts.hint) out.push('The student says this is: ' + String(opts.hint).slice(0, 120));
+  return out.length ? '\n\n' + out.join('\n') : '';
+}
 
 function _extractJson(text) {
   let t = String(text || '').trim().replace(/^```(?:json)?/i, '').replace(/```$/, '');
@@ -100,9 +136,17 @@ function _tidy(voice) {
   return String(voice || '').trim().replace(/(:[1-5](?:,[1-5])*)~/g, '~$1');
 }
 
+const MARK_KINDS = { tip: 1, teacher: 1, dynamic: 1 };
+
 function _clean(p) {
   const pickup = Number(p.pickup) || 0;
+  const tempo = p.tempo && typeof p.tempo === 'object' ? p.tempo : {};
+  const bpm = Math.round(Number(tempo.bpm));
   return {
+    tempo: String(tempo.text || '').slice(0, 40),
+    bpm: bpm >= 30 && bpm <= 220 ? bpm : null,
+    marks: (Array.isArray(p.marks) ? p.marks : []).filter(m => m && Number.isFinite(+m.bar) && m.text && MARK_KINDS[m.kind])
+      .slice(0, 40).map(m => ({ bar: Math.round(+m.bar), kind: m.kind, text: String(m.text).slice(0, 120) })),
     title: String(p.title || '').slice(0, 80),
     time: /^\d+\/\d+$/.test(p.time || '') ? p.time : '4/4',
     key: String(p.key || 'C'),
@@ -115,7 +159,7 @@ function _clean(p) {
 // Compile with the app's own engine; returns an error message or null
 function _check(piece) {
   try {
-    const score = { time: piece.time, key: piece.key, rh: piece.rh || undefined, lh: piece.lh || undefined };
+    const score = { time: piece.time, key: piece.key, rh: piece.rh || undefined, lh: piece.lh || undefined, marks: piece.marks };
     if (piece.pickup) score.pickup = piece.pickup;
     LMScore.compile({ id: 'omr', title: piece.title || 'photo', score });
     return null;
@@ -160,8 +204,10 @@ async function transcribe(imageB64, opts) {
   const model = opts.model || MODEL;
   const reads = opts.reads || READS;
   const thinking = opts.thinking === undefined ? THINKING : opts.thinking;
-  const image = { inlineData: { mimeType: opts.mime || 'image/jpeg', data: imageB64 } };
-  const hint = opts.hint ? '\nThe student says this is: ' + String(opts.hint).slice(0, 120) : '';
+  // One photo or several pages, in order
+  const images = (Array.isArray(imageB64) ? imageB64 : [imageB64]).slice(0, 4)
+    .map(data => ({ inlineData: { mimeType: opts.mime || 'image/jpeg', data } }));
+  const hint = _context(Object.assign({}, opts, { pages: images.length }));
 
   const started = Date.now();
   const timings = [];
@@ -173,7 +219,7 @@ async function transcribe(imageB64, opts) {
     const finish = () => { if (done) return; done = true; clearTimeout(voteTimer); ctrls.forEach(c => c.abort()); resolve(); };
     ctrls.forEach((ctrl, i) => {
       const limit = setTimeout(() => ctrl.abort(), READ_LIMIT_MS);
-      _ask([{ text: PROMPT + hint }, image], model, thinking, ctrl.signal)
+      _ask([{ text: PROMPT + hint }].concat(images), model, thinking, ctrl.signal)
         .then(a => {
           if (done) return;
           answers.push(a);
@@ -202,10 +248,10 @@ async function transcribe(imageB64, opts) {
     if (opts.log) opts.log('repairing: ' + err);
     // One repair round, with the compiler's complaint
     const fix = await _ask([
-      { text: PROMPT + hint }, image,
+      { text: PROMPT + hint }].concat(images, [
       { text: 'Your previous answer was:\n' + JSON.stringify(piece) + '\n\nIt is invalid: ' + err +
               '\nLook at the photo again, fix that bar (and any others like it), and return the full corrected JSON.' },
-    ], model, thinking, AbortSignal.timeout(60000)).catch(() => null);
+    ]), model, thinking, AbortSignal.timeout(60000)).catch(() => null);
     if (!fix) return Object.assign({ ok: false, error: err }, { piece, unsure: voted.unsure, notes: notes.slice(0, 400), model, reads: voted.reads, agreed: voted.agreed });
     const piece2 = _clean(fix.json);
     const err2 = _check(piece2);
@@ -216,14 +262,20 @@ async function transcribe(imageB64, opts) {
 }
 
 function init(app) {
-  app.post('/api/omr', async (req, res) => {
-    const img = req.body && req.body.image;
-    if (!img || typeof img !== 'string' || img.length < 1000) return res.status(400).json({ ok: false, error: 'No image' });
-    const b64 = img.replace(/^data:image\/\w+;base64,/, '');
+  // Several photos can pass the app-wide 5 MB body limit (server.js skips it for this route)
+  app.post('/api/omr', require('express').json({ limit: '25mb' }), async (req, res) => {
+    const body = req.body || {};
+    const list = (Array.isArray(body.images) ? body.images : [body.image]).filter(x => typeof x === 'string' && x.length >= 1000);
+    if (!list.length) return res.status(400).json({ ok: false, error: 'No image' });
+    if (list.length > 4) return res.status(400).json({ ok: false, error: 'Up to 4 pages at a time' });
+    const b64 = list.map(img => img.replace(/^data:image\/\w+;base64,/, ''));
     const started = Date.now();
     try {
-      const out = await transcribe(b64, { hint: req.body.hint, log: m => console.log('[omr] ' + m) });
-      console.log('[omr] ' + (out.ok ? 'ok' : 'invalid: ' + out.error) + ' in ' + (Date.now() - started) + ' ms (' + out.model + ')');
+      const out = await transcribe(b64, {
+        hint: body.hint, title: body.title, continueFrom: body.continueFrom,
+        log: m => console.log('[omr] ' + m),
+      });
+      console.log('[omr] ' + (out.ok ? 'ok' : 'invalid: ' + out.error) + ' in ' + (Date.now() - started) + ' ms (' + out.model + ', ' + b64.length + ' page' + (b64.length > 1 ? 's' : '') + ')');
       res.json(out);
     } catch (e) {
       console.error('[omr] failed:', e.message);
