@@ -441,9 +441,14 @@
 
     // Dynamics: a playback loudness per written bar, carried forward
     var DYN = { ppp: 0.45, pp: 0.55, p: 0.7, mp: 0.85, mf: 1, f: 1.15, ff: 1.3, fff: 1.4 };
-    var cleanMarks = (Array.isArray(marks) ? marks : []).filter(function (mk) {
-      return mk && mk.bar >= 1 && mk.bar <= measures.length && mk.text;
-    }).map(function (mk) { return { bar: +mk.bar, kind: mk.kind || 'tip', text: String(mk.text).slice(0, 120) }; });
+    // `src` is the mark's place in the song's list (the builder drags marks
+    // by it); dx / dy nudge where it's drawn, in staff units.
+    var nudge = function (v) { v = +v || 0; return Math.max(-300, Math.min(300, Math.round(v))); };
+    var cleanMarks = (Array.isArray(marks) ? marks : []).map(function (mk, i) {
+      return mk && mk.bar >= 1 && mk.bar <= measures.length && mk.text
+        ? { bar: +mk.bar, kind: mk.kind || 'tip', text: String(mk.text).slice(0, 120), src: i, dx: nudge(mk.dx), dy: nudge(mk.dy) }
+        : null;
+    }).filter(Boolean);
     var dyn = [], level = 1;
     measures.forEach(function (m, i) {
       cleanMarks.forEach(function (mk) {
@@ -697,21 +702,27 @@
           st.setContext(ctx).draw();
         });
         // Words over the staff: tempo, Fine / D.C., bar notes, dynamics
+        // Placed once all the music is drawn (see placeTexts): `y` is where
+        // each starts, and they move off the notes from there.
         var line0 = topStave.getYForLine(0);
         var under = staves.rh ? staves.rh.getYForLine(4) + (grand ? 34 : 22) : null;
-        if (row === 0 && mi === 0 && c.tempo) texts.push({ x: x + 20, y: line0 - 26, t: c.tempo, size: 12, weight: 'bold' });
-        if (f.segno) texts.push({ x: x + 6, y: line0 - 6, t: '𝄋', size: 18 });
-        if (f.fine) texts.push({ x: x + w - 4, y: line0 - 6, t: 'Fine', size: 12, style: 'italic', weight: 'bold', anchor: 'end' });
-        if (f.dc || f.ds) texts.push({ x: x + w - 4, y: line0 - 6, t: (f.ds ? 'D.S.' : 'D.C.') + ' al Fine', size: 12, style: 'italic', weight: 'bold', anchor: 'end' });
+        var gap = grand ? { lo: staves.rh.getYForLine(4) + 14, hi: staves.lh.getYForLine(0) - 2 } : null;
+        var above = { row: row, rowY: y, place: 'above' };
+        var add = function (tx, where) { texts.push(Object.assign(tx, where || above)); };
+        if (row === 0 && mi === 0 && c.tempo) add({ x: x + 20, y: line0 - 26, t: c.tempo, size: 12, weight: 'bold' });
+        if (f.segno) add({ x: x + 6, y: line0 - 6, t: '𝄋', size: 18 });
+        if (f.fine) add({ x: x + w - 4, y: line0 - 6, t: 'Fine', size: 12, style: 'italic', weight: 'bold', anchor: 'end' });
+        if (f.dc || f.ds) add({ x: x + w - 4, y: line0 - 6, t: (f.ds ? 'D.S.' : 'D.C.') + ' al Fine', size: 12, style: 'italic', weight: 'bold', anchor: 'end' });
         var noteY = line0 - (vk ? 30 : 18);
         (c.marks || []).filter(function (mk) { return mk.bar === m.index + 1; }).forEach(function (mk) {
           if (mk.kind === 'dynamic') {
-            if (under != null) texts.push({ x: x + (mi === 0 ? decor : 8), y: under, t: mk.text, size: 15, style: 'italic', weight: 'bold', family: 'Georgia, serif' });
+            if (under != null) add({ x: x + (mi === 0 ? decor : 8), y: under, t: mk.text, size: 15, style: 'italic', weight: 'bold', family: 'Georgia, serif',
+                                     cls: 'lm-bar-mark lm-dyn-mark', mk: mk }, { row: row, rowY: y, place: 'between', gap: gap });
             return;
           }
           var label = mk.text.length > 34 ? mk.text.slice(0, 33) + '…' : mk.text;
-          texts.push({ x: x + (mi === 0 ? decor : 6), y: noteY, t: (mk.kind === 'teacher' ? '✎ ' : '') + label, size: 10, weight: 'bold',
-                       style: mk.kind === 'teacher' ? 'italic' : '', fill: mk.kind === 'teacher' ? '#B45309' : '#0F766E', cls: 'lm-bar-mark' });
+          add({ x: x + (mi === 0 ? decor : 6), y: noteY, t: (mk.kind === 'teacher' ? '✎ ' : '') + label, size: 10, weight: 'bold',
+                style: mk.kind === 'teacher' ? 'italic' : '', fill: mk.kind === 'teacher' ? '#B45309' : '#0F766E', cls: 'lm-bar-mark', mk: mk });
           noteY -= 12;
         });
         if (grand) {
@@ -812,22 +823,8 @@
     });
 
     // Text goes on last, over the music
-    var NS = 'http://www.w3.org/2000/svg';
-    if (svg && svg.ownerDocument) {
-      texts.forEach(function (tx) {
-        var el = svg.ownerDocument.createElementNS(NS, 'text');
-        el.setAttribute('x', tx.x); el.setAttribute('y', tx.y);
-        el.setAttribute('font-family', tx.family || 'Arial, sans-serif');
-        el.setAttribute('font-size', tx.size || 10);
-        if (tx.weight) el.setAttribute('font-weight', tx.weight);
-        if (tx.style) el.setAttribute('font-style', tx.style);
-        if (tx.anchor) el.setAttribute('text-anchor', tx.anchor);
-        el.setAttribute('fill', tx.fill || '#3D3555');
-        if (tx.cls) el.setAttribute('class', tx.cls);
-        el.textContent = tx.t;
-        svg.appendChild(el);
-      });
-    }
+    var markEls = [];
+    if (svg && svg.ownerDocument) placeTexts(svg, texts, top, markEls);
 
     tieQueue.forEach(function (tq) {
       try {
@@ -840,7 +837,102 @@
       } catch (e) { /* a tie VexFlow can't place is only cosmetic */ }
     });
 
-    return { svg: svg, evEls: evEls, bars: bars, perRow: perRow, rowH: rowH, top: top };
+    return { svg: svg, evEls: evEls, bars: bars, perRow: perRow, rowH: rowH, top: top, marks: markEls };
+  }
+
+  // Words over the music. Each starts where it belongs and steps off any
+  // note, stem, finger number, bracket or earlier word in its way: up when
+  // it sits over the staff, up or down when it sits between the staves.
+  // A mark's own dx / dy is added last, so a hand-placed one stays put.
+  // Off-screen (no layout, getBBox gives nothing) they keep their start.
+  function placeTexts(svg, texts, top, markEls) {
+    if (!texts.length) return markEls;
+    var NS = 'http://www.w3.org/2000/svg';
+    var boxOf = function (el) {
+      try { var b = el.getBBox(); return b && (b.width || b.height) ? { x: b.x, y: b.y, w: b.width, h: b.height } : null; } catch (e) { return null; }
+    };
+    // What's already drawn, staff lines aside (long and thin)
+    var ink = [];
+    Array.prototype.forEach.call(svg.querySelectorAll('path, rect, text'), function (el) {
+      var b = boxOf(el);
+      if (b && !(b.h < 2.5 && b.w > 40)) ink.push(b);
+    });
+    var measured = ink.length > 0;
+    var PAD = 3;
+    var hits = function (r) {
+      for (var i = 0; i < ink.length; i++) {
+        var b = ink[i];
+        if (r.x < b.x + b.w + PAD && r.x + r.w + PAD > b.x && r.y < b.y + b.h + PAD && r.y + r.h + PAD > b.y) return true;
+      }
+      return false;
+    };
+    var minY = Infinity;
+    texts.forEach(function (tx) {
+      var el = svg.ownerDocument.createElementNS(NS, 'text');
+      el.setAttribute('x', tx.x); el.setAttribute('y', tx.y);
+      el.setAttribute('font-family', tx.family || 'Arial, sans-serif');
+      el.setAttribute('font-size', tx.size || 10);
+      if (tx.weight) el.setAttribute('font-weight', tx.weight);
+      if (tx.style) el.setAttribute('font-style', tx.style);
+      if (tx.anchor) el.setAttribute('text-anchor', tx.anchor);
+      el.setAttribute('fill', tx.fill || '#3D3555');
+      if (tx.cls) el.setAttribute('class', tx.cls);
+      el.textContent = tx.t;
+      svg.appendChild(el);
+
+      var y = tx.y;
+      var b = measured && boxOf(el);
+      if (b) {
+        // Box relative to the baseline, so it can be tried at other heights
+        var rel = { x: b.x, w: b.w, up: tx.y - b.y, down: b.y + b.h - tx.y };
+        var at = function (yy) { return { x: rel.x, w: rel.w, y: yy - rel.up, h: rel.up + rel.down }; };
+        var tries = [];
+        if (tx.place === 'between' && tx.gap) {
+          for (var d = 0; d <= 40; d += 3) { tries.push(tx.y + d); if (d) tries.push(tx.y - d); }
+          tries = tries.filter(function (yy) { return yy - rel.up >= tx.gap.lo - 12 && yy + rel.down <= tx.gap.hi; });
+        } else if (tx.place === 'between') {
+          // One staff: dynamics sit under it, so only move down
+          for (var dd = 0; dd <= 30; dd += 3) tries.push(tx.y + dd);
+        } else {
+          // Up to just under the row above; over the first row the page
+          // grows upward instead (see below)
+          var ceiling = tx.row === 0 ? -120 : tx.rowY - 26;
+          for (var yy = tx.y; yy - rel.up >= ceiling; yy -= 3) tries.push(yy);
+          if (!tries.length) tries.push(tx.y);
+        }
+        var free = tries.filter(function (yy) { return !hits(at(yy)); })[0];
+        y = free != null ? free : (tx.place === 'between' ? tx.y : tries[tries.length - 1]);
+      }
+      var mk = tx.mk;
+      if (mk && (mk.dx || mk.dy)) {
+        el.setAttribute('x', tx.x + mk.dx);
+        y += mk.dy;
+      }
+      el.setAttribute('y', y);
+      if (b) {
+        var nb = boxOf(el);
+        if (nb) ink.push(nb);
+      }
+      if (mk) {
+        el.setAttribute('data-mk', mk.src);
+        markEls.push({ src: mk.src, el: el });
+      }
+      if (b) minY = Math.min(minY, y - rel.up);
+    });
+    // Words pushed above the first row: grow the drawing upward. Moving the
+    // viewBox keeps every coordinate (bars, notes) where callers expect it.
+    if (minY < 2) grow(svg, Math.ceil(4 - minY));
+    return markEls;
+  }
+
+  function grow(svg, extra) {
+    var w = parseFloat(svg.getAttribute('width')) || 0, h = parseFloat(svg.getAttribute('height')) || 0;
+    var vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(parseFloat);
+    if (vb.length !== 4 || vb.some(isNaN)) vb = [0, 0, w, h];
+    var k = vb[3] ? h / vb[3] : 1;               // pixels per unit (the render scale)
+    svg.setAttribute('viewBox', [vb[0], vb[1] - extra, vb[2], vb[3] + extra].join(' '));
+    svg.setAttribute('height', h + extra * k);
+    if (svg.style && svg.style.height) svg.style.height = (h + extra * k) + 'px';
   }
 
   function relativeMajor(minor) {

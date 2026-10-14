@@ -935,7 +935,12 @@ var CloudSync = (function() {
       pill.id = 'zs-sync-pill';
       pill.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9000;background:var(--bg-surface,#1E1B2E);border:1.5px solid rgba(255,255,255,0.08);border-radius:99px;padding:6px 12px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 12px rgba(0,0,0,0.3);color:#fff;';
       pill.onclick = function() {
-        if (!state.isConfigured()) { alert('Cloud Sync not configured.'); return; }
+        if (!state.isConfigured()) {
+          // dialog.js isn't on every page that loads sync.js.
+          if (typeof ZsDialog !== 'undefined') ZsDialog.toast('Cloud Sync not configured.');
+          else console.warn('[Sync] Cloud Sync not configured.');
+          return;
+        }
         if (typeof Debug !== 'undefined') Debug.show();
       };
       document.body.appendChild(pill);

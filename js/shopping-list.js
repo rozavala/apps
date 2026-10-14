@@ -60,7 +60,7 @@ var ShoppingList = (function() {
   // Called from the "Shop" button in the header.
   function unlockShopping() {
     if (!_activeIsParent()) {
-      alert('Sign in as a parent first to use Amazon lookup.');
+      ZsDialog.toast('Sign in as a parent first to use Amazon lookup.');
       return;
     }
     if (_isUnlocked()) {
@@ -69,14 +69,21 @@ var ShoppingList = (function() {
       return;
     }
     var expected = (typeof getParentPin === 'function') ? String(getParentPin()) : '1234';
-    var entered = window.prompt('Parent PIN to show Amazon links:');
-    if (entered === null) return;
-    if (String(entered).trim() !== expected) {
-      alert('That PIN is not right.');
-      return;
-    }
-    try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
-    _render();
+    ZsDialog.prompt({
+      title: 'Parent PIN',
+      message: 'Enter the parent PIN to show Amazon links.',
+      inputType: 'password',
+      inputMode: 'numeric',
+      confirmLabel: 'Unlock'
+    }).then(function(entered) {
+      if (entered === null) return;
+      if (String(entered).trim() !== expected) {
+        ZsDialog.toast('That PIN is not right.');
+        return;
+      }
+      try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
+      _render();
+    });
   }
 
   // Reflects state in the header button, and hides it entirely from
@@ -238,7 +245,7 @@ var ShoppingList = (function() {
     var items = _load();
     var unchecked = items.filter(function(it) { return !it.checked; });
     if (unchecked.length === 0) {
-      alert('La lista está vacía. Agrega ítems antes de compartir.');
+      ZsDialog.toast('La lista está vacía. Agrega ítems antes de compartir.');
       return;
     }
 
@@ -262,7 +269,7 @@ var ShoppingList = (function() {
       navigator.share({ title: 'Lista de Compras', text: text }).catch(function() {});
     } else if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
-        alert('Lista copiada al portapapeles ✓');
+        ZsDialog.toast('Lista copiada al portapapeles ✓');
       }).catch(function() {
         _fallbackShare(text);
       });

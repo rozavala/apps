@@ -149,13 +149,20 @@ var Vacation = (function() {
 
   function deleteTrip(id) {
     if (!_parentUnlocked) return;
-    if (!confirm('Delete this trip and all its data?')) return;
-    var data = _load();
-    data.trips = data.trips.filter(function(t) { return t.id !== id; });
-    _save(data);
-    _viewing = null;
-    _mode = 'list';
-    _render();
+    ZsDialog.confirm({
+      title: 'Delete this trip?',
+      message: 'The trip and all its data will be removed.',
+      confirmLabel: 'Delete',
+      danger: true
+    }).then(function(ok) {
+      if (!ok || !_parentUnlocked) return;
+      var data = _load();
+      data.trips = data.trips.filter(function(t) { return t.id !== id; });
+      _save(data);
+      _viewing = null;
+      _mode = 'list';
+      _render();
+    });
   }
 
   function saveNewTrip() {
@@ -171,7 +178,7 @@ var Vacation = (function() {
     var hidden = document.getElementById('vc-new-hidden').checked;
 
     if (!name || !start) {
-      alert('Pick a trip name and a start date.');
+      ZsDialog.toast('Pick a trip name and a start date.');
       return;
     }
     var data = _load();
@@ -252,7 +259,7 @@ var Vacation = (function() {
     var name = document.getElementById('vc-edit-name').value.trim();
     var start = document.getElementById('vc-edit-start').value;
     if (!name || !start) {
-      alert('Pick a trip name and a start date.');
+      ZsDialog.toast('Pick a trip name and a start date.');
       return;
     }
     var end = document.getElementById('vc-edit-end').value;

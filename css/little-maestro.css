@@ -6997,3 +6997,5 @@ body .rr-fab {
 .lmb-note-kind { font-size: 12px; color: var(--color-text-muted); min-width: 84px; }
 .lmb-note-text { flex: 1; }
 .lmb-notes-add { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lmb-preview .lm-bar-mark { cursor: grab; }
+.lmb-preview .lmb-dragging { cursor: grabbing; opacity: 0.85; }

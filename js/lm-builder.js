@@ -273,7 +273,12 @@ var LMBuilder = (function () {
     if (typeof QuestMap !== 'undefined' && document.getElementById('screen-questmap')) QuestMap.render();
   }
 
-  function _stop() { if (_ui.player) { _ui.player.stop(); _ui.player = null; } }
+  function _stop() {
+    if (_ui.player) { _ui.player.stop(); _ui.player = null; }
+    _ui.listenToken = null;
+    var b = document.getElementById('lmb-listen');
+    if (b) b.textContent = '▶ Listen';
+  }
 
   function _overlay() {
     var old = document.getElementById('lmb-overlay');
@@ -339,14 +344,20 @@ var LMBuilder = (function () {
     next.onclick = function () {
       var hadNotes = _d.rh.length || _d.lh.length;
       var t = document.getElementById('lmb-time').value, p = parseFloat(document.getElementById('lmb-pickup').value) || 0;
-      if (hadNotes && (t !== _d.time || p !== _d.pickup) && !confirm('Changing the time signature or pickup re-flows the bars you entered. Continue?')) return;
+      if (hadNotes && (t !== _d.time || p !== _d.pickup)) {
+        ZsDialog.confirm({ title: 'Change the time signature?', message: 'Changing the time signature or pickup re-flows the bars you entered.', confirmLabel: 'Change it' })
+          .then(function (ok) { if (ok) go(); });
+      } else go();
+    };
+    function go() {
+      var t = document.getElementById('lmb-time').value, p = parseFloat(document.getElementById('lmb-pickup').value) || 0;
       _readDetails();
       _d.time = t;
       _d.key = document.getElementById('lmb-key').value;
       _d.pickup = p >= LMScore.parseTime(t).barBeats ? 0 : p;
       _d.bpm = parseInt(document.getElementById('lmb-bpm').value, 10) || 80;
       _notes();
-    };
+    }
     foot.appendChild(next);
   }
 
@@ -388,7 +399,7 @@ var LMBuilder = (function () {
       if (!files.length) return;
       handled = true;
       _log('picked ' + files.length + ' file(s): ' + files.map(function (f) { return (f.type || '?') + ' ' + Math.round(f.size / 1024) + ' KB'; }).join(', '));
-      if (files.length > 4) { alert('Up to 4 pages at a time. Read the first 4, then use "Add next page" for the rest.'); files = files.slice(0, 4); }
+      if (files.length > 4) { ZsDialog.toast('Up to 4 pages at a time. Reading the first 4; use "Add next page" for the rest.', 6000); files = files.slice(0, 4); }
       if (files.length > 1) _pageOrder(files, mode);
       else _readPhotos(files, mode);
       setTimeout(function () { input.remove(); }, 1000);
@@ -476,7 +487,7 @@ var LMBuilder = (function () {
     var body = document.getElementById('lmb-body'), foot = document.getElementById('lmb-foot');
     document.getElementById('lmb-kb').style.display = 'none';
     var server = typeof CloudSync !== 'undefined' && CloudSync.server;
-    if (!server) { alert('Reading photos needs the family sync server.'); return; }
+    if (!server) { ZsDialog.alert({ title: 'No connection to the family server', message: 'Reading photos needs the family sync server.' }); return; }
     body.innerHTML = '<div class="lml-done"><div class="lml-done-icon lmb-reading">📷</div>' +
       '<div class="lml-done-title">Reading ' + (files.length > 1 ? files.length + ' pages' : 'the music') + '…</div>' +
       '<div class="lml-done-sub" id="lmb-omr-time">Usually under 30 seconds. Keep the app open.</div></div>';
@@ -523,7 +534,7 @@ var LMBuilder = (function () {
       if (e && e.name === 'AbortError') return;
       _log('failed: ' + (e && e.message));
       back();
-      alert((e && e.message) || 'Could not read the photo. Check the internet connection and try again.');
+      ZsDialog.alert({ title: 'Could not read the photo', message: (e && e.message) || 'Check the internet connection and try again.' });
     });
   }
 
@@ -611,7 +622,7 @@ var LMBuilder = (function () {
       (_ui.fromPhoto ? '<div class="lmb-photo-note" id="lmb-photo-note"></div>' : '') +
       '<div class="lml-feedback" id="lmb-status"></div>' +
       '<div class="lmb-preview" id="lmb-preview"></div>' +
-      '<div class="lmb-notes"><div class="lmb-notes-head"><b>Bar notes</b> <small>tips from the book, the teacher\'s notes, p / f</small></div>' +
+      '<div class="lmb-notes"><div class="lmb-notes-head"><b>Bar notes</b> <small>tips from the book, the teacher\'s notes, p / f · drag one on the music to move it</small></div>' +
         '<div id="lmb-notes-list"></div>' +
         '<div class="lmb-notes-add">Bar <input id="lmb-note-bar" class="lmp-pm-input" type="number" min="1" style="width:64px">' +
           '<select id="lmb-note-kind" class="lmp-pm-input"><option value="tip">Tip</option><option value="teacher">Teacher\'s note</option><option value="dynamic">Dynamic (p, f…)</option></select>' +
@@ -631,8 +642,9 @@ var LMBuilder = (function () {
     back.onclick = function () { _stop(); _details(); };
     var listen = document.createElement('button');
     listen.className = 'lesson-btn';
+    listen.id = 'lmb-listen';
     listen.textContent = '▶ Listen';
-    listen.onclick = _listen;
+    listen.onclick = function () { if (_ui.player || _ui.listenToken) _stop(); else _listen(); };
     var more = document.createElement('button');
     more.className = 'lesson-btn';
     more.textContent = '📷 ＋ Add next page';
@@ -713,8 +725,11 @@ var LMBuilder = (function () {
         if (!p.getAttribute('fill') || p.getAttribute('fill') === 'black') p.setAttribute('fill', '#3D3555');
         if (p.getAttribute('stroke') === 'black') p.setAttribute('stroke', '#3D3555');
       });
-      // Follow the end while entering notes; start at the top when checking a photo
-      prev.scrollTop = _ui.followEnd ? prev.scrollHeight : 0;
+      // Follow the end while entering notes; start at the top when checking a
+      // photo; stay put after dragging a bar note
+      if (_ui.keepScroll != null) { prev.scrollTop = _ui.keepScroll; _ui.keepScroll = null; }
+      else prev.scrollTop = _ui.followEnd ? prev.scrollHeight : 0;
+      _wireMarkDrag(out, prev);
     } catch (e) {
       prev.innerHTML = '<div class="lmp-muted">' + _esc(e.message) + '</div>';
     }
@@ -756,6 +771,49 @@ var LMBuilder = (function () {
     _refresh(label + (on ? ' set on bar ' : ' removed from bar ') + (idx + 1) + '.');
   }
 
+  // Bar notes on the preview can be dragged off whatever they cover; the
+  // move is kept on the mark (dx / dy, in staff units) and saved with the piece.
+  function _wireMarkDrag(out, prev) {
+    if (!out || !out.svg || !out.marks) return;
+    out.marks.forEach(function (m) {
+      var el = m.el;
+      el.style.cursor = 'grab';
+      el.style.touchAction = 'none';
+      // Without this the iPad scrolls the preview instead of moving the note
+      el.addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });
+      el.addEventListener('pointerdown', function (e) {
+        var mk = _d.marks[m.src];
+        if (!mk) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var ctm = out.svg.getScreenCTM();
+        var k = ctm && ctm.a ? ctm.a : 1;
+        var sx = e.clientX, sy = e.clientY, moved = false;
+        try { el.setPointerCapture(e.pointerId); } catch (er) {}
+        el.classList.add('lmb-dragging');
+        var move = function (ev) {
+          var dx = (ev.clientX - sx) / k, dy = (ev.clientY - sy) / k;
+          if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+          el.setAttribute('transform', 'translate(' + dx.toFixed(1) + ' ' + dy.toFixed(1) + ')');
+        };
+        var up = function (ev) {
+          el.removeEventListener('pointermove', move);
+          el.removeEventListener('pointerup', up);
+          el.removeEventListener('pointercancel', up);
+          el.classList.remove('lmb-dragging');
+          if (!moved || ev.type === 'pointercancel') { el.removeAttribute('transform'); return; }
+          mk.dx = Math.round((mk.dx || 0) + (ev.clientX - sx) / k);
+          mk.dy = Math.round((mk.dy || 0) + (ev.clientY - sy) / k);
+          _ui.keepScroll = prev.scrollTop;
+          _refresh('Moved the note on bar ' + mk.bar + '. Tap ↺ in Bar notes to put it back.');
+        };
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+    });
+  }
+
   function _drawNotes() {
     var el = document.getElementById('lmb-notes-list');
     if (!el) return;
@@ -764,8 +822,12 @@ var LMBuilder = (function () {
       return '<div class="lmb-note-row' + (m.fromPhoto ? ' lmb-note-row--photo' : '') + '">' +
         '<span class="lmb-note-bar">Bar ' + m.bar + '</span><span class="lmb-note-kind">' + (KIND[m.kind] || m.kind) + '</span>' +
         '<span class="lmb-note-text">' + _esc(m.text) + (m.fromPhoto ? ' <small>(from the photo — check it)</small>' : '') + '</span>' +
+        (m.dx || m.dy ? '<button class="lmb-finger" data-reset-note="' + i + '" aria-label="Put back in place" title="Put back in place">↺</button>' : '') +
         '<button class="lmb-finger" data-del-note="' + i + '" aria-label="Remove">✕</button></div>';
     }).join('') || '<div class="lmp-muted">None yet.</div>';
+    el.querySelectorAll('[data-reset-note]').forEach(function (b) {
+      b.onclick = function () { var mk = _d.marks[+b.dataset.resetNote]; delete mk.dx; delete mk.dy; _refresh('Note put back in place.'); };
+    });
     el.querySelectorAll('[data-del-note]').forEach(function (b) {
       b.onclick = function () { _d.marks.splice(+b.dataset.delNote, 1); _refresh(); };
     });
@@ -863,11 +925,26 @@ var LMBuilder = (function () {
 
   function _listen() {
     _stop();
-    try {
-      var c = LMScore.compile(_song(_d));
-      AudioEngine.init();
-      _ui.player = LMScore.play(c, AudioEngine, { bpm: _d.bpm });
-    } catch (e) { _status(e.message, true); }
+    var c;
+    try { c = LMScore.compile(_song(_d)); } catch (e) { _status(e.message, true); return; }
+    if (!c.events.length) { _status('Enter some notes first.', true); return; }
+    AudioEngine.init();
+    var btn = document.getElementById('lmb-listen');
+    if (btn) btn.textContent = '■ Stop';
+    var token = _ui.listenToken = {};
+    var start = function () {
+      if (_ui.listenToken !== token || !_ui.active) return;
+      _ui.player = LMScore.play(c, AudioEngine, { bpm: _d.bpm, onEnd: function () { _ui.player = null; _stop(); } });
+      _ui.listenToken = null;
+    };
+    // After the camera or photo picker, iOS leaves the audio suspended; notes
+    // sent before it is running again are lost, so wait for it (briefly).
+    var ac = AudioEngine.context;
+    if (ac && ac.state !== 'running' && ac.resume) {
+      var once = function () { var f = start; start = function () {}; f(); };
+      ac.resume().then(once, once);
+      setTimeout(once, 500);
+    } else start();
   }
 
   // ── Step 3: save ───────────────────────────────────────────────
@@ -875,7 +952,12 @@ var LMBuilder = (function () {
     _stop();
     if (!_d.rh.length && !_d.lh.length) { _status('Enter some notes first.', true); return; }
     var song;
-    _d.marks = (_d.marks || []).map(function (m) { return { bar: m.bar, kind: m.kind, text: m.text }; });
+    _d.marks = (_d.marks || []).map(function (m) {
+      var o = { bar: m.bar, kind: m.kind, text: m.text };
+      if (m.dx) o.dx = m.dx;
+      if (m.dy) o.dy = m.dy;
+      return o;
+    });
     try { song = _song(_d); LMScore.compile(JSON.parse(JSON.stringify(song))); }
     catch (e) { _status(e.message, true); return; }
     var data = _load();
@@ -915,7 +997,10 @@ var LMBuilder = (function () {
   }
 
   function _delete() {
-    if (!confirm('Delete "' + (_d.title || 'this piece') + '"? Stars earned on it stay in the history.')) return;
+    ZsDialog.confirm({ title: 'Delete "' + (_d.title || 'this piece') + '"?', message: 'Stars earned on it stay in the history.', confirmLabel: 'Delete', danger: true })
+      .then(function (ok) { if (ok) _deleteNow(); });
+  }
+  function _deleteNow() {
     var data = _load();
     if (!data) return;
     data.customSongs = (data.customSongs || []).filter(function (s) { return s.id !== _d.id; });
