@@ -29,12 +29,14 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const MODEL = process.env.OMR_MODEL || 'gemini-4-argon';
 const READS = Math.max(1, Math.min(5, parseInt(process.env.OMR_READS, 10) || 3));
 const THINKING = process.env.OMR_THINKING || null;    // Gemini 3 thinking level; null = the model's default
-// A read occasionally stalls at the API. Without a limit Node waits out its
-// own 300 s header timeout (a kid once waited 5 minutes for a page). So each
-// read gets READ_LIMIT_MS, and once all but one are back the last one gets
-// STRAGGLER_MS more — a majority of reads is enough to vote.
-const READ_LIMIT_MS = 75000;
-const STRAGGLER_MS = 15000;
+// The API's latency for the very same request swings from ~7 s to 2 min
+// or more (queueing, not thinking: thoughtsTokenCount is 0), and once
+// a page took 5 minutes. So the reads race: as soon as the first good one
+// is back, the others get VOTE_WINDOW_MS to join the vote, and the answer
+// goes out with whatever has arrived. A read that hasn't answered within
+// READ_LIMIT_MS is dropped.
+const READ_LIMIT_MS = 150000;
+const VOTE_WINDOW_MS = 12000;
 
 const PROMPT = `You are an expert music engraver. Transcribe the piano piece in this photo into the notation below.
 
@@ -92,6 +94,12 @@ async function _ask(parts, model, thinking, signal) {
   return { raw: text, json: _extractJson(text) };
 }
 
+// Small slips in token order the model makes that mean the same thing:
+// "D5h.:5~" (finger before tie) → "D5h.~:5"
+function _tidy(voice) {
+  return String(voice || '').trim().replace(/(:[1-5](?:,[1-5])*)~/g, '~$1');
+}
+
 function _clean(p) {
   const pickup = Number(p.pickup) || 0;
   return {
@@ -99,8 +107,8 @@ function _clean(p) {
     time: /^\d+\/\d+$/.test(p.time || '') ? p.time : '4/4',
     key: String(p.key || 'C'),
     pickup: pickup > 0 ? pickup : 0,
-    rh: String(p.rh || '').trim(),
-    lh: String(p.lh || '').trim(),
+    rh: _tidy(p.rh),
+    lh: _tidy(p.lh),
   };
 }
 
@@ -160,20 +168,24 @@ async function transcribe(imageB64, opts) {
   const answers = [];
   let lastError = null;
   await new Promise(resolve => {
-    let pending = reads, graceTimer = null;
+    let pending = reads, voteTimer = null, done = false;
     const ctrls = Array.from({ length: reads }, () => new AbortController());
-    const finish = () => { clearTimeout(graceTimer); ctrls.forEach(c => c.abort()); resolve(); };
+    const finish = () => { if (done) return; done = true; clearTimeout(voteTimer); ctrls.forEach(c => c.abort()); resolve(); };
     ctrls.forEach((ctrl, i) => {
       const limit = setTimeout(() => ctrl.abort(), READ_LIMIT_MS);
       _ask([{ text: PROMPT + hint }, image], model, thinking, ctrl.signal)
-        .then(a => { answers.push(a); timings[i] = ((Date.now() - started) / 1000).toFixed(1) + 's'; })
+        .then(a => {
+          if (done) return;
+          answers.push(a);
+          timings[i] = ((Date.now() - started) / 1000).toFixed(1) + 's';
+          // First good read: the rest have a short window to join the vote
+          if (!voteTimer && _check(_clean(a.json)) === null) voteTimer = setTimeout(finish, VOTE_WINDOW_MS);
+        })
         .catch(e => { lastError = e; timings[i] = ctrl.signal.aborted ? 'cut off' : 'failed'; })
         .finally(() => {
           clearTimeout(limit);
           pending--;
-          if (pending === 0) return finish();
-          // All but one back: give the straggler a little longer, then vote without it
-          if (pending === 1 && answers.length >= 2 && !graceTimer) graceTimer = setTimeout(finish, STRAGGLER_MS);
+          if (pending === 0) finish();
         });
     });
   });
@@ -187,12 +199,13 @@ async function transcribe(imageB64, opts) {
   let err = _check(piece);
   const notes = answers.map(a => String(a.json.notes || '')).find(Boolean) || '';
   if (err) {
+    if (opts.log) opts.log('repairing: ' + err);
     // One repair round, with the compiler's complaint
     const fix = await _ask([
       { text: PROMPT + hint }, image,
       { text: 'Your previous answer was:\n' + JSON.stringify(piece) + '\n\nIt is invalid: ' + err +
               '\nLook at the photo again, fix that bar (and any others like it), and return the full corrected JSON.' },
-    ], model, thinking, AbortSignal.timeout(READ_LIMIT_MS)).catch(() => null);
+    ], model, thinking, AbortSignal.timeout(60000)).catch(() => null);
     if (!fix) return Object.assign({ ok: false, error: err }, { piece, unsure: voted.unsure, notes: notes.slice(0, 400), model, reads: voted.reads, agreed: voted.agreed });
     const piece2 = _clean(fix.json);
     const err2 = _check(piece2);
