@@ -720,10 +720,14 @@
                                      cls: 'lm-bar-mark lm-dyn-mark', mk: mk }, { row: row, rowY: y, place: 'between', gap: gap });
             return;
           }
-          var label = mk.text.length > 34 ? mk.text.slice(0, 33) + '…' : mk.text;
-          add({ x: x + (mi === 0 ? decor : 6), y: noteY, t: (mk.kind === 'teacher' ? '✎ ' : '') + label, size: 10, weight: 'bold',
+          // Long notes wrap (up to three lines) over the room left in the row,
+          // bottom line where a one-line note would sit
+          var nx = x + (mi === 0 ? decor : 6);
+          var room = Math.min(left + usable - nx - 4, 2.2 * barW);
+          var lines = wrap((mk.kind === 'teacher' ? '✎ ' : '') + mk.text, Math.max(14, Math.floor(room / 5.6)), 3);
+          add({ x: nx, y: noteY - (lines.length - 1) * 11, t: lines.join(' '), lines: lines, size: 10, weight: 'bold',
                 style: mk.kind === 'teacher' ? 'italic' : '', fill: mk.kind === 'teacher' ? '#B45309' : '#0F766E', cls: 'lm-bar-mark', mk: mk });
-          noteY -= 12;
+          noteY -= 11 * lines.length + 1;
         });
         if (grand) {
           if (mi === 0) {
@@ -877,7 +881,15 @@
       if (tx.anchor) el.setAttribute('text-anchor', tx.anchor);
       el.setAttribute('fill', tx.fill || '#3D3555');
       if (tx.cls) el.setAttribute('class', tx.cls);
-      el.textContent = tx.t;
+      if (tx.lines && tx.lines.length > 1) {
+        tx.lines.forEach(function (ln, i) {
+          var sp = svg.ownerDocument.createElementNS(NS, 'tspan');
+          sp.setAttribute('x', tx.x);
+          if (i) sp.setAttribute('dy', 11);
+          sp.textContent = ln;
+          el.appendChild(sp);
+        });
+      } else el.textContent = tx.t;
       svg.appendChild(el);
 
       var y = tx.y;
@@ -906,6 +918,7 @@
       var mk = tx.mk;
       if (mk && (mk.dx || mk.dy)) {
         el.setAttribute('x', tx.x + mk.dx);
+        Array.prototype.forEach.call(el.childNodes, function (sp) { if (sp.setAttribute) sp.setAttribute('x', tx.x + mk.dx); });
         y += mk.dy;
       }
       el.setAttribute('y', y);
@@ -923,6 +936,25 @@
     // viewBox keeps every coordinate (bars, notes) where callers expect it.
     if (minY < 2) grow(svg, Math.ceil(4 - minY));
     return markEls;
+  }
+
+  // Words into lines of at most `max` characters; past `maxLines` the last
+  // line ends in '…'. A word longer than a line is cut.
+  function wrap(text, max, maxLines) {
+    var lines = [], cur = '';
+    String(text).split(/\s+/).filter(Boolean).forEach(function (w) {
+      while (w.length > max) { if (cur) { lines.push(cur); cur = ''; } lines.push(w.slice(0, max - 1) + '-'); w = w.slice(max - 1); }
+      if (!cur) cur = w;
+      else if (cur.length + 1 + w.length <= max) cur += ' ' + w;
+      else { lines.push(cur); cur = w; }
+    });
+    if (cur) lines.push(cur);
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      var last = lines[maxLines - 1];
+      lines[maxLines - 1] = (last.length > max - 1 ? last.slice(0, max - 1) : last) + '…';
+    }
+    return lines.length ? lines : [''];
   }
 
   function grow(svg, extra) {
