@@ -502,9 +502,19 @@ var CopyMaster = (function() {
 
   function _clear() {
     if (!state || !state.ctx || !state.canvas) return;
-    if (!confirm('¿Borrar todo y empezar de nuevo?')) return;
-    var c = state.canvas;
-    state.ctx.clearRect(0, 0, c.width, c.height);
+    var st = state;
+    ZsDialog.confirm({
+      title: '¿Borrar todo?',
+      message: 'Se borrará tu dibujo y empezarás de nuevo.',
+      confirmLabel: 'Borrar',
+      cancelLabel: 'Cancelar',
+      danger: true
+    }).then(function(ok) {
+      // The screen may have been closed while the question was open.
+      if (!ok || state !== st || !st.ctx || !st.canvas) return;
+      var c = st.canvas;
+      st.ctx.clearRect(0, 0, c.width, c.height);
+    });
   }
 
   function _save() {
@@ -519,7 +529,7 @@ var CopyMaster = (function() {
         ActivityLog.log('Art Studio', '🖼', 'Copied "' + state.comp.title + '"');
       }
     } catch (e) {
-      alert('No se pudo guardar: ' + e.message);
+      ZsDialog.alert({ title: 'No se pudo guardar', message: e.message });
     }
   }
 

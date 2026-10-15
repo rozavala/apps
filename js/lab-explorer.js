@@ -1156,7 +1156,7 @@ const LabExplorer = (() => {
 
           // Show factual pop-up about mechanical advantage
           setTimeout(() => {
-            alert('Fact: A lever makes work easier! The fulcrum is the pivot point. When weights are balanced, the torque on both sides is equal.');
+            ZsDialog.alert({ title: '⚖️ Fact', message: 'A lever makes work easier! The fulcrum is the pivot point. When weights are balanced, the torque on both sides is equal.', confirmLabel: 'Cool!' });
           }, 500);
 
           if (stars >= 3) {

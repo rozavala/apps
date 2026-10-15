@@ -232,7 +232,7 @@ var RecitalRecorder = (function() {
     function _start() {
       if (mediaRecorder) return;
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Microphone access is not available in this browser.');
+        ZsDialog.alert({ title: 'No microphone', message: 'Microphone access is not available in this browser.' });
         return;
       }
       navigator.mediaDevices.getUserMedia({ audio: true })
@@ -241,7 +241,7 @@ var RecitalRecorder = (function() {
           try {
             mediaRecorder = new MediaRecorder(stream);
           } catch (e) {
-            alert('Recording not supported by this browser.');
+            ZsDialog.alert({ title: 'Can\'t record', message: 'Recording is not supported by this browser.' });
             _cleanup();
             return;
           }
@@ -281,7 +281,7 @@ var RecitalRecorder = (function() {
           stopTimer = setTimeout(_stop, MAX_CLIP_MS);
         })
         .catch(function() {
-          alert('Please allow microphone access to record.');
+          ZsDialog.alert({ title: 'Microphone blocked', message: 'Please allow microphone access to record.' });
           _cleanup();
         });
     }

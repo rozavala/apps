@@ -518,10 +518,11 @@ const ArtStudio = (() => {
       ctx.drawImage(img, 0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
     };
   }
-  function clearCanvas() { if (confirm('Clear the entire canvas?')) {
+  async function clearCanvas() {
+    if (!(await ZsDialog.confirm({ title: 'Clear the canvas?', message: 'Everything on it will be erased.', confirmLabel: 'Clear', danger: true }))) return;
     const { ctx, canvas } = currentLesson ? { ctx: document.getElementById('lesson-main-canvas').getContext('2d'), canvas: document.getElementById('lesson-main-canvas') } : { ctx: mainCtx, canvas: mainCanvas };
     ctx.clearRect(0, 0, canvas.width, canvas.height); saveHistory();
-  }}
+  }
 
 
   // ── Guided Lessons ────────────────────────────────────────────
@@ -714,7 +715,7 @@ const ArtStudio = (() => {
 
   function openSaveDialog() { document.getElementById('save-dialog').classList.add('active'); document.getElementById('art-title').focus(); }
   function closeSaveDialog() { document.getElementById('save-dialog').classList.remove('active'); }
-  function confirmSave() {
+  async function confirmSave() {
     const title = document.getElementById('art-title').value.trim() || 'My Masterpiece';
     
     // ── Downscale for storage ──
@@ -742,13 +743,19 @@ const ArtStudio = (() => {
     // Use JPEG 0.6 for much better compression than PNG
     const dataUrl = saveCanvas.toDataURL('image/jpeg', 0.6);
     
-    const p = getProgress();
-    if (p.gallery.length >= 10) {
-      const oldest = p.gallery[p.gallery.length - 1];
-      if (!confirm(`Your gallery is full (10 artworks). Saving will remove "${oldest.title}". Continue?`)) {
-        return;
-      }
+    const full = getProgress();
+    if (full.gallery.length >= 10) {
+      const oldest = full.gallery[full.gallery.length - 1];
+      const ok = await ZsDialog.confirm({
+        title: 'Your gallery is full',
+        message: `It holds 10 artworks. Saving this one will remove "${oldest.title}".`,
+        confirmLabel: 'Save anyway'
+      });
+      if (!ok) return;
     }
+
+    // Read again after the question: the gallery may have changed meanwhile.
+    const p = getProgress();
     
     p.gallery.unshift({ id: Date.now(), title, dataUrl, date: new Date().toISOString() });
     if (p.gallery.length > 10) p.gallery.pop();
@@ -757,7 +764,7 @@ const ArtStudio = (() => {
     try {
       saveProgress({ gallery: p.gallery });
       if (droppedForSpace.length) {
-        alert('Saved! To make room, your oldest artwork was removed.');
+        ZsDialog.toast('Saved! To make room, your oldest artwork was removed.');
       }
     } catch (e) {
       // If still fails, try removing one more
@@ -765,13 +772,13 @@ const ArtStudio = (() => {
         p.gallery.pop();
         try {
           saveProgress({ gallery: p.gallery });
-          alert('Storage full: Oldest artwork was removed to make room.');
+          ZsDialog.toast('Storage full: Oldest artwork was removed to make room.');
         } catch (e2) {
-          alert('Storage full: Please delete some older artworks manually.');
+          ZsDialog.alert({ title: 'Storage full', message: 'Please delete some older artworks, then save again.' });
           return;
         }
       } else {
-        alert('Storage full: Could not save artwork.');
+        ZsDialog.alert({ title: 'Storage full', message: 'Could not save the artwork.' });
         return;
       }
     }
@@ -806,11 +813,11 @@ const ArtStudio = (() => {
     document.getElementById('viewer-img').src = art.dataUrl;
     document.getElementById('viewer-title').textContent = art.title;
     document.getElementById('gallery-viewer').classList.add('active');
-    document.getElementById('viewer-delete').onclick = () => {
-      if (confirm('Delete this artwork forever?')) {
-        const p = getProgress(); p.gallery = p.gallery.filter(a => a.id !== id);
-        saveProgress({ gallery: p.gallery }); closeViewer(); renderGallery();
-      }
+    document.getElementById('viewer-delete').onclick = async () => {
+      const ok = await ZsDialog.confirm({ title: 'Delete this artwork?', message: `"${art.title}" will be gone forever.`, confirmLabel: 'Delete', danger: true });
+      if (!ok) return;
+      const p = getProgress(); p.gallery = p.gallery.filter(a => a.id !== id);
+      saveProgress({ gallery: p.gallery }); closeViewer(); renderGallery();
     };
   }
   function closeViewer() { document.getElementById('gallery-viewer').classList.remove('active'); }

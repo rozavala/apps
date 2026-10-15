@@ -42,25 +42,33 @@ var BMC = (function() {
     } catch (e) { return false; }
   }
 
+  // Resolves true once the parent PIN has been given this session.
   function _requestParentMode() {
-    if (_parentMode) return true;
-    var entered = prompt('Parent PIN:');
-    if (!entered) return false;
-    var correct = typeof getParentPin === 'function' ? getParentPin() : '1234';
-    if (entered === correct) {
-      _parentMode = true;
-      return true;
-    }
-    alert('Incorrect PIN.');
-    return false;
+    if (_parentMode) return Promise.resolve(true);
+    return ZsDialog.prompt({
+      title: 'Parent PIN',
+      inputType: 'password',
+      inputMode: 'numeric',
+      confirmLabel: 'Unlock'
+    }).then(function(entered) {
+      if (!entered) return false;
+      var correct = typeof getParentPin === 'function' ? getParentPin() : '1234';
+      if (entered === correct) {
+        _parentMode = true;
+        return true;
+      }
+      ZsDialog.toast('Incorrect PIN.');
+      return false;
+    });
   }
 
   function unlockParent() {
-    if (_requestParentMode()) {
+    _requestParentMode().then(function(ok) {
+      if (!ok) return;
       if (_currentResult) showResult(_currentResult);
       _refreshStaleCount();
       _rerenderActiveScreen();
-    }
+    });
   }
 
   // ── Storage helpers ────────────────────────────────────────────
@@ -593,14 +601,20 @@ var BMC = (function() {
 
   function promptManualIsbn() {
     closeScan();
-    var isbn = prompt('Type the ISBN (the number on the barcode):');
-    if (!isbn) return;
-    isbn = isbn.replace(/[^0-9Xx]/g, '');
-    if (isbn.length !== 10 && isbn.length !== 13) {
-      alert('That doesn\'t look like a valid ISBN.');
-      return;
-    }
-    _lookupByIsbn(isbn);
+    ZsDialog.prompt({
+      title: 'Type the ISBN',
+      message: 'The number on the barcode.',
+      inputMode: 'numeric',
+      confirmLabel: 'Look up'
+    }).then(function(isbn) {
+      if (!isbn) return;
+      isbn = isbn.replace(/[^0-9Xx]/g, '');
+      if (isbn.length !== 10 && isbn.length !== 13) {
+        ZsDialog.toast('That doesn\'t look like a valid ISBN.');
+        return;
+      }
+      _lookupByIsbn(isbn);
+    });
   }
 
   function _lookupByIsbn(isbn) {
@@ -765,10 +779,12 @@ var BMC = (function() {
   // Triggered by the "Show trailer" button; re-renders the current result
   // in parent mode, which inlines the iframe.
   function unlockTrailer() {
-    if (_requestParentMode() && _currentResult) {
-      showResult(_currentResult);
-      _refreshStaleCount();
-    }
+    _requestParentMode().then(function(ok) {
+      if (ok && _currentResult) {
+        showResult(_currentResult);
+        _refreshStaleCount();
+      }
+    });
   }
 
   // ── Result screen render ───────────────────────────────────────
@@ -1090,81 +1106,94 @@ var BMC = (function() {
   // Re-review the book currently on the result screen (parent only)
   function rereviewCurrent() {
     if (!_currentResult) return;
-    if (!_requestParentMode()) return;
-    var id = _currentResult.canonical_id;
-    var title = _currentResult.title;
-    if (!confirm('Re-evaluate "' + title + '" from scratch? This takes a few seconds.')) return;
-    _setStatus('Re-evaluating "' + title + '"…', 'working');
-    _fetchJson(VPS + '/api/media/reevaluate/' + encodeURIComponent(id), { method: 'POST' })
-      .then(function(fresh) {
-        _familyLibrary[id] = fresh;
-        _setStatus('');
-        showResult(fresh);
+    _requestParentMode().then(function(ok) {
+      if (!ok || !_currentResult) return;
+      var id = _currentResult.canonical_id;
+      var title = _currentResult.title;
+      return ZsDialog.confirm({
+        title: 'Re-evaluate "' + title + '"?',
+        message: 'It is checked again from scratch. This takes a few seconds.',
+        confirmLabel: 'Re-evaluate'
+      }).then(function(yes) {
+        if (!yes) return;
+        _setStatus('Re-evaluating "' + title + '"…', 'working');
+        _fetchJson(VPS + '/api/media/reevaluate/' + encodeURIComponent(id), { method: 'POST' })
+          .then(function(fresh) {
+            _familyLibrary[id] = fresh;
+            _setStatus('');
+            showResult(fresh);
+          })
+          .catch(function(err) {
+            console.warn('[BMC] Re-review failed:', err);
+            _setStatus(_userMsgForFetchErr(err, 're-review'), 'error');
+          });
+      });
+    });
+  }
+
+  // Start a background re-review of these ids; progress goes to statusEl.
+  function _startBatchReview(idList, statusEl) {
+    if (statusEl) statusEl.textContent = 'Starting…';
+    _fetchJson(VPS + '/api/media/reevaluate-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: idList })
+    })
+      .then(function(r) {
+        if (statusEl) {
+          statusEl.textContent = 'Re-reviewing ' + r.count + ' titles in the background. '
+            + 'Refresh in a few minutes.';
+        }
       })
       .catch(function(err) {
-        console.warn('[BMC] Re-review failed:', err);
-        _setStatus(_userMsgForFetchErr(err, 're-review'), 'error');
+        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
       });
   }
 
   // Re-review every title on this child's shelf + wishlist + recent checks
   function rereviewMyShelf() {
-    if (!_requestParentMode()) return;
-    var statusEl = document.getElementById('bmc-shelf-reeval-status');
-    var data = loadData();
-    var ids = {};
-    (data.consumed || []).forEach(function(c) { ids[c.canonical_id] = true; });
-    (data.wishlist || []).forEach(function(id) { ids[id] = true; });
-    Object.keys(data.lookups || {}).forEach(function(id) { ids[id] = true; });
-    var idList = Object.keys(ids).filter(function(id) { return _familyLibrary[id]; });
-    if (!idList.length) {
-      if (statusEl) statusEl.textContent = 'Nothing on this shelf to re-review.';
-      return;
-    }
-    if (!confirm('Re-review all ' + idList.length + ' titles on this child\'s shelf? This can take several minutes.')) return;
-    if (statusEl) statusEl.textContent = 'Starting…';
-    _fetchJson(VPS + '/api/media/reevaluate-batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: idList })
-    })
-      .then(function(r) {
-        if (statusEl) {
-          statusEl.textContent = 'Re-reviewing ' + r.count + ' titles in the background. '
-            + 'Refresh in a few minutes.';
-        }
-      })
-      .catch(function(err) {
-        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
+    _requestParentMode().then(function(ok) {
+      if (!ok) return;
+      var statusEl = document.getElementById('bmc-shelf-reeval-status');
+      var data = loadData();
+      var ids = {};
+      (data.consumed || []).forEach(function(c) { ids[c.canonical_id] = true; });
+      (data.wishlist || []).forEach(function(id) { ids[id] = true; });
+      Object.keys(data.lookups || {}).forEach(function(id) { ids[id] = true; });
+      var idList = Object.keys(ids).filter(function(id) { return _familyLibrary[id]; });
+      if (!idList.length) {
+        if (statusEl) statusEl.textContent = 'Nothing on this shelf to re-review.';
+        return;
+      }
+      return ZsDialog.confirm({
+        title: 'Re-review ' + idList.length + ' titles?',
+        message: 'Everything on this child\'s shelf is checked again. This can take several minutes.',
+        confirmLabel: 'Re-review'
+      }).then(function(yes) {
+        if (yes) _startBatchReview(idList, statusEl);
       });
+    });
   }
 
   // Re-review every title in the family library, not just stale ones
   function rereviewFamilyLibrary() {
-    if (!_requestParentMode()) return;
-    var statusEl = document.getElementById('bmc-reeval-status');
-    var idList = Object.keys(_familyLibrary);
-    if (!idList.length) {
-      if (statusEl) statusEl.textContent = 'Family library is empty.';
-      return;
-    }
-    if (!confirm('Re-review ALL ' + idList.length + ' titles in the family library? '
-                 + 'This can take a long time and uses API quota.')) return;
-    if (statusEl) statusEl.textContent = 'Starting…';
-    _fetchJson(VPS + '/api/media/reevaluate-batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids: idList })
-    })
-      .then(function(r) {
-        if (statusEl) {
-          statusEl.textContent = 'Re-reviewing ' + r.count + ' titles in the background. '
-            + 'Refresh in a few minutes.';
-        }
-      })
-      .catch(function(err) {
-        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
+    _requestParentMode().then(function(ok) {
+      if (!ok) return;
+      var statusEl = document.getElementById('bmc-reeval-status');
+      var idList = Object.keys(_familyLibrary);
+      if (!idList.length) {
+        if (statusEl) statusEl.textContent = 'Family library is empty.';
+        return;
+      }
+      return ZsDialog.confirm({
+        title: 'Re-review ALL ' + idList.length + ' titles?',
+        message: 'Every title in the family library is checked again. '
+                 + 'This can take a long time and uses API quota.',
+        confirmLabel: 'Re-review all'
+      }).then(function(yes) {
+        if (yes) _startBatchReview(idList, statusEl);
       });
+    });
   }
 
   // ── Per-item remove (parent only) ─────────────────────────────
@@ -1175,7 +1204,12 @@ var BMC = (function() {
   //   'wishlist'  → this kid's wishlist[]
   //   'library'   → family library (VPS DELETE + local cache)
   function removeItem(context, canonicalId) {
-    if (!_requestParentMode()) return;
+    _requestParentMode().then(function(ok) {
+      if (ok) _removeItem(context, canonicalId);
+    });
+  }
+
+  function _removeItem(context, canonicalId) {
     var item = _familyLibrary[canonicalId];
     var title = (item && item.title) || 'this title';
     var data = loadData();
@@ -1205,24 +1239,34 @@ var BMC = (function() {
       });
       changed = beforeW !== data.wishlist.length;
     } else if (context === 'library') {
-      if (!confirm('Remove "' + title + '" from the family library for everyone?')) return;
-      _fetchJson(VPS + '/api/media/library/' + encodeURIComponent(canonicalId),
-                 { method: 'DELETE' })
-        .then(function() {
-          delete _familyLibrary[canonicalId];
-          // Also scrub local references so kids don't see a dangling entry
-          var d = loadData();
-          if (d.lookups) delete d.lookups[canonicalId];
-          d.consumed = (d.consumed || []).filter(function(c) {
-            return c.canonical_id !== canonicalId;
+      ZsDialog.confirm({
+        title: 'Remove "' + title + '"?',
+        message: 'It is removed from the family library for everyone.',
+        confirmLabel: 'Remove',
+        danger: true
+      }).then(function(yes) {
+        if (!yes) return;
+        _fetchJson(VPS + '/api/media/library/' + encodeURIComponent(canonicalId),
+                   { method: 'DELETE' })
+          .then(function() {
+            delete _familyLibrary[canonicalId];
+            // Also scrub local references so kids don't see a dangling entry
+            var d = loadData();
+            if (d.lookups) delete d.lookups[canonicalId];
+            d.consumed = (d.consumed || []).filter(function(c) {
+              return c.canonical_id !== canonicalId;
+            });
+            d.wishlist = (d.wishlist || []).filter(function(id) { return id !== canonicalId; });
+            saveData(d);
+            _rerenderActiveScreen();
+          })
+          .catch(function(err) {
+            ZsDialog.alert({
+              title: 'Could not remove',
+              message: (err && err.message ? err.message : 'unknown error')
+            });
           });
-          d.wishlist = (d.wishlist || []).filter(function(id) { return id !== canonicalId; });
-          saveData(d);
-          _rerenderActiveScreen();
-        })
-        .catch(function(err) {
-          alert('Could not remove: ' + (err && err.message ? err.message : 'unknown error'));
-        });
+      });
       return;
     } else {
       return;
@@ -1244,65 +1288,99 @@ var BMC = (function() {
 
   // Clear this kid's lookups (recent checks list on home)
   function clearMySearches() {
-    if (!_requestParentMode()) return;
-    if (!confirm('Clear this child\'s recent checks? Their shelf and wishlist stay.')) return;
-    var data = loadData();
-    data.lookups = {};
-    saveData(data);
-    var statusEl = document.getElementById('bmc-reeval-status');
-    if (statusEl) statusEl.textContent = 'Recent checks cleared.';
-    // If currently on home, re-render so the list disappears
-    if (document.getElementById('screen-home').classList.contains('active')) {
-      _renderHome();
-    }
+    _requestParentMode().then(function(ok) {
+      if (!ok) return;
+      return ZsDialog.confirm({
+        title: 'Clear recent checks?',
+        message: 'This child\'s shelf and wishlist stay.',
+        confirmLabel: 'Clear',
+        danger: true
+      });
+    }).then(function(yes) {
+      if (!yes) return;
+      var data = loadData();
+      data.lookups = {};
+      saveData(data);
+      var statusEl = document.getElementById('bmc-reeval-status');
+      if (statusEl) statusEl.textContent = 'Recent checks cleared.';
+      // If currently on home, re-render so the list disappears
+      if (document.getElementById('screen-home').classList.contains('active')) {
+        _renderHome();
+      }
+    });
   }
 
   // Wipe the family-wide media-cache.json on the VPS
   function resetFamilyLibrary() {
-    if (!_requestParentMode()) return;
     var statusEl = document.getElementById('bmc-reeval-status');
-    if (!confirm('⚠️ This will DELETE every evaluation in the family library for ALL kids.\n\n' +
+    _requestParentMode().then(function(ok) {
+      if (!ok) return false;
+      return ZsDialog.confirm({
+        title: '⚠️ Delete the whole family library?',
+        message: 'This will DELETE every evaluation in the family library for ALL kids.\n\n' +
                  'Every previously-checked book will be re-evaluated from scratch the next time ' +
-                 'anyone searches for it.\n\nAre you sure?')) return;
-    var typed = prompt('Type WIPE to confirm:');
-    if (typed !== 'WIPE') {
-      if (statusEl) statusEl.textContent = 'Reset cancelled.';
-      return;
-    }
-    if (statusEl) statusEl.textContent = 'Wiping family library…';
-    _fetchJson(VPS + '/api/media/library', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ confirm: 'WIPE_FAMILY_LIBRARY' })
-    })
-      .then(function(r) {
-        _familyLibrary = {};
-        if (statusEl) statusEl.textContent = 'Wiped ' + r.cleared + ' entries. Library reset.';
-        _refreshStaleCount();
-        // Clear the displayed library list too
-        var listEl = document.getElementById('bmc-library-list');
-        if (listEl) listEl.innerHTML = '<div class="bmc-empty">Library is empty. Check a book to get started.</div>';
-      })
-      .catch(function(err) {
-        if (statusEl) statusEl.textContent = 'Reset failed: ' + err.message;
+                 'anyone searches for it.',
+        confirmLabel: 'Continue',
+        danger: true
+      }).then(function(yes) {
+        if (!yes) return false;
+        return ZsDialog.prompt({
+          title: 'Type WIPE to confirm',
+          placeholder: 'WIPE',
+          confirmLabel: 'Wipe library'
+        }).then(function(typed) {
+          if (typed !== 'WIPE') {
+            if (statusEl) statusEl.textContent = 'Reset cancelled.';
+            return false;
+          }
+          return true;
+        });
       });
+    }).then(function(go) {
+      if (!go) return;
+      if (statusEl) statusEl.textContent = 'Wiping family library…';
+      _fetchJson(VPS + '/api/media/library', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: 'WIPE_FAMILY_LIBRARY' })
+      })
+        .then(function(r) {
+          _familyLibrary = {};
+          if (statusEl) statusEl.textContent = 'Wiped ' + r.cleared + ' entries. Library reset.';
+          _refreshStaleCount();
+          // Clear the displayed library list too
+          var listEl = document.getElementById('bmc-library-list');
+          if (listEl) listEl.innerHTML = '<div class="bmc-empty">Library is empty. Check a book to get started.</div>';
+        })
+        .catch(function(err) {
+          if (statusEl) statusEl.textContent = 'Reset failed: ' + err.message;
+        });
+    });
   }
 
   function reviewWithNewCriteria() {
-    if (!_requestParentMode()) return;
-    if (!confirm('Re-review all stale entries? This can take several minutes.')) return;
-    var statusEl = document.getElementById('bmc-reeval-status');
-    if (statusEl) statusEl.textContent = 'Starting…';
-    _fetchJson(VPS + '/api/media/reevaluate-stale', { method: 'POST' })
-      .then(function(r) {
-        if (statusEl) {
-          statusEl.textContent = 'Re-reviewing ' + r.count + ' books in the background. '
-            + 'Refresh in a few minutes.';
-        }
-      })
-      .catch(function(err) {
-        if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
+    _requestParentMode().then(function(ok) {
+      if (!ok) return;
+      return ZsDialog.confirm({
+        title: 'Re-review all stale entries?',
+        message: 'This can take several minutes.',
+        confirmLabel: 'Re-review'
       });
+    }).then(function(yes) {
+      if (!yes) return;
+      var statusEl = document.getElementById('bmc-reeval-status');
+      if (statusEl) statusEl.textContent = 'Starting…';
+      _fetchJson(VPS + '/api/media/reevaluate-stale', { method: 'POST' })
+        .then(function(r) {
+          if (statusEl) {
+            statusEl.textContent = 'Re-reviewing ' + r.count + ' books in the background. '
+              + 'Refresh in a few minutes.';
+          }
+        })
+        .catch(function(err) {
+          if (statusEl) statusEl.textContent = 'Failed to start: ' + (err && err.message ? err.message : 'unknown');
+        });
+    });
   }
 
   // ── Init ───────────────────────────────────────────────────────

@@ -130,7 +130,10 @@ test.describe('Family Wall — routines, order and Summer Quest', () => {
   });
 
   test('a parent can copy one list to every other kid', async ({ page }) => {
-    page.on('dialog', (d) => d.accept());
+    // The question is an in-page ZsDialog: native confirm() is a silent
+    // "no" on the iPad, so it must never be used.
+    const native = [];
+    page.on('dialog', (d) => { native.push(d.message()); d.dismiss(); });
 
     await page.locator('.fw-r-kid', { hasText: 'Eldest' }).locator('.fw-r-edit').click();
     await page.locator('#fw-pin-input').fill('1234');
@@ -139,8 +142,10 @@ test.describe('Family Wall — routines, order and Summer Quest', () => {
     await page.locator('#fw-re-add-afternoon').fill('Walk the dog 🐶');
     await page.locator('.fw-re-block', { hasText: 'Afternoon' }).locator('.fw-re-add-btn').click();
     await page.locator('.fw-re-block', { hasText: 'Afternoon' }).locator('.fw-re-apply').click();
+    await page.locator('.zsd-ok').click();
 
     await expect(page.locator('.fw-re-note')).toContainText('Copied to Mid, Young');
+    expect(native).toEqual([]);
 
     const after = await page.evaluate(() => {
       const labels = (kid, which) =>

@@ -259,7 +259,8 @@
 
   <!-- Perfiles y sincronización compartidos del proyecto -->
   <script src="js/auth.js?v=2"></script>
-  <script src="js/sync.js?v=12"></script>
+  <script src="js/sync.js?v=13"></script>
+  <script src="js/dialog.js?v=2"></script>
 
   <script>
   /* =====================================================================
@@ -1181,8 +1182,12 @@
       }).join('');
     },
 
-    resetProgress(){
-      if(!confirm('¿Reiniciar todo tu progreso de estudio?')) return;
+    async resetProgress(){
+      const ok = await ZsDialog.confirm({
+        title:'¿Reiniciar todo tu progreso de estudio?',
+        confirmLabel:'Reiniciar', cancelLabel:'Cancelar', danger:true
+      });
+      if(!ok) return;
       Object.assign(state, defaultState());
       saveState();
       this.renderModules(); this.renderProgress(); this.updateOverall();

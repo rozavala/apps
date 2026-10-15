@@ -158,7 +158,7 @@ var Debug = (function() {
       controls.style.cssText = 'margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap;';
       controls.innerHTML = 
         '<button onclick="Debug.clear();Debug.render();" style="background:#ef444433;color:#ef4444;border:1px solid #ef444455;padding:4px 12px;border-radius:4px;font-size:12px;">Clear Local Logs</button>' +
-        '<button onclick="Debug.pushToServer().then(function(){alert(\'Logs pushed! Check /api/kids/debug/logs_\' + Debug.getDeviceId())})" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f655;padding:4px 12px;border-radius:4px;font-size:12px;">⬆️ Push to Cloud</button>' +
+        '<button onclick="Debug.pushToServer().then(function(){var m=\'Logs pushed! Check /api/kids/debug/logs_\' + Debug.getDeviceId();if(window.ZsDialog)ZsDialog.toast(m);else console.log(m);})" style="background:#3b82f633;color:#3b82f6;border:1px solid #3b82f655;padding:4px 12px;border-radius:4px;font-size:12px;">⬆️ Push to Cloud</button>' +
         '<button onclick="Debug.showStorageReport()" style="background:#10b98133;color:#10b981;border:1px solid #10b98155;padding:4px 12px;border-radius:4px;font-size:12px;">📊 Storage Report</button>' +
         '<button onclick="Debug.showLayoutReport()" style="background:#a78bfa33;color:#a78bfa;border:1px solid #a78bfa55;padding:4px 12px;border-radius:4px;font-size:12px;">📐 Layout Report</button>';
       

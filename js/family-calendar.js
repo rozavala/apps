@@ -544,11 +544,18 @@ var FamilyCalendar = (function() {
   }
 
   function _removeAndRender(id) {
-    if (!confirm('Remove this calendar?')) return;
-    removeUrl(id);
-    var holder = document.querySelector('[data-fcal-editor]');
-    if (holder) renderEditor(holder.id);
-    renderHubWidget('family-calendar-widget');
+    ZsDialog.confirm({
+      title: 'Remove this calendar?',
+      message: 'Its events stop showing for the family.',
+      confirmLabel: 'Remove',
+      danger: true
+    }).then(function(ok) {
+      if (!ok) return;
+      removeUrl(id);
+      var holder = document.querySelector('[data-fcal-editor]');
+      if (holder) renderEditor(holder.id);
+      renderHubWidget('family-calendar-widget');
+    });
   }
 
   // Auto-mount the hub widget if its container exists.
