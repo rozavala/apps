@@ -19,6 +19,17 @@
    check first. The result is checked with the compiler the app uses
    (js/lm-score.js); if a bar doesn't add up, the model gets one
    chance to fix it with the error in hand.
+
+   Voting catches random slips, not a mistake every read makes the same
+   way. So the voted piece then gets one proofread: the model looks at
+   the photo again with the transcription in hand (and the bars the
+   reads disagreed on, with their alternatives) and checks that the
+   music hangs together: staff positions, the key, finger numbers
+   against hand positions, leaps, chords under the melody, repeated
+   figures. The photo stays the authority: a lesson book's arrangement
+   often differs from the famous tune, and must not be "corrected" to
+   it. A change is kept only if the piece still compiles, and every
+   changed bar comes back in `unsure` for the student to check.
    ================================================================ */
 
 const path = require('path');
@@ -40,6 +51,12 @@ const THINKING = process.env.OMR_THINKING || null;    // Gemini 3 thinking level
 // READ_LIMIT_MS is dropped.
 const READ_LIMIT_MS = 150000;
 const VOTE_WINDOW_MS = 12000;
+// Proofread pass (OMR_PROOFREAD=0 turns it off). It usually takes 3–5 s,
+// but the same latency swings hit it, so two race and the first answer
+// counts; past the limit the voted piece goes out as it is.
+const PROOFREAD = process.env.OMR_PROOFREAD !== '0';
+const PROOF_RACE = 2;
+const PROOF_LIMIT_MS = 40000;
 
 const PROMPT = `You are an expert music engraver. Transcribe the piano piece in the photo(s) into the notation below.
 
@@ -85,6 +102,34 @@ Return ONLY a JSON object, no markdown:
  "marks": [{"bar": 5, "kind": "tip", "text": "Move thumb to G"}],
  "unsure": [bar numbers you could not read confidently], "notes": "anything the student should check"}
 Key names: C G D A E F Bb Eb Am Em Bm Dm Gm Cm.`;
+
+const PROOF_PROMPT = `You are an expert piano teacher proofreading a transcription of the piano piece in the photo(s).
+The transcription uses this notation (one string per hand, bars separated by " | "):
+pitch+octave+duration (w h q e s; middle C = C4), "." dotted, "~" tie, "+" chord, "R" rest, ":n" finger number(s),
+and bar marks inside right-hand bars: [: :] {1} {2} Fine DC DS Segno.
+
+The PHOTO IS THE AUTHORITY. This is usually a beginner method-book arrangement (e.g. Alfred's Basic Piano Library):
+it is often simplified, in a different key or hand position than the well-known tune, with its own rhythm.
+NEVER change notes to match a version of the tune you know; change a bar only when the photo shows it was misread.
+
+Use musical sense to find bars worth a second look, then check those against the photo:
+- the first note of every bar against the staff (treble lines E4 G4 B4 D5 F5, spaces F4 A4 C5 E5; bass lines G2 B2 D3 F3 A3,
+  spaces A2 C3 E3 G3; middle C one ledger line below treble / above bass). The most common errors: a note or a whole bar
+  read one line/space too high or low (a third off), or an octave off.
+- notes the key signature or an accidental changes (an accidental lasts to the end of its bar);
+- finger numbers that don't fit the notes (a five-finger position: finger 1 on C means 2=D 3=E 4=F 5=G; a jump the
+  fingering can't reach usually means a misread note or position change printed in the music);
+- leaps that are unusual for a beginner piece (a sixth or more), notes far from the rest of the line;
+- left-hand notes or chords that clash with the melody where the piece is otherwise consonant;
+- figures and bars that repeat elsewhere in the piece but were transcribed differently;
+- ties joining different pitches, rhythms that don't match the beaming you see.
+If a bar looks odd but the photo really shows it, leave it alone.
+
+Return ONLY JSON, no markdown:
+{"changes": [{"hand": "rh" or "lh", "bar": <bar number, 1 = first bar>, "to": "<the whole corrected bar, same notation, same total length, keeping its bar marks and finger numbers>", "why": "<short reason>"}],
+ "check": [bar numbers that still look doubtful but you could not settle from the photo],
+ "notes": "<one short sentence for the student, or empty>"}
+Return {"changes": [], "check": [], "notes": ""} if the transcription matches the photo.`;
 
 // Extra instructions for several pages, a chosen piece, or a continuation
 function _context(opts) {
@@ -198,6 +243,57 @@ function _vote(pieces) {
   return { piece: out, unsure: Array.from(unsure).sort((a, b) => a - b), agreed: group.length, reads: pieces.length };
 }
 
+const BAR_MARK = /^(\[:|:\]|\{[12]\}|Fine|DC|DS|Segno)$/;
+function _marksOf(bar) { return bar.split(/\s+/).filter(t => BAR_MARK.test(t)); }
+function _withMarks(bar, marks) {
+  // A replacement keeps the original's bar marks, in their usual places
+  const notes = bar.split(/\s+/).filter(t => t && !BAR_MARK.test(t));
+  const open = marks.filter(m => m === '[:' || /^\{/.test(m) || m === 'Segno');
+  const close = marks.filter(m => !(m === '[:' || /^\{/.test(m) || m === 'Segno'));
+  return open.concat(notes, close).join(' ');
+}
+
+// One proofreading pass over a valid piece. Returns { piece, changed: [{hand, bar, from, to, why}], check, notes }.
+async function _proofread(piece, images, hint, disagree, model, thinking, log, signal) {
+  const ask = 'TRANSCRIPTION TO CHECK:\n' + JSON.stringify({ title: piece.title, time: piece.time, key: piece.key, pickup: piece.pickup, rh: piece.rh, lh: piece.lh }) +
+    (disagree.length ? '\n\nThe independent reads disagreed on these bars (alternatives they gave):\n' +
+      disagree.map(d => d.hand + ' bar ' + d.bar + ': ' + d.options.map(o => '"' + o + '"').join(' or ')).join('\n') : '');
+  const r = await _ask([{ text: PROOF_PROMPT + hint }].concat(images, [{ text: ask }]), model, thinking, signal || AbortSignal.timeout(PROOF_LIMIT_MS));
+  const j = r.json || {};
+  let cur = Object.assign({}, piece);
+  const changed = [];
+  (Array.isArray(j.changes) ? j.changes : []).slice(0, 24).forEach(ch => {
+    const hand = ch && (ch.hand === 'lh' ? 'lh' : ch.hand === 'rh' ? 'rh' : null);
+    const i = Math.round(+(ch && ch.bar)) - 1;
+    if (!hand || !cur[hand] || !(typeof ch.to === 'string')) return;
+    const bars = _bars(cur[hand]);
+    if (i < 0 || i >= bars.length) return;
+    const to = _withMarks(_tidy(ch.to), _marksOf(bars[i]));
+    if (_norm(to) === _norm(bars[i])) return;
+    const next = Object.assign({}, cur, { [hand]: bars.map((b, k) => (k === i ? to : b)).join(' | ') });
+    const err = _check(next);
+    if (err) { if (log) log('proofread change dropped (' + hand + ' bar ' + (i + 1) + '): ' + err); return; }
+    changed.push({ hand, bar: i + 1, from: bars[i], to, why: String(ch.why || '').slice(0, 120) });
+    cur = next;
+  });
+  const check = (Array.isArray(j.check) ? j.check : []).map(n => Math.round(+n)).filter(n => n >= 1 && n <= _bars(cur.rh || cur.lh).length);
+  return { piece: cur, changed, check, notes: String(j.notes || '').slice(0, 200) };
+}
+
+// Bars the vote split on, with what each side read
+function _disagreements(pieces, voted) {
+  const out = [];
+  voted.unsure.forEach(bar => {
+    ['rh', 'lh'].forEach(h => {
+      if (!voted.piece[h]) return;
+      const opts = {};
+      pieces.forEach(p => { const b = _bars(p[h])[bar - 1]; if (b) opts[_norm(b)] = b; });
+      if (Object.keys(opts).length > 1) out.push({ hand: h, bar, options: Object.values(opts).slice(0, 3) });
+    });
+  });
+  return out.slice(0, 16);
+}
+
 async function transcribe(imageB64, opts) {
   opts = opts || {};
   if (!GEMINI_KEY) throw new Error('GEMINI_API_KEY not set');
@@ -257,7 +353,35 @@ async function transcribe(imageB64, opts) {
     const err2 = _check(piece2);
     if (!err2 || err2 !== err) { piece = piece2; err = err2; }
   }
-  const out = { piece, unsure: voted.unsure, notes: notes.slice(0, 400), model, reads: voted.reads, agreed: voted.agreed };
+  let unsure = voted.unsure;
+  let proof = null;
+  let allNotes = notes;
+  const wantProof = opts.proofread === undefined ? PROOFREAD : opts.proofread;
+  if (!err && wantProof) {
+    const t0 = Date.now();
+    const ctrls = Array.from({ length: PROOF_RACE }, () => new AbortController());
+    const limit = setTimeout(() => ctrls.forEach(c => c.abort()), PROOF_LIMIT_MS);
+    try {
+      const disagree = _disagreements(valid.length ? valid : pieces, voted);
+      const pr = await Promise.any(ctrls.map(c => _proofread(piece, images, hint, disagree, model, thinking, opts.log, c.signal)));
+      piece = pr.piece;
+      unsure = Array.from(new Set(unsure.concat(pr.changed.map(c => c.bar), pr.check))).sort((a, b) => a - b);
+      if (pr.changed.length) allNotes = ('Proofreading changed bar' + (pr.changed.length > 1 ? 's ' : ' ') +
+        Array.from(new Set(pr.changed.map(c => c.bar))).join(', ') + ' — check ' + (pr.changed.length > 1 ? 'them' : 'it') + ' against the book. ' + allNotes).trim();
+      if (pr.notes && allNotes.indexOf(pr.notes) < 0) allNotes = (allNotes + ' ' + pr.notes).trim();
+      proof = { changed: pr.changed, check: pr.check, ms: Date.now() - t0 };
+      if (opts.log) opts.log('proofread in ' + (proof.ms / 1000).toFixed(1) + 's: ' + (pr.changed.length
+        ? pr.changed.map(c => c.hand + ' bar ' + c.bar + ' "' + c.from + '" → "' + c.to + '" (' + c.why + ')').join('; ')
+        : 'no changes') + (pr.check.length ? '; check bars ' + pr.check.join(',') : ''));
+    } catch (e) {
+      const why = e && e.errors ? (ctrls[0].signal.aborted ? 'no answer in ' + PROOF_LIMIT_MS / 1000 + ' s' : e.errors.map(x => x.message).join('; ')) : e.message;
+      if (opts.log) opts.log('proofread skipped: ' + why);
+    } finally {
+      clearTimeout(limit);
+      ctrls.forEach(c => c.abort());
+    }
+  }
+  const out = { piece, unsure, notes: allNotes.slice(0, 400), model, reads: voted.reads, agreed: voted.agreed, proofread: proof };
   return err ? Object.assign({ ok: false, error: err }, out) : Object.assign({ ok: true }, out);
 }
 
@@ -284,4 +408,4 @@ function init(app) {
   });
 }
 
-module.exports = { init, transcribe, PROMPT };
+module.exports = { init, transcribe, PROMPT, _proofread };

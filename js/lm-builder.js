@@ -490,7 +490,7 @@ var LMBuilder = (function () {
     if (!server) { ZsDialog.alert({ title: 'No connection to the family server', message: 'Reading photos needs the family sync server.' }); return; }
     body.innerHTML = '<div class="lml-done"><div class="lml-done-icon lmb-reading">📷</div>' +
       '<div class="lml-done-title">Reading ' + (files.length > 1 ? files.length + ' pages' : 'the music') + '…</div>' +
-      '<div class="lml-done-sub" id="lmb-omr-time">Usually under 30 seconds. Keep the app open.</div></div>';
+      '<div class="lml-done-sub" id="lmb-omr-time">Usually under a minute. Keep the app open.</div></div>';
     foot.innerHTML = '';
     var cancel = document.createElement('button');
     cancel.className = 'lesson-btn';
@@ -499,7 +499,7 @@ var LMBuilder = (function () {
     var started = Date.now();
     var tick = setInterval(function () {
       var el = document.getElementById('lmb-omr-time');
-      if (el) el.textContent = Math.round((Date.now() - started) / 1000) + ' s — reading every bar three times to be sure…';
+      if (el) el.textContent = Math.round((Date.now() - started) / 1000) + ' s — reading every bar three times, then proofreading…';
     }, 1000);
     var done = function () { clearInterval(tick); _omrAbort = null; };
     _omrAbort = typeof AbortController !== 'undefined' ? new AbortController() : null;
