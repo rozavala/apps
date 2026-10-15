@@ -511,10 +511,19 @@ var LMBuilder = (function () {
       var spec = toSpec(_d);
       payload.continueFrom = { bars: barCount(_d), time: _d.time, key: _d.key, rh: _lastBar(spec, 'rh'), lh: _lastBar(spec, 'lh') };
     }
+    // The server is only reachable over the family VPN (Tailscale): check it
+    // answers before spending time on the photos, and say so if it doesn't.
+    var offline = new Error('OFFLINE');
+    var ping = new Promise(function (resolve, reject) {
+      var t = setTimeout(function () { reject(offline); }, 8000);
+      fetch(server + '/api/ping', { cache: 'no-store', signal: _omrAbort ? _omrAbort.signal : undefined })
+        .then(function (r) { clearTimeout(t); if (r.ok) resolve(); else reject(offline); },
+              function (e) { clearTimeout(t); reject(e && e.name === 'AbortError' ? e : offline); });
+    });
     // Shrink the pages one after another (older iPads run out of memory doing them at once)
-    files.reduce(function (p, f) {
+    ping.then(function () { return files; }).then(function (files) { return files.reduce(function (p, f) {
       return p.then(function (list) { return _shrink(f).then(function (d) { return list.concat([d]); }); });
-    }, Promise.resolve([])).then(function (images) {
+    }, Promise.resolve([])); }).then(function (images) {
       payload.images = images;
       return fetch(server + '/api/omr', {
         method: 'POST',
@@ -534,6 +543,12 @@ var LMBuilder = (function () {
       if (e && e.name === 'AbortError') return;
       _log('failed: ' + (e && e.message));
       back();
+      // fetch() itself failing ("Load failed" on iPad, "Failed to fetch" in Chrome) means no connection
+      if (e === offline || (e && e.name === 'TypeError' && /load failed|failed to fetch|network/i.test(e.message || ''))) {
+        ZsDialog.alert({ title: 'Can\'t reach the family server',
+          message: 'Reading photos goes through the family server. Check that the iPad is online and that Tailscale (the VPN) is connected, then try again.' });
+        return;
+      }
       ZsDialog.alert({ title: 'Could not read the photo', message: (e && e.message) || 'Check the internet connection and try again.' });
     });
   }
