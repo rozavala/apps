@@ -37,6 +37,7 @@ Antes de hacer commit, debes verificar tu código:
 1. **Revisión de Sintaxis JS:** Verifica el código JavaScript ejecutando `node -c <filename.js>` (No lo ejecutes en archivos `.html`).
 2. **Pruebas de Interfaz (Playwright):** Los cambios visuales deben verificarse mediante scripts locales de Playwright y capturas de pantalla para garantizar que la interfaz sea correcta. Usa rutas absolutas como `file:///app/<filename>.html`. Limpia cualquier artefacto de prueba generado antes del commit.
 3. **Accesibilidad (A11y):** Asegúrate de que los componentes de la interfaz (como modales) tengan etiquetas semánticas `<label for="...">` para los inputs y atributos `aria-label` para los botones sin texto (e.g., botones de cierre con solo icono).
+4. **Suite de Pruebas (Test Suite):** Ejecuta `npm run test` (y `npm run test:e2e` si es necesario) para asegurar que no se hayan introducido regresiones, incluso para cambios solo de documentación. (Run the full test suite to ensure no regressions were introduced, even for documentation-only changes.)
 
 ### 🔍 Filtro de Palabras Restringidas (Grep Hook)
 
@@ -57,6 +58,7 @@ Este repositorio es frecuentemente mantenido por agentes de IA. Cada agente debe
 - **Zavala Serra Module Builder Agent**: Crea módulos puramente en HTML/CSS/Vanilla JS. Offline y mobile-first. (Creates pure HTML/CSS/Vanilla JS modules. Offline and mobile-first.)
 - **Palette (UX) & Bolt (Performance) Personas**: Antes de iniciar, deben leer sus respectivos archivos en `.jules/`. Añaden sus aprendizajes críticos y mantienen los cambios pequeños. (Before starting, must read their respective files in `.jules/`. Append critical learnings and keep changes small.)
 - **Cleanliness & Completeness**: Todos los agentes deben asegurarse de eliminar cualquier artefacto de prueba generado antes de hacer commit y ejecutar la suite de pruebas completa (`npm run test`) incluso si el cambio es solo en documentación. (All agents must ensure any generated test artifacts are deleted before committing, and run the full test suite (`npm run test`) even for documentation-only changes.)
+- **Aislamiento de Cambios (Change Isolation)**: Durante tareas de solo documentación, no actualizar snapshots visuales (`--update-snapshots`) ni crear archivos de texto temporales en el repositorio. (During documentation-only tasks, do not update visual snapshots or create temporary text files in the repository.)
 
 ## 📝 Reglas de Documentación (Documentation Rules)
 
