@@ -977,6 +977,7 @@ var LMBuilder = (function () {
     catch (e) { _status(e.message, true); return; }
     var data = _load();
     if (!data) return;
+    song.savedAt = Date.now();   // sync: the later-saved copy of a piece wins
     data.customSongs = (data.customSongs || []).filter(function (s) { return s.id !== song.id; }).concat([song]);
     _save(data);
     _syncedFor = null;
@@ -1019,6 +1020,9 @@ var LMBuilder = (function () {
     var data = _load();
     if (!data) return;
     data.customSongs = (data.customSongs || []).filter(function (s) { return s.id !== _d.id; });
+    // Marker so a copy on the server or another device doesn't bring it back
+    data.deletedSongs = data.deletedSongs || {};
+    data.deletedSongs[_d.id] = Date.now();
     _save(data);
     if (typeof LMPractice !== 'undefined' && LMPractice.removeSong) LMPractice.removeSong(_d.id);
     _syncedFor = null;

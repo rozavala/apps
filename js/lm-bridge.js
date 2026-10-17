@@ -187,4 +187,31 @@
   } else {
     setTimeout(bridgeInit, 150);
   }
+
+  // ── Backup to the family server ───────────────────────────────
+  // Little Maestro saves to localStorage from many places and none of
+  // them pushed, so the server's copy went stale for months and My Book
+  // pieces lived only on the iPad. Rather than push from every save,
+  // watch the student's blob and push when it changed. CloudSync.push
+  // merges with the server's copy first (_mergeLM in js/sync.js).
+  var _pushedRaw = null, _pushing = false;
+  function _lmKey() {
+    var u = UserManager.getCurrentUser && UserManager.getCurrentUser();
+    return u && u.profile ? 'littlemaestro_' + u.profile.name.toLowerCase().replace(/\s+/g, '_') : null;
+  }
+  function backup() {
+    if (_pushing || typeof CloudSync === 'undefined' || !CloudSync.online || typeof UserManager === 'undefined') return;
+    var key = _lmKey();
+    var raw = key && localStorage.getItem(key);
+    if (!raw || raw === _pushedRaw) return;
+    _pushing = true;
+    CloudSync.push(key).then(function(ok) {
+      _pushing = false;
+      if (ok) _pushedRaw = localStorage.getItem(key);
+    }, function() { _pushing = false; });
+  }
+  setInterval(backup, 20000);
+  document.addEventListener('visibilitychange', function() { if (document.hidden) backup(); });
+  window.addEventListener('pagehide', backup);
+  window.LMBackup = backup;
 })();

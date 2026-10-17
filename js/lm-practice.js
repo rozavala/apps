@@ -169,7 +169,7 @@ var LMPractice = (function () {
         if (!it.days[today]) { it.days[today] = true; changed = true; }
       }
     });
-    if (changed) _save(data);
+    if (changed) { data.assignments.updatedAt = Date.now(); _save(data); }
   }
 
   // Used by My Book (js/lm-builder.js) when a piece is saved
@@ -178,6 +178,7 @@ var LMPractice = (function () {
     if (!data) return;
     var a = _assign(data);
     a.items.push({ kind: 'song', ref: id, hands: hands || null, text: text || '' });
+    a.updatedAt = Date.now();
     data.assignments = a;
     _save(data);
   }
@@ -187,7 +188,7 @@ var LMPractice = (function () {
     if (!data || !data.assignments || !Array.isArray(data.assignments.items)) return;
     var n = data.assignments.items.length;
     data.assignments.items = data.assignments.items.filter(function (it) { return !(it.kind === 'song' && it.ref === id); });
-    if (data.assignments.items.length !== n) _save(data);
+    if (data.assignments.items.length !== n) { data.assignments.updatedAt = Date.now(); _save(data); }
   }
   function hasSong(id) {
     return _assign().items.some(function (it) { return it.kind === 'song' && it.ref === id; });
@@ -199,6 +200,7 @@ var LMPractice = (function () {
     var it = data.assignments.items[idx];
     if (!it) return;
     it.done = !it.done;
+    data.assignments.updatedAt = Date.now();
     _save(data);
     _rerenderHome();
   }
@@ -352,6 +354,7 @@ var LMPractice = (function () {
     if (!data) return;
     var a = _assign(data);
     fn(a);
+    a.updatedAt = Date.now();   // sync: the last-edited list wins
     data.assignments = a;
     _save(data);
     var panel = document.getElementById('lmp-pm-panel');

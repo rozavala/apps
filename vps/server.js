@@ -109,7 +109,8 @@ app.put('/api/kids/:kid/:app', (req, res) => {
   }
 
   fs.writeFileSync(filePath, JSON.stringify(incoming, null, 2));
-  res.json({ status: 'saved' });
+  // The client keeps this stamp, so its next pull doesn't take the server's copy for a newer one
+  res.json({ status: 'saved', syncedAt: incoming._syncedAt });
 });
 
 app.put('/api/profiles', (req, res) => {
