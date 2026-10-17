@@ -466,6 +466,97 @@ var CloudSync = (function() {
       '#' + JSON.stringify(data.templates || null);
   }
 
+  // ── Little Maestro ─────────────────────────────────────────────
+  // One blob per student (littlemaestro_<kid>). A plain "newer wins"
+  // let a stale copy (the server's was months old) replace the
+  // device's, and a device that never pushed left nothing to restore,
+  // so this merges instead. Earned things only go up: stars, unlocks,
+  // accuracy, practice time, game bests, lessons. My Book pieces are
+  // united by id: the later-saved copy wins, and a deletion marker
+  // keeps a deleted piece from coming back. The practice list goes
+  // with the side that edited it last. Everything else (profile,
+  // settings, notes) follows `primary`: the device in use, unless it
+  // has never synced, in which case its blob is a placeholder.
+  var _ISO = /^\d{4}-\d\d-\d\d/;
+  function _lmUp(a, b, primaryIsB) {
+    if (a === undefined) return b;
+    if (b === undefined) return a;
+    if (typeof a === 'number' && typeof b === 'number') return Math.max(a, b);
+    if (typeof a === 'boolean' && typeof b === 'boolean') return a || b;
+    if (typeof a === 'string' && typeof b === 'string' && _ISO.test(a) && _ISO.test(b)) return a > b ? a : b;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      // Lists of records have no safe union; lists of ids do
+      if (a.concat(b).some(function(x) { return x && typeof x === 'object'; })) return primaryIsB ? b : a;
+      var out = a.slice();
+      b.forEach(function(x) { if (out.indexOf(x) === -1) out.push(x); });
+      return out;
+    }
+    if (a && b && typeof a === 'object' && typeof b === 'object') {
+      var o = {};
+      Object.keys(a).concat(Object.keys(b)).forEach(function(k) { if (!(k in o)) o[k] = _lmUp(a[k], b[k], primaryIsB); });
+      return o;
+    }
+    return primaryIsB ? b : a;
+  }
+  // Stats mixes running totals with things that can go down (the
+  // current streak, a spendable note balance): those follow the side
+  // that practised last.
+  var LM_STATS_UP = { practiceSecs: 1, games: 1, stars: 1, completedSongs: 1, totalPracticeMinutes: 1,
+    totalSessionsCompleted: 1, longestStreak: 1, totalMusicNotes: 1, musicNotesSpent: 1, lastPracticeDate: 1 };
+  function _mergeLM(server, local) {
+    var s = server || {}, l = local || {};
+    var localPrimary = !!l._syncedAt || !server;
+    var p = localPrimary ? l : s, q = localPrimary ? s : l;
+    var out = Object.assign({}, q, p);
+    out.progress = _lmUp(s.progress, l.progress, localPrimary);
+    if (out.progress === undefined) delete out.progress;
+    out.precurriculum = _lmUp(s.precurriculum, l.precurriculum, localPrimary);
+    if (out.precurriculum === undefined) delete out.precurriculum;
+
+    var sS = s.stats || {}, lS = l.stats || {};
+    var later = _parseTs(lS.lastPracticeDate) >= _parseTs(sS.lastPracticeDate) ? lS : sS;
+    if (s.stats || l.stats) {
+      out.stats = Object.assign({}, localPrimary ? sS : lS, localPrimary ? lS : sS);
+      ['currentStreak', 'streak', 'notes'].forEach(function(k) { if (k in later) out.stats[k] = later[k]; });
+      Object.keys(LM_STATS_UP).forEach(function(k) {
+        var v = _lmUp(sS[k], lS[k], localPrimary);
+        if (v !== undefined) out.stats[k] = v;
+      });
+    }
+
+    // Deletion markers: {id: when}. A piece saved after its marker
+    // (the id was reused) stays.
+    var dead = Object.assign({}, s.deletedSongs || {});
+    Object.keys(l.deletedSongs || {}).forEach(function(id) { dead[id] = Math.max(dead[id] || 0, l.deletedSongs[id]); });
+    var songs = {};
+    [].concat(q.customSongs || [], p.customSongs || []).forEach(function(song) {
+      if (!song || song.id == null) return;
+      var cur = songs[song.id];
+      if (!cur || (song.savedAt || 0) >= (cur.savedAt || 0)) songs[song.id] = song;
+    });
+    var kept = Object.keys(songs).map(function(id) { return songs[id]; })
+      .filter(function(song) { return !dead[song.id] || (song.savedAt || 0) > dead[song.id]; })
+      .sort(function(a, b) { return a.id - b.id; });
+    if (kept.length || s.customSongs || l.customSongs) out.customSongs = kept;
+    if (Object.keys(dead).length) out.deletedSongs = dead;
+
+    var sA = s.assignments, lA = l.assignments;
+    if (sA && lA) out.assignments = ((lA.updatedAt || 0) === (sA.updatedAt || 0) ? (localPrimary ? lA : sA)
+      : ((lA.updatedAt || 0) > (sA.updatedAt || 0) ? lA : sA));
+    out._syncedAt = s._syncedAt || l._syncedAt;
+    if (!out._syncedAt) delete out._syncedAt;
+    return out;
+  }
+  // Content only, key order and bookkeeping aside
+  function _canon(v) {
+    if (Array.isArray(v)) return '[' + v.map(_canon).join(',') + ']';
+    if (v && typeof v === 'object') {
+      return '{' + Object.keys(v).filter(function(k) { return k !== '_syncedAt'; }).sort()
+        .map(function(k) { return JSON.stringify(k) + ':' + _canon(v[k]); }).join(',') + '}';
+    }
+    return JSON.stringify(v === undefined ? null : v);
+  }
+
   state.push = function(key) {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var info = _getAppInfo(key);
@@ -510,6 +601,21 @@ var CloudSync = (function() {
           });
         })
         .catch(function() { return data; });
+    } else if (info.appName === 'littlemaestro') {
+      mergeStep = _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + info.kidKey + '/' + info.appName)
+        .then(function(res) {
+          if (!res.ok) throw new Error('read before write: http ' + res.status);
+          return res.json().then(function(serverData) {
+            if (!serverData) return data;
+            var mergedLM = _mergeLM(serverData, data);
+            if (_canon(mergedLM) !== _canon(data)) {
+              try { localStorage.setItem(key, JSON.stringify(mergedLM)); } catch (e) {}
+            }
+            return mergedLM;
+          });
+        });
+      // No .catch: without the server's copy to merge into, don't write
+      // over it (a new device's empty blob would wipe the real one).
     } else if (info.appName === 'worldcup') {
       // Before pushing the World Cup snapshot, fetch the server's
       // current copy and union-merge it with ours, then push the
@@ -546,22 +652,30 @@ var CloudSync = (function() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).then(function() {
+      }).then(function(res) {
+        if (res && res.ok === false) throw new Error('http ' + res.status);
+        return res && res.json ? res.json().catch(function() { return {}; }) : {};
+      }).then(function(reply) {
         try {
           var rawReload = localStorage.getItem(key);
           if (rawReload) {
             var current = JSON.parse(rawReload);
             if (!Array.isArray(current)) {
-              current._syncedAt = ts;
+              // The server stamps its own time; keep that one, or the
+              // next pull sees the server as newer than what we just
+              // sent and replaces local changes made since.
+              current._syncedAt = (reply && reply.syncedAt) || ts;
               localStorage.setItem(key, JSON.stringify(current));
             }
           }
         } catch(ignore) {}
         _updatePill('idle');
+        return true;
       });
     }).catch(function(e) {
       if (typeof Debug !== 'undefined') Debug.error('[Sync] Push failed: ' + key, e && e.message ? e.message : '(no message)');
       _updatePill('error');
+      return false;
     });
   };
 
@@ -606,6 +720,17 @@ var CloudSync = (function() {
             throw e;
           }
           return true;
+        }
+
+        if (info.appName === 'littlemaestro') {
+          var mergedLM = _mergeLM(serverData, localMissing ? null : localData);
+          var changedLM = localMissing || _canon(mergedLM) !== _canon(localData);
+          if (changedLM) {
+            try { localStorage.setItem(key, JSON.stringify(mergedLM)); }
+            catch (e) { if (typeof Debug !== 'undefined') Debug.error('[Sync] Quota Exceeded', key); throw e; }
+          }
+          if (_canon(mergedLM) !== _canon(serverData)) state.push(key);
+          return changedLM;
         }
 
         if (info.appName === 'worldcup') {
@@ -703,6 +828,16 @@ var CloudSync = (function() {
               } catch (e) {
                 if (typeof Debug !== 'undefined') Debug.warn('[Sync] routines merge failed for ' + key);
               }
+              continue;
+            }
+
+            if (appName === 'littlemaestro') {
+              var lmMerged = _mergeLM(serverData, localMissing ? null : localData);
+              if (localMissing || _canon(lmMerged) !== _canon(localData)) {
+                try { localStorage.setItem(key, JSON.stringify(lmMerged)); changed = true; }
+                catch (e) { if (typeof Debug !== 'undefined') Debug.warn('[Sync] Quota Exceeded for ' + key + ' skipping pull.'); }
+              }
+              if (_canon(lmMerged) !== _canon(serverData)) promises.push(state.push(key));
               continue;
             }
 
@@ -1050,5 +1185,6 @@ var CloudSync = (function() {
     });
   });
 
+  state._mergeLM = _mergeLM;
   return state;
 })();
