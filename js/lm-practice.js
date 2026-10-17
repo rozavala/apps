@@ -181,6 +181,14 @@ var LMPractice = (function () {
     data.assignments = a;
     _save(data);
   }
+  // Used by My Book when a piece is deleted
+  function removeSong(id) {
+    var data = _load();
+    if (!data || !data.assignments || !Array.isArray(data.assignments.items)) return;
+    var n = data.assignments.items.length;
+    data.assignments.items = data.assignments.items.filter(function (it) { return !(it.kind === 'song' && it.ref === id); });
+    if (data.assignments.items.length !== n) _save(data);
+  }
   function hasSong(id) {
     return _assign().items.some(function (it) { return it.kind === 'song' && it.ref === id; });
   }
@@ -200,6 +208,11 @@ var LMPractice = (function () {
     var it = a.items[idx];
     if (!it) return;
     if (it.kind === 'song' && typeof LessonEngine !== 'undefined') {
+      // A My Book piece can be deleted after it was put on the list
+      if (typeof SONGS !== 'undefined' && !SONGS.some(function (s) { return s.id === it.ref; })) {
+        if (typeof ZsDialog !== 'undefined') ZsDialog.toast('That piece isn\u2019t in My Book any more.');
+        return;
+      }
       if (typeof showScreen === 'function') showScreen('lesson');
       LessonEngine.startLesson(it.ref, { hands: it.hands || null, tempo: it.tempo || null });
     } else if (it.kind === 'lesson' && typeof LMLessons !== 'undefined') {
@@ -654,7 +667,7 @@ var LMPractice = (function () {
   return {
     start: start, ping: ping, flush: _flush, minutesOn: minutesOn, recentDays: recentDays,
     homeHtml: homeHtml, parentHtml: parentHtml, notePlayed: notePlayed,
-    toggleDone: toggleDone, playItem: playItem, addSong: addSong, hasSong: hasSong,
+    toggleDone: toggleDone, playItem: playItem, addSong: addSong, removeSong: removeSong, hasSong: hasSong,
     noteRush: noteRush, echo: echo, closeGame: _closeGame,
     _saveMeta: _saveMeta, _addSong: _addSong, _addLesson: _addLesson, _addCustom: _addCustom,
     _remove: _remove, _newWeek: _newWeek,

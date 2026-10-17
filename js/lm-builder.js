@@ -1020,6 +1020,7 @@ var LMBuilder = (function () {
     if (!data) return;
     data.customSongs = (data.customSongs || []).filter(function (s) { return s.id !== _d.id; });
     _save(data);
+    if (typeof LMPractice !== 'undefined' && LMPractice.removeSong) LMPractice.removeSong(_d.id);
     _syncedFor = null;
     syncSongs();
     close();

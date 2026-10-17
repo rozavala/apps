@@ -14354,7 +14354,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Find song
         const song = SONGS.find(s => s.id === songId);
-        if (!song) { console.warn('LessonEngine: unknown songId', songId); return; }
+        if (!song) {
+          // e.g. a My Book piece that was deleted: don't leave an empty lesson screen up
+          console.warn('LessonEngine: unknown songId', songId);
+          if (typeof showScreen === 'function') showScreen('home');
+          if (typeof ZsDialog !== 'undefined') ZsDialog.toast('That song isn\u2019t available any more.');
+          return;
+        }
 
         _s.songId = songId;
         _s.song   = song;
@@ -16493,8 +16499,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/lm-bridge.js?v=2"></script>
 <script src="js/recital.js?v=2"></script>
 <script src="js/lm-lessons.js?v=1"></script>
-<script src="js/lm-practice.js?v=1"></script>
-<script src="js/lm-builder.js?v=7"></script>
+<script src="js/lm-practice.js?v=2"></script>
+<script src="js/lm-builder.js?v=8"></script>
 <script>if (typeof LMPractice !== 'undefined') LMPractice.start();</script>
 <script>
   window.addEventListener('load', function() {

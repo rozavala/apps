@@ -125,8 +125,12 @@ Use musical sense to find bars worth a second look, then check those against the
 - ties joining different pitches, rhythms that don't match the beaming you see.
 If a bar looks odd but the photo really shows it, leave it alone.
 
+The transcription is listed bar by bar with its bar numbers. Use THOSE numbers (bar 1 is the first bar listed, the pickup
+if there is one), even where the book prints its own: before changing a bar, make sure you are looking at the same bar in
+the photo, counting from the start of the piece. A bar that looks like its neighbour's music is usually miscounted, not misread.
+
 Return ONLY JSON, no markdown:
-{"changes": [{"hand": "rh" or "lh", "bar": <bar number, 1 = first bar>, "to": "<the whole corrected bar, same notation, same total length, keeping its bar marks and finger numbers>", "why": "<short reason>"}],
+{"changes": [{"hand": "rh" or "lh", "bar": <bar number as listed>, "from": "<that bar exactly as listed>", "to": "<the whole corrected bar, same notation, same total length, keeping its bar marks and finger numbers>", "why": "<short reason>"}],
  "check": [bar numbers that still look doubtful but you could not settle from the photo],
  "notes": "<one short sentence for the student, or empty>"}
 Return {"changes": [], "check": [], "notes": ""} if the transcription matches the photo.`;
@@ -175,10 +179,20 @@ async function _ask(parts, model, thinking, signal) {
   return { raw: text, json: _extractJson(text) };
 }
 
-// Small slips in token order the model makes that mean the same thing:
-// "D5h.:5~" (finger before tie) → "D5h.~:5"
+// Small slips the model makes that would otherwise fail the whole piece:
+// "D5h.:5~" (finger before tie) → "D5h.~:5"; "G4h.Fine" (mark glued on) → "G4h. Fine";
+// "A2+C3+E3h:1" (fingers don't match the chord) → "A2+C3+E3h" (fingers dropped)
 function _tidy(voice) {
-  return String(voice || '').trim().replace(/(:[1-5](?:,[1-5])*)~/g, '~$1');
+  return String(voice || '').trim()
+    .replace(/(:[1-5](?:,[1-5])*)~/g, '~$1')
+    .replace(/(\S)(Fine|DC|DS|Segno|:\])(?=\s|\||$)/g, '$1 $2')
+    .replace(/(^|[\s|])(\[:|\{[12]\})(?=[A-GR])/g, '$1$2 ')
+    .replace(/\S+/g, tok => {
+      const m = /^([A-G][^:]*):([\d,]+)$/.exec(tok);
+      if (!m) return tok;
+      const notes = (m[1].match(/[A-G][#b]?\d/g) || []).length;
+      return m[2].split(',').length === notes ? tok : m[1];
+    });
 }
 
 const MARK_KINDS = { tip: 1, teacher: 1, dynamic: 1 };
@@ -243,6 +257,26 @@ function _vote(pieces) {
   return { piece: out, unsure: Array.from(unsure).sort((a, b) => a - b), agreed: group.length, reads: pieces.length };
 }
 
+// A bar that doesn't compile: use another read's version of it if that one does.
+// Cheaper and safer than a repair round, which re-reads the whole piece.
+function _patch(piece, pieces, log) {
+  for (let n = 0; n < 12; n++) {
+    const err = _check(piece);
+    const m = err && /^(RH|LH) bar (\d+)/.exec(err);
+    if (!m) return piece;
+    const hand = m[1].toLowerCase(), i = +m[2] - 1;
+    const bars = _bars(piece[hand]);
+    const fixed = pieces.map(p => _bars(p[hand]))
+      .filter(alt => alt.length === bars.length && alt[i] && _norm(alt[i]) !== _norm(bars[i]))
+      .map(alt => Object.assign({}, piece, { [hand]: bars.map((b, k) => (k === i ? alt[i] : b)).join(' | ') }))
+      .find(p => { const e = _check(p); return !e || !e.startsWith(m[0] + ' ') && !e.startsWith(m[0] + ':'); });
+    if (!fixed) return piece;
+    if (log) log('patched ' + hand + ' bar ' + (i + 1) + ' from another read (' + err + ')');
+    piece = fixed;
+  }
+  return piece;
+}
+
 const BAR_MARK = /^(\[:|:\]|\{[12]\}|Fine|DC|DS|Segno)$/;
 function _marksOf(bar) { return bar.split(/\s+/).filter(t => BAR_MARK.test(t)); }
 function _withMarks(bar, marks) {
@@ -253,21 +287,42 @@ function _withMarks(bar, marks) {
   return open.concat(notes, close).join(' ');
 }
 
+// The bar's notes alone: no fingers, no bar marks
+function _notesOnly(bar) { return _norm(_tidy(bar)).split(' ').filter(t => t && !BAR_MARK.test(t)).join(' '); }
+
 // One proofreading pass over a valid piece. Returns { piece, changed: [{hand, bar, from, to, why}], check, notes }.
+// A proofread that wants to rewrite much of the piece has usually lost count of the bars (each bar "corrected" to
+// its neighbour) or is reading another piece, so past MAX_SHARE of the bars it changes nothing.
+const PROOF_MAX_SHARE = 0.3;
 async function _proofread(piece, images, hint, disagree, model, thinking, log, signal) {
-  const ask = 'TRANSCRIPTION TO CHECK:\n' + JSON.stringify({ title: piece.title, time: piece.time, key: piece.key, pickup: piece.pickup, rh: piece.rh, lh: piece.lh }) +
+  const list = h => piece[h] ? '\n\n' + (h === 'rh' ? 'Right' : 'Left') + ' hand (' + h + '), bar by bar:\n' +
+    _bars(piece[h]).map((b, k) => (k + 1) + ': ' + b).join('\n') : '';
+  const ask = 'TRANSCRIPTION TO CHECK:\n' + JSON.stringify({ title: piece.title, time: piece.time, key: piece.key, pickup: piece.pickup }) +
+    list('rh') + list('lh') +
     (disagree.length ? '\n\nThe independent reads disagreed on these bars (alternatives they gave):\n' +
       disagree.map(d => d.hand + ' bar ' + d.bar + ': ' + d.options.map(o => '"' + o + '"').join(' or ')).join('\n') : '');
   const r = await _ask([{ text: PROOF_PROMPT + hint }].concat(images, [{ text: ask }]), model, thinking, signal || AbortSignal.timeout(PROOF_LIMIT_MS));
   const j = r.json || {};
+  const nBars = _bars(piece.rh || piece.lh).length;
+  const limit = Math.max(3, Math.round(nBars * PROOF_MAX_SHARE));
   let cur = Object.assign({}, piece);
   const changed = [];
-  (Array.isArray(j.changes) ? j.changes : []).slice(0, 24).forEach(ch => {
+  const asked = Array.isArray(j.changes) ? j.changes : [];
+  if (asked.length > limit) {
+    if (log) log('proofread ignored: it wanted to change ' + asked.length + ' of ' + nBars + ' bars');
+    return { piece: cur, changed, check: [], notes: '', doubt: true };
+  }
+  asked.forEach(ch => {
     const hand = ch && (ch.hand === 'lh' ? 'lh' : ch.hand === 'rh' ? 'rh' : null);
     const i = Math.round(+(ch && ch.bar)) - 1;
     if (!hand || !cur[hand] || !(typeof ch.to === 'string')) return;
     const bars = _bars(cur[hand]);
     if (i < 0 || i >= bars.length) return;
+    // It must say which bar it is correcting; a "from" that isn't this bar means it miscounted
+    if (typeof ch.from !== 'string' || _notesOnly(ch.from) !== _notesOnly(piece[hand] ? _bars(piece[hand])[i] : '')) {
+      if (log) log('proofread change dropped (' + hand + ' bar ' + (i + 1) + '): "from" is not that bar');
+      return;
+    }
     const to = _withMarks(_tidy(ch.to), _marksOf(bars[i]));
     if (_norm(to) === _norm(bars[i])) return;
     const next = Object.assign({}, cur, { [hand]: bars.map((b, k) => (k === i ? to : b)).join(' | ') });
@@ -276,7 +331,9 @@ async function _proofread(piece, images, hint, disagree, model, thinking, log, s
     changed.push({ hand, bar: i + 1, from: bars[i], to, why: String(ch.why || '').slice(0, 120) });
     cur = next;
   });
-  const check = (Array.isArray(j.check) ? j.check : []).map(n => Math.round(+n)).filter(n => n >= 1 && n <= _bars(cur.rh || cur.lh).length);
+  let check = (Array.isArray(j.check) ? j.check : []).map(n => Math.round(+n)).filter(n => n >= 1 && n <= nBars);
+  check = Array.from(new Set(check));
+  if (check.length > limit) check = [];   // "check everything" tells the student nothing
   return { piece: cur, changed, check, notes: String(j.notes || '').slice(0, 200) };
 }
 
@@ -337,7 +394,7 @@ async function transcribe(imageB64, opts) {
   const pieces = answers.map(a => _clean(a.json));
   const valid = pieces.filter(p => !_check(p));
   const voted = _vote(valid.length ? valid : pieces);
-  let piece = voted.piece;
+  let piece = _patch(voted.piece, pieces, opts.log);
   let err = _check(piece);
   const notes = answers.map(a => String(a.json.notes || '')).find(Boolean) || '';
   if (err) {
@@ -349,7 +406,7 @@ async function transcribe(imageB64, opts) {
               '\nLook at the photo again, fix that bar (and any others like it), and return the full corrected JSON.' },
     ]), model, thinking, AbortSignal.timeout(60000)).catch(() => null);
     if (!fix) return Object.assign({ ok: false, error: err }, { piece, unsure: voted.unsure, notes: notes.slice(0, 400), model, reads: voted.reads, agreed: voted.agreed });
-    const piece2 = _clean(fix.json);
+    const piece2 = _patch(_clean(fix.json), pieces, opts.log);
     const err2 = _check(piece2);
     if (!err2 || err2 !== err) { piece = piece2; err = err2; }
   }
@@ -368,8 +425,9 @@ async function transcribe(imageB64, opts) {
       unsure = Array.from(new Set(unsure.concat(pr.changed.map(c => c.bar), pr.check))).sort((a, b) => a - b);
       if (pr.changed.length) allNotes = ('Proofreading changed bar' + (pr.changed.length > 1 ? 's ' : ' ') +
         Array.from(new Set(pr.changed.map(c => c.bar))).join(', ') + ' — check ' + (pr.changed.length > 1 ? 'them' : 'it') + ' against the book. ' + allNotes).trim();
+      if (pr.doubt) allNotes = ('A second look disagreed with a lot of this reading — check it carefully against the book. ' + allNotes).trim();
       if (pr.notes && allNotes.indexOf(pr.notes) < 0) allNotes = (allNotes + ' ' + pr.notes).trim();
-      proof = { changed: pr.changed, check: pr.check, ms: Date.now() - t0 };
+      proof = { changed: pr.changed, check: pr.check, doubt: !!pr.doubt, ms: Date.now() - t0 };
       if (opts.log) opts.log('proofread in ' + (proof.ms / 1000).toFixed(1) + 's: ' + (pr.changed.length
         ? pr.changed.map(c => c.hand + ' bar ' + c.bar + ' "' + c.from + '" → "' + c.to + '" (' + c.why + ')').join('; ')
         : 'no changes') + (pr.check.length ? '; check bars ' + pr.check.join(',') : ''));
@@ -408,4 +466,4 @@ function init(app) {
   });
 }
 
-module.exports = { init, transcribe, PROMPT, _proofread };
+module.exports = { init, transcribe, PROMPT, _proofread, _tidy, _patch };
