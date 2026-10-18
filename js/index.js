@@ -773,8 +773,15 @@
     return { next: null, prev: _DASH_RANKS[_DASH_RANKS.length - 1] };
   }
 
+  // The device's own calendar day. toISOString() is UTC, which in
+  // California rolls over at 4–5 PM and handed out a second day's allowance.
+  function _today(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
   // Weekly STARS history — one snapshot per ISO week (Monday key), last 12 weeks.
-  function _starsWeekKey(ts) { var d = new Date(ts); var dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow); return d.toISOString().split('T')[0]; }
+  function _starsWeekKey(ts) { var d = new Date(ts); var dow = (d.getDay() + 6) % 7; d.setDate(d.getDate() - dow); return _today(d); }
   function _readStarsHistory() { try { return JSON.parse(localStorage.getItem('zs_stars_history')) || {}; } catch (e) { return {}; } }
   function _recordStarsSnapshot(profiles) {
     var h = _readStarsHistory();
@@ -829,7 +836,7 @@
         var wk = Math.floor(age / (7 * DAY));
         if (wk >= 0 && wk < 8) weekBuckets[7 - wk]++;
         if (age <= 7 * DAY) {
-          var d = new Date(e.ts).toISOString().split('T')[0];
+          var d = _today(new Date(e.ts));
           activeDays[d] = true; kidDays[d] = true; kidWeek++;
           if (e.app) { appCount[e.app] = (appCount[e.app] || 0) + 1; if (e.icon) appIcon[e.app] = e.icon; }
         }
@@ -837,7 +844,7 @@
       // streak: consecutive days ending today (or yesterday) with activity
       var streak = 0;
       for (var i = 0; i < 60; i++) {
-        var dk = new Date(now - i * DAY).toISOString().split('T')[0];
+        var dk = _today(new Date(now - i * DAY));
         if (kidDays[dk]) streak++;
         else if (i > 0) break;
       }
@@ -1728,6 +1735,7 @@
         '</div>' +
       '</div>' +
       (typeof AppSchedule !== 'undefined' ? AppSchedule.renderScheduleConfig() : '') +
+      (typeof OffHours !== 'undefined' ? OffHours.renderConfig() : '') +
       '<div class="parents-grid">' +
         profiles.map(function(p, i) {
           var timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
