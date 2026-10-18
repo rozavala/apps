@@ -1728,6 +1728,7 @@
         '</div>' +
       '</div>' +
       (typeof AppSchedule !== 'undefined' ? AppSchedule.renderScheduleConfig() : '') +
+      (typeof OffHours !== 'undefined' ? OffHours.renderConfig() : '') +
       '<div class="parents-grid">' +
         profiles.map(function(p, i) {
           var timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
