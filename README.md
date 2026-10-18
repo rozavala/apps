@@ -143,6 +143,20 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 **💡 Pro Tip:** ¿Sabías que puedes ganar Tokens de Aventura completando tareas en el mundo real? ¡Úsalos para obtener más tiempo de pantalla! (Did you know you can earn Adventure Tokens by completing real-world chores? Use them to get more screen time!)
 
+```text
+    ___________
+   '._==_==_=_.'
+   .-\:      /-.
+  | (|:.     |) |
+   '-|:.     |-'
+     \::.    /
+      '::. .'
+        ) (
+      _.' '._
+     `"""""""`
+```
+¡Colecciona insignias, demuestra tus habilidades y llena tu Salón de Trofeos! (Collect badges, show your skills, and fill your Trophy Room!)
+
 ## 🚀 Instalación y Uso (Getting Started)
 
 Zavala Serra Apps no requiere servidores ni instalaciones complejas. (No build steps or server setup required).
