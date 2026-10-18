@@ -3,11 +3,11 @@ const { test, expect } = require('@playwright/test');
 const { injectMockProfile } = require('../helpers/utils');
 
 // 2026-10-19 is a Monday, 2026-10-23 a Friday.
-const MON_EARLY = '2026-10-19T06:30:00-03:00';   // Chile summer time
+const MON_EARLY = '2026-10-19T06:30:00-07:00';   // Pacific daylight time
 const ON = { enabled: true, start: '21:00', end: '07:20', days: [1, 2, 3, 4, 5] };
 
 // No service worker: its first-visit reload would race the fake clock.
-test.use({ timezoneId: 'America/Santiago', serviceWorkers: 'block' });
+test.use({ timezoneId: 'America/Los_Angeles', serviceWorkers: 'block' });
 
 async function setup(page, settings = ON) {
   await page.route(/tail57521e\.ts\.net/, r => r.abort());
@@ -69,7 +69,7 @@ test.describe('Off hours', () => {
 
   test('an open app warns at 8:55 and falls asleep at 9:00', async ({ page }) => {
     await setup(page);
-    await page.clock.install({ time: new Date('2026-10-19T20:54:30-03:00') });
+    await page.clock.install({ time: new Date('2026-10-19T20:54:30-07:00') });
     await page.goto('/math-galaxy.html');
     await page.waitForFunction(() => !!window.OffHours);
     await expect(page.locator('#off-hours-overlay')).toHaveCount(0);

@@ -92,6 +92,13 @@ var LearningCheck = (function() {
     ]
   };
 
+  // The device's own calendar day. toISOString() is UTC, which in
+  // California rolls over at 4–5 PM and handed out a second day's allowance.
+  function _today(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
   function _key() {
     var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
     if (!user) return null;
@@ -103,7 +110,7 @@ var LearningCheck = (function() {
     if (!key) return {};
     try {
       var data = JSON.parse(localStorage.getItem(key)) || {};
-      var today = new Date().toISOString().split('T')[0];
+      var today = _today();
       if (data.date !== today) {
         data = { date: today, count: 0, lastCheck: 0 };
       }
