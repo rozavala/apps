@@ -1,7 +1,21 @@
 {
-  "generatedAt": "2026-10-19T00:01:00.976Z",
+  "generatedAt": "2026-10-20T00:57:57.099Z",
   "windowHours": 72,
-  "totalGroups": 0,
-  "totalEvents": 0,
-  "topGroups": []
+  "totalGroups": 1,
+  "totalEvents": 1,
+  "topGroups": [
+    {
+      "app": "little-maestro",
+      "kind": "console.warn",
+      "page": "little-maestro.html",
+      "message": "[LM-Bridge] Create failed, trying load: A student named \"Guest\" already exists",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 1,
+      "firstTs": 1792457504760,
+      "lastTs": 1792457504760,
+      "users": 1
+    }
+  ]
 }

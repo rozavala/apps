@@ -1,0 +1,31 @@
+{
+  "day": "2026-10-20",
+  "groups": [
+    {
+      "entry": {
+        "id": "e_mvfyx2bc_0xx4s0",
+        "ts": 1792457504760,
+        "clientTs": 1792457504760,
+        "kind": "console.warn",
+        "app": "little-maestro",
+        "page": "little-maestro.html",
+        "message": "[LM-Bridge] Create failed, trying load: A student named \"Guest\" already exists",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-f452fe",
+        "age": 7,
+        "guest": true,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1792457504760,
+      "lastTs": 1792457504760,
+      "users": [
+        "u-f452fe"
+      ]
+    }
+  ]
+}
