@@ -12,12 +12,20 @@ var BMC = (function() {
   var STORAGE_PREFIX = 'zs_bmcheck_';
   var FETCH_TIMEOUT = 60000;  // 60s — Gemini calls with google_search grounding routinely take 15-30s, plus Wikipedia enrichment adds ~1s
 
-  // In kid mode, the LGBTQ chip and any concerns text touching the topic
-  // are redacted entirely. Verdict is still "not_recommended" so the kid
-  // sees "Not for our family" — they just don't read about what specifically.
-  // Patterns are intentionally broad; false positives only redact non-parent
-  // text, which is acceptable.
-  var LGBTQ_KEYWORD_RE = /\b(lgbtq?\+?|gay|lesbian|queer|same[\s-]?sex|transgender|non[\s-]?binary|gender\s+identity|pride\s+flag|drag\s+queen|she\/her\/they|pronouns?)\b/i;
+  // Kid mode never shows the evaluator's own wording about content: the
+  // reasoning, concerns and values chips are written for parents and name
+  // the very things we don't want to introduce. Kids get fixed messages
+  // instead. The plot summary is still shown, unless it touches these
+  // topics. Patterns are intentionally broad; a false positive only hides
+  // the summary from a kid.
+  var LGBTQ_KEYWORD_RE = /\b(lgbt\w*|gay|lesbian|queer|homosexual\w*|bisexual\w*|same[\s-]?sex|trans\w*gender\w*|trans|non[\s-]?binary|gender\w*|pride\s+(flags?|month|parades?)|drag\s+(queen|king|show)s?|she\/her|they\/them|pronouns?|two\s+(moms|dads|mothers|fathers))\b/i;
+  var KID_VERDICT_MSG = {
+    approved: 'This one is a good fit for our family. Enjoy!',
+    caution: 'Ask Mom or Dad about this one before you start.',
+    not_recommended: 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
+  };
+  // The only content chips a kid sees: practical, not about values.
+  var KID_FLAGS = { violence: 1, scary_content: 1, profanity: 1 };
 
   // In-memory caches
   var _familyLibrary = {};   // canonical_id -> full evaluation (synced across family via VPS cache)
@@ -812,16 +820,17 @@ var BMC = (function() {
     var kidHideDetails = isLowConf && !isParent;
     var showSummary = isParent || isSafe || isCaution;
     var showFlags = (isParent || isSafe) && !kidHideDetails;
-    var showConcerns = (isParent || isSafe) && !kidHideDetails;
+    var showConcerns = isParent;
     var showAgeInfo = !kidHideDetails;
     var showParentNotes = isParent;
     var showActions = isParent || !isBlocked;
 
     var verdictEmoji = e.verdict === 'approved' ? '✅' : (e.verdict === 'not_recommended' ? '❌' : '⚠️');
     var verdictTitle = e.verdict === 'approved' ? 'Approved' : (e.verdict === 'not_recommended' ? 'Not for our family' : 'Needs care');
-    var verdictMessage = isBlocked && !isParent
-      ? 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
-      : (e.verdict_reasoning || '');
+    var verdictMessage = isParent
+      ? (e.verdict_reasoning || '')
+      : (KID_VERDICT_MSG[e.verdict] || KID_VERDICT_MSG.caution);
+    if (!isParent && e.summary && LGBTQ_KEYWORD_RE.test(String(e.summary))) showSummary = false;
 
     // Grown-up banner vs. values-rejection banner
     // Fires for ANY verdict when the book is age-gated (min_age >= 13)
@@ -893,9 +902,9 @@ var BMC = (function() {
       chipHtml = flagOrder.map(function(k) {
         var sev = (e.content_flags || {})[k];
         if (!sev || sev === 'none') return '';
-        // Kid mode: the LGBTQ chip is never shown — kids don't read the
-        // label even at "mild". Parents still see it on unlock.
-        if (!isParent && k === 'lgbtq_content') return '';
+        // Kid mode: only the practical chips (violence, scary, language).
+        // Parents see every flag on unlock.
+        if (!isParent && !KID_FLAGS[k]) return '';
         return '<span class="bmc-chip bmc-chip-' + sev + '">' + flagLabels[k] + ' · ' + sev + '</span>';
       }).join('');
       var posLabels = {
@@ -917,18 +926,9 @@ var BMC = (function() {
 
     var concernsHtml = '';
     if (showConcerns && e.specific_concerns && e.specific_concerns.length) {
-      // Kid mode: drop any concern line that names LGBTQ topics, so the
-      // child never reads a phrase like "casual mention of a side
-      // character with same-sex parents". If nothing remains after
-      // filtering, the card is omitted entirely.
-      var concerns = !isParent
-        ? e.specific_concerns.filter(function(c) { return !LGBTQ_KEYWORD_RE.test(String(c)); })
-        : e.specific_concerns;
-      if (concerns.length) {
-        concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
-          concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
-          '</ul></div>';
-      }
+      concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
+        e.specific_concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
+        '</ul></div>';
     } else if (isCaution && !isParent && e.confidence !== 'low') {
       var nFlags = 0;
       if (e.content_flags) {
