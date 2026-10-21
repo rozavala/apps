@@ -572,13 +572,25 @@ var BMC = (function() {
 
   // ZXing fallback for browsers without BarcodeDetector (notably iOS
   // Safari / every iOS browser). Uses the vendored UMD bundle to read
-  // ISBN-13 / EAN-13 directly from the rear-camera video feed.
+  // ISBN-13 / EAN-13 from the rear-camera video feed.
+  //
+  // We run our own frame loop instead of ZXing's decodeFromConstraints:
+  // its loop stops for good on any error other than "no barcode in this
+  // frame" (e.g. a first frame before Safari knows the video size), and
+  // it reports those errors by minified class names ("N"), so every
+  // empty frame read as a camera failure. Here a bad frame is skipped,
+  // and only a refused camera shows a camera message.
   var _zxingReader = null;
+  var _scanTimer = null;
+  var CAMERA_HELP = {
+    NotAllowedError: 'The camera is blocked for this site. In Safari, tap the aA button in the address bar → Website Settings → Camera → Allow, then try again. Or tap "Type ISBN instead" below.',
+    NotFoundError: 'No camera was found on this device. Tap "Type ISBN instead" below.',
+    NotReadableError: 'Another app is using the camera. Close it and try again, or tap "Type ISBN instead" below.'
+  };
+
   function _startZxingScan() {
-    // Re-entry guard. If the kid taps "Scan ISBN" while a scan is
-    // already running, the second decodeFromConstraints call ends up
-    // invoking video.play() on an already-playing element, which Safari
-    // logs as "Trying to play video that is already playing." Just bail.
+    // Re-entry guard: a second tap while the camera prompt is up must not
+    // open a second stream.
     if (_scanActive) return;
 
     var modal = document.getElementById('bmc-scan-modal');
@@ -588,55 +600,97 @@ var BMC = (function() {
     if (!modal || !video) return promptManualIsbn();
     modal.classList.add('active');
     if (ipadHint) ipadHint.style.display = 'none';
-    if (hint) hint.textContent = 'Apunta al código de barras…';
+    if (hint) hint.textContent = 'Starting the camera…';
 
     try {
-      // Restrict to the formats actually printed on book barcodes — keeps
-      // false positives down compared to scanning every supported format.
-      var hints = null;
-      if (ZXing.DecodeHintType && ZXing.BarcodeFormat) {
-        hints = new Map();
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-          ZXing.BarcodeFormat.EAN_13,
-          ZXing.BarcodeFormat.EAN_8,
-          ZXing.BarcodeFormat.UPC_A
-        ]);
-        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-      }
-      _zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+      // Only the formats printed on book barcodes, to keep false reads down.
+      var hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      _zxingReader = new ZXing.MultiFormatReader();
+      _zxingReader.setHints(hints);
     } catch (e) {
-      if (ipadHint) {
-        ipadHint.style.display = 'block';
-        ipadHint.textContent = 'Could not start the scanner. Tap "Type ISBN instead" below.';
-      }
+      _showScanProblem('Could not start the scanner. Tap "Type ISBN instead" below.');
       return;
     }
 
     _scanActive = true;
-    _zxingReader.decodeFromConstraints(
-      { audio: false, video: { facingMode: 'environment' } },
-      video,
-      function(result, err) {
-        if (!_scanActive) return;
-        if (result) {
-          var code = (result.getText && result.getText()) || result.text;
-          closeScan();
-          if (code) _lookupByIsbn(code.replace(/[^0-9Xx]/g, ''));
-        }
-        // err is fired on every empty frame — only surface real errors.
-        if (err && err.name && !/NotFoundException|ChecksumException|FormatException/.test(err.name)) {
-          if (ipadHint) {
-            ipadHint.style.display = 'block';
-            ipadHint.textContent = 'Camera blocked or not available. Check Safari Settings → Camera, or tap "Type ISBN instead" below.';
-          }
-        }
+    // A sharper feed than the 640×480 default: the bars of an ISBN are thin.
+    navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    }).then(function(stream) {
+      if (!_scanActive) {  // closed while the permission prompt was up
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        return;
       }
-    ).catch(function() {
-      if (ipadHint) {
-        ipadHint.style.display = 'block';
-        ipadHint.textContent = 'Camera blocked or not available. Check Safari Settings → Camera, or tap "Type ISBN instead" below.';
-      }
+      _scanStream = stream;
+      video.srcObject = stream;
+      var playing = video.play();
+      if (playing && playing.catch) playing.catch(function() {});
+      if (hint) hint.textContent = 'Apunta al código de barras…';
+      _zxingLoop(video, hint);
+    }).catch(function(err) {
+      _scanActive = false;
+      var name = err && err.name;
+      _showScanProblem(_isIpadWrapper()
+        ? 'This app can\'t use the camera. Open Book & Movie Check in Safari to scan, or tap "Type ISBN instead" below.'
+        : (CAMERA_HELP[name] || 'The camera didn\'t start. Tap "Type ISBN instead" below.'));
     });
+  }
+
+  function _showScanProblem(text) {
+    var ipadHint = document.getElementById('bmc-scan-ipad-hint');
+    if (!ipadHint) return;
+    ipadHint.style.display = 'block';
+    ipadHint.textContent = text;
+  }
+
+  // ISBN-13s are EAN-13s starting 978 or 979; anything else on a cover
+  // (a price code, a magazine EAN) isn't something we can look up.
+  function _isIsbnCode(code) { return /^97[89]\d{10}$/.test(code); }
+
+  function _zxingLoop(video, hint) {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d', { willReadFrequently: true }) || canvas.getContext('2d');
+    var frame = 0;
+    var wrongUntil = 0;
+    var tick = function() {
+      if (!_scanActive) return;
+      var w = video.videoWidth, h = video.videoHeight;
+      if (w && h && video.readyState >= 2) {
+        // Alternate the middle of the picture at full sharpness (where a
+        // barcode held up to the camera sits) with the whole picture
+        // scaled down, so an off-centre barcode is found too.
+        var crop = frame++ % 2 === 0;
+        var sw = crop ? Math.round(w * 0.7) : w, sh = crop ? Math.round(h * 0.6) : h;
+        var scale = Math.min(1, 1280 / Math.max(sw, sh));
+        var cw = Math.max(1, Math.round(sw * scale)), ch = Math.max(1, Math.round(sh * scale));
+        if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+        try {
+          ctx.drawImage(video, (w - sw) / 2, (h - sh) / 2, sw, sh, 0, 0, cw, ch);
+          var bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(canvas)));
+          var code = _zxingReader.decodeWithState(bitmap).getText();
+          if (_isIsbnCode(code)) {
+            closeScan();
+            _lookupByIsbn(code);
+            return;
+          }
+          if (hint && Date.now() > wrongUntil) {
+            hint.textContent = 'That barcode isn\'t an ISBN. Look for the one starting 978 or 979.';
+            wrongUntil = Date.now() + 2500;
+          }
+        } catch (e) {
+          // No barcode in this frame (or a frame that wasn't ready): keep looking.
+        }
+        if (hint && wrongUntil && Date.now() > wrongUntil) {
+          hint.textContent = 'Apunta al código de barras…';
+          wrongUntil = 0;
+        }
+      }
+      _scanTimer = setTimeout(tick, 100);
+    };
+    tick();
   }
 
   function _startScan(formats) {
@@ -690,12 +744,15 @@ var BMC = (function() {
 
   function closeScan() {
     _scanActive = false;
+    if (_scanTimer) { clearTimeout(_scanTimer); _scanTimer = null; }
     var modal = document.getElementById('bmc-scan-modal');
     if (modal) modal.classList.remove('active');
     if (_scanStream) {
       _scanStream.getTracks().forEach(function(t) { t.stop(); });
       _scanStream = null;
     }
+    var video = document.getElementById('bmc-scan-video');
+    if (video) video.srcObject = null;
     if (_zxingReader) {
       try { _zxingReader.reset(); } catch (e) {}
       _zxingReader = null;
