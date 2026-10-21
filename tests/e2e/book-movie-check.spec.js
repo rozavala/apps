@@ -2,6 +2,9 @@
 const { test, expect } = require('@playwright/test');
 const { injectMockProfile } = require('../helpers/utils');
 
+// No service worker: its first-visit reload can land mid-test.
+test.use({ serviceWorkers: 'block' });
+
 const FLAGS_NONE = { lgbtq_content: 'none', crt_ideology: 'none', sexual_content: 'none', violence: 'none', scary_content: 'none',
   profanity: 'none', occult_aspirational: 'none', anti_religious: 'none', moral_relativism: 'none', disrespect_authority: 'none' };
 
