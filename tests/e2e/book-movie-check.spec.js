@@ -79,3 +79,73 @@ test.describe('Book & Movie Check — what kids read', () => {
     expect(text).toContain('Moral relativism · mild');
   });
 });
+
+test.describe('Book & Movie Check — Library for parents', () => {
+  test.use({ timezoneId: 'America/Los_Angeles' });
+
+  const at = (s) => new Date(s).getTime();
+  const LIB = {
+    'title:the-lost-hero': Object.assign({}, CAUTION, { canonical_id: 'title:the-lost-hero', evaluated_at: at('2026-09-02T19:06:00-07:00') }),
+    'title:el-sari-rojo': Object.assign({}, APPROVED, { canonical_id: 'title:el-sari-rojo', title: 'El sari rojo', evaluated_at: at('2026-10-12T12:22:00-07:00') }),
+    'title:old-favourite': Object.assign({}, APPROVED, { canonical_id: 'title:old-favourite', title: 'Old Favourite', evaluated_at: at('2026-08-01T10:00:00-07:00') }),
+  };
+  const KIDS = {
+    pablo: { lookups: { 'title:the-lost-hero': { ts: at('2026-10-20T18:52:00-07:00'), query: 'The Lost Hero', verdict: 'caution' } } },
+    'rodrigo_jr.': { lookups: {
+      'title:the-lost-hero': { ts: at('2026-09-02T19:06:40-07:00'), query: 'The Lost Hero', verdict: 'caution' },
+      'title:el-sari-rojo': { ts: at('2026-10-12T12:22:30-07:00'), query: 'El sari rojo', verdict: 'approved' },
+    } },
+  };
+
+  async function openLibrary(page, { parent }) {
+    await page.route(/tail57521e\.ts\.net/, r => r.abort());
+    await page.addInitScript(() => {
+      const profiles = [{ name: 'Pablo', avatar: '🦊', age: 10 }, { name: 'Rodrigo Jr.', avatar: '🐶', age: 12 }, { name: 'Papa', avatar: '🦁', age: 40 }];
+      localStorage.setItem('zs_profiles', JSON.stringify(profiles));
+      localStorage.setItem('zs_active_user', JSON.stringify(profiles[2]));
+    });
+    await page.goto('/book-movie-check.html');
+    await page.waitForFunction(() => typeof BMC !== 'undefined' && typeof ZsDialog !== 'undefined');
+    await page.waitForLoadState('networkidle');
+    // The family server, faked after sync.js has set up its test guard
+    await page.evaluate(async ([lib, kids, parent]) => {
+      window.fetch = async (url) => {
+        const u = String(url);
+        const json = (body) => ({ ok: true, status: 200, json: async () => body });
+        if (u.endsWith('/api/media/library')) return json(lib);
+        const m = u.match(/\/api\/kids\/([^/]+)\/bmcheck$/);
+        if (m && kids[decodeURIComponent(m[1])]) return json(kids[decodeURIComponent(m[1])]);
+        return { ok: false, status: 404, json: async () => ({}) };
+      };
+      BMC.init();
+      await new Promise(r => setTimeout(r, 50));
+      if (parent) { ZsDialog.prompt = () => Promise.resolve('1234'); BMC.unlockParent(); }
+      BMC.showTab('library');
+    }, [LIB, KIDS, parent]);
+  }
+
+  const titles = (page) => page.locator('#bmc-library-list .bmc-list-title').allInnerTexts();
+
+  test('shows who looked each title up, latest lookup first', async ({ page }) => {
+    await openLibrary(page, { parent: true });
+    await expect(page.locator('.bmc-list-who').first()).toContainText('Pablo · Oct 20, Rodrigo Jr. · Sep 2');
+    expect(await titles(page)).toEqual(['The Lost Hero', 'El sari rojo', 'Old Favourite']);
+  });
+
+  test('can narrow the Library to one kid', async ({ page }) => {
+    await openLibrary(page, { parent: true });
+    await page.locator('#bmc-library-filter').getByRole('button', { name: 'Rodrigo Jr.' }).click();
+    expect(await titles(page)).toEqual(['El sari rojo', 'The Lost Hero']);
+    await page.locator('#bmc-library-filter').getByRole('button', { name: 'Pablo' }).click();
+    expect(await titles(page)).toEqual(['The Lost Hero']);
+    await page.getByRole('button', { name: '👪 Everyone' }).click();
+    expect((await titles(page)).length).toBe(3);
+  });
+
+  test('kids don\'t see who looked things up', async ({ page }) => {
+    await openLibrary(page, { parent: false });
+    await expect(page.locator('#bmc-library-list .bmc-list-title').first()).toBeVisible();
+    await expect(page.locator('.bmc-list-who')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '👪 Everyone' })).toHaveCount(0);
+  });
+});

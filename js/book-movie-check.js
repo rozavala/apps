@@ -34,6 +34,8 @@ var BMC = (function() {
   var _scanStream = null;
   var _parentMode = false;  // session-only, resets on page reload
   var _libraryTypeFilter = 'all';  // 'all' | 'book' | 'movie'
+  var _libraryKidFilter = 'all';   // 'all' | a kid key — parent mode only
+  var _lookupsByKid = null;        // kid key -> { name, lookups } — parent mode only
   var _searchType = 'all';         // 'all' | 'book' | 'movie' — restricts /media/lookup
 
   // Environment detection for iPad-in-WKWebView-wrapper cases
@@ -175,6 +177,7 @@ var BMC = (function() {
 
     if (name === 'library') {
       document.getElementById('screen-library').classList.add('active');
+      if (_parentMode && !_lookupsLoading) _lookupsByKid = null;   // pick up new lookups
       _renderLibrary();
       _refreshStaleCount();
       _activateTabButtons('.bmc-tab-btn[onclick*="library"]');
@@ -247,11 +250,75 @@ var BMC = (function() {
       { key: 'book', label: '📕 Books' },
       { key: 'movie', label: '🎬 Movies' }
     ];
-    filterEl.innerHTML = opts.map(function(o) {
+    var html = opts.map(function(o) {
       var active = _libraryTypeFilter === o.key ? ' active' : '';
       return '<button type="button" class="bmc-filter-chip' + active +
              '" onclick="BMC.setLibraryFilter(\'' + o.key + '\')">' + o.label + '</button>';
     }).join('');
+    // Parents can narrow the list to what one kid looked up.
+    var kids = _parentMode && _lookupsByKid ? Object.keys(_lookupsByKid).filter(function(k) {
+      return Object.keys(_lookupsByKid[k].lookups).some(function(id) { return !!_familyLibrary[id]; });
+    }) : [];
+    if (kids.length) {
+      html += '<span class="bmc-filter-break"></span>' +
+        [{ key: 'all', label: '👪 Everyone' }].concat(kids.map(function(k) {
+          return { key: k, label: _lookupsByKid[k].name };
+        })).map(function(o) {
+          var active = _libraryKidFilter === o.key ? ' active' : '';
+          return '<button type="button" class="bmc-filter-chip' + active +
+                 '" onclick="BMC.setLibraryKid(\'' + escAttr(o.key) + '\')">' + _escHtmlLocal(o.label) + '</button>';
+        }).join('');
+    }
+    filterEl.innerHTML = html;
+  }
+
+  function setLibraryKid(key) {
+    _libraryKidFilter = key;
+    _renderLibrary();
+  }
+
+  // ── Who looked it up (parent mode) ─────────────────────────────
+  // The family library only keeps the evaluation, which the server
+  // reuses for every later lookup. Each kid's own lookups live in their
+  // bmcheck blob, synced to /api/kids/<kid>/bmcheck, so parents gather
+  // those to see who checked what, and when.
+  var _lookupsLoading = false;
+
+  function _loadFamilyLookups() {
+    var profiles = typeof getProfiles === 'function' ? getProfiles() : [];
+    var out = {};
+    profiles.forEach(function(p) {
+      if (!p || !p.name || p.isGuest) return;
+      var key = p.name.toLowerCase().replace(/\s+/g, '_');
+      var local = null;
+      try { local = JSON.parse(localStorage.getItem(STORAGE_PREFIX + key)); } catch (e) {}
+      out[key] = { name: p.name, lookups: Object.assign({}, (local && local.lookups) || {}) };
+    });
+    _lookupsByKid = out;
+    return Promise.all(Object.keys(out).map(function(key) {
+      return _fetchJson(VPS + '/api/kids/' + encodeURIComponent(key) + '/bmcheck')
+        .then(function(server) {
+          var l = (server && server.lookups) || {};
+          Object.keys(l).forEach(function(id) {
+            var mine = out[key].lookups[id];
+            if (!mine || (l[id].ts || 0) > (mine.ts || 0)) out[key].lookups[id] = l[id];
+          });
+        })
+        .catch(function() { /* offline or never synced: this device's copy is all we have */ });
+    }));
+  }
+
+  function _whoLookedUp(id) {
+    if (!_lookupsByKid) return [];
+    return Object.keys(_lookupsByKid).map(function(key) {
+      var l = _lookupsByKid[key].lookups[id];
+      return l ? { key: key, name: _lookupsByKid[key].name, ts: l.ts || 0 } : null;
+    }).filter(Boolean).sort(function(a, b) { return b.ts - a.ts; });
+  }
+
+  function _shortDate(ts) {
+    try { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+    catch (e) { return ''; }
   }
 
   function setLibraryFilter(kind) {
@@ -268,18 +335,34 @@ var BMC = (function() {
   }
 
   function _renderLibrary() {
+    if (_parentMode && !_lookupsByKid && !_lookupsLoading) {
+      _lookupsLoading = true;
+      _loadFamilyLookups().then(function() {
+        _lookupsLoading = false;
+        if (document.getElementById('screen-library').classList.contains('active')) _renderLibrary();
+      });
+    }
     _renderLibraryFilter();
     var container = document.getElementById('bmc-library-list');
     if (!container) return;
+    var kidFilter = _parentMode && _lookupsByKid && _lookupsByKid[_libraryKidFilter] ? _libraryKidFilter : 'all';
+    // Newest activity first: a title checked months ago and looked up
+    // again today belongs at the top, not under its first evaluation.
+    var lastSeen = function(item) {
+      var who = _whoLookedUp(item.canonical_id);
+      if (kidFilter !== 'all') who = who.filter(function(w) { return w.key === kidFilter; });
+      return Math.max(item.evaluated_at || 0, who.length ? who[0].ts : 0);
+    };
     var items = Object.keys(_familyLibrary)
       .map(function(id) { return _familyLibrary[id]; })
       .filter(function(item) {
         if (!item) return false;
         if (!_parentMode && item.verdict === 'not_recommended') return false;
         if (!_matchesTypeFilter(item)) return false;
+        if (kidFilter !== 'all' && !_lookupsByKid[kidFilter].lookups[item.canonical_id]) return false;
         return true;
       })
-      .sort(function(a, b) { return (b.evaluated_at || 0) - (a.evaluated_at || 0); });
+      .sort(function(a, b) { return lastSeen(b) - lastSeen(a); });
     if (!items.length) {
       container.innerHTML = '<div class="bmc-empty">No titles checked yet. Search for a book or movie to get started!</div>';
       return;
@@ -355,6 +438,17 @@ var BMC = (function() {
       label = '🤔 Not sure';
     }
 
+    // Parent-only: who looked this up, newest first.
+    var whoHtml = '';
+    if (_parentMode && context === 'library') {
+      var who = _whoLookedUp(item.canonical_id);
+      if (who.length) {
+        whoHtml = '  <div class="bmc-list-who">🔎 ' + who.map(function(w) {
+          return escHtml(w.name) + ' · ' + _shortDate(w.ts);
+        }).join(', ') + '</div>';
+      }
+    }
+
     // Parent-only per-item remove. Rendered outside the clickable card
     // (wrapped in .bmc-list-row) so the outer element stays a real <button>.
     var removeBtn = '';
@@ -372,6 +466,7 @@ var BMC = (function() {
         '<div class="bmc-list-body">' +
         '  <div class="bmc-list-title">' + escHtml(item.title) + '</div>' +
         '  <div class="bmc-list-meta">' + escHtml(item.author_or_director || '') + (item.year ? ' · ' + item.year : '') + ' · ages ' + (item.minimum_age || '?') + '+</div>' +
+        whoHtml +
         '</div>' +
         '<div class="bmc-list-verdict verdict-' + escAttr(displayVerdict) + '">' + label + '</div>' +
       '</button>' +
@@ -1426,6 +1521,7 @@ var BMC = (function() {
     resetFamilyLibrary: resetFamilyLibrary,
     removeItem: removeItem,
     setLibraryFilter: setLibraryFilter,
+    setLibraryKid: setLibraryKid,
     setSearchType: setSearchType,
     unlockTrailer: unlockTrailer
   };
