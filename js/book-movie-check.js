@@ -913,7 +913,9 @@ var BMC = (function() {
     // On low confidence in kid mode, the verdict itself is unreliable:
     // hide content details so we don't present guesses as findings.
     var kidHideDetails = isLowConf && !isParent;
-    var showSummary = isParent || isSafe || isCaution;
+    // A low-confidence summary can be invented outright (the model may not
+    // know the book at all), so kids don't see it.
+    var showSummary = (isParent || isSafe || isCaution) && !kidHideDetails;
     var showFlags = (isParent || isSafe) && !kidHideDetails;
     var showConcerns = isParent;
     var showAgeInfo = !kidHideDetails;

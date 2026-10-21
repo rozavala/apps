@@ -65,6 +65,13 @@ test.describe('Book & Movie Check — what kids read', () => {
     expect(text).not.toContain('two moms');
   });
 
+  test('a low-confidence result doesn\'t show kids a summary that may be made up', async ({ page }) => {
+    await open(page);
+    const text = await show(page, Object.assign({}, CAUTION, { confidence: 'low', summary: 'A young girl named Lina assists the lantern keeper.' }));
+    expect(text).toContain('Not sure yet');
+    expect(text).not.toContain('Lina');
+  });
+
   test('parents still see everything after the PIN', async ({ page }) => {
     await open(page);
     await show(page, CAUTION);
