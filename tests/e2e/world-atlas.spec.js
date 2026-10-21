@@ -2,6 +2,11 @@
 const { test, expect } = require('@playwright/test');
 const { injectMockProfile } = require('../helpers/utils');
 
+// No service worker: on a first visit it takes over and reloads the page,
+// which can land while a test is reading it ("Execution context was
+// destroyed"). These tests don't exercise offline support.
+test.use({ serviceWorkers: 'block' });
+
 test.describe('World Atlas', () => {
 
   test.beforeEach(async ({ page }) => {
