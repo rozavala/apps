@@ -704,6 +704,23 @@ const WorldExplorer = (() => {
           { q: 'What is the national bird of New Zealand?', qEs: '¿Cuál es el ave nacional de Nueva Zelanda?', options: ['Eagle', 'Penguin', 'Kiwi', 'Ostrich'], optionsEs: ['Águila', 'Pingüino', 'Kiwi', 'Avestruz'], answer: 2 },
           { q: 'How many main islands does New Zealand have?', qEs: '¿Cuántas islas principales tiene Nueva Zelanda?', options: ['One', 'Two', 'Three', 'Four'], optionsEs: ['Una', 'Dos', 'Tres', 'Cuatro'], answer: 1 }
         ]
+      },
+      {
+        id: 'fiji', name: 'Fiji', nameEs: 'Fiyi', flag: '🇫🇯',
+        capital: 'Suva', capitalEs: 'Suva',
+        facts: [
+          { en: 'Fiji is an island country in the South Pacific Ocean.', es: 'Fiyi es un país insular en el Océano Pacífico Sur.' },
+          { en: 'It consists of more than 300 islands.', es: 'Está formado por más de 300 islas.' },
+          { en: 'Fiji is famous for its beautiful coral reefs and beaches.', es: 'Fiyi es famoso por sus hermosos arrecifes de coral y playas.' },
+          { en: 'Rugby is the most popular sport in Fiji.', es: 'El rugby es el deporte más popular en Fiyi.' }
+        ],
+        landmark: { name: 'Sri Siva Subramaniya Temple', nameEs: 'Templo Sri Siva Subramaniya', emoji: '🛕' },
+        animal: { name: 'Fiji Banded Iguana', nameEs: 'Iguana bandeada de Fiyi', emoji: '🦎' },
+        quiz: [
+          { q: 'What is the capital of Fiji?', qEs: '¿Cuál es la capital de Fiyi?', options: ['Suva', 'Nadi', 'Lautoka', 'Apia'], optionsEs: ['Suva', 'Nadi', 'Lautoka', 'Apia'], answer: 0, tier: 'advanced', explain: { en: 'Suva is the capital and largest city of Fiji.', es: 'Suva es la capital y la ciudad más grande de Fiyi.' } },
+          { q: 'How many islands make up Fiji?', qEs: '¿Cuántas islas forman Fiyi?', options: ['Over 300', 'Exactly 10', 'About 50', 'Over 1000'], optionsEs: ['Más de 300', 'Exactamente 10', 'Alrededor de 50', 'Más de 1000'], answer: 0, tier: 'intermediate', explain: { en: 'Fiji is an archipelago of more than 300 islands.', es: 'Fiyi es un archipiélago de más de 300 islas.' } },
+          { q: 'What is the most popular sport in Fiji?', qEs: '¿Cuál es el deporte más popular en Fiyi?', options: ['Rugby', 'Football', 'Cricket', 'Basketball'], optionsEs: ['Rugby', 'Fútbol', 'Críquet', 'Baloncesto'], answer: 0, tier: 'beginner', explain: { en: 'Rugby union is the national sport of Fiji.', es: 'El rugby es el deporte nacional de Fiyi.' } }
+        ]
       }
     ] }
   ];

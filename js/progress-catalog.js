@@ -428,6 +428,7 @@ window.ZSProgressCatalog = {
     {"i":"indonesia","l":"🇮🇩 Indonesia","g":"🌏 Asia"},
     {"i":"taiwan","l":"🇹🇼 Taiwan","g":"🌏 Asia"},
     {"i":"australia","l":"🇦🇺 Australia","g":"🌏 Oceania"},
-    {"i":"new_zealand","l":"🇳🇿 New Zealand","g":"🌏 Oceania"}
+    {"i":"new_zealand","l":"🇳🇿 New Zealand","g":"🌏 Oceania"},
+    {"i":"fiji","l":"🇫🇯 Fiji","g":"🌏 Oceania"}
   ]
 };

@@ -146,8 +146,11 @@ function genCadet() {
   // PRUNED [2026-04-22]: Removed 'alien_shape', 'moon_shape' to make room for 'satellite_count', 'planet_sub'
   // PRUNED [2026-05-18]: Removed 'robot_add', 'alien_sub' to make room for 'sun_sub', 'meteor_pattern' and stay within MAX 25 limit.
   // PRUNED [2026-06-15]: Removed 'shape_pattern', 'star_shape' to make room for 'sun_count_2', 'planet_compare' and stay within MAX 25 limit.
-  const types = ['count', 'add', 'moon_count', 'star_sub', 'planet_count', 'rocket_sub', 'astronaut_count', 'star_add', 'galaxy_count', 'alien_count', 'satellite_add', 'meteor_add', 'meteor_count', 'ufo_count', 'telescope_add', 'sun_count', 'sun_add', 'rocket_count', 'satellite_count', 'asteroid_add', 'planet_sub', 'sun_sub', 'meteor_pattern', 'sun_count_2', 'planet_compare'];
+  // PRUNED [2026-10-24]: Removed 'count', 'add' to make room for 'shape_count', 'emoji_add'
+  const types = ['moon_count', 'star_sub', 'planet_count', 'rocket_sub', 'astronaut_count', 'star_add', 'galaxy_count', 'alien_count', 'satellite_add', 'meteor_add', 'meteor_count', 'ufo_count', 'telescope_add', 'sun_count', 'sun_add', 'rocket_count', 'satellite_count', 'asteroid_add', 'planet_sub', 'sun_sub', 'meteor_pattern', 'sun_count_2', 'planet_compare', 'shape_count', 'emoji_add'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'shape_count') { const n = rand(1, 10); const s = ['🟢','🟦','🔺','⭐'][rand(0,3)]; return { label: 'Shape Count', text: s.repeat(n), hint: 'Count the shapes', answer: n, options: generateDistractors(n, 3, 1, 10), mode: 'choice' }; }
+  if (type === 'emoji_add') { const a = rand(1, 5), b = rand(1, 5); return { label: 'Emoji Add', text: `${a} 🛸 + ${b} 🛸 = ?`, hint: '', answer: a + b, options: generateDistractors(a + b, 3, 2, 10), mode: 'choice' }; }
   if (type === 'sun_count_2') { const n = rand(1, 10); return { label: 'Suns', text: '☀️'.repeat(n), hint: 'How many suns?', answer: n, options: generateDistractors(n, 3, 1, 15), mode: 'choice' }; }
   if (type === 'planet_compare') { const a = rand(1, 10), b = rand(1, 10); if (a === b) return genCadet(); return { label: 'Comparing', text: `${a} 🪐 or ${b} 🪐`, hint: 'Which is bigger?', answer: Math.max(a, b), options: shuffle([a, b]), mode: 'choice' }; }
   if (type === 'galaxy_count') { return { label: 'Counting', text: '🌌🌌🌌', hint: 'Count the galaxies!', answer: 3, options: generateDistractors(3, 3, 1, 10), mode: 'choice' }; }
@@ -265,8 +268,11 @@ function genExplorer() {
   // PRUNED [2026-04-22]: Removed 'satellite_mult', 'comet_diff' to make room for 'asteroid_sub', 'meteor_add_2'
   // PRUNED [2026-05-18]: Removed 'alien_add', 'rocket_add' to make room for 'spaceship_add', 'satellite_add2' and stay within MAX 25 limit.
   // PRUNED [2026-06-15]: Removed 'planet_pattern', 'moon_pattern' to make room for 'alien_diff', 'asteroid_add_2' and stay within MAX 25 limit.
-  const types = ['add', 'sub', 'planet_add', 'comet_compare2', 'double', 'space_compare', 'star_fraction', 'ufo_sub', 'meteor_sub', 'rocket_compare', 'astronaut_sub', 'robot_pattern', 'satellite_compare', 'comet_sub', 'alien_pattern', 'planet_compare', 'star_sub', 'planet_sub', 'comet_add', 'asteroid_sub', 'meteor_add_2', 'spaceship_add', 'satellite_add2', 'alien_diff', 'asteroid_add_2'];
+  // PRUNED [2026-10-24]: Removed 'add', 'sub' to make room for 'frac_intro', 'pattern_ext'
+  const types = ['planet_add', 'comet_compare2', 'double', 'space_compare', 'star_fraction', 'ufo_sub', 'meteor_sub', 'rocket_compare', 'astronaut_sub', 'robot_pattern', 'satellite_compare', 'comet_sub', 'alien_pattern', 'planet_compare', 'star_sub', 'planet_sub', 'comet_add', 'asteroid_sub', 'meteor_add_2', 'spaceship_add', 'satellite_add2', 'alien_diff', 'asteroid_add_2', 'frac_intro', 'pattern_ext'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'frac_intro') { return { label: 'Half', text: '1/2 of 10 = ?', hint: 'What is half of 10?', answer: 5, options: shuffle([4,5,6,10]), mode: 'choice' }; }
+  if (type === 'pattern_ext') { return { label: 'Pattern', text: '2, 4, 6, 8, ?', hint: 'What comes next?', answer: 10, options: shuffle([9,10,11,12]), mode: 'choice' }; }
   if (type === 'alien_diff') { const a = rand(15,30), b = rand(5,14); return { label: 'Alien Subtraction', text: `${a} 👽 - ${b} 👽 = ?`, hint: 'Subtract the aliens', answer: a-b, options: generateDistractors(a-b, 3, 1, 30), mode: 'choice' }; }
   if (type === 'asteroid_add_2') { const a = rand(10, 25), b = rand(10, 25); return { label: 'Asteroid Addition', text: `${a} 🪨 + ${b} 🪨 = ?`, hint: 'Add the numbers', answer: a+b, options: generateDistractors(a+b, 3, 10, 60), mode: 'choice' }; }
   if (type === 'asteroid_sub') { const a = rand(10,20), b = rand(1,9); return { label: 'Subtraction', text: `${a} ☄️ - ${b} ☄️ = ?`, hint: '', answer: a-b, options: generateDistractors(a-b, 3, 1, 25), mode: 'choice' }; }
@@ -377,8 +383,11 @@ function genPilot() {
   // PRUNED [2026-04-22]: Removed 'rocket_alg', 'planet_div' to make room for 'blackhole_mult', 'galaxy_div'
   // PRUNED [2026-05-18]: Removed 'alien_mult', 'rocket_word' to make room for 'nebula_frac', 'star_div' and stay within MAX 25 limit.
   // PRUNED [2026-06-15]: Removed 'robot_mult', 'meteor_div' to make room for 'moon_div', 'comet_mult_2' and stay within MAX 25 limit.
-  const types = ['mult', 'div', 'frac_visual', 'ufo_mult', 'satellite_frac', 'comet_mult', 'asteroid_div', 'star_word', 'satellite_div', 'telescope_frac', 'planet_mult', 'ufo_div', 'astronaut_mult', 'rocket_div', 'moon_frac', 'alien_pct', 'asteroid_mult', 'alien_div', 'blackhole_mult', 'comet_frac', 'galaxy_div', 'nebula_frac', 'star_div', 'moon_div', 'comet_mult_2'];
+  // PRUNED [2026-10-24]: Removed 'mult', 'div' to make room for 'frac_add', 'word_mult'
+  const types = ['frac_visual', 'ufo_mult', 'satellite_frac', 'comet_mult', 'asteroid_div', 'star_word', 'satellite_div', 'telescope_frac', 'planet_mult', 'ufo_div', 'astronaut_mult', 'rocket_div', 'moon_frac', 'alien_pct', 'asteroid_mult', 'alien_div', 'blackhole_mult', 'comet_frac', 'galaxy_div', 'nebula_frac', 'star_div', 'moon_div', 'comet_mult_2', 'frac_add', 'word_mult'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'frac_add') { return { label: 'Fractions', text: '1/4 + 1/4 = ?', hint: 'Add the top numbers', answer: '2/4', options: shuffle(['1/8','2/4','2/8','1/4']), mode: 'choice' }; }
+  if (type === 'word_mult') { const a = rand(3,6), b = rand(4,8); return { label: 'Word Problem', text: `If 1 rocket has ${a} seats, how many seats in ${b} rockets?`, hint: 'Multiply', answer: a*b, options: generateDistractors(a*b, 3, 10, 50), mode: 'choice' }; }
   if (type === 'moon_div') { const b = rand(2, 8), ans = rand(2, 9); return { label: 'Moon Division', text: `${b * ans} 🌕 ÷ ${b} = ?`, hint: 'Divide', answer: ans, options: generateDistractors(ans, 3, 1, 10), mode: 'choice' }; }
   if (type === 'comet_mult_2') { const a = rand(5, 12), b = rand(5, 12); return { label: 'Comet Multiplication', text: `${a} ☄️ × ${b} = ?`, hint: 'Multiply', answer: a*b, options: generateDistractors(a*b, 3, 20, 150), mode: 'choice' }; }
   if (type === 'blackhole_mult') { const a = rand(6,12), b = rand(6,12); return { label: 'Multiplication', text: `${a} 🕳️ × ${b} = ?`, hint: '', answer: a*b, options: generateDistractors(a*b, 3, 30, 150), mode: 'choice' }; }
@@ -485,8 +494,11 @@ function genCommander() {
   // PRUNED [2026-06-15]: Removed 'robot_ops', 'ufo_decimal' to make room for 'blackhole_sub', 'galaxy_pct_2' and stay within MAX 25 limit.
   // ADDED [2026-06-24]: Harder content for ages 10-12 — 'void_neg' (negatives), 'star_power' (exponents), 'cosmic_pemdas' (parentheses), 'orbit_ratio' (ratios), 'warp_algebra' (one/two-step algebra), 'prime_scan' (primes), 'station_geo' (area/perimeter). Array grown intentionally.
   // ADDED [2026-06-24]: More breadth at the harder end — 'data_mean' (average), 'data_median' (median), 'data_mode' (mode), 'frac_to_dec' (fraction→decimal), 'pct_of_num' (N% of a number), 'dec_to_pct' (decimal→percent).
-  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2', 'void_neg', 'star_power', 'cosmic_pemdas', 'orbit_ratio', 'warp_algebra', 'prime_scan', 'station_geo', 'data_mean', 'data_median', 'data_mode', 'frac_to_dec', 'pct_of_num', 'dec_to_pct'];
+  // PRUNED [2026-10-24]: Removed 15 types ('big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct') to stay within MAX 25.
+  const types = ['blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2', 'void_neg', 'star_power', 'cosmic_pemdas', 'orbit_ratio', 'warp_algebra', 'prime_scan', 'station_geo', 'data_mean', 'data_median', 'data_mode', 'frac_to_dec', 'pct_of_num', 'dec_to_pct', 'dec_mult', 'big_pemdas'];
   const type = types[rand(0, types.length - 1)];
+  if (type === 'dec_mult') { const a = (rand(10,50)/10).toFixed(1), b = rand(2,5); return { label: 'Decimals', text: `${a} × ${b} = ?`, hint: '', answer: (a*b).toFixed(1), options: shuffle([(a*b).toFixed(1), (a*b+1).toFixed(1), (a*b-1).toFixed(1), (a*b+2).toFixed(1)]), mode: 'choice' }; }
+  if (type === 'big_pemdas') { const a = rand(2,5), b = rand(2,5), c = rand(2,5); return { label: 'Order of Ops', text: `${a} + ${b} × ${c} = ?`, hint: 'Multiply first', answer: a + (b*c), options: generateDistractors(a + (b*c), 3, 1, 30), mode: 'choice' }; }
   if (type === 'void_neg') {
     // Negative-number arithmetic: subtracting a larger number, or adding a negative.
     if (rand(0, 1) === 0) {

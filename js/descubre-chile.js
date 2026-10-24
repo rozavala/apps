@@ -485,6 +485,8 @@ const QB={
     {q:'¿Qué columna de material puede subir kilómetros en el aire durante una erupción?',a:'Columna eruptiva de ceniza',o:['Columna eruptiva de ceniza','Columna de agua','Columna de hielo','Columna de arena'], tier:'advanced'}
   ],
   animales:[
+    {q:'¿Cuál es el ave voladora más grande que habita en la cordillera de los Andes?',a:'El cóndor andino',o:['El cóndor andino','El águila real','El halcón peregrino','El flamenco'], tier:'beginner', explain:'El cóndor andino es una de las aves voladoras más grandes del mundo y un símbolo de Chile.'},
+    {q:'¿Qué anfibio pequeño vive en los bosques del sur de Chile y fue descrito por Charles Darwin?',a:'La ranita de Darwin',o:['La ranita de Darwin','La rana chilena','El sapito de cuatro ojos','El sapo de rulo'], tier:'intermediate', explain:'La ranita de Darwin es famosa por su forma de hoja y porque el macho incuba los huevos en su saco vocal.'},
     {q:'¿Qué tipo de animales son las vicuñas y guanacos?',a:'Camélidos sudamericanos',o:['Camélidos sudamericanos','Roedores grandes','Aves andinas','Reptiles de altura'], tier:'intermediate'},
     {q:'¿Dónde habita principalmente la vicuña?',a:'A gran altitud en los Andes',o:['A gran altitud en los Andes','En la costa del Pacífico','En los bosques del sur','En la selva lluviosa'], tier:'intermediate'},
     {q:'¿Qué animal tiene una de las lanas más finas y valiosas?',a:'La vicuña',o:['La vicuña','La oveja común','El guanaco','El zorro'], tier:'advanced', explain:'La fibra de la vicuña es una de las más finas y caras del mundo, por eso este animal está protegido.'},
@@ -496,6 +498,8 @@ const QB={
     {q:'¿Cuál es el felino más grande que habita en Chile?',a:'El puma',o:['El puma','El gato colocolo','El jaguar','El güiña'], tier:'intermediate'}
   ],
   volcanes_chile:[
+    {q:'¿Cuál es el volcán activo más alto del mundo, ubicado en la frontera entre Chile y Argentina?',a:'Ojos del Salado',o:['Ojos del Salado','Llullaillaco','Villarrica','Osorno'], tier:'expert', explain:'El Nevado Ojos del Salado es el volcán más alto de la Tierra, con 6.891 metros.'},
+    {q:'¿Qué volcán del sur de Chile es famoso por su forma casi perfectamente cónica?',a:'Volcán Osorno',o:['Volcán Osorno','Volcán Llaima','Volcán Calbuco','Volcán Chaitén'], tier:'beginner', explain:'El volcán Osorno es un símbolo de la Región de Los Lagos gracias a su forma cónica.'},
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
     {q:'¿Aproximadamente cuántos volcanes hay en Chile?',a:'Más de 2.000',o:['Más de 2.000','Menos de 100','Alrededor de 500','Solo 10'], tier:'expert'},
     {q:'¿Cuál de estos volcanes tiene un lago de lava?',a:'Villarrica',o:['Villarrica','Osorno','Llaima','Calbuco'], tier:'advanced'},
@@ -521,6 +525,8 @@ const QB={
     {q:'¿Qué instrumento de viento andino se fabrica con cañas de distinto largo?',a:'La zampoña',o:['La zampoña','El charango','El bombo','El guitarrón'], tier:'advanced'}
   ],
   fiestas_patrias:[
+    {q:'¿Qué juego tradicional chileno consiste en intentar ensartar un madero con un agujero en un palo?',a:'El emboque',o:['El emboque','El trompo','El volantín','La rayuela'], tier:'beginner', explain:'El emboque es un juego tradicional de madera muy popular en Fiestas Patrias.'},
+    {q:'¿Qué preparación dulce es un postre clásico que se come mucho en Fiestas Patrias?',a:'El mote con huesillos',o:['El mote con huesillos','El arroz con leche','Los alfajores','Los picarones'], tier:'intermediate', explain:'El mote con huesillos es una bebida dulce tradicional hecha con trigo mote y duraznos deshidratados.'},
     {q:'¿Qué fecha principal se celebra en las Fiestas Patrias?',a:'El 18 de septiembre',o:['El 18 de septiembre','El 21 de mayo','El 1 de enero','El 25 de diciembre'], tier:'beginner'},
     {q:'¿Qué baile tradicional se baila en las fondas?',a:'La Cueca',o:['La Cueca','La Cumbia','El Tango','El Reggaetón'], tier:'beginner'},
     {q:'¿En qué año se declaró a la Cueca como baile nacional?',a:'1979',o:['1979','1810','1990','2000'], tier:'expert', explain:'La cueca fue declarada baile nacional de Chile en 1979 por decreto oficial.'},
