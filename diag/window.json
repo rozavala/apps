@@ -1,37 +1,5 @@
 {
-  "generatedAt": "2026-10-24T01:53:19.114Z",
+  "generatedAt": "2026-10-24T02:53:21.857Z",
   "windowHours": 72,
-  "days": [
-    {
-      "day": "2026-10-21",
-      "groups": [
-        {
-          "entry": {
-            "id": "e_mvhin3cw_vel9wv",
-            "ts": 1792551098048,
-            "clientTs": 1792551098048,
-            "kind": "console.warn",
-            "app": "book-movie-check",
-            "page": "book-movie-check.html",
-            "message": "Trying to play video that is already playing.",
-            "filename": null,
-            "lineno": null,
-            "colno": null,
-            "stack": null,
-            "user": "u-46a6e4",
-            "age": 7,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 5,
-          "firstTs": 1792551098048,
-          "lastTs": 1792551198221,
-          "users": [
-            "u-46a6e4"
-          ]
-        }
-      ]
-    }
-  ]
+  "days": []
 }
