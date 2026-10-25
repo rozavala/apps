@@ -3917,7 +3917,7 @@
       todayCardTitle = `📅 Today — ${todays.length} match${todays.length===1?'':'es'}`;
       todayHTML = todays.map(m => renderTodayRow(m)).join('');
     } else if (next) {
-      const dayDiff = Math.ceil((new Date(next.date+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
+      const dayDiff = Math.round((new Date(next.date+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
       const dayLabel = dayDiff === 1 ? 'Tomorrow' : (dayDiff <= 0 ? 'Coming up' : 'Coming up — in ' + dayDiff + ' days');
       todayCardTitle = `⚽ Next match — ${dayLabel}`;
       todayHTML = `
