@@ -78,6 +78,8 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Corrección de Errores (Bug Fixes)**: Se solucionó un problema en la lista de versículos de Bible Explorer y se restauraron los goleadores en World Cup 2026. (Fixed a crash in the Bible Explorer verse list and restored empty scorers in World Cup 2026.)
+
 - **Horas de Descanso (Off Hours)**: Las aplicaciones ahora se apagan automáticamente durante las noches de escuela (por defecto de 9:00 PM a 7:20 AM), mostrando una pantalla de descanso amigable para fomentar rutinas saludables. La configuración se puede ajustar en el Rincón para Padres y se puede desbloquear con el PIN de padres. (Off Hours: Apps now automatically go to sleep during school nights (9:00 PM to 7:20 AM by default), showing a friendly rest screen to encourage healthy routines. Settings can be adjusted in Parents Corner and unlocked via parent PIN.)
 
 - **¡Nueva App "Patrón de Lancha"!**: Estudia y practica para el examen teórico de Patrón de Lancha Deportiva con contenido basado en el temario oficial. Incluye preguntas y simulacros de examen. (Study and practice for the Patrón de Lancha Deportiva exam with content based on the official syllabus. Includes questions and exam simulations.)
