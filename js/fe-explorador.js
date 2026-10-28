@@ -317,78 +317,8 @@ const FeManager = (() => {
         { q: '¿De qué país era?', a: ['España', 'Francia', 'Italia'], correct: 0 }
       ]
     },
-    {
-      id: 'tomas_aquino',
-      name: 'Santo Tomás de Aquino',
-      dates: '1225–1274',
-      country: 'Italia 🇮🇹',
-      bio: 'Fue un fraile dominico, filósofo y teólogo. Es autor de la "Suma Teológica" y uno de los grandes maestros de la Iglesia. Nació en Italia.',
-      questions: [
-        { q: '¿Cuál es la obra más famosa de Santo Tomás de Aquino?', a: ['La Divina Comedia', 'La Suma Teológica', 'El Quijote'], correct: 1, explain: 'Santo Tomás de Aquino (1225–1274) fue un fraile dominico italiano, autor de la "Suma Teológica".' },
-        { q: '¿A qué orden religiosa pertenecía?', a: ['Dominicos', 'Franciscanos', 'Jesuitas'], correct: 0 },
-        { q: '¿En qué siglo vivió Santo Tomás de Aquino?', a: ['Siglo XIII', 'Siglo XVI', 'Siglo X'], correct: 0 }
-      ]
-    },
-    {
-      id: 'agustin',
-      name: 'San Agustín de Hipona',
-      dates: '354–430',
-      country: 'Tagaste, Numidia 🌍',
-      bio: 'Obispo de Hipona, en el norte de África, y uno de los Padres de la Iglesia. Escribió las "Confesiones" y "La Ciudad de Dios".',
-      questions: [
-        { q: '¿De qué ciudad fue obispo San Agustín?', a: ['Roma', 'Hipona', 'Milán'], correct: 1, explain: 'San Agustín de Hipona (354–430) fue obispo de Hipona, en el norte de África, y escribió las "Confesiones".' },
-        { q: '¿Cuál de estas obras escribió San Agustín?', a: ['Las Confesiones', 'La Odisea', 'La Eneida'], correct: 0 },
-        { q: '¿En qué siglo vivió San Agustín?', a: ['Siglo IV y V', 'Siglo XII', 'Siglo I'], correct: 0 }
-      ]
-    },
-    {
-      id: 'catalina_siena',
-      name: 'Santa Catalina de Siena',
-      dates: '1347–1380',
-      country: 'Italia 🇮🇹',
-      bio: 'Religiosa dominica italiana, Doctora de la Iglesia y copatrona de Europa. Influyó para que el Papa volviera de Aviñón a Roma.',
-      questions: [
-        { q: '¿De qué ciudad italiana era Santa Catalina?', a: ['Siena', 'Florencia', 'Venecia'], correct: 0, explain: 'Santa Catalina de Siena (1347–1380) fue una religiosa dominica italiana, Doctora de la Iglesia y copatrona de Europa.' },
-        { q: '¿A qué ciudad ayudó a que regresara el Papa?', a: ['Roma', 'París', 'Madrid'], correct: 0 },
-        { q: '¿En qué siglo vivió Santa Catalina de Siena?', a: ['Siglo XIV', 'Siglo XVIII', 'Siglo IX'], correct: 0 }
-      ]
-    },
-    {
-      id: 'jorge',
-      name: 'San Jorge',
-      dates: 'Siglo IV',
-      country: 'Capadocia 🐉',
-      bio: 'Soldado romano y mártir cristiano. La tradición lo representa venciendo a un dragón. Es patrono de muchos países y ciudades.',
-      questions: [
-        { q: '¿Qué profesión tenía San Jorge?', a: ['Soldado romano', 'Pescador', 'Comerciante'], correct: 0, explain: 'San Jorge, de Capadocia y del siglo IV, fue un soldado romano y mártir cristiano.' },
-        { q: '¿Con qué animal se le representa en la tradición?', a: ['Un dragón', 'Un león', 'Un caballo de mar'], correct: 0 },
-        { q: '¿En qué siglo vivió San Jorge?', a: ['Siglo IV', 'Siglo XII', 'Siglo XVII'], correct: 0 }
-      ]
-    },
-    {
-      id: 'ambrosio',
-      name: 'San Ambrosio de Milán',
-      dates: '340–397',
-      country: 'Tréveris 🇮🇹',
-      bio: 'Obispo de Milán y uno de los Padres de la Iglesia. Fue un gran predicador e himnógrafo, y bautizó a San Agustín.',
-      questions: [
-        { q: '¿De qué ciudad fue obispo San Ambrosio?', a: ['Milán', 'Roma', 'Nápoles'], correct: 0, explain: 'San Ambrosio (340–397) fue obispo de Milán, Padre de la Iglesia, y bautizó a San Agustín.' },
-        { q: '¿A qué famoso santo bautizó San Ambrosio?', a: ['San Agustín', 'San Benito', 'San Francisco'], correct: 0 },
-        { q: '¿En qué siglo vivió San Ambrosio?', a: ['Siglo IV', 'Siglo X', 'Siglo XV'], correct: 0 }
-      ]
-    },
-    {
-      id: 'monica',
-      name: 'Santa Mónica',
-      dates: '331–387',
-      country: 'Tagaste, Numidia 🌍',
-      bio: 'Madre de San Agustín. Es recordada por su constancia y sus oraciones durante muchos años por la conversión de su hijo.',
-      questions: [
-        { q: '¿De quién fue madre Santa Mónica?', a: ['De San Agustín', 'De San Benito', 'De San Jorge'], correct: 0, explain: 'Santa Mónica (331–387) fue la madre de San Agustín y es recordada por sus oraciones por la conversión de su hijo.' },
-        { q: '¿Por qué es especialmente recordada Santa Mónica?', a: ['Por sus oraciones por su hijo', 'Por fundar conventos', 'Por sus viajes'], correct: 0 },
-        { q: '¿En qué siglo vivió Santa Mónica?', a: ['Siglo IV', 'Siglo XI', 'Siglo XVI'], correct: 0 }
-      ]
-    }
+    // PRUNED: 6 saints to reach 14, added 1 new.
+    { id: 'juan_dios', name: 'San Juan de Dios', dates: '1495–1550', country: 'Portugal 🇵🇹', bio: 'Fundador de la Orden de los Hospitalarios. Dedicó su vida a cuidar a los enfermos y pobres.', questions: [ { q: '¿A qué dedicó su vida San Juan de Dios?', a: ['A cuidar a los enfermos', 'A la política', 'A la pintura'], correct: 0 }, { q: '¿Qué orden fundó?', a: ['Los Jesuitas', 'Los Hospitalarios', 'Los Franciscanos'], correct: 1 }, { q: '¿Dónde nació?', a: ['En Italia', 'En Portugal', 'En Francia'], correct: 1 } ] }
   ];
 
   /* The four sets of mysteries of the Holy Rosary, with the traditional
@@ -528,34 +458,8 @@ const FeManager = (() => {
       q: '¿A quién se le hizo la promesa de construir este templo?', a: ['A San José', 'A la Virgen del Carmen', 'A San Miguel'], correct: 1,
       explain: 'El Templo Votivo de Maipú se construyó en Santiago para cumplir la promesa hecha a la Virgen del Carmen tras la independencia de Chile.'
     },
-    {
-      id: 'teresa',
-      title: 'Santuario de Santa Teresa de Los Andes',
-      info: 'Ubicado en Auco, es un importante lugar de peregrinación donde descansan los restos de la primera santa chilena.',
-      q: '¿Qué santa chilena descansa en este santuario?', a: ['Santa Rosa', 'Santa Teresa de Los Andes', 'Santa Cecilia'], correct: 1,
-      explain: 'El Santuario de Santa Teresa de Los Andes está ubicado en Auco y guarda los restos de la primera santa chilena.'
-    },
-    {
-      id: 'catedral_stgo',
-      title: 'Catedral Metropolitana de Santiago',
-      info: 'Ubicada en la Plaza de Armas de Santiago, es la iglesia principal de la Arquidiócesis. La construcción del edificio actual comenzó en 1748.',
-      q: '¿En qué plaza se encuentra la Catedral Metropolitana?', a: ['Plaza de Armas', 'Plaza Italia', 'Plaza Brasil'], correct: 0,
-      explain: 'La Catedral Metropolitana de Santiago está en la Plaza de Armas; la construcción del edificio actual comenzó en 1748.'
-    },
-    {
-      id: 'lourdes_punta_arenas',
-      title: 'Santuario de Lourdes en Punta Arenas',
-      info: 'Es una gruta y santuario dedicado a la Virgen de Lourdes en la ciudad de Punta Arenas, en el extremo sur de Chile. Es un destacado lugar de peregrinación en la Patagonia.',
-      q: '¿En qué ciudad del sur de Chile está este santuario?', a: ['Punta Arenas', 'La Serena', 'Arica'], correct: 0,
-      explain: 'El Santuario de Lourdes está en Punta Arenas, en el extremo sur de Chile, y es un lugar de peregrinación de la Patagonia.'
-    },
-    {
-      id: 'candelaria',
-      title: 'Fiesta de la Virgen de la Candelaria',
-      info: 'Se celebra el 2 de febrero, fiesta de la Presentación del Señor. En Copiapó, en el norte de Chile, se honra a la Virgen de la Candelaria con bailes religiosos.',
-      q: '¿Qué día se celebra la Virgen de la Candelaria?', a: ['2 de febrero', '16 de julio', '8 de diciembre'], correct: 0,
-      explain: 'La Virgen de la Candelaria se celebra el 2 de febrero, fiesta de la Presentación del Señor; en Copiapó se honra con bailes religiosos.'
-    }
+    // PRUNED: 4 heritage items to reach 7, added 1 new.
+    { id: 'fiesta_tirana', name: 'Fiesta de La Tirana', type: 'Festival', location: 'Región de Tarapacá', facts: 'La fiesta religiosa más grande del norte de Chile, en honor a la Virgen del Carmen.', q: '¿En honor a quién es la Fiesta de La Tirana?', a: ['La Virgen del Carmen', 'San Pedro', 'Santa Rosa'], correct: 0 }
   ];
 
   function _key() {

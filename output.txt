@@ -1,0 +1,273 @@
+// === CONTENT GUARDIAN [2026-06-25] ===
+// Math Galaxy: 8 new question types added, 21 pruned
+// Descubre Chile: 9 new questions, 0 new topic (if any)
+// Fe Explorador: 2 new saint/heritage items, 10 pruned
+// World Explorer: 1 new countries/questions
+// Guitar Jam: 2 new chord/song, 16 pruned
+// Learning Checks: 0 new questions
+// Story Explorer: 1 new stories/words, 5 pruned
+
+FILE: js/math-galaxy.js
+FIND:
+const types = ['count', 'add', 'moon_count', 'star_sub', 'planet_count', 'rocket_sub', 'astronaut_count', 'star_add', 'galaxy_count', 'alien_count', 'satellite_add', 'meteor_add', 'meteor_count', 'ufo_count', 'telescope_add', 'sun_count', 'sun_add', 'rocket_count', 'satellite_count', 'asteroid_add', 'planet_sub', 'sun_sub', 'meteor_pattern', 'sun_count_2', 'planet_compare'];
+REPLACE WITH:
+// PRUNED: 'sun_count_2', 'planet_compare'
+  const types = ['count', 'add', 'moon_count', 'star_sub', 'planet_count', 'rocket_sub', 'astronaut_count', 'star_add', 'galaxy_count', 'alien_count', 'satellite_add', 'meteor_add', 'meteor_count', 'ufo_count', 'telescope_add', 'sun_count', 'sun_add', 'rocket_count', 'satellite_count', 'asteroid_add', 'planet_sub', 'sun_sub', 'meteor_pattern', 'astronaut_sub_2', 'alien_add_2'];
+
+FILE: js/math-galaxy.js
+FIND:
+  if (type === 'sun_count_2') { const n = rand(1, 10); return { label: 'Suns', text: '☀️'.repeat(n), hint: 'How many suns?', answer: n, options: generateDistractors(n, 3, 1, 15), mode: 'choice' }; }
+  if (type === 'planet_compare') { const a = rand(1, 10), b = rand(1, 10); if (a === b) return genCadet(); return { label: 'Comparing', text: `${a} 🪐 or ${b} 🪐`, hint: 'Which is bigger?', answer: Math.max(a, b), options: shuffle([a, b]), mode: 'choice' }; }
+REPLACE WITH:
+  if (type === 'astronaut_sub_2') { const a = rand(5, 10), b = rand(1, 4); return { label: 'Subtraction', text: `${a} 👨‍🚀 - ${b} 👨‍🚀 = ?`, hint: 'Subtract', answer: a-b, options: generateDistractors(a-b, 3, 1, 10), mode: 'choice' }; }
+  if (type === 'alien_add_2') { const a = rand(1, 5), b = rand(1, 5); return { label: 'Addition', text: `${a} 👽 + ${b} 👽 = ?`, hint: 'Add', answer: a+b, options: generateDistractors(a+b, 3, 1, 10), mode: 'choice' }; }
+
+FILE: js/math-galaxy.js
+FIND:
+  const types = ['add', 'sub', 'planet_add', 'comet_compare2', 'double', 'space_compare', 'star_fraction', 'ufo_sub', 'meteor_sub', 'rocket_compare', 'astronaut_sub', 'robot_pattern', 'satellite_compare', 'comet_sub', 'alien_pattern', 'planet_compare', 'star_sub', 'planet_sub', 'comet_add', 'asteroid_sub', 'meteor_add_2', 'spaceship_add', 'satellite_add2', 'alien_diff', 'asteroid_add_2'];
+REPLACE WITH:
+// PRUNED: 'alien_diff', 'asteroid_add_2'
+  const types = ['add', 'sub', 'planet_add', 'comet_compare2', 'double', 'space_compare', 'star_fraction', 'ufo_sub', 'meteor_sub', 'rocket_compare', 'astronaut_sub', 'robot_pattern', 'satellite_compare', 'comet_sub', 'alien_pattern', 'planet_compare', 'star_sub', 'planet_sub', 'comet_add', 'asteroid_sub', 'meteor_add_2', 'spaceship_add', 'satellite_add2', 'comet_sub_2', 'rocket_add_2'];
+
+FILE: js/math-galaxy.js
+FIND:
+  if (type === 'alien_diff') { const a = rand(15,30), b = rand(5,14); return { label: 'Alien Subtraction', text: `${a} 👽 - ${b} 👽 = ?`, hint: 'Subtract the aliens', answer: a-b, options: generateDistractors(a-b, 3, 1, 30), mode: 'choice' }; }
+  if (type === 'asteroid_add_2') { const a = rand(10, 25), b = rand(10, 25); return { label: 'Asteroid Addition', text: `${a} 🪨 + ${b} 🪨 = ?`, hint: 'Add the numbers', answer: a+b, options: generateDistractors(a+b, 3, 10, 60), mode: 'choice' }; }
+REPLACE WITH:
+  if (type === 'comet_sub_2') { const a = rand(10, 20), b = rand(1, 9); return { label: 'Comet Subtraction', text: `${a} ☄️ - ${b} ☄️ = ?`, hint: 'Subtract', answer: a-b, options: generateDistractors(a-b, 3, 1, 20), mode: 'choice' }; }
+  if (type === 'rocket_add_2') { const a = rand(10, 20), b = rand(10, 20); return { label: 'Rocket Addition', text: `${a} 🚀 + ${b} 🚀 = ?`, hint: 'Add', answer: a+b, options: generateDistractors(a+b, 3, 20, 50), mode: 'choice' }; }
+
+FILE: js/math-galaxy.js
+FIND:
+  const types = ['mult', 'div', 'frac_visual', 'ufo_mult', 'satellite_frac', 'comet_mult', 'asteroid_div', 'star_word', 'satellite_div', 'telescope_frac', 'planet_mult', 'ufo_div', 'astronaut_mult', 'rocket_div', 'moon_frac', 'alien_pct', 'asteroid_mult', 'alien_div', 'blackhole_mult', 'comet_frac', 'galaxy_div', 'nebula_frac', 'star_div', 'moon_div', 'comet_mult_2'];
+REPLACE WITH:
+// PRUNED: 'moon_div', 'comet_mult_2'
+  const types = ['mult', 'div', 'frac_visual', 'ufo_mult', 'satellite_frac', 'comet_mult', 'asteroid_div', 'star_word', 'satellite_div', 'telescope_frac', 'planet_mult', 'ufo_div', 'astronaut_mult', 'rocket_div', 'moon_frac', 'alien_pct', 'asteroid_mult', 'alien_div', 'blackhole_mult', 'comet_frac', 'galaxy_div', 'nebula_frac', 'star_div', 'planet_div_2', 'star_mult_2'];
+
+FILE: js/math-galaxy.js
+FIND:
+  if (type === 'moon_div') { const b = rand(2, 8), ans = rand(2, 9); return { label: 'Moon Division', text: `${b * ans} 🌕 ÷ ${b} = ?`, hint: 'Divide', answer: ans, options: generateDistractors(ans, 3, 1, 10), mode: 'choice' }; }
+  if (type === 'comet_mult_2') { const a = rand(5, 12), b = rand(5, 12); return { label: 'Comet Multiplication', text: `${a} ☄️ × ${b} = ?`, hint: 'Multiply', answer: a*b, options: generateDistractors(a*b, 3, 20, 150), mode: 'choice' }; }
+REPLACE WITH:
+  if (type === 'planet_div_2') { const b = rand(2, 9), ans = rand(2, 10); return { label: 'Planet Division', text: `${b * ans} 🪐 ÷ ${b} = ?`, hint: 'Divide', answer: ans, options: generateDistractors(ans, 3, 1, 12), mode: 'choice' }; }
+  if (type === 'star_mult_2') { const a = rand(6, 12), b = rand(6, 12); return { label: 'Star Multiplication', text: `${a} ⭐ × ${b} = ?`, hint: 'Multiply', answer: a*b, options: generateDistractors(a*b, 3, 20, 150), mode: 'choice' }; }
+
+FILE: js/math-galaxy.js
+FIND:
+  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'blackhole_sub', 'galaxy_pct_2', 'void_neg', 'star_power', 'cosmic_pemdas', 'orbit_ratio', 'warp_algebra', 'prime_scan', 'station_geo', 'data_mean', 'data_median', 'data_mode', 'frac_to_dec', 'pct_of_num', 'dec_to_pct'];
+REPLACE WITH:
+// PRUNED: 15 types to reach exactly 25.
+  const types = ['big_add', 'big_mult', 'blackhole_div', 'galaxy_frac', 'percent', 'order_ops', 'galaxy_decimal', 'lightyear_percent', 'blackhole_ops', 'nebula_dec', 'blackhole_pct', 'galaxy_ops', 'comet_ops', 'star_decimal', 'asteroid_pct', 'blackhole_add', 'supernova_pct', 'gravity_ops', 'orbit_dec', 'quasar_ops', 'pulsar_dec', 'pulsar_add', 'galaxy_pct', 'nova_add', 'nova_sub'];
+
+FILE: js/descubre-chile.js
+FIND:
+  animales:[
+    {q:'¿Qué tipo de animales son las vicuñas
+REPLACE WITH:
+  animales:[
+    {q:'¿Qué ave corredora vive en la Patagonia chilena?',a:'El ñandú',o:['El ñandú','El avestruz','El emú','El cóndor'], tier:'beginner'},
+    {q:'¿Qué pequeño marsupial endémico habita en los bosques del sur de Chile?',a:'El monito del monte',o:['El monito del monte','La chinchilla','El pudú','El huemul'], tier:'advanced'},
+    {q:'¿Cuál es el anfibio endémico de Chile que destaca por su forma y canto en los bosques del sur?',a:'Ranita de Darwin',o:['Ranita de Darwin','Sapo de rulo','Rana chilena','Sapo espinoso'], tier:'intermediate'},
+    {q:'¿Qué tipo de animales son las vicuñas
+
+FILE: js/descubre-chile.js
+FIND:
+  volcanes_chile:[
+    {q:'¿En qué región del Pacífico
+REPLACE WITH:
+  volcanes_chile:[
+    {q:'¿Qué volcán es famoso por su forma cónica perfecta cerca del lago Llanquihue?',a:'Osorno',o:['Osorno','Villarrica','Llaima','Calbuco'], tier:'beginner'},
+    {q:'¿Cuál es el volcán más alto de Chile y del mundo?',a:'Nevados de Ojos del Salado',o:['Nevados de Ojos del Salado','Llullaillaco','Licancabur','Tupungato'], tier:'expert', explain:'El Nevados de Ojos del Salado, en la Región de Atacama, es el volcán activo más alto del mundo.'},
+    {q:'¿Qué volcán hizo una gran erupción en 2008 cubriendo de cenizas la Patagonia?',a:'Chaitén',o:['Chaitén','Calbuco','Hudson','Puyehue'], tier:'advanced'},
+    {q:'¿En qué región del Pacífico
+
+FILE: js/descubre-chile.js
+FIND:
+  fiestas_patrias:[
+    {q:'¿Qué fecha principal
+REPLACE WITH:
+  fiestas_patrias:[
+    {q:'¿Qué estructura se arma con ramas y hojas para celebrar las fiestas?',a:'La ramada',o:['La ramada','La carpa','El toldo','La ruca'], tier:'beginner'},
+    {q:'¿Qué bebida tradicional, sin alcohol, se prepara con duraznos deshidratados y trigo?',a:'Mote con huesillo',o:['Mote con huesillo','Chicha','Pisco sour','Jugos naturales'], tier:'beginner'},
+    {q:'¿Qué juego tradicional consiste en ensartar un madero con un agujero en un palo?',a:'El emboque',o:['El emboque','El trompo','El volantín','El palo encebado'], tier:'intermediate'},
+    {q:'¿Qué fecha principal
+
+FILE: js/fe-explorador.js
+PRUNE:
+    {
+      id: 'tomas_aquino',
+      name: 'Santo Tomás de Aquino',
+...
+      id: 'monica',
+      name: 'Santa Mónica',
+      dates: '332–387',
+      country: 'Tagaste, Numidia 🌍',
+      bio: 'Madre de San Agustín, famosa por su paciencia y oraciones para que su hijo conociera a Dios.',
+      questions: [
+        { q: '¿De quién fue madre Santa Mónica?', a: ['De San Agustín', 'De San Pedro', 'De San Pablo'], correct: 0, explain: 'Santa Mónica fue madre de San Agustín y rezó toda su vida por él.' },
+        { q: '¿Por qué es famosa Santa Mónica?', a: ['Por su paciencia y oraciones', 'Por escribir muchos libros', 'Por ser reina'], correct: 0 },
+        { q: '¿En qué siglo vivió?', a: ['Siglo IV', 'Siglo I', 'Siglo XX'], correct: 0 }
+      ]
+    }
+REASON: Pruned 6 saints to reach 14 to stay below MAX 15 limit before adding San Juan de Dios.
+
+FILE: js/fe-explorador.js
+FIND:
+    {
+      id: 'monica',
+      name: 'Santa Mónica',
+      ...
+    }
+  ];
+REPLACE WITH:
+    // PRUNED: 6 saints to reach 14, added 1 new.
+    { id: 'juan_dios', name: 'San Juan de Dios', dates: '1495–1550', country: 'Portugal 🇵🇹', bio: 'Fundador de la Orden de los Hospitalarios. Dedicó su vida a cuidar a los enfermos y pobres.', questions: [ { q: '¿A qué dedicó su vida San Juan de Dios?', a: ['A cuidar a los enfermos', 'A la política', 'A la pintura'], correct: 0 }, { q: '¿Qué orden fundó?', a: ['Los Jesuitas', 'Los Hospitalarios', 'Los Franciscanos'], correct: 1 }, { q: '¿Dónde nació?', a: ['En Italia', 'En Portugal', 'En Francia'], correct: 1 } ] }
+  ];
+
+FILE: js/fe-explorador.js
+PRUNE:
+  {
+    id: 'teresa',
+    name: 'Templo Votivo de Maipú',
+...
+  {
+    id: 'candelaria',
+    name: 'Santuario de la Candelaria',
+    type: 'Iglesia',
+    location: 'Copiapó, Región de Atacama',
+    facts: 'El principal centro de devoción de los mineros del norte, donde se celebra a la Virgen de la Candelaria.',
+    q: '¿Quiénes tienen gran devoción a la Virgen de la Candelaria en Copiapó?',
+    a: ['Los mineros', 'Los pescadores', 'Los agricultores'],
+    correct: 0
+  }
+REASON: Pruned 4 items to reach 7 to stay below MAX 8 limit before adding Fiesta de La Tirana.
+
+FILE: js/fe-explorador.js
+FIND:
+  {
+    id: 'candelaria',
+...
+  }
+];
+REPLACE WITH:
+  // PRUNED: 4 heritage items to reach 7, added 1 new.
+  { id: 'fiesta_tirana', name: 'Fiesta de La Tirana', type: 'Festival', location: 'Región de Tarapacá', facts: 'La fiesta religiosa más grande del norte de Chile, en honor a la Virgen del Carmen.', q: '¿En honor a quién es la Fiesta de La Tirana?', a: ['La Virgen del Carmen', 'San Pedro', 'Santa Rosa'], correct: 0 }
+];
+
+FILE: js/world-explorer.js
+FIND:
+    { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
+REPLACE WITH:
+    { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
+        {
+          id: 'fiji', name: 'Fiji', nameEs: 'Fiyi', flag: '🇫🇯',
+          capital: 'Suva', capitalEs: 'Suva',
+          facts: [
+            { en: 'Fiji is an island country in Melanesia.', es: 'Fiyi es un país insular en Melanesia.' },
+            { en: 'It consists of more than 330 islands.', es: 'Consiste en más de 330 islas.' },
+            { en: 'Rugby is the most popular sport in Fiji.', es: 'El rugby es el deporte más popular en Fiyi.' },
+            { en: 'Fiji is known for its beautiful coral reefs.', es: 'Fiyi es conocido por sus hermosos arrecifes de coral.' }
+          ],
+          landmark: { name: 'Sri Siva Subramaniya Temple', nameEs: 'Templo Sri Siva Subramaniya', emoji: '🛕' },
+          animal: { name: 'Collared Lory', nameEs: 'Lori acollarado', emoji: '🦜' },
+          quiz: [
+            { q: 'What is the capital of Fiji?', qEs: '¿Cuál es la capital de Fiyi?', options: ['Suva', 'Nadi', 'Lautoka', 'Apia'], optionsEs: ['Suva', 'Nadi', 'Lautoka', 'Apia'], answer: 0, tier: 'beginner' },
+            { q: 'How many islands does Fiji have?', qEs: '¿Cuántas islas tiene Fiyi?', options: ['About 100', 'Over 330', 'Exactly 50', 'Over 1000'], optionsEs: ['Alrededor de 100', 'Más de 330', 'Exactamente 50', 'Más de 1000'], answer: 1, tier: 'intermediate' },
+            { q: 'What is the most popular sport in Fiji?', qEs: '¿Cuál es el deporte más popular en Fiyi?', options: ['Soccer', 'Cricket', 'Rugby', 'Tennis'], optionsEs: ['Fútbol', 'Críquet', 'Rugby', 'Tenis'], answer: 2, tier: 'advanced' }
+          ]
+        },
+
+FILE: js/guitar-jam.js
+PRUNE:
+  { name: 'A#m', frets: [6, 8, 8, 6, 6, 6], fingers: [1, 3, 4, 1, 1, 1], tier: 'expert', funFact: 'A# minor is commonly used in sad or dramatic songs.' },
+...
+  { name: 'F#m', frets: [2, 4, 4, 2, 2, 2], fingers: [1, 3, 4, 1, 1, 1], tier: 'advanced', funFact: 'F# minor is a popular key for rock and metal songs.' }
+REASON: Pruned 9 chords to reach 17 and stay below MAX 18 limit before adding Gmaj7.
+
+FILE: js/guitar-jam.js
+FIND:
+  { name: 'F#m', frets: [2, 4, 4, 2, 2, 2], fingers: [1, 3, 4, 1, 1, 1], tier: 'advanced', funFact: 'F# minor is a popular key for rock and metal songs.' }
+];
+REPLACE WITH:
+  // PRUNED: 9 chords to reach 17, added 1 new.
+  { name: 'Gmaj7', frets: [3, 2, 0, 0, 0, 2], fingers: [2, 1, 0, 0, 0, 3], tier: 'advanced', funFact: 'Gmaj7 adds a bright, jazzy sound to the key of G.' }
+];
+
+FILE: js/guitar-jam.js
+PRUNE:
+  { title: 'Down in the Valley', artist: 'Traditional', tier: 'intermediate', tempo: 100, pattern: 'D D U U D', progression: [['C', 4], ['G7', 4], ['G7', 4], ['C', 4]] },
+...
+  { title: 'Greensleeves', artist: 'Traditional', tier: 'advanced', tempo: 90, pattern: 'D D U D U', progression: [['Am', 2], ['G', 2], ['F', 2], ['E', 2]] }
+REASON: Pruned 7 songs to reach 11 and stay below MAX 12 limit before adding Morning Light.
+
+FILE: js/guitar-jam.js
+FIND:
+  { title: 'Greensleeves', artist: 'Traditional', tier: 'advanced', tempo: 90, pattern: 'D D U D U', progression: [['Am', 2], ['G', 2], ['F', 2], ['E', 2]] }
+];
+REPLACE WITH:
+  // PRUNED: 7 songs to reach 11, added 1 new.
+  { title: 'Morning Light', artist: 'Original', tier: 'advanced', tempo: 100, pattern: 'D D U U D U', progression: [['G', 4], ['Gmaj7', 4], ['C', 4], ['D', 4]] }
+];
+
+FILE: js/story-explorer.js
+PRUNE:
+    {
+      id: 'moon_landing',
+      title: 'The Great Moon Landing',
+...
+    {
+      id: 'atacama_stars',
+      title: 'Stargazing in the Atacama',
+...
+    }
+REASON: Pruned 5 stories to reach 11 and stay below MAX 12 limit before adding The Atacama Giant.
+
+FILE: js/story-explorer.js
+FIND:
+    {
+      id: 'atacama_stars',
+      title: 'Stargazing in the Atacama',
+...
+    }
+  ];
+REPLACE WITH:
+    // PRUNED: 5 stories to reach 11, added 1 new.
+    {
+      id: 'atacama_giant',
+      title: 'The Atacama Giant',
+      titleEs: 'El Gigante de Atacama',
+      tier: 'intermediate', ageMin: 8, region: 'desert', icon: '🌵',
+      pages: [
+        {
+          en: 'The explorers traveled through the dry desert.',
+          es: 'Los exploradores viajaron por el desierto seco.',
+          vocab: [
+            { word: 'explorers', wordEs: 'exploradores', def: 'People who travel to new places.', defEs: 'Personas que viajan a lugares nuevos.' },
+            { word: 'desert', wordEs: 'desierto', def: 'A very dry area of land.', defEs: 'Un área de tierra muy seca.' },
+            { word: 'dry', wordEs: 'seco', def: 'Having no water.', defEs: 'Que no tiene agua.' }
+          ]
+        },
+        {
+          en: 'They found a massive ancient geoglyph on the hill.',
+          es: 'Encontraron un enorme geoglifo antiguo en el cerro.',
+          vocab: [
+            { word: 'massive', wordEs: 'enorme', def: 'Very large.', defEs: 'Muy grande.' },
+            { word: 'ancient', wordEs: 'antiguo', def: 'Very old.', defEs: 'Muy viejo.' },
+            { word: 'geoglyph', wordEs: 'geoglifo', def: 'A large drawing on the ground.', defEs: 'Un gran dibujo en la tierra.' }
+          ]
+        },
+        {
+          en: 'It was created by ancient inhabitants using dark stones.',
+          es: 'Fue creado por habitantes antiguos usando piedras oscuras.',
+          vocab: [
+            { word: 'inhabitants', wordEs: 'habitantes', def: 'People who live in a place.', defEs: 'Personas que viven en un lugar.' },
+            { word: 'stones', wordEs: 'piedras', def: 'Hard, solid pieces of rock.', defEs: 'Piezas duras y sólidas de roca.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What did they find?', qEs: '¿Qué encontraron?', options: ['A city', 'A geoglyph', 'A river', 'A forest'], optionsEs: ['Una ciudad', 'Un geoglifo', 'Un río', 'Un bosque'], answer: 1 },
+        { q: 'What was it made of?', qEs: '¿De qué estaba hecho?', options: ['Wood', 'Sand', 'Stones', 'Water'], optionsEs: ['Madera', 'Arena', 'Piedras', 'Agua'], answer: 2 }
+      ]
+    }
+  ];
