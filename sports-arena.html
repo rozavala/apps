@@ -270,13 +270,15 @@
 </div>
 
 <script src="js/auth.js"></script>
+<script src="js/off-hours.js?v=1"></script>
 
 <script src="js/a11y.js"></script>
-<script src="js/sync.js?v=12"></script>
+<script src="js/dialog.js?v=2"></script>
+<script src="js/sync.js?v=15"></script>
 <script src="js/zs-diag.js?v=3"></script>
 <script src="js/nav.js?v=3"></script>
 <script src="js/sounds.js"></script>
-<script src="js/timer.js"></script>
+<script src="js/timer.js?v=3"></script>
 <script src="js/activity-log.js"></script>
 <script src="js/sports-arena.js"></script>
 <script>
@@ -765,29 +767,49 @@
     }
   }
 
-  function editMatchInline(matchId) {
+  async function editMatchInline(matchId) {
     const all = SportsArena.getRecentMatches(HISTORY_LIMIT);
     const m = all.find(x => x.id === matchId);
     if (!m) return;
-    const newScore1 = prompt(`Score for ${m.player1}:`, m.score1);
+    const newScore1 = await ZsDialog.prompt({
+      title: 'Edit score',
+      message: `Score for ${m.player1}:`,
+      defaultValue: m.score1,
+      inputType: 'number',
+      inputMode: 'numeric',
+      confirmLabel: 'Next'
+    });
     if (newScore1 === null) return;
-    const newScore2 = prompt(`Score for ${m.player2}:`, m.score2);
+    const newScore2 = await ZsDialog.prompt({
+      title: 'Edit score',
+      message: `Score for ${m.player2}:`,
+      defaultValue: m.score2,
+      inputType: 'number',
+      inputMode: 'numeric',
+      confirmLabel: 'Save'
+    });
     if (newScore2 === null) return;
     const s1 = parseInt(newScore1, 10);
     const s2 = parseInt(newScore2, 10);
     if (isNaN(s1) || isNaN(s2)) {
-      alert('Scores must be numbers.');
+      ZsDialog.alert({ title: 'Score not changed', message: 'Scores must be numbers.' });
       return;
     }
     SportsArena.editMatch(matchId, { score1: s1, score2: s2 });
     renderStandings();
   }
 
-  function deleteMatchInline(matchId) {
+  async function deleteMatchInline(matchId) {
     const all = SportsArena.getRecentMatches(HISTORY_LIMIT);
     const m = all.find(x => x.id === matchId);
     if (!m) return;
-    if (!confirm(`Delete this match?\n${m.player1} ${m.score1} – ${m.score2} ${m.player2}`)) return;
+    const ok = await ZsDialog.confirm({
+      title: 'Delete this match?',
+      message: `${m.player1} ${m.score1} – ${m.score2} ${m.player2}`,
+      confirmLabel: 'Delete',
+      danger: true
+    });
+    if (!ok) return;
     SportsArena.deleteMatch(matchId);
     renderStandings();
   }
@@ -824,8 +846,13 @@
     renderSportsList();
   }
 
-  function removeCustomSportById(id) {
-    if (confirm('Remove this custom sport?')) {
+  async function removeCustomSportById(id) {
+    const ok = await ZsDialog.confirm({
+      title: 'Remove this custom sport?',
+      confirmLabel: 'Remove',
+      danger: true
+    });
+    if (ok) {
       SportsArena.removeCustomSport(id);
       renderSportsList();
     }
@@ -864,10 +891,16 @@
       }).join('');
   }
 
-  function deletePlayerByName(name) {
+  async function deletePlayerByName(name) {
     const counts = _playerMatchCounts();
     const n = counts[name] || 0;
-    if (!confirm('Remove ' + name + ' from Sports Arena?\nThis deletes ' + n + ' match' + (n === 1 ? '' : 'es') + ' they played. Their profile is not affected.')) return;
+    const ok = await ZsDialog.confirm({
+      title: 'Remove ' + name + ' from Sports Arena?',
+      message: 'This deletes ' + n + ' match' + (n === 1 ? '' : 'es') + ' they played. Their profile is not affected.',
+      confirmLabel: 'Remove',
+      danger: true
+    });
+    if (!ok) return;
     SportsArena.deletePlayer(name);
     renderPlayersList();
   }

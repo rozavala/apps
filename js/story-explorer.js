@@ -985,19 +985,19 @@ const StoryExplorer = (() => {
 
     if (useShared) {
       if (!ZsTTS.supported()) {
-        alert(lang === 'es'
+        ZsDialog.alert(lang === 'es'
           ? 'Este navegador no soporta lectura en voz alta.'
           : 'This browser does not support read-aloud.');
         return;
       }
       if (!ZsTTS.getSettings().enabled) {
-        alert(lang === 'es'
+        ZsDialog.alert(lang === 'es'
           ? 'Lectura en voz alta está desactivada. Un adulto puede activarla en el Dashboard.'
           : 'Read-aloud is turned off. A grown-up can turn it on in the Dashboard.');
         return;
       }
     } else if (!('speechSynthesis' in window)) {
-      alert(lang === 'es'
+      ZsDialog.alert(lang === 'es'
         ? 'Este navegador no soporta lectura en voz alta.'
         : 'This browser does not support read-aloud.');
       return;

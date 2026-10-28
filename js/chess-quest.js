@@ -356,8 +356,9 @@ let capturedByWhite=[],capturedByBlack=[],lastPlayMove=null;
 function openPlay(){
   if (typeof canPlayChess === 'function' && !canPlayChess()) {
     const limit = getChessLimit();
-    const msg = limit === 0 ? 'Chess is currently disabled.' : 'You have used all your Chess plays for this week! 🔒';
-    alert(msg);
+    ZsDialog.alert(limit === 0
+      ? { title: 'Chess is off', message: 'Chess is currently disabled.' }
+      : { title: 'No plays left 🔒', message: 'You have used all your Chess plays for this week!' });
     return;
   }
 

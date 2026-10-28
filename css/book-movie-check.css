@@ -322,6 +322,13 @@ body {
   color: var(--text-muted);
   font-weight: 600;
 }
+.bmc-list-who {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-top: 2px;
+}
+.bmc-filter-break { flex-basis: 100%; height: 0; }
 .bmc-list-verdict {
   font-size: 0.72rem;
   font-weight: 800;

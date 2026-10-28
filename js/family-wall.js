@@ -621,9 +621,15 @@ var FamilyWall = (function() {
   }
   function summerRemove(id) {
     if (typeof SummerTodos === 'undefined') return;
-    if (typeof confirm === 'function' && !confirm('Remove this summer to-do?')) return;
-    SummerTodos.removeItem(id);
-    _paint();
+    ZsDialog.confirm({
+      title: 'Remove this summer to-do?',
+      confirmLabel: 'Remove',
+      danger: true
+    }).then(function(ok) {
+      if (!ok) return;
+      SummerTodos.removeItem(id);
+      _paint();
+    });
   }
   function summerTarget(delta) {
     if (typeof SummerTodos === 'undefined') return;
@@ -709,7 +715,8 @@ var FamilyWall = (function() {
     }
 
     var today = new Date(); today.setHours(0, 0, 0, 0);
-    var endOfRange = new Date(today.getTime() + 7 * 86400000);
+    // Step by calendar day, not 24 h: the clock-change Sunday is 23 or 25 h.
+    var endOfRange = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
     var events;
     try {
       events = FamilyCalendar.getUpcoming(500).filter(function(ev) {
@@ -733,7 +740,7 @@ var FamilyWall = (function() {
 
     var inner = '';
     for (var i = 0; i < 7; i++) {
-      var d = new Date(today.getTime() + i * 86400000);
+      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
       var key = d.toDateString();
       var dayEvents = buckets[key] || [];
       // Skip the first day (today) — already in the "Today" tile.
@@ -882,9 +889,12 @@ var FamilyWall = (function() {
   function _storageFullNotice() {
     if (_storageNoticeShown) return;
     _storageNoticeShown = true;
-    alert('This device is out of storage, so the tick didn\u2019t save.\n\n' +
-          'Freeing space fixes it \u2014 the Art Studio galleries are usually ' +
-          'what fills it up. Ticks made on a phone still sync here.');
+    ZsDialog.alert({
+      title: 'This device is out of storage',
+      message: 'So the tick didn\u2019t save.\n\n' +
+               'Freeing space fixes it \u2014 the Art Studio galleries are usually ' +
+               'what fills it up. Ticks made on a phone still sync here.'
+    });
   }
 
   // Let the routines conditions (sunscreen if it's sunny, cleats if
@@ -1085,14 +1095,19 @@ var FamilyWall = (function() {
     var info = _routineLabel(which);
     var label = info.short.toLowerCase();
     var names = others.map(function(p) { return p.name; }).join(', ');
-    if (typeof confirm === 'function' &&
-        !confirm('Give ' + names + ' the same ' + label + ' list as ' + _editKid + '?\n\n' +
-                 'Their current ' + label + ' tasks are replaced. Anything they already ' +
-                 'ticked off today stays ticked if the task is still on the list.')) return;
-    var tpl = Routines.getTemplates(_editKid)[which] || [];
-    others.forEach(function(p) { Routines.setTemplate(which, tpl, p.name); });
-    _applyNote = { which: which, text: '✓ Copied to ' + names };
-    _renderRoutineEditor();
+    var kid = _editKid;
+    ZsDialog.confirm({
+      title: 'Give ' + names + ' the same ' + label + ' list as ' + kid + '?',
+      message: 'Their current ' + label + ' tasks are replaced. Anything they already ' +
+               'ticked off today stays ticked if the task is still on the list.',
+      confirmLabel: 'Copy list'
+    }).then(function(ok) {
+      if (!ok || _editKid !== kid) return;
+      var tpl = Routines.getTemplates(kid)[which] || [];
+      others.forEach(function(p) { Routines.setTemplate(which, tpl, p.name); });
+      _applyNote = { which: which, text: '✓ Copied to ' + names };
+      _renderRoutineEditor();
+    });
   }
 
   function addRoutineTask(which) {
@@ -1132,7 +1147,7 @@ var FamilyWall = (function() {
     if (!tpl[j]) return;
     // An empty list falls back to the built-in defaults, so keep one.
     if (tpl.length <= 1) {
-      alert('Keep at least one task in this list, or tap ↻ Default to restore it.');
+      ZsDialog.toast('Keep at least one task in this list, or tap ↻ Default to restore it.');
       return;
     }
     tpl.splice(j, 1);
@@ -1144,10 +1159,17 @@ var FamilyWall = (function() {
     if (!_editKid) return;
     _applyNote = null;
     var info = _routineLabel(which);
-    if (typeof confirm === 'function' &&
-        !confirm('Restore the default ' + info.short.toLowerCase() + ' tasks for ' + _editKid + '?')) return;
-    Routines.resetTemplate(which, _editKid);
-    _renderRoutineEditor();
+    var kid = _editKid;
+    ZsDialog.confirm({
+      title: 'Restore the default ' + info.short.toLowerCase() + ' tasks for ' + kid + '?',
+      message: 'The list goes back to the built-in tasks.',
+      confirmLabel: 'Restore',
+      danger: true
+    }).then(function(ok) {
+      if (!ok || _editKid !== kid) return;
+      Routines.resetTemplate(which, kid);
+      _renderRoutineEditor();
+    });
   }
 
   // ---- Location modal ----
@@ -1203,7 +1225,7 @@ var FamilyWall = (function() {
 
   function requestGeo() {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser. Pick a city instead.');
+      ZsDialog.toast('Geolocation is not supported by this browser. Pick a city instead.');
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -1216,7 +1238,7 @@ var FamilyWall = (function() {
         closeLocationModal();
         _paint();
       },
-      function(err) { alert('Could not get your location: ' + err.message); },
+      function(err) { ZsDialog.toast('Could not get your location: ' + err.message); },
       { timeout: 10000 }
     );
   }

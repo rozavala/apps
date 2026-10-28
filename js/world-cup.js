@@ -3917,7 +3917,7 @@
       todayCardTitle = `📅 Today — ${todays.length} match${todays.length===1?'':'es'}`;
       todayHTML = todays.map(m => renderTodayRow(m)).join('');
     } else if (next) {
-      const dayDiff = Math.ceil((new Date(next.date+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
+      const dayDiff = Math.round((new Date(next.date+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
       const dayLabel = dayDiff === 1 ? 'Tomorrow' : (dayDiff <= 0 ? 'Coming up' : 'Coming up — in ' + dayDiff + ' days');
       todayCardTitle = `⚽ Next match — ${dayLabel}`;
       todayHTML = `
@@ -5664,8 +5664,14 @@
   // pool picks are untouched — only the KO fixtures' home/away teams
   // revert to placeholders and then refill automatically. Use this to
   // wipe edits made before auto-resolution existed.
-  function resetBracket() {
-    if (!confirm('Reset the knockout bracket?\n\nThis clears any manually-set teams in the Round of 32 onward and re-derives them from results and the official feed. Match scores and your bracket picks are NOT affected.')) return;
+  async function resetBracket() {
+    const ok = await ZsDialog.confirm({
+      title: 'Reset the knockout bracket?',
+      message: 'This clears any manually-set teams in the Round of 32 onward and re-derives them from results and the official feed. Match scores and your bracket picks are NOT affected.',
+      confirmLabel: 'Reset',
+      danger: true,
+    });
+    if (!ok) return;
     state.koAuto = state.koAuto || {};
     state.koFeed = state.koFeed || {};
     state.koTeams = state.koTeams || {};
@@ -5870,8 +5876,13 @@
     save();
     // Don't re-render on every keystroke — just persist. Leaderboard updates on Done.
   }
-  function removeMember(id) {
-    if (!confirm('Remove this bracket from the pool?')) return;
+  async function removeMember(id) {
+    const ok = await ZsDialog.confirm({
+      title: 'Remove this bracket from the pool?',
+      confirmLabel: 'Remove',
+      danger: true,
+    });
+    if (!ok) return;
     state.members = state.members.filter(m => m.id !== id);
     delete state.picks[id];
     if (state.uiSelectedMember === id) state.uiSelectedMember = null;
@@ -6187,10 +6198,15 @@
     if (mode === 'underdogs') return sorted[sorted.length - 1];
     return sorted[0];
   }
-  function quickFill(memberId, mode) {
+  async function quickFill(memberId, mode) {
     const p = state.picks[memberId];
     if (!p) return;
-    if (!confirm(`Quick-fill all UNLOCKED picks with ${mode}? Already-locked picks won't change.`)) return;
+    const ok = await ZsDialog.confirm({
+      title: `Quick-fill picks with ${mode}?`,
+      message: "This fills all UNLOCKED picks. Already-locked picks won't change.",
+      confirmLabel: 'Fill picks',
+    });
+    if (!ok) return;
     // Groups
     for (const g of GROUP_LETTERS) {
       if (isGroupLocked(g)) continue;
@@ -6235,8 +6251,14 @@
     renderPool();
   }
 
-  function resetAll() {
-    if (!confirm('This will erase all results, members, picks, and group customizations. Continue?')) return;
+  async function resetAll() {
+    const ok = await ZsDialog.confirm({
+      title: 'Clear all data?',
+      message: 'This will erase all results, members, picks, and group customizations.',
+      confirmLabel: 'Erase',
+      danger: true,
+    });
+    if (!ok) return;
     localStorage.removeItem(STORE_KEY);
     state = {
       groups: buildGroups(),

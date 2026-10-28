@@ -128,11 +128,21 @@ var WeeklyMenu = (function() {
     var base = new Date(_weekAnchor + 'T00:00:00');
     var prevAnchor = _iso(_addDays(base, -7));
     var prev = data.weeks[prevAnchor];
-    if (!prev) { alert('No hay menú de la semana anterior.'); return; }
-    if (!confirm('¿Copiar el menú de la semana anterior a esta semana? Reemplaza lo que haya ahora.')) return;
-    data.weeks[_weekAnchor] = JSON.parse(JSON.stringify(prev));
-    _save(data);
-    _render();
+    if (!prev) { ZsDialog.toast('No hay menú de la semana anterior.'); return; }
+    var anchor = _weekAnchor;
+    ZsDialog.confirm({
+      title: '¿Copiar la semana anterior?',
+      message: 'Reemplaza lo que haya ahora en esta semana.',
+      confirmLabel: 'Copiar',
+      cancelLabel: 'Cancelar'
+    }).then(function(ok) {
+      if (!ok) return;
+      // Re-read: a sync may have landed while the question was open.
+      var fresh = _load();
+      fresh.weeks[anchor] = JSON.parse(JSON.stringify(prev));
+      _save(fresh);
+      _render();
+    });
   }
 
   function setMeal(dayId, mealId, value) {
@@ -149,11 +159,20 @@ var WeeklyMenu = (function() {
 
   function clearWeek() {
     if (!_parentUnlocked) return;
-    if (!confirm('¿Borrar todo el menú de esta semana?')) return;
-    var data = _load();
-    delete data.weeks[_weekAnchor];
-    _save(data);
-    _render();
+    var anchor = _weekAnchor;
+    ZsDialog.confirm({
+      title: '¿Borrar esta semana?',
+      message: 'Se borra todo el menú de esta semana.',
+      confirmLabel: 'Borrar',
+      cancelLabel: 'Cancelar',
+      danger: true
+    }).then(function(ok) {
+      if (!ok) return;
+      var data = _load();
+      delete data.weeks[anchor];
+      _save(data);
+      _render();
+    });
   }
 
   function shareOrPrint() {
@@ -177,7 +196,7 @@ var WeeklyMenu = (function() {
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
-        alert('Menú copiado al portapapeles.');
+        ZsDialog.toast('Menú copiado al portapapeles.');
       });
       return;
     }

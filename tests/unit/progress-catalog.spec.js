@@ -17,19 +17,26 @@ test.describe('progress catalog', () => {
   });
 
   test('little-maestro song order is the quest-map order', () => {
-    // The quest map groups by world, so each world must be one
-    // contiguous run in the catalog and the worlds must ascend.
+    // The map is a run of paths (Primer → Level 1 → Level 2), each a run
+    // of worlds, so every "<path> · World N" group must be one contiguous
+    // run, the paths must come in order, and worlds ascend inside a path.
     const src = fs.readFileSync(OUT, 'utf8');
     const catalog = new Function(
       'window',
       src + '\nreturn window.ZSProgressCatalog;'
     )({});
 
-    const worlds = [];
-    catalog.piano.forEach(u => { if (worlds[worlds.length - 1] !== u.g) worlds.push(u.g); });
-    const numbers = worlds.map(w => parseInt(w.replace('World ', ''), 10));
+    const groups = [];
+    catalog.piano.forEach(u => { if (groups[groups.length - 1] !== u.g) groups.push(u.g); });
+    expect(new Set(groups).size, 'each world is one contiguous run').toBe(groups.length);
 
-    expect(new Set(worlds).size, 'each world is one contiguous run').toBe(worlds.length);
-    expect(numbers).toEqual([...numbers].sort((a, b) => a - b));
+    const PATHS = ['Primer', 'Level 1', 'Level 2'];
+    const keys = groups.map(g => {
+      const m = /^(.+) · World (\d+)$/.exec(g);
+      expect(m, 'group label "' + g + '"').toBeTruthy();
+      return PATHS.indexOf(m[1]) * 100 + parseInt(m[2], 10);
+    });
+    expect(keys.every(k => k >= 0)).toBe(true);
+    expect(keys).toEqual([...keys].sort((a, b) => a - b));
   });
 });

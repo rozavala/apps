@@ -2,7 +2,8 @@
    MEDIA — Book & Movie Check backend
    Endpoints: /api/media/lookup, /api/media/evaluate,
               /api/media/cache/:id, /api/media/library
-   Provider: Gemini 3.5 Flash via REST (AI_PROVIDER=gemini)
+   Provider: Gemini via REST (AI_PROVIDER=gemini): Argon evaluates,
+   Flash handles the quick ISBN / photo identification steps
    Cache: <DATA_DIR>/media-cache.json (family-wide, no per-kid)
    ================================================================ */
 'use strict';
@@ -13,6 +14,10 @@ const path = require('path');
 const PROVIDER = (process.env.AI_PROVIDER || 'gemini').toLowerCase();
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GROK_KEY = process.env.GROK_API_KEY;
+// Evaluations use Argon: in a 39-title trial with known answers it matched
+// Flash on every rejection and false-alarm check, and unlike Flash it
+// never invented a plot for a book that doesn't exist. It was no slower.
+const EVAL_MODEL = 'gemini-4-argon';
 const CACHE_TTL_DAYS = 90;
 const PROMPT_VERSION = 5;  // bump whenever media-prompt.txt is edited or eval inputs change
 const RATE_LIMIT_PER_HOUR = 60;  // per source IP, total evaluate calls
@@ -535,7 +540,7 @@ function _extractJson(text) {
 
 async function _evaluateGemini(metadata, imageB64) {
   if (!GEMINI_KEY) throw new Error('GEMINI_API_KEY not set');
-  const model = 'gemini-3.5-flash';
+  const model = EVAL_MODEL;
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + GEMINI_KEY;
   const prompt = _fillPrompt(metadata);
   const parts = [{ text: prompt }];
@@ -561,9 +566,11 @@ async function _evaluateGemini(metadata, imageB64) {
   }
   const j = await r.json();
   const candidate = j.candidates && j.candidates[0];
-  const text = candidate && candidate.content && candidate.content.parts &&
-               candidate.content.parts[0] && candidate.content.parts[0].text;
-  if (!text) throw new Error('Gemini returned empty response');
+  // A thinking model can put its reasoning, and the answer itself, in
+  // several parts; the JSON is the non-thought text, joined.
+  const text = ((candidate && candidate.content && candidate.content.parts) || [])
+    .filter(p => p.text && !p.thought).map(p => p.text).join('');
+  if (!text) throw new Error('Gemini returned empty response' + (candidate && candidate.finishReason ? ' (' + candidate.finishReason + ')' : ''));
   const evaluation = _extractJson(text);
   const gm = candidate.groundingMetadata;
   const grounding = gm ? {

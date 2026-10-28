@@ -37,7 +37,7 @@ test.describe('ProgressAdmin', () => {
     expect(info.ids).toContain('codecadet');
     expect(info.pianoLen).toBeGreaterThan(100);
     expect(info.worldRuns).toBe(info.distinctWorlds);
-    expect(info.firstPiano.g).toBe('World 1');
+    expect(info.firstPiano.g).toBe('Primer · World 1');
   });
 
   test('setPosition marks earlier songs done and leaves later ones alone', async ({ page }) => {
