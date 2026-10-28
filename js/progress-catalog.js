@@ -315,11 +315,7 @@ window.ZSProgressCatalog = {
     {"i":"glacier_explorer","l":"🧊 The Great Glacier Explorer","g":"Pilot"},
     {"i":"lost_map","l":"🗺️ The Lost Map","g":"Explorer"},
     {"i":"atacama_desert","l":"🏜️ The Atacama Desert","g":"Explorer"},
-    {"i":"moon_landing","l":"🌕 The Great Moon Landing","g":"Commander"},
-    {"i":"darwin_patagonia","l":"🔬 Darwin in Patagonia","g":"Pilot"},
-    {"i":"valdivia_1960","l":"🌊 The Great Valdivia Earthquake","g":"Pilot"},
-    {"i":"crossing_andes","l":"⛰️ Crossing the Andes","g":"Commander"},
-    {"i":"atacama_stars","l":"🔭 Stargazing in the Atacama","g":"Commander"}
+    {"i":"atacama_giant","l":"🌵 The Atacama Giant","g":"Intermediate"}
   ],
 
   vocab: [
@@ -427,6 +423,7 @@ window.ZSProgressCatalog = {
     {"i":"singapore","l":"🇸🇬 Singapore","g":"🌏 Asia"},
     {"i":"indonesia","l":"🇮🇩 Indonesia","g":"🌏 Asia"},
     {"i":"taiwan","l":"🇹🇼 Taiwan","g":"🌏 Asia"},
+    {"i":"fiji","l":"🇫🇯 Fiji","g":"🌏 Oceania"},
     {"i":"australia","l":"🇦🇺 Australia","g":"🌏 Oceania"},
     {"i":"new_zealand","l":"🇳🇿 New Zealand","g":"🌏 Oceania"}
   ]

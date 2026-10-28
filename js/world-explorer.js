@@ -671,6 +671,23 @@ const WorldExplorer = (() => {
       }
     ] },
     { id: 'oceania', name: 'Oceania', nameEs: 'Oceanía', icon: '🌏', color: '#EC4899', countries: [
+        {
+          id: 'fiji', name: 'Fiji', nameEs: 'Fiyi', flag: '🇫🇯',
+          capital: 'Suva', capitalEs: 'Suva',
+          facts: [
+            { en: 'Fiji is an island country in Melanesia.', es: 'Fiyi es un país insular en Melanesia.' },
+            { en: 'It consists of more than 330 islands.', es: 'Consiste en más de 330 islas.' },
+            { en: 'Rugby is the most popular sport in Fiji.', es: 'El rugby es el deporte más popular en Fiyi.' },
+            { en: 'Fiji is known for its beautiful coral reefs.', es: 'Fiyi es conocido por sus hermosos arrecifes de coral.' }
+          ],
+          landmark: { name: 'Sri Siva Subramaniya Temple', nameEs: 'Templo Sri Siva Subramaniya', emoji: '🛕' },
+          animal: { name: 'Collared Lory', nameEs: 'Lori acollarado', emoji: '🦜' },
+          quiz: [
+            { q: 'What is the capital of Fiji?', qEs: '¿Cuál es la capital de Fiyi?', options: ['Suva', 'Nadi', 'Lautoka', 'Apia'], optionsEs: ['Suva', 'Nadi', 'Lautoka', 'Apia'], answer: 0, tier: 'beginner' },
+            { q: 'How many islands does Fiji have?', qEs: '¿Cuántas islas tiene Fiyi?', options: ['About 100', 'Over 330', 'Exactly 50', 'Over 1000'], optionsEs: ['Alrededor de 100', 'Más de 330', 'Exactamente 50', 'Más de 1000'], answer: 1, tier: 'intermediate' },
+            { q: 'What is the most popular sport in Fiji?', qEs: '¿Cuál es el deporte más popular en Fiyi?', options: ['Soccer', 'Cricket', 'Rugby', 'Tennis'], optionsEs: ['Fútbol', 'Críquet', 'Rugby', 'Tenis'], answer: 2, tier: 'advanced' }
+          ]
+        },
       {
         id: 'australia', name: 'Australia', nameEs: 'Australia', flag: '🇦🇺',
         capital: 'Canberra', capitalEs: 'Canberra',

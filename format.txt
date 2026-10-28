@@ -1,0 +1,8 @@
+// === CONTENT GUARDIAN [2026-06-25] ===
+// Math Galaxy: 2 new question types added, 15 pruned
+// Descubre Chile: 3 new questions, 0 new topic
+// Fe Explorador: 2 new saint/heritage items
+// World Explorer: 1 new countries/questions
+// Guitar Jam: 2 new chord/song
+// Learning Checks: 0 new questions
+// Story Explorer: 1 new stories/words

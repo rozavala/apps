@@ -1,0 +1,13 @@
+
+1. **Math Galaxy**: Use `replace_with_git_merge_diff` on `js/math-galaxy.js` to modify `genCadet()` by replacing the `types` array with a pruned version (removing `sun_count_2` and `planet_compare`) and adding two new types (`astronaut_sub_2`, `alien_add_2`). Similarly for `genExplorer()`, `genPilot()`, and `genCommander()` (pruning 15 types to reach exactly 25). The SEARCH/REPLACE blocks will include the exact array definitions and the exact `if (type === '...')` statements.
+2. **Descubre Chile**: Use `replace_with_git_merge_diff` on `js/descubre-chile.js` to insert 3 specific factual questions into the arrays `animales`, `volcanes_chile`, and `fiestas_patrias` respectively, ensuring the total stays within the limit of 20. The SEARCH blocks will be the start of each topic's array.
+3. **Fe Explorador**: Use `replace_with_git_merge_diff` on `js/fe-explorador.js` to replace the trailing saints in the `SAINTS` array with a pruning comment and add "San Juan de Dios". Do the same for the `HERITAGE` array to prune down to 7 items and add "Fiesta de La Tirana".
+4. **World Explorer**: Use `replace_with_git_merge_diff` on `js/world-explorer.js` to find the `id: 'oceania'` continent definition and append a new country object for `fiji` with 4 facts and 3 quiz questions matching existing formats.
+5. **Guitar Jam**: Use `replace_with_git_merge_diff` on `js/guitar-jam.js` to drop the last 9 chords from the `CHORDS` array and the last 7 songs from the `SONGS` array, replacing them with a pruning comment and adding `Gmaj7` chord and `Morning Light` song.
+6. **Learning Checks**: No changes required here since all arrays have exactly 8 elements, which is the MAX limit, and the rules specify adding only if below 6.
+7. **Story Explorer**: Use `replace_with_git_merge_diff` on `js/story-explorer.js` to replace the last 5 stories with a pruning comment and add a new story (`The Atacama Giant`).
+8. **Compliance Grep**: Use `run_in_bash_session` to execute the exact compliance `grep` command provided in memory.
+9. **Test Suite Execution**: Use `run_in_bash_session` to run `npm run test` to verify no regressions in the app code.
+10. **Syntax Check**: Use `run_in_bash_session` to run `node -c` on all modified JS files to ensure the patched JavaScript has no syntax errors.
+11. **Pre-commit**: Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+12. **Submit**: Use `submit` to commit the changes and provide the specific copy-paste ready patches per file with the final `// === CONTENT GUARDIAN ===` summary block format exactly as requested in the task description.
