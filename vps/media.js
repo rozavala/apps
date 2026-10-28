@@ -38,7 +38,19 @@ function _loadCache() {
   }
 }
 function _saveCache(cache) {
-  fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2));
+  // Write then rename, so a crash mid-write can't leave a truncated file
+  // (which _loadCache would read as an empty cache).
+  const tmp = CACHE_PATH + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(cache, null, 2));
+  fs.renameSync(tmp, CACHE_PATH);
+}
+// Store one entry against the cache as it is now. An evaluation takes
+// seconds, and saving the copy loaded before it would undo every other
+// write made meanwhile (another lookup, a re-review, a parent's review).
+function _putCacheEntry(id, entry) {
+  const cache = _loadCache();
+  cache[id] = entry;
+  _saveCache(cache);
 }
 
 function _rateOk(ip) {
@@ -769,8 +781,7 @@ function init(app, dataDir) {
         evaluation.trailer_url = await _trailerForTmdbId(tmdbId);
       }
 
-      cache[canonical_id] = evaluation;
-      _saveCache(cache);
+      _putCacheEntry(canonical_id, evaluation);
       res.json(evaluation);
     } catch (err) {
       console.error('[media/evaluate]', err.message);
@@ -827,8 +838,7 @@ function init(app, dataDir) {
       fresh.prompt_version = PROMPT_VERSION;
       fresh.parent_reviewed = entry.parent_reviewed || false;
       if (entry.trailer_url) fresh.trailer_url = entry.trailer_url;
-      cache[entry.canonical_id] = fresh;
-      _saveCache(cache);
+      _putCacheEntry(entry.canonical_id, fresh);
       res.json(fresh);
     } catch (err) {
       console.error('[media/reevaluate]', err.message);
@@ -867,9 +877,7 @@ function init(app, dataDir) {
           fresh.evaluated_at = Date.now();
           fresh.prompt_version = PROMPT_VERSION;
           fresh.parent_reviewed = entry.parent_reviewed || false;
-          const current = _loadCache();
-          current[id] = fresh;
-          _saveCache(current);
+          _putCacheEntry(id, fresh);
           console.log('[media/reevaluate-batch] Updated ' + entry.title);
           await new Promise(r => setTimeout(r, 1500));
         } catch (err) {
@@ -904,9 +912,7 @@ function init(app, dataDir) {
           fresh.evaluated_at = Date.now();
           fresh.prompt_version = PROMPT_VERSION;
           fresh.parent_reviewed = entry.parent_reviewed || false;
-          const current = _loadCache();
-          current[id] = fresh;
-          _saveCache(current);
+          _putCacheEntry(id, fresh);
           console.log('[media/reevaluate-stale] Updated ' + entry.title);
           await new Promise(r => setTimeout(r, 1500));
         } catch (err) {
