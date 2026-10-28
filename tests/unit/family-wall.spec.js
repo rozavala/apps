@@ -243,7 +243,10 @@ test.describe('Family Wall — routines, order and Summer Quest', () => {
   });
 
   test('homework is Rodrigo\'s and piano is Pablo\'s', async ({ page }) => {
+    // Homework is a school-day task, so pin a Tuesday.
+    await page.clock.setFixedTime(new Date('2026-10-27T15:00:00'));
     const seen = await page.evaluate(() => {
+      window.Routines.refreshConditions();
       const pm = (kid) => window.Routines.getStatusFor(kid).afternoon
         .items.map(function(i) { return i.label; }).join(' ');
       return {

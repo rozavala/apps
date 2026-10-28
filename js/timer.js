@@ -11,6 +11,13 @@ var TimerManager = (function() {
   var DEFAULT_MAX  = 20;
   var _interval      = null;
 
+  // The device's own calendar day. toISOString() is UTC, which in
+  // California rolls over at 4–5 PM and handed out a second day's allowance.
+  function _today(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
   function _key(name) {
     var user = name ? { name: name } : getActiveUser();
     if (!user) return null;
@@ -23,12 +30,12 @@ var TimerManager = (function() {
     try {
       var raw = localStorage.getItem(key);
       var data = raw ? JSON.parse(raw) : {
-        date: new Date().toISOString().split('T')[0],
+        date: _today(),
         minutesUsed: 0,
         maxMinutes: DEFAULT_MAX
       };
       // Midnight reset
-      var today = new Date().toISOString().split('T')[0];
+      var today = _today();
       if (data.date !== today) {
         data.date = today;
         data.minutesUsed = 0;
@@ -51,6 +58,8 @@ var TimerManager = (function() {
     if (_interval) return;
     _interval = setInterval(function() {
       if (isPaused()) return;
+      // Nobody can play while the apps are asleep; don't burn tomorrow's minutes.
+      if (typeof OffHours !== 'undefined' && OffHours.isOff()) return;
       var data = _getData();
       if (data) {
         data.minutesUsed++;
