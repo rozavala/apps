@@ -48,6 +48,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 
 Una característica principal de la suite Zavala Serra Apps es ayudar a los niños a desarrollar hábitos digitales saludables equilibrando el tiempo de pantalla con actividades del mundo real. (A core feature of the Zavala Serra Apps suite is helping kids develop healthy digital habits while balancing screen time with real-world activities).
 
+- **Horas de Descanso (Off Hours)**: Las aplicaciones duermen automáticamente en noches de escuela (9:00 PM a 7:20 AM por defecto). Aparece una pantalla nocturna amigable y se requiere el PIN de los padres para desbloquearla. (Apps automatically sleep on school nights (9:00 PM to 7:20 AM by default). A friendly night screen appears, and a parent PIN is required to unlock.)
 - **Temporizador Diario (Daily Play Timer)**: Cada perfil tiene un límite diario (por defecto 20 minutos) para fomentar descansos. Al terminar el tiempo, la pantalla se bloquea de forma amigable. *Nota: Las aplicaciones de actividad física como "Sports Arena" y "Move Quest" no consumen tiempo de pantalla.* (Each profile has a daily limit (default 20 mins) to encourage breaks. When time is up, the screen locks in a friendly way. *Note: Physical activity apps like "Sports Arena" do not consume screen time.*)
 - **Límites Diarios (Daily Limits)**: Los padres pueden configurar límites específicos por aplicación o niño desde el Panel de Padres. Estos límites se mantienen locales en el dispositivo. (Parents can set specific limits per app or child from the Parent Dashboard. These limits are kept local to the device).
 - **Sistema de Tareas (Chores System)**: Cuando se acaba el tiempo, los niños pueden ganar tiempo extra (tokens) completando tareas del mundo real (ej. "Hacer la cama", "Leer 20 minutos"). Un PIN de padres es requerido para aprobar el tiempo extra (1 token = 5 minutos extra). (When time runs out, kids can earn extra time (tokens) by completing real-world chores (e.g. "Make the bed", "Read 20 minutes"). A parent PIN is required to approve extra time (1 token = 5 extra minutes)).
@@ -76,6 +77,8 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 - **Lenguaje Neutral (Neutral Language)**: Narración factual sin agendas sociales o políticas modernas. (Factual storytelling without modern social or political agendas.)
 
 ## 🆕 Novedades de la Semana (What's New This Week)
+
+- **Horas de Descanso (Off Hours)**: Las aplicaciones ahora se apagan automáticamente durante las noches de escuela (por defecto de 9:00 PM a 7:20 AM), mostrando una pantalla de descanso amigable para fomentar rutinas saludables. La configuración se puede ajustar en el Rincón para Padres y se puede desbloquear con el PIN de padres. (Off Hours: Apps now automatically go to sleep during school nights (9:00 PM to 7:20 AM by default), showing a friendly rest screen to encourage healthy routines. Settings can be adjusted in Parents Corner and unlocked via parent PIN.)
 
 - **¡Nueva App "Patrón de Lancha"!**: Estudia y practica para el examen teórico de Patrón de Lancha Deportiva con contenido basado en el temario oficial. Incluye preguntas y simulacros de examen. (Study and practice for the Patrón de Lancha Deportiva exam with content based on the official syllabus. Includes questions and exam simulations.)
 
