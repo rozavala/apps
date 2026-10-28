@@ -12,12 +12,20 @@ var BMC = (function() {
   var STORAGE_PREFIX = 'zs_bmcheck_';
   var FETCH_TIMEOUT = 60000;  // 60s — Gemini calls with google_search grounding routinely take 15-30s, plus Wikipedia enrichment adds ~1s
 
-  // In kid mode, the LGBTQ chip and any concerns text touching the topic
-  // are redacted entirely. Verdict is still "not_recommended" so the kid
-  // sees "Not for our family" — they just don't read about what specifically.
-  // Patterns are intentionally broad; false positives only redact non-parent
-  // text, which is acceptable.
-  var LGBTQ_KEYWORD_RE = /\b(lgbtq?\+?|gay|lesbian|queer|same[\s-]?sex|transgender|non[\s-]?binary|gender\s+identity|pride\s+flag|drag\s+queen|she\/her\/they|pronouns?)\b/i;
+  // Kid mode never shows the evaluator's own wording about content: the
+  // reasoning, concerns and values chips are written for parents and name
+  // the very things we don't want to introduce. Kids get fixed messages
+  // instead. The plot summary is still shown, unless it touches these
+  // topics. Patterns are intentionally broad; a false positive only hides
+  // the summary from a kid.
+  var LGBTQ_KEYWORD_RE = /\b(lgbt\w*|gay|lesbian|queer|homosexual\w*|bisexual\w*|same[\s-]?sex|trans\w*gender\w*|trans|non[\s-]?binary|gender\w*|pride\s+(flags?|month|parades?)|drag\s+(queen|king|show)s?|she\/her|they\/them|pronouns?|two\s+(moms|dads|mothers|fathers))\b/i;
+  var KID_VERDICT_MSG = {
+    approved: 'This one is a good fit for our family. Enjoy!',
+    caution: 'Ask Mom or Dad about this one before you start.',
+    not_recommended: 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
+  };
+  // The only content chips a kid sees: practical, not about values.
+  var KID_FLAGS = { violence: 1, scary_content: 1, profanity: 1 };
 
   // In-memory caches
   var _familyLibrary = {};   // canonical_id -> full evaluation (synced across family via VPS cache)
@@ -26,6 +34,8 @@ var BMC = (function() {
   var _scanStream = null;
   var _parentMode = false;  // session-only, resets on page reload
   var _libraryTypeFilter = 'all';  // 'all' | 'book' | 'movie'
+  var _libraryKidFilter = 'all';   // 'all' | a kid key — parent mode only
+  var _lookupsByKid = null;        // kid key -> { name, lookups } — parent mode only
   var _searchType = 'all';         // 'all' | 'book' | 'movie' — restricts /media/lookup
 
   // Environment detection for iPad-in-WKWebView-wrapper cases
@@ -167,6 +177,7 @@ var BMC = (function() {
 
     if (name === 'library') {
       document.getElementById('screen-library').classList.add('active');
+      if (_parentMode && !_lookupsLoading) _lookupsByKid = null;   // pick up new lookups
       _renderLibrary();
       _refreshStaleCount();
       _activateTabButtons('.bmc-tab-btn[onclick*="library"]');
@@ -239,11 +250,75 @@ var BMC = (function() {
       { key: 'book', label: '📕 Books' },
       { key: 'movie', label: '🎬 Movies' }
     ];
-    filterEl.innerHTML = opts.map(function(o) {
+    var html = opts.map(function(o) {
       var active = _libraryTypeFilter === o.key ? ' active' : '';
       return '<button type="button" class="bmc-filter-chip' + active +
              '" onclick="BMC.setLibraryFilter(\'' + o.key + '\')">' + o.label + '</button>';
     }).join('');
+    // Parents can narrow the list to what one kid looked up.
+    var kids = _parentMode && _lookupsByKid ? Object.keys(_lookupsByKid).filter(function(k) {
+      return Object.keys(_lookupsByKid[k].lookups).some(function(id) { return !!_familyLibrary[id]; });
+    }) : [];
+    if (kids.length) {
+      html += '<span class="bmc-filter-break"></span>' +
+        [{ key: 'all', label: '👪 Everyone' }].concat(kids.map(function(k) {
+          return { key: k, label: _lookupsByKid[k].name };
+        })).map(function(o) {
+          var active = _libraryKidFilter === o.key ? ' active' : '';
+          return '<button type="button" class="bmc-filter-chip' + active +
+                 '" onclick="BMC.setLibraryKid(\'' + escAttr(o.key) + '\')">' + _escHtmlLocal(o.label) + '</button>';
+        }).join('');
+    }
+    filterEl.innerHTML = html;
+  }
+
+  function setLibraryKid(key) {
+    _libraryKidFilter = key;
+    _renderLibrary();
+  }
+
+  // ── Who looked it up (parent mode) ─────────────────────────────
+  // The family library only keeps the evaluation, which the server
+  // reuses for every later lookup. Each kid's own lookups live in their
+  // bmcheck blob, synced to /api/kids/<kid>/bmcheck, so parents gather
+  // those to see who checked what, and when.
+  var _lookupsLoading = false;
+
+  function _loadFamilyLookups() {
+    var profiles = typeof getProfiles === 'function' ? getProfiles() : [];
+    var out = {};
+    profiles.forEach(function(p) {
+      if (!p || !p.name || p.isGuest) return;
+      var key = p.name.toLowerCase().replace(/\s+/g, '_');
+      var local = null;
+      try { local = JSON.parse(localStorage.getItem(STORAGE_PREFIX + key)); } catch (e) {}
+      out[key] = { name: p.name, lookups: Object.assign({}, (local && local.lookups) || {}) };
+    });
+    _lookupsByKid = out;
+    return Promise.all(Object.keys(out).map(function(key) {
+      return _fetchJson(VPS + '/api/kids/' + encodeURIComponent(key) + '/bmcheck')
+        .then(function(server) {
+          var l = (server && server.lookups) || {};
+          Object.keys(l).forEach(function(id) {
+            var mine = out[key].lookups[id];
+            if (!mine || (l[id].ts || 0) > (mine.ts || 0)) out[key].lookups[id] = l[id];
+          });
+        })
+        .catch(function() { /* offline or never synced: this device's copy is all we have */ });
+    }));
+  }
+
+  function _whoLookedUp(id) {
+    if (!_lookupsByKid) return [];
+    return Object.keys(_lookupsByKid).map(function(key) {
+      var l = _lookupsByKid[key].lookups[id];
+      return l ? { key: key, name: _lookupsByKid[key].name, ts: l.ts || 0 } : null;
+    }).filter(Boolean).sort(function(a, b) { return b.ts - a.ts; });
+  }
+
+  function _shortDate(ts) {
+    try { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+    catch (e) { return ''; }
   }
 
   function setLibraryFilter(kind) {
@@ -260,18 +335,34 @@ var BMC = (function() {
   }
 
   function _renderLibrary() {
+    if (_parentMode && !_lookupsByKid && !_lookupsLoading) {
+      _lookupsLoading = true;
+      _loadFamilyLookups().then(function() {
+        _lookupsLoading = false;
+        if (document.getElementById('screen-library').classList.contains('active')) _renderLibrary();
+      });
+    }
     _renderLibraryFilter();
     var container = document.getElementById('bmc-library-list');
     if (!container) return;
+    var kidFilter = _parentMode && _lookupsByKid && _lookupsByKid[_libraryKidFilter] ? _libraryKidFilter : 'all';
+    // Newest activity first: a title checked months ago and looked up
+    // again today belongs at the top, not under its first evaluation.
+    var lastSeen = function(item) {
+      var who = _whoLookedUp(item.canonical_id);
+      if (kidFilter !== 'all') who = who.filter(function(w) { return w.key === kidFilter; });
+      return Math.max(item.evaluated_at || 0, who.length ? who[0].ts : 0);
+    };
     var items = Object.keys(_familyLibrary)
       .map(function(id) { return _familyLibrary[id]; })
       .filter(function(item) {
         if (!item) return false;
         if (!_parentMode && item.verdict === 'not_recommended') return false;
         if (!_matchesTypeFilter(item)) return false;
+        if (kidFilter !== 'all' && !_lookupsByKid[kidFilter].lookups[item.canonical_id]) return false;
         return true;
       })
-      .sort(function(a, b) { return (b.evaluated_at || 0) - (a.evaluated_at || 0); });
+      .sort(function(a, b) { return lastSeen(b) - lastSeen(a); });
     if (!items.length) {
       container.innerHTML = '<div class="bmc-empty">No titles checked yet. Search for a book or movie to get started!</div>';
       return;
@@ -347,6 +438,17 @@ var BMC = (function() {
       label = '🤔 Not sure';
     }
 
+    // Parent-only: who looked this up, newest first.
+    var whoHtml = '';
+    if (_parentMode && context === 'library') {
+      var who = _whoLookedUp(item.canonical_id);
+      if (who.length) {
+        whoHtml = '  <div class="bmc-list-who">🔎 ' + who.map(function(w) {
+          return escHtml(w.name) + ' · ' + _shortDate(w.ts);
+        }).join(', ') + '</div>';
+      }
+    }
+
     // Parent-only per-item remove. Rendered outside the clickable card
     // (wrapped in .bmc-list-row) so the outer element stays a real <button>.
     var removeBtn = '';
@@ -364,6 +466,7 @@ var BMC = (function() {
         '<div class="bmc-list-body">' +
         '  <div class="bmc-list-title">' + escHtml(item.title) + '</div>' +
         '  <div class="bmc-list-meta">' + escHtml(item.author_or_director || '') + (item.year ? ' · ' + item.year : '') + ' · ages ' + (item.minimum_age || '?') + '+</div>' +
+        whoHtml +
         '</div>' +
         '<div class="bmc-list-verdict verdict-' + escAttr(displayVerdict) + '">' + label + '</div>' +
       '</button>' +
@@ -469,13 +572,25 @@ var BMC = (function() {
 
   // ZXing fallback for browsers without BarcodeDetector (notably iOS
   // Safari / every iOS browser). Uses the vendored UMD bundle to read
-  // ISBN-13 / EAN-13 directly from the rear-camera video feed.
+  // ISBN-13 / EAN-13 from the rear-camera video feed.
+  //
+  // We run our own frame loop instead of ZXing's decodeFromConstraints:
+  // its loop stops for good on any error other than "no barcode in this
+  // frame" (e.g. a first frame before Safari knows the video size), and
+  // it reports those errors by minified class names ("N"), so every
+  // empty frame read as a camera failure. Here a bad frame is skipped,
+  // and only a refused camera shows a camera message.
   var _zxingReader = null;
+  var _scanTimer = null;
+  var CAMERA_HELP = {
+    NotAllowedError: 'The camera is blocked for this site. In Safari, tap the aA button in the address bar → Website Settings → Camera → Allow, then try again. Or tap "Type ISBN instead" below.',
+    NotFoundError: 'No camera was found on this device. Tap "Type ISBN instead" below.',
+    NotReadableError: 'Another app is using the camera. Close it and try again, or tap "Type ISBN instead" below.'
+  };
+
   function _startZxingScan() {
-    // Re-entry guard. If the kid taps "Scan ISBN" while a scan is
-    // already running, the second decodeFromConstraints call ends up
-    // invoking video.play() on an already-playing element, which Safari
-    // logs as "Trying to play video that is already playing." Just bail.
+    // Re-entry guard: a second tap while the camera prompt is up must not
+    // open a second stream.
     if (_scanActive) return;
 
     var modal = document.getElementById('bmc-scan-modal');
@@ -485,55 +600,97 @@ var BMC = (function() {
     if (!modal || !video) return promptManualIsbn();
     modal.classList.add('active');
     if (ipadHint) ipadHint.style.display = 'none';
-    if (hint) hint.textContent = 'Apunta al código de barras…';
+    if (hint) hint.textContent = 'Starting the camera…';
 
     try {
-      // Restrict to the formats actually printed on book barcodes — keeps
-      // false positives down compared to scanning every supported format.
-      var hints = null;
-      if (ZXing.DecodeHintType && ZXing.BarcodeFormat) {
-        hints = new Map();
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-          ZXing.BarcodeFormat.EAN_13,
-          ZXing.BarcodeFormat.EAN_8,
-          ZXing.BarcodeFormat.UPC_A
-        ]);
-        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-      }
-      _zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+      // Only the formats printed on book barcodes, to keep false reads down.
+      var hints = new Map();
+      hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13]);
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+      _zxingReader = new ZXing.MultiFormatReader();
+      _zxingReader.setHints(hints);
     } catch (e) {
-      if (ipadHint) {
-        ipadHint.style.display = 'block';
-        ipadHint.textContent = 'Could not start the scanner. Tap "Type ISBN instead" below.';
-      }
+      _showScanProblem('Could not start the scanner. Tap "Type ISBN instead" below.');
       return;
     }
 
     _scanActive = true;
-    _zxingReader.decodeFromConstraints(
-      { audio: false, video: { facingMode: 'environment' } },
-      video,
-      function(result, err) {
-        if (!_scanActive) return;
-        if (result) {
-          var code = (result.getText && result.getText()) || result.text;
-          closeScan();
-          if (code) _lookupByIsbn(code.replace(/[^0-9Xx]/g, ''));
-        }
-        // err is fired on every empty frame — only surface real errors.
-        if (err && err.name && !/NotFoundException|ChecksumException|FormatException/.test(err.name)) {
-          if (ipadHint) {
-            ipadHint.style.display = 'block';
-            ipadHint.textContent = 'Camera blocked or not available. Check Safari Settings → Camera, or tap "Type ISBN instead" below.';
-          }
-        }
+    // A sharper feed than the 640×480 default: the bars of an ISBN are thin.
+    navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    }).then(function(stream) {
+      if (!_scanActive) {  // closed while the permission prompt was up
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        return;
       }
-    ).catch(function() {
-      if (ipadHint) {
-        ipadHint.style.display = 'block';
-        ipadHint.textContent = 'Camera blocked or not available. Check Safari Settings → Camera, or tap "Type ISBN instead" below.';
-      }
+      _scanStream = stream;
+      video.srcObject = stream;
+      var playing = video.play();
+      if (playing && playing.catch) playing.catch(function() {});
+      if (hint) hint.textContent = 'Apunta al código de barras…';
+      _zxingLoop(video, hint);
+    }).catch(function(err) {
+      _scanActive = false;
+      var name = err && err.name;
+      _showScanProblem(_isIpadWrapper()
+        ? 'This app can\'t use the camera. Open Book & Movie Check in Safari to scan, or tap "Type ISBN instead" below.'
+        : (CAMERA_HELP[name] || 'The camera didn\'t start. Tap "Type ISBN instead" below.'));
     });
+  }
+
+  function _showScanProblem(text) {
+    var ipadHint = document.getElementById('bmc-scan-ipad-hint');
+    if (!ipadHint) return;
+    ipadHint.style.display = 'block';
+    ipadHint.textContent = text;
+  }
+
+  // ISBN-13s are EAN-13s starting 978 or 979; anything else on a cover
+  // (a price code, a magazine EAN) isn't something we can look up.
+  function _isIsbnCode(code) { return /^97[89]\d{10}$/.test(code); }
+
+  function _zxingLoop(video, hint) {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d', { willReadFrequently: true }) || canvas.getContext('2d');
+    var frame = 0;
+    var wrongUntil = 0;
+    var tick = function() {
+      if (!_scanActive) return;
+      var w = video.videoWidth, h = video.videoHeight;
+      if (w && h && video.readyState >= 2) {
+        // Alternate the middle of the picture at full sharpness (where a
+        // barcode held up to the camera sits) with the whole picture
+        // scaled down, so an off-centre barcode is found too.
+        var crop = frame++ % 2 === 0;
+        var sw = crop ? Math.round(w * 0.7) : w, sh = crop ? Math.round(h * 0.6) : h;
+        var scale = Math.min(1, 1280 / Math.max(sw, sh));
+        var cw = Math.max(1, Math.round(sw * scale)), ch = Math.max(1, Math.round(sh * scale));
+        if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+        try {
+          ctx.drawImage(video, (w - sw) / 2, (h - sh) / 2, sw, sh, 0, 0, cw, ch);
+          var bitmap = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(canvas)));
+          var code = _zxingReader.decodeWithState(bitmap).getText();
+          if (_isIsbnCode(code)) {
+            closeScan();
+            _lookupByIsbn(code);
+            return;
+          }
+          if (hint && Date.now() > wrongUntil) {
+            hint.textContent = 'That barcode isn\'t an ISBN. Look for the one starting 978 or 979.';
+            wrongUntil = Date.now() + 2500;
+          }
+        } catch (e) {
+          // No barcode in this frame (or a frame that wasn't ready): keep looking.
+        }
+        if (hint && wrongUntil && Date.now() > wrongUntil) {
+          hint.textContent = 'Apunta al código de barras…';
+          wrongUntil = 0;
+        }
+      }
+      _scanTimer = setTimeout(tick, 100);
+    };
+    tick();
   }
 
   function _startScan(formats) {
@@ -587,12 +744,15 @@ var BMC = (function() {
 
   function closeScan() {
     _scanActive = false;
+    if (_scanTimer) { clearTimeout(_scanTimer); _scanTimer = null; }
     var modal = document.getElementById('bmc-scan-modal');
     if (modal) modal.classList.remove('active');
     if (_scanStream) {
       _scanStream.getTracks().forEach(function(t) { t.stop(); });
       _scanStream = null;
     }
+    var video = document.getElementById('bmc-scan-video');
+    if (video) video.srcObject = null;
     if (_zxingReader) {
       try { _zxingReader.reset(); } catch (e) {}
       _zxingReader = null;
@@ -810,18 +970,21 @@ var BMC = (function() {
     // On low confidence in kid mode, the verdict itself is unreliable:
     // hide content details so we don't present guesses as findings.
     var kidHideDetails = isLowConf && !isParent;
-    var showSummary = isParent || isSafe || isCaution;
+    // A low-confidence summary can be invented outright (the model may not
+    // know the book at all), so kids don't see it.
+    var showSummary = (isParent || isSafe || isCaution) && !kidHideDetails;
     var showFlags = (isParent || isSafe) && !kidHideDetails;
-    var showConcerns = (isParent || isSafe) && !kidHideDetails;
+    var showConcerns = isParent;
     var showAgeInfo = !kidHideDetails;
     var showParentNotes = isParent;
     var showActions = isParent || !isBlocked;
 
     var verdictEmoji = e.verdict === 'approved' ? '✅' : (e.verdict === 'not_recommended' ? '❌' : '⚠️');
     var verdictTitle = e.verdict === 'approved' ? 'Approved' : (e.verdict === 'not_recommended' ? 'Not for our family' : 'Needs care');
-    var verdictMessage = isBlocked && !isParent
-      ? 'This book or movie is not a good fit for our family. If you\'re curious, talk with Mom or Dad.'
-      : (e.verdict_reasoning || '');
+    var verdictMessage = isParent
+      ? (e.verdict_reasoning || '')
+      : (KID_VERDICT_MSG[e.verdict] || KID_VERDICT_MSG.caution);
+    if (!isParent && e.summary && LGBTQ_KEYWORD_RE.test(String(e.summary))) showSummary = false;
 
     // Grown-up banner vs. values-rejection banner
     // Fires for ANY verdict when the book is age-gated (min_age >= 13)
@@ -893,9 +1056,9 @@ var BMC = (function() {
       chipHtml = flagOrder.map(function(k) {
         var sev = (e.content_flags || {})[k];
         if (!sev || sev === 'none') return '';
-        // Kid mode: the LGBTQ chip is never shown — kids don't read the
-        // label even at "mild". Parents still see it on unlock.
-        if (!isParent && k === 'lgbtq_content') return '';
+        // Kid mode: only the practical chips (violence, scary, language).
+        // Parents see every flag on unlock.
+        if (!isParent && !KID_FLAGS[k]) return '';
         return '<span class="bmc-chip bmc-chip-' + sev + '">' + flagLabels[k] + ' · ' + sev + '</span>';
       }).join('');
       var posLabels = {
@@ -917,18 +1080,9 @@ var BMC = (function() {
 
     var concernsHtml = '';
     if (showConcerns && e.specific_concerns && e.specific_concerns.length) {
-      // Kid mode: drop any concern line that names LGBTQ topics, so the
-      // child never reads a phrase like "casual mention of a side
-      // character with same-sex parents". If nothing remains after
-      // filtering, the card is omitted entirely.
-      var concerns = !isParent
-        ? e.specific_concerns.filter(function(c) { return !LGBTQ_KEYWORD_RE.test(String(c)); })
-        : e.specific_concerns;
-      if (concerns.length) {
-        concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
-          concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
-          '</ul></div>';
-      }
+      concernsHtml = '<div class="bmc-card"><h4>Things to know</h4><ul>' +
+        e.specific_concerns.map(function(c) { return '<li>' + _escHtmlLocal(c) + '</li>'; }).join('') +
+        '</ul></div>';
     } else if (isCaution && !isParent && e.confidence !== 'low') {
       var nFlags = 0;
       if (e.content_flags) {
@@ -1426,6 +1580,7 @@ var BMC = (function() {
     resetFamilyLibrary: resetFamilyLibrary,
     removeItem: removeItem,
     setLibraryFilter: setLibraryFilter,
+    setLibraryKid: setLibraryKid,
     setSearchType: setSearchType,
     unlockTrailer: unlockTrailer
   };
