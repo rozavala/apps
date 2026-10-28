@@ -1076,7 +1076,7 @@ var Vacation = (function() {
 
     var html = '';
     for (var i = 0; i < dayCount; i++) {
-      var d = new Date(start.getTime() + i * 86400000);
+      var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
       var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       var label = months[d.getMonth()] + ' ' + d.getDate();
