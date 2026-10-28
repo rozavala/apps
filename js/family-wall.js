@@ -715,7 +715,8 @@ var FamilyWall = (function() {
     }
 
     var today = new Date(); today.setHours(0, 0, 0, 0);
-    var endOfRange = new Date(today.getTime() + 7 * 86400000);
+    // Step by calendar day, not 24 h: the clock-change Sunday is 23 or 25 h.
+    var endOfRange = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
     var events;
     try {
       events = FamilyCalendar.getUpcoming(500).filter(function(ev) {
@@ -739,7 +740,7 @@ var FamilyWall = (function() {
 
     var inner = '';
     for (var i = 0; i < 7; i++) {
-      var d = new Date(today.getTime() + i * 86400000);
+      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
       var key = d.toDateString();
       var dayEvents = buckets[key] || [];
       // Skip the first day (today) — already in the "Today" tile.
