@@ -78,6 +78,8 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Corrección de Caché en Book & Movie Check (Cache Bug Fix)**: Se solucionó un problema donde las evaluaciones lentas sobrescribían otras actualizaciones recientes. (Fixed an issue where slow evaluations overwrote other recent updates in the cache.)
+
 - **Corrección de Calendario (Calendar Bug Fix)**: Se corrigió un problema donde el cambio de hora (horario de verano) causaba que los días del calendario se repitieran. (Fixed an issue where the daylight saving time transition could repeat a calendar day).
 
 - **Horas de Descanso (Off Hours)**: Las aplicaciones ahora se apagan automáticamente durante las noches de escuela (por defecto de 9:00 PM a 7:20 AM), mostrando una pantalla de descanso amigable para fomentar rutinas saludables. La configuración se puede ajustar en el Rincón para Padres y se puede desbloquear con el PIN de padres. (Off Hours: Apps now automatically go to sleep during school nights (9:00 PM to 7:20 AM by default), showing a friendly rest screen to encourage healthy routines. Settings can be adjusted in Parents Corner and unlocked via parent PIN.)
