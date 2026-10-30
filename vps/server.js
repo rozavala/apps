@@ -128,6 +128,8 @@ app.get('/api/profiles', (req, res) => {
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-app.listen(PORT, '0.0.0.0', () => {
+// Loopback only: tailscale serve is the way in (it proxies the tailnet
+// HTTPS name to 127.0.0.1:3333), so the home LAN can't reach the port.
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`Zavala Sync running on port ${PORT}`);
 });

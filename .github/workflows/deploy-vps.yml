@@ -31,5 +31,5 @@ jobs:
             cd /opt/zavala-sync
             git fetch origin main
             git reset --hard origin/main
-            cd vps && npm install --omit=dev
+            cd vps && npm ci --omit=dev
             sudo systemctl restart zavala-sync.service
