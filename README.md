@@ -231,10 +231,12 @@ TMDB_API_KEY=
 **3. Start the server**
 
 ```bash
-npm start            # listens on :3333
+npm start            # listens on 127.0.0.1:3333
 ```
 
 The client talks to it via the `VPS` constant at the top of `js/book-movie-check.js` and `js/sync.js`. Swap that to `http://localhost:3333` (or your own tunnel/domain) to point the static apps at a non-default backend.
+
+**Runtime and access.** The server needs Node 22 or newer (`engines` in `vps/package.json`). It listens on loopback only, and `tailscale serve` publishes it to the tailnet as `https://all-options-dev.<tailnet>.ts.net`. No route has its own login: being on the family tailnet is the access control, so don't expose the port any other way.
 
 ## 📂 Estructura del Proyecto (Project Structure)
 
