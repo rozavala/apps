@@ -295,8 +295,9 @@ var APP_STAR_CONFIGS = [
       return n;
     } },
 
-  // Invest Quest scores its portfolio game out of 3, then the
-  // concept quiz (9 questions) and each math topic practised.
+  // Invest Quest scores its portfolio game out of 3, then one
+  // concept-quiz round (9 questions drawn from a larger bank)
+  // and each math topic practised. A strong round is still 7 of 9.
   { id: 'invest', prefix: 'zs_invest_', stars: function(d) {
       return (d.bestStars || 0) +
              ((d.quizBest || 0) >= 7 ? 1 : 0) +
