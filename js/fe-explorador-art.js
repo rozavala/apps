@@ -47,7 +47,19 @@ const FeArt = (() => {
     catalina_siena:  { robe: WHITE, mantle: BLACK, head: 'veil', veil: '#22232b', attr: 'lily', sym: 'el hábito dominico y un lirio' },
     jorge:           { robe: 'armor', mantle: '#b3122e', head: 'curly', hair: '#6b4426', attr: 'dragon', sym: 'el escudo con la cruz roja y el dragón' },
     ambrosio:        { robe: WHITE, mantle: '#c99a2a', orphrey: true, head: 'mitre', beard: 'short', hair: '#d8d2c6', attr: 'beehive', crosier: true, sym: 'una colmena y la mitra de obispo' },
-    monica:          { robe: '#6d6158', head: 'veil', veil: '#3b3a40', attr: 'praying', sym: 'el velo y las manos en oración' }
+    monica:          { robe: '#6d6158', head: 'veil', veil: '#3b3a40', attr: 'praying', sym: 'el velo y las manos en oración' },
+    // added 2026-11 (namesake saints + kid favourites)
+    emilia:          { robe: '#7a2f4a', mantle: '#2f6a8a', head: 'veil', veil: '#3b3a5a', attr: 'family', sym: 'cuatro pequeñas aureolas, por sus hijos santos' },
+    rodrigo:         { robe: WHITE, mantle: '#a8172f', orphrey: true, head: 'short', hair: '#3a2a1e', beard: 'short', attr: 'palm', sym: 'la palma de los mártires y la casulla roja de sacerdote' },
+    isabel:          { robe: '#2f6a4a', mantle: '#c98a28', head: 'veil', veil: '#7a2f4a', attr: 'baby', sym: 'el niño Juan Bautista en sus brazos' },
+    santiago:        { robe: '#2f5a8a', mantle: '#8a4a2a', head: 'short', hair: '#5b3b22', beard: 'short', attr: 'shell', sym: 'la concha y el bastón de peregrino' },
+    francisco_javier:{ robe: BLACK, head: 'short', hair: '#2a221c', beard: 'short', attr: 'ship', sym: 'un barco, por sus viajes de misionero' },
+    clara:           { robe: BROWN, cord: true, head: 'veil', veil: '#22232b', attr: 'monstrance', sym: 'la custodia con la Eucaristía' },
+    laura_vicuna:    { robe: '#2c3a6a', collar: true, head: 'girl', hair: '#3a2618', attr: 'andes', sym: 'la cordillera de los Andes, entre Chile y Argentina' },
+    nicolas:         { robe: WHITE, mantle: '#a8172f', orphrey: true, head: 'mitre', hair: '#ece8df', beard: 'long', attr: 'gold', crosier: true, sym: 'el libro con tres bolas de oro y la mitra de obispo' },
+    bernardita:      { robe: '#3b4f7a', head: 'veil', veil: '#efe9dc', attr: 'rosary', sym: 'el rosario y su pañuelo blanco' },
+    juan_pablo:      { robe: WHITE, mantle: '#f6f3ec', head: 'zucchetto', hair: '#e9e4da', attr: 'ferula', sym: 'el báculo con la cruz y el solideo blanco del Papa' },
+    teresa_lisieux:  { robe: BROWN, mantle: WHITE, head: 'veil', veil: '#22232b', attr: 'roses', sym: 'un crucifijo con rosas, por su «lluvia de rosas»' }
   };
 
   function saintSymbol(id) { return (SAINT_LOOKS[id] || {}).sym || ''; }
@@ -114,6 +126,7 @@ const FeArt = (() => {
     // Veil / hood behind the figure
     if (L.head === 'veil') s.push('<path d="M66 150 C60 104 66 58 100 54 C134 58 140 104 134 150 Z" fill="' + L.veil + '" ' + S + '/>');
     if (L.head === 'hood') s.push('<path d="M64 150 C58 108 62 70 100 42 C138 70 142 108 136 150 Z" fill="' + _shade(L.veil, -0.15) + '" ' + S + '/>');
+    if (L.head === 'girl') s.push('<path d="M76 136 C70 112 74 70 100 62 C126 70 130 112 124 136 Q112 142 100 132 Q88 142 76 136 Z" fill="' + (L.hair || '#3a2618') + '" ' + S + '/>');
     if (L.crosier) s.push(_crosier());
 
     // Body: robe, mantle, details
@@ -189,6 +202,14 @@ const FeArt = (() => {
       o += '<path d="M88 66 q3 3 6 0 M98 63 q3 3 6 0 M107 66 q3 3 6 0" stroke="' + _shade(h, -0.35) + '" stroke-width="1" fill="none"/>';
     }
     if (L.head === 'tonsure') o += '<path d="M83 90 C81 78 84 72 89 70 C93 75 107 75 111 70 C116 72 119 78 117 90 C115 82 112 79 108 78 L92 78 C88 79 85 82 83 90 Z" fill="' + h + '" ' + S + '/>';
+    if (L.head === 'girl') {
+      o += '<path d="M82 90 C80 70 90 62 100 62 C110 62 120 70 118 90 C114 78 108 74 100 76 C94 74 87 78 82 90 Z" fill="' + h + '" ' + S + '/>';
+      o += '<path d="M115 71 l6 -5 l1 7 Z M115 71 l-1 -8 l-5 4 Z" fill="#f4f1ea" stroke="' + LEAD + '" stroke-width="1"/><circle cx="115" cy="70.5" r="1.6" fill="#f4f1ea" stroke="' + LEAD + '" stroke-width="0.8"/>';
+    }
+    if (L.head === 'zucchetto') {
+      o += '<path d="M83.5 92 C82 84 84 79 88 77 L89 93 Z M116.5 92 C118 84 116 79 112 77 L111 93 Z" fill="' + h + '" stroke="' + LEAD + '" stroke-width="1.6"/>';
+      o += '<path d="M86 72 C88 63 94 60 100 60 C106 60 112 63 114 72 Q100 67 86 72 Z" fill="#fbfaf5" ' + S + '/>';
+    }
     if (L.head === 'bald' || L.head === 'mitre') o += '<path d="M83.5 92 C82 84 84 79 88 77 L89 93 Z M116.5 92 C118 84 116 79 112 77 L111 93 Z" fill="' + h + '" stroke="' + LEAD + '" stroke-width="1.6"/>';
     if (L.beard === 'short') o += '<path d="M84 92 C86 108 93 112 100 112 C107 112 114 108 116 92 C112 100 107 102 100 102 C93 102 88 100 84 92 Z" fill="' + h + '" ' + S + '/>';
     if (L.beard === 'long') o += '<path d="M84 92 C83 118 92 132 100 134 C108 132 117 118 116 92 C112 102 107 104 100 104 C93 104 88 102 84 92 Z" fill="' + h + '" ' + S + '/><path d="M96 108 Q97 122 99 130 M104 108 Q103 122 101 130" stroke="' + _shade(h, -0.3) + '" stroke-width="1" fill="none"/>';
@@ -312,6 +333,103 @@ const FeArt = (() => {
           '<path d="M119 176 H149 M120 166 H148 M124 157 H144" stroke="#9a6a14" stroke-width="1.6"/><path d="M131 186 v-7 a3 3 0 0 1 6 0 v7" fill="#5a3a14"/>' +
           '<g fill="' + LEAD + '"><ellipse cx="156" cy="146" rx="2.4" ry="1.6"/><ellipse cx="146" cy="138" rx="2.4" ry="1.6"/></g>' +
           '<path d="M154 143 l2 -2 M144 135 l2 -2" stroke="#f4f1ea" stroke-width="1.2"/>' + _hand(122, 188) + _hand(146, 188);
+      case 'family': {
+        // four small haloed figures: her sons Basil, Gregory, Peter (bishops) and daughter Macrina
+        const kids = [[70, '#a8172f', 'mitre'], [90, '#2457a8', 'mitre'], [110, '#3b3a40', 'veil'], [130, '#2f7a5e', 'mitre']];
+        let o = _hand(66, 200) + _hand(134, 200);
+        kids.forEach(k => {
+          const x = k[0];
+          o += '<circle cx="' + x + '" cy="219" r="9" fill="url(#' + u + 'halo)" stroke="' + LEAD + '" stroke-width="1.4"/>' +
+            '<path d="M' + (x - 10) + ' 252 C' + (x - 10) + ' 238 ' + (x - 6) + ' 230 ' + x + ' 230 C' + (x + 6) + ' 230 ' + (x + 10) + ' 238 ' + (x + 10) + ' 252 Z" fill="' + k[1] + '" stroke="' + LEAD + '" stroke-width="1.6"/>';
+          if (k[2] === 'veil') o += '<path d="M' + (x - 7) + ' 232 C' + (x - 8) + ' 218 ' + (x - 5) + ' 212 ' + x + ' 212 C' + (x + 5) + ' 212 ' + (x + 8) + ' 218 ' + (x + 7) + ' 232 Z" fill="#22232b" stroke="' + LEAD + '" stroke-width="1.2"/>';
+          o += '<circle cx="' + x + '" cy="222" r="5.2" fill="' + SKIN + '" stroke="' + LEAD + '" stroke-width="1.2"/>';
+          if (k[2] === 'mitre') o += '<path d="M' + (x - 4.5) + ' 218 L' + (x - 4) + ' 211 L' + x + ' 207 L' + (x + 4) + ' 211 L' + (x + 4.5) + ' 218 Z" fill="#f3ead2" stroke="' + LEAD + '" stroke-width="1"/>';
+          if (k[2] === 'veil') o += '<path d="M' + (x - 5) + ' 219 C' + (x - 4) + ' 214 ' + (x + 4) + ' 214 ' + (x + 5) + ' 219" fill="none" stroke="#f4f1ea" stroke-width="1.6"/>';
+        });
+        return o;
+      }
+      case 'palm': {
+        let o = '<path d="M122 186 Q136 150 154 106" stroke="#2f6a3a" stroke-width="3" fill="none" stroke-linecap="round"/>';
+        for (let i = 0; i < 9; i++) {
+          const t = 0.25 + i * 0.085, m = 1 - t;
+          const x = m * m * 122 + 2 * m * t * 136 + t * t * 154, y = m * m * 186 + 2 * m * t * 150 + t * t * 106;
+          const len = 15 - i * 0.9;
+          o += '<path d="M' + x.toFixed(1) + ' ' + y.toFixed(1) + ' q' + (-len * 0.8).toFixed(1) + ' ' + (-len * 0.15).toFixed(1) + ' ' + (-len).toFixed(1) + ' ' + (len * 0.45).toFixed(1) + ' M' + x.toFixed(1) + ' ' + y.toFixed(1) + ' q' + (len * 0.75).toFixed(1) + ' ' + (len * 0.05).toFixed(1) + ' ' + (len * 0.95).toFixed(1) + ' ' + (len * 0.62).toFixed(1) + '" stroke="#3f9a4a" stroke-width="3.2" fill="none" stroke-linecap="round"/>';
+        }
+        o += '<path d="M146 122 l6 -14" stroke="#7cc27a" stroke-width="1.2"/>';
+        return o + _hand(122, 186) + _hand(84, 182);
+      }
+      case 'baby':
+        return '<g transform="rotate(-14 104 170)"><ellipse cx="106" cy="170" rx="22" ry="11" fill="#f6efdc" ' + S + '/>' +
+          '<path d="M94 162 Q98 170 94 178 M106 160 Q110 170 106 180 M118 162 Q121 170 118 177" stroke="#c9b98f" stroke-width="1.3" fill="none"/></g>' +
+          '<circle cx="82" cy="164" r="10.5" fill="url(#' + u + 'halo)" stroke="' + LEAD + '" stroke-width="1.4"/>' +
+          '<circle cx="83" cy="166" r="7" fill="' + SKIN + '" stroke="' + LEAD + '" stroke-width="1.5"/>' +
+          '<path d="M80.5 166 h1.2 M85 166 h1.2 M81.5 169.5 q1.5 1 3 0" stroke="#6a3f2a" stroke-width="0.9" fill="none" stroke-linecap="round"/>' +
+          _hand(84, 184) + _hand(128, 170);
+      case 'shell':
+        return '<path d="M140 252 V112" stroke="#8a5a2c" stroke-width="5" stroke-linecap="round"/><path d="M140 252 V112" stroke="' + LEAD + '" stroke-width="1" opacity="0.5"/>' +
+          '<path d="M141 132 q-6 2 -5 9 q1 7 6 7 q6 0 6 -7 q0 -6 -6 -7 q2 -4 0 -6 Z" fill="#d9a441" stroke="' + LEAD + '" stroke-width="1.3"/><path d="M140 126 q-3 -3 -1 -6" stroke="#8a5a2c" stroke-width="1.4" fill="none"/>' +
+          _hand(140, 170) +
+          '<path d="M100 166 L84 148 C86 136 114 136 116 148 Z" fill="#f6e7c4" ' + S + '/>' +
+          '<path d="M100 166 L89 142 M100 166 L95 139 M100 166 L100 138 M100 166 L105 139 M100 166 L111 142" stroke="#b98a4a" stroke-width="1.3"/>' +
+          '<path d="M95 166 h10 l-2 4 h-6 Z" fill="#e8cf9a" stroke="' + LEAD + '" stroke-width="1.2"/>' +
+          _hand(80, 190);
+      case 'ship':
+        return '<g transform="translate(100 214) scale(1.3) translate(-100 -232)">' +
+          '<path d="M100 236 V196" stroke="#6e4a2c" stroke-width="2.6"/>' +
+          '<path d="M102 198 Q122 210 102 228 Z" fill="#f4f1ea" stroke="' + LEAD + '" stroke-width="1.6"/><path d="M107 206 V222 M102 213 H112" stroke="#b3122e" stroke-width="2"/>' +
+          '<path d="M98 202 Q84 214 98 228 Z" fill="#ece6d6" stroke="' + LEAD + '" stroke-width="1.6"/>' +
+          '<path d="M100 196 l8 3 l-8 3 Z" fill="#b3122e"/>' +
+          '<path d="M72 232 H130 L122 246 H80 Z" fill="#8a5a2c" ' + S + '/><path d="M78 238 H124" stroke="#e7b844" stroke-width="1.4"/>' +
+          '</g>' + _hand(68, 218) + _hand(132, 218);
+      case 'monstrance': {
+        let rays = '';
+        for (let i = 0; i < 16; i++) {
+          const a = i * Math.PI / 8, r2 = i % 2 ? 19 : 24;
+          rays += 'M' + (100 + Math.cos(a) * 11).toFixed(1) + ' ' + (154 + Math.sin(a) * 11).toFixed(1) + ' L' + (100 + Math.cos(a) * r2).toFixed(1) + ' ' + (154 + Math.sin(a) * r2).toFixed(1) + ' ';
+        }
+        return '<path d="' + rays + '" stroke="#f0c040" stroke-width="3.4" stroke-linecap="round"/><path d="' + rays + '" stroke="' + LEAD + '" stroke-width="0.7"/>' +
+          '<circle cx="100" cy="154" r="11" fill="#e7b844" stroke="' + LEAD + '" stroke-width="1.6"/><circle cx="100" cy="154" r="7" fill="#fbf8ee" stroke="' + LEAD + '" stroke-width="1"/>' +
+          '<path d="M100 165 V194" stroke="#e7b844" stroke-width="4.5"/><path d="M100 165 V194" stroke="' + LEAD + '" stroke-width="0.8"/><circle cx="100" cy="178" r="3.4" fill="#e7b844" stroke="' + LEAD + '" stroke-width="1"/>' +
+          '<path d="M86 200 Q100 190 114 200 Z" fill="#e7b844" ' + S + '/>' +
+          '<path d="M100 130 V124 M97 127 H103" stroke="#f0c040" stroke-width="1.8"/>' +
+          _hand(88, 194) + _hand(112, 194);
+      }
+      case 'andes':
+        return '<path d="M94 182 C92 168 96 150 100 146 C104 150 108 168 106 182 Z" fill="' + SKIN2 + '" ' + S + '/><path d="M100 148 V182" stroke="' + LEAD + '" stroke-width="1.2"/>' +
+          '<path d="M0 252 V226 L26 204 L44 220 L70 194 L96 224 L118 200 L144 222 L170 198 L200 222 V252 Z" fill="#6f7f9a" ' + S + '/>' +
+          '<path d="M60 204 L70 194 L80 205 L74 202 L70 207 L65 202 Z M110 208 L118 200 L127 209 L121 206 L117 211 L114 206 Z M162 206 L170 198 L178 206 L173 204 L170 208 L166 204 Z M20 209 L26 204 L32 210 L26 208 Z" fill="#f7f9fc" stroke="' + LEAD + '" stroke-width="1"/>' +
+          '<path d="M0 252 V240 Q50 230 100 238 T200 236 V252 Z" fill="#4f7a4a" stroke="' + LEAD + '" stroke-width="1.6"/>';
+      case 'gold':
+        return _book(82, 160, 36, 34, '#1f4fa8') +
+          [[91, 154], [109, 154], [100, 145]].map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6" fill="url(#' + u + 'halo)" stroke="' + LEAD + '" stroke-width="1.4"/><circle cx="' + (p[0] - 2) + '" cy="' + (p[1] - 2) + '" r="1.6" fill="#fff8d0"/>').join('') +
+          _hand(84, 196) + _hand(116, 196);
+      case 'rosary': {
+        let o = '<path d="M94 182 C92 168 96 150 100 146 C104 150 108 168 106 182 Z" fill="' + SKIN2 + '" ' + S + '/><path d="M100 148 V182" stroke="' + LEAD + '" stroke-width="1.2"/>';
+        o += '<path d="M96 180 C84 196 88 213 100 214 C112 213 116 196 104 180" stroke="#cfc8b8" stroke-width="0.9" fill="none"/>';
+        for (let i = 0; i <= 12; i++) {
+          const a = -0.5 + i * (Math.PI + 1) / 12;
+          const x = 100 + Math.cos(a) * 12.5, y = 197 + Math.sin(a) * 17;
+          o += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2" fill="#f4f1ea" stroke="' + LEAD + '" stroke-width="0.7"/>';
+        }
+        o += '<path d="M100 214 V230 M95 220 H105" stroke="#d8dde6" stroke-width="2.4"/><path d="M100 214 V230 M95 220 H105" stroke="' + LEAD + '" stroke-width="0.6"/>';
+        return o;
+      }
+      case 'ferula':
+        return '<path d="M140 252 V112" stroke="#d8dde6" stroke-width="4.5"/><path d="M140 252 V112" stroke="' + LEAD + '" stroke-width="1"/>' +
+          '<path d="M140 100 V128 M130 108 H150" stroke="#d8dde6" stroke-width="5" stroke-linecap="square"/><path d="M140 100 V128 M130 108 H150" stroke="' + LEAD + '" stroke-width="1" fill="none"/>' +
+          '<path d="M140 106 V122 M134 109 L140 111 L146 109" stroke="#8a8f98" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="140" cy="104" r="1.6" fill="#8a8f98"/>' +
+          '<path d="M100 128 V146 M95 134 H105" stroke="#e7b844" stroke-width="2.4"/>' +
+          _hand(140, 172) + _hand(86, 186);
+      case 'roses': {
+        let o = '<g transform="rotate(-24 100 170)"><path d="M100 134 V206 M88 150 H112" stroke="#5a3a20" stroke-width="6" stroke-linecap="square"/><path d="M100 134 V206 M88 150 H112" stroke="' + LEAD + '" stroke-width="1" fill="none"/>' +
+          '<path d="M100 148 V170 M93 151 L100 154 L107 151" stroke="#efc04a" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>';
+        [[84, 184], [96, 190], [108, 186], [90, 196], [104, 199], [116, 194]].forEach((p, i) => {
+          o += '<path d="M' + (p[0] - 5) + ' ' + (p[1] + 4) + ' q-4 4 -2 8 M' + (p[0] + 4) + ' ' + (p[1] + 4) + ' q5 2 5 7" stroke="#2f7a3a" stroke-width="2.4" fill="none"/>';
+          o += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="5.4" fill="' + (i % 2 ? '#c8102e' : '#e0405a') + '" stroke="' + LEAD + '" stroke-width="1.1"/><path d="M' + (p[0] - 2.5) + ' ' + p[1] + ' q2.5 -3 5 0 q-2.5 3 -5 0" stroke="#7a0a1e" stroke-width="0.9" fill="none"/>';
+        });
+        return o + _hand(80, 200) + _hand(120, 200);
+      }
       case 'cross':
         return '<path d="M100 128 V214 M84 148 H116" stroke="#7a5230" stroke-width="7" stroke-linecap="square"/><path d="M100 128 V214 M84 148 H116" stroke="' + LEAD + '" stroke-width="1" fill="none"/>' + _hand(94, 192) + _hand(106, 188);
       default:

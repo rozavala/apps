@@ -403,6 +403,9 @@
       catch(e) { if (typeof Debug !== 'undefined') Debug.error('Routines.renderHubWidget failed', e.message); }
     }
 
+    try { renderSaintDayBanner(user); }
+    catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderSaintDayBanner failed', e.message); }
+
     if (typeof Debug !== 'undefined') Debug.log('Rendering app cards...');
     try {
       renderAppCards(user);
@@ -431,6 +434,40 @@
     } catch(e) { if (typeof Debug !== 'undefined') Debug.error('getNextChallenge failed', e.message); }
     
     if (typeof Debug !== 'undefined') Debug.log('showHub finished');
+  }
+
+  // ── Saint-day banner: "¡Hoy es tu santo!" on the kid's feast day ──
+  // Uses js/name-days.js (harmless if it isn't loaded) and the saint the
+  // kid picked in Fe Explorador (zs_fe_<kid>.favoriteSaint). Hidden when
+  // the parent has turned Fe Explorador off for this kid.
+  function renderSaintDayBanner(user) {
+    var el = document.getElementById('saint-day-banner');
+    if (!el) return;
+    el.innerHTML = '';
+    if (!user || !user.name || typeof NameDays === 'undefined' || isGuestUser()) return;
+    var prof = null;
+    try { prof = (getProfiles() || []).filter(function(p) { return p && p.name === user.name; })[0] || null; } catch (e) {}
+    if (user.faithVisible === false || (prof && prof.faithVisible === false)) return;
+    var entry = null;
+    try {
+      var fe = JSON.parse(localStorage.getItem('zs_fe_' + user.name.toLowerCase().replace(/\s+/g, '_')) || 'null');
+      if (fe && fe.favoriteSaint) entry = NameDays.forSaint(fe.favoriteSaint);
+    } catch (e) {}
+    if (!entry) entry = NameDays.forName(user.name);
+    if (!entry || !NameDays.isToday(entry)) return;
+    el.innerHTML =
+      '<a href="fe-explorador.html" aria-label="' + escHtml('Hoy es tu santo, ' + user.name + ': ' + entry.saint + '. Ver en Fe Explorador') + '" ' +
+         'style="display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:20px;border-radius:16px;' +
+                'background:linear-gradient(135deg,#fffaf0,#fff1cc);border:1.5px solid #ecd59a;' +
+                'box-shadow:0 4px 14px rgba(180,120,20,0.14);color:var(--text-primary);text-decoration:none;animation:fadeUp 0.5s ease-out both;">' +
+        '<span style="font-size:2rem;flex-shrink:0;" aria-hidden="true">🎉</span>' +
+        '<span style="flex:1;min-width:0;">' +
+          '<span style="display:block;font-family:var(--font-display);font-weight:800;font-size:1.05rem;line-height:1.25;">¡Hoy es tu santo, ' + escHtml(user.name) + '!</span>' +
+          '<span style="display:block;font-size:0.88rem;font-weight:700;color:#8e1022;margin-top:2px;">' + escHtml(entry.saint) + ' · ' + escHtml(NameDays.label(entry)) + '</span>' +
+          '<span style="display:block;font-size:0.8rem;font-weight:700;color:var(--text-muted);margin-top:2px;">Ver en Fe Explorador ⛪</span>' +
+        '</span>' +
+        '<span style="font-size:1.4rem;color:#b07812;flex-shrink:0;" aria-hidden="true">→</span>' +
+      '</a>';
   }
 
   function showRankUpCelebration(rank) {

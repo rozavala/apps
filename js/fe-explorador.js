@@ -388,8 +388,220 @@ const FeManager = (() => {
         { q: '¿Por qué es especialmente recordada Santa Mónica?', a: ['Por sus oraciones por su hijo', 'Por fundar conventos', 'Por sus viajes'], correct: 0 },
         { q: '¿En qué siglo vivió Santa Mónica?', a: ['Siglo IV', 'Siglo XI', 'Siglo XVI'], correct: 0 }
       ]
+    },
+    // ── Added 2026-11: namesake saints of the family + kid favourites.
+    // Always append at the END: progress is keyed by id, but the strip
+    // order and the "next saint" button follow this array.
+    // New fields (also filled in for the older saints below):
+    //   feast  { m, d }  day the Church celebrates the saint (Chile)
+    //   lesson           "Lo que podemos aprender…" one-liner
+    //   bio paragraphs are separated by a blank line ("\n\n").
+    {
+      id: 'emilia',
+      name: 'Santa Emilia',
+      dates: 'Siglo IV',
+      country: 'Capadocia 🏛️',
+      feast: { m: 5, d: 30 },
+      bio: 'Santa Emilia (también llamada Emelia) vivió en el siglo IV en Capadocia y el Ponto, tierras que hoy son parte de Turquía. Estaba casada con San Basilio el Viejo y tuvieron muchos hijos.\n\n' +
+        'Fue la mamá de una familia de santos: entre sus hijos están San Basilio Magno, San Gregorio de Nisa, Santa Macrina y San Pedro de Sebaste. Cuando quedó viuda, vivió una vida de oración junto a su hija Macrina.',
+      lesson: 'Lo que podemos aprender de ella: la familia es el primer lugar donde aprendemos a querer a Dios.',
+      questions: [
+        { q: '¿Por qué es recordada Santa Emilia?', a: ['Fue la mamá de una familia de santos', 'Fue una reina de Francia', 'Fue una exploradora del mar'], correct: 0, explain: 'Santa Emilia (siglo IV) vivió en Capadocia y fue la mamá de San Basilio Magno, San Gregorio de Nisa, Santa Macrina y San Pedro de Sebaste.' },
+        { q: '¿Cuál de estos santos fue hijo de Santa Emilia?', a: ['San Basilio Magno', 'San Francisco de Asís', 'San Juan Bosco'], correct: 0 },
+        { q: '¿En qué siglo vivió Santa Emilia?', a: ['Siglo IV', 'Siglo XV', 'Siglo XX'], correct: 0 }
+      ]
+    },
+    {
+      id: 'rodrigo',
+      name: 'San Rodrigo de Córdoba',
+      dates: 'Siglo IX (†857)',
+      country: 'España 🇪🇸',
+      feast: { m: 3, d: 13 },
+      bio: 'San Rodrigo fue un sacerdote que vivió en Córdoba, en el sur de España, en el siglo IX. Fue acusado injustamente y lo llevaron a la cárcel. Allí conoció a otro cristiano, Salomón, y los dos se acompañaron como amigos.\n\n' +
+        'Ninguno de los dos quiso dejar su fe en Jesús, y murieron mártires el 13 de marzo del año 857. Su historia la escribió San Eulogio de Córdoba, un sacerdote que vivía en esa ciudad en la misma época.',
+      lesson: 'Lo que podemos aprender de él: decir siempre la verdad y ser fiel a Jesús, aunque sea difícil.',
+      questions: [
+        { q: '¿Qué era San Rodrigo de Córdoba?', a: ['Sacerdote', 'Rey', 'Pescador'], correct: 0, explain: 'San Rodrigo fue un sacerdote de Córdoba (España) que murió mártir el 13 de marzo del año 857, junto a San Salomón.' },
+        { q: '¿En qué ciudad de España vivió?', a: ['Córdoba', 'Madrid', 'Barcelona'], correct: 0 },
+        { q: '¿Junto a qué amigo es recordado San Rodrigo?', a: ['San Salomón', 'San Jorge', 'San Benito'], correct: 0 }
+      ]
+    },
+    {
+      id: 'isabel',
+      name: 'Santa Isabel',
+      dates: 'Siglo I',
+      country: 'Judea ⛰️',
+      feast: { m: 11, d: 5 },
+      bio: 'Santa Isabel es la mamá de San Juan Bautista y la esposa de Zacarías, un sacerdote del Templo de Jerusalén. Su historia está en la Biblia, en el capítulo 1 del Evangelio de San Lucas. Isabel y Zacarías ya eran mayores y no tenían hijos, y Dios les regaló a Juan.\n\n' +
+        'Isabel era pariente de la Virgen María; por eso se dice que era su prima. Cuando María fue a visitarla, Isabel la saludó con palabras que hoy rezamos en el Ave María: «Bendita tú entre las mujeres y bendito el fruto de tu vientre». Esa visita se llama la Visitación.',
+      lesson: 'Lo que podemos aprender de ella: alegrarnos de corazón con las cosas buenas que les pasan a los demás.',
+      questions: [
+        { q: '¿De quién fue mamá Santa Isabel?', a: ['De San Juan Bautista', 'De San Pedro', 'De San Pablo'], correct: 0, explain: 'Santa Isabel, esposa de Zacarías, fue la mamá de San Juan Bautista. Su historia está en el Evangelio de San Lucas, capítulo 1.' },
+        { q: '¿Quién fue a visitar a Santa Isabel?', a: ['La Virgen María', 'San Jorge', 'Santa Clara'], correct: 0 },
+        { q: '¿Qué palabras de Isabel rezamos en el Ave María?', a: ['«Bendita tú entre las mujeres»', '«Padre nuestro que estás en el cielo»', '«Gloria al Padre»'], correct: 0 }
+      ]
+    },
+    {
+      id: 'santiago',
+      name: 'Santiago Apóstol',
+      dates: 'Siglo I',
+      country: 'Galilea 🐚',
+      feast: { m: 7, d: 25 },
+      bio: 'Santiago fue uno de los doce apóstoles de Jesús. Era pescador en el mar de Galilea, como su papá Zebedeo, y hermano de San Juan Evangelista. Jesús los llamó mientras arreglaban sus redes.\n\n' +
+        'Fue el primer apóstol en dar su vida por Jesús, en Jerusalén, como cuentan los Hechos de los Apóstoles. Según la tradición, sus restos están en Santiago de Compostela, en España, adonde llegan peregrinos caminando. La capital de Chile lleva su nombre: Pedro de Valdivia la fundó en 1541 como Santiago del Nuevo Extremo.',
+      lesson: 'Lo que podemos aprender de él: seguir a Jesús con entusiasmo, paso a paso, como un buen peregrino.',
+      questions: [
+        { q: '¿Qué oficio tenía Santiago antes de seguir a Jesús?', a: ['Pescador', 'Carpintero', 'Soldado'], correct: 0, explain: 'Santiago Apóstol era pescador en el mar de Galilea y hermano de San Juan. La capital de Chile lleva su nombre.' },
+        { q: '¿Qué ciudad de Chile lleva el nombre de este apóstol?', a: ['Santiago', 'Valparaíso', 'Temuco'], correct: 0 },
+        { q: '¿Quién era el hermano de Santiago?', a: ['San Juan', 'San Pablo', 'San José'], correct: 0 }
+      ]
+    },
+    {
+      id: 'francisco_javier',
+      name: 'San Francisco Javier',
+      dates: '1506–1552',
+      country: 'España 🇪🇸',
+      feast: { m: 12, d: 3 },
+      bio: 'Nació en 1506 en el castillo de Javier, en Navarra (España). Mientras estudiaba en la Universidad de París conoció a San Ignacio de Loyola y fue uno de los primeros jesuitas.\n\n' +
+        'Viajó en barco miles de kilómetros para enseñar sobre Jesús en la India, en Japón y en otras tierras de Asia. Murió en 1552 en la isla de Shangchuan, frente a la costa de China. Es patrono de las misiones.',
+      lesson: 'Lo que podemos aprender de él: compartir con alegría lo que sabemos de Jesús, aunque cueste esfuerzo.',
+      questions: [
+        { q: '¿A qué santo conoció San Francisco Javier en París?', a: ['San Ignacio de Loyola', 'San Benito', 'San Jorge'], correct: 0, explain: 'San Francisco Javier (1506–1552) conoció a San Ignacio de Loyola en París y fue uno de los primeros jesuitas.' },
+        { q: '¿A qué continente viajó para enseñar sobre Jesús?', a: ['Asia', 'Oceanía', 'Antártica'], correct: 0 },
+        { q: '¿De qué es patrono San Francisco Javier?', a: ['De las misiones', 'De los músicos', 'De los panaderos'], correct: 0 }
+      ]
+    },
+    {
+      id: 'clara',
+      name: 'Santa Clara de Asís',
+      dates: '1194–1253',
+      country: 'Italia 🇮🇹',
+      feast: { m: 8, d: 11 },
+      bio: 'Nació en Asís, Italia, en 1194. Cuando era joven escuchó predicar a San Francisco de Asís y decidió seguir a Jesús con una vida sencilla y pobre.\n\n' +
+        'Fundó la orden de las Hermanas Pobres, que hoy conocemos como las Clarisas, y vivió en el convento de San Damián. Según la tradición, protegió su convento de unos soldados mostrando la Eucaristía; por eso se la pinta con una custodia en las manos.',
+      lesson: 'Lo que podemos aprender de ella: ser felices con las cosas sencillas y confiar en Dios.',
+      questions: [
+        { q: '¿Qué santo inspiró a Santa Clara?', a: ['San Francisco de Asís', 'San Agustín', 'San Pedro'], correct: 0, explain: 'Santa Clara de Asís (1194–1253) siguió el ejemplo de San Francisco de Asís y fundó la orden de las Clarisas.' },
+        { q: '¿Cómo se llaman hoy las religiosas de la orden que fundó?', a: ['Clarisas', 'Jesuitas', 'Benedictinas'], correct: 0 },
+        { q: '¿Qué sostiene Santa Clara en sus imágenes?', a: ['Una custodia', 'Una espada', 'Un barco'], correct: 0 }
+      ]
+    },
+    {
+      id: 'laura_vicuna',
+      name: 'Beata Laura Vicuña',
+      dates: '1891–1904',
+      country: 'Chile 🇨🇱',
+      feast: { m: 1, d: 22 },
+      bio: 'Nació en Santiago de Chile el 5 de abril de 1891. Siendo pequeña se fue a vivir con su mamá y su hermana a Argentina, al otro lado de la cordillera de los Andes, y estudió en el colegio de las Hijas de María Auxiliadora en Junín de los Andes.\n\n' +
+        'Era una alumna alegre y buena compañera, y rezaba mucho por su mamá. Murió el 22 de enero de 1904, con solo 12 años. San Juan Pablo II la declaró beata en 1988; «beata» es el paso anterior a ser declarada santa.',
+      lesson: 'Lo que podemos aprender de ella: rezar por nuestra familia y quererla mucho.',
+      questions: [
+        { q: '¿En qué ciudad nació Laura Vicuña?', a: ['Santiago de Chile', 'Lima', 'Madrid'], correct: 0, explain: 'La Beata Laura Vicuña nació en Santiago de Chile en 1891 y estudió en Junín de los Andes, Argentina.' },
+        { q: '¿Qué cordillera cruzó para ir a vivir a Argentina?', a: ['Los Andes', 'Los Alpes', 'El Himalaya'], correct: 0 },
+        { q: '¿Qué Papa la declaró beata en 1988?', a: ['San Juan Pablo II', 'San Pedro', 'San Benito'], correct: 0 }
+      ]
+    },
+    {
+      id: 'nicolas',
+      name: 'San Nicolás de Bari',
+      dates: 'Siglo IV',
+      country: 'Licia, actual Turquía 🎁',
+      feast: { m: 12, d: 6 },
+      bio: 'San Nicolás fue obispo de Mira, una ciudad de Licia, en lo que hoy es Turquía, en el siglo IV. Es conocido por lo mucho que ayudaba a los pobres, y es patrono de los niños.\n\n' +
+        'Según la tradición, ayudó en secreto a un papá muy pobre dejándole bolsas de oro por la noche. En 1087 sus restos fueron llevados a Bari, en Italia; por eso lo llamamos San Nicolás de Bari. De su nombre y su fama de dar regalos viene Santa Claus, que en Chile llamamos el Viejito Pascuero.',
+      lesson: 'Lo que podemos aprender de él: ayudar a los demás sin buscar que nos aplaudan.',
+      questions: [
+        { q: '¿De qué ciudad fue obispo San Nicolás?', a: ['Mira', 'Roma', 'Santiago'], correct: 0, explain: 'San Nicolás (siglo IV) fue obispo de Mira, en Licia (hoy Turquía); en 1087 sus restos fueron llevados a Bari, Italia.' },
+        { q: '¿A qué ciudad de Italia llevaron sus restos?', a: ['Bari', 'Venecia', 'Milán'], correct: 0 },
+        { q: '¿Qué personaje de Navidad viene de San Nicolás?', a: ['El Viejito Pascuero', 'Los Reyes Magos', 'El burrito del pesebre'], correct: 0 }
+      ]
+    },
+    {
+      id: 'bernardita',
+      name: 'Santa Bernardita Soubirous',
+      dates: '1844–1879',
+      country: 'Francia 🇫🇷',
+      feast: { m: 4, d: 16 },
+      bio: 'Nació en Lourdes, Francia, en 1844, en una familia muy pobre. En 1858, cuando tenía 14 años, contó que la Virgen María se le apareció 18 veces en la gruta de Massabielle, mientras ella rezaba el Rosario. La Señora le dijo: «Yo soy la Inmaculada Concepción».\n\n' +
+        'Hoy Lourdes es uno de los santuarios más visitados del mundo, y en Chile hay grutas de Lourdes, como la de Punta Arenas. Bernardita se hizo religiosa en Nevers, donde murió en 1879. Fue declarada santa en 1933.',
+      lesson: 'Lo que podemos aprender de ella: ser sencillos y humildes, y rezar el Rosario.',
+      questions: [
+        { q: '¿En qué ciudad de Francia nació Santa Bernardita?', a: ['Lourdes', 'París', 'Lisieux'], correct: 0, explain: 'Santa Bernardita Soubirous (1844–1879) nació en Lourdes, Francia, donde en 1858 contó que la Virgen se le apareció en la gruta de Massabielle.' },
+        { q: '¿Quién se le apareció a Bernardita en la gruta?', a: ['La Virgen María', 'San Jorge', 'Santa Clara'], correct: 0 },
+        { q: '¿En qué año ocurrieron las apariciones de Lourdes?', a: ['1858', '1492', '1998'], correct: 0 }
+      ]
+    },
+    {
+      id: 'juan_pablo',
+      name: 'San Juan Pablo II',
+      dates: '1920–2005',
+      country: 'Polonia 🇵🇱',
+      feast: { m: 10, d: 22 },
+      bio: 'Se llamaba Karol Wojtyła y nació en Wadowice, Polonia, en 1920. De joven le gustaban el teatro, el deporte y las caminatas por la montaña. Fue Papa desde 1978 hasta 2005 y visitó más de cien países. Una de sus frases más famosas es: «¡No tengan miedo!».\n\n' +
+        'En 1987 visitó Chile. Su mediación ayudó a que Chile y Argentina firmaran el Tratado de Paz y Amistad de 1984. Declaró beata a Laura Vicuña (1988) y santa a Teresa de los Andes (1993). Fue declarado santo en 2014.',
+      lesson: 'Lo que podemos aprender de él: no tener miedo de seguir a Jesús y ayudar a que haya paz.',
+      questions: [
+        { q: '¿En qué país nació San Juan Pablo II?', a: ['Polonia', 'Italia', 'Chile'], correct: 0, explain: 'San Juan Pablo II (1920–2005), Karol Wojtyła, nació en Polonia, fue Papa desde 1978 y visitó Chile en 1987.' },
+        { q: '¿En qué año visitó Chile?', a: ['1987', '1810', '2020'], correct: 0 },
+        { q: '¿Cuál era su nombre antes de ser Papa?', a: ['Karol Wojtyła', 'Juan Bosco', 'Pedro de Valdivia'], correct: 0 }
+      ]
+    },
+    {
+      id: 'teresa_lisieux',
+      name: 'Santa Teresa de Lisieux',
+      dates: '1873–1897',
+      country: 'Francia 🇫🇷',
+      feast: { m: 10, d: 1 },
+      bio: 'Nació en Alençon, Francia, en 1873. A los 15 años entró al convento de las carmelitas de Lisieux con el nombre de Teresa del Niño Jesús; por eso también la llamamos Santa Teresita.\n\n' +
+        'Enseñó el «caminito»: hacer con mucho amor las cosas pequeñas de cada día. Escribió la historia de su vida, «Historia de un alma». Murió en 1897, con 24 años. Es Doctora de la Iglesia y patrona de las misiones, junto a San Francisco Javier.',
+      lesson: 'Lo que podemos aprender de ella: hacer con amor las cosas pequeñas de cada día.',
+      questions: [
+        { q: '¿Cómo se llama el camino que enseñó Santa Teresita?', a: ['El caminito', 'La gran carretera', 'El camino del mar'], correct: 0, explain: 'Santa Teresa de Lisieux (1873–1897), carmelita francesa, enseñó el «caminito»: hacer con amor las cosas pequeñas.' },
+        { q: '¿En qué convento vivió Santa Teresita?', a: ['En el Carmelo de Lisieux', 'En el convento de San Damián', 'En el monasterio de Montecassino'], correct: 0 },
+        { q: '¿Qué flores acompañan a Santa Teresita en sus imágenes?', a: ['Rosas', 'Girasoles', 'Tulipanes'], correct: 0 }
+      ]
     }
   ];
+
+  // Feast days (as celebrated in Chile) and a one-line lesson for the
+  // saints that were in the app before these fields existed.
+  const FEASTS = {
+    benito: [7, 11], francisco: [10, 4], teresa_andes: [7, 13], alberto_hurtado: [8, 18],
+    rosa_lima: [8, 30], martin_porres: [11, 3], ignacio_loyola: [7, 31], teresa_avila: [10, 15],
+    juan_bosco: [1, 31], jose: [3, 19], juan_dios: [3, 8], pablo: [6, 29], pedro: [6, 29],
+    juan_cruz: [12, 14], tomas_aquino: [1, 28], agustin: [8, 28], catalina_siena: [4, 29],
+    jorge: [4, 23], ambrosio: [12, 7], monica: [8, 27]
+  };
+  const LESSONS = {
+    benito: 'Lo que podemos aprender de él: rezar y trabajar, las dos cosas con cariño.',
+    francisco: 'Lo que podemos aprender de él: cuidar a los animales y a la naturaleza, que Dios creó.',
+    teresa_andes: 'Lo que podemos aprender de ella: vivir con alegría y contarle todo a Jesús.',
+    alberto_hurtado: 'Lo que podemos aprender de él: ayudar a quien lo necesita, ¡contentos!',
+    rosa_lima: 'Lo que podemos aprender de ella: ayudar a los enfermos y necesitados.',
+    martin_porres: 'Lo que podemos aprender de él: ser humildes y servir con alegría.',
+    ignacio_loyola: 'Lo que podemos aprender de él: hacer todo para la mayor gloria de Dios.',
+    teresa_avila: 'Lo que podemos aprender de ella: hablar con Dios como con un amigo.',
+    juan_bosco: 'Lo que podemos aprender de él: aprender y jugar con alegría.',
+    jose: 'Lo que podemos aprender de él: trabajar bien y cuidar a la familia.',
+    juan_dios: 'Lo que podemos aprender de él: cuidar a los enfermos con cariño.',
+    pablo: 'Lo que podemos aprender de él: contar a todos lo que sabemos de Jesús.',
+    pedro: 'Lo que podemos aprender de él: volver a empezar cuando nos equivocamos.',
+    juan_cruz: 'Lo que podemos aprender de él: buscar a Dios también en el silencio.',
+    tomas_aquino: 'Lo que podemos aprender de él: estudiar con ganas para conocer mejor a Dios.',
+    agustin: 'Lo que podemos aprender de él: buscar la verdad con todo el corazón.',
+    catalina_siena: 'Lo que podemos aprender de ella: ser valientes para hacer el bien.',
+    jorge: 'Lo que podemos aprender de él: ser valientes y fieles.',
+    ambrosio: 'Lo que podemos aprender de él: alabar a Dios con canciones y buenas palabras.',
+    monica: 'Lo que podemos aprender de ella: rezar con paciencia por las personas que queremos.'
+  };
+  SAINTS.forEach(s => {
+    if (!s.feast && FEASTS[s.id]) s.feast = { m: FEASTS[s.id][0], d: FEASTS[s.id][1] };
+    if (!s.lesson && LESSONS[s.id]) s.lesson = LESSONS[s.id];
+  });
+
+  const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  // "13 de marzo"
+  function feastLabel(s) { return s && s.feast ? s.feast.d + ' de ' + MONTHS[s.feast.m - 1] : ''; }
 
   /* The four sets of mysteries of the Holy Rosary, with the traditional
      weekly schedule (post-2002, including the Luminous mysteries).
@@ -572,6 +784,7 @@ const FeManager = (() => {
   //   rosaries         number of full rosaries finished
   //   rosaryMaterial   'madera' | 'cristal'
   //   challengeBest    { tier: { score, total, stars } }
+  //   favoriteSaint    saint id chosen in the "Mi santo" card (v3)
   // The star rule (js/auth.js) reads totalStars only.
   function _fresh() { return { totalStars: 0, completed: [] }; }
 
@@ -619,8 +832,8 @@ const FeManager = (() => {
   function getSaint(id) { return SAINTS.find(s => s.id === id) || null; }
 
   return {
-    PRAYERS, SAINTS, MYSTERIES, ROSARY_SETS, HERITAGE, addStar,
-    getRosarySetIndexForDay, DAY_NAMES, getPrayer, getSaint,
+    PRAYERS, SAINTS, MYSTERIES, ROSARY_SETS, HERITAGE, MONTHS, addStar,
+    getRosarySetIndexForDay, DAY_NAMES, getPrayer, getSaint, feastLabel,
     getStatus: _getData, update
   };
 })();
