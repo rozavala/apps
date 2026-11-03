@@ -922,7 +922,7 @@ var QheArt = (function() {
       '<rect x="' + (x - 22) + '" y="' + (y + h * 0.5) + '" width="' + (cw * 0.8) + '" height="5" rx="2" fill="#e8c15a" transform="rotate(-8 ' + (x - 10) + ' ' + (y + h * 0.5) + ')"/>' +
       '<rect x="' + (x + w + 22 - cw * 0.8) + '" y="' + (y + h * 0.5) + '" width="' + (cw * 0.8) + '" height="5" rx="2" fill="#e8c15a" transform="rotate(8 ' + (x + w + 10) + ' ' + (y + h * 0.5) + ')"/>';
   }
-  function room(wallA, wallB, win, props) {
+  function room(wallA, wallB, win, props, glows) {
     var w = win || { x: 52, y: 40, w: 132, h: 108 };
     return '<svg class="qs-scene" viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" role="img">' +
       defs('<linearGradient id="qs-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + wallA + '"/><stop offset="1" stop-color="' + wallB + '"/></linearGradient>' +
@@ -938,6 +938,7 @@ var QheArt = (function() {
       windowBox(w.x, w.y, w.w, w.h) + curtains(w.x, w.y, w.w, w.h) +
       props +
       '<rect class="qs-dim" data-max="0.42" width="480" height="270" fill="#0b1236" opacity="0" style="mix-blend-mode:multiply"/>' +
+      (glows || '') +
       '</svg>';
   }
   function outdoor(props, extraDefs) {
@@ -1069,9 +1070,11 @@ var QheArt = (function() {
       '<path d="M420 64 l12 -44 h8 l12 44Z" fill="url(#qs-woodH)"/><path d="M426 58 l9 -32 h2 l9 32Z" fill="#2d160b"/>' +
       '<g class="qs-tick" style="transform-origin:436px 58px"><path d="M436 58 l0 -34" stroke="#d9c06a" stroke-width="1.6"/><rect x="433" y="34" width="6" height="5" fill="url(#qs-brass)"/></g>' +
       // stool
-      shadowEllipse(360, 252, 40, 5, 0.3) +
-      '<rect x="326" y="208" width="68" height="10" rx="4" fill="#5b2c17"/><rect x="330" y="200" width="60" height="10" rx="5" fill="#7b2430"/>' +
-      '<rect x="332" y="218" width="5" height="30" fill="#3a1a0e"/><rect x="383" y="218" width="5" height="30" fill="#3a1a0e"/>';
+      shadowEllipse(358, 264, 46, 5, 0.4) +
+      '<rect x="318" y="234" width="6" height="30" fill="#2a120a"/><rect x="392" y="234" width="6" height="30" fill="#2a120a"/>' +
+      '<rect x="330" y="236" width="4" height="24" fill="#1c0b05"/><rect x="382" y="236" width="4" height="24" fill="#1c0b05"/>' +
+      '<rect x="312" y="226" width="92" height="11" rx="4" fill="url(#qs-woodH)"/>' +
+      '<rect x="316" y="216" width="84" height="13" rx="6" fill="#9b2c3a"/><rect x="322" y="217" width="60" height="4" rx="2" fill="#fff" opacity="0.25"/>';
   }
   function hangingLamp(cx) {
     return '<circle class="qs-lamp" cx="' + cx + '" cy="90" r="120" fill="url(#qs-lampGlow)" opacity="0"/>' +
@@ -1163,20 +1166,34 @@ var QheArt = (function() {
       '<path class="qs-flame" d="M' + x + ' 138 q4 6 0 12 q-4 -6 0 -12Z" fill="#ffcf5a"/><circle class="qs-lamp" cx="' + x + '" cy="144" r="20" fill="url(#qs-lampGlow)" opacity="0"/>';
   }
 
+  function painting(x, y, w, h) {
+    return shadowEllipse(x + w / 2 + 3, y + h + 4, w * 0.45, 3, 0.25) +
+      '<rect x="' + (x - 7) + '" y="' + (y - 7) + '" width="' + (w + 14) + '" height="' + (h + 14) + '" rx="2" fill="url(#qs-brass)"/>' +
+      '<rect x="' + (x - 3) + '" y="' + (y - 3) + '" width="' + (w + 6) + '" height="' + (h + 6) + '" fill="#7a5212" opacity="0.5"/>' +
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="#9cc6e8"/>' +
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h * 0.5 + '" fill="#f4d9b0" opacity="0.5"/>' +
+      '<path d="M' + x + ' ' + (y + h * 0.7) + ' L' + (x + w * 0.22) + ' ' + (y + h * 0.3) + ' L' + (x + w * 0.38) + ' ' + (y + h * 0.5) + ' L' + (x + w * 0.58) + ' ' + (y + h * 0.18) + ' L' + (x + w * 0.8) + ' ' + (y + h * 0.48) + ' L' + (x + w) + ' ' + (y + h * 0.35) + ' V' + (y + h * 0.7) + 'Z" fill="#7d8db3"/>' +
+      '<path d="M' + (x + w * 0.52) + ' ' + (y + h * 0.27) + ' L' + (x + w * 0.58) + ' ' + (y + h * 0.18) + ' L' + (x + w * 0.65) + ' ' + (y + h * 0.27) + 'Z" fill="#fff"/>' +
+      '<path d="M' + x + ' ' + (y + h * 0.7) + ' Q' + (x + w * 0.5) + ' ' + (y + h * 0.58) + ' ' + (x + w) + ' ' + (y + h * 0.68) + ' V' + (y + h) + ' H' + x + 'Z" fill="#6f9a52"/>' +
+      '<rect x="' + x + '" y="' + (y + h * 0.82) + '" width="' + w + '" height="' + h * 0.18 + '" fill="#4f86b8" opacity="0.8"/>' +
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="url(#qs-glass)" opacity="0.6"/>';
+  }
+  function glowAt(cx, cy, r) { return '<circle class="qs-lamp" cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#qs-lampGlow)" opacity="0" style="mix-blend-mode:screen"/>'; }
+
   var SCENES = {
     wake: function() {
       return room('#f6e6c8', '#ead2a8', null, nightstand(196) + alarmClock(218, 144) + bed(false) +
         '<ellipse cx="160" cy="236" rx="48" ry="9" fill="#2f6c8f" opacity="0.8"/><ellipse cx="160" cy="236" rx="40" ry="6" fill="none" stroke="#f3c55c" stroke-dasharray="3 3"/>');
     },
     breakfast: function() {
-      return room('#e5f0e4', '#c9dfc6', null, table(206, 168, 260, true) +
+      return room('#e5f0e4', '#c9dfc6', null, painting(300, 48, 96, 64) + table(206, 168, 260, true) +
         plate(262, 168, 26) + marraqueta(262, 166) + mug(304, 142, '#2f6c8f') + glass(344, 140, '#fdfdfd') +
         '<rect x="372" y="146" width="22" height="22" rx="4" fill="#d9a35a" opacity="0.85"/><rect x="370" y="142" width="26" height="7" rx="2" fill="#e8e1d1"/><rect x="376" y="153" width="14" height="9" rx="1" fill="#fff" opacity="0.8"/>' +
         '<path d="M410 166 q14 -16 28 0Z" fill="#f4f1ea" stroke="#cfd3da"/><ellipse cx="424" cy="166" rx="14" ry="3.5" fill="#e9ad3b"/><circle cx="420" cy="164" r="2" fill="#c47d1a"/><circle cx="428" cy="165" r="2" fill="#c47d1a"/>');
     },
     school: function() { return outdoor(schoolProps()); },
     lunch: function() {
-      return room('#f4e4d4', '#e3c7ab', null, table(206, 168, 260, true) +
+      return room('#f4e4d4', '#e3c7ab', null, painting(290, 44, 110, 72) + table(206, 168, 260, true) +
         claypot(296, 160) + plate(380, 168, 24) + '<path d="M368 164 q12 -10 24 0Z" fill="#7dbb4c"/><path d="M372 163 q8 -7 16 0" fill="#cf3f2e"/>' +
         glass(416, 140, '#f6a23a') + '<path d="M240 168 l18 -2 M246 170 l14 -3" stroke="#b8bcc4" stroke-width="2" stroke-linecap="round"/>');
     },
@@ -1185,11 +1202,13 @@ var QheArt = (function() {
     dinner: function() {
       return room('#efe0c9', '#d9c19c', null, hangingLamp(336) + table(206, 168, 260, true) +
         plate(260, 168, 24) + plate(412, 168, 24) + claypot(336, 160) + candle(296) + candle(376) +
-        '<path d="M232 170 l14 -2" stroke="#b8bcc4" stroke-width="2" stroke-linecap="round"/>');
+        '<path d="M232 170 l14 -2" stroke="#b8bcc4" stroke-width="2" stroke-linecap="round"/>',
+        glowAt(336, 96, 130) + glowAt(296, 144, 26) + glowAt(376, 144, 26));
     },
     bedtime: function() {
       return room('#dfe5f3', '#c3cde6', null, nightstand(196) + lamp(203, true) + bed(true) + teddy(300, 132) +
-        '<path d="M206 160 l12 -6 l12 6Z" fill="#7b2430"/>');
+        '<path d="M206 160 l12 -6 l12 6Z" fill="#7b2430"/>',
+        glowAt(217, 128, 90));
     }
   };
   function sceneSVG(id) { return (SCENES[id] || SCENES.wake)(); }

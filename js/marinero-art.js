@@ -1195,6 +1195,355 @@ var MarineroArt = (function() {
     ctx.restore();
   }
 
+
+  // ---------------------------------------------------------------
+  // SEA, HARBOUR AND BUOYS
+  // ---------------------------------------------------------------
+  var TAU = Math.PI * 2;
+
+  // Static part of the harbour view (sky, clouds, coast, town, lighthouse).
+  function harbourBackdrop(w, h, dpr, hz) {
+    var key = 'hb' + w + 'x' + h + '@' + dpr + ':' + hz;
+    if (_bgCache[key]) return _bgCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    var H = h * hz;
+    var sky = c.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#5f9cc9'); sky.addColorStop(0.7, '#b9d7e8'); sky.addColorStop(1, '#e4eef0');
+    c.fillStyle = sky; c.fillRect(0, 0, w, H + 2);
+    var R = rng(5);
+    // clouds: clusters of soft puffs
+    for (var cl = 0; cl < 5; cl++) {
+      var cx = R() * w, cy = H * (0.15 + R() * 0.45), sz = w * (0.05 + R() * 0.06);
+      for (var pf = 0; pf < 7; pf++) {
+        var px = cx + (R() - 0.5) * sz * 2.4, py = cy + (R() - 0.5) * sz * 0.5, pr = sz * (0.4 + R() * 0.5);
+        var g = c.createRadialGradient(px, py - pr * 0.3, pr * 0.1, px, py, pr);
+        g.addColorStop(0, 'rgba(255,255,255,0.85)'); g.addColorStop(0.6, 'rgba(250,252,255,0.45)'); g.addColorStop(1, 'rgba(240,246,250,0)');
+        c.fillStyle = g; c.beginPath(); c.arc(px, py, pr, 0, TAU); c.fill();
+      }
+    }
+    // far mountains (Andes-blue haze)
+    c.fillStyle = 'rgba(120,150,175,0.7)';
+    c.beginPath(); c.moveTo(0, H);
+    for (var x = 0; x <= w; x += 8) c.lineTo(x, H - h * 0.09 - Math.sin(x * 0.011) * h * 0.025 - Math.sin(x * 0.031 + 1) * h * 0.012);
+    c.lineTo(w, H); c.fill();
+    // nearer coastal hills (green-brown)
+    var hills = c.createLinearGradient(0, H - h * 0.08, 0, H);
+    hills.addColorStop(0, '#6f8a52'); hills.addColorStop(1, '#3f5a35');
+    c.fillStyle = hills;
+    c.beginPath(); c.moveTo(0, H);
+    for (var x2 = 0; x2 <= w * 0.62; x2 += 6) c.lineTo(x2, H - h * 0.055 - Math.sin(x2 * 0.02) * h * 0.012 - (x2 < w * 0.1 ? (w * 0.1 - x2) * 0.15 : 0));
+    c.lineTo(w * 0.62, H); c.fill();
+    // headland with lighthouse on the right
+    c.beginPath(); c.moveTo(w * 0.72, H);
+    c.quadraticCurveTo(w * 0.8, H - h * 0.07, w * 0.9, H - h * 0.075);
+    c.lineTo(w, H - h * 0.08); c.lineTo(w, H); c.fill();
+    // rocks at the headland foot
+    c.fillStyle = '#4a4740';
+    for (var rk = 0; rk < 9; rk++) {
+      var rx = w * (0.73 + rk * 0.03), rw = w * 0.025 * (0.6 + R());
+      c.beginPath(); c.ellipse(rx, H, rw, h * 0.008 * (0.8 + R()), 0, Math.PI, 0); c.fill();
+    }
+    // lighthouse (white tower, red lantern room)
+    var lx = w * 0.87, ly = H - h * 0.075, lh = h * 0.085, lw = w * 0.012;
+    var lg = c.createLinearGradient(lx - lw, 0, lx + lw, 0);
+    lg.addColorStop(0, '#bfc4c6'); lg.addColorStop(0.4, '#ffffff'); lg.addColorStop(1, '#9da3a6');
+    c.fillStyle = lg;
+    c.beginPath(); c.moveTo(lx - lw, ly); c.lineTo(lx - lw * 0.7, ly - lh); c.lineTo(lx + lw * 0.7, ly - lh); c.lineTo(lx + lw, ly); c.fill();
+    c.fillStyle = '#b3261e'; c.fillRect(lx - lw * 0.75, ly - lh * 0.55, lw * 1.5, lh * 0.12);
+    c.fillStyle = '#2b2b2b'; c.fillRect(lx - lw * 0.85, ly - lh - lw * 0.3, lw * 1.7, lw * 0.35);
+    c.fillStyle = '#fff6b0'; c.fillRect(lx - lw * 0.5, ly - lh - lw * 1.1, lw, lw * 0.8);
+    c.fillStyle = '#b3261e';
+    c.beginPath(); c.moveTo(lx - lw * 0.7, ly - lh - lw * 1.1); c.lineTo(lx, ly - lh - lw * 1.9); c.lineTo(lx + lw * 0.7, ly - lh - lw * 1.1); c.fill();
+    // little town: white houses with red/ochre roofs on the left hills
+    for (var hs = 0; hs < 22; hs++) {
+      var hx = w * (0.08 + R() * 0.4), hy = H - h * (0.012 + R() * 0.035), hw = w * (0.008 + R() * 0.008);
+      c.fillStyle = R() < 0.7 ? '#f3f0e6' : '#e8d9b5';
+      c.fillRect(hx, hy - hw * 0.7, hw, hw * 0.7);
+      c.fillStyle = R() < 0.5 ? '#a8432c' : '#c27a3a';
+      c.beginPath(); c.moveTo(hx - hw * 0.1, hy - hw * 0.7); c.lineTo(hx + hw * 0.5, hy - hw * 1.05); c.lineTo(hx + hw * 1.1, hy - hw * 0.7); c.fill();
+    }
+    // breakwater (stone) on the left at the waterline
+    c.fillStyle = '#7d7a70';
+    c.beginPath(); c.moveTo(0, H + 1); c.lineTo(0, H - h * 0.012); c.lineTo(w * 0.3, H - h * 0.008); c.lineTo(w * 0.32, H + 1); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.15)'; c.fillRect(0, H - h * 0.012, w * 0.3, h * 0.003);
+    _bgCache[key] = cv;
+    return cv;
+  }
+
+  // Animated sea below the horizon at fraction hz of the height.
+  function drawSea(ctx, w, h, t, hz) {
+    var H = h * hz;
+    var sea = ctx.createLinearGradient(0, H, 0, h);
+    sea.addColorStop(0, '#8fb2c2'); sea.addColorStop(0.08, '#4f8299'); sea.addColorStop(0.5, '#215a73'); sea.addColorStop(1, '#0d3346');
+    ctx.fillStyle = sea; ctx.fillRect(0, H, w, h - H);
+    // sun glitter near the horizon
+    var R = rng(19);
+    ctx.fillStyle = 'rgba(255,255,240,0.5)';
+    for (var gI = 0; gI < 60; gI++) {
+      var gx = w * (0.45 + (R() - 0.5) * 0.5), gy = H + (h - H) * Math.pow(R(), 2.5) * 0.35;
+      var on = Math.sin(t * 3 + gI * 1.7) > 0.4;
+      if (on) ctx.fillRect(gx, gy, 2 + R() * 6, 1.2);
+    }
+    // wave rows in perspective
+    var rows = 34;
+    for (var i = 1; i <= rows; i++) {
+      var f = i / rows;
+      var y = H + (h - H) * f * f;
+      var amp = 0.6 + f * f * h * 0.012;
+      var len = 30 + f * w * 0.12;
+      var ph = t * (0.6 + f * 0.8) + i * 1.3;
+      ctx.beginPath();
+      for (var x = -20; x <= w + 20; x += 6) {
+        var yy = y + Math.sin(x / len * TAU + ph) * amp + Math.sin(x / (len * 0.43) * TAU - ph * 1.3) * amp * 0.35;
+        if (x === -20) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+      }
+      ctx.lineWidth = 0.6 + f * 2.2;
+      ctx.strokeStyle = 'rgba(200,230,240,' + (0.08 + f * 0.12) + ')';
+      ctx.stroke();
+      ctx.lineWidth = 0.8 + f * 3;
+      ctx.strokeStyle = 'rgba(5,30,45,' + (0.06 + f * 0.12) + ')';
+      ctx.translate(0, amp * 1.6); ctx.stroke(); ctx.translate(0, -amp * 1.6);
+    }
+  }
+
+  // Shaded vertical cylinder fill for colour c across [x0, x1].
+  function cylGrad(ctx, x0, x1, c) {
+    var g = ctx.createLinearGradient(x0, 0, x1, 0);
+    g.addColorStop(0, rgb(shadeC(c, 0.42)));
+    g.addColorStop(0.22, rgb(shadeC(c, 1.0)));
+    g.addColorStop(0.34, rgb(shadeC(c, 1.18)));
+    g.addColorStop(0.5, rgb(shadeC(c, 0.95)));
+    g.addColorStop(0.85, rgb(shadeC(c, 0.6)));
+    g.addColorStop(1, rgb(shadeC(c, 0.38)));
+    return g;
+  }
+
+  var BC = { red: [196, 34, 28], green: [24, 132, 60], black: [30, 30, 32], yellow: [242, 196, 20], white: [236, 236, 230] };
+
+  // Light rhythm (true = lit) for each mark, t in seconds.
+  function lightOn(type, t) {
+    function q(n, period, dur) { // n quick flashes at 1 Hz, then dark
+      var p = t % period;
+      if (p < n) return (p % 1) < (dur || 0.35);
+      return false;
+    }
+    switch (type) {
+      case 'north': return (t % 1) < 0.35;
+      case 'east': return q(3, 10);
+      case 'south': var p = t % 15; return p < 6 ? (p % 1) < 0.35 : (p >= 6.3 && p < 8.3);
+      case 'west': return q(9, 15);
+      case 'danger': var d = t % 5; return d < 0.4 || (d > 1 && d < 1.4);
+      case 'safe': return (t % 10) < 2;
+      case 'special': return (t % 4) < 0.6;
+      default: return (t % 4) < 0.6; // lateral: flashing
+    }
+  }
+  var LIGHT_COL = { port: '#3dff7a', stbd: '#ff3b30', special: '#ffd21a' };
+
+  function bandsFor(type) {
+    switch (type) {
+      case 'north': return [BC.black, BC.yellow];
+      case 'south': return [BC.yellow, BC.black];
+      case 'east': return [BC.black, BC.yellow, BC.black];
+      case 'west': return [BC.yellow, BC.black, BC.yellow];
+      case 'danger': return [BC.black, BC.red, BC.black];
+      case 'special': return [BC.yellow];
+      default: return [BC.red];
+    }
+  }
+
+  function cone(ctx, x, y, w, h, up, col) {
+    ctx.beginPath();
+    if (up) { ctx.moveTo(x, y - h); ctx.lineTo(x + w / 2, y); ctx.lineTo(x - w / 2, y); }
+    else { ctx.moveTo(x - w / 2, y - h); ctx.lineTo(x + w / 2, y - h); ctx.lineTo(x, y); }
+    ctx.closePath();
+    ctx.fillStyle = cylGrad(ctx, x - w / 2, x + w / 2, col); ctx.fill();
+  }
+  function sphere(ctx, x, y, r, col) {
+    var g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+    g.addColorStop(0, rgb(shadeC(col, 1.35))); g.addColorStop(0.5, rgb(col)); g.addColorStop(1, rgb(shadeC(col, 0.4)));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+  }
+
+  function drawTopmark(ctx, type, x, y, s) {
+    // y = base of topmark. Shapes are about 0.32 s.
+    var k = s * 0.32;
+    switch (type) {
+      case 'port':
+        ctx.fillStyle = cylGrad(ctx, x - k * 0.45, x + k * 0.45, BC.green);
+        ctx.fillRect(x - k * 0.45, y - k, k * 0.9, k);
+        break;
+      case 'stbd': cone(ctx, x, y, k, k, true, BC.red); break;
+      case 'north': cone(ctx, x, y, k, k * 0.8, true, BC.black); cone(ctx, x, y - k * 0.95, k, k * 0.8, true, BC.black); break;
+      case 'south': cone(ctx, x, y, k, k * 0.8, false, BC.black); cone(ctx, x, y - k * 0.95, k, k * 0.8, false, BC.black); break;
+      case 'east': cone(ctx, x, y, k, k * 0.8, false, BC.black); cone(ctx, x, y - k * 0.85, k, k * 0.8, true, BC.black); break;
+      case 'west': cone(ctx, x, y, k, k * 0.8, true, BC.black); cone(ctx, x, y - k * 0.85, k, k * 0.8, false, BC.black); break;
+      case 'danger': sphere(ctx, x, y - k * 0.42, k * 0.42, BC.black); sphere(ctx, x, y - k * 1.4, k * 0.42, BC.black); break;
+      case 'safe': sphere(ctx, x, y - k * 0.5, k * 0.5, BC.red); break;
+      case 'special':
+        ctx.save(); ctx.translate(x, y - k * 0.55);
+        ctx.lineCap = 'butt'; ctx.lineWidth = k * 0.26;
+        ctx.strokeStyle = rgb(shadeC(BC.yellow, 0.55));
+        ctx.beginPath(); ctx.moveTo(-k * 0.45, -k * 0.45); ctx.lineTo(k * 0.45, k * 0.45); ctx.moveTo(k * 0.45, -k * 0.45); ctx.lineTo(-k * 0.45, k * 0.45); ctx.stroke();
+        ctx.lineWidth = k * 0.16; ctx.strokeStyle = rgb(BC.yellow); ctx.stroke();
+        ctx.restore();
+        break;
+    }
+  }
+
+  // The buoy body above the waterline, origin at the waterline centre.
+  function buoyBody(ctx, type, s, t, lit) {
+    var shape = type === 'port' ? 'can' : type === 'stbd' ? 'cone' : 'pillar';
+    var mastTop;
+    if (shape === 'can') {
+      var cw = s * 0.95, ch = s * 1.2;
+      ctx.fillStyle = cylGrad(ctx, -cw / 2, cw / 2, BC.green);
+      ctx.fillRect(-cw / 2, -ch, cw, ch);
+      ctx.beginPath(); ctx.ellipse(0, -ch, cw / 2, s * 0.1, 0, 0, TAU);
+      ctx.fillStyle = rgb(shadeC(BC.green, 1.25)); ctx.fill();
+      mastTop = -ch;
+    } else if (shape === 'cone') {
+      var bw = s * 1.05, th = s * 1.45, tw = s * 0.18;
+      ctx.beginPath(); ctx.moveTo(-bw / 2, 0); ctx.lineTo(-tw / 2, -th); ctx.lineTo(tw / 2, -th); ctx.lineTo(bw / 2, 0); ctx.closePath();
+      ctx.fillStyle = cylGrad(ctx, -bw / 2, bw / 2, BC.red); ctx.fill();
+      mastTop = -th;
+    } else {
+      // float
+      var fw = s * 1.3, fh = s * 0.34;
+      var bands = bandsFor(type);
+      var lowCol = type === 'safe' ? BC.red : bands[bands.length - 1];
+      ctx.fillStyle = cylGrad(ctx, -fw / 2, fw / 2, lowCol);
+      ctx.beginPath(); ctx.moveTo(-fw / 2, 0); ctx.lineTo(-fw / 2, -fh * 0.7);
+      ctx.quadraticCurveTo(-fw / 2, -fh, -fw * 0.4, -fh); ctx.lineTo(fw * 0.4, -fh); ctx.quadraticCurveTo(fw / 2, -fh, fw / 2, -fh * 0.7); ctx.lineTo(fw / 2, 0); ctx.fill();
+      // tower
+      var b0 = s * 0.62, b1 = s * 0.34, tH = s * 1.55, y0 = -fh;
+      var nb = type === 'safe' ? 1 : bands.length;
+      for (var i = 0; i < nb; i++) {
+        var ya = y0 - tH * (i / nb), yb = y0 - tH * ((i + 1) / nb);
+        var wa = b0 + (b1 - b0) * (i / nb), wb = b0 + (b1 - b0) * ((i + 1) / nb);
+        var col = type === 'safe' ? BC.red : bands[nb - 1 - i];
+        ctx.beginPath(); ctx.moveTo(-wa / 2, ya); ctx.lineTo(-wb / 2, yb); ctx.lineTo(wb / 2, yb); ctx.lineTo(wa / 2, ya); ctx.closePath();
+        ctx.fillStyle = cylGrad(ctx, -wa / 2, wa / 2, col); ctx.fill();
+      }
+      if (type === 'safe') { // white vertical stripes over red
+        ctx.save();
+        ctx.beginPath(); ctx.moveTo(-b0 / 2, y0); ctx.lineTo(-b1 / 2, y0 - tH); ctx.lineTo(b1 / 2, y0 - tH); ctx.lineTo(b0 / 2, y0); ctx.closePath(); ctx.clip();
+        for (var st = -2; st <= 2; st += 2) {
+          var sx0 = st * b0 * 0.16, sx1 = st * b1 * 0.16;
+          ctx.beginPath();
+          ctx.moveTo(sx0 - b0 * 0.08, y0); ctx.lineTo(sx1 - b1 * 0.08, y0 - tH); ctx.lineTo(sx1 + b1 * 0.08, y0 - tH); ctx.lineTo(sx0 + b0 * 0.08, y0); ctx.closePath();
+          ctx.fillStyle = cylGrad(ctx, -b0 / 2, b0 / 2, BC.white); ctx.fill();
+        }
+        ctx.restore();
+      }
+      // cage rails at the top of the float
+      ctx.strokeStyle = 'rgba(40,40,40,0.55)'; ctx.lineWidth = Math.max(1, s * 0.025);
+      ctx.beginPath(); ctx.moveTo(-fw * 0.42, -fh); ctx.lineTo(-b0 * 0.45, y0 - tH * 0.25); ctx.moveTo(fw * 0.42, -fh); ctx.lineTo(b0 * 0.45, y0 - tH * 0.25); ctx.stroke();
+      mastTop = y0 - tH;
+    }
+    // mast, lantern and topmark
+    var mh = s * 0.32;
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(-s * 0.025, mastTop - mh * 2.2, s * 0.05, mh * 2.2);
+    // lantern
+    var ly = mastTop - mh * 0.45, lr = s * 0.09;
+    var lc = type === 'port' ? LIGHT_COL.port : type === 'stbd' ? LIGHT_COL.stbd : type === 'special' ? LIGHT_COL.special : '#ffffff';
+    ctx.fillStyle = '#222'; ctx.fillRect(-lr * 1.1, ly + lr * 0.8, lr * 2.2, lr * 0.4);
+    ctx.fillStyle = lit ? lc : 'rgba(200,210,215,0.85)';
+    ctx.fillRect(-lr * 0.8, ly - lr * 0.8, lr * 1.6, lr * 1.6);
+    if (lit) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      var gl = ctx.createRadialGradient(0, ly, 0, 0, ly, s * 0.5);
+      gl.addColorStop(0, lc); gl.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalAlpha = 0.7; ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, ly, s * 0.5, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+    drawTopmark(ctx, type, 0, mastTop - mh * 1.25, s);
+    // weathering: salt streaks
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    for (var k = -2; k <= 2; k++) ctx.fillRect(k * s * 0.12, -s * 0.5, s * 0.015, s * 0.45);
+  }
+
+  /* drawBuoy(ctx, type, x, y, s, t, opts) — y is the waterline.
+     types: port, stbd, north, east, south, west, danger, safe, special */
+  function drawBuoy(ctx, type, x, y, s, t, opts) {
+    opts = opts || {};
+    var seed = opts.seed || 0;
+    var bob = Math.sin(t * 1.5 + seed) * s * 0.05;
+    var tilt = Math.sin(t * 1.1 + seed * 1.7) * 0.05;
+    var lit = opts.light === false ? false : lightOn(type, t + seed);
+    // reflection (flipped, darker, rippled by slicing)
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x - s * 1.5, y, s * 3, s * 2.2); ctx.clip();
+    ctx.globalAlpha = 0.32;
+    for (var sl = 0; sl < 10; sl++) {
+      var sy = y + sl * s * 0.2;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x - s * 1.5, sy, s * 3, s * 0.2); ctx.clip();
+      ctx.translate(x + Math.sin(t * 2.4 + sl * 0.9) * s * 0.04 * (1 + sl * 0.2), y + bob * 0.5);
+      ctx.scale(1, -0.8);
+      ctx.rotate(-tilt);
+      buoyBody(ctx, type, s, t, false);
+      ctx.restore();
+    }
+    ctx.restore();
+    // body
+    ctx.save();
+    ctx.translate(x, y + bob);
+    ctx.rotate(tilt);
+    // waterline grime band
+    buoyBody(ctx, type, s, t, lit);
+    var wl = ctx.createLinearGradient(0, -s * 0.12, 0, 0);
+    wl.addColorStop(0, 'rgba(60,70,40,0)'); wl.addColorStop(1, 'rgba(60,70,40,0.55)');
+    ctx.fillStyle = wl; ctx.fillRect(-s * 0.7, -s * 0.12, s * 1.4, s * 0.12);
+    ctx.restore();
+    // foam ring at the waterline
+    ctx.beginPath(); ctx.ellipse(x, y + bob * 0.3, s * 0.72, s * 0.09, 0, 0, TAU);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = Math.max(1, s * 0.03); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x, y + bob * 0.3 + s * 0.03, s * 0.9, s * 0.12, 0, 0, Math.PI);
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = Math.max(1, s * 0.02); ctx.stroke();
+  }
+
+  // First-person bow of a small white motor boat (lancha) at the bottom.
+  function drawBow(ctx, w, h, sway) {
+    var cx = w / 2 + (sway || 0) * w * 0.01;
+    var tipY = h * 0.72, base = h * 1.02;
+    var g = ctx.createLinearGradient(cx - w * 0.35, 0, cx + w * 0.35, 0);
+    g.addColorStop(0, '#9aa3a8'); g.addColorStop(0.35, '#f4f6f6'); g.addColorStop(0.5, '#ffffff'); g.addColorStop(0.65, '#e9ecec'); g.addColorStop(1, '#8a9398');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.42, base);
+    ctx.quadraticCurveTo(cx - w * 0.2, h * 0.8, cx, tipY);
+    ctx.quadraticCurveTo(cx + w * 0.2, h * 0.8, cx + w * 0.42, base);
+    ctx.closePath(); ctx.fill();
+    // non-skid deck panel
+    ctx.fillStyle = 'rgba(205,210,205,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.3, base);
+    ctx.quadraticCurveTo(cx - w * 0.13, h * 0.84, cx, h * 0.77);
+    ctx.quadraticCurveTo(cx + w * 0.13, h * 0.84, cx + w * 0.3, base);
+    ctx.closePath(); ctx.fill();
+    // anchor locker hatch + cleat
+    ctx.fillStyle = '#c9cdca'; ctx.strokeStyle = 'rgba(80,90,90,0.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(cx, h * 0.9, w * 0.05, h * 0.025, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    // stainless bow rail (pulpit)
+    ctx.strokeStyle = '#dfe6ea'; ctx.lineWidth = Math.max(2, w * 0.006);
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.36, base); ctx.quadraticCurveTo(cx - w * 0.16, h * 0.74, cx, h * 0.69);
+    ctx.quadraticCurveTo(cx + w * 0.16, h * 0.74, cx + w * 0.36, base); ctx.stroke();
+    ctx.strokeStyle = 'rgba(90,100,105,0.7)'; ctx.lineWidth = Math.max(1, w * 0.002); ctx.stroke();
+    // navigation lights: red to port (left), green to starboard (right)
+    [[-1, '#ff3b30'], [1, '#3dff7a']].forEach(function(p) {
+      var lx = cx + p[0] * w * 0.075, ly = h * 0.765;
+      ctx.fillStyle = '#333'; ctx.fillRect(lx - w * 0.012, ly - h * 0.008, w * 0.024, h * 0.016);
+      ctx.fillStyle = p[1]; ctx.fillRect(lx - w * 0.009, ly - h * 0.006, w * 0.018, h * 0.012);
+    });
+  }
+
   // Objects a knot is tied around, ready for drawModel's level ordering.
   function knotObjects(K, devScale) {
     var out = [];
@@ -1214,7 +1563,7 @@ var MarineroArt = (function() {
   }
 
   return {
-    knotObjects: knotObjects, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
+    knotObjects: knotObjects, harbourBackdrop: harbourBackdrop, drawSea: drawSea, drawBuoy: drawBuoy, drawBow: drawBow, lightOn: lightOn, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
     clamp: clamp, rgb: rgb, shadeC: shadeC, mixC: mixC, rng: rng,
     fitCanvas: fitCanvas, castShadow: castShadow,
     ROPE_COLORS: ROPE_COLORS,
