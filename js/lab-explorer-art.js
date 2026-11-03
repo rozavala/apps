@@ -392,14 +392,15 @@ const LXArt = (() => {
     const D = window.LXData ? LXData.STARS : [];
     const pick = ids => ids.map(id => D.find(s => s.id === id)).filter(Boolean);
     const sel = pick(['acrux', 'mimosa', 'gacrux', 'imai', 'ginan', 'rigilk', 'hadar']);
-    const k = 7.2, cx = 172, cy = 92;
+    const k = 11, cx = 168, cy = 84;
     const pos = s => {
       const dra = (s.ra - 12.9) * 15 * Math.cos(s.dec * Math.PI / 180);
-      return [cx - dra * k * 0.62, cy - (s.dec + 60.5) * k * 0.62];
+      return [cx - dra * k, cy - (s.dec + 60.5) * k];
     };
+    const cs = pos({ ra: 12.85, dec: -62.5 });
     let st = '';
     sel.forEach(s => {
-      const p = pos(s), r = Math.max(1.6, 4.6 - s.mag * 1.5);
+      const p = pos(s), r = Math.max(1.8, 4.4 - s.mag * 1.1);
       st += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (r * 3).toFixed(1) + '" fill="url(#sg{u})"/>' +
             '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + r.toFixed(1) + '" fill="#fff"/>';
     });
@@ -418,7 +419,7 @@ const LXArt = (() => {
 </defs>
 <rect width="320" height="200" fill="url(#nt{u})"/>
 <path d="M0 40 C80 70 180 90 320 170 L320 120 C200 60 100 20 0 0Z" fill="url(#mw{u})"/>
-<ellipse cx="206" cy="92" rx="12" ry="9" fill="#05070F" opacity="0.6"/>
+<ellipse cx="${cs[0].toFixed(1)}" cy="${cs[1].toFixed(1)}" rx="20" ry="15" fill="#05070F" opacity="0.55"/>
 ${bg}
 <g stroke="#9DB4FF" stroke-width="1.3" opacity="0.65">${ln('gacrux', 'acrux')}${ln('mimosa', 'imai')}</g>
 ${st}
@@ -482,12 +483,14 @@ ${st}
   CARDS.static = () => {
     let hair = '';
     const r = rng(5);
-    for (let i = 0; i < 26; i++) {
-      const a = Math.PI * (0.98 + i / 25 * 0.95);
-      const x0 = 96 + Math.cos(a) * 40, y0 = 112 + Math.sin(a) * 44;
-      const pull = Math.max(0, Math.cos(a - (-0.45))) ;
-      const tx = x0 + Math.cos(a) * 18 + pull * 48 + r() * 4, ty = y0 + Math.sin(a) * 16 - pull * 10;
-      hair += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' Q' + ((x0 + tx) / 2 + 4).toFixed(1) + ' ' + ((y0 + ty) / 2 - 8).toFixed(1) + ' ' + tx.toFixed(1) + ' ' + ty.toFixed(1) + '"/>';
+    for (let i = 0; i < 22; i++) {
+      const a = Math.PI * (1.08 + (i / 21) * 0.84);
+      const x0 = 96 + Math.cos(a) * 36, y0 = 108 + Math.sin(a) * 40;
+      const near = Math.max(0, Math.cos(a + 0.5)) ;            // strands on the balloon side lift most
+      const len = 22 + r() * 8;
+      const ux = Math.cos(a) * 0.6, uy = Math.sin(a) * 0.9 - 0.4;
+      const tx = x0 + ux * len + near * 34 + 6, ty = y0 + uy * len - near * 14;
+      hair += '<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' Q' + (x0 + ux * len * 0.6).toFixed(1) + ' ' + (y0 + uy * len * 0.6 - 4).toFixed(1) + ' ' + tx.toFixed(1) + ' ' + ty.toFixed(1) + '"/>';
     }
     return `
 <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A charged balloon pulling hair up and lifting bits of paper">
@@ -500,8 +503,8 @@ ${st}
 <rect x="0" y="168" width="320" height="32" fill="#C8A27A"/><rect x="0" y="168" width="320" height="3" fill="#E2C29C"/>
 <path d="M46 200 C46 168 70 154 96 154 C122 154 146 168 146 200Z" fill="#3B82F6"/>
 <ellipse cx="96" cy="118" rx="38" ry="42" fill="url(#sk{u})"/>
-<g stroke="#7A4A1E" stroke-width="2.4" fill="none" stroke-linecap="round">${hair}</g>
-<path d="M60 108 C60 76 132 72 134 106 C120 92 78 90 60 108Z" fill="#8A5528"/>
+<path d="M58 112 C56 72 136 68 136 110 C124 94 74 92 58 112Z" fill="#8A5528"/>
+<g stroke="#7A4A1E" stroke-width="2.6" fill="none" stroke-linecap="round">${hair}</g>
 <circle cx="84" cy="122" r="3.5" fill="#3A2A20"/><circle cx="110" cy="122" r="3.5" fill="#3A2A20"/>
 <path d="M88 140 Q97 148 106 140" stroke="#A0522D" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 <g transform="translate(206 70)">

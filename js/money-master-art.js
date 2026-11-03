@@ -79,15 +79,15 @@
   var EAR = 'M50 40 C47 38 45 41 46 45 C46.5 49 48 52 51 52 C53 52 53.5 49 52.5 47 C53 44 52.5 41 50 40 Z';
   var BUST = 'M12 100 C14 88 27 82 41 81 L59 81 C73 82 86 88 89 100 Z';
   var HAIR = {
-    short: 'M70 28 C68 18 60 12 48 12.5 C36 13.5 29 24 30.5 38 C31.5 48 35 57 40 64 C41 58 43 50 47 45 C48 42 50 40.5 52.5 41 L54 52 L56.5 52 L56 40 C56.5 32 62 27 70 28 Z',
-    neat: 'M70.5 27 C70 16 61 9 48 10 C35 11 28 22 29.5 37 C30.5 47 34 56 39 62 C41 56 43 50 47 45 C49 42 51 40.5 53.5 41 L54.5 46 L56.5 46 L56.5 38 C57.5 31 63 27 70.5 27 Z',
-    swept: 'M71 26 C70 14 62 4 48 5 C34 6 27 18 29 34 C30 46 33 55 38 62 C40 55 43 48 47 44 C49 41 51 40 53 41 L55 51 L57.5 51 L57 38 C58 31 63 27 71 26 Z',
-    wig: 'M69 27 C67 16 58 10 47 11 C35 12 28 22 29 36 C29.5 46 32 54 36 60 L44 56 C44 50 46 45 50 42 L58 34 C61 30 65 28 69 27 Z',
+    short: 'M66 19 C62 13 54 11 46 12.5 C35 14.5 29 25 30.5 38 C31.5 48 35 57 40 64 C41 58 43 50 47 45 C48 42 50 40.5 52.5 41 L54 50 L56 50 L56 38 C57 31 60 25 66 19 Z',
+    neat: 'M67.5 18 C64 10.5 56 8 47 9.5 C35 11 28 22 29.5 37 C30.5 47 34 56 39 62 C41 56 43 50 47 45 C49 42 51 40.5 53.5 41 L54.5 46 L56.5 46 L56.5 37 C57.5 30 61 24 67.5 18 Z',
+    swept: 'M67 20 C70 10 62 3 48 4.5 C34 6 27 18 29 34 C30 46 33 55 38 62 C40 55 43 48 47 44 C49 41 51 40 53 41 L55 50 L57.5 50 L57 37 C58 30 61.5 24.5 67 20 Z',
+    wig: 'M66 19 C63 12 56 9.5 47 10.5 C35 12 28 22 29 36 C29.5 46 32 54 36 60 L44 56 C44 50 46 45 50 42 L58 33 C60 27 62.5 22 66 19 Z',
     bald: 'M57 15.5 C47 14 36 18 32 30 C30 40 32 52 38 62 C40 56 43 49 47 45 C49 42 51 41 53 42 L54.5 49 L56 49 L55.5 38 C55 31 55.5 23 57 15.5 Z',
-    woman: 'M70 28 C68 17 59 11 48 11.5 C35 12.5 28 23 29.5 37 C30.5 47 33 54 37 59 C40 60 43 58 45 54 C45 48 47 43 51 40.5 C55 38 57 33 61 30 C64 28.5 67 28 70 28 Z',
-    long: 'M70 28 C68 17 59 11 48 11.5 C35 12.5 28 23 29 37 C29 50 30 62 28 76 L26 92 L39 92 C39 80 40 70 42 62 C44 56 45 50 48 44 C51 40 56 34 61 30 C64 28.5 67 28 70 28 Z'
+    woman: 'M67 19 C63 12 56 10 47 11 C35 12.5 28 23 29.5 37 C30.5 47 33 54 37 59 C40 60 43 58 45 54 C45 48 47 43 51 40.5 C55 37 56 31 58.5 26 C61 22 64 20.5 67 19 Z',
+    long: 'M67 19 C63 12 56 10 47 11 C35 12.5 28 23 29 37 C29 50 30 62 28 76 L26 92 L39 92 C39 80 40 70 42 62 C44 56 45 50 48 44 C51 40 55 34 58 27 C61 22 64 20.5 67 19 Z'
   };
-  var CURLS = [[37, 15.5, 3.8], [43, 12, 3.8], [49.5, 10.5, 3.8], [56, 11, 3.8], [62, 13.5, 3.6], [67, 18.5, 3.4], [69.5, 24, 3], [32.5, 22, 3.8],
+  var CURLS = [[37, 15.5, 3.8], [43, 12, 3.8], [49.5, 10.5, 3.8], [56, 11, 3.8], [61.5, 14, 3.4], [32.5, 22, 3.8],
     [30.5, 29.5, 3.6], [30.5, 37, 3.6], [32, 45, 3.4]];
   var BEARD = {
     chin: 'M53.5 44 L55 54 C57 60 61 64 66 66 C69 65.5 70.8 63 71 60.5 C70 58 70.6 57.4 71.8 56.6 C72.6 60 72.4 66 69 70.5 C65 74.5 59 74.5 55 71 C51 67 50 60 50.5 53 Z',
@@ -137,7 +137,7 @@
     silva:    { hair: 'bald', collar: 'clerical', cap: 1 },
     carrera:  { hair: 'short', collar: 'military' },
     rodriguez:{ hair: 'short', curls: 1, collar: 'cravat' },
-    mistral:  { hair: 'woman', collar: 'plain', face: 'f' },
+    mistral:  { hair: 'woman', collar: 'plain', face: 'f', bun: 1 },
     prat:     { hair: 'short', beard: 'full', stache: 1, collar: 'military' },
     bello:    { hair: 'bald', collar: 'cravat' },
     lincoln:  { hair: 'short', beard: 'chin', collar: 'suit' },
@@ -168,18 +168,21 @@
       L.push(['M34 56 C30 62 28 70 28.5 80 L32.5 80 C32.5 72 34.5 65 38.5 59 Z', 'hair']);
       L.push(['M27 62 L33 64.5 L27 68 Z M39 61 L33 64.5 L38 69 Z', 'tie']);
     }
+    if (f.bun) L.push(['M24 45 a7 6.5 0 1 0 14 0 a7 6.5 0 1 0 -14 0 Z', 'hair']);
     if (f.cap) L.push(['M35 22 C39 13 51 10 60 14 C54 17.5 44 19.5 35 22 Z', 'tie']);
     if (f.band) {
-      L.push(['M30 31 C40 26 56 24 70 26.5 L70.4 30.4 C56 28.4 40 30.4 30.6 35 Z', 'trim']);
+      L.push(['M30 27.5 C40 22.5 55 19.5 67.6 20.4 L68.8 24.2 C56 23.4 40 25.6 30.6 31.5 Z', 'trim']);
     }
-    if (f.hair !== 'bald') L.push(['M40 16.5 C48 13.5 58 15 65.5 21.5 M34.5 25 C42 19.5 52 18.5 61 23.5 M32.5 35 C38 28 46 25.5 54 28', 'strand']);
+    if (f.hair !== 'bald') L.push(['M40 16.5 C48 13.5 56 14 62.5 18.5 M34.5 25 C42 19.5 50 18.5 57.5 22.5 M32.5 35 C38 28 46 25.5 53 28', 'strand']);
     if (f.beard) L.push([BEARD[f.beard], 'hair']);
     if (f.stache) L.push([BEARD.stache, 'hair']);
     if (f.earring) L.push(['M46.5 54 L51.5 54 L53.5 61 L44.5 61 Z', 'trim']);
     (col.parts || []).forEach(function (p) { L.push(p); });
     // fine features
-    L.push(['M63.5 38.5 C65 37.2 67 37.2 68.5 38.3', 'line']);
-    L.push(['M62 35.2 C65 33.8 68 34 70.5 35', 'line']);
+    L.push(['M63.5 38.5 C65 37.2 67 37.2 68.5 38.3 C67 39.4 65 39.5 63.5 38.5 Z', 'eye']);
+    L.push(['M66.4 37.6 a.9 .9 0 1 0 .1 0', 'pupil']);
+    L.push(['M62 35.2 C65 33.6 68 33.8 70.5 35', 'line']);
+    L.push(['M62.4 35.6 C65 34.4 68 34.6 70.2 35.6', 'line']);
     L.push(['M72.6 47.8 C73.5 48.6 74.2 48.4 74.6 47.6', 'line']);
     L.push(['M70.6 54.3 L72.8 54.1', 'line']);
     L.push(['M48.6 43.5 C50.5 44 51 46.5 49.5 48.5', 'line']);
@@ -194,6 +197,7 @@
     var out = '<g transform="' + tf + '">';
     L.forEach(function (l) {
       var d = l[0], role = l[1];
+      if (role === 'eye' || role === 'pupil') { out += '<path d="' + d + '" fill="' + (role === 'eye' ? 'none' : m.ink) + '" stroke="' + m.ink + '" stroke-opacity=".55" stroke-width=".8"/>'; return; }
       if (role === 'line' || role === 'strand') {
         out += '<path d="' + d + '" fill="none" stroke="' + m.ink + '" stroke-opacity="' + (role === 'strand' ? .3 : .55) + '" stroke-width="1.1" stroke-linecap="round"/>';
         return;
@@ -215,8 +219,10 @@
     var out = '<g transform="' + tf + '">';
     L.forEach(function (l) {
       var d = l[0], role = l[1];
+      if (role === 'eye') { out += '<path d="' + d + '" fill="#fff" stroke="' + ink + '" stroke-width=".7"/>'; return; }
+      if (role === 'pupil') { out += '<path d="' + d + '" fill="' + ink + '"/>'; return; }
       if (role === 'line' || role === 'strand') {
-        out += '<path d="' + d + '" fill="none" stroke="' + (role === 'strand' ? paper : ink) + '" stroke-opacity="' + (role === 'strand' ? .7 : 1) + '" stroke-width="' + (role === 'strand' ? 1.1 : .9) + '" stroke-linecap="round"/>';
+        out += '<path d="' + d + '" fill="none" stroke="' + (role === 'strand' ? paper : ink) + '" stroke-opacity="' + (role === 'strand' ? .45 : 1) + '" stroke-width="' + (role === 'strand' ? .8 : .9) + '" stroke-linecap="round"/>';
         return;
       }
       var dense = role === 'coat' || role === 'cassock' || role === 'tie' ? 2 : role === 'hair' || role === 'shawl' ? 1 : role === 'dress' ? 1 : 0;
@@ -230,9 +236,9 @@
       out += '<path d="' + d + '" fill="none" stroke="' + ink + '" stroke-width=".7" stroke-opacity=".9"/>';
       if (role === 'skin' && d.length > 100) {
         // shade the back of the head / under the jaw
-        out += '<path d="M31 40 C32 54 36 64 40 74 L41 86 L50 86 L50 60 C44 56 40 48 38 36 Z" fill="url(#' + ids.x + ')" opacity=".35"/>';
-        out += '<path d="M60 44 C62 50 62 56 60 62 C64 60 66 54 65 48 Z" fill="url(#' + ids.h + ')" opacity=".35"/>';
-        out += '<path d="M58 70 C61 68.5 64 68 66 67 L60 76 Z" fill="url(#' + ids.h + ')" opacity=".9"/>';
+        // soft shading: neck under the jaw, cheek hollow
+        out += '<path d="M44 62 C48 68 53 70 58.4 70.5 L58.6 86 L41 86 L40 74 C41.5 70 42.5 66 44 62 Z" fill="url(#' + ids.x + ')" opacity=".55"/>';
+        out += '<path d="M58 54 C60.5 58 63 61 66.5 61.5 C63 63.5 59 62 57 58 Z" fill="url(#' + ids.h + ')" opacity=".6"/>';
       }
     });
     return out + '</g>';

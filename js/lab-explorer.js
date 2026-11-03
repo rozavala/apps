@@ -322,6 +322,7 @@ const LabExplorer = (() => {
       canvas.onpointerdown = canvas.onpointermove = canvas.onpointerup = canvas.onpointercancel = null;
     }
     clearTimeout(winTimer);
+    clearTimeout(_advT);
     _winQ = [];
     const w = document.getElementById('lx-win');
     if (w) w.remove();
@@ -426,7 +427,11 @@ const LabExplorer = (() => {
     if (allDone) document.getElementById('next-btn').style.display = '';
     _renderChallenge();
     clearTimeout(_advT);
+    const labAt = currentLab && currentLab.id, cAt = c.id;
     _advT = setTimeout(() => {
+      // only move on if the kid is still in this lab, on this card
+      const cur = _visible(mod)[active];
+      if (!currentLab || currentLab.id !== labAt || !cur || cur.id !== cAt) return;
       if (!allDone) { active = nextIdx >= 0 ? nextIdx : anyIdx; _renderChallenge(); _notifyActive(); }
     }, 2600);
   }

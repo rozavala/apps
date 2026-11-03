@@ -259,8 +259,8 @@ LXLabs.weather = (() => {
       const n = 4;
       for (let i = 0; i < n; i++) {
         const key = 'c' + i + (S.seed || 0);
-        const w = W * (0.2 + r() * 0.12), h = w * 0.55;
-        const x = ((W * (0.12 + i * 0.27) + t * 6 + r() * 40) % (W + 200)) - 60, y = H * (0.18 + r() * 0.22);
+        const w = W * (0.12 + r() * 0.1) * (api.narrow ? 1.3 : 1), h = w * 0.55;
+        const x = ((W * (0.1 + i * 0.26) + t * 6 + r() * 50) % (W + 200)) - 60, y = gy * (0.16 + r() * 0.42);
         if (!S.puffs[key]) S.puffs[key] = A.cloudPuffs(w, h, 10 + i);
         A.cloud(ctx, x, y, w, h, { puffs: S.puffs[key] });
       }
@@ -549,7 +549,7 @@ LXLabs.astronomy = (() => {
     let rgt = [f[1], -f[0], 0];
     const n = Math.hypot(rgt[0], rgt[1]) || 1; rgt = [rgt[0] / n, rgt[1] / n, 0];
     const up = [rgt[1] * f[2] - 0 * f[1], 0 * f[0] - rgt[0] * f[2], rgt[0] * f[1] - rgt[1] * f[0]];
-    const fov = (api.narrow ? 84 : 100) * D2R;
+    const fov = (api.narrow ? 74 : 86) * D2R;
     const F = (api.W / 2) / (2 * Math.tan(fov / 4));
     return { f, r: rgt, u: up, F, cx: api.W / 2, cy: api.H * 0.52 };
   }
@@ -591,7 +591,7 @@ LXLabs.astronomy = (() => {
     if (c.view) {
       S.month = c.view.m; S.hour = c.view.h; S.az = c.view.dir * D2R; S.alt = 38 * D2R;
       recompute();
-      if (c.fig && api.tier <= 2) aimAt(figById(c.fig));
+      if (c.fig) aimAt(figById(c.fig));
       if (c.id === 'south' || c.id === 'pred-turn') { S.az = Math.PI; S.alt = 36 * D2R; }
       ui.month.set(S.month); ui.hour.set(S.hour); ui.dir.set(dirKey());
       S.found = {};
@@ -923,11 +923,11 @@ LXLabs.sound = (() => {
   ];
 
   const fFromSlider = v => Math.round(100 * Math.pow(10, v / 100));      // 0..100 → 100..1000 Hz
-  const sliderFromF = f => Math.round(Math.log10(f / 100) * 100);
+  const sliderFromF = f => Math.round(Math.log10(f / 100) * 200) / 2;
 
   function start(a) {
     api = a;
-    S = { f: 262, amp: 0.6, shape: 'sine', playing: false, t: 0, cone: 0, rings: [], ringAcc: 0, buf: null, predF: null, had220: false };
+    S = { f: 263, amp: 0.6, shape: 'sine', playing: false, t: 0, cone: 0, rings: [], ringAcc: 0, buf: null, predF: null, had220: false };
     buildControls();
   }
 
@@ -935,7 +935,7 @@ LXLabs.sound = (() => {
     const c = api.controls;
     c.innerHTML = '';
     ui.play = LXUI.button('▶ Play', togglePlay, 'lx-btn-main');
-    ui.freq = LXUI.slider({ label: '🎵 Pitch (frequency)', min: 0, max: 100, value: sliderFromF(S.f), fmt: v => fFromSlider(v) + ' Hz',
+    ui.freq = LXUI.slider({ label: '🎵 Pitch (frequency)', min: 0, max: 100, step: 0.5, value: sliderFromF(S.f), fmt: v => fFromSlider(v) + ' Hz',
       ends: ['low', 'high'], onInput: v => { S.f = fFromSlider(v); apply(); } });
     ui.amp = LXUI.slider({ label: '🔊 Loudness', min: 10, max: 100, value: Math.round(S.amp * 100), fmt: v => v + '%', onInput: v => { S.amp = v / 100; apply(); } });
     c.appendChild(LXUI.row([ui.play]));
@@ -1334,7 +1334,7 @@ LXLabs.crystals = (() => {
   function plan() {
     const sub = SUBS[S.sub], r = A.rng(Math.floor(Math.random() * 1e6));
     const capCold = cap(S.sub, 20) * (S.cooling === 'fast' ? sub.cold : 1);
-    const evap = S.cooling === 'fast' ? 0.02 : 0.06;
+    const evap = S.cooling === 'fast' ? 0.012 : 0.035;
     const finalCap = capCold * (1 - evap * 7);
     S.mass = Math.max(0, S.dissolved - finalCap);
     S.massCool = Math.max(0, S.dissolved - capCold);
@@ -1435,7 +1435,7 @@ LXLabs.crystals = (() => {
     const base = A.hex(sub.col);
     faces.forEach(F => {
       const d = Math.max(0, F.n[0] * L[0] + F.n[1] * L[1] + F.n[2] * L[2]);
-      const k = 0.42 + d * 0.7;
+      const k = sub.shape === 'tri' ? 0.42 + d * 0.7 : 0.72 + d * 0.38;
       ctx.beginPath();
       F.f.forEach((i, j) => { const px = x + V[i][0] * s, py = y + V[i][1] * s; if (j) ctx.lineTo(px, py); else ctx.moveTo(px, py); });
       ctx.closePath();
@@ -1519,7 +1519,7 @@ LXLabs.crystals = (() => {
     // magnifier on the biggest crystal when done
     if (S.step === 'done' && S.crystals.length && api.tier >= 1) {
       const c = S.crystals.reduce((m, q) => q.size > m.size ? q : m, S.crystals[0]);
-      const mx = api.narrow ? W - 100 : W - 90, my = api.narrow ? 100 : 96, mr = api.narrow ? 76 : 66;
+      const mx = api.narrow ? W - 100 : 100, my = api.narrow ? 100 : 110, mr = api.narrow ? 76 : 66;
       ctx.save();
       ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.closePath();
       ctx.fillStyle = fridge ? '#E6F1F8' : '#F6F2FC'; ctx.fill(); ctx.clip();
@@ -1527,8 +1527,8 @@ LXLabs.crystals = (() => {
       drawCrystal(ctx, mx, my, mr * 1.1, { rx: c.rx + t * 0.3, ry: c.ry, rz: c.rz }, sub);
       ctx.restore();
       ctx.strokeStyle = '#3F3A4F'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI * 2); ctx.stroke();
-      ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(mx - mr * 0.72, my + mr * 0.72); ctx.lineTo(mx - mr * 1.15, my + mr * 1.15); ctx.stroke();
-      A.label(ctx, 'magnified', mx, my + mr + 18, { size: api.narrow ? 15 : 12 });
+      const hd = api.narrow ? -1 : 1; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(mx + hd * mr * 0.72, my + mr * 0.72); ctx.lineTo(mx + hd * mr * 1.15, my + mr * 1.15); ctx.stroke();
+      A.label(ctx, 'magnified', mx + (api.narrow ? 0 : -20), my + mr + 18, { size: api.narrow ? 15 : 12 });
     }
   }
 
@@ -1555,7 +1555,8 @@ LXLabs.crystals = (() => {
   }
 
   function stop() { if (S) S.running = false; }
-  return { challenges, start, frame, stop, _S: () => S, _fast: () => { while (S.running) { S.dayAcc += 0.9; frame(0, S.t); } } };
+  return { challenges, start, frame, stop, _S: () => S, _go: o => { Object.assign(S, o); S.level = S.levelT = 1; S.tempNow = S.temp; S.hung = true; S.step = 'grow'; S.running = true; plan(); buildControls(); },
+    _fast: () => { while (S.running) { S.dayAcc += 0.9; frame(0, S.t); } } };
 })();
 
 
@@ -1695,7 +1696,7 @@ LXLabs.static = (() => {
       }
       const dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy);
       if (d < b.R + 70) nearPaper = true;
-      const f = S.charge * 2.4e6 / Math.max(d * d * d, 2000);
+      const f = S.charge * 6e6 / Math.max(d * d, 900);
       let ax = dx / d * f, ay = dy / d * f + 900;
       if (p.y >= S.table - 2 && ay > 0 && f < 900) { ay = 0; p.vy = 0; }
       p.vx += ax * dt; p.vy += ay * dt;
@@ -1738,7 +1739,7 @@ LXLabs.static = (() => {
     for (; y < tp.end; y += 5) {
       const v = Math.sqrt(2 * g * (y - tp.y - 40) + 900), dtt = 5 / v;
       const dx = b.x - x, dy = b.y - y, d = Math.max(b.R, Math.hypot(dx, dy));
-      vx += S.charge * 9e7 * dx / (d * d * d) * dtt * 0.5;
+      vx += S.charge * 8e6 * (dx / d) / (d * d) * dtt;
       x += vx * dtt;
       pts.push([x, y]);
     }
@@ -1842,7 +1843,7 @@ LXLabs.static = (() => {
       ctx.textBaseline = 'alphabetic';
     }
     // charge meter
-    const mw = api.narrow ? 170 : 130, mh = api.narrow ? 34 : 26, mx = W - mw - 14, my = 14;
+    const mw = api.narrow ? 170 : 130, mh = api.narrow ? 34 : 26, mx = W / 2 - mw / 2 + (api.narrow ? -40 : 0), my = 14;
     A.rr(ctx, mx, my, mw, mh, mh / 2); ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fill();
     ctx.strokeStyle = '#F2D3B5'; ctx.lineWidth = 1.5; ctx.stroke();
     const fg = ctx.createLinearGradient(mx, 0, mx + mw, 0);
