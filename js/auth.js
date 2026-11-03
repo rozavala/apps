@@ -337,6 +337,13 @@ var APP_STAR_CONFIGS = [
       var n = 0, L = d.levels || {};
       for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
       return n;
+    } },
+  // Little Engineer stars each of its 12 bridges out of 3, plus one for
+  // the real spaghetti bridge a parent confirmed.
+  { id: 'engineer', prefix: 'zs_engineer_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, Math.max(0, (L[k] && L[k].stars) | 0));
+      return n + (d.realBuild ? 1 : 0);
     } }
 ];
 

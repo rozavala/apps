@@ -45,7 +45,11 @@ const CASES = [
   { id: 'circuit', prefix: 'zs_circuit_',
     data: { v: 1, levels: { loop: { stars: 3, date: '2026-11-03' }, switch: { stars: 2, date: '2026-11-03' },
             motor: { stars: 1, date: '2026-11-04' } }, facts: ['safety', 'volta', 'bulb'], electrons: false },
-    stars: 6, note: 'fact cards read do not score' }
+    stars: 6, note: 'fact cards read do not score' },
+  { id: 'engineer', prefix: 'zs_engineer_',
+    data: { v: 1, levels: { l1: { stars: 3, best: 20800 }, l2: { stars: 2, best: 52000 }, l5: { stars: 1, best: 110000 } },
+            designs: {}, realBuild: { date: '2026-11-03', coins: 23 } },
+    stars: 7, note: 'real build adds one' }
 ];
 
 test.describe('per-app star rules', () => {
