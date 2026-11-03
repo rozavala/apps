@@ -105,7 +105,18 @@
         '</div>' +
         '<div class="board-wrap"><div class="board" id="rushBoard"></div></div>' +
         '<div class="rush-hint" id="rush-hint" aria-live="polite"></div>' +
-        '<div class="rush-feedback" id="rush-feedback"></div>';
+        '<div class="rush-feedback" id="rush-feedback"></div>' +
+        '<div class="btn-row"><button type="button" class="btn btn-outline" onclick="ChessExtras.Rush.quit()">Stop and go back</button></div>';
+    }
+
+    // Leave mid-run without scoring it.
+    function quit() {
+      stop();
+      if (typeof goMenu === 'function') goMenu();
+    }
+    function stop() {
+      if (state && state.timerId) clearInterval(state.timerId);
+      state = null;
     }
 
     function _loadCurrent() {
@@ -252,7 +263,7 @@
       state = null;
     }
 
-    return { open: open, start: start };
+    return { open: open, start: start, quit: quit, stop: stop };
   })();
 
   /* ============================================================

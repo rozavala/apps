@@ -414,7 +414,7 @@ function showFeedback(emoji){
 }
 let _timers=[];
 function _later(fn,ms){const t=setTimeout(fn,ms);_timers.push(t);return t}
-function _stopTimers(){_timers.forEach(clearTimeout);_timers=[];if(typeof Lesson!=='undefined')Lesson.stop()}
+function _stopTimers(){_timers.forEach(clearTimeout);_timers=[];if(typeof Lesson!=='undefined')Lesson.stop();if(window.ChessExtras&&ChessExtras.Rush.stop)ChessExtras.Rush.stop()}
 function _sfx(name){try{if(typeof SFX!=='undefined'&&SFX[name])SFX[name]()}catch(e){}}
 
 // Coach bubble: kind = '' | 'good' | 'warn' | 'bad'; actions = [{label, cls, fn}]
@@ -872,7 +872,7 @@ function openPuzzle(i){
   const tag=document.getElementById('puzzleTag');
   if(tag){const info=CQData.CHAPTERS[pz.ch]||{};tag.textContent=info.title||'';}
   const goal=document.getElementById('puzzleGoal');
-  if(goal){const g=CQPuzzle.goal(pz,pos);goal.innerHTML='<span class="turn-dot" aria-hidden="true"></span>White to move — '+(g==='mate'?'checkmate in 1!':g==='mate2'?'checkmate in 2 moves!':'win material!')}
+  if(goal){const g=CQPuzzle.goal(pz,pos);goal.innerHTML='<span class="turn-dot" aria-hidden="true"></span>White to move — '+(g==='mate'?'checkmate in 1!':g==='mate2'?'checkmate in 2 moves!':({fork:'win material with a fork!',pin:'use a pin to win material!',skewer:'win material with a skewer!',discovered:'win material with a discovered attack!'}[pz.theme]||'win material!'))}
   setCoach('puzzleCoach',_esc(pz.hint),'',null,'Hint');
   document.getElementById('nextPuzzleBtn').style.display='none';
   updatePuzzleTools();

@@ -508,7 +508,7 @@
     ensureDefs(); ensureWood();
     var pcs = [['bR', 4, 46, 0.78], ['wN', 22, 40, 0.92], ['wK', 40, 30, 1.1], ['bQ', 60, 36, 1.0], ['wP', 79, 52, 0.7]];
     return '<div class="cq-hero-plank" aria-hidden="true">' + pcs.map(function (p) {
-      return '<span class="cq-hero-pc" style="left:' + p[1] + '%;bottom:' + (14 + (1.1 - p[3]) * 10) + '%;height:' + (p[3] * 82) + '%">' + pieceSVG(p[0]) + '</span>';
+      return '<span class="cq-hero-pc" style="left:' + p[1] + '%;bottom:' + (12 + (1.1 - p[3]) * 6) + '%;height:' + (p[3] * 74) + '%">' + pieceSVG(p[0]) + '</span>';
     }).join('') + '</div>';
   }
 
