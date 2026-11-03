@@ -1427,174 +1427,33 @@ var NaturalezaArt = (function() {
     return s;
   }
 
-  // ---- Southern pudú · Pudú (male with spike antlers) ----
-  P.pudu = function(k) {
-    var r = k.rnd, s = '', bg = '';
-    var body = 'M140 176C136 150 150 132 176 126C206 118 240 108 268 114C294 120 306 146 302 172C300 192 286 204 266 206C236 208 200 208 176 204C154 200 142 192 140 176Z';
-    var head = 'M150 132C142 112 128 98 112 100C98 102 88 112 82 124C78 132 76 140 80 144C88 148 100 146 110 144C124 146 138 146 150 140Z';
-    var defs = k.lg('puB', 0.5, 0, 0.5, 1, [[0, '#7e4c2a'], [0.55, '#8e5a34'], [1, '#5a3a22']]) +
-      k.rg('puBl', 0.45, 0.2, 0.6, [[0, '#c08a5a', 0.45], [1, '#c08a5a', 0]]) +
-      k.lg('puH', 0, 0, 1, 1, [[0, '#4a3020'], [0.6, '#7a4c2c'], [1, '#6a4428']]) +
-      k.lg('puL', 0, 0, 1, 0, [[0, '#4a2c18'], [0.5, '#6a4228'], [1, '#3a2414']]) +
-      k.clip('puBC', body) + k.clip('puHC', head);
-    bg += k.p('M30 0L44 0L46 260L28 260Z', '#6a6a50', 'opacity=".25"') + k.p('M340 0L360 0L364 260L336 260Z', '#6a6a50', 'opacity=".3"');
-    bg += k.fern(r, 330, 250, 90, -120, '#4a7a3a') + k.fern(r, 352, 252, 80, -70, '#3e6a32') + k.fern(r, 40, 252, 80, -60, '#4a7a3a') + k.fern(r, 30, 254, 70, -110, '#5a8a42');
-    bg += forestFloor(k, 240);
-    var shadowS = k.shadow(222, 248, 92, 7, 0.85);
-    // far legs (darker, short)
-    s += k.p('M170 196L167 222L165 244L173 246L177 222L184 198Z', '#3a2414') + k.p('M262 194L268 222L264 244L272 246L278 222L276 194Z', '#3a2414');
-    // body
-    s += k.p(body, k.U('puB'));
-    s += fur(k, 'puBC', 222, 162, 86, 48, 420, 6.5, function(x, y) { return y < 150 ? 172 : 196 - (x - 220) * 0.12; }, ['#b07a4a', '#4a2a18', '#9a663c'], 0.9, 0.7);
-    s += k.g(k.p(body, k.U('puBl')) + k.el(232, 206, 70, 16, '#2a160a', 'opacity=".3"'), 'clip-path="' + k.U('puBC') + '"');
-    // near legs: slim front leg, rounded haunch and hind leg
-    s += k.p('M186 198L182 224L180 244L190 246L194 224L200 200Z', k.U('puL'));
-    s += k.p('M272 168C294 178 300 204 292 222L288 244L298 246L302 222C310 198 302 172 284 160Z', k.U('puL'));
-    s += k.p('M262 150C284 152 300 170 298 196C290 186 276 176 262 172Z', '#5a3820', 'opacity=".45"');
-    var hv = [[178, 241], [287, 241], [163, 241], [262, 241]];
-    for (var i = 0; i < 4; i++) s += k.p('M' + hv[i][0] + ' ' + hv[i][1] + 'l12 0l1 6l-14 0Z', '#1a100a');
-    s += k.p('M300 130C308 128 312 134 308 140C304 140 300 136 300 130Z', '#4a2c18');
-    // short thick neck + head, carried low
-    var hd = k.p('M144 152C140 134 146 122 156 118L178 126C168 134 162 146 160 160Z', '#82502e');
-    hd += k.p(head, k.U('puH'));
-    hd += fur(k, 'puHC', 116, 124, 36, 24, 140, 5, function() { return 170; }, ['#a06a40', '#2e1a10'], 0.7, 0.6);
-    hd += k.p('M126 104C128 88 138 80 146 84C148 94 142 104 132 108Z', '#5a3820') + k.p('M130 102C132 92 138 86 143 88C143 96 139 102 133 105Z', '#c9a080');
-    hd += k.p('M118 102L116 82L120 81L124 100Z', '#4a3a2a') + k.p('M110 104L107 86L111 85L115 102Z', '#3a2c1e');
-    hd += k.sp('M118 98L117 86M110 100L108 90', 'rgba(255,240,220,.4)', 0.7);
-    hd += k.p('M80 124C76 132 76 140 80 144C86 146 92 144 96 140C94 132 88 126 80 124Z', '#2a1a10');
-    hd += k.el(80, 132, 3.4, 3, '#0e0a08') + k.circ(79, 131, 1, '#fff', 'opacity=".4"');
-    hd += k.eye(104, 118, 4.8, '#1a100a');
-    hd += k.p('M94 112C98 108 106 108 110 112', 'none', 'stroke="#2a1a10" stroke-width="1"');
-    s += '<g transform="translate(8 22)">' + hd + '</g>';
-    return { wash: '#b9c4a4', defs: defs, bg: bg, shadow: shadowS, fg: s, front: k.fern(r, 120, 262, 60, -40, '#5a8a42') + k.fern(r, 300, 266, 50, -150, '#4a7a3a') };
-  };
-
-  // ---- South Andean deer · Huemul (male) ----
-  P.huemul = function(k) {
-    var r = k.rnd, s = '', bg = '';
-    var body = 'M128 140C132 114 160 104 196 104C232 102 266 100 290 110C312 120 318 146 310 170C304 186 286 190 264 188C230 190 196 190 168 186C142 182 126 164 128 140Z';
-    var head = 'M128 92C126 74 114 62 100 62C86 62 74 70 66 84C62 92 62 100 66 104C76 108 90 106 102 104C114 106 124 102 128 92Z';
-    var defs = k.lg('huB', 0.5, 0, 0.5, 1, [[0, '#7a6a52'], [0.5, '#8a7a60'], [1, '#5a4c3a']]) +
-      k.lg('huH', 0, 0, 1, 1, [[0, '#6a5a46'], [1, '#8a7a62']]) +
-      k.lg('huN', 0, 0, 1, 0, [[0, '#6e5e48'], [1, '#8a7a62']]) +
-      k.clip('huBC', body) + k.clip('huHC', head);
-    bg += k.ridge(r, 'huR', 170, 60, '#a8b4bc', 0.65, 0.7);
-    bg += k.p('M0 236C80 226 160 232 240 240C300 246 350 240 400 236L400 300L0 300Z', '#8a8a62', 'opacity=".55"');
-    bg += k.rock(r, 'huRk', 60, 228, 110, 40, ['#b8b0a0', '#8a8274', '#5a5448']) + k.rock(r, 'huRk2', 350, 236, 90, 30, ['#b8b0a0', '#8a8274', '#5a5448']);
-    bg += miniTree(k, 362, 200, 56, ['#3e5a30', '#4e6e3a', '#7a9a5a', '#4a3a2a']);
-    bg += k.grass(r, 0, 400, 290, 80, 22, ['#8a8a4a', '#a8a05a', '#6a7038']);
-    var shadowS = k.shadow(220, 256, 100, 7, 0.8);
-    // far legs
-    s += k.p('M160 178L156 220L152 254L162 256L166 220L174 182Z', '#4a3e30') + k.p('M270 178L280 218L274 254L284 256L290 218L284 178Z', '#4a3e30');
-    s += k.p(body, k.U('huB'));
-    s += fur(k, 'huBC', 220, 146, 96, 46, 420, 8, function(x, y) { return y < 140 ? 172 : 196; }, ['#a8987a', '#3e3224', '#8a7a60'], 1, 0.7);
-    s += k.p('M150 170C190 182 240 184 290 176L300 186C260 192 200 194 160 188Z', '#e8e0d0', 'opacity=".25"');
-    // near legs (thick, sturdy)
-    s += k.p('M176 180L170 222L168 254L180 256L184 222L194 184Z', '#6a5a46') + k.p('M286 172L298 214L292 254L304 256L310 214L304 170Z', '#6a5a46');
-    var hooves = [[152, 254], [168, 254], [274, 254], [292, 254]];
-    for (var i = 0; i < 4; i++) s += k.p('M' + hooves[i][0] + ' ' + hooves[i][1] + 'L' + (hooves[i][0] + 12) + ' ' + hooves[i][1] + 'L' + (hooves[i][0] + 13) + ' ' + (hooves[i][1] + 5) + 'L' + (hooves[i][0] - 1) + ' ' + (hooves[i][1] + 5) + 'Z', '#1a140e');
-    s += k.p('M312 120C320 118 324 126 318 132C314 132 312 128 312 120Z', '#4a3c2c');
-    // thick neck with pale throat
-    s += k.p('M128 146C120 124 118 104 122 88L150 96C150 112 158 126 170 132Z', k.U('huN'));
-    s += k.p('M120 96C116 110 118 128 128 146L136 140C128 126 126 110 128 98Z', '#e8e0cc', 'opacity=".8"');
-    // head with the dark "Y" running up the muzzle to the forehead
-    var hd = k.p(head, k.U('huH'));
-    hd += fur(k, 'huHC', 98, 84, 34, 24, 120, 5, function() { return 175; }, ['#a8987a', '#3e3224'], 0.7, 0.6);
-    hd += k.p('M64 88C74 78 88 70 102 66L106 72C92 76 78 84 68 94Z', '#1e1812', 'opacity=".88"');
-    hd += k.p('M102 66C108 62 112 60 116 58L118 64C114 66 110 70 106 72Z', '#1e1812', 'opacity=".75"');
-    hd += k.el(66, 96, 4.4, 3.6, '#0e0a08') + k.circ(65, 95, 1.1, '#fff', 'opacity=".35"');
-    hd += k.p('M68 104C76 108 86 108 94 104', 'none', 'stroke="#e8e0cc" stroke-width="2"');
-    hd += k.p('M122 72C130 52 146 44 156 48C154 62 140 74 126 80Z', '#6a5a46') + k.p('M126 74C132 58 144 52 151 54C148 64 138 72 129 77Z', '#d8ccb8');
-    var ant = 'M112 60C110 44 104 30 96 18M106 40C114 32 118 22 118 12M118 58C124 44 132 34 142 26M128 44C128 34 124 24 120 16';
-    hd += k.sp(ant, '#6a5a44', 4.2) + k.sp(ant, '#b8a888', 1.4, 'transform="translate(-.6 -.6)"');
-    hd += k.eye(94, 82, 4.6, '#1a100a') + k.sp('M86 76C90 73 96 73 100 76', '#2a2018', 1);
-    s += '<g transform="translate(118 88) scale(1.32) translate(-118 -88)">' + hd + '</g>';
-    s = '<g transform="translate(210 258) scale(.9) translate(-210 -258)">' + s + '</g>';
-    return { wash: '#bcc4b0', defs: defs, bg: bg, shadow: shadowS, fg: s };
-  };
-
-  // ---- Culpeo fox · Zorro culpeo ----
-  P.culpeo = function(k) {
-    var r = k.rnd, s = '', bg = '';
-    var body = 'M150 148C154 128 178 120 210 120C240 120 264 122 280 132C296 142 298 160 288 174C276 184 254 182 232 180C206 180 182 182 166 176C152 170 146 160 150 148Z';
-    var tail = 'M284 140C310 140 340 156 360 182C372 198 374 218 366 226C352 230 338 218 326 204C312 188 296 170 284 160Z';
-    var head = 'M156 128C152 110 138 98 120 98C106 98 94 108 84 118C74 126 66 132 62 136C68 140 80 142 96 142C112 146 130 146 146 142Z';
-    var defs = k.lg('cuB', 0.5, 0, 0.5, 1, [[0, '#8a8478'], [0.45, '#a89a84'], [0.7, '#c98a52'], [1, '#e8dcc4']]) +
-      k.lg('cuT', 0, 0, 1, 1, [[0, '#9a8a74'], [0.7, '#6a5e50'], [1, '#2a2420']]) +
-      k.lg('cuH', 0, 0, 1, 1, [[0, '#c86a2e'], [0.6, '#d8843e'], [1, '#b0602a']]) +
-      k.clip('cuBC', body) + k.clip('cuTC', tail) + k.clip('cuHC', head);
-    bg += k.ridge(r, 'cuR', 180, 50, '#b0b8b8', 0.7, 0.6);
-    bg += k.p('M0 236C80 228 160 232 240 238C300 242 350 238 400 234L400 300L0 300Z', '#a89a70', 'opacity=".5"');
-    bg += k.rock(r, 'cuRk', 330, 222, 120, 50) + miniTree(k, 60, 240, 30, ['#6a7a48', '#7a8a52', '#a8b070', '#5a4a3a'], { n: 6, wide: 1.2 });
-    bg += k.grass(r, 0, 400, 292, 70, 22, ['#a8a05a', '#8a8a4a', '#c0b070']);
-    var shadowS = k.shadow(214, 246, 84, 6, 0.8);
-    // far legs
-    s += k.p('M172 172L168 214L164 244L172 246L176 214L182 176Z', '#8a4a22') + k.p('M262 172L270 210L266 244L274 246L278 210L274 172Z', '#8a4a22');
-    // bushy tail with dark tip
-    s += k.p(tail, k.U('cuT'));
-    s += fur(k, 'cuTC', 330, 186, 50, 44, 160, 8, function(x, y) { return 45; }, ['#c8b8a0', '#3a3028', '#8a7a68'], 1, 0.7);
-    s += k.p(body, k.U('cuB'));
-    s += fur(k, 'cuBC', 220, 150, 76, 34, 300, 7, function(x, y) { return y < 148 ? 178 : 200; }, ['#d8ccb8', '#4a4238', '#a89a84'], 0.9, 0.7);
-    // near legs (rufous) with dark paws
-    s += k.p('M186 172L180 214L178 244L188 246L192 214L200 176Z', '#c0682e') + k.p('M276 166L286 208L282 244L292 246L298 208L292 164Z', '#c0682e');
-    s += k.p('M176 240L190 240L192 247L176 247Z', '#3a2418') + k.p('M280 240L294 240L296 247L280 247Z', '#3a2418') + k.p('M162 240L174 240L175 247L162 247Z', '#3a2418') + k.p('M264 240L276 240L277 247L264 247Z', '#3a2418');
-    // neck with white throat
-    s += k.p('M150 150C146 134 150 122 158 116L178 124C170 134 168 146 170 160Z', '#b8784a');
-    s += k.p('M150 150C144 138 144 128 148 122L162 130C158 138 158 148 162 158Z', '#f2ece0', 'opacity=".9"');
-    // head: rufous, pointed ears, long muzzle, white lips
-    s += k.p(head, k.U('cuH'));
-    s += fur(k, 'cuHC', 110, 122, 50, 24, 140, 5, function() { return 175; }, ['#f0a060', '#7a3a18'], 0.7, 0.6);
-    s += k.p('M62 136C74 140 88 142 102 140C114 140 126 142 140 140L138 146C120 148 100 148 84 146C74 144 66 140 62 136Z', '#f2ece0');
-    s += k.p('M120 100L128 66L142 98Z', '#b0602a') + k.p('M124 98L129 74L137 98Z', '#3a2418', 'opacity=".55"');
-    s += k.p('M136 102L150 72L156 106Z', '#a8582a') + k.p('M140 102L149 80L152 104Z', '#3a2418', 'opacity=".5"');
-    s += k.el(63, 134, 3.6, 3, '#120c08');
-    s += k.p('M76 128C84 124 94 122 100 124', 'none', 'stroke="#7a3a18" stroke-width="1" opacity=".7"');
-    s += k.eye(108, 116, 4, '#c88a2a', { pupil: 0.45 });
-    return { wash: '#cdc1a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
-  };
-
-  // ---- Guanaco ----
-  P.guanaco = function(k) {
-    var r = k.rnd, s = '', bg = '';
-    var body = 'M168 148C172 128 194 120 226 120C256 118 282 118 300 128C314 136 318 152 312 166C306 176 290 178 272 176C246 176 216 178 194 176C176 172 166 162 168 148Z';
-    var neck = 'M168 152C156 130 146 104 142 78C140 66 140 58 142 52L172 54C172 72 178 94 186 112C192 122 200 130 208 134Z';
-    var head = 'M172 58C170 42 158 32 142 32C128 32 118 40 112 48C106 56 104 62 108 68C116 72 130 72 142 70C158 72 170 68 172 58Z';
-    var defs = k.lg('gB', 0.5, 0, 0.5, 1, [[0, '#b07a48'], [0.55, '#c08a54'], [0.7, '#efe6d6'], [1, '#e2d8c6']]) +
-      k.lg('gN', 0, 0, 1, 0, [[0, '#f0e8da'], [0.25, '#e8dccb'], [0.45, '#b98450'], [1, '#a87444']]) +
-      k.lg('gH', 0, 0, 1, 1, [[0, '#8a8478'], [1, '#6a645a']]) +
-      k.lg('gS', 0, 0, 0, 1, [[0, '#d8c88a'], [1, '#b0a06a']]) +
-      k.clip('gBC', body) + k.clip('gNC', neck) + k.clip('gHC', head);
-    // Patagonian steppe and granite towers far away
-    bg += k.p('M250 200L262 120L272 118L278 200Z', '#9aa4b0', 'opacity=".55"') + k.p('M280 200L290 104L302 102L308 200Z', '#8a96a4', 'opacity=".6"') + k.p('M312 200L320 130L330 128L336 200Z', '#9aa4b0', 'opacity=".5"');
-    bg += k.p('M262 120L272 118L270 134L264 136Z', '#fff', 'opacity=".7"') + k.p('M290 104L302 102L300 120L292 122Z', '#fff', 'opacity=".7"');
-    bg += k.p('M0 200C80 190 160 196 240 200C300 204 350 198 400 194L400 300L0 300Z', k.U('gS'), 'opacity=".75"');
-    var i;
-    bg += k.grass(r, 0, 400, 290, 90, 26, ['#c8b46a', '#a8984e', '#d8c88a', '#8a7e40']);
-    for (i = 0; i < 6; i++) { var cx = 30 + i * 70 + r() * 20, cy = 236 + r() * 20; bg += k.grass(r, cx - 10, cx + 10, cy, 14, 16, ['#b0a058', '#8a8040']); }
-    var shadowS = k.shadow(240, 262, 90, 6, 0.8);
-    // far legs (long and slender)
-    s += k.p('M196 172L192 216L190 260L198 262L202 216L208 174Z', '#9a6a3e') + k.p('M286 170L294 214L290 260L298 262L304 214L300 168Z', '#9a6a3e');
-    s += k.p(body, k.U('gB'));
-    s += fur(k, 'gBC', 240, 148, 76, 32, 320, 7, function(x, y) { return y < 150 ? 176 : 192; }, ['#e0b080', '#7a5028', '#c8945e'], 0.9, 0.65);
-    // near legs: cinnamon outside, pale inside
-    s += k.p('M210 170L204 216L202 260L212 262L216 216L224 172Z', '#b07a48') + k.p('M300 162L312 210L306 260L316 262L322 210L314 160Z', '#b07a48');
-    s += k.sp('M212 180L208 250M306 180L312 250', '#efe6d6', 1.6, 'opacity=".5"');
-    s += k.p('M200 258L214 258L215 264L199 264Z', '#3a2c20') + k.p('M304 258L318 258L319 264L303 264Z', '#3a2c20') + k.p('M188 258L200 258L200 264L187 264Z', '#3a2c20') + k.p('M288 258L300 258L300 264L287 264Z', '#3a2c20');
-    s += k.p('M312 132C322 132 326 142 320 152C316 150 312 142 312 132Z', '#9a6a3e');
-    // long neck
-    s += k.p(neck, k.U('gN'));
-    s += fur(k, 'gNC', 170, 96, 30, 50, 160, 6, function() { return 250; }, ['#f6eee0', '#8a6038'], 0.8, 0.55);
-    // grey head, pointed ears, split lip
-    s += k.p(head, k.U('gH'));
-    s += fur(k, 'gHC', 140, 52, 30, 18, 70, 4, function() { return 180; }, ['#b0aaa0', '#3e3a34'], 0.6, 0.6);
-    s += k.p('M150 40L156 14L164 18L160 42Z', '#7a746a') + k.p('M152 38L157 20L161 22L158 40Z', '#c9c2b6');
-    s += k.p('M160 42L170 18L176 24L168 46Z', '#6a645a');
-    s += k.p('M112 64C118 68 128 70 136 68', 'none', 'stroke="#3a3632" stroke-width="1.2"');
-    s += k.el(114, 56, 2.6, 2, '#1e1a16');
-    s += k.eye(136, 48, 4.4, '#1a120c', { ring: '#3a3632', ringR: 1.25 });
-    s += k.sp('M128 42C134 38 142 38 146 42', '#2a2622', 1.1);
-    return { wash: '#d3c7a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
-  };
+  // a furry tail along cubic segments [[p0,p1,p2,p3],…]: core + hairs,
+  // with a differently coloured brush from `tipFrom` (0–1) onwards
+  function bushyTail(k, segs, w0, w1, cols, tipFrom, tipCols, tipW) {
+    var r = k.rnd, core = '', hairs = {}, N = 70, i, j;
+    function at(t) {
+      var f = Math.min(segs.length - 1e-6, t * segs.length), si = Math.floor(f), u = f - si, q = segs[si], v = 1 - u;
+      var x = v * v * v * q[0][0] + 3 * v * v * u * q[1][0] + 3 * v * u * u * q[2][0] + u * u * u * q[3][0];
+      var y = v * v * v * q[0][1] + 3 * v * v * u * q[1][1] + 3 * v * u * u * q[2][1] + u * u * u * q[3][1];
+      return [x, y];
+    }
+    var pts = [];
+    for (i = 0; i <= N; i++) pts.push(at(i / N));
+    for (i = 0; i <= N; i++) {
+      var t = i / N, p0 = pts[Math.max(0, i - 1)], p1 = pts[Math.min(N, i + 1)];
+      var ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]);
+      var tip = t >= tipFrom, w = tip && tipW ? tipW * Math.sin(Math.PI * Math.min(1, (t - tipFrom) / (1 - tipFrom) * 0.8 + 0.2)) : w0 + (w1 - w0) * t;
+      core += k.circ(pts[i][0], pts[i][1], Math.max(1.5, w * 0.42), tip ? tipCols[0] : cols[0]);
+      for (j = 0; j < 5; j++) {
+        var side = j % 2 ? 1 : -1, a = ang + side * (1.1 + r() * 0.5) - 0.35, L = w * (0.45 + r() * 0.45);
+        var c = tip ? tipCols[Math.floor(r() * tipCols.length)] : cols[Math.floor(r() * cols.length)];
+        hairs[c] = (hairs[c] || '') + 'M' + k.n(pts[i][0]) + ' ' + k.n(pts[i][1]) + 'q' + k.n(Math.cos(a + 0.4) * L * 0.5) + ' ' + k.n(Math.sin(a + 0.4) * L * 0.5) + ' ' + k.n(Math.cos(a) * L) + ' ' + k.n(Math.sin(a) * L);
+      }
+    }
+    var s = core;
+    for (var c2 in hairs) s += k.sp(hairs[c2], c2, 1.1);
+    return s;
+  }
 
   // ---- Mountain vizcacha · Vizcacha (sunning on a rock) ----
   P.vizcacha = function(k) {
@@ -1610,15 +1469,14 @@ var NaturalezaArt = (function() {
     bg += k.grass(r, 0, 80, 296, 30, 26, ['#a8a05a', '#8a8a4a']);
     var shadowS = k.shadow(222, 222, 74, 6, 0.85);
     // long tail curling up at the back
-    var tl = 'M270 196C300 200 322 190 330 170C336 154 330 140 320 136';
-    s += k.sp(tl, '#8a8070', 9) + k.sp(tl, '#b0a694', 4, 'transform="translate(-1 -1)"');
-    s += k.p('M320 136C312 126 316 112 326 110C334 116 334 130 326 140Z', '#2e2620');
+    s += bushyTail(k, [[[266, 198], [300, 206], [334, 194], [338, 166]], [[338, 166], [342, 144], [330, 128], [314, 130]]], 16, 20,
+      ['#9a907e', '#c8beac', '#7a7060', '#b0a694'], 0.78, ['#2e2620', '#4a4036', '#1a1410'], 22);
     s += k.p(body, k.U('vzB'));
     s += fur(k, 'vzBC', 222, 166, 66, 60, 420, 6, function(x, y) { return 110 + (x - 220) * 0.5; }, ['#e8e0d0', '#6a6252', '#b8ae9a'], 0.8, 0.6);
     s += k.p('M240 110C250 120 256 150 254 180', 'none', 'stroke="#5a5244" stroke-width="3" opacity=".25"');
     // haunch and tucked paws
     s += k.el(244, 190, 32, 24, '#a89e8a', 'opacity=".55"');
-    s += k.p('M220 208C230 212 244 214 254 212L256 218C244 220 228 220 218 216Z', '#7a7060');
+    s += k.p('M206 210C226 212 250 214 264 212C268 214 268 219 262 220C244 222 222 222 204 218Z', '#8a8070') + k.sp('M212 216C230 218 248 218 262 217', '#c8beac', 1, 'opacity=".6"');
     s += k.p('M168 196C174 206 182 212 190 214L188 220C178 218 170 212 166 204Z', '#8a8070');
     // head
     s += k.p(head, k.U('vzH'));
@@ -1649,8 +1507,8 @@ var NaturalezaArt = (function() {
     for (var i = 0; i < 20; i++) bg += k.el(r() * 400, 240 + r() * 56, 2 + r() * 3, 1.4 + r() * 1.5, r() < 0.5 ? '#9a8058' : '#d0b88a');
     var shadowS = k.shadow(210, 232, 78, 6, 0.85);
     // tail with black brush tip
-    var tl = 'M266 200C296 210 320 222 336 214C350 206 358 190 362 176';
-    s += k.sp(tl, '#7a6040', 5) + k.p('M352 196C352 180 360 166 372 162C376 172 372 190 362 200Z', '#1a1410');
+    s += bushyTail(k, [[[264, 202], [296, 214], [322, 224], [338, 214]], [[338, 214], [352, 204], [360, 190], [364, 172]]], 6, 4,
+      ['#8a6a44', '#6a5032'], 0.72, ['#141010', '#2a2018', '#000'], 18);
     // hind foot
     s += k.p('M222 222C232 228 252 230 262 228L262 234C250 236 230 236 220 230Z', '#a88a62');
     s += k.p(body, k.U('dgB'));
@@ -1669,6 +1527,293 @@ var NaturalezaArt = (function() {
     s += k.el(152, 122, 12, 13, '#4a3a2e', 'transform="rotate(-20 152 122)"') + k.el(152, 123, 7.5, 8.5, '#8a6a5a', 'transform="rotate(-20 152 122)"');
     s += k.eye(128, 138, 5.4, '#120c08', { ring: '#d8c49a', ringR: 1.3 });
     return { wash: '#d6c69e', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- jointed-leg toolkit for the hoofed and padded mammals ---------
+  // limbPath: tapered outline along joints [[x, y, width], …] (shoulder → foot)
+  function limbPath(k, pts) {
+    var L = [], R = [];
+    for (var i = 0; i < pts.length; i++) {
+      var a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+      var dx = b[0] - a[0], dy = b[1] - a[1], len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = -dy / len, ny = dx / len, w = pts[i][2] / 2;
+      L.push([pts[i][0] + nx * w, pts[i][1] + ny * w]);
+      R.unshift([pts[i][0] - nx * w, pts[i][1] - ny * w]);
+    }
+    return { d: k.smooth(L.concat(R), true), front: k.smooth(L.slice(1), false), back: k.smooth(R.slice(0, -1), false) };
+  }
+  // a shaded leg: gradient fill (light from the top-left), lit front edge,
+  // shadowed back edge and soft highlights on the knee / hock bumps
+  function leg(k, pts, grad, o) {
+    o = o || {};
+    var lp = limbPath(k, pts), s = k.p(lp.d, k.U(grad));
+    s += k.sp(lp.back, o.dark || 'rgba(0,0,0,.35)', 2.2, 'opacity=".6"');
+    s += k.sp(lp.front, o.lite || 'rgba(255,240,220,.22)', 1.2);
+    (o.joints || []).forEach(function(j) { var q = pts[j]; s += k.el(q[0] - q[2] * 0.12, q[1], q[2] * 0.42, q[2] * 0.36, '#fff', 'opacity=".14"'); });
+    if (o.mask) {
+      // fade the top of a near leg into the body so it reads as one animal
+      var y0 = pts[0][1];
+      s = '<defs>' + k.lg(o.mask + 'g', 0, y0 - 4, 0, y0 + 16, [[0, '#000'], [1, '#fff']], ' gradientUnits="userSpaceOnUse"') +
+        '<mask id="§' + o.mask + '" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="300"><rect width="400" height="300" fill="' + k.U(o.mask + 'g') + '"/></mask></defs>' +
+        '<g mask="' + k.U(o.mask) + '">' + s + '</g>';
+    }
+    return s;
+  }
+  // cloven deer hoof with dew claw; (x,y) = ground contact centre
+  function hoof(k, x, y, w) {
+    return k.p('M' + (x - w * 0.75) + ' ' + y + 'L' + (x - w * 0.45) + ' ' + (y - 8) + 'L' + (x + w * 0.5) + ' ' + (y - 8) + 'L' + (x + w * 0.6) + ' ' + y + 'Z', '#1c140e') +
+      k.sp('M' + (x - w * 0.05) + ' ' + (y - 7) + 'L' + (x - w * 0.15) + ' ' + y, '#5a4a3a', 0.8) +
+      k.sp('M' + (x - w * 0.45) + ' ' + (y - 7.5) + 'L' + (x + w * 0.45) + ' ' + (y - 7.5), '#6a5a48', 1, 'opacity=".7"') +
+      k.el(x + w * 0.55, y - 12, 1.8, 2.6, '#2a1e14');
+  }
+  // soft, two-toed camelid foot
+  function padFoot(k, x, y, col) {
+    return k.p('M' + (x - 11) + ' ' + y + 'C' + (x - 12) + ' ' + (y - 6) + ' ' + (x - 4) + ' ' + (y - 8) + ' ' + (x + 4) + ' ' + (y - 7) + 'C' + (x + 7) + ' ' + (y - 5) + ' ' + (x + 6) + ' ' + y + ' ' + (x + 4) + ' ' + y + 'Z', col) +
+      k.p('M' + (x - 12) + ' ' + y + 'l3 -4l2 4Z', '#2a2018') + k.p('M' + (x - 6) + ' ' + y + 'l3 -4l2 4Z', '#2a2018');
+  }
+  // dog paw seen from the side
+  function paw(k, x, y, col) {
+    return k.el(x, y - 4, 9, 5, col) + k.sp('M' + (x - 7) + ' ' + (y - 1) + 'v-3M' + (x - 3) + ' ' + y + 'v-3M' + (x + 1) + ' ' + y + 'v-3', '#2a1a10', 0.9, 'opacity=".7"') +
+      k.el(x - 6, y - 0.5, 3, 1.2, '#1a120c');
+  }
+  // body volume: highlights on shoulder and haunch, creases, belly shadow
+  function volume(k, id, o) {
+    var s = '';
+    s += k.el(o.sh[0], o.sh[1], o.sh[2], o.sh[3], k.U(id + 'Hi'));
+    s += k.el(o.hp[0], o.hp[1], o.hp[2], o.hp[3], k.U(id + 'Hi'));
+    s += k.el(o.belly[0], o.belly[1], o.belly[2], o.belly[3], '#120a04', 'opacity=".26"');
+    (o.creases || []).forEach(function(d) { s += k.sp(d, '#1a0e06', 5, 'opacity=".16"') + k.sp(d, '#1a0e06', 1.4, 'opacity=".28"'); });
+    (o.rims || []).forEach(function(d) { s += k.sp(d, '#fff6e0', 3, 'opacity=".22"'); });
+    return s;
+  }
+  function hiGrad(k, id) { return k.rg(id + 'Hi', 0.38, 0.32, 0.6, [[0, '#fff2d8', 0.42], [0.6, '#fff2d8', 0.1], [1, '#fff2d8', 0]]); }
+
+  // ---- Southern pudú · Pudú (male, three-quarter head) ----
+  P.pudu = function(k) {
+    var r = k.rnd, s = '', bg = '', i;
+    var body = 'M146 190C136 168 140 146 160 136C180 128 205 134 228 128C250 120 276 118 292 134C306 150 306 176 296 194C286 206 268 210 250 206C230 204 210 208 190 208C170 208 152 202 146 190Z';
+    var neck = 'M170 140C158 132 144 136 136 146L130 168C138 182 154 190 172 190L184 158Z';
+    var head = 'M146 148C144 132 132 122 116 122C100 122 90 132 86 144C82 152 80 160 84 166C90 172 100 172 108 168C120 168 134 166 142 160C145 156 146 152 146 148Z';
+    var defs = k.lg('puB', 0.35, 0, 0.6, 1, [[0, '#9a6236'], [0.5, '#7e4a28'], [1, '#4e2e18']]) +
+      k.lg('puL', 0, 0, 1, 0.2, [[0, '#6e4224'], [0.55, '#4e2e18'], [1, '#2e1a0c']]) +
+      k.lg('puLF', 0, 0, 1, 0.2, [[0, '#4a2c18'], [1, '#22140a']]) +
+      k.rg('puH', 0.55, 0.3, 0.75, [[0, '#9a6438'], [0.6, '#74462a'], [1, '#4a2c18']]) +
+      hiGrad(k, 'pu') + k.clip('puBC', body) + k.clip('puNC', neck) + k.clip('puHC', head);
+    bg += k.p('M30 0L44 0L46 260L28 260Z', '#6a6a50', 'opacity=".25"') + k.p('M340 0L360 0L364 260L336 260Z', '#6a6a50', 'opacity=".3"');
+    bg += k.fern(r, 330, 250, 90, -120, '#4a7a3a') + k.fern(r, 352, 252, 80, -70, '#3e6a32') + k.fern(r, 40, 252, 80, -60, '#4a7a3a') + k.fern(r, 30, 254, 70, -110, '#5a8a42');
+    bg += forestFloor(k, 240);
+    var shadowS = k.shadow(222, 248, 96, 7, 0.9);
+    // far legs
+    s += leg(k, [[162, 182, 22], [164, 202, 15], [162, 222, 9], [163, 228, 10], [162, 240, 7], [160, 246, 7]], 'puLF') + hoof(k, 159, 248, 8);
+    s += leg(k, [[258, 182, 28], [252, 204, 17], [268, 228, 9], [266, 240, 7], [263, 246, 7]], 'puLF') + hoof(k, 262, 248, 8);
+    // tiny tail
+    s += k.p('M296 136C306 134 310 142 304 148C300 148 296 142 296 136Z', '#5a3420');
+    // body with layered fur and volume
+    s += k.p(body, k.U('puB'));
+    s += k.g(fur(k, 'puBC', 222, 166, 86, 46, 360, 7, function(x, y) { return y < 150 ? 172 : 194 - (x - 220) * 0.12; }, ['#b8804e', '#3e2210', '#9a643a'], 1, 0.7) +
+      fur(k, 'puBC', 222, 166, 86, 46, 160, 4, function(x, y) { return 160 + (y - 160) * 0.3; }, ['#d0a070', '#5a3418'], 0.6, 0.6) +
+      volume(k, 'pu', { sh: [176, 158, 30, 26], hp: [270, 150, 34, 30], belly: [226, 212, 76, 16],
+        creases: ['M190 168C196 180 196 194 190 206', 'M248 172C250 186 252 198 256 206'], rims: ['M150 150C166 134 196 132 228 128C252 122 278 120 292 132'] }), 'clip-path="' + k.U('puBC') + '"');
+    // near legs (drawn over the body), knee and hock defined
+    s += leg(k, [[180, 182, 26], [180, 202, 18], [178, 222, 10], [179, 228, 11.5], [178, 240, 8], [176, 246, 8]], 'puL', { joints: [3], mask: 'nl1' }) + hoof(k, 175, 249, 9);
+    s += leg(k, [[272, 180, 36], [266, 202, 22], [286, 228, 10], [284, 240, 8], [281, 246, 8]], 'puL', { joints: [2], mask: 'nl2' }) + hoof(k, 280, 249, 9);
+    // short, thick neck
+    s += k.p(neck, k.U('puB'));
+    s += fur(k, 'puNC', 156, 162, 26, 30, 90, 6, function() { return 120; }, ['#b8804e', '#3e2210'], 0.9, 0.7);
+    s += k.sp('M136 148C134 162 140 178 156 188', '#2a160a', 3, 'opacity=".25"');
+    // head, three-quarter view: far ear, skull, dark muzzle, both eyes
+    s += k.el(119, 120, 7, 13, '#5a3420', 'transform="rotate(-24 119 120)"') + k.el(119, 121, 3.5, 8, '#a87a60', 'transform="rotate(-24 119 121)"');
+    s += k.p(head, k.U('puH'));
+    s += k.g(fur(k, 'puHC', 116, 146, 34, 26, 140, 4.5, function(x, y) { return Math.atan2(y - 120, x - 150) * 180 / Math.PI; }, ['#c08a5a', '#2e1a0c'], 0.7, 0.65) +
+      k.p('M80 150C86 140 96 136 104 142C106 154 100 166 90 172C84 172 80 166 80 150Z', '#2a1810', 'opacity=".8"') +
+      k.el(128, 136, 16, 10, '#fff2d8', 'opacity=".12"'), 'clip-path="' + k.U('puHC') + '"');
+    // near ear
+    s += k.p('M134 138C130 120 138 106 150 104C158 108 156 124 146 138Z', '#6a3e22') + k.p('M138 134C136 122 141 112 148 110C152 116 150 126 144 134Z', '#c49a80');
+    s += k.sp('M140 132C140 122 144 114 148 112', '#f0d8c8', 0.8, 'opacity=".6"');
+    // spike antlers between the ears
+    s += k.p('M117 126L112 104L116 103L122 125Z', '#3e3024') + k.p('M128 126L127 102L131 102L133 126Z', '#4a3a2a');
+    s += k.sp('M118 122L114 106M129 122L128.5 105', 'rgba(255,235,210,.45)', 0.8);
+    s += k.el(124, 126, 9, 4, '#5a3420');
+    // eyes: near (large, dark) and far (small, beside the nose bridge)
+    s += k.eye(110, 144, 5, '#1a0e08', { ring: '#2a160a', ringR: 1.25 }) + k.sp('M116 150C112 156 106 160 100 162', '#1a0e08', 1.4, 'opacity=".6"');
+    s += k.el(91, 143, 3, 2.3, '#140a06') + k.circ(90.2, 142.2, 0.8, '#fff', 'opacity=".8"');
+    // nose with nostrils
+    s += k.el(84, 162, 7, 5.5, '#120a06') + k.el(82, 160, 2.6, 1.6, '#4a3a32', 'opacity=".8"') + k.el(80.5, 163, 1.6, 1.1, '#000') + k.el(86.5, 163.5, 1.6, 1.1, '#000');
+    s += k.p('M86 170C90 172 96 172 100 170', 'none', 'stroke="#2a1a10" stroke-width="1"');
+    return { wash: '#b9c4a4', defs: defs, bg: bg, shadow: shadowS, fg: s, front: k.fern(r, 120, 264, 60, -40, '#5a8a42') + k.fern(r, 306, 266, 50, -150, '#4a7a3a') };
+  };
+
+  // ---- South Andean deer · Huemul (male, forked antlers, three-quarter head) ----
+  P.huemul = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M124 150C126 124 150 112 184 110C220 106 262 104 288 112C312 120 322 146 316 170C310 188 292 194 270 192C236 194 200 194 172 190C146 186 126 172 124 150Z';
+    var neck = 'M124 164C114 136 108 110 110 88L140 80C148 104 160 124 186 136L172 172Z';
+    var head = 'M128 74C124 58 110 50 96 52C82 54 72 64 68 76C64 86 64 96 70 102C78 108 88 106 96 102C110 100 122 92 128 74Z';
+    var defs = k.lg('huB', 0.35, 0, 0.6, 1, [[0, '#7e705c'], [0.5, '#62564a'], [1, '#3e352c']]) +
+      k.lg('huL', 0, 0, 1, 0.2, [[0, '#5e5244'], [0.55, '#463c32'], [1, '#2a241e']]) +
+      k.lg('huLF', 0, 0, 1, 0.2, [[0, '#3e352c'], [1, '#221c16']]) +
+      k.lg('huN', 0, 0, 1, 0, [[0, '#6e6252'], [1, '#5a4e40']]) +
+      k.rg('huH', 0.6, 0.35, 0.75, [[0, '#8a7c66'], [0.6, '#6a5e4c'], [1, '#4a4034']]) +
+      k.lg('huA', 0, 0, 1, 0, [[0, '#d8ccb0'], [0.5, '#a8987a'], [1, '#6a5a44']]) +
+      hiGrad(k, 'hu') + k.clip('huBC', body) + k.clip('huNC', neck) + k.clip('huHC', head);
+    bg += k.ridge(r, 'huR', 170, 60, '#a8b4bc', 0.65, 0.7);
+    bg += k.p('M0 236C80 226 160 232 240 240C300 246 350 240 400 236L400 300L0 300Z', '#8a8a62', 'opacity=".55"');
+    bg += k.rock(r, 'huRk', 50, 232, 100, 40, ['#b8b0a0', '#8a8274', '#5a5448']) + k.rock(r, 'huRk2', 360, 240, 90, 30, ['#b8b0a0', '#8a8274', '#5a5448']);
+    bg += miniTree(k, 364, 204, 56, ['#3e5a30', '#4e6e3a', '#7a9a5a', '#4a3a2a']);
+    bg += k.grass(r, 0, 400, 292, 80, 22, ['#8a8a4a', '#a8a05a', '#6a7038']);
+    var shadowS = k.shadow(222, 258, 112, 7, 0.85);
+    // far legs
+    s += leg(k, [[150, 182, 26], [152, 204, 18], [150, 228, 11], [151, 234, 12.5], [150, 248, 9], [148, 255, 9]], 'huLF') + hoof(k, 147, 258, 10);
+    s += leg(k, [[268, 180, 32], [258, 206, 19], [278, 232, 11], [274, 248, 8.5], [271, 255, 8.5]], 'huLF') + hoof(k, 270, 258, 10);
+    // tail (dark above)
+    s += k.p('M312 124C322 122 326 132 320 140C316 140 312 134 312 124Z', '#3a3028');
+    // body
+    s += k.p(body, k.U('huB'));
+    s += k.g(fur(k, 'huBC', 220, 150, 100, 46, 460, 8, function(x, y) { return y < 140 ? 172 : 196; }, ['#a89a80', '#2e271e', '#857868'], 1, 0.7) +
+      fur(k, 'huBC', 220, 150, 100, 46, 180, 4, function() { return 170; }, ['#c8bca0'], 0.6, 0.45) +
+      volume(k, 'hu', { sh: [168, 140, 38, 32], hp: [282, 138, 40, 36], belly: [222, 196, 90, 16],
+        creases: ['M184 154C192 170 192 184 186 194', 'M246 158C250 172 252 186 256 194'], rims: ['M128 146C138 124 164 114 196 110C232 106 266 104 290 112'] }), 'clip-path="' + k.U('huBC') + '"');
+    // near legs: sturdy, jointed
+    s += leg(k, [[166, 180, 32], [168, 204, 22], [166, 228, 13], [167, 234, 14.5], [166, 248, 10], [163, 255, 10]], 'huL', { joints: [3], mask: 'nl3' }) + hoof(k, 162, 258, 11);
+    s += leg(k, [[284, 176, 44], [272, 206, 26], [294, 232, 13], [290, 248, 9.5], [287, 255, 9.5]], 'huL', { joints: [2], mask: 'nl4' }) + hoof(k, 286, 258, 11);
+    // thick neck, pale throat patch
+    s += k.p(neck, k.U('huN'));
+    s += fur(k, 'huNC', 140, 126, 34, 48, 140, 7, function() { return 250; }, ['#a89a80', '#2e271e'], 0.9, 0.65);
+    s += k.p('M112 94C110 104 112 116 117 126C121 126 124 122 124 118C120 110 119 102 120 96Z', '#e6dcc6', 'opacity=".7"');
+    s += k.sp('M140 80C148 102 160 122 186 136', '#2a2018', 3, 'opacity=".3"');
+    // far ear and far antler (behind the head)
+    s += k.p('M98 58C92 42 96 30 104 24C112 32 112 46 106 58Z', '#4e4438') + k.p('M100 54C97 42 100 34 104 30C108 38 107 48 104 54Z', '#a89a84');
+    var antF = 'M96 54C94 42 92 30 92 16M93 36C88 30 84 24 82 16';
+    s += k.sp(antF, '#5a4a36', 4) + k.sp(antF, '#a8987a', 1.2, 'transform="translate(-.6 -.4)"');
+    // head
+    s += k.p(head, k.U('huH'));
+    s += k.g(fur(k, 'huHC', 98, 80, 32, 28, 120, 4.5, function(x, y) { return Math.atan2(y - 60, x - 120) * 180 / Math.PI; }, ['#a89a80', '#2e271e'], 0.7, 0.6) +
+      // the dark "Y": down the nose bridge, forking above the eyes
+      k.p('M70 98C78 86 88 74 96 64L103 66C96 77 86 90 78 102Z', '#1e1812', 'opacity=".9"') +
+      k.p('M96 64C100 58 106 54 112 52L114 57C108 59 103 63 101 67Z', '#1e1812', 'opacity=".85"') +
+      k.p('M96 64C92 59 88 56 84 55L84 60C88 61 92 64 95 68Z', '#1e1812', 'opacity=".8"') +
+      k.el(76, 104, 10, 6, '#d8ceb8', 'opacity=".7"'), 'clip-path="' + k.U('huHC') + '"');
+    // near ear (large) and near antler: main beam with a forward tine
+    s += k.p('M118 68C120 48 134 36 150 36C150 52 138 66 124 74Z', '#5e5244') + k.p('M122 66C124 52 134 42 145 41C144 52 136 62 126 69Z', '#d8ccb8');
+    s += k.sp('M126 64C130 54 136 47 142 44', '#fff', 0.8, 'opacity=".4"');
+    var antN = 'M110 52C112 40 116 26 124 12M114 36C108 28 104 22 104 12';
+    s += k.sp(antN, '#4a3c2c', 5.2) + k.sp(antN, k.U('huA'), 3.4) + k.sp(antN, '#fff', 0.9, 'opacity=".35" transform="translate(-.8 -.5)"');
+    s += k.el(104, 54, 10, 4, '#4a4034');
+    // eyes, nose
+    s += k.eye(108, 72, 4.8, '#1a100a', { ring: '#2a2018', ringR: 1.25 });
+    s += k.el(84, 70, 2.8, 2.2, '#120a06') + k.circ(83.3, 69.3, 0.8, '#fff', 'opacity=".8"');
+    s += k.el(69, 100, 7, 5.5, '#0e0a08') + k.el(66.5, 101, 1.6, 1.2, '#000') + k.el(72.5, 101.5, 1.6, 1.2, '#000') + k.el(68, 98, 2.4, 1.3, '#4a4038', 'opacity=".8"');
+    s = '<g transform="translate(212 258) scale(.94) translate(-212 -258)">' + s + '</g>';
+    return { wash: '#bcc4b0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Guanaco (long neck, small grey three-quarter head) ----
+  P.guanaco = function(k) {
+    var r = k.rnd, s = '', bg = '', i;
+    var body = 'M170 150C172 130 194 122 226 122C256 120 284 120 302 130C318 140 320 158 312 172C304 182 288 182 272 180C246 180 216 182 196 180C178 176 168 166 170 150Z';
+    var neck = 'M172 162C160 140 148 110 142 82C140 72 140 64 142 58L166 60C166 76 170 100 182 122C188 132 196 138 206 142Z';
+    var head = 'M168 60C166 46 156 38 144 38C132 38 122 46 118 56C114 64 114 72 118 76C126 80 136 80 144 76C156 74 166 70 168 60Z';
+    var defs = k.lg('gB', 0.4, 0, 0.5, 1, [[0, '#c48c54'], [0.5, '#a8743f'], [0.66, '#c8a07a'], [0.74, '#f2ece0'], [1, '#ddd4c4']]) +
+      k.lg('gL', 0, 0, 1, 0.15, [[0, '#d8a46a'], [0.45, '#b07a44'], [1, '#7a5028']]) +
+      k.lg('gLF', 0, 0, 1, 0.15, [[0, '#9a6a3a'], [1, '#5e3e20']]) +
+      k.lg('gN', 0, 0, 1, 0, [[0, '#f6f0e4'], [0.3, '#e8dcc8'], [0.5, '#c08850'], [1, '#a06a38']]) +
+      k.rg('gH', 0.6, 0.35, 0.75, [[0, '#a8a298'], [0.6, '#827c72'], [1, '#5a564e']]) +
+      k.lg('gS', 0, 0, 0, 1, [[0, '#d8c88a'], [1, '#b0a06a']]) +
+      hiGrad(k, 'g') + k.clip('gBC', body) + k.clip('gNC', neck) + k.clip('gHC', head);
+    // Patagonian steppe and granite towers far away
+    bg += k.p('M250 200L262 120L272 118L278 200Z', '#9aa4b0', 'opacity=".55"') + k.p('M280 200L290 104L302 102L308 200Z', '#8a96a4', 'opacity=".6"') + k.p('M312 200L320 130L330 128L336 200Z', '#9aa4b0', 'opacity=".5"');
+    bg += k.p('M262 120L272 118L270 134L264 136Z', '#fff', 'opacity=".7"') + k.p('M290 104L302 102L300 120L292 122Z', '#fff', 'opacity=".7"');
+    bg += k.p('M0 200C80 190 160 196 240 200C300 204 350 198 400 194L400 300L0 300Z', k.U('gS'), 'opacity=".75"');
+    bg += k.grass(r, 0, 400, 292, 90, 26, ['#c8b46a', '#a8984e', '#d8c88a', '#8a7e40']);
+    for (i = 0; i < 6; i++) { var cx = 30 + i * 70 + r() * 20, cy = 236 + r() * 20; bg += k.grass(r, cx - 10, cx + 10, cy, 14, 16, ['#b0a058', '#8a8040']); }
+    var shadowS = k.shadow(244, 264, 92, 6, 0.85);
+    // far legs
+    s += leg(k, [[184, 168, 20], [186, 186, 14], [184, 218, 9], [185, 224, 10], [184, 252, 6.5], [182, 258, 6.5]], 'gLF') + padFoot(k, 184, 263, '#6a4e34');
+    s += leg(k, [[276, 164, 28], [268, 190, 16], [286, 224, 9], [282, 252, 6.5], [280, 258, 6.5]], 'gLF') + padFoot(k, 282, 263, '#6a4e34');
+    // short tail held down
+    s += k.p('M310 136C320 138 324 150 320 164C316 166 312 156 310 146Z', '#a06a38');
+    // body: cinnamon above, sharply white below
+    s += k.p(body, k.U('gB'));
+    s += k.g(fur(k, 'gBC', 244, 146, 76, 30, 300, 7, function(x, y) { return y < 150 ? 176 : 192; }, ['#e2b07c', '#7a4e24', '#c48c54'], 0.9, 0.6) +
+      volume(k, 'g', { sh: [194, 140, 26, 22], hp: [292, 138, 30, 26], belly: [244, 184, 70, 8],
+        creases: ['M208 158C212 168 212 176 208 182', 'M262 156C264 166 266 174 268 180'], rims: ['M174 146C182 130 204 124 228 122C260 120 286 120 302 130'] }), 'clip-path="' + k.U('gBC') + '"');
+    // near legs: long, slender, clearly jointed
+    s += leg(k, [[198, 168, 24], [200, 186, 16], [198, 218, 10], [199, 224, 11.5], [198, 252, 7], [196, 258, 7]], 'gL', { joints: [3], mask: 'nl5' }) + padFoot(k, 198, 263, '#8a6a48');
+    s += leg(k, [[290, 164, 34], [280, 190, 19], [300, 224, 10], [296, 252, 7], [294, 258, 7]], 'gL', { joints: [2], mask: 'nl6' }) + padFoot(k, 296, 263, '#8a6a48');
+    // long neck: pale front, cinnamon back
+    s += k.p(neck, k.U('gN'));
+    s += fur(k, 'gNC', 170, 104, 30, 56, 170, 6, function() { return 250; }, ['#f8f2e8', '#8a5a30'], 0.8, 0.5);
+    s += k.sp('M166 60C166 76 170 100 182 122C188 132 196 138 206 142', '#6a4220', 2.4, 'opacity=".3"');
+    // far ear, head, near ear
+    s += k.p('M144 42L142 14L150 18L152 42Z', '#6a645a') + k.p('M146 38L145 20L149 22L150 38Z', '#bcb4a8');
+    s += k.p(head, k.U('gH'));
+    s += k.g(fur(k, 'gHC', 142, 58, 28, 20, 80, 4, function(x, y) { return Math.atan2(y - 40, x - 170) * 180 / Math.PI; }, ['#c8c2b8', '#3e3a34'], 0.6, 0.6) +
+      k.p('M114 62C118 70 124 76 132 78L134 70C126 68 120 64 116 58Z', '#3a3632', 'opacity=".55"') +
+      k.el(150, 50, 14, 8, '#fff', 'opacity=".12"'), 'clip-path="' + k.U('gHC') + '"');
+    s += k.p('M156 44L166 14L174 22L164 48Z', '#7a746a') + k.p('M158 42L166 22L170 26L162 44Z', '#d0c8bc');
+    // split lip, nostrils, both eyes
+    s += k.p('M116 70C120 74 126 76 132 76', 'none', 'stroke="#2a2622" stroke-width="1.2"') + k.sp('M118 72L117 76', '#2a2622', 1);
+    s += k.el(119, 62, 2.6, 1.3, '#1e1a16', 'transform="rotate(-30 119 62)"') + k.el(125, 64, 2.2, 1.1, '#1e1a16', 'transform="rotate(-10 125 64)"');
+    s += k.eye(146, 52, 4.6, '#1a120c', { ring: '#3a3632', ringR: 1.25 }) + k.sp('M140 47C144 44 150 44 153 47', '#1e1a16', 1.2);
+    s += k.el(128, 50, 2.6, 2, '#120c08') + k.circ(127.3, 49.4, 0.7, '#fff', 'opacity=".8"');
+    return { wash: '#d3c7a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Culpeo fox · Zorro culpeo (three-quarter head) ----
+  P.culpeo = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M150 152C154 132 176 124 206 124C238 122 266 124 282 134C298 144 300 162 290 174C278 184 256 182 234 180C206 180 182 182 166 178C152 172 146 164 150 152Z';
+    var tail = 'M280 140C306 140 338 156 360 182C372 198 376 218 368 228C354 232 340 220 328 206C312 190 296 172 282 162Z';
+    var neck = 'M152 160C146 142 150 128 160 120L188 128C178 138 174 150 174 166Z';
+    var head = 'M162 116C160 98 146 88 128 88C114 88 104 96 98 106L74 120C68 124 70 132 76 134C88 138 104 138 116 136C134 138 152 132 162 116Z';
+    var defs = k.lg('cuB', 0.45, 0, 0.5, 1, [[0, '#9a9284'], [0.4, '#8a8274'], [0.62, '#c08048'], [0.8, '#d8a670'], [1, '#ece2cc']]) +
+      k.lg('cuT', 0, 0, 1, 1, [[0, '#a89a86'], [0.65, '#6a5e50'], [0.85, '#2a2420'], [1, '#141210']]) +
+      k.lg('cuL', 0, 0, 1, 0.2, [[0, '#d8844a'], [0.5, '#b8622a'], [1, '#7a3a14']]) +
+      k.lg('cuLF', 0, 0, 1, 0.2, [[0, '#8a4a22'], [1, '#5a2e12']]) +
+      k.rg('cuH', 0.6, 0.35, 0.75, [[0, '#e08a48'], [0.6, '#c06a30'], [1, '#8a4a22']]) +
+      hiGrad(k, 'cu') + k.clip('cuBC', body) + k.clip('cuTC', tail) + k.clip('cuHC', head) + k.clip('cuNC', neck);
+    bg += k.ridge(r, 'cuR', 180, 50, '#b0b8b8', 0.7, 0.6);
+    bg += k.p('M0 236C80 228 160 232 240 238C300 242 350 238 400 234L400 300L0 300Z', '#a89a70', 'opacity=".5"');
+    bg += k.rock(r, 'cuRk', 340, 226, 110, 46) + miniTree(k, 50, 240, 30, ['#6a7a48', '#7a8a52', '#a8b070', '#5a4a3a'], { n: 6, wide: 1.2 });
+    bg += k.grass(r, 0, 400, 292, 70, 22, ['#a8a05a', '#8a8a4a', '#c0b070']);
+    var shadowS = k.shadow(220, 252, 96, 6, 0.85);
+    // far legs
+    s += leg(k, [[166, 170, 18], [170, 188, 13], [168, 222, 8], [169, 228, 9], [168, 244, 7]], 'cuLF') + paw(k, 166, 251, '#4a2a14');
+    s += leg(k, [[258, 166, 26], [250, 190, 15], [270, 220, 8], [268, 244, 7]], 'cuLF') + paw(k, 266, 251, '#4a2a14');
+    // big bushy tail with a dark tip
+    s += k.p(tail, k.U('cuT'));
+    s += fur(k, 'cuTC', 328, 186, 52, 46, 220, 9, function() { return 48; }, ['#d0c4b0', '#2a2420', '#8a7c6a'], 1, 0.7);
+    s += k.p(k.fluff(r, 350, 214, 18, 14, 40, 12, 0.3), '#181412', 'opacity=".55"');
+    // body
+    s += k.p(body, k.U('cuB'));
+    s += k.g(fur(k, 'cuBC', 220, 150, 78, 34, 340, 7, function(x, y) { return y < 148 ? 178 : 200; }, ['#e0d8c8', '#3a342c', '#a89a84'], 0.9, 0.7) +
+      volume(k, 'cu', { sh: [178, 144, 28, 24], hp: [270, 142, 32, 28], belly: [222, 184, 70, 10],
+        creases: ['M190 156C196 166 196 176 192 182'], rims: ['M154 148C162 132 184 126 210 124C240 122 266 124 282 134'] }), 'clip-path="' + k.U('cuBC') + '"');
+    // near legs: rufous, slim, jointed (hock bends back)
+    s += leg(k, [[182, 170, 22], [184, 188, 15], [182, 222, 9], [183, 228, 10], [182, 244, 8]], 'cuL', { joints: [3], mask: 'nl7' }) + paw(k, 180, 251, '#5a3018');
+    s += leg(k, [[272, 164, 32], [262, 190, 18], [284, 220, 9], [282, 244, 8]], 'cuL', { joints: [2], mask: 'nl8' }) + paw(k, 280, 251, '#5a3018');
+    s += k.sp('M184 196L183 222', '#3a1a08', 2.4, 'opacity=".35"');
+    // neck: rufous behind, white throat in front
+    s += k.p(neck, '#c07040');
+    s += fur(k, 'cuNC', 166, 142, 22, 26, 70, 5, function() { return 110; }, ['#e0a070', '#6a3414'], 0.8, 0.6);
+    s += k.p('M152 160C146 146 148 134 154 126L166 132C162 140 162 150 166 164Z', '#f4eee2');
+    // far ear, head, near ear
+    s += k.p('M118 96L120 60L138 92Z', '#9a5022') + k.p('M122 92L122 68L133 90Z', '#2a1810', 'opacity=".55"');
+    s += k.p(head, k.U('cuH'));
+    s += k.g(fur(k, 'cuHC', 120, 114, 46, 24, 150, 5, function(x, y) { return Math.atan2(y - 100, x - 170) * 180 / Math.PI; }, ['#f2aa6a', '#6a3010'], 0.7, 0.6) +
+      // white lip line and cheek, darker muzzle top
+      k.p('M72 126C84 132 104 134 122 132C134 132 148 130 158 124L160 134C140 140 110 142 86 140C78 138 72 132 72 126Z', '#f4eee2') +
+      k.p('M78 118C90 112 102 106 112 102L114 106C102 110 90 116 80 122Z', '#8a4a22', 'opacity=".5"') +
+      k.el(136, 104, 20, 10, '#fff2d8', 'opacity=".14"'), 'clip-path="' + k.U('cuHC') + '"');
+    s += k.p('M134 98L148 60L162 104Z', '#b0602a') + k.p('M140 98L148 70L156 100Z', '#f0e0cc') + k.sp('M148 60L162 104', '#2a1810', 2, 'opacity=".6"');
+    s += k.sp('M142 96L147 76M146 98L149 80', '#c8a080', 0.7);
+    // nose, eyes
+    s += k.el(72, 124, 5.4, 4.4, '#120c08') + k.el(70, 122.5, 2, 1.1, '#4a4038', 'opacity=".8"') + k.el(69.5, 125.5, 1.2, 0.9, '#000') + k.el(74, 126, 1.2, 0.9, '#000');
+    s += k.p('M76 130C82 134 88 134 92 132', 'none', 'stroke="#3a1a08" stroke-width="1"');
+    s += k.eye(120, 106, 4.4, '#d08a28', { pupil: 0.42, ring: '#2a1408', ringR: 1.2 });
+    s += k.el(100, 106, 2.6, 2, '#2a1408') + k.circ(99.4, 105.4, 0.7, '#fff', 'opacity=".8"');
+    s += k.sp('M112 112C108 118 100 120 94 120', '#3a1a08', 1, 'opacity=".5"');
+    return { wash: '#cdc1a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
   };
 
   // =================================================================
