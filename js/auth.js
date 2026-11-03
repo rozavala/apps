@@ -358,6 +358,12 @@ var APP_STAR_CONFIGS = [
       var n = 0, m = d.missions || {};
       for (var k in m) n += Math.min(3, (m[k] && m[k].stars) || 0);
       return n;
+    } },
+  // ¿Qué Hora Es? stars each of its 29 levels out of 3.
+  { id: 'clock', prefix: 'zs_clock_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
+      return n;
     } }
 ];
 

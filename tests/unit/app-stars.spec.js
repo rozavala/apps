@@ -57,7 +57,12 @@ const CASES = [
   { id: 'secretos', prefix: 'zs_secretos_',
     data: { missions: { m01: { stars: 3, date: '2026-11-03' }, m02: { stars: 2, date: '2026-11-03' },
             m10: { stars: 1, date: '2026-11-04' } }, tools: { caesar: '2026-11-03' }, history: ['h-caesar'] },
-    stars: 6, note: 'tools and history cards do not score' }
+    stars: 6, note: 'tools and history cards do not score' },
+  { id: 'clock', prefix: 'zs_clock_',
+    data: { lang: 'es', helper: true, digital: true, rounds: 5, levels: {
+            'set-oclock': { stars: 3, best: 10, of: 10 }, 'read-half': { stars: 2, best: 8, of: 10 },
+            'day-day1': { stars: 1, best: 5, of: 8 }, 'calendar-cal1': { stars: 0, best: 3, of: 10 } } },
+    stars: 6, note: 'rounds played do not score' }
 ];
 
 test.describe('per-app star rules', () => {
