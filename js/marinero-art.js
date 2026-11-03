@@ -1033,7 +1033,7 @@ var MarineroArt = (function() {
     var brass = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
     brass.addColorStop(0, '#fff0b8'); brass.addColorStop(0.25, '#d9ab48'); brass.addColorStop(0.5, '#8f6420');
     brass.addColorStop(0.75, '#d6a443'); brass.addColorStop(1, '#5e3e10');
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.arc(cx, cy, R * 0.9, 0, 7, true);
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.arc(cx, cy, R * 0.9, 0, Math.PI * 2, true);
     ctx.fillStyle = brass; ctx.fill();
     ctx.lineWidth = Math.max(1, R * 0.01); ctx.strokeStyle = 'rgba(60,35,5,0.7)';
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
@@ -1050,7 +1050,7 @@ var MarineroArt = (function() {
     // bowl rim (inner brass bezel)
     var rim = ctx.createLinearGradient(cx, cy - R * 0.9, cx, cy + R * 0.9);
     rim.addColorStop(0, '#f7dc8c'); rim.addColorStop(0.5, '#a87a2a'); rim.addColorStop(1, '#e7c066');
-    ctx.beginPath(); ctx.arc(cx, cy, R * 0.86, 0, 7); ctx.arc(cx, cy, R * 0.79, 0, 7, true);
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.86, 0, Math.PI * 2); ctx.arc(cx, cy, R * 0.79, 0, Math.PI * 2, true);
     ctx.fillStyle = rim; ctx.fill();
     // bezel graduations (fixed, every 10°)
     ctx.strokeStyle = 'rgba(70,40,5,0.75)';
@@ -1176,7 +1176,7 @@ var MarineroArt = (function() {
     // rim
     var rg = ctx.createRadialGradient(0, 0, R * 0.68, 0, 0, R * 0.82);
     rg.addColorStop(0, '#4a2810'); rg.addColorStop(0.35, '#b77840'); rg.addColorStop(0.6, '#8a5427'); rg.addColorStop(1, '#3a1e0a');
-    ctx.beginPath(); ctx.arc(0, 0, R * 0.82, 0, 7); ctx.arc(0, 0, R * 0.68, 0, 7, true);
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.82, 0, Math.PI * 2); ctx.arc(0, 0, R * 0.68, 0, Math.PI * 2, true);
     ctx.fillStyle = rg; ctx.fill();
     ctx.strokeStyle = 'rgba(25,12,3,0.7)'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(0, 0, R * 0.82, 0, 7); ctx.stroke();
@@ -1193,10 +1193,6 @@ var MarineroArt = (function() {
     ctx.strokeStyle = 'rgba(60,35,5,0.8)'; ctx.stroke();
     ctx.beginPath(); ctx.arc(0, 0, R * 0.07, 0, 7); ctx.fillStyle = '#8a6118'; ctx.fill();
     ctx.restore();
-    // static highlight on top (light does not turn with the wheel)
-    var hl = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.4, 1, cx, cy, R);
-    hl.addColorStop(0, 'rgba(255,240,210,0.16)'); hl.addColorStop(1, 'rgba(255,240,210,0)');
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fillStyle = hl; ctx.fill();
   }
 
   // Objects a knot is tied around, ready for drawModel's level ordering.

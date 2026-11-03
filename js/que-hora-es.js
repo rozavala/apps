@@ -511,7 +511,7 @@ var QueHoraEs = (function() {
       if (cb) later(cb, 300);
     },
     answerText: function(q) { return R.lvl === 'h24' ? bi(D.digital24(q.t), D.digital24(q.t)) : bi(D.digital12(q.t) + ' — ' + D.phraseEn(q.t), D.digital12(q.t) + ' — ' + D.phraseEs(q.t)); },
-    retry: true
+    retry: false
   };
   function periodBadge(t) {
     var h = D.h24(t), icon = h < 6 || h >= 21 ? '🌙' : h < 12 ? '🌅' : h < 18 ? '☀️' : '🌇';

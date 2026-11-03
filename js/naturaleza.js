@@ -180,10 +180,9 @@ var Naturaleza = (function() {
     data.sightings.forEach(function(x) { spotted[x.s] = 1; });
     var cards = '<div class="nat-grid">' + list.map(function(s) {
       return '<a class="nat-card" href="#sp/' + s.id + '">' +
-        '<span class="nat-card-no">No. ' + pad(plateNo(s.id)) + '</span>' +
         (spotted[s.id] ? '<span class="nat-card-stamp" title="You have spotted this one">✓ spotted</span>' : '') +
         '<div class="nat-card-plate">' + plate(s.id) + '</div>' +
-        '<div class="nat-card-lbl"><b class="nat-pencil">' + s.es + '</b><span>' + s.en + '</span><i>' + s.sci + '</i></div></a>';
+        '<div class="nat-card-lbl"><span class="nat-card-no">No. ' + pad(plateNo(s.id)) + '</span><b class="nat-pencil">' + s.es + '</b><span>' + s.en + '</span><i>' + s.sci + '</i></div></a>';
     }).join('') + '</div>';
     setView(header('Field Guide', g.es + ' · ' + list.length + ' species', 'home') + tabs + cards, 'is-guide');
   }
@@ -207,8 +206,8 @@ var Naturaleza = (function() {
     var g = group(s.group);
     var html = header(s.es, s.en, 'guide/' + s.group) +
       '<article class="nat-sp">' +
-      '<figure class="nat-sp-plate"><span class="nat-card-no">Plate ' + pad(plateNo(id)) + ' · ' + g.en + '</span>' + plate(id, { label: 1 }) +
-      '<figcaption><b class="nat-pencil">' + s.es + '</b> · ' + s.en + ' · <i>' + s.sci + '</i></figcaption></figure>' +
+      '<figure class="nat-sp-plate">' + plate(id, { label: 1 }) +
+      '<figcaption><b class="nat-pencil">' + s.es + '</b> · ' + s.en + ' · <i>' + s.sci + '</i><span class="nat-pencil nat-sp-no">Plate ' + pad(plateNo(id)) + ' · ' + g.en + '</span></figcaption></figure>' +
       '<div class="nat-sp-actions">' +
       (ttsOn() ? '<button type="button" class="nat-btn nat-btn-soft" data-act="read" data-id="' + id + '">🔊 Read aloud</button>' : '') +
       '<button type="button" class="nat-btn" data-act="log" data-id="' + id + '">✓ I spotted it!</button></div>' +

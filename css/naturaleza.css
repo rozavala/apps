@@ -142,7 +142,9 @@ html body.nat-body { background: #e9dcc0 !important; color: var(--nat-ink) !impo
 .nat-card:nth-child(odd)::before { transform: translateX(-50%) rotate(3deg); width: 70px; }
 .nat-card:hover { transform: translateY(-4px) rotate(0); box-shadow: 0 16px 30px -12px rgba(60, 40, 15, .5); }
 .nat-card-plate { background: var(--nat-card2); border: 1px solid rgba(90, 70, 40, .14); }
-.nat-card-no { position: absolute; top: 12px; left: 14px; z-index: 2; font-family: var(--nat-hand); font-size: 1.05rem; color: var(--nat-pencil); }
+.nat-card-no { position: absolute; top: 9px; right: 4px; font-family: var(--nat-hand); font-size: 1.05rem; color: var(--nat-muted); }
+.nat-card-lbl { position: relative; padding-right: 44px !important; }
+.nat-sp-no { display: block; font-size: 1.05rem; color: var(--nat-muted); }
 .nat-card-stamp {
   position: absolute; top: 12px; right: 12px; z-index: 2; font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .05em;
   color: var(--nat-red); border: 2px solid var(--nat-red); border-radius: 6px; padding: 1px 6px; transform: rotate(6deg); background: rgba(255,250,240,.7);
@@ -359,7 +361,8 @@ html body.nat-body { background: #e9dcc0 !important; color: var(--nat-ink) !impo
   .nat-card-lbl b { font-size: 1.3rem; }
   .nat-card-lbl span { font-size: .8rem; }
   .nat-card-lbl i { font-size: .72rem; }
-  .nat-card-no { font-size: .9rem; top: 8px; left: 9px; }
+  .nat-card-no { font-size: .9rem; top: 7px; }
+  .nat-card-lbl { padding-right: 34px !important; }
   .nat-bingo { gap: 6px; padding: 7px; }
   .nat-sq { padding: 3px 3px 2px; }
   .nat-sq-name { font-size: .98rem; }
