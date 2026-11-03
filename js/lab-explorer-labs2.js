@@ -491,15 +491,15 @@ LXLabs.astronomy = (() => {
       const dl = Math.min(l, 360 - l);
       const bright = 0.35 + 0.75 * Math.exp(-(dl / 32) * (dl / 32)) + 0.35 * Math.exp(-Math.pow((l - 300) / 22, 2)) + 0.2 * Math.exp(-Math.pow((l - 75) / 20, 2));
       const sig = 4.5 + 6 * Math.exp(-(dl / 25) * (dl / 25));
-      for (let k = 0; k < 4; k++) {
+      for (let k = 0; k < 6; k++) {
         const b = gauss() * sig;
         const e = galToEq(l + (r() - 0.5) * 1.2, b);
-        MW.push({ ra: e[0], dec: e[1], a: bright * (0.6 + r() * 0.5) * Math.exp(-(b * b) / (2 * sig * sig)), s: 2.2 + r() * 2.5 });
+        MW.push({ ra: e[0], dec: e[1], a: bright * (0.5 + r() * 0.5) * Math.exp(-(b * b) / (2 * sig * sig)), s: 1.8 + r() * 2.2 });
       }
     }
     // dark dust lanes: the Coalsack by the Cross and the Great Rift
     MW.dark = [{ ra: 12.85, dec: -62.5, s: 3.2 }];
-    for (let l = 8; l < 60; l += 3) { const e = galToEq(l, 1.4 + Math.sin(l * 0.2) * 0.8); MW.dark.push({ ra: e[0], dec: e[1], s: 1.9 }); }
+    for (let l = 6; l < 62; l += 1.2) { const e = galToEq(l, 1.2 + Math.sin(l * 0.15) * 0.9); MW.dark.push({ ra: e[0], dec: e[1], s: 1.3, a: 0.35 }); }
     // faint background speckle, denser along the Milky Way (decorative)
     BG = [];
     for (let i = 0; i < 1500; i++) {
@@ -720,7 +720,7 @@ LXLabs.astronomy = (() => {
         const h = altaz(p.ra, p.dec, S.lst); if (h[0] < -0.05) return;
         const s = project(cam, vec(h[0], h[1])); if (!s) return;
         const g = m.createRadialGradient(s[0], s[1], 0, s[0], s[1], p.s * pxDeg);
-        g.addColorStop(0, 'rgba(0,0,0,0.75)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        g.addColorStop(0, 'rgba(0,0,0,' + (p.a || 0.75) + ')'); g.addColorStop(1, 'rgba(0,0,0,0)');
         m.fillStyle = g; m.beginPath(); m.arc(s[0], s[1], p.s * pxDeg, 0, Math.PI * 2); m.fill();
       });
       m.globalCompositeOperation = 'source-over';
@@ -1615,8 +1615,8 @@ LXLabs.static = (() => {
     const W = api.W, H = api.H;
     S = { t: 0, charge: 0, hairQ: 0, show: false, drag: null, bits: [], hair: [], emitted: {}, near: 0, peak: 0, lastRub: 0, stuckN: 0 };
     S.table = api.narrow ? H - 70 : H - 56;
-    S.head = api.narrow ? { x: 150, y: 210, r: 74 } : { x: 120, y: 190, r: 70 };
-    S.b = { x: api.narrow ? 360 : 300, y: api.narrow ? 300 : 200, R: api.narrow ? 54 : 46, vx: 0, vy: 0, sx: 0, sy: 0 };
+    S.head = api.narrow ? { x: 150, y: S.table - 236, r: 74 } : { x: 120, y: S.table - 170, r: 66 };
+    S.b = { x: api.narrow ? 380 : 300, y: api.narrow ? 220 : 150, R: api.narrow ? 54 : 46, vx: 0, vy: 0, sx: 0, sy: 0 };
     S.tap = api.tier >= 1 ? (api.narrow ? { x: 510, y: 40, end: S.table - 10 } : { x: 520, y: 40, end: S.table - 8 }) : null;
     // hair strands from the scalp
     const r = A.rng(7);

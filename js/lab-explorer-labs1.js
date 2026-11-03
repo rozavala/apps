@@ -212,12 +212,14 @@ LXLabs.colors = (() => {
     // Light box
     const L = S.L;
     S.wall = { x: L.x + 16, y: L.y + 16, w: L.w - 32, h: L.h - 106 };
-    const sr = api.narrow ? 74 : 66;
+    const sr = api.narrow ? 74 : 58;
     const cx = S.wall.x + S.wall.w / 2, cy = S.wall.y + S.wall.h / 2;
-    const spread = Math.min(S.wall.w * 0.33, sr * 1.9);
+    // start apart, so mixing is something the kid does
+    const startPos = api.narrow
+      ? [[cx - sr * 1.95, cy + sr * 0.25], [cx, cy - sr * 0.45], [cx + sr * 1.95, cy + sr * 0.25]]
+      : [[cx - sr * 1.2, cy - sr * 1.2], [cx + sr * 1.2, cy - sr * 1.2], [cx, cy + sr * 1.25]];
     if (!S.spots) {
-      S.spots = LIGHTS.map((l, i) => ({ l, on: true, r: sr,
-        x: cx + (i - 1) * spread, y: cy + (i === 1 ? -sr * 0.55 : sr * 0.25) }));
+      S.spots = LIGHTS.map((l, i) => ({ l, on: true, r: sr, x: startPos[i][0], y: startPos[i][1] }));
     } else {
       S.spots.forEach(s => { s.r = sr; s.x = Math.max(S.wall.x + 10, Math.min(S.wall.x + S.wall.w - 10, s.x)); s.y = Math.max(S.wall.y + 10, Math.min(S.wall.y + S.wall.h - 10, s.y)); });
     }
@@ -1862,8 +1864,8 @@ LXLabs.magnets = (() => {
 
   // Field of point poles with a 3D (1/r²) falloff, plus a weak
   // uniform Earth field pointing to the top of the paper (north).
-  function field(x, y, P) {
-    let bx = 0, by = -0.0000028;
+  function field(x, y, P, noEarth) {
+    let bx = 0, by = noEarth ? 0 : -0.000007;
     for (const p of P) {
       const dx = x - p.x, dy = y - p.y, r2 = dx * dx + dy * dy + 30;
       const k = p.q / (r2 * Math.sqrt(r2));
@@ -1888,7 +1890,7 @@ LXLabs.magnets = (() => {
     while (list.length < n && guard++ < n * 10) {
       const x = pp.x + 6 + Math.random() * (pp.w - 12), y = pp.y + 6 + Math.random() * (pp.h - 12);
       if (underMagnet(x, y, 2)) continue;
-      const b = field(x, y, P), mag = Math.hypot(b[0], b[1]);
+      const b = field(x, y, P, true), mag = Math.hypot(b[0], b[1]);
       // filings are pulled in and pile up where the field is strong
       const keep = Math.min(1, 0.05 + mag * 2.4e4);
       if (Math.random() > keep) continue;
@@ -1900,7 +1902,7 @@ LXLabs.magnets = (() => {
         const a = Math.random() * Math.PI * 2, r = 10 + Math.pow(Math.random(), 1.6) * 60;
         const x = pl.x + Math.cos(a) * r, y = pl.y + Math.sin(a) * r;
         if (x < pp.x + 4 || x > pp.x + pp.w - 4 || y < pp.y + 4 || y > pp.y + pp.h - 4 || underMagnet(x, y, 1)) continue;
-        const b = field(x, y, P);
+        const b = field(x, y, P, true);
         list.push({ x, y, a0: Math.random() * Math.PI, a: 0, len: 2.4 + Math.random() * 3, s: Math.hypot(b[0], b[1]), k: 0.8 });
       }
     });
@@ -1930,7 +1932,7 @@ LXLabs.magnets = (() => {
     if (!S.filings) return;
     const P = allPoles();
     S.filings = S.filings.filter(f => !underMagnet(f.x, f.y, 1));
-    S.filings.forEach(f => { f.a0 = f.a; const b = field(f.x, f.y, P); f.s = Math.hypot(b[0], b[1]); });
+    S.filings.forEach(f => { f.a0 = f.a; const b = field(f.x, f.y, P, true); f.s = Math.hypot(b[0], b[1]); });
     S.settle = 1;
   }
 
@@ -2045,7 +2047,7 @@ LXLabs.magnets = (() => {
     let near = null;
     P.forEach(pl => { const dd = Math.hypot(c.x - pl.x, c.y - pl.y); if (dd < 130 && (!near || dd < near.d)) near = { d: dd, q: pl.q }; });
     const minD = Math.min.apply(null, S.mags.map(m => Math.hypot(c.x - m.x, c.y - m.y)));
-    const earth = minD > (api.narrow ? 270 : 240) && Math.abs(Math.sin(c.ang)) < 0.25 && Math.cos(c.ang) > 0.9;
+    const earth = minD > (api.narrow ? 250 : 220) && Math.abs(Math.sin(c.ang)) < 0.25 && Math.cos(c.ang) > 0.9;
     api.emit({ type: 'compass', near: near ? (near.q === 1 ? 'N' : 'S') : null, earth });
   }
 
@@ -2066,7 +2068,7 @@ LXLabs.magnets = (() => {
       if (S.filings) {
         const e = 1 - S.settle, ease = e * e * (3 - 2 * e);
         S.filings.forEach(f => {
-          if (f.tgt === undefined || S.settle > 0.98) { const b = field(f.x, f.y, P); f.tgt = Math.atan2(b[1], b[0]); }
+          if (f.tgt === undefined || S.settle > 0.98) { const b = field(f.x, f.y, P, true); f.tgt = Math.atan2(b[1], b[0]); }
           let d = f.tgt - f.a0;
           while (d > Math.PI / 2) d -= Math.PI;
           while (d < -Math.PI / 2) d += Math.PI;
