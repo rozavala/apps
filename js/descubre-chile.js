@@ -1237,6 +1237,8 @@ function initDragQuiz(){
       // auto-scroll the map view near its edges
       const vr=dragMV.view.getBoundingClientRect();
       if(e.clientX>vr.left&&e.clientX<vr.right){if(e.clientY<vr.top+40&&e.clientY>vr.top-30)dragMV.view.scrollTop-=14;else if(e.clientY>vr.bottom-40&&e.clientY<vr.bottom+30)dragMV.view.scrollTop+=14}
+      // and the page itself, so the top of the map can be reached from the tray
+      if(e.clientY<50)window.scrollBy(0,-14);else if(e.clientY>window.innerHeight-30)window.scrollBy(0,14);
     });
     const end=e=>{
       if(activeDragEl!==t)return;activeDragEl=null;
