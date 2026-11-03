@@ -176,7 +176,7 @@ var EuclidArt = (function() {
     var mx = (cx + px) / 2, my = (cy + py) / 2;
     var k = Math.max(1, Math.min(2.1, L / 150));       // heavier build for a big opening
     // the hand leans the compass a little in the direction it turns
-    var lean = o.lean == null ? 0.3 : o.lean;
+    var lean = o.lean == null ? 0.22 : o.lean;
     var tx = r > 0.5 ? -(py - cy) / r : 0, ty = r > 0.5 ? (px - cx) / r : 0;
     var hx = mx + tx * z * lean, hy = my + ty * z * lean - z * 0.66 - lift;
     var shx = mx + tx * z * lean + (z + lift) * 0.36, shy = my + ty * z * lean + (z + lift) * 0.17;

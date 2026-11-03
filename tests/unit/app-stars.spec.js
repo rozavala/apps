@@ -67,7 +67,11 @@ const CASES = [
     data: { cards: { '2026-spring': { found: ['loica', 'chincol', 'zorzal', 'jilguero', 'chinita', 'queltehue'] },
                      '2026-winter': { found: ['picaflor', 'jilguero', 'chuncho', 'queltehue', 'tiuque', 'zorzal', 'espino', 'boldo', 'condor'] } },
             quiz: { clues_birds: 3, tap_all: 1, shadow_bugs: 5 }, sightings: [], seen: ['pudu'] },
-    stars: 12, note: 'quiz stars cap at 3' }
+    stars: 12, note: 'quiz stars cap at 3' },
+  { id: 'euclid', prefix: 'zs_euclid_',
+    data: { v: 1, levels: { equilateral: { stars: 3, best: 4, at: '2026-11-03' }, midpoint: { stars: 2, best: 3, at: '2026-11-03' },
+            hexagon: { stars: 1, best: 12, at: '2026-11-03' } }, guided: false, last: 'hexagon' },
+    stars: 6 }
 ];
 
 test.describe('per-app star rules', () => {

@@ -982,9 +982,9 @@ var EuclidWorkshop = (function() {
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
     return [x0, y0, x1, y1];
   }
-  function fitView() {
+  function fitView(box) {
     if (!G || !W) return;
-    var b = levelBox();
+    var b = box || levelBox();
     var m = W < 500 ? 20 : 36, mr = m + 44;      // keep clear of the zoom buttons on the right
     V.z = Math.min((W - m - mr) / Math.max(b[2] - b[0], 1), (H - m * 2) / Math.max(b[3] - b[1], 1));
     V.z = Math.max(0.15, Math.min(V.z, 4));
@@ -1752,6 +1752,14 @@ var EuclidWorkshop = (function() {
     if (!G || !G.solved) return;
     finishAnim();
     G.replay = buildReplay();
+    // frame the player's own construction for the replay
+    var xs = [], ys = [];
+    G.sc.pts.forEach(function(p) { if (p.kind === 'given' || G.replay.needP[p.id]) { xs.push(p.x); ys.push(p.y); } });
+    G.replay.steps.forEach(function(st) {
+      if (st.obj && st.obj.type === 'circle') { xs.push(st.obj.cx - st.obj.r, st.obj.cx + st.obj.r); ys.push(st.obj.cy - st.obj.r, st.obj.cy + st.obj.r); }
+    });
+    G.sc.objs.forEach(function(o) { if (o.given && o.type === 'circle') { xs.push(o.cx - o.r, o.cx + o.r); ys.push(o.cy - o.r, o.cy + o.r); } });
+    if (xs.length) fitView([Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)]);
     var ol = document.getElementById('ew-steps');
     if (ol) {
       ol.innerHTML = G.replay.steps.map(function(s, i) {

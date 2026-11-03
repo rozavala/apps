@@ -373,6 +373,12 @@ var APP_STAR_CONFIGS = [
       for (c in (d.cards || {})) { f = ((d.cards[c] || {}).found || []).length; n += f >= 9 ? 3 : f >= 6 ? 2 : f >= 3 ? 1 : 0; }
       for (c in (d.quiz || {})) n += Math.max(0, Math.min(3, d.quiz[c] || 0));
       return n;
+    } },
+  // Euclid's Workshop stars each of its 18 constructions out of 3.
+  { id: 'euclid', prefix: 'zs_euclid_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
+      return n;
     } }
 ];
 

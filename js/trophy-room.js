@@ -35,7 +35,8 @@ var TrophyRoom = (function() {
     { id: 'negocio', name: 'Mi Negocio', emoji: '🥟', color: '#D9480F', threshold: 1 },
     { id: 'secretos', name: 'Mensajes Secretos', emoji: '🔐', color: '#B8862F', threshold: 1 },
     { id: 'clock', name: '¿Qué Hora Es?', emoji: '🕰️', color: '#C8952F', threshold: 1 },
-    { id: 'naturaleza', name: 'Explorador de Naturaleza', emoji: '🦅', color: '#4B6A33', threshold: 1 }
+    { id: 'naturaleza', name: 'Explorador de Naturaleza', emoji: '🦅', color: '#4B6A33', threshold: 1 },
+    { id: 'euclid', name: "Euclid's Workshop", emoji: '📐', color: '#B8862B', threshold: 1 }
   ];
 
   // Mirror of RANKS in auth.js so we can show the progression strip.
