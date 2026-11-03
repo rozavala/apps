@@ -575,6 +575,17 @@
     .card-civics  { --card-accent: #FBBF24; --card-glow: rgba(251, 191, 36, 0.30); --card-icon-bg: linear-gradient(135deg, #1E3A8A, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
     .card-invest  { --card-accent: #34D399; --card-glow: rgba(52, 211, 153, 0.30); --card-icon-bg: linear-gradient(135deg, #4338CA, #34D399); --card-tag-bg: rgba(52, 211, 153, 0.15); }
 
+    /* Learn-by-doing apps */
+    .card-circuit { --card-accent: #FBBF24; --card-glow: rgba(251, 191, 36, 0.30); --card-icon-bg: linear-gradient(135deg, #B45309, #FBBF24); --card-tag-bg: rgba(251, 191, 36, 0.15); }
+    .card-engineer { --card-accent: #F97316; --card-glow: rgba(249, 115, 22, 0.30); --card-icon-bg: linear-gradient(135deg, #9A3412, #F97316); --card-tag-bg: rgba(249, 115, 22, 0.15); }
+    .card-negocio { --card-accent: #F59E0B; --card-glow: rgba(245, 158, 11, 0.30); --card-icon-bg: linear-gradient(135deg, #B91C1C, #F59E0B); --card-tag-bg: rgba(245, 158, 11, 0.15); }
+    .card-euclid { --card-accent: #D6A35C; --card-glow: rgba(214, 163, 92, 0.30); --card-icon-bg: linear-gradient(135deg, #78350F, #D6A35C); --card-tag-bg: rgba(214, 163, 92, 0.15); }
+    .card-cocina { --card-accent: #FDBA74; --card-glow: rgba(253, 186, 116, 0.30); --card-icon-bg: linear-gradient(135deg, #C2410C, #FDBA74); --card-tag-bg: rgba(253, 186, 116, 0.15); }
+    .card-marinero { --card-accent: #38BDF8; --card-glow: rgba(56, 189, 248, 0.30); --card-icon-bg: linear-gradient(135deg, #1E3A8A, #38BDF8); --card-tag-bg: rgba(56, 189, 248, 0.15); }
+    .card-naturaleza { --card-accent: #84CC16; --card-glow: rgba(132, 204, 22, 0.30); --card-icon-bg: linear-gradient(135deg, #166534, #84CC16); --card-tag-bg: rgba(132, 204, 22, 0.15); }
+    .card-secretos { --card-accent: #A1A1AA; --card-glow: rgba(161, 161, 170, 0.30); --card-icon-bg: linear-gradient(135deg, #3F3F46, #A1A1AA); --card-tag-bg: rgba(161, 161, 170, 0.15); }
+    .card-clock { --card-accent: #E7B36A; --card-glow: rgba(231, 179, 106, 0.30); --card-icon-bg: linear-gradient(135deg, #7C2D12, #E7B36A); --card-tag-bg: rgba(231, 179, 106, 0.15); }
+
     /* ── Hub Calendar Widget (liturgical + Chilean) ── */
     #calendar-widget { animation: fadeUp 0.6s ease-out both; }
 

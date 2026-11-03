@@ -17,7 +17,17 @@ const MAJOR_APPS = [
   'world-atlas.html',
   'story-explorer.html',
   'quest-adventure.html',
-  'guess-quest.html'
+  'guess-quest.html',
+  // Learn-by-doing apps
+  'circuit-lab.html',
+  'little-engineer.html',
+  'mi-negocio.html',
+  'euclid-workshop.html',
+  'cocina-lab.html',
+  'marinero.html',
+  'naturaleza.html',
+  'mensajes-secretos.html',
+  'que-hora-es.html'
 ];
 
 test.describe('Major Apps Critical Path', () => {

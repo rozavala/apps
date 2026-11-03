@@ -323,7 +323,18 @@ var ProgressAdmin = (function() {
     { id: 'bmcheck',  label: 'Book & Movie Check', icon: '🔍', href: 'book-movie-check.html', prefix: 'zs_bmcheck_', mode: 'reset' },
     { id: 'worldcup', label: 'World Cup 2026',   icon: '🏆',  href: 'world-cup.html',        prefix: 'zs_worldcup_', mode: 'reset' },
     { id: 'sports',   label: 'Sports Arena',     icon: '🏓',  href: 'sports-arena.html',     prefix: 'zs_sports_',   mode: 'reset' },
-    { id: 'move',     label: 'Move Quest',       icon: '💪',  href: 'move-quest.html',       prefix: 'zs_move_',     mode: 'reset' }
+    { id: 'move',     label: 'Move Quest',       icon: '💪',  href: 'move-quest.html',       prefix: 'zs_move_',     mode: 'reset' },
+
+    // ── Learn-by-doing apps: reset only ───────────────────────────
+    { id: 'circuit',    label: 'Circuit Lab',       icon: '⚡',  href: 'circuit-lab.html',       prefix: 'zs_circuit_',    mode: 'reset' },
+    { id: 'engineer',   label: 'Little Engineer',   icon: '🌉',  href: 'little-engineer.html',   prefix: 'zs_engineer_',   mode: 'reset' },
+    { id: 'negocio',    label: 'Mi Negocio',        icon: '🥟',  href: 'mi-negocio.html',        prefix: 'zs_negocio_',    mode: 'reset' },
+    { id: 'euclid',     label: "Euclid's Workshop", icon: '📐',  href: 'euclid-workshop.html',   prefix: 'zs_euclid_',     mode: 'reset' },
+    { id: 'cocina',     label: 'Cocina Lab',        icon: '👩‍🍳', href: 'cocina-lab.html',        prefix: 'zs_cocina_',     mode: 'reset' },
+    { id: 'marinero',   label: 'Marinero',          icon: '🪢',  href: 'marinero.html',          prefix: 'zs_marinero_',   mode: 'reset' },
+    { id: 'naturaleza', label: 'Explorador de Naturaleza', icon: '🦅', href: 'naturaleza.html', prefix: 'zs_naturaleza_', mode: 'reset' },
+    { id: 'secretos',   label: 'Mensajes Secretos', icon: '🔐',  href: 'mensajes-secretos.html', prefix: 'zs_secretos_',   mode: 'reset' },
+    { id: 'clock',      label: '¿Qué Hora Es?',     icon: '🕰️',  href: 'que-hora-es.html',       prefix: 'zs_clock_',      mode: 'reset' }
   ];
 
   var _byId = {};
