@@ -168,9 +168,9 @@ var DCArt = (function () {
     s.push(ctxText([210, 1180], 'OCÉANO PACÍFICO', -90, 'dc-sea'));
     s.push(ctxText([668, 1650], 'OCÉANO', 0, 'dc-sea dc-sea-s'));
     s.push(ctxText([668, 1672], 'ATLÁNTICO', 0, 'dc-sea dc-sea-s'));
-    s.push(ctxText([tr[Math.floor(tr.length * .38)][0] - 14, tr[Math.floor(tr.length * .38)][1]], 'Fosa de Atacama', -90, 'dc-trench lod2'));
+    s.push(ctxText([tr[Math.floor(tr.length * .38)][0] - 26, tr[Math.floor(tr.length * .38)][1]], 'Fosa de Atacama', -90, 'dc-trench lod2'));
     s.push(ctxText(P(-29.4, -68.85), 'CORDILLERA DE LOS ANDES', -88, 'dc-andes'));
-    s.push(ctxText([300, tcY - 6], 'Trópico de Capricornio', 0, 'dc-tropic'));
+    s.push(ctxText([250, tcY - 6], 'Trópico de Capricornio', 0, 'dc-tropic'));
     G.graticule.forEach(function (g) { if (g.lat) s.push('<text class="dc-latlbl" x="8" y="' + f1(yOf(g.lat) - 4) + '">' + (-g.lat) + '°S</text>'); });
     var em = P(-52.75, -70.2);
     s.push(ctxText(em, 'Estrecho de Magallanes', -12, 'dc-strait lod2'));
@@ -217,7 +217,7 @@ var DCArt = (function () {
   function insets(p) {
     var s = [];
     // locator
-    s.push('<g class="dc-inset dc-locator" transform="translate(16 40)" pointer-events="none">');
+    s.push('<g class="dc-inset dc-locator" transform="translate(44 40)" pointer-events="none">');
     s.push('<rect width="168" height="232" rx="14" fill="#fffdf7" stroke="#0f3a5a" stroke-opacity=".3" filter="url(#' + p + 'shadow)"/>');
     s.push('<rect x="8" y="8" width="152" height="196" rx="9" fill="#cfe7f2"/>');
     s.push('<g transform="translate(10 10) scale(1.38)">');
@@ -229,8 +229,8 @@ var DCArt = (function () {
     s.push('</g>');
 
     // Rapa Nui (box drawn at 5 units per km)
-    var rnx = 16, rny = 520, sc = 5.2;
-    s.push('<g class="dc-inset dc-island" data-island="RN" transform="translate(' + rnx + ' ' + rny + ')" role="button" aria-label="Rapa Nui">');
+    var rnx = 44, rny = 520, sc = 5.2;
+    s.push('<g class="dc-inset dc-island" data-island="RN" transform="translate(' + rnx + ' ' + rny + ')">');
     s.push('<rect width="176" height="150" rx="14" fill="#fffdf7" stroke="#0f3a5a" stroke-opacity=".3" filter="url(#' + p + 'shadow)"/>');
     s.push('<rect x="8" y="26" width="160" height="116" rx="9" fill="url(#' + p + 'ocean)"/>');
     s.push('<text x="14" y="19" class="dc-inset-t dc-inset-tl">Rapa Nui</text><text x="164" y="19" text-anchor="end" class="dc-inset-s">3.700 km →</text>');
@@ -243,8 +243,8 @@ var DCArt = (function () {
     s.push('</g>');
 
     // Juan Fernández: both main islands enlarged (3.4 units per km), 180 km apart in reality
-    var jfx = 16, jfy = 870, js = 3.4, cs = G.jf.cs, cc = G.jf.cc;
-    s.push('<g class="dc-inset dc-island" data-island="JF" transform="translate(' + jfx + ' ' + jfy + ')" role="button" aria-label="Archipiélago Juan Fernández">');
+    var jfx = 44, jfy = 870, js = 3.4, cs = G.jf.cs, cc = G.jf.cc;
+    s.push('<g class="dc-inset dc-island" data-island="JF" transform="translate(' + jfx + ' ' + jfy + ')">');
     s.push('<rect width="200" height="132" rx="14" fill="#fffdf7" stroke="#0f3a5a" stroke-opacity=".3" filter="url(#' + p + 'shadow)"/>');
     s.push('<rect x="8" y="26" width="184" height="98" rx="9" fill="url(#' + p + 'ocean)"/>');
     s.push('<text x="14" y="19" class="dc-inset-t dc-inset-tl">Juan Fernández</text><text x="186" y="19" text-anchor="end" class="dc-inset-s">670 km →</text>');
@@ -337,7 +337,7 @@ var DCArt = (function () {
       return isNaN(e) ? null : e - .12 * K;
     }
     var EF = 2.2 * K; // how far east of the crest we paint
-    for (var y = 0; y < ch; y++) {
+    function heightRow(y) {
       var uy = y / S, lat = latOf(uy);
       var wx0 = WEST[Math.min(H, Math.round(uy))], ex0 = EAST[Math.min(H, Math.round(uy))];
       var cx = crestX(uy, lat);
@@ -362,11 +362,12 @@ var DCArt = (function () {
         var ed = Math.min(x - x0, x1 - x) / (12 * S); if (ed < 1) h *= ed;
         hgt[y * cw + x] = h;
       }
-    }
+        }
     var img = ctx.createImageData(cw, ch), px = img.data;
     var Lx = -.62, Ly = -.62, Lz = .48, Ll = Math.sqrt(Lx * Lx + Ly * Ly + Lz * Lz); Lx /= Ll; Ly /= Ll; Lz /= Ll;
     var ZF = 26 * S;
-    for (y = 1; y < ch - 1; y++) {
+    function shadeRow(y) {
+      var x;
       var lat2 = latOf(y / S), snow = interp(T_SNOW, lat2);
       for (x = Math.max(1, span[y * 2]); x <= Math.min(cw - 2, span[y * 2 + 1]); x++) {
         var i0 = y * cw + x, hh = hgt[i0];
@@ -400,10 +401,14 @@ var DCArt = (function () {
         px[j + 2] = (sb * sa2 + tb * ta * (1 - sa2)) / oa;
         px[j + 3] = oa * 255;
       }
-    }
-    ctx.putImageData(img, 0, 0);
-    if (cv.toBlob) cv.toBlob(function (b) { done(b ? URL.createObjectURL(b) : cv.toDataURL()); }, 'image/png');
-    else done(cv.toDataURL());
+        }
+    // work in slices so the page stays responsive while the relief is painted
+    function slices(from, to, fn, next) { var y = from; (function step() { var end = Math.min(to, y + 140); for (; y < end; y++) fn(y); if (y < to) setTimeout(step, 0); else next(); })(); }
+    slices(0, ch, heightRow, function () { slices(1, ch - 1, shadeRow, function () {
+        ctx.putImageData(img, 0, 0);
+        if (cv.toBlob) cv.toBlob(function (b) { done(b ? URL.createObjectURL(b) : cv.toDataURL()); }, 'image/png');
+        else done(cv.toDataURL());
+    }); });
   }
 
   function relief(svg) {

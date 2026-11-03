@@ -1115,7 +1115,7 @@
         var totalDC = 0;
         for (var dk in dc) { if (dk !== 'vr' && dk !== 'memBest' && dc[dk]) totalDC += (dc[dk].bestStars || 0); }
         if (totalDC > 0) {
-          var pct = (totalDC / 30) * 100;
+          var pct = (totalDC / 57) * 100;   // 19 starred activities × 3 since the map upgrade
           appRows += '<div class="dash-app-row">' +
             '<span class="dash-app-icon">🇨🇱</span>' +
             '<span class="dash-app-name">Descubre Chile</span>' +
