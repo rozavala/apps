@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/story-explorer.css?v=2">
+  <link rel="stylesheet" href="css/story-explorer.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -19,51 +19,64 @@
 
 </head>
 <body>
-  <div class="atmo" style="width:400px;height:400px;background:rgba(139,92,246,0.08);top:-100px;left:-100px;"></div>
-  <div class="atmo" style="width:350px;height:350px;background:rgba(236,72,153,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
-
   <div class="app">
     <!-- SCREEN: LIBRARY -->
     <div class="screen active" id="screen-library">
-      <div class="story-header">
-        <span class="icon">📚</span>
-        <h1>Story Explorer</h1>
-        <p>Adventure tales and vocabulary quests!</p>
-        <div class="lang-toggle" onclick="StoryExplorer.toggleLanguage()">
-          <span id="lang-label">EN / ES</span> 🌐
+      <header class="story-header">
+        <div class="se-hero-art" id="se-hero-art" aria-hidden="true"></div>
+        <div class="se-hero-text">
+          <h1>Story Explorer</h1>
+          <p id="se-sub">Illustrated adventure tales — read, listen and collect new words!</p>
+          <div class="se-stats" id="se-lib-stats"></div>
         </div>
-      </div>
-      <div class="tier-select" id="tier-select">
-        <!-- Tier tabs -->
-      </div>
-      <div class="story-grid" id="story-grid">
-        <!-- Populated by JS -->
-      </div>
+        <div class="se-hero-actions">
+          <button type="button" class="se-lang lang-toggle" data-act="lang" aria-label="Cambiar a español"><span class="on">EN</span><span>ES</span></button>
+          <button type="button" class="se-nb-btn" data-act="notebook"><span aria-hidden="true">📒</span> <span data-i18n="Word Collector|Colección de palabras">Word Collector</span> <b class="se-nb-count">0</b></button>
+        </div>
+      </header>
+      <div id="se-continue"></div>
+      <div class="tier-select" id="tier-select" role="tablist" aria-label="Reading level"></div>
+      <div class="story-grid" id="story-grid"></div>
     </div>
 
     <!-- SCREEN: READ -->
     <div class="screen" id="screen-read">
       <div class="exp-header">
-        <button class="back-btn" aria-label="Go back" onclick="StoryExplorer.backToLibrary()">←</button>
-        <div class="exp-title" id="story-title">Story Title</div>
+        <button type="button" class="back-btn" data-act="back" aria-label="Back to the library">←</button>
+        <div class="se-bar-mid">
+          <div class="exp-title" id="story-title">Story Title</div>
+          <div class="se-dots" id="se-dots" aria-hidden="true"></div>
+        </div>
+        <button type="button" class="se-lang se-lang-sm" data-act="lang" aria-label="Cambiar a español"><span class="on">EN</span><span>ES</span></button>
         <div class="exp-stars" id="story-stars">⭐ 0</div>
       </div>
-      <div class="story-content">
-        <div class="page-image" id="page-icon">📖</div>
-        <div class="page-text" id="page-text">
-          <!-- Text with highlighted vocab -->
+      <div class="se-stage" id="se-stage">
+        <div class="se-book" id="se-book">
+          <div class="se-sheet se-left" id="se-left"></div>
+          <div class="se-sheet se-right" id="se-right"></div>
         </div>
-        <div class="page-controls">
-          <button class="nav-btn" onclick="StoryExplorer.prevPage()">Prev</button>
+      </div>
+      <div class="page-controls">
+        <button type="button" class="nav-btn se-prev" id="se-prev" data-act="prev" aria-label="Previous page"><b aria-hidden="true">‹</b></button>
+        <div class="se-mid-ctl">
+          <button type="button" class="audio-btn" id="se-read" data-act="read" aria-pressed="false"><span aria-hidden="true">🔊</span> Read to me</button>
           <div class="page-indicator" id="page-indicator">Page 1 / 4</div>
-          <button class="nav-btn" onclick="StoryExplorer.nextPage()">Next</button>
         </div>
-        <button class="audio-btn" onclick="StoryExplorer.readAloud()">🔊 Read Aloud</button>
+        <button type="button" class="nav-btn se-next" id="se-next" data-act="next" aria-label="Next page"><b aria-hidden="true">›</b></button>
+      </div>
+      <div class="se-auto">
+        <input type="checkbox" id="se-auto">
+        <label for="se-auto" data-i18n="Read on and turn the pages for me|Seguir leyendo y pasar las páginas solo">Read on and turn the pages for me</label>
       </div>
     </div>
 
-    <!-- SCREEN: QUIZ -->
+    <!-- SCREEN: CHALLENGES -->
     <div class="screen" id="screen-quiz">
+      <div class="exp-header">
+        <button type="button" class="back-btn" data-act="back" aria-label="Back to the library">←</button>
+        <div class="se-bar-mid"><div class="exp-title" data-i18n="Story challenges|Desafíos de la historia">Story challenges</div></div>
+        <button type="button" class="se-lang se-lang-sm" data-act="lang" aria-label="Cambiar a español"><span class="on">EN</span><span>ES</span></button>
+      </div>
       <div class="quiz-wrap" id="quiz-wrap"></div>
     </div>
 
@@ -71,18 +84,32 @@
     <div class="screen" id="screen-results">
       <div class="results-wrap" id="results-wrap"></div>
     </div>
-  </div>
 
-  <!-- Vocab Popup -->
-  <div id="vocab-overlay" class="dash-overlay" onclick="if(event.target===this) this.classList.remove('active')">
-    <div class="dash-panel" style="max-width:320px; text-align:center;">
-      <div id="vocab-word" style="font-family:var(--font-display); font-size:1.8rem; font-weight:800; color:var(--purple); margin-bottom:8px;">Word</div>
-      <div id="vocab-def" style="font-size:1rem; font-weight:600; line-height:1.4; color:var(--text-primary); margin-bottom:20px;">Definition</div>
-      <button class="action-btn btn-primary" onclick="document.getElementById('vocab-overlay').classList.remove('active')">Got it! 🧠</button>
+    <!-- SCREEN: WORD COLLECTOR -->
+    <div class="screen" id="screen-notebook">
+      <div class="exp-header">
+        <button type="button" class="back-btn" data-act="library" aria-label="Back to the library">←</button>
+        <div class="se-bar-mid"><div class="exp-title"><span aria-hidden="true">📒</span> <span data-i18n="Word Collector|Colección de palabras">Word Collector</span></div></div>
+        <button type="button" class="se-lang se-lang-sm" data-act="lang" aria-label="Cambiar a español"><span class="on">EN</span><span>ES</span></button>
+      </div>
+      <div class="se-notebook" id="se-notebook"></div>
     </div>
   </div>
 
-  <div class="feedback" id="feedback"><span class="feedback-emoji" id="feedbackEmoji"></span></div>
+  <!-- Vocabulary card -->
+  <div id="vocab-overlay" class="se-modal" role="dialog" aria-modal="true" aria-labelledby="vocab-word" aria-hidden="true" onclick="if(event.target===this) this.querySelector('[data-act=vclose]').click()">
+    <div class="se-modal-card">
+      <div class="se-modal-tab" aria-hidden="true">Aa</div>
+      <div id="vocab-word" class="se-v-word">Word</div>
+      <div id="vocab-other" class="se-v-other"></div>
+      <div id="vocab-def" class="se-v-def">Definition</div>
+      <div id="vocab-new" class="se-v-new" hidden><span aria-hidden="true">📒</span> <span data-i18n="New word for your Word Collector!|¡Palabra nueva para tu colección!">New word for your Word Collector!</span></div>
+      <div class="se-v-btns">
+        <button type="button" class="action-btn btn-secondary" data-act="vsay"><span aria-hidden="true">🔊</span> <span data-i18n="Hear it|Escuchar">Hear it</span></button>
+        <button type="button" class="action-btn btn-primary" data-act="vclose"><span data-i18n="Got it!|¡Entendido!">Got it!</span></button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/auth.js?v=4"></script>
   <script src="js/off-hours.js?v=1"></script>
@@ -97,7 +124,9 @@
   <script src="js/learning-checks.js?v=5"></script>
   <script src="js/tts.js"></script>
   <script src="js/dialog.js?v=2"></script>
-  <script src="js/story-explorer.js?v=4"></script>
+  <script src="js/story-explorer-art.js?v=1"></script>
+  <script src="js/story-explorer-data.js?v=1"></script>
+  <script src="js/story-explorer.js?v=5"></script>
   <script src="js/pwa.js"></script>
 
 </body>

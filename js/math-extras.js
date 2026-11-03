@@ -36,7 +36,18 @@ var MathExtras = (function() {
     if (target) target.classList.add('active');
   }
 
-  function goHome() { _showScreen('screen-select'); _refreshBestBadges(); }
+  function goHome() {
+    if (typeof window.goHome === 'function') window.goHome();
+    else _showScreen('screen-select');
+    _refreshBestBadges();
+  }
+
+  // Names, avatars and colours come from profiles: escape before innerHTML.
+  function _e(s) {
+    if (typeof escHtml === 'function') return escHtml(s);
+    return String(s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+  function _col(c) { return (typeof c === 'string' && /^#[0-9a-f]{3,8}$/i.test(c)) ? c : '#A78BFA'; }
 
   function _refreshBestBadges() {
     // Refresh sprint best + words best tags on the select screen.
@@ -118,9 +129,9 @@ var MathExtras = (function() {
           '<h2>⚡ Sprint de Tablas</h2>' +
           '<p>Responde tantas como puedas en ' + SPRINT_SECONDS + ' segundos.</p>' +
         '</div>' +
-        '<div class="sprint-mixed" onclick="MathExtras.Sprint.start(0)" style="cursor:pointer;" role="button">' +
-          '<span>🎲</span> Mixed tables (2–12)' +
-        '</div>' +
+        '<button type="button" class="sprint-mixed" onclick="MathExtras.Sprint.start(0)">' +
+          'Mixed tables (2–12)' +
+        '</button>' +
         '<div class="sprint-picker">' + cards + '</div>';
     }
 
@@ -168,6 +179,7 @@ var MathExtras = (function() {
         '</div>' +
         '<div class="sprint-question">' +
           '<div class="sprint-q-text">' + q.a + ' × ' + q.b + ' = ?</div>' +
+          '<label for="sprint-input" class="sr-only">Your answer</label>' +
           '<input type="number" id="sprint-input" class="sprint-input" autocomplete="off" inputmode="numeric" />' +
           '<button type="button" class="sprint-submit" onclick="MathExtras.Sprint._submit()">Enviar ✓</button>' +
         '</div>' +
@@ -191,7 +203,7 @@ var MathExtras = (function() {
       if (isNaN(val)) return;
       if (val === state.current.answer) {
         state.correct++;
-        if (typeof SFX !== 'undefined' && SFX.tick) SFX.tick();
+        if (typeof SFX !== 'undefined' && SFX.click) SFX.click();
       } else {
         state.wrong++;
         if (typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
@@ -372,10 +384,10 @@ var MathExtras = (function() {
       var words = data.words || {};
 
       var tiers = [
-        { id: 'cadet',     emoji: '🛸', label: 'Cadet',     ages: '4–6' },
-        { id: 'explorer',  emoji: '🚀', label: 'Explorer',  ages: '6–8' },
-        { id: 'pilot',     emoji: '🌟', label: 'Pilot',     ages: '8–10' },
-        { id: 'commander', emoji: '👨‍🚀', label: 'Commander', ages: '10+' }
+        { id: 'cadet',     planet: 'moon',    label: 'Cadet',     ages: '4–6' },
+        { id: 'explorer',  planet: 'mars',    label: 'Explorer',  ages: '6–8' },
+        { id: 'pilot',     planet: 'jupiter', label: 'Pilot',     ages: '8–10' },
+        { id: 'commander', planet: 'saturn',  label: 'Commander', ages: '10+' }
       ];
 
       wrap.innerHTML =
@@ -383,8 +395,8 @@ var MathExtras = (function() {
           '<button class="back-btn" onclick="MathExtras._goHome()" aria-label="Back">←</button>' +
           '<h2>🧠 Problemas con palabras</h2>' +
           '<p>Cinco problemas por nivel. Lee con atención.</p>' +
-          '<div class="words-lang" onclick="MathExtras.Words.toggleLang()"><span id="words-lang-label">' +
-          (lang === 'es' ? 'ES / EN' : 'EN / ES') + '</span> 🌐</div>' +
+          '<button type="button" class="words-lang" onclick="MathExtras.Words.toggleLang()" aria-label="Switch language"><span id="words-lang-label">' +
+          (lang === 'es' ? 'ES / EN' : 'EN / ES') + '</span></button>' +
         '</div>' +
         '<div class="words-tiers">' +
           tiers.map(function(t) {
@@ -393,13 +405,19 @@ var MathExtras = (function() {
               ? '⭐'.repeat(Math.min(3, rec.bestStars / 5 >> 0)) + ' · ' + rec.bestStars + ' total'
               : '—';
             return '<button class="words-tier" onclick="MathExtras.Words.start(\'' + t.id + '\')">' +
-              '<div class="words-tier-icon">' + t.emoji + '</div>' +
+              '<canvas class="words-tier-icon" data-planet="' + t.planet + '" aria-hidden="true"></canvas>' +
               '<div class="words-tier-name">' + t.label + '</div>' +
               '<div class="words-tier-ages">' + t.ages + '</div>' +
               '<div class="words-tier-best">' + starLine + '</div>' +
             '</button>';
           }).join('') +
         '</div>';
+      if (typeof MGArt !== 'undefined') {
+        requestAnimationFrame(function() {
+          var cs = wrap.querySelectorAll('canvas.words-tier-icon');
+          for (var i = 0; i < cs.length; i++) MGArt.thumb(cs[i], cs[i].getAttribute('data-planet'));
+        });
+      }
     }
 
     function toggleLang() {
@@ -575,14 +593,14 @@ var MathExtras = (function() {
       var data = _load();
       var lastDuel = (data.duel && data.duel.last) || null;
 
-      function tile(p, side) {
+      function tile(p, side, idx) {
         var sel = (side === 'A' ? pickedA : pickedB);
         var on = sel && sel.name === p.name;
         return '<button type="button" class="duel-tile ' + (on ? 'active' : '') + '" ' +
-                 'style="--accent:' + (p.color || '#A78BFA') + '" ' +
-                 'onclick="MathExtras.Duel._pick(\'' + side + '\', \'' + p.name.replace(/'/g, "\\'") + '\')">' +
-            '<span class="duel-avatar">' + (p.avatar || '🛸') + '</span>' +
-            '<span class="duel-pname">' + p.name + '</span>' +
+                 'style="--accent:' + _col(p.color) + '" aria-pressed="' + (on ? 'true' : 'false') + '" ' +
+                 'onclick="MathExtras.Duel._pickIdx(\'' + side + '\', ' + idx + ')">' +
+            '<span class="duel-avatar">' + _e(p.avatar || '🛸') + '</span>' +
+            '<span class="duel-pname">' + _e(p.name) + '</span>' +
           '</button>';
       }
 
@@ -595,7 +613,7 @@ var MathExtras = (function() {
 
       var canStart = pickedA && pickedB && pickedA.name !== pickedB.name;
       var lastLine = lastDuel
-        ? '<div class="duel-last">Last duel: ' + lastDuel.a + ' ' + lastDuel.scoreA + ' — ' + lastDuel.scoreB + ' ' + lastDuel.b + ' (×' + (lastDuel.table || 'Mix') + ')</div>'
+        ? '<div class="duel-last">Last duel: ' + _e(lastDuel.a) + ' ' + _e(lastDuel.scoreA) + ' — ' + _e(lastDuel.scoreB) + ' ' + _e(lastDuel.b) + ' (×' + _e(lastDuel.table || 'Mix') + ')</div>'
         : '';
 
       wrap.innerHTML =
@@ -606,11 +624,11 @@ var MathExtras = (function() {
         '</div>' +
         '<div class="duel-picker">' +
           '<div class="duel-side"><div class="duel-side-label">Player 1</div>' +
-            '<div class="duel-tiles">' + profiles.map(function(p) { return tile(p, 'A'); }).join('') + '</div>' +
+            '<div class="duel-tiles">' + profiles.map(function(p, i) { return tile(p, 'A', i); }).join('') + '</div>' +
           '</div>' +
           '<div class="duel-vs">VS</div>' +
           '<div class="duel-side"><div class="duel-side-label">Player 2</div>' +
-            '<div class="duel-tiles">' + profiles.map(function(p) { return tile(p, 'B'); }).join('') + '</div>' +
+            '<div class="duel-tiles">' + profiles.map(function(p, i) { return tile(p, 'B', i); }).join('') + '</div>' +
           '</div>' +
         '</div>' +
         '<div class="duel-tables">' +
@@ -624,6 +642,11 @@ var MathExtras = (function() {
             'Start Duel ⚔️' +
           '</button>' +
         '</div>';
+    }
+
+    function _pickIdx(side, idx) {
+      var p = _profileList()[idx];
+      if (p) _pick(side, p.name);
     }
 
     function _pick(side, name) {
@@ -672,8 +695,8 @@ var MathExtras = (function() {
       var label = state.current === 'A' ? 'goes first' : 'is up next';
       wrap.innerHTML =
         '<div class="duel-handoff">' +
-          '<div class="duel-handoff-emoji">' + (who.avatar || '🛸') + '</div>' +
-          '<div class="duel-handoff-name" style="--accent:' + (who.color || '#A78BFA') + '">' + who.name + '</div>' +
+          '<div class="duel-handoff-emoji">' + _e(who.avatar || '🛸') + '</div>' +
+          '<div class="duel-handoff-name" style="--accent:' + _col(who.color) + '">' + _e(who.name) + '</div>' +
           '<div class="duel-handoff-sub">' + label + ' — ' + DUEL_SECONDS + ' seconds, same problems for both.</div>' +
           '<button class="action-btn btn-primary" onclick="MathExtras.Duel._startTurn()">I\'m ready ▶</button>' +
         '</div>';
@@ -709,11 +732,12 @@ var MathExtras = (function() {
       wrap.innerHTML =
         '<div class="sprint-header">' +
           '<div class="sprint-chip" id="duel-time">' + DUEL_SECONDS + 's</div>' +
-          '<h2 style="color:' + (who.color || '#A78BFA') + ';">' + (who.avatar || '🛸') + ' ' + who.name + '</h2>' +
+          '<h2 style="color:' + _col(who.color) + ';">' + _e(who.avatar || '🛸') + ' ' + _e(who.name) + '</h2>' +
           '<div class="sprint-chip correct">✓ ' + score + '</div>' +
         '</div>' +
         '<div class="sprint-question">' +
           '<div class="sprint-q-text">' + q.a + ' × ' + q.b + ' = ?</div>' +
+          '<label for="duel-input" class="sr-only">Your answer</label>' +
           '<input type="number" id="duel-input" class="sprint-input" autocomplete="off" inputmode="numeric" />' +
           '<button type="button" class="sprint-submit" onclick="MathExtras.Duel._submit()">Submit ✓</button>' +
         '</div>' +
@@ -739,7 +763,7 @@ var MathExtras = (function() {
       } else {
         if (correct) state.scoreB++; else state.wrongB++;
       }
-      if (correct && typeof SFX !== 'undefined' && SFX.tick) SFX.tick();
+      if (correct && typeof SFX !== 'undefined' && SFX.click) SFX.click();
       else if (!correct && typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
       state.idx++;
       if (state.idx >= state.problems.length) { _endTurn(); return; }
@@ -786,7 +810,7 @@ var MathExtras = (function() {
 
       var wrap = document.getElementById('duel-wrap');
       var winLine = winner
-        ? '<div class="duel-winner-line">🏆 ' + (winner.avatar || '🛸') + ' ' + winner.name + ' wins!</div>'
+        ? '<div class="duel-winner-line">🏆 ' + _e(winner.avatar || '🛸') + ' ' + _e(winner.name) + ' wins!</div>'
         : '<div class="duel-winner-line">🤝 It\'s a tie!</div>';
 
       wrap.innerHTML =
@@ -796,15 +820,15 @@ var MathExtras = (function() {
         '</div>' +
         winLine +
         '<div class="duel-scoreboard">' +
-          '<div class="duel-score-card" style="--accent:' + (state.playerA.color || '#A78BFA') + '">' +
-            '<div class="duel-score-emoji">' + (state.playerA.avatar || '🛸') + '</div>' +
-            '<div class="duel-score-name">' + state.playerA.name + '</div>' +
+          '<div class="duel-score-card" style="--accent:' + _col(state.playerA.color) + '">' +
+            '<div class="duel-score-emoji">' + _e(state.playerA.avatar || '🛸') + '</div>' +
+            '<div class="duel-score-name">' + _e(state.playerA.name) + '</div>' +
             '<div class="duel-score-num">' + state.scoreA + '</div>' +
             '<div class="duel-score-sub">' + state.wrongA + ' wrong</div>' +
           '</div>' +
-          '<div class="duel-score-card" style="--accent:' + (state.playerB.color || '#A78BFA') + '">' +
-            '<div class="duel-score-emoji">' + (state.playerB.avatar || '🛸') + '</div>' +
-            '<div class="duel-score-name">' + state.playerB.name + '</div>' +
+          '<div class="duel-score-card" style="--accent:' + _col(state.playerB.color) + '">' +
+            '<div class="duel-score-emoji">' + _e(state.playerB.avatar || '🛸') + '</div>' +
+            '<div class="duel-score-name">' + _e(state.playerB.name) + '</div>' +
             '<div class="duel-score-num">' + state.scoreB + '</div>' +
             '<div class="duel-score-sub">' + state.wrongB + ' wrong</div>' +
           '</div>' +
@@ -821,6 +845,7 @@ var MathExtras = (function() {
     return {
       open: open,
       _pick: _pick,
+      _pickIdx: _pickIdx,
       _setTable: _setTable,
       _begin: _begin,
       _startTurn: _startTurn,

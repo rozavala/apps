@@ -1,6 +1,9 @@
 /* ================================================================
    WORLD EXPLORER — world-explorer.js
-   Interactive geography with SVG maps and travel quests.
+   Interactive geography: Equal Earth world map, continents, country
+   cards, quizzes and map challenges (tap the country, find the
+   landmark, fly across the ocean). Map + flags: js/world-map-data.js;
+   landmark art: js/world-explorer-art.js.
    Storage key: zs_world_[username] via getUserAppKey('zs_world_')
    ================================================================ */
 
@@ -722,11 +725,133 @@ const WorldExplorer = (() => {
     ] }
   ];
 
+  // ── Geography for the map (lon, lat). Capitals and landmark sites. ──
+  // iso = ISO 3166-1 alpha-3, the key used by js/world-map-data.js.
+  const GEO = {
+    chile:          { iso: 'chl', cap: [-70.67, -33.45], lm: [-109.35, -27.12] },
+    argentina:      { iso: 'arg', cap: [-58.38, -34.60], lm: [-54.44, -25.69] },
+    brazil:         { iso: 'bra', cap: [-47.88, -15.79], lm: [-43.21, -22.95] },
+    peru:           { iso: 'per', cap: [-77.04, -12.05], lm: [-72.55, -13.16] },
+    colombia:       { iso: 'col', cap: [-74.07, 4.71],   lm: [-75.55, 10.42] },
+    venezuela:      { iso: 'ven', cap: [-66.90, 10.48],  lm: [-62.54, 5.97] },
+    ecuador:        { iso: 'ecu', cap: [-78.47, -0.18],  lm: [-90.40, -0.65] },
+    bolivia:        { iso: 'bol', cap: [-65.26, -19.04], lm: [-67.49, -20.13] },
+    paraguay:       { iso: 'pry', cap: [-57.58, -25.26], lm: [-54.59, -25.41] },
+    uruguay:        { iso: 'ury', cap: [-56.16, -34.90], lm: [-57.84, -34.47] },
+    guyana:         { iso: 'guy', cap: [-58.16, 6.80],   lm: [-59.48, 5.18] },
+    suriname:       { iso: 'sur', cap: [-55.20, 5.85],   lm: [-56.50, 4.00] },
+    united_states:  { iso: 'usa', cap: [-77.04, 38.91],  lm: [-74.04, 40.69] },
+    canada:         { iso: 'can', cap: [-75.70, 45.42],  lm: [-79.39, 43.64] },
+    mexico:         { iso: 'mex', cap: [-99.13, 19.43],  lm: [-88.57, 20.68] },
+    italy:          { iso: 'ita', cap: [12.50, 41.90],   lm: [12.49, 41.89] },
+    spain:          { iso: 'esp', cap: [-3.70, 40.42],   lm: [2.17, 41.40] },
+    france:         { iso: 'fra', cap: [2.35, 48.86],    lm: [2.29, 48.86] },
+    germany:        { iso: 'deu', cap: [13.40, 52.52],   lm: [13.38, 52.52] },
+    united_kingdom: { iso: 'gbr', cap: [-0.13, 51.51],   lm: [-0.12, 51.50] },
+    greece:         { iso: 'grc', cap: [23.73, 37.98],   lm: [23.73, 37.97] },
+    portugal:       { iso: 'prt', cap: [-9.14, 38.72],   lm: [-9.22, 38.69] },
+    kenya:          { iso: 'ken', cap: [36.82, -1.29],   lm: [37.31, -0.15] },
+    egypt:          { iso: 'egy', cap: [31.24, 30.04],   lm: [31.13, 29.98] },
+    south_africa:   { iso: 'zaf', cap: [28.19, -25.75],  lm: [18.40, -33.96] },
+    morocco:        { iso: 'mar', cap: [-6.84, 34.02],   lm: [-7.99, 31.62] },
+    nigeria:        { iso: 'nga', cap: [7.49, 9.06],     lm: [7.23, 9.13] },
+    japan:          { iso: 'jpn', cap: [139.69, 35.69],  lm: [138.73, 35.36] },
+    china:          { iso: 'chn', cap: [116.40, 39.90],  lm: [116.02, 40.36] },
+    india:          { iso: 'ind', cap: [77.21, 28.61],   lm: [78.04, 27.18] },
+    south_korea:    { iso: 'kor', cap: [126.98, 37.57],  lm: [126.98, 37.58] },
+    thailand:       { iso: 'tha', cap: [100.50, 13.76],  lm: [100.49, 13.75] },
+    singapore:      { iso: 'sgp', cap: [103.82, 1.35],   lm: [103.86, 1.28] },
+    indonesia:      { iso: 'idn', cap: [106.85, -6.21],  lm: [110.20, -7.61] },
+    taiwan:         { iso: 'twn', cap: [121.56, 25.03],  lm: [121.56, 25.03] },
+    australia:      { iso: 'aus', cap: [149.13, -35.28], lm: [151.21, -33.86] },
+    new_zealand:    { iso: 'nzl', cap: [174.78, -41.29], lm: [167.93, -44.67] }
+  };
+
+  // Map view of each continent [lon0, lat0, lon1, lat1] and its map code.
+  const VIEW = {
+    south_america: { box: [-111, -57, -32, 14], code: 'sa' },
+    north_america: { box: [-168, 8, -52, 72],   code: 'na' },
+    europe:        { box: [-24, 34, 42, 70],    code: 'eu' },
+    africa:        { box: [-19, -36, 53, 38],   code: 'af' },
+    asia:          { box: [26, -11, 150, 55],   code: 'as' },
+    oceania:       { box: [111, -48, 179, -9],  code: 'oc' }
+  };
+  const CODE2CONT = { sa: 'south_america', na: 'north_america', eu: 'europe', af: 'africa', as: 'asia', oc: 'oceania' };
+
+  // Land tints per continent: [land, taught country, visited country]
+  const TINT = {
+    sa: ['#cfe8c3', '#9dd48b', '#2f9e57'],
+    na: ['#ddd3f6', '#b9a6ef', '#7357d8'],
+    eu: ['#cfdff6', '#9fc1ef', '#3b78d8'],
+    af: ['#f6dcc3', '#f0bb8a', '#d4742c'],
+    as: ['#f6e7b9', '#efd27a', '#c99412'],
+    oc: ['#f5d2e3', '#eda5c8', '#cf4f8c'],
+    an: ['#f3f7fa', '#f3f7fa', '#f3f7fa']
+  };
+
+  function mix(a, b, t2) {
+    const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+    const ch2 = sh => Math.round(((pa >> sh) & 255) * (1 - t2) + ((pb >> sh) & 255) * t2);
+    return '#' + ((1 << 24) + (ch2(16) << 16) + (ch2(8) << 8) + ch2(0)).toString(16).slice(1);
+  }
+  function pale(cc) { return mix((TINT[cc] || TINT.an)[0], '#f3f2ec', 0.55); }
+
+  // Ocean & sea names, placed on the map at [lon, lat].
+  const WATERS = {
+    pacific:  { en: 'Pacific Ocean',  es: 'Océano Pacífico',  at: [[-138, -6], [164, 22]] },
+    atlantic: { en: 'Atlantic Ocean', es: 'Océano Atlántico', at: [[-40, 30], [-17, -24]] },
+    indian:   { en: 'Indian Ocean',   es: 'Océano Índico',    at: [[78, -24]] },
+    arctic:   { en: 'Arctic Ocean',   es: 'Océano Ártico',    at: [[-160, 77]] },
+    southern: { en: 'Southern Ocean', es: 'Océano Austral',   at: [[25, -62]] },
+    mediterranean: { en: 'Mediterranean Sea', es: 'Mar Mediterráneo', at: [[18, 34.6]], sea: true },
+    caribbean: { en: 'Caribbean Sea', es: 'Mar Caribe', at: [[-75, 15]], sea: true }
+  };
+
+  // Flights between capitals, along the shortest (great-circle) route.
+  // Each `cross` was checked against the 1:50m map: the route's open-water
+  // stretch lies in that ocean/sea. `over` = a country the route crosses.
+  const FLIGHTS = [
+    { from: 'chile',          to: 'spain',          cross: 'atlantic', not: ['pacific', 'indian', 'arctic'], over: 'brazil', notOver: ['peru', 'colombia', 'venezuela'] },
+    { from: 'japan',          to: 'mexico',         cross: 'pacific',  not: ['atlantic', 'indian', 'arctic'] },
+    { from: 'south_africa',   to: 'australia',      cross: 'indian',   not: ['atlantic', 'pacific', 'arctic'] },
+    { from: 'brazil',         to: 'nigeria',        cross: 'atlantic', not: ['pacific', 'indian', 'southern'] },
+    { from: 'canada',         to: 'united_kingdom', cross: 'atlantic', not: ['pacific', 'indian', 'southern'] },
+    { from: 'new_zealand',    to: 'chile',          cross: 'pacific',  not: ['atlantic', 'indian', 'arctic'] },
+    { from: 'kenya',          to: 'india',          cross: 'indian',   not: ['atlantic', 'pacific', 'arctic'], over: 'somalia', notOver: ['egypt', 'saudi_arabia', 'madagascar'] },
+    { from: 'india',          to: 'indonesia',      cross: 'indian',   not: ['atlantic', 'arctic', 'mediterranean'] },
+    { from: 'argentina',      to: 'south_africa',   cross: 'atlantic', not: ['pacific', 'indian', 'arctic'] },
+    { from: 'australia',      to: 'united_states',  cross: 'pacific',  not: ['atlantic', 'indian', 'arctic'] },
+    { from: 'peru',           to: 'new_zealand',    cross: 'pacific',  not: ['atlantic', 'indian', 'arctic'] },
+    { from: 'japan',          to: 'australia',      cross: 'pacific',  not: ['atlantic', 'indian', 'arctic'], over: 'papua_new_guinea', notOver: ['philippines', 'new_zealand', 'china'] },
+    { from: 'thailand',       to: 'kenya',          cross: 'indian',   not: ['atlantic', 'pacific', 'arctic'], over: 'india', notOver: ['china', 'pakistan', 'madagascar'] },
+    { from: 'spain',          to: 'argentina',      cross: 'atlantic', not: ['pacific', 'indian', 'arctic'], over: 'brazil', notOver: ['chile', 'peru', 'colombia'] },
+    { from: 'egypt',          to: 'greece',         cross: 'mediterranean', not: ['caribbean', 'atlantic', 'indian'], minTier: 'advanced' },
+    { from: 'morocco',        to: 'italy',          cross: 'mediterranean', not: ['caribbean', 'pacific', 'indian'], minTier: 'advanced' },
+    { from: 'china',          to: 'united_states',  cross: 'arctic',   not: ['atlantic', 'indian', 'southern'], minTier: 'expert',
+      note: { en: 'The shortest way from Beijing to Washington goes far north, over Siberia, the Arctic Ocean and Canada.', es: 'El camino más corto de Pekín a Washington va muy al norte: sobre Siberia, el océano Ártico y Canadá.' } }
+  ];
+  const OVER_NAMES = {
+    brazil: ['Brazil', 'Brasil'], peru: ['Peru', 'Perú'], colombia: ['Colombia', 'Colombia'], venezuela: ['Venezuela', 'Venezuela'],
+    somalia: ['Somalia', 'Somalia'], egypt: ['Egypt', 'Egipto'], saudi_arabia: ['Saudi Arabia', 'Arabia Saudita'], madagascar: ['Madagascar', 'Madagascar'],
+    papua_new_guinea: ['Papua New Guinea', 'Papúa Nueva Guinea'], philippines: ['Philippines', 'Filipinas'], new_zealand: ['New Zealand', 'Nueva Zelanda'], china: ['China', 'China'],
+    india: ['India', 'India'], pakistan: ['Pakistan', 'Pakistán'], chile: ['Chile', 'Chile']
+  };
+
+  const TIERS = ['beginner', 'intermediate', 'advanced', 'expert'];
+
+  // Where a country's name sits on the map when its centre is awkward.
+  const LABEL_AT = {
+    chile: [-71.5, -30], argentina: [-65, -37], brazil: [-52, -10], peru: [-75, -9.5], united_states: [-98, 39],
+    canada: [-105, 58], norway: [9, 61], indonesia: [114, -1], japan: [138, 37], united_kingdom: [-2, 53.5],
+    new_zealand: [172.5, -42], italy: [12.8, 42.6], portugal: [-8.2, 39.6], greece: [22, 39.4], vietnam: [106, 15]
+  };
+
   // ── State ──
   let currentContinent = null;
   let currentCountry = null;
   let lang = 'en';
-  let stars = 0;
+  let mapMode = 'world';
+  let worldMap = null;
 
   // ── Quiz state ──
   let quizPool = [];
@@ -742,20 +867,256 @@ const WorldExplorer = (() => {
     if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('world', 'zs_world_');
     return getUserAppKey('zs_world_');
   }
-  function _load() { 
+  function _load() {
     const k = _key();
     if (!k) return {};
-    try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } 
+    try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; }
   }
-  function _save(data) { 
-    const k = _key(); 
+  function _save(data) {
+    const k = _key();
     if (k) {
-      localStorage.setItem(k, JSON.stringify(data)); 
+      try { localStorage.setItem(k, JSON.stringify(data)); } catch (e) { /* storage full or blocked */ }
       if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(k);
     }
   }
 
-  // ── Init ──
+  // ── Helpers ──
+  const ALL = [];
+  CONTINENTS.forEach(c => c.countries.forEach(k => ALL.push({ k, c })));
+  function findCountry(id) { const r = ALL.find(x => x.k.id === id); return r ? r.k : null; }
+  function contOf(id) { const r = ALL.find(x => x.k.id === id); return r ? r.c : null; }
+  function byIso(iso) { return ALL.find(x => GEO[x.k.id] && GEO[x.k.id].iso === iso) || null; }
+  const ATLAS = {};
+  if (typeof WORLD_ATLAS_DATA !== 'undefined') WORLD_ATLAS_DATA.forEach(a => { ATLAS[a.id] = a; });
+  function isoName(iso) {
+    const t = byIso(iso);
+    if (t) return nm(t.k);
+    const a = ATLAS[iso];
+    return a ? (lang === 'es' ? a.nameEs : a.name) : '';
+  }
+  function nm(o) { return lang === 'es' ? (o.nameEs || o.name) : o.name; }
+  function t(en, es) { return lang === 'es' ? es : en; }
+  function esc(s) {
+    if (typeof escHtml === 'function') return escHtml(String(s == null ? '' : s));
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function sfx(n) { try { if (typeof SFX !== 'undefined' && SFX[n]) SFX[n](); } catch (e) { /* audio optional */ } }
+  function tier() { return (typeof getAgeTier === 'function') ? getAgeTier() : 'intermediate'; }
+  function tierAtLeast(min) { return TIERS.indexOf(tier()) >= TIERS.indexOf(min); }
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function hasMap() { return typeof WorldMap !== 'undefined'; }
+  function flagSVG(id, cls, wave) {
+    const g = GEO[id];
+    if (hasMap() && g && WorldMap.hasFlag(g.iso)) return WorldMap.flag(g.iso, { cls: cls || 'we-flag', wave: !!wave, label: t('Flag of ', 'Bandera de ') + nm(findCountry(id)) });
+    const k = findCountry(id);
+    return '<span class="' + (cls || 'we-flag') + ' we-flag-emoji">' + (k ? k.flag : '') + '</span>';
+  }
+  function lmIcon(id, cls, bg) {
+    const k = findCountry(id);
+    if (typeof WEArt !== 'undefined' && WEArt.has(id)) return WEArt.landmarkSVG(id, cls || 'we-lm-svg', k ? nm(k.landmark) : '', bg);
+    return '<span class="' + (cls || 'we-lm-svg') + ' we-lm-emoji">' + (k ? k.landmark.emoji : '') + '</span>';
+  }
+  function fmtLL(ll) {
+    const la = Math.abs(ll[1]).toFixed(1) + '°' + (ll[1] >= 0 ? 'N' : 'S');
+    const lo = Math.abs(ll[0]).toFixed(1) + '°' + (ll[0] >= 0 ? t('E', 'E') : t('W', 'O'));
+    return la + ' ' + lo;
+  }
+
+  // ================================================================
+  //  MAP VIEW — one interactive SVG world map (Equal Earth)
+  // ================================================================
+  let mapUid = 0;
+  function FULL() { return [-24, -30, WorldMap.W + 48, WorldMap.H + 60]; }
+  function MapView(host, opts) {
+    this.host = host;
+    this.o = opts || {};
+    this.id = 'wem' + (++mapUid);
+    this.box = FULL();
+    this._build();
+  }
+  MapView.prototype._build = function() {
+    const W = WorldMap.W, H = WorldMap.H, id = this.id;
+    const ns = 'http://www.w3.org/2000/svg';
+    let s = '<svg class="we-map" xmlns="' + ns + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(t('World map', 'Mapa del mundo')) + '">' +
+      '<defs>' +
+        '<radialGradient id="' + id + 'oc" cx="50%" cy="48%" r="62%"><stop offset="0" stop-color="#7cc1e6"/><stop offset=".6" stop-color="#94cdea"/><stop offset="1" stop-color="#c3e4f4"/></radialGradient>' +
+        '<linearGradient id="' + id + 'sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#1d3b5a" stop-opacity=".10"/></linearGradient>' +
+      '</defs>' +
+      '<path class="we-globe-shadow" d="' + WorldMap.outline() + '" transform="translate(0,9)"/>' +
+      '<path class="we-ocean" d="' + WorldMap.outline() + '" fill="url(#' + id + 'oc)"/>' +
+      '<path class="we-grat" d="' + WorldMap.graticule(30) + '"/>' +
+      '<path class="we-equator" d="' + WorldMap.parallel(0) + '"/>' +
+      '<g class="we-shelf"><path d="' + WorldMap.landPath() + '"/></g>' +
+      '<g class="we-lands">';
+    WorldMap.codes().forEach(code => {
+      s += '<path class="we-land" data-code="' + code + '" d="' + WorldMap.path(code) + '"/>';
+    });
+    s += '</g><path class="we-relief" d="' + WorldMap.outline() + '" fill="url(#' + id + 'sh)"/>' +
+      '<g class="we-waters"></g><g class="we-marks"></g><g class="we-over"></g></svg>';
+    this.host.innerHTML = s;
+    this.svg = this.host.querySelector('svg');
+    this.lands = {};
+    this.svg.querySelectorAll('.we-land').forEach(p => { this.lands[p.dataset.code] = p; });
+    this.gWaters = this.svg.querySelector('.we-waters');
+    this.gMarks = this.svg.querySelector('.we-marks');
+    this.gOver = this.svg.querySelector('.we-over');
+    this._wire();
+  };
+  // Taps: pointerdown+up with little movement → country under the finger.
+  MapView.prototype._wire = function() {
+    let down = null;
+    this.svg.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
+    this.svg.addEventListener('pointerup', e => {
+      if (!down) return;
+      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+      down = null;
+      if (moved > 12) return;
+      const pt = this.toGrid(e.clientX, e.clientY);
+      let target = e.target.closest ? e.target.closest('[data-code],[data-hit]') : null;
+      let code = target ? (target.dataset.code || target.dataset.hit) : null;
+      if (this.o.onTap) this.o.onTap(code, pt, e);
+    });
+  };
+  MapView.prototype.toGrid = function(cx, cy) {
+    const r = this.svg.getBoundingClientRect(), b = this.box;
+    const s = Math.max(b[2] / r.width, b[3] / r.height);
+    const ox = b[0] + b[2] / 2 - (r.width * s) / 2, oy = b[1] + b[3] / 2 - (r.height * s) / 2;
+    return [ox + (cx - r.left) * s, oy + (cy - r.top) * s];
+  };
+  // User units per screen pixel at the current zoom.
+  MapView.prototype.upp = function() {
+    const r = this.svg.getBoundingClientRect(), b = this.box;
+    if (!r.width) return b[2] / 360;
+    return Math.max(b[2] / r.width, b[3] / r.height);
+  };
+  // Grid box that shows a lon/lat box (or a grid box with {grid:true}) in
+  // this SVG's shape. topPx keeps room for the floating title bar.
+  // Text scale: smaller labels on small maps.
+  MapView.prototype.fs = function() {
+    const r = this.svg.getBoundingClientRect();
+    return Math.max(0.7, Math.min(1.1, (r.width || 700) / 760));
+  };
+  MapView.prototype.fit = function(llBox, pad, topPx, isGrid) {
+    const b = isGrid ? llBox : WorldMap.box(llBox), r = this.svg.getBoundingClientRect();
+    const rw = r.width || 360, rh = r.height || 340;
+    pad = pad == null ? 0.04 : pad;
+    topPx = Math.min(topPx || 0, rh * 0.3);
+    // reserve topPx of the screen height above the content
+    const aspect = rw / (rh - topPx);
+    let x = b[0] - b[2] * pad, y = b[1] - b[3] * pad, w = b[2] * (1 + 2 * pad), h = b[3] * (1 + 2 * pad);
+    if (w / h > aspect) { const nh = w / aspect; y -= (nh - h) / 2; h = nh; } else { const nw = h * aspect; x -= (nw - w) / 2; w = nw; }
+    const extra = h * topPx / (rh - topPx);
+    y -= extra; h += extra;
+    // keep inside the map where we can
+    const F = FULL();
+    if (w < F[2]) x = Math.max(F[0], Math.min(x, F[0] + F[2] - w));
+    if (h < F[3]) y = Math.max(F[1], Math.min(y, F[1] + F[3] - h));
+    return [x, y, w, h];
+  };
+  MapView.prototype.setBox = function(b) {
+    this.box = b.slice();
+    this.svg.setAttribute('viewBox', b.map(v => v.toFixed(1)).join(' '));
+    this.svg.style.setProperty('--upp', this.upp().toFixed(4));
+  };
+  MapView.prototype.zoomTo = function(b, ms, done) {
+    const from = this.box.slice(), t0 = performance.now(), self = this;
+    if (this._raf) cancelAnimationFrame(this._raf);
+    if (!ms || window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { this.setBox(b); if (done) done(); return; }
+    function ease(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function step(now) {
+      const k = Math.min(1, (now - t0) / ms), e = ease(k);
+      self.setBox(from.map((v, i) => v + (b[i] - v) * e));
+      if (k < 1) self._raf = requestAnimationFrame(step); else { self._raf = null; if (done) done(); }
+    }
+    this._raf = requestAnimationFrame(step);
+  };
+  MapView.prototype.paint = function(fn) {
+    for (const code in this.lands) {
+      const st = fn(code, WorldMap.continentOf(code)) || {};
+      const p = this.lands[code];
+      p.setAttribute('fill', st.fill || '#e9ecea');
+      p.setAttribute('class', 'we-land' + (st.cls ? ' ' + st.cls : ''));
+    }
+  };
+  MapView.prototype.clear = function() { this.gMarks.innerHTML = ''; this.gOver.innerHTML = ''; this.gWaters.innerHTML = ''; };
+  MapView.prototype.waters = function(keys) {
+    const u = this.upp();
+    let s = '';
+    keys.forEach(k => {
+      const w = WATERS[k];
+      w.at.forEach(ll => {
+        const p = WorldMap.project(ll[0], ll[1]);
+        const fs = (w.sea ? 10 : 12.5) * u * this.fs();
+        s += '<text class="we-water' + (w.sea ? ' sea' : '') + '" x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '" font-size="' + fs.toFixed(2) + '" text-anchor="middle">' + esc(lang === 'es' ? w.es : w.en) + '</text>';
+      });
+    });
+    this.gWaters.innerHTML = s;
+  };
+  // Text label at a grid point; size in screen px.
+  MapView.prototype.labelSVG = function(x, y, text, px, cls) {
+    const u = this.upp();
+    const k = cls && cls.indexOf('cont') >= 0 ? this.fs() : 1;
+    return '<text class="we-label ' + (cls || '') + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" font-size="' + (px * u * k).toFixed(2) + '" stroke-width="' + (3 * u * k).toFixed(2) + '" text-anchor="middle">' + esc(text) + '</text>';
+  };
+  MapView.prototype.dotSVG = function(x, y, px, cls, extra) {
+    const u = this.upp();
+    return '<circle class="' + (cls || 'we-dot') + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (px * u).toFixed(2) + '" stroke-width="' + (2 * u).toFixed(2) + '"' + (extra || '') + '/>';
+  };
+  // Landmark badges with leader lines, nudged apart so none overlap.
+  MapView.prototype.landmarks = function(ids, opts) {
+    opts = opts || {};
+    const u = this.upp(), size = (opts.px || 38) * u, half = size / 2, box = this.box;
+    const obst = opts.obstacles || [];
+    const topSafe = box[1] + (opts.topPx || 0) * u + half + 4 * u;
+    const items = ids.map(id => {
+      const g = GEO[id], p = WorldMap.project(g.lm[0], g.lm[1]);
+      return { id, px: p[0], py: p[1], x: p[0] + size * 0.55, y: p[1] - size * 0.85 };
+    });
+    for (let it = 0; it < 140; it++) {
+      for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+        const a = items[i], b = items[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = size * 1.12;
+        if (d < min) { const push = (min - d) / 2, ux = dx / d, uy = dy / d; a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push; }
+      }
+      items.forEach(a => {
+        // keep off labels and pins
+        obst.forEach(o => {
+          const ox = Math.max(o.x0 - half, Math.min(a.x, o.x1 + half)), oy = Math.max(o.y0 - half, Math.min(a.y, o.y1 + half));
+          if (a.x > o.x0 - half && a.x < o.x1 + half && a.y > o.y0 - half && a.y < o.y1 + half) {
+            const l = a.x - (o.x0 - half), r = (o.x1 + half) - a.x, t2 = a.y - (o.y0 - half), b2 = (o.y1 + half) - a.y, m = Math.min(l, r, t2, b2);
+            if (m === l) a.x -= l * 0.5; else if (m === r) a.x += r * 0.5; else if (m === t2) a.y -= t2 * 0.5; else a.y += b2 * 0.5;
+          }
+          void ox; void oy;
+        });
+        items.forEach(b => { if (b === a) return; const dx = a.x - b.px, dy = a.y - b.py, d = Math.hypot(dx, dy) || 0.01; if (d < half * 1.1) { a.x += dx / d * (half * 1.1 - d) * 0.5; a.y += dy / d * (half * 1.1 - d) * 0.5; } });
+        a.x += (a.px + size * 0.55 - a.x) * 0.015; a.y += (a.py - size * 0.85 - a.y) * 0.015;
+        a.x = Math.max(box[0] + half + 4 * u, Math.min(box[0] + box[2] - half - 4 * u, a.x));
+        a.y = Math.max(topSafe, Math.min(box[1] + box[3] - half - 4 * u, a.y));
+      });
+    }
+    let s = '';
+    const visited = opts.visited || [];
+    items.forEach(a => {
+      const k = findCountry(a.id);
+      s += '<g class="we-lm' + (visited.indexOf(a.id) >= 0 ? ' seen' : '') + '" data-hit="lm:' + a.id + '" role="button" aria-label="' + esc(nm(k.landmark)) + '">' +
+        '<path class="we-lm-lead" d="M' + a.px.toFixed(1) + ',' + a.py.toFixed(1) + 'L' + a.x.toFixed(1) + ',' + a.y.toFixed(1) + '" stroke-width="' + (1.6 * u).toFixed(2) + '"/>' +
+        '<circle class="we-lm-pin" cx="' + a.px.toFixed(1) + '" cy="' + a.py.toFixed(1) + '" r="' + (3.2 * u).toFixed(2) + '" stroke-width="' + (1.5 * u).toFixed(2) + '"/>' +
+        '<rect class="we-lm-shadow" x="' + (a.x - size / 2).toFixed(1) + '" y="' + (a.y - size / 2 + 2.5 * u).toFixed(1) + '" width="' + size.toFixed(1) + '" height="' + size.toFixed(1) + '" rx="' + (size * 0.24).toFixed(1) + '"/>' +
+        '<g transform="translate(' + (a.x - size / 2).toFixed(1) + ',' + (a.y - size / 2).toFixed(1) + ') scale(' + (size / 40).toFixed(4) + ')">' + WEArt.landmark(a.id, '#ffffff') +
+        '<rect x="1" y="1" width="38" height="38" rx="8.4" fill="none" stroke="#fff" stroke-width="2.2"/></g></g>';
+    });
+    this.gMarks.insertAdjacentHTML('beforeend', s);
+  };
+
+  // ── Paint helpers ──
+  function taughtIsoSet(cont) {
+    const set = {};
+    (cont ? cont.countries : ALL.map(x => x.k)).forEach(k => { if (GEO[k.id]) set[GEO[k.id].iso] = k.id; });
+    return set;
+  }
+
+  // ================================================================
+  //  EXPLORE SCREEN — world view → continent view
+  // ================================================================
   function init() {
     const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
     if (!user) return;
@@ -763,163 +1124,321 @@ const WorldExplorer = (() => {
     if (typeof CloudSync !== 'undefined' && CloudSync.online) {
       CloudSync.pull(_key());
     }
-
-    _renderContinentSelect();
+    const data = _load();
+    if (data.lang === 'es') lang = 'es';
+    _applyStaticText();
+    _renderExplore();
     _updateGlobalStars();
+    window.addEventListener('resize', () => { if (worldMap && document.getElementById('screen-select').classList.contains('active')) _refitMap(); });
   }
 
-  function _renderContinentSelect() {
-    const grid = document.getElementById('continent-grid');
-    const data = _load();
-    const visited = data.visited || [];
+  function _applyStaticText() {
+    document.documentElement.lang = lang;
+    const label = document.getElementById('lang-label');
+    if (label) label.textContent = lang === 'en' ? 'EN' : 'ES';
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('we-title', t('World Explorer', 'Explorador del Mundo'));
+    set('we-ch-title', t('Map challenges', 'Desafíos del mapa'));
+  }
 
-    grid.innerHTML = CONTINENTS.map(c => {
-      const count = c.countries.filter(country => visited.includes(country.id)).length;
-      const total = c.countries.length;
-      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+  function _renderExplore() {
+    const host = document.getElementById('we-stage-map');
+    if (!host) return;
+    if (!hasMap()) { host.innerHTML = '<p class="we-nomap">' + esc(t('Map data did not load.', 'No se cargó el mapa.')) + '</p>'; }
+    else if (!worldMap) {
+      worldMap = new MapView(host, { onTap: _onExploreTap });
+    }
+    if (mapMode === 'continent' && currentContinent) _showContinentMode(false);
+    else _showWorldMode(false);
+    _renderChallengeCards();
+  }
 
-      return `
-        <div class="continent-card" onclick="WorldExplorer.openContinent('${c.id}')">
-          <span class="continent-icon">${c.icon}</span>
-          <div class="continent-name">${lang === 'es' ? c.nameEs : c.name}</div>
-          <div class="continent-stats">${total > 0 ? `${count}/${total} ${lang === 'es' ? 'países' : 'countries'}` : (lang === 'es' ? 'Próximamente' : 'Coming Soon')}</div>
-          <div class="lab-progress" style="height:4px; margin-top:8px;">
-            <div class="lab-progress-bar" style="width:${pct}%; background:${c.color};"></div>
-          </div>
-        </div>
-      `;
-    }).join('');
+  function _paintWorld(hoverCont) {
+    const visited = (_load().visited) || [];
+    const taught = taughtIsoSet(null);
+    worldMap.paint((code, cc) => {
+      const tint = TINT[cc] || TINT.an;
+      const id = taught[code];
+      if (id && visited.indexOf(id) >= 0) return { fill: tint[2], cls: 'visited' + (cc !== 'an' ? ' tap' : '') };
+      return { fill: id ? tint[1] : tint[0], cls: cc !== 'an' ? 'tap' : '' };
+    });
+  }
+
+  function _showWorldMode(animate) {
+    mapMode = 'world';
+    currentContinent = null;
+    const stage = document.getElementById('we-stage');
+    if (stage) stage.className = 'we-stage world';
+    _setHud();
+    if (worldMap) {
+      _paintWorld();
+      worldMap.clear();
+      const full = FULL();
+      const after = () => {
+        worldMap.waters(window.innerWidth < 560 ? ['pacific', 'atlantic', 'indian'] : ['pacific', 'atlantic', 'indian', 'arctic', 'southern']);
+        // Continent names over the land
+        let s = '';
+        CONTINENTS.forEach(c => {
+          const v = VIEW[c.id]; if (!v) return;
+          const ll = c.id === 'europe' ? [15, 56] : c.id === 'asia' ? [92, 44] : c.id === 'oceania' ? [134, -25] : c.id === 'africa' ? [20, 6] : c.id === 'north_america' ? [-101, 47] : [-60, -12];
+          const p = WorldMap.project(ll[0], ll[1]);
+          s += worldMap.labelSVG(p[0], p[1], nm(c), 13, 'cont');
+        });
+        worldMap.gOver.innerHTML = s;
+      };
+      if (animate) { worldMap.gOver.innerHTML = ''; worldMap.zoomTo(full, 750, after); } else { worldMap.setBox(full); after(); }
+    }
+    _renderBelowWorld();
+  }
+
+  function _refitMap() {
+    if (!worldMap) return;
+    if (mapMode === 'continent' && currentContinent) _showContinentMode(false);
+    else _showWorldMode(false);
+  }
+
+  function _setHud() {
+    const back = document.getElementById('we-stage-back');
+    const title = document.getElementById('we-stage-title');
+    const hint = document.getElementById('we-stage-hint');
+    if (mapMode === 'continent' && currentContinent) {
+      if (back) back.hidden = false;
+      if (title) title.textContent = nm(currentContinent);
+      if (hint) hint.textContent = t('Tap a coloured country or a landmark', 'Toca un país de color o un monumento');
+    } else {
+      if (back) back.hidden = true;
+      if (title) title.textContent = t('Pick a continent', 'Elige un continente');
+      if (hint) hint.textContent = t('Tap the map to fly there', 'Toca el mapa para volar allí');
+    }
+  }
+
+  function _onExploreTap(code, pt) {
+    if (mapMode === 'world') {
+      const cc = code ? WorldMap.continentOf(code) : null;
+      const cont = cc && CODE2CONT[cc];
+      if (cont) { sfx('click'); openContinent(cont); }
+      return;
+    }
+    if (!code) return;
+    if (code.indexOf('lm:') === 0) { sfx('click'); openCountry(code.slice(3)); return; }
+    const hit = byIso(code);
+    if (hit && currentContinent && hit.c.id === currentContinent.id) { sfx('click'); openCountry(hit.k.id); return; }
+    // Another continent's land: fly there.
+    const cc = WorldMap.continentOf(code), cont = CODE2CONT[cc];
+    if (cont && (!currentContinent || cont !== currentContinent.id)) { sfx('click'); openContinent(cont); }
   }
 
   function openContinent(id) {
-    currentContinent = CONTINENTS.find(c => c.id === id);
-    if (!currentContinent) return;
-
-    if (currentContinent.countries.length === 0) {
-      _showFeedback('🚧');
-      return;
-    }
-
-    document.getElementById('continent-title').textContent = lang === 'es' ? currentContinent.nameEs : currentContinent.name;
-    _renderMap();
-    _showScreen('continent');
+    const c = CONTINENTS.find(x => x.id === id);
+    if (!c) return;
+    if (c.countries.length === 0) { _showFeedback('🚧'); return; }
+    currentContinent = c;
+    const scr = document.getElementById('screen-select');
+    if (!scr.classList.contains('active')) { _showScreen('select'); }
+    if (!worldMap) _renderExplore();
+    _showContinentMode(true);
+    const stage = document.getElementById('we-stage');
+    if (stage && stage.scrollIntoView && window.scrollY > stage.offsetTop) stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function _renderMap() {
-    const wrap = document.getElementById('map-wrap');
-    const data = _load();
-    const visited = data.visited || [];
-
-    // Geographically accurate simplified SVG paths for South America
-    const MAP_PATHS = {
-      'chile':     { path: 'M122,195 L130,205 L133,218 L130,235 L128,255 L130,270 L132,285 L130,300 L125,320 L120,340 L118,355 L120,368 L118,382 L114,398 L108,415 L104,428 L100,438 L96,448 L90,458 L84,465 L78,470 L74,468 L72,460 L75,448 L78,435 L80,420 L82,405 L85,388 L88,370 L90,352 L92,335 L95,318 L98,300 L100,282 L102,265 L105,248 L108,232 L112,218 L116,205 Z', label: { x: 72, y: 385 } },
-      'argentina': { path: 'M133,218 L142,222 L152,220 L155,230 L160,240 L165,252 L168,265 L172,275 L178,285 L185,288 L192,285 L188,292 L192,298 L198,305 L195,315 L188,328 L182,342 L178,358 L175,372 L170,388 L165,402 L158,418 L148,432 L138,445 L128,455 L118,462 L108,465 L100,460 L96,448 L100,438 L104,428 L108,415 L114,398 L118,382 L120,368 L118,355 L120,340 L125,320 L130,300 L132,285 L130,270 L128,255 L130,235 Z', label: { x: 148, y: 375 } },
-      'brazil':    { path: 'M148,168 L162,158 L178,150 L195,142 L215,135 L235,132 L255,135 L272,140 L288,150 L298,162 L305,178 L308,195 L305,215 L300,232 L292,248 L282,262 L270,275 L258,285 L245,292 L230,298 L215,300 L200,298 L188,292 L192,285 L185,288 L178,285 L172,275 L168,265 L165,252 L160,240 L155,230 L152,220 L158,212 L162,200 L160,188 L155,175 Z', label: { x: 232, y: 215 } },
-      'peru':      { path: 'M80,155 L95,148 L110,142 L122,140 L135,145 L142,155 L148,168 L145,180 L140,192 L135,202 L130,210 L122,195 L116,205 L112,218 L108,232 L105,240 L98,238 L90,230 L82,220 L75,208 L72,195 L74,178 L76,165 Z', label: { x: 108, y: 188 } },
-      'colombia':  { path: 'M80,155 L76,142 L78,128 L85,115 L95,105 L108,98 L122,95 L135,98 L145,105 L152,115 L155,128 L152,140 L148,150 L148,168 L142,155 L135,145 L122,140 L110,142 L95,148 Z', label: { x: 118, y: 125 } },
-      'venezuela': { path: 'M122,95 L135,88 L150,82 L168,80 L185,82 L200,88 L210,98 L215,110 L210,122 L200,130 L190,135 L178,138 L165,140 L155,142 L155,128 L152,115 L145,105 L135,98 Z', label: { x: 170, y: 108 } },
-      'ecuador':   { path: 'M68,155 L72,148 L76,142 L80,155 L76,165 L72,168 L65,165 L62,158 Z', label: { x: 55, y: 155 } },
-      'bolivia':   { path: 'M135,202 L140,192 L145,180 L148,168 L155,175 L160,188 L162,200 L158,212 L152,220 L148,222 L142,222 L133,218 L130,210 Z', label: { x: 148, y: 200 } },
-      'paraguay':  { path: 'M172,260 L180,255 L192,252 L200,258 L198,270 L192,280 L185,288 L178,285 L172,275 L168,265 Z', label: { x: 185, y: 272 } },
-      'uruguay':   { path: 'M192,280 L200,278 L210,282 L215,292 L212,302 L205,308 L198,305 L192,298 L188,292 L192,285 Z', label: { x: 202, y: 295 } },
-      'guyana':    { path: 'M210,98 L220,92 L232,90 L240,95 L242,108 L238,118 L232,125 L225,130 L218,128 L215,120 L215,110 Z', label: { x: 228, y: 112 } },
-      'suriname':  { path: 'M240,95 L250,92 L258,95 L262,105 L260,115 L255,122 L248,125 L242,120 L242,108 Z', label: { x: 250, y: 112 } },
-    };
-
-    let svg = `<svg viewBox="0 0 380 520" width="100%" style="max-width:380px; margin:0 auto; display:block;" xmlns="http://www.w3.org/2000/svg">`;
-    
-    // Ocean background
-    svg += `<rect width="380" height="520" rx="16" fill="rgba(59,130,246,0.06)" />`;
-
-    // Render each country
-    currentContinent.countries.forEach(c => {
-      const mapData = MAP_PATHS[c.id];
-      if (!mapData) return;
-
-      const isVisited = visited.includes(c.id);
-      const fillColor = isVisited ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)';
-      const strokeColor = isVisited ? '#34D399' : 'rgba(255,255,255,0.2)';
-
-      svg += `<path d="${mapData.path}" 
-                fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.5" stroke-linejoin="round"
-                style="cursor:pointer; transition: all 0.3s;"
-                onclick="WorldExplorer.openCountry('${c.id}')" />`;
-
-      // Country label with flag
-      const lbl = mapData.label;
-      const fontSize = ['brazil', 'argentina', 'peru', 'colombia', 'chile', 'venezuela'].includes(c.id) ? 11 : 8;
-      const showFlag = ['brazil', 'argentina', 'peru', 'colombia', 'chile', 'venezuela'].includes(c.id);
-      svg += `<text x="${lbl.x}" y="${lbl.y}" text-anchor="middle" 
-                fill="${isVisited ? '#6EE7B7' : 'rgba(255,255,255,0.5)'}" 
-                font-family="var(--font-display)" font-size="${fontSize}" font-weight="800"
-                style="pointer-events:none; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                ${showFlag ? c.flag + ' ' : ''}${lang === 'es' ? c.nameEs : c.name}
-              </text>`;
+  function _showContinentMode(animate) {
+    mapMode = 'continent';
+    const c = currentContinent, v = VIEW[c.id];
+    const stage = document.getElementById('we-stage');
+    if (stage) stage.className = 'we-stage continent';
+    _setHud();
+    if (!worldMap) { _renderBelowContinent(); return; }
+    const visited = (_load().visited) || [];
+    const taught = taughtIsoSet(c);
+    worldMap.paint((code, cc) => {
+      const id = taught[code];
+      const tint = TINT[cc] || TINT.an;
+      if (id) return { fill: visited.indexOf(id) >= 0 ? tint[2] : tint[1], cls: 'tap taught' + (visited.indexOf(id) >= 0 ? ' visited' : '') };
+      if (cc === v.code) return { fill: pale(cc), cls: 'dim' };
+      return { fill: cc === 'an' ? TINT.an[0] : '#e7e8e2', cls: 'far' + (CODE2CONT[cc] ? ' tap' : '') };
     });
+    worldMap.clear();
+    // Let the stage take its continent shape first, then fit.
+    requestAnimationFrame(() => {
+      const target = worldMap.fit(v.box, 0.02, 64);
+      const after = () => _decorateContinent();
+      if (animate) worldMap.zoomTo(target, 800, after); else { worldMap.setBox(target); after(); }
+    });
+    _renderBelowContinent();
+  }
 
-    svg += `</svg>`;
+  function _decorateContinent() {
+    const c = currentContinent;
+    if (!c || !worldMap) return;
+    const visited = (_load().visited) || [];
+    const ids = c.countries.map(k => k.id).filter(id => GEO[id]);
+    const waters = { south_america: ['pacific', 'atlantic', 'caribbean'], north_america: ['pacific', 'atlantic', 'arctic', 'caribbean'], europe: ['atlantic', 'mediterranean'], africa: ['atlantic', 'indian', 'mediterranean'], asia: ['pacific', 'indian'], oceania: ['pacific', 'indian'] }[c.id] || [];
+    worldMap.waters(waters);
+    let s = '';
+    const u = worldMap.upp(), wide = window.innerWidth >= 700, obstacles = [];
+    ids.forEach(id => {
+      const g = GEO[id], inf = WorldMap.info(g.iso);
+      if (!inf) return;
+      const small = inf.a < 40, seen = visited.indexOf(id) >= 0;
+      const k = findCountry(id);
+      // tiny countries get a tappable ring so they can be reached
+      if (small) s += worldMap.dotSVG(inf.c[0], inf.c[1], 9, 'we-hitring' + (seen ? ' visited' : ''), ' data-hit="' + g.iso + '"');
+      const px = small ? 10.5 : (wide ? 13 : 11.5);
+      const lab = LABEL_AT[id] ? WorldMap.project(LABEL_AT[id][0], LABEL_AT[id][1]) : inf.c;
+      const lx = lab[0], ly = lab[1] + (small ? 19 * u : 0);
+      const tw = nm(k).length * px * 0.56 * u + (seen ? 16 * u : 0);
+      s += worldMap.labelSVG(lx + (seen ? 8 * u : 0), ly + px * 0.35 * u, nm(k), px, seen ? 'seen' : '');
+      if (seen) s += '<g class="we-check" transform="translate(' + (lx - tw / 2 + 6 * u).toFixed(1) + ',' + ly.toFixed(1) + ') scale(' + u.toFixed(4) + ')"><circle r="7" /><path d="M-3.2,0 l2.2,2.4 4.2-4.6"/></g>';
+      obstacles.push({ x0: lx - tw / 2, x1: lx + tw / 2, y0: ly - px * 0.6 * u, y1: ly + px * 0.6 * u });
+    });
+    worldMap.gOver.innerHTML = s;
+    if (typeof WEArt !== 'undefined') worldMap.landmarks(ids, { visited, px: wide ? 46 : 28, obstacles, topPx: 60 });
+  }
 
-    // Tappable country grid. The SVG map only has drawn shapes for South
-    // America, so without this every other continent would show a blank
-    // ocean with no way to open a country. The grid makes every country
-    // reachable and doubles as a legend where the map does exist.
-    const grid = '<div class="we-country-grid">' +
-      currentContinent.countries.map(c => {
-        const isVisited = visited.includes(c.id);
-        return `<button class="we-country-chip${isVisited ? ' visited' : ''}" onclick="WorldExplorer.openCountry('${c.id}')">` +
-          `<span class="we-chip-flag">${c.flag}</span>` +
-          `<span class="we-chip-name">${lang === 'es' ? c.nameEs : c.name}</span>` +
-          (isVisited ? '<span class="we-chip-check">✓</span>' : '') +
-        `</button>`;
-      }).join('') + '</div>';
+  function _renderBelowWorld() {
+    const host = document.getElementById('we-below');
+    if (!host) return;
+    const visited = (_load().visited) || [];
+    host.innerHTML = '<div class="continent-grid">' + CONTINENTS.map(c => {
+      const count = c.countries.filter(k => visited.includes(k.id)).length;
+      const total = c.countries.length;
+      const pct = total ? Math.round(count / total * 100) : 0;
+      return '<button type="button" class="continent-card" onclick="WorldExplorer.openContinent(\'' + c.id + '\')" style="--cc:' + c.color + '">' +
+        '<span class="continent-icon">' + _continentGlyph(c.id) + '</span>' +
+        '<span class="continent-text"><span class="continent-name">' + esc(nm(c)) + '</span>' +
+        '<span class="continent-stats">' + count + '/' + total + ' ' + t('countries', 'países') + '</span>' +
+        '<span class="we-bar"><span style="width:' + pct + '%"></span></span></span>' +
+        '<span class="continent-flags">' + c.countries.slice(0, 3).map(k => flagSVG(k.id, 'we-flag mini')).join('') + '</span>' +
+      '</button>';
+    }).join('') + '</div>';
+  }
 
-    wrap.innerHTML = svg + grid;
+  // A small silhouette of the continent, drawn from the map itself.
+  function _continentGlyph(id) {
+    if (!hasMap()) return '';
+    const v = VIEW[id], b = WorldMap.box(v.box), code = v.code;
+    let d = '';
+    WorldMap.codes().forEach(cc => { if (WorldMap.continentOf(cc) === code) d += WorldMap.path(cc); });
+    return '<svg viewBox="' + b.map(n => n.toFixed(0)).join(' ') + '" aria-hidden="true" preserveAspectRatio="xMidYMid meet"><path d="' + d + '" fill="currentColor"/></svg>';
+  }
+
+  function _renderBelowContinent() {
+    const host = document.getElementById('we-below');
+    if (!host || !currentContinent) return;
+    const visited = (_load().visited) || [];
+    host.innerHTML = '<div class="we-country-grid">' + currentContinent.countries.map(k => {
+      const v = visited.includes(k.id);
+      return '<button type="button" class="we-country-chip' + (v ? ' visited' : '') + '" onclick="WorldExplorer.openCountry(\'' + k.id + '\')">' +
+        flagSVG(k.id, 'we-flag chip') +
+        '<span class="we-chip-name">' + esc(nm(k)) + '</span>' +
+        (v ? '<span class="we-chip-check" aria-label="' + esc(t('Visited', 'Visitado')) + '">✓</span>' : '') +
+      '</button>';
+    }).join('') + '</div>';
+  }
+
+  function backToSelect() {
+    _showScreen('select');
+    if (!worldMap) _renderExplore();
+    _showWorldMode(mapMode === 'continent');
+  }
+  function backToContinent() {
+    _showScreen('select');
+    if (currentContinent) { if (!worldMap) _renderExplore(); _showContinentMode(false); }
+    else backToSelect();
+  }
+
+  // ================================================================
+  //  COUNTRY CARD
+  // ================================================================
+  function _locatorSVG(id) {
+    if (!hasMap() || !GEO[id]) return '';
+    const g = GEO[id], cont = contOf(id), v = VIEW[cont.id];
+    const inf = WorldMap.info(g.iso);
+    // Frame: the country plus a margin, at least a slice of its continent.
+    let b = inf ? inf.b.slice() : WorldMap.box(v.box);
+    let w = b[2] - b[0], h = b[3] - b[1];
+    const minW = 150, cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+    w = Math.max(w * 1.9, minW); h = Math.max(h * 1.6, minW * 0.62);
+    if (w / h > 1.6) h = w / 1.6; else w = h * 1.6;
+    const box = [cx - w / 2, cy - h / 2, w, h];
+    const nb = inf ? inf.n : [];
+    let s = '<svg class="we-locator" viewBox="' + box.map(n => n.toFixed(1)).join(' ') + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + esc(t('Map: where ', 'Mapa: dónde está ') + nm(findCountry(id))) + '">' +
+      '<rect x="' + box[0] + '" y="' + box[1] + '" width="' + w + '" height="' + h + '" fill="#9fd3ec"/>' +
+      '<path d="' + WorldMap.graticule(10) + '" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="' + (w / 400).toFixed(2) + '"/>';
+    const u = w / 340;
+    WorldMap.codes().forEach(code => {
+      const cc = WorldMap.continentOf(code), tint = TINT[cc] || TINT.an;
+      const fill = code === g.iso ? '#e8553d' : nb.indexOf(code) >= 0 ? tint[1] : tint[0];
+      s += '<path d="' + WorldMap.path(code) + '" fill="' + fill + '" stroke="#fff" stroke-width="' + (u * 0.9).toFixed(2) + '" stroke-linejoin="round"/>';
+    });
+    const cp = WorldMap.project(g.cap[0], g.cap[1]);
+    s += '<path d="' + _starPath(cp[0], cp[1], 6 * u) + '" fill="#ffd34d" stroke="#7a3b12" stroke-width="' + (u * 0.9).toFixed(2) + '"/>';
+    if (inf && inf.a < 40) s += '<circle cx="' + inf.c[0] + '" cy="' + inf.c[1] + '" r="' + (13 * u).toFixed(1) + '" fill="none" stroke="#e8553d" stroke-width="' + (2.4 * u).toFixed(2) + '"/>';
+    s += '</svg>';
+    const nbNames = nb.map(isoName).filter(Boolean);
+    return '<div class="we-locator-wrap">' + s +
+      '<div class="we-locator-key"><span><i class="k-c"></i>' + esc(nm(findCountry(id))) + '</span><span><i class="k-s">★</i>' + esc(t('Capital', 'Capital')) + '</span>' +
+      (nbNames.length ? '<span class="we-nb">' + esc(t('Neighbours: ', 'Vecinos: ') + nbNames.join(', ')) + '</span>' : '<span class="we-nb">' + esc(t('No land borders', 'Sin fronteras terrestres')) + '</span>') + '</div></div>';
+  }
+  function _starPath(x, y, r) {
+    let d = '';
+    for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.42 : r; d += (i ? 'L' : 'M') + (x + rr * Math.cos(a)).toFixed(1) + ',' + (y + rr * Math.sin(a)).toFixed(1); }
+    return d + 'Z';
   }
 
   function openCountry(id) {
-    currentCountry = currentContinent.countries.find(c => c.id === id);
-    if (!currentCountry) return;
-
+    const k = findCountry(id);
+    if (!k) return;
+    currentCountry = k;
+    currentContinent = contOf(id);
+    mapMode = 'continent';
     const card = document.getElementById('country-card');
     const data = _load();
     const isVisited = (data.visited || []).includes(id);
+    const g = GEO[id];
+    const showLL = tierAtLeast('advanced') && g;
 
     card.innerHTML = `
-      <span class="country-flag">${currentCountry.flag}</span>
-      <div class="country-name">${lang === 'es' ? currentCountry.nameEs : currentCountry.name}</div>
-      <div class="country-capital">${lang === 'es' ? 'Capital' : 'Capital'}: ${lang === 'es' ? currentCountry.capitalEs : currentCountry.capital}</div>
-      
+      <div class="we-cbar">
+        <button class="back-btn" aria-label="${esc(t('Back to map', 'Volver al mapa'))}" onclick="WorldExplorer.backToContinent()">←</button>
+        <span class="we-cbar-cont">${esc(nm(currentContinent))}</span>
+        ${isVisited ? '<span class="we-visited-pill">✓ ' + esc(t('Visited', 'Visitado')) + '</span>' : ''}
+      </div>
+      <div class="we-hero">
+        <div class="we-hero-flag">${flagSVG(id, 'we-flag big', true)}<span class="we-pole" aria-hidden="true"></span></div>
+        <div class="we-hero-text">
+          <div class="country-name">${esc(nm(k))}</div>
+          <div class="country-capital"><span class="we-cap-star" aria-hidden="true">★</span> ${esc(t('Capital', 'Capital'))}: <b>${esc(lang === 'es' ? k.capitalEs : k.capital)}</b></div>
+        </div>
+      </div>
+      ${_locatorSVG(id)}
       <div class="country-info-grid">
-        <div class="info-box">
-          <div class="info-label">${lang === 'es' ? 'Hito' : 'Landmark'}</div>
-          <div class="info-value">${currentCountry.landmark.emoji} ${lang === 'es' ? currentCountry.landmark.nameEs : currentCountry.landmark.name}</div>
+        <div class="info-box we-lm-box">
+          ${lmIcon(id, 'we-lm-svg big')}
+          <div>
+            <div class="info-label">${esc(t('Landmark', 'Monumento'))}</div>
+            <div class="info-value">${esc(nm(k.landmark))}</div>
+            ${showLL ? '<div class="we-ll">📍 ' + fmtLL(g.lm) + '</div>' : ''}
+          </div>
         </div>
-        <div class="info-box">
-          <div class="info-label">${lang === 'es' ? 'Animal' : 'Animal'}</div>
-          <div class="info-value">${currentCountry.animal.emoji} ${lang === 'es' ? currentCountry.animal.nameEs : currentCountry.animal.name}</div>
+        <div class="info-box we-animal-box">
+          <span class="we-animal-emoji" aria-hidden="true">${k.animal.emoji}</span>
+          <div>
+            <div class="info-label">${esc(t('Animal', 'Animal'))}</div>
+            <div class="info-value">${esc(nm(k.animal))}</div>
+          </div>
         </div>
       </div>
-
       <div class="country-facts">
-        ${currentCountry.facts.map(f => `
-          <div class="fact-item">📍 ${lang === 'es' ? f.es : f.en}</div>
-        `).join('')}
+        ${k.facts.map(f => `<div class="fact-item"><span class="we-fact-dot" aria-hidden="true"></span><span>${esc(lang === 'es' ? f.es : f.en)}</span></div>`).join('')}
       </div>
-
       ${typeof WorldExplorerExtras !== 'undefined' ? WorldExplorerExtras.renderExtras(id, lang) : ''}
-
       <button class="action-btn btn-primary" onclick="WorldExplorer.markVisited('${id}')" ${isVisited ? 'disabled' : ''}>
-        ${isVisited ? '✅ ' + (lang === 'es' ? 'Visitado' : 'Visited') : '🗺️ ' + (lang === 'es' ? 'Marcar como Visitado' : 'Mark as Visited')}
+        ${isVisited ? '✅ ' + esc(t('Visited', 'Visitado')) : '🗺️ ' + esc(t('Mark as Visited', 'Marcar como Visitado'))}
       </button>
-      ${(currentCountry.quiz && currentCountry.quiz.length) ? `
-      <button class="action-btn btn-quiz" onclick="WorldExplorer.startQuiz('${id}')">
-        ${lang === 'es' ? '❓ Tomar Quiz' : '❓ Take Quiz'}
-      </button>` : ''}
-      <button class="action-btn btn-secondary" onclick="WorldExplorer.backToContinent()">
-        ${lang === 'es' ? 'Volver al Mapa' : 'Back to Map'}
-      </button>
+      ${(k.quiz && k.quiz.length) ? `<button class="action-btn btn-quiz" onclick="WorldExplorer.startQuiz('${id}')">❓ ${esc(t('Take Quiz', 'Tomar Quiz'))}</button>` : ''}
+      <button class="action-btn btn-secondary" onclick="WorldExplorer.backToContinent()">${esc(t('Back to Map', 'Volver al Mapa'))}</button>
     `;
-
     _showScreen('country');
   }
 
@@ -931,14 +1450,12 @@ const WorldExplorer = (() => {
       data.totalStars = (data.totalStars || 0) + 1;
       _save(data);
       _showFeedback('⭐');
-      if (typeof playSound === 'function') playSound('correct');
+      sfx('star');
       _updateGlobalStars();
-      
+      const k = findCountry(id);
       if (typeof ActivityLog !== 'undefined') {
-        ActivityLog.log('World Explorer', '🌍', `Visited ${lang === 'es' ? currentCountry.nameEs : currentCountry.name}`);
+        ActivityLog.log('World Explorer', '🌍', `Visited ${k ? k.name : id}`);
       }
-
-      // Trigger learning check
       if (typeof LearningCheck !== 'undefined') {
         LearningCheck.maybePrompt('geography', () => openCountry(id));
       } else {
@@ -947,22 +1464,18 @@ const WorldExplorer = (() => {
     }
   }
 
-  // ── Quiz (mirrors Civics Lab quiz flow) ──
+  // ================================================================
+  //  COUNTRY QUIZ (unchanged rules: one star per finished quiz)
+  // ================================================================
   function startQuiz(id) {
-    const country = (currentContinent && currentContinent.countries.find(c => c.id === id)) || currentCountry;
+    const country = findCountry(id) || currentCountry;
     if (!country || !country.quiz || !country.quiz.length) return;
     currentCountry = country;
     quizCountryId = id;
-
-    // Filter the country's questions by the child's age tier.
     const original = country.quiz.slice();
-    let qs = original.slice();
-    const tier = (typeof getAgeTier === 'function') ? getAgeTier() : 'expert';
-    const order = ['beginner', 'intermediate', 'advanced', 'expert'];
-    const max = order.indexOf(tier);
-    qs = qs.filter(q => order.indexOf(q.tier || 'intermediate') <= max);
+    const max = TIERS.indexOf(tier() || 'expert');
+    let qs = original.filter(q => TIERS.indexOf(q.tier || 'intermediate') <= max);
     if (!qs.length) qs = original;
-
     quizPool = qs;
     quizIdx = 0;
     quizCorrect = 0;
@@ -975,45 +1488,37 @@ const WorldExplorer = (() => {
     if (!wrap) return;
     const q = quizPool[quizIdx];
     if (!q) return _finishQuiz();
-
     const opts = lang === 'es' ? (q.optionsEs || q.options) : q.options;
     wrap.innerHTML =
-      '<button class="back-btn quiz-back" aria-label="Back" onclick="WorldExplorer.backToCountry()">←</button>' +
-      '<div class="quiz-counter">' + (quizIdx + 1) + ' / ' + quizPool.length + '</div>' +
-      '<h2 class="quiz-q">' + (lang === 'es' ? q.qEs : q.q) + '</h2>' +
+      '<div class="we-qbar"><button class="back-btn quiz-back" aria-label="' + esc(t('Back', 'Volver')) + '" onclick="WorldExplorer.backToCountry()">←</button>' +
+      '<span class="we-qflag">' + flagSVG(quizCountryId, 'we-flag chip') + '</span>' +
+      '<div class="quiz-counter">' + (quizIdx + 1) + ' / ' + quizPool.length + '</div></div>' +
+      '<div class="we-progress"><span style="width:' + (quizIdx / quizPool.length * 100) + '%"></span></div>' +
+      '<h2 class="quiz-q">' + esc(lang === 'es' ? q.qEs : q.q) + '</h2>' +
       '<div class="quiz-options">' +
-        opts.map((o, i) =>
-          '<button class="quiz-opt" data-correct="' + (i === q.answer ? '1' : '0') + '">' + o + '</button>'
-        ).join('') +
+        opts.map((o, i) => '<button class="quiz-opt" data-correct="' + (i === q.answer ? '1' : '0') + '"><span class="we-opt-letter">' + 'ABCD'[i] + '</span>' + esc(o) + '</button>').join('') +
       '</div>' +
       '<div class="quiz-explain" id="quiz-explain"></div>';
 
     wrap.querySelectorAll('.quiz-opt').forEach(btn => {
       btn.onclick = () => {
-        // Lock all options once answered.
         wrap.querySelectorAll('.quiz-opt').forEach(b => { b.disabled = true; });
         const correct = btn.dataset.correct === '1';
         btn.classList.add(correct ? 'correct' : 'wrong');
         if (!correct) {
-          // Highlight the right answer too.
           const right = wrap.querySelector('.quiz-opt[data-correct="1"]');
           if (right) right.classList.add('correct');
         }
         if (correct) quizCorrect++;
-        if (typeof playSound === 'function') playSound(correct ? 'correct' : 'wrong');
-
-        // Show explanation in the current language, if present.
+        sfx(correct ? 'correct' : 'wrong');
         const exEl = document.getElementById('quiz-explain');
         if (exEl && q.explain && (q.explain[lang] || q.explain.en)) {
           exEl.textContent = '💡 ' + (q.explain[lang] || q.explain.en);
           exEl.classList.add('active');
         }
-
         const advance = document.createElement('button');
         advance.className = 'action-btn btn-primary quiz-next';
-        advance.textContent = (quizIdx + 1 < quizPool.length)
-          ? (lang === 'es' ? 'Siguiente →' : 'Next →')
-          : (lang === 'es' ? 'Ver Resultado' : 'See Result');
+        advance.textContent = (quizIdx + 1 < quizPool.length) ? t('Next →', 'Siguiente →') : t('See Result', 'Ver Resultado');
         advance.onclick = () => { quizIdx++; _renderQuizQuestion(); };
         wrap.appendChild(advance);
       };
@@ -1024,33 +1529,41 @@ const WorldExplorer = (() => {
     const total = quizPool.length;
     const acc = total > 0 ? quizCorrect / total : 0;
     const earnedStars = acc >= 0.95 ? 3 : acc >= 0.8 ? 2 : 1;
-
-    // Award a star on completion using World Explorer's progress store.
     const data = _load();
     data.totalStars = (data.totalStars || 0) + 1;
     if (!data.quizDone) data.quizDone = [];
     if (quizCountryId && !data.quizDone.includes(quizCountryId)) data.quizDone.push(quizCountryId);
     _save(data);
     _updateGlobalStars();
-    if (typeof playSound === 'function') playSound('correct');
-
+    sfx('cheer');
     if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
-      ActivityLog.log('World Explorer', '🌍',
-        (lang === 'es' ? 'Quiz ' : 'Quiz ') +
-        (lang === 'es' ? currentCountry.nameEs : currentCountry.name) +
-        ': ' + quizCorrect + '/' + total);
+      ActivityLog.log('World Explorer', '🌍', 'Quiz ' + currentCountry.name + ': ' + quizCorrect + '/' + total);
     }
+    _results({
+      stars: earnedStars,
+      title: nm(currentCountry),
+      score: quizCorrect + ' / ' + total + ' ' + t('correct', 'correctas'),
+      again: () => startQuiz(quizCountryId),
+      againLabel: t('🔁 Try Again', '🔁 Reintentar'),
+      back: () => backToCountry(),
+      backLabel: t('Back to Country', 'Volver al País'),
+      flag: quizCountryId
+    });
+  }
 
+  function _results(r) {
     const wrap = document.getElementById('results-wrap');
-    if (wrap) {
-      wrap.innerHTML =
-        '<div class="results-stars">' + '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars) + '</div>' +
-        '<div class="results-score">' + quizCorrect + ' / ' + total + ' ' + (lang === 'es' ? 'correctas' : 'correct') + '</div>' +
-        '<button class="action-btn btn-primary" onclick="WorldExplorer.startQuiz(\'' + quizCountryId + '\')">' +
-          (lang === 'es' ? '🔁 Reintentar' : '🔁 Try Again') + '</button>' +
-        '<button class="action-btn btn-secondary" onclick="WorldExplorer.backToCountry()">' +
-          (lang === 'es' ? 'Volver al País' : 'Back to Country') + '</button>';
-    }
+    if (!wrap) return;
+    wrap.innerHTML =
+      (r.flag ? '<div class="we-res-flag">' + flagSVG(r.flag, 'we-flag big', true) + '</div>' : '') +
+      '<div class="results-title">' + esc(r.title || '') + '</div>' +
+      '<div class="results-stars" aria-label="' + r.stars + ' / 3">' + [0, 1, 2].map(i => '<span class="we-rstar' + (i < r.stars ? ' on' : '') + '" style="animation-delay:' + (i * 0.18) + 's">★</span>').join('') + '</div>' +
+      '<div class="results-score">' + esc(r.score) + '</div>' +
+      (r.note ? '<div class="we-res-note">' + esc(r.note) + '</div>' : '') +
+      '<button class="action-btn btn-primary" id="we-res-again">' + esc(r.againLabel) + '</button>' +
+      '<button class="action-btn btn-secondary" id="we-res-back">' + esc(r.backLabel) + '</button>';
+    document.getElementById('we-res-again').onclick = r.again;
+    document.getElementById('we-res-back').onclick = r.back;
     _showScreen('results');
   }
 
@@ -1059,26 +1572,429 @@ const WorldExplorer = (() => {
     else backToContinent();
   }
 
-  function toggleLanguage() {
-    lang = lang === 'en' ? 'es' : 'en';
-    const label = document.getElementById('lang-label');
-    if (label) label.textContent = lang === 'en' ? 'ES / EN' : 'EN / ES';
+  // ================================================================
+  //  MAP CHALLENGES — tap the country, find the landmark, fly across
+  // ================================================================
+  const CH_TYPES = [
+    { id: 'tap',      icon: 'tap',      en: 'Tap the country',        es: 'Toca el país',
+      dEn: 'Find countries on the map.', dEs: 'Encuentra países en el mapa.' },
+    { id: 'landmark', icon: 'landmark', en: 'Where is this landmark?', es: '¿Dónde está este monumento?',
+      dEn: 'Put famous places where they belong.', dEs: 'Ubica lugares famosos en el mapa.' },
+    { id: 'flight',   icon: 'flight',   en: 'Fly across the ocean',    es: 'Vuela sobre el océano',
+      dEn: 'Which ocean do you cross?', dEs: '¿Qué océano cruzas?' }
+  ];
+  let ch = null;   // running challenge
+  let chMap = null;
 
-    // Refresh current screen
-    const active = document.querySelector('.screen.active');
-    if (active.id === 'screen-select') _renderContinentSelect();
-    else if (active.id === 'screen-continent') openContinent(currentContinent.id);
-    else if (active.id === 'screen-country') openCountry(currentCountry.id);
-    else if (active.id === 'screen-quiz') _renderQuizQuestion();
+  function _chIcon(kind) {
+    if (kind === 'tap') return '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#dff1fb"/><path d="M8,30c4-6 8-3 11-8s6-10 12-9 9,6 8,11-6,8-11,10-14,4-20-4Z" fill="#9dd48b" stroke="#fff" stroke-width="1.5"/><path d="M19,22c3-1 6,1 6,4s-3,5-6,4-4-7 0-8Z" fill="#e8553d"/><path d="M30,27v-8a2.2,2.2 0 0,1 4.4,0v6l4,1.4c1.6.6 2.2,2 1.8,3.6l-1.4,5.6c-.4,1.4-1.6,2.4-3,2.4h-5c-1.2,0-2.2-.6-2.8-1.6l-3.4-5.4c-.6-1 .2-2.4 1.4-2.2Z" fill="#ffd9b8" stroke="#8a5a3a" stroke-width="1.2" stroke-linejoin="round"/></svg>';
+    if (kind === 'landmark') return '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#fde8c8"/><path d="M12,36 L21,12 h2 L32,36 h-6 q-4-7-8,0Z" fill="#8a6a4a"/><path d="M16,28 h12 M18.6,21 h6.8" stroke="#6f5338" stroke-width="1.6"/><path d="M34,10c-3.3,0-6,2.6-6,5.8 0,4.4 6,10.2 6,10.2s6-5.8 6-10.2c0-3.2-2.7-5.8-6-5.8Z" fill="#e8553d"/><circle cx="34" cy="15.8" r="2.2" fill="#fff"/></svg>';
+    return '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#d6ecfb"/><path d="M6,30 q18-20 36-8" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="3 3"/><path d="M30,15l4-1.4 1.4,1-3.4,2.8 5.4,4.6-1.4,1-6.6-2.4-4,3.4.4,2.6-1,.8-1.8-3.4-3.4-1.8.8-1 2.6.4 3.4-4-2.4-6.6 1-1.4 4.6,5.4Z" fill="#3b5b8a"/></svg>';
   }
 
-  function backToSelect() { _showScreen('select'); _renderContinentSelect(); }
-  function backToContinent() { _showScreen('continent'); _renderMap(); }
+  function _renderChallengeCards() {
+    const host = document.getElementById('we-challenges');
+    if (!host) return;
+    const best = (_load().mapBest) || {};
+    host.innerHTML = CH_TYPES.map(c => {
+      const b = best[c.id] || 0;
+      return '<button type="button" class="we-ch-card" onclick="WorldExplorer.startChallenge(\'' + c.id + '\')">' +
+        '<span class="we-ch-icon">' + _chIcon(c.icon) + '</span>' +
+        '<span class="we-ch-text"><span class="we-ch-name">' + esc(lang === 'es' ? c.es : c.en) + '</span>' +
+        '<span class="we-ch-desc">' + esc(lang === 'es' ? c.dEs : c.dEn) + '</span></span>' +
+        '<span class="we-ch-best" aria-label="' + esc(t('Best: ', 'Mejor: ') + b + '/3') + '">' + [0, 1, 2].map(i => '<i class="' + (i < b ? 'on' : '') + '">★</i>').join('') + '</span>' +
+      '</button>';
+    }).join('');
+  }
+
+  function _rounds(type) {
+    const T = tier();
+    if (type === 'tap') return { beginner: 5, intermediate: 6, advanced: 8, expert: 8 }[T] || 6;
+    if (type === 'landmark') return { beginner: 5, intermediate: 6, advanced: 6, expert: 7 }[T] || 6;
+    return { beginner: 4, intermediate: 5, advanced: 6, expert: 7 }[T] || 5;
+  }
+
+  function startChallenge(type) {
+    const T = tier();
+    const n = _rounds(type);
+    let qs = [];
+    const withGeo = ALL.filter(x => GEO[x.k.id]);
+    if (type === 'tap' || type === 'landmark') {
+      // Younger explorers stay in one or two continents per round;
+      // older ones get the whole set.
+      let pool = withGeo;
+      if (T === 'beginner' || T === 'intermediate') {
+        const conts = shuffle(CONTINENTS.filter(c => c.countries.length >= 3)).slice(0, T === 'beginner' ? 1 : 2).map(c => c.id);
+        pool = withGeo.filter(x => conts.indexOf(x.c.id) >= 0);
+      }
+      qs = shuffle(pool).slice(0, n).map(x => ({ id: x.k.id }));
+      if (type === 'tap' && T === 'expert') qs.forEach((q, i) => { q.byCapital = i % 2 === 1; });
+    } else {
+      const ok = FLIGHTS.filter(f => !f.minTier || tierAtLeast(f.minTier));
+      let pick = shuffle(ok);
+      if (T === 'expert' && !pick.slice(0, n).some(f => f.cross === 'arctic')) {
+        const arc = ok.find(f => f.cross === 'arctic'); if (arc) pick = [arc].concat(pick.filter(f => f !== arc));
+        pick = shuffle(pick.slice(0, n)).concat(pick.slice(n));
+      }
+      qs = pick.slice(0, n).map(f => ({ flight: f, reverse: Math.random() < 0.5 }));
+      // Older explorers also say which country the plane flies over.
+      if (tierAtLeast('advanced')) qs.forEach(q => { q.askOver = !!q.flight.over && Math.random() < (T === 'expert' ? 0.7 : 0.4); });
+    }
+    ch = { type, qs, idx: 0, score: 0, tries: 0, done: false, tier: T };
+    _showScreen('challenge');
+    const host = document.getElementById('we-ch-map');
+    if (hasMap()) chMap = new MapView(host, { onTap: _onChallengeTap });
+    _renderChallengeQ();
+  }
+
+  function _chHeader() {
+    const def = CH_TYPES.find(c => c.id === ch.type);
+    document.getElementById('we-ch-name').textContent = lang === 'es' ? def.es : def.en;
+    document.getElementById('we-ch-count').textContent = (ch.idx + 1) + ' / ' + ch.qs.length;
+    document.getElementById('we-ch-fill').style.width = (ch.idx / ch.qs.length * 100) + '%';
+    document.getElementById('we-ch-score').textContent = '✓ ' + (Math.round(ch.score * 10) / 10);
+  }
+
+  function _chPrompt(html) { document.getElementById('we-ch-prompt').innerHTML = html; }
+  function _chFeedback(html, kind) {
+    const el = document.getElementById('we-ch-feedback');
+    el.className = 'we-ch-feedback' + (kind ? ' ' + kind : '');
+    el.innerHTML = html || '';
+  }
+
+  function _paintChallenge(focusCont, hintIds) {
+    const T = ch.tier;
+    const hint = {};
+    (hintIds || []).forEach(id => { if (GEO[id]) hint[GEO[id].iso] = 1; });
+    chMap.paint((code, cc) => {
+      const tint = TINT[cc] || TINT.an;
+      if (hint[code]) return { fill: tint[1], cls: 'tap taught' };
+      if (cc === 'an') return { fill: TINT.an[0] };
+      if (focusCont && VIEW[focusCont] && cc !== VIEW[focusCont].code) return { fill: '#e7e8e2', cls: 'tap far' };
+      return { fill: (T === 'advanced' || T === 'expert') ? '#efeee6' : pale(cc), cls: 'tap' };
+    });
+  }
+
+  function _renderChallengeQ() {
+    _chHeader();
+    _chFeedback('');
+    const next = document.getElementById('we-ch-next');
+    next.hidden = true;
+    const q = ch.qs[ch.idx];
+    if (!q) return _finishChallenge();
+    ch.tries = 0;
+    ch.answered = false;
+    if (!chMap) { _chPrompt('<p>' + esc(t('Map data did not load.', 'No se cargó el mapa.')) + '</p>'); return; }
+    chMap.clear();
+    const T = ch.tier;
+    const stage = document.getElementById('we-ch-stage');
+    stage.className = 'we-ch-stage ' + ch.type + (ch.type === 'landmark' && T === 'expert' && window.innerWidth >= 700 ? ' world' : '');
+    const optsHost = document.getElementById('we-ch-options');
+    optsHost.innerHTML = '';
+
+    if (ch.type === 'tap') {
+      const k = findCountry(q.id), cont = contOf(q.id);
+      const hintIds = T === 'beginner' ? cont.countries.map(x => x.id) : [];
+      _paintChallenge(cont.id, hintIds);
+      requestAnimationFrame(() => {
+        chMap.setBox(_fitTaught(cont));
+        // tiny countries get a tap ring so they can be hit at all
+        let s = '';
+        cont.countries.forEach(x => { const g = GEO[x.id], inf = g && WorldMap.info(g.iso); if (inf && inf.a < 40) s += chMap.dotSVG(inf.c[0], inf.c[1], 10, 'we-hitring', ' data-hit="' + g.iso + '"'); });
+        chMap.gMarks.innerHTML = s;
+      });
+      const clue = q.byCapital
+        ? t('Tap the country whose capital is ', 'Toca el país cuya capital es ') + '<b>' + esc(lang === 'es' ? k.capitalEs : k.capital) + '</b>'
+        : t('Tap ', 'Toca ') + '<b>' + esc(nm(k)) + '</b>';
+      _chPrompt((T === 'beginner' || T === 'intermediate' ? flagSVG(q.id, 'we-flag prompt', true) : '') + '<div class="we-ch-q">' + clue + '</div>');
+    } else if (ch.type === 'landmark') {
+      const k = findCountry(q.id), cont = contOf(q.id);
+      const world = T === 'expert' && window.innerWidth >= 700;
+      _paintChallenge(world ? null : cont.id, T === 'beginner' ? cont.countries.map(x => x.id) : []);
+      requestAnimationFrame(() => { chMap.setBox(world ? FULL() : _fitTaught(cont)); if (world) chMap.waters(['pacific', 'atlantic', 'indian']); });
+      const how = (T === 'advanced' || T === 'expert')
+        ? t('Tap the exact spot on the map.', 'Toca el lugar exacto en el mapa.')
+        : t('Tap the country where it is.', 'Toca el país donde está.');
+      _chPrompt(lmIcon(q.id, 'we-lm-svg prompt') + '<div class="we-ch-q"><b>' + esc(nm(k.landmark)) + '</b><span class="we-ch-sub">' + esc(how) + '</span></div>');
+    } else {
+      _renderFlightQ(q);
+    }
+  }
+
+  // Frame the continent's taught countries (plus some of the land around).
+  function _fitTaught(cont) {
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    cont.countries.forEach(k => { const g = GEO[k.id], inf = g && WorldMap.info(g.iso); if (!inf) return;
+      x0 = Math.min(x0, inf.b[0]); y0 = Math.min(y0, inf.b[1]); x1 = Math.max(x1, inf.b[2]); y1 = Math.max(y1, inf.b[3]); });
+    const vb = WorldMap.box(VIEW[cont.id].box);
+    // never zoom closer than half the continent view
+    let w = Math.max(x1 - x0, vb[2] * 0.5), h = Math.max(y1 - y0, vb[3] * 0.5);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    return chMap.fit([cx - w / 2, cy - h / 2, w, h], 0.08, 0, true);
+  }
+
+  function _flightEnds(q) {
+    const f = q.flight;
+    return q.reverse && !f.note ? [f.to, f.from] : [f.from, f.to];
+  }
+
+  function _renderFlightQ(q) {
+    const T = ch.tier, f = q.flight, ends = _flightEnds(q);
+    const A = findCountry(ends[0]), B = findCountry(ends[1]);
+    _paintChallenge(null, ends);
+    const showNames = T === 'beginner' || T === 'intermediate';
+    requestAnimationFrame(() => {
+      chMap.setBox(_fitRoute(ends));
+      if (showNames) chMap.waters(['pacific', 'atlantic', 'indian', 'arctic', 'southern', 'mediterranean']);
+      _drawFlight(ends);
+    });
+    _chPrompt('<div class="we-ch-flight">' + flagSVG(ends[0], 'we-flag prompt sm') + '<span class="we-ch-arrow">✈</span>' + flagSVG(ends[1], 'we-flag prompt sm') + '</div>' +
+      '<div class="we-ch-q">' + esc(t('Fly from ', 'Vuela de ') + (lang === 'es' ? A.capitalEs : A.capital) + ' (' + nm(A) + ')' + t(' to ', ' a ') + (lang === 'es' ? B.capitalEs : B.capital) + ' (' + nm(B) + ').') +
+      '<span class="we-ch-sub">' + esc(t('Which ocean or sea do you cross?', '¿Qué océano o mar cruzas?')) + '</span></div>');
+    let n = T === 'beginner' ? 2 : T === 'intermediate' ? 3 : 4;
+    const opts = shuffle([f.cross].concat(f.not.slice(0, n - 1)));
+    _options(opts.map(k => ({ key: k, label: lang === 'es' ? WATERS[k].es : WATERS[k].en })), key => _answerFlight(key));
+  }
+
+  // Frame a flight: the route plus room around it, never tighter than a
+  // third of the world (routes that wrap past the map edge show it all).
+  function _fitRoute(ends) {
+    const pts = WorldMap.greatCircle(GEO[ends[0]].cap, GEO[ends[1]].cap, 60);
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, wrap = false;
+    pts.forEach((p, i) => { if (i && Math.abs(p[0] - pts[i - 1][0]) > WorldMap.W / 3) wrap = true; x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); });
+    if (wrap) return chMap.fit(FULL(), 0, 0, true);
+    const w = Math.max(x1 - x0, WorldMap.W * 0.36), h = Math.max(y1 - y0, WorldMap.H * 0.3);
+    return chMap.fit([(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - h / 2, w, h], 0.14, 0, true);
+  }
+
+  function _drawFlight(ends) {
+    const a = GEO[ends[0]].cap, b = GEO[ends[1]].cap;
+    const pts = WorldMap.greatCircle(a, b, 90), u = chMap.upp();
+    // split where the route wraps around the map edge
+    const segs = [[pts[0]]];
+    for (let i = 1; i < pts.length; i++) {
+      if (Math.abs(pts[i][0] - pts[i - 1][0]) > WorldMap.W / 3) segs.push([]);
+      segs[segs.length - 1].push(pts[i]);
+    }
+    let s = segs.map(sg => '<path class="we-route-shadow" d="M' + sg.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L') + '" stroke-width="' + (5 * u).toFixed(2) + '"/>' +
+      '<path class="we-route" pathLength="100" d="M' + sg.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L') + '" stroke-width="' + (2.6 * u).toFixed(2) + '" stroke-dasharray="' + (2 * u).toFixed(2) + ' ' + (4 * u).toFixed(2) + '"/>').join('');
+    const pa = WorldMap.project(a[0], a[1]), pb = WorldMap.project(b[0], b[1]);
+    s += chMap.dotSVG(pa[0], pa[1], 5, 'we-city from') + chMap.dotSVG(pb[0], pb[1], 5, 'we-city to');
+    s += '<g class="we-plane" transform="translate(' + pa[0].toFixed(1) + ',' + pa[1].toFixed(1) + ') scale(' + u.toFixed(4) + ')"><path d="M-9,0 l5-1.4 3-7 2.4,0 -1.6,7 6,0 2.4-3 1.8,0 -1.2,4.4 1.2,4.4 -1.8,0 -2.4-3 -6,0 1.6,7 -2.4,0 -3-7Z" transform="rotate(0)"/></g>';
+    chMap.gOver.innerHTML = s;
+    // fly the plane along the route
+    const plane = chMap.gOver.querySelector('.we-plane'), t0 = performance.now(), dur = 2200;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function step(now) {
+      if (!plane.isConnected) return;
+      const k = reduce ? 1 : Math.max(0, Math.min(1, (now - t0) / dur)), i = Math.min(pts.length - 2, Math.floor(k * (pts.length - 1)));
+      const p = pts[i], p2 = pts[i + 1];
+      let ang = Math.atan2(p2[1] - p[1], p2[0] - p[0]) * 180 / Math.PI;
+      if (Math.abs(p2[0] - p[0]) > WorldMap.W / 3) ang = 0;
+      const pos = k >= 1 ? pts[pts.length - 1] : p;
+      plane.setAttribute('transform', 'translate(' + pos[0].toFixed(1) + ',' + pos[1].toFixed(1) + ') scale(' + u.toFixed(4) + ') rotate(' + ang.toFixed(0) + ')');
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function _options(list, onPick) {
+    const host = document.getElementById('we-ch-options');
+    host.innerHTML = list.map((o, i) => '<button type="button" class="quiz-opt we-ch-opt" data-key="' + esc(o.key) + '"><span class="we-opt-letter">' + 'ABCD'[i] + '</span>' + esc(o.label) + '</button>').join('');
+    host.querySelectorAll('.we-ch-opt').forEach(b => { b.onclick = () => onPick(b.dataset.key, b); });
+  }
+
+  function _answerFlight(key) {
+    if (ch.answered) return;
+    const q = ch.qs[ch.idx], f = q.flight;
+    const right = key === f.cross;
+    const host = document.getElementById('we-ch-options');
+    host.querySelectorAll('.we-ch-opt').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.key === f.cross) b.classList.add('correct');
+      else if (b.dataset.key === key) b.classList.add('wrong');
+    });
+    const ends = _flightEnds(q);
+    const km = Math.round(WorldMap.distanceKm(GEO[ends[0]].cap, GEO[ends[1]].cap) / 100) * 100;
+    chMap.waters([f.cross]);
+    const cname = lang === 'es' ? WATERS[f.cross].es : WATERS[f.cross].en;
+    let msg = (right ? t('Yes! ', '¡Sí! ') : t('Not this time. ', 'Esta vez no. ')) +
+      t('This flight crosses the ', 'Este vuelo cruza el ') + cname + '. ' +
+      t('About ', 'Unos ') + km.toLocaleString(lang === 'es' ? 'es-CL' : 'en-US') + ' km.';
+    if (f.note) msg += ' ' + f.note[lang];
+    if (q.askOver && !q.overDone) {
+      // follow-up question for older explorers
+      ch.score += right ? 0.5 : 0;
+      sfx(right ? 'correct' : 'wrong');
+      q.overDone = true;
+      _chFeedback(esc(msg), right ? 'good' : 'bad');
+      setTimeout(() => _askOver(q), 900);
+      return;
+    }
+    ch.answered = true;
+    if (right) ch.score += q.askOver ? 0.5 : 1;
+    sfx(right ? 'correct' : 'wrong');
+    _chFeedback(esc(msg), right ? 'good' : 'bad');
+    _showNext();
+  }
+
+  function _askOver(q) {
+    const f = q.flight;
+    document.getElementById('we-ch-prompt').querySelector('.we-ch-sub').textContent = t('Which country does the plane fly over on the way?', '¿Sobre qué país vuela el avión en el camino?');
+    const opts = shuffle([f.over].concat(f.notOver.slice(0, 3)));
+    _options(opts.map(k => ({ key: k, label: OVER_NAMES[k] ? OVER_NAMES[k][lang === 'es' ? 1 : 0] : k })), key => {
+      if (ch.answered) return;
+      ch.answered = true;
+      const right = key === f.over;
+      document.getElementById('we-ch-options').querySelectorAll('.we-ch-opt').forEach(b => {
+        b.disabled = true;
+        if (b.dataset.key === f.over) b.classList.add('correct'); else if (b.dataset.key === key) b.classList.add('wrong');
+      });
+      if (right) ch.score += 0.5;
+      sfx(right ? 'correct' : 'wrong');
+      const on = OVER_NAMES[f.over][lang === 'es' ? 1 : 0];
+      _chFeedback(esc((right ? t('Right! ', '¡Correcto! ') : t('Look again: ', 'Mira otra vez: ')) + t('the route passes over ', 'la ruta pasa sobre ') + on + '.'), right ? 'good' : 'bad');
+      _showNext();
+    });
+  }
+
+  function _onChallengeTap(code, pt) {
+    if (!ch || ch.answered || ch.type === 'flight') return;
+    const q = ch.qs[ch.idx];
+    const T = ch.tier;
+    const g = GEO[q.id], k = findCountry(q.id);
+    if (ch.type === 'tap' || (ch.type === 'landmark' && (T === 'beginner' || T === 'intermediate'))) {
+      if (!code || code.indexOf('lm:') === 0) return;
+      const right = code === g.iso;
+      const maxTries = T === 'beginner' ? 3 : T === 'intermediate' ? 2 : 1;
+      ch.tries++;
+      if (right) {
+        ch.answered = true;
+        const pts = ch.tries === 1 ? 1 : 0.5;
+        ch.score += pts;
+        sfx('correct');
+        _flashCountry(code, 'hit');
+        const extra = ch.type === 'landmark' ? ' ' + nm(k.landmark) + t(' is in ', ' está en ') + nm(k) + '.' : '';
+        _chFeedback(esc((ch.tries === 1 ? t('Spot on! ', '¡Exacto! ') : t('Got it! ', '¡Lo encontraste! ')) + nm(k) + '.' + extra), 'good');
+        if (ch.type === 'landmark') _revealLandmark(q.id, null);
+        _showNext();
+        return;
+      }
+      sfx('wrong');
+      _flashCountry(code, 'miss');
+      const said = isoName(code);
+      if (ch.tries >= maxTries) {
+        ch.answered = true;
+        _flashCountry(g.iso, 'hit');
+        _chFeedback(esc((said ? t('That is ', 'Ese es ') + said + '. ' : '') + t('Here is ', 'Aquí está ') + nm(k) + '.'), 'bad');
+        if (ch.type === 'landmark') _revealLandmark(q.id, null);
+        _showNext();
+      } else {
+        _chFeedback(esc((said ? t('That is ', 'Ese es ') + said + '. ' : t('Not quite. ', 'No exactamente. ')) + t('Try again!', '¡Inténtalo otra vez!')), 'try');
+      }
+      return;
+    }
+    // landmark, exact spot (advanced / expert)
+    const ll = WorldMap.invert(pt[0], pt[1]);
+    if (!ll) return;
+    ch.answered = true;
+    const km = WorldMap.distanceKm(ll, g.lm);
+    // older explorers are scored more tightly on a continent map
+    const near = T === 'expert' ? (window.innerWidth >= 700 ? [500, 1200] : [250, 700]) : [350, 900];
+    const pts = km <= near[0] ? 1 : km <= near[1] ? 0.5 : 0;
+    ch.score += pts;
+    sfx(pts ? 'correct' : 'wrong');
+    _revealLandmark(q.id, pt);
+    const kmTxt = Math.round(km).toLocaleString(lang === 'es' ? 'es-CL' : 'en-US');
+    const head = pts === 1 ? t('Bullseye! ', '¡En el blanco! ') : pts ? t('Close! ', '¡Cerca! ') : t('Far away. ', 'Lejos. ');
+    _chFeedback(esc(head + t('You were ', 'Estabas a ') + kmTxt + ' km ' + t('away. ', 'de distancia. ') + nm(k.landmark) + t(' is in ', ' está en ') + nm(k) + '.'), pts ? 'good' : 'bad');
+    _showNext();
+  }
+
+  function _flashCountry(iso, cls) {
+    const p = chMap && chMap.lands[iso];
+    if (!p) return;
+    p.classList.remove('hit', 'miss');
+    void p.getBBox();
+    p.classList.add(cls);
+    if (cls === 'miss') setTimeout(() => p.classList.remove('miss'), 900);
+  }
+
+  function _revealLandmark(id, tapPt) {
+    const g = GEO[id], p = WorldMap.project(g.lm[0], g.lm[1]), u = chMap.upp();
+    let s = '';
+    if (tapPt) {
+      s += '<path class="we-miss-line" d="M' + tapPt[0].toFixed(1) + ',' + tapPt[1].toFixed(1) + 'L' + p[0].toFixed(1) + ',' + p[1].toFixed(1) + '" stroke-width="' + (2 * u).toFixed(2) + '" stroke-dasharray="' + (3 * u).toFixed(2) + ' ' + (3 * u).toFixed(2) + '"/>';
+      s += chMap.dotSVG(tapPt[0], tapPt[1], 5, 'we-tapdot');
+    }
+    chMap.gOver.innerHTML = s;
+    chMap.gMarks.innerHTML = '';
+    chMap.landmarks([id], { px: 44 });
+  }
+
+  function _showNext() {
+    const next = document.getElementById('we-ch-next');
+    next.hidden = false;
+    next.textContent = ch.idx + 1 < ch.qs.length ? t('Next →', 'Siguiente →') : t('See result', 'Ver resultado');
+    next.onclick = () => { ch.idx++; _renderChallengeQ(); };
+    document.getElementById('we-ch-score').textContent = '✓ ' + (Math.round(ch.score * 10) / 10);
+    if (next.scrollIntoView && window.innerHeight < next.getBoundingClientRect().bottom) next.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  function _finishChallenge() {
+    const total = ch.qs.length, acc = total ? ch.score / total : 0;
+    const stars = acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : acc >= 0.4 ? 1 : 0;
+    const data = _load();
+    if (!data.mapBest) data.mapBest = {};
+    const prev = data.mapBest[ch.type] || 0;
+    // Stars count once per level of mastery: only an improvement adds.
+    const gain = Math.max(0, stars - prev);
+    if (stars > prev) data.mapBest[ch.type] = stars;
+    data.totalStars = (data.totalStars || 0) + gain;
+    data.mapRounds = (data.mapRounds || 0) + 1;
+    _save(data);
+    _updateGlobalStars();
+    sfx(stars ? 'cheer' : 'click');
+    const def = CH_TYPES.find(c => c.id === ch.type);
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      ActivityLog.log('World Explorer', '🗺️', def.en + ': ' + (Math.round(ch.score * 10) / 10) + '/' + total);
+    }
+    const type = ch.type;
+    _results({
+      stars,
+      title: lang === 'es' ? def.es : def.en,
+      score: (Math.round(ch.score * 10) / 10) + ' / ' + total,
+      note: gain ? t('+' + gain + ' ⭐ new best!', '+' + gain + ' ⭐ ¡nuevo récord!') : (prev >= 3 ? t('You have mastered this challenge.', 'Ya dominas este desafío.') : t('Beat your best to earn stars.', 'Supera tu récord para ganar estrellas.')),
+      again: () => startChallenge(type),
+      againLabel: t('🔁 Play again', '🔁 Jugar otra vez'),
+      back: () => { ch = null; backToSelect(); },
+      backLabel: t('Back to the map', 'Volver al mapa')
+    });
+  }
+
+  function quitChallenge() { ch = null; backToSelect(); }
+
+  // ================================================================
+  function toggleLanguage() {
+    lang = lang === 'en' ? 'es' : 'en';
+    const data = _load();
+    data.lang = lang;
+    _save(data);
+    _applyStaticText();
+    const active = document.querySelector('.screen.active');
+    if (!active) return;
+    if (active.id === 'screen-select') { if (worldMap) { worldMap.svg.setAttribute('aria-label', t('World map', 'Mapa del mundo')); } _refitMap(); _renderChallengeCards(); }
+    else if (active.id === 'screen-country' && currentCountry) openCountry(currentCountry.id);
+    else if (active.id === 'screen-quiz') _renderQuizQuestion();
+    else if (active.id === 'screen-challenge' && ch) { ch.answered = false; _renderChallengeQ(); }
+  }
 
   function _showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById('screen-' + name);
     if (el) el.classList.add('active');
+    window.scrollTo(0, 0);
+    if (name === 'select') { _renderChallengeCards(); }
   }
 
   function _updateGlobalStars() {
@@ -1106,5 +2022,6 @@ const WorldExplorer = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { init, openContinent, openCountry, markVisited, toggleLanguage, backToSelect, backToContinent, startQuiz, backToCountry, getStats };
+  return { init, openContinent, openCountry, markVisited, toggleLanguage, backToSelect, backToContinent, startQuiz, backToCountry, getStats,
+    startChallenge, quitChallenge, _geo: GEO, _flights: FLIGHTS, _ch: () => ch };
 })();

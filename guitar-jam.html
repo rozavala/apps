@@ -6,7 +6,7 @@
   <title>Guitar Jam 🎸</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/guitar-jam.css">
+  <link rel="stylesheet" href="css/guitar-jam.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -17,137 +17,243 @@
 
 </head>
 <body>
-  <div class="app">
-    <!-- Top navigation managed by nav.js, plus custom tabs for this app -->
+  <div class="app gj-app">
+    <!-- nav.js puts the home button + user badge in this container -->
     <div class="screen active" id="screen-learn">
-    <div class="tabs-bar">
-      <button class="tab active" data-tab="learn">Learn</button>
-      <button class="tab" data-tab="play">Play</button>
-      <button class="tab" data-tab="ear">Ear</button>
-      <button class="tab" data-tab="tuner">Tuner</button>
-    </div>
+    <header class="gj-header">
+      <span id="gj-logo" class="gj-logo-wrap"></span>
+      <div>
+        <h1 class="gj-title">Guitar Jam</h1>
+        <div class="gj-subtitle">Guitarra · learn real chords</div>
+      </div>
+    </header>
+
+    <nav class="tabs-bar gj-tabs" role="tablist" aria-label="Guitar Jam sections">
+      <button class="tab active" data-tab="learn" role="tab" aria-selected="true"><span class="tab-ico" data-ico="learn"></span><span class="tab-txt">Learn<small>Aprende</small></span></button>
+      <button class="tab" data-tab="play" role="tab" aria-selected="false"><span class="tab-ico" data-ico="play"></span><span class="tab-txt">Play<small>Toca</small></span></button>
+      <button class="tab" data-tab="ear" role="tab" aria-selected="false"><span class="tab-ico" data-ico="ear"></span><span class="tab-txt">Ear<small>Oído</small></span></button>
+      <button class="tab" data-tab="tuner" role="tab" aria-selected="false"><span class="tab-ico" data-ico="tuner"></span><span class="tab-txt">Tuner<small>Afinador</small></span></button>
+    </nav>
 
     <div class="content-container">
-      <div id="tab-learn" class="tab-content active">
-        <div class="chord-layout">
-          <div class="chord-sidebar">
-            <h2 style="font-family: var(--font-display); margin-bottom: 12px;">Chords to Learn</h2>
-            <div id="chord-list" class="chord-list"></div>
-          </div>
-          <div class="chord-main">
-            <div class="fretboard-wrap">
-              <svg id="fretboard-container" viewBox="0 0 200 250" preserveAspectRatio="xMidYMid meet"></svg>
+      <!-- ═════════════ LEARN ═════════════ -->
+      <section id="tab-learn" class="tab-content active" role="tabpanel">
+        <div class="gj-card gj-chords">
+          <div class="gj-card-title">Chords to learn <span id="chord-count" class="gj-count"></span></div>
+          <div id="chord-list" class="chord-list"></div>
+        </div>
+
+        <div class="gj-stage">
+          <div class="gj-stage-head">
+            <div class="gj-stage-name">
+              <div id="chord-name" class="chord-name">Select a chord</div>
+              <div id="chord-full" class="chord-full"></div>
             </div>
-            <div id="chord-name" class="chord-name">Select a chord</div>
-            <div id="chord-fact" class="chord-fact"></div>
-            <button id="strum-btn" class="strum-btn" style="display:none;">Strum ▶</button>
+            <div class="gj-seg" role="group" aria-label="Learn mode">
+              <button type="button" class="gj-seg-btn on" id="mode-look" aria-pressed="true">Look &amp; listen</button>
+              <button type="button" class="gj-seg-btn" id="mode-build" aria-pressed="false">Place your fingers</button>
+            </div>
+          </div>
+          <div class="gj-neck-wrap" id="learn-neck-wrap">
+            <canvas id="learn-guitar" role="img" aria-label="Guitar neck"></canvas>
+          </div>
+          <div id="learn-hint" class="gj-hint">Swipe across the strings over the sound hole to strum. Tap a fret to hear one note.</div>
+
+          <div id="learn-actions" class="gj-actions">
+            <button type="button" class="gj-btn primary" id="strum-down"><span data-ico="down"></span> Strum down</button>
+            <button type="button" class="gj-btn" id="strum-up"><span data-ico="up"></span> Strum up</button>
+            <button type="button" class="gj-btn" id="arp-btn"><span data-ico="arp"></span> One string at a time</button>
+            <div id="note-row" class="gj-notes" aria-label="Notes in this chord"></div>
+          </div>
+
+          <div id="build-panel" class="gj-build" hidden>
+            <div class="gj-build-prompt" id="build-prompt"></div>
+            <div class="gj-build-btns">
+              <button type="button" class="gj-btn primary" id="build-check"><span data-ico="check"></span> Check</button>
+              <button type="button" class="gj-btn" id="build-hint"><span data-ico="bulb"></span> Hint</button>
+              <button type="button" class="gj-btn" id="build-clear"><span data-ico="erase"></span> Clear</button>
+              <button type="button" class="gj-btn primary" id="build-next" hidden>Next chord →</button>
+            </div>
+            <div class="gj-build-score" id="build-score"></div>
           </div>
         </div>
-      </div>
 
-      <div id="tab-play" class="tab-content">
+        <div class="gj-info">
+          <div class="gj-card gj-box-card">
+            <div class="gj-card-title">Chord box</div>
+            <div id="chord-box" class="gj-box"></div>
+            <button type="button" class="gj-btn small" id="peek-btn" hidden>Peek (2 s)</button>
+          </div>
+          <div class="gj-card gj-fact-card">
+            <div class="gj-card-title">Good to know</div>
+            <p id="chord-fact" class="chord-fact"></p>
+            <div class="gj-legend" id="finger-legend"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════ PLAY ═════════════ -->
+      <section id="tab-play" class="tab-content" role="tabpanel">
         <div id="song-select-screen" class="song-select-screen">
-          <h2 style="font-family: var(--font-display); margin-bottom: 20px; text-align: center;">Pick a Song</h2>
+          <div class="gj-section-head">
+            <h2>Pick a song</h2>
+            <p>Traditional and folk tunes · chord charts only</p>
+          </div>
           <div id="song-list" class="song-grid"></div>
         </div>
-        
-        <div id="gameplay-screen" class="gameplay-screen" style="display:none;">
+
+        <div id="gameplay-screen" class="gameplay-screen" hidden>
           <div class="game-header">
-            <button class="back-to-songs" onclick="GuitarJam.exitSong()">← Songs</button>
-            <div id="game-song-title" class="game-song-title">Song Title</div>
-            <button id="metro-toggle" class="metro-toggle">⌛ Metro: On</button>
-          </div>
-
-          <div class="chord-strip-container">
-            <div id="chord-strip" class="chord-strip"></div>
-            <div class="hit-indicator"></div>
-          </div>
-
-          <div class="game-main">
-            <div class="fretboard-display">
-              <svg id="game-fretboard" viewBox="0 0 200 250"></svg>
-              <div id="game-chord-name" class="game-chord-name">C</div>
+            <button type="button" class="gj-btn small back-to-songs" id="back-songs"><span data-ico="back"></span> Songs</button>
+            <div class="game-title-wrap">
+              <div id="game-song-title" class="game-song-title">Song</div>
+              <div id="game-song-meta" class="game-song-meta"></div>
             </div>
+            <div class="game-controls">
+              <div class="gj-tempo" role="group" aria-label="Tempo">
+                <button type="button" class="gj-round" id="tempo-down" aria-label="Slower">−</button>
+                <span id="tempo-val" class="gj-tempo-val">100%</span>
+                <button type="button" class="gj-round" id="tempo-up" aria-label="Faster">+</button>
+              </div>
+              <button type="button" id="metro-toggle" class="gj-btn small metro-toggle on" aria-pressed="true"><span data-ico="metro"></span> Click</button>
+            </div>
+          </div>
+
+          <div class="gj-lane-wrap">
+            <canvas id="chord-lane" aria-hidden="true"></canvas>
+            <div id="lane-count" class="gj-count-in" aria-live="assertive"></div>
+            <div id="lane-judge" class="gj-judge"></div>
+            <div id="lane-combo" class="gj-combo"></div>
+          </div>
+          <div class="gj-now-row">
+            <div id="game-chord-name" class="game-chord-name" aria-live="polite"></div>
+            <div id="pattern-guide" class="gj-pattern"></div>
+          </div>
+
+          <div class="gj-neck-wrap game">
+            <canvas id="game-guitar" role="img" aria-label="Guitar with the current chord"></canvas>
           </div>
 
           <div class="game-footer">
-            <button id="big-strum-btn" class="big-strum-btn">STRUM!</button>
+            <button type="button" id="big-strum-btn" class="big-strum-btn"><span data-ico="down"></span> <span id="big-strum-label">STRUM</span></button>
+            <button type="button" id="up-strum-btn" class="big-strum-btn up" hidden><span data-ico="up"></span> UP</button>
+          </div>
+
+          <div id="game-ready" class="gj-ready">
+            <div class="gj-ready-card">
+              <div id="ready-title" class="gj-ready-title"></div>
+              <div id="ready-text" class="gj-ready-text"></div>
+              <button type="button" class="gj-btn primary big" id="start-song">Start</button>
+            </div>
           </div>
         </div>
 
-        <div id="results-screen" class="results-screen" style="display:none;">
-          <div class="results-card">
-            <div class="results-emoji">🎸</div>
-            <h2 id="results-title">Great Playing!</h2>
+        <div id="results-screen" class="results-screen" hidden>
+          <div class="results-card" role="dialog" aria-labelledby="results-title">
+            <div class="results-emoji" id="results-art"></div>
+            <h2 id="results-title">Great playing!</h2>
             <div class="results-stars" id="results-stars"></div>
+            <div id="results-note" class="results-note"></div>
             <div class="results-stats">
               <div class="stat-item"><span class="stat-label">Accuracy</span><span id="stat-accuracy" class="stat-val">0%</span></div>
               <div class="stat-item"><span class="stat-label">Correct</span><span id="stat-hits" class="stat-val">0</span></div>
+              <div class="stat-item"><span class="stat-label">Perfect</span><span id="stat-perfect" class="stat-val">0</span></div>
+              <div class="stat-item"><span class="stat-label">Best combo</span><span id="stat-combo" class="stat-val">0</span></div>
             </div>
             <div class="results-btns">
-              <button class="results-btn primary" onclick="GuitarJam.replaySong()">↺ Play Again</button>
-              <button class="results-btn" onclick="GuitarJam.exitSong()">More Songs</button>
+              <button type="button" class="results-btn primary" id="replay-btn">↺ Play again</button>
+              <button type="button" class="results-btn" id="more-songs-btn">More songs</button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div id="tab-ear" class="tab-content">
-        <div id="ear-game-screen" class="ear-game-screen">
+      <!-- ═════════════ EAR ═════════════ -->
+      <section id="tab-ear" class="tab-content" role="tabpanel">
+        <div id="ear-menu" class="ear-menu">
+          <div class="gj-section-head">
+            <h2>Ear training</h2>
+            <p>Listen first, then answer. 10 rounds each.</p>
+          </div>
+          <div id="ear-modes" class="ear-modes"></div>
+        </div>
+
+        <div id="ear-game-screen" class="ear-game-screen" hidden>
           <div class="ear-header">
+            <button type="button" class="gj-btn small" id="ear-back"><span data-ico="back"></span> Modes</button>
             <div id="ear-round" class="ear-round">Round 1/10</div>
-            <div id="ear-streak" class="ear-streak">🔥 0</div>
+            <div id="ear-streak" class="ear-streak">Streak 0</div>
           </div>
           <div class="ear-main">
             <div class="ear-question-card">
-              <button id="ear-replay-btn" class="ear-replay-btn">Replay 🔊</button>
-              <p>Which chord did you hear?</p>
+              <div id="ear-mode-title" class="ear-mode-title"></div>
+              <div class="ear-play-row">
+                <button type="button" id="ear-replay-btn" class="ear-replay-btn" aria-label="Play the sound again"><span data-ico="speaker"></span> <span>Listen</span></button>
+                <button type="button" id="ear-ref-btn" class="gj-btn small" hidden>Hear all 6 strings</button>
+              </div>
+              <p id="ear-prompt" class="ear-prompt">Which chord did you hear?</p>
             </div>
             <div id="ear-options" class="ear-options"></div>
+            <div id="ear-explain" class="ear-explain" aria-live="polite"></div>
+            <div class="gj-neck-wrap ear">
+              <canvas id="ear-guitar" aria-hidden="true"></canvas>
+            </div>
           </div>
         </div>
-        
-        <div id="ear-results-screen" class="results-screen" style="display:none;">
-          <div class="results-card">
-            <div class="results-emoji">👂</div>
-            <h2>Ear Training Done!</h2>
+
+        <div id="ear-results-screen" class="results-screen" hidden>
+          <div class="results-card" role="dialog" aria-labelledby="ear-results-title">
+            <div class="results-emoji" id="ear-results-art"></div>
+            <h2 id="ear-results-title">Ear training done!</h2>
             <div class="results-stars" id="ear-results-stars"></div>
             <div class="results-stats">
               <div class="stat-item"><span class="stat-label">Score</span><span id="ear-stat-score" class="stat-val">0/10</span></div>
-              <div class="stat-item"><span class="stat-label">Best Streak</span><span id="ear-stat-streak" class="stat-val">0</span></div>
+              <div class="stat-item"><span class="stat-label">Best streak</span><span id="ear-stat-streak" class="stat-val">0</span></div>
             </div>
             <div class="results-btns">
-              <button class="results-btn primary" onclick="GuitarJam.startEarGame()">↺ Play Again</button>
-              <button class="results-btn" onclick="GuitarJam.initLearn()">Back to Library</button>
+              <button type="button" class="results-btn primary" id="ear-again">↺ Play again</button>
+              <button type="button" class="results-btn" id="ear-to-menu">Other ear games</button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div id="tab-tuner" class="tab-content">
+      <!-- ═════════════ TUNER ═════════════ -->
+      <section id="tab-tuner" class="tab-content" role="tabpanel">
         <div class="tuner-container">
-          <h2 style="font-family: var(--font-display); text-align: center; margin-bottom: 24px;">Standard Tuner</h2>
-          <div class="tuner-headstock">
-            <!-- Visual buttons for each string -->
-            <div class="string-buttons">
-              <button class="tuner-btn" data-freq="329.63" data-name="E4">E <span>(High)</span></button>
-              <button class="tuner-btn" data-freq="246.94" data-name="B3">B</button>
-              <button class="tuner-btn" data-freq="196.00" data-name="G3">G</button>
-              <button class="tuner-btn" data-freq="146.83" data-name="D3">D</button>
-              <button class="tuner-btn" data-freq="110.00" data-name="A2">A</button>
-              <button class="tuner-btn" data-freq="82.41" data-name="E2">E <span>(Low)</span></button>
+          <div class="gj-section-head">
+            <h2>Standard tuner</h2>
+            <p>E A D G B E — tap a tuning key to hear that string.</p>
+          </div>
+          <div class="tuner-layout">
+            <div class="tuner-headstock">
+              <div id="headstock-art" class="headstock-art"></div>
+              <div class="string-buttons">
+                <button type="button" class="tuner-btn" data-string="0" data-freq="82.41" data-name="E2" style="left:12%;top:67.6%" aria-label="Low E string, E2">E<small>6</small></button>
+                <button type="button" class="tuner-btn" data-string="1" data-freq="110.00" data-name="A2" style="left:12%;top:45.9%" aria-label="A string, A2">A<small>5</small></button>
+                <button type="button" class="tuner-btn" data-string="2" data-freq="146.83" data-name="D3" style="left:12%;top:24.3%" aria-label="D string, D3">D<small>4</small></button>
+                <button type="button" class="tuner-btn" data-string="3" data-freq="196.00" data-name="G3" style="left:88%;top:24.3%" aria-label="G string, G3">G<small>3</small></button>
+                <button type="button" class="tuner-btn" data-string="4" data-freq="246.94" data-name="B3" style="left:88%;top:45.9%" aria-label="B string, B3">B<small>2</small></button>
+                <button type="button" class="tuner-btn" data-string="5" data-freq="329.63" data-name="E4" style="left:88%;top:67.6%" aria-label="High E string, E4">e<small>1</small></button>
+              </div>
+            </div>
+            <div class="tuner-meter">
+              <div id="gauge-art" class="gauge-art"></div>
+              <div id="tuner-readout" class="tuner-readout" aria-live="polite">Tap a string to hear its note.</div>
+              <button type="button" class="gj-btn" id="mic-btn" aria-pressed="false"><span data-ico="mic"></span> <span id="mic-label">Use microphone</span></button>
+              <p class="tuner-help">Optional. The microphone only listens while this is switched on, to measure the pitch. Nothing is recorded or saved. Tune each string until the needle points straight up.</p>
             </div>
           </div>
-          <p class="tuner-help">Tap a string to hear the correct pitch. Match your guitar string to this sound.</p>
-          <div class="tuner-tuning">E A D G B E</div>
+          <div class="tuner-tuning" aria-hidden="true">E A D G B E</div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </div>
 
   <!-- Common Feedback Overlay -->
   <div id="feedback" class="feedback-float"><span></span></div>
+  <div id="gj-toast" class="gj-toast" aria-live="polite"></div>
 
   <script src="js/auth.js?v=4"></script>
   <script src="js/off-hours.js?v=1"></script>
@@ -161,7 +267,9 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js?v=5"></script>
   <script src="js/dialog.js?v=2"></script>
-  <script src="js/guitar-jam.js?v=1"></script>
+  <script src="js/guitar-jam-audio.js?v=1"></script>
+  <script src="js/guitar-jam-art.js?v=1"></script>
+  <script src="js/guitar-jam.js?v=2"></script>
   <script src="js/recital.js?v=2"></script>
   <script>
     window.addEventListener('load', function() {

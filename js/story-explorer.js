@@ -1,7 +1,19 @@
 /* ================================================================
    STORY EXPLORER — story-explorer.js
-   Reading library with comprehension and vocabulary.
+   An illustrated bilingual storybook: pages turn like a real book,
+   read-aloud lights up each word (tts.js), tapping a highlighted word
+   shows and says its meaning, and each story ends with a round of
+   comprehension challenges sized to the reader's age.
+
    Storage key: zs_story_[username] via getUserAppKey('zs_story_')
+     storiesRead  [id]        stories finished (Progress Manager sets it)
+     totalStars   number      the star rule in auth.js reads this
+     wordsLearned [word]      words collected (English form)
+     storyStars   {id: 1-3}   best round per story (added)
+     bookmark     {id, page}  where a half-read story was left (added)
+     prefs        {lang}      EN / ES (added)
+
+   Art: js/story-explorer-art.js · challenges: js/story-explorer-data.js
    ================================================================ */
 
 const StoryExplorer = (() => {
@@ -55,32 +67,32 @@ const StoryExplorer = (() => {
           en: 'The helicopter flew over the snowy peaks. A climber was lost.',
           es: 'El helicóptero voló sobre los picos nevados. Un escalador estaba perdido.',
           vocab: [
-            { word: 'helicopter', wordEs: 'helicóptero' },
-            { word: 'peaks', wordEs: 'picos' }
+            { word: 'helicopter', wordEs: 'helicóptero', def: 'An aircraft with spinning blades on top.', defEs: 'Una aeronave con aspas que giran en el techo.' },
+            { word: 'peaks', wordEs: 'picos', def: 'The pointed tops of mountains.', defEs: 'Las cimas puntiagudas de las montañas.' }
           ]
         },
         {
           en: 'The wind was very strong. The pilot had to be careful.',
           es: 'El viento era muy fuerte. El piloto tenía que ser cuidadoso.',
           vocab: [
-            { word: 'wind', wordEs: 'viento' },
-            { word: 'strong', wordEs: 'fuerte' }
+            { word: 'wind', wordEs: 'viento', def: 'Moving air.', defEs: 'Aire en movimiento.' },
+            { word: 'strong', wordEs: 'fuerte', def: 'Having a lot of power or force.', defEs: 'Que tiene mucha fuerza.' }
           ]
         },
         {
           en: 'Finally, they saw a red tent on the white snow.',
           es: 'Finalmente, vieron una carpa roja sobre la nieve blanca.',
           vocab: [
-            { word: 'tent', wordEs: 'carpa' },
-            { word: 'snow', wordEs: 'nieve' }
+            { word: 'tent', wordEs: 'carpa', def: 'A cloth shelter held up by poles.', defEs: 'Un refugio de tela sostenido por palos.' },
+            { word: 'snow', wordEs: 'nieve', def: 'Frozen water that falls from the sky as white flakes.', defEs: 'Agua congelada que cae del cielo en copos blancos.' }
           ]
         },
         {
           en: 'The rescue team threw down a rope to help him.',
           es: 'El equipo de rescate lanzó una cuerda para ayudarlo.',
           vocab: [
-            { word: 'rope', wordEs: 'cuerda' },
-            { word: 'team', wordEs: 'equipo' }
+            { word: 'rope', wordEs: 'cuerda', def: 'A thick, strong cord.', defEs: 'Un cordel grueso y fuerte.' },
+            { word: 'team', wordEs: 'equipo', def: 'A group of people working together.', defEs: 'Un grupo de personas que trabajan juntas.' }
           ]
         }
       ],
@@ -724,16 +736,280 @@ const StoryExplorer = (() => {
         { q: 'What is ALMA?', qEs: '¿Qué es ALMA?', options: ['A famous mountain', 'A group of giant radio telescopes', 'A type of star', 'A river in the desert'], optionsEs: ['Una montaña famosa', 'Un conjunto de gigantescos radiotelescopios', 'Un tipo de estrella', 'Un río en el desierto'], answer: 1 },
         { q: 'What do radio telescopes gather?', qEs: '¿Qué recogen los radiotelescopios?', options: ['Sunlight only', 'Invisible radio waves from space', 'Rain water', 'Desert sand'], optionsEs: ['Solo luz solar', 'Ondas de radio invisibles del espacio', 'Agua de lluvia', 'Arena del desierto'], answer: 1 }
       ]
+    },
+    // ── Added with the illustrated edition (new stories go at the END) ──
+    {
+      id: 'penguin_coast',
+      title: 'Pipo the Penguin',
+      titleEs: 'Pipo el Pingüino',
+      tier: 'cadet', ageMin: 4, region: 'north', icon: '🐧',
+      pages: [
+        {
+          en: 'On the rocky coast of northern Chile lives a penguin named Pipo. He is a Humboldt penguin.',
+          es: 'En la costa rocosa del norte de Chile vive un pingüino llamado Pipo. Es un pingüino de Humboldt.',
+          vocab: [
+            { word: 'coast', wordEs: 'costa', def: 'The land next to the sea.', defEs: 'La tierra junto al mar.' },
+            { word: 'penguin', wordEs: 'pingüino', def: 'A bird that swims very well but cannot fly.', defEs: 'Un ave que nada muy bien pero no puede volar.' },
+            { word: 'rocky', wordEs: 'rocosa', def: 'Full of rocks.', defEs: 'Llena de rocas.' }
+          ]
+        },
+        {
+          en: 'Pipo has a black band across his white chest. Every Humboldt penguin has one!',
+          es: 'Pipo tiene una franja negra sobre su pecho blanco. ¡Todos los pingüinos de Humboldt tienen una!',
+          vocab: [
+            { word: 'band', wordEs: 'franja', def: 'A long, thin stripe.', defEs: 'Una raya larga y delgada.' },
+            { word: 'chest', wordEs: 'pecho', def: 'The front of the body, below the neck.', defEs: 'La parte delantera del cuerpo, bajo el cuello.' }
+          ]
+        },
+        {
+          en: 'Pipo cannot fly, but he is a fast swimmer. He uses his wings like flippers to chase little fish.',
+          es: 'Pipo no puede volar, pero es un nadador rápido. Usa sus alas como aletas para perseguir pececitos.',
+          vocab: [
+            { word: 'swimmer', wordEs: 'nadador', def: 'Someone who swims.', defEs: 'Alguien que nada.' },
+            { word: 'flippers', wordEs: 'aletas', def: 'Flat body parts used for swimming.', defEs: 'Partes planas del cuerpo que sirven para nadar.' },
+            { word: 'chase', wordEs: 'perseguir', def: 'To go quickly after something.', defEs: 'Ir rápido detrás de algo.' }
+          ]
+        },
+        {
+          en: 'In the evening, Pipo waddles home to his nest in a cozy burrow, where his family is waiting.',
+          es: 'Al atardecer, Pipo camina balanceándose hasta su nido en una acogedora madriguera, donde lo espera su familia.',
+          vocab: [
+            { word: 'waddles', wordEs: 'balanceándose', def: 'Walks with short steps, rocking from side to side.', defEs: 'Caminando con pasos cortos, meciéndose de lado a lado.' },
+            { word: 'burrow', wordEs: 'madriguera', def: 'A hole in the ground where an animal lives.', defEs: 'Un hoyo en la tierra donde vive un animal.' },
+            { word: 'nest', wordEs: 'nido', def: 'A home where birds lay eggs and raise their chicks.', defEs: 'Un hogar donde las aves ponen huevos y crían a sus polluelos.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Where does Pipo live?', qEs: '¿Dónde vive Pipo?', options: ['On a snowy mountain', 'On the rocky coast of northern Chile', 'In a big city', 'In a jungle'], optionsEs: ['En una montaña nevada', 'En la costa rocosa del norte de Chile', 'En una gran ciudad', 'En una selva'], answer: 1 },
+        { q: 'What does Pipo use like flippers?', qEs: '¿Qué usa Pipo como aletas?', options: ['His feet', 'His tail', 'His wings', 'His beak'], optionsEs: ['Sus patas', 'Su cola', 'Sus alas', 'Su pico'], answer: 2 },
+        { q: 'Where is Pipo\'s nest?', qEs: '¿Dónde está el nido de Pipo?', options: ['In a tree', 'In a cozy burrow', 'On a boat', 'In a sand castle'], optionsEs: ['En un árbol', 'En una acogedora madriguera', 'En un bote', 'En un castillo de arena'], answer: 1 }
+      ]
+    },
+    {
+      id: 'empanadas',
+      title: 'Empanadas for the Fiesta',
+      titleEs: 'Empanadas para la Fiesta',
+      tier: 'cadet', ageMin: 4, region: 'central', icon: '🥟',
+      pages: [
+        {
+          en: 'It is September in Chile, and the Fiestas Patrias are coming. Sofía and her grandma are making empanadas.',
+          es: 'Es septiembre en Chile y se acercan las Fiestas Patrias. Sofía y su abuela están haciendo empanadas.',
+          vocab: [
+            { word: 'September', wordEs: 'septiembre', def: 'The ninth month of the year.', defEs: 'El noveno mes del año.' },
+            { word: 'grandma', wordEs: 'abuela', def: 'The mother of your mom or dad.', defEs: 'La mamá de tu mamá o de tu papá.' }
+          ]
+        },
+        {
+          en: 'Grandma rolls out the dough. Sofía helps fill each one with pino: beef, onion, an olive and a piece of egg.',
+          es: 'La abuela estira la masa. Sofía ayuda a rellenar cada una con pino: carne, cebolla, una aceituna y un trozo de huevo.',
+          vocab: [
+            { word: 'dough', wordEs: 'masa', def: 'A soft mix of flour and water for baking.', defEs: 'Una mezcla suave de harina y agua para hornear.' },
+            { word: 'onion', wordEs: 'cebolla', def: 'A round vegetable with a strong taste.', defEs: 'Una verdura redonda de sabor fuerte.' },
+            { word: 'olive', wordEs: 'aceituna', def: 'A small green or black fruit.', defEs: 'Un fruto pequeño, verde o negro.' }
+          ]
+        },
+        {
+          en: 'They fold the dough into half-moons and press the edges. Then the empanadas go into the hot oven.',
+          es: 'Doblan la masa en forma de media luna y aprietan los bordes. Luego las empanadas van al horno caliente.',
+          vocab: [
+            { word: 'fold', wordEs: 'doblan', def: 'To bend something over onto itself.', defEs: 'Plegar algo sobre sí mismo.' },
+            { word: 'edges', wordEs: 'bordes', def: 'The outside lines of something.', defEs: 'Las orillas de algo.' },
+            { word: 'oven', wordEs: 'horno', def: 'A hot box for baking food.', defEs: 'Una caja caliente para hornear comida.' }
+          ]
+        },
+        {
+          en: 'Soon the kitchen smells wonderful. The whole family sits together to eat and celebrate on the eighteenth of September.',
+          es: 'Pronto la cocina huele delicioso. Toda la familia se sienta junta a comer y celebrar el dieciocho de septiembre.',
+          vocab: [
+            { word: 'kitchen', wordEs: 'cocina', def: 'The room where food is cooked.', defEs: 'La habitación donde se cocina.' },
+            { word: 'celebrate', wordEs: 'celebrar', def: 'To do something happy for a special day.', defEs: 'Hacer algo alegre en un día especial.' },
+            { word: 'family', wordEs: 'familia', def: 'Parents, children, grandparents and other relatives.', defEs: 'Padres, hijos, abuelos y otros parientes.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'What are Sofía and Grandma making?', qEs: '¿Qué están haciendo Sofía y su abuela?', options: ['A cake', 'Empanadas', 'Soup', 'Bread'], optionsEs: ['Un pastel', 'Empanadas', 'Sopa', 'Pan'], answer: 1 },
+        { q: 'What goes into the pino filling?', qEs: '¿Qué lleva el relleno de pino?', options: ['Beef, onion, olive and egg', 'Chocolate and candy', 'Apples and honey', 'Rice and beans'], optionsEs: ['Carne, cebolla, aceituna y huevo', 'Chocolate y dulces', 'Manzanas y miel', 'Arroz y porotos'], answer: 0 },
+        { q: 'When does the family celebrate?', qEs: '¿Cuándo celebra la familia?', options: ['On Christmas Day', 'On the eighteenth of September', 'On New Year\'s Day', 'On a rainy Monday'], optionsEs: ['En Navidad', 'El dieciocho de septiembre', 'En Año Nuevo', 'Un lunes de lluvia'], answer: 1 }
+      ]
+    },
+    {
+      id: 'miners_33',
+      title: 'The Rescue of the 33',
+      titleEs: 'El Rescate de los 33',
+      tier: 'pilot', ageMin: 8, region: 'north', icon: '⛑️',
+      pages: [
+        {
+          en: 'On August 5, 2010, part of the San José mine in the Atacama Desert collapsed. Thirty-three miners were trapped deep underground, about 700 meters below the surface.',
+          es: 'El 5 de agosto de 2010, una parte de la mina San José, en el desierto de Atacama, se derrumbó. Treinta y tres mineros quedaron atrapados bajo tierra, a unos 700 metros de profundidad.',
+          vocab: [
+            { word: 'mine', wordEs: 'mina', def: 'A place dug into the ground to take out rocks and metals.', defEs: 'Un lugar excavado en la tierra para sacar rocas y metales.' },
+            { word: 'collapsed', wordEs: 'derrumbó', def: 'Fell down suddenly.', defEs: 'Se cayó de repente.' },
+            { word: 'trapped', wordEs: 'atrapados', def: 'Stuck and unable to get out.', defEs: 'Encerrados, sin poder salir.' },
+            { word: 'underground', wordEs: 'bajo tierra', def: 'Below the surface of the ground.', defEs: 'Debajo de la superficie del suelo.' }
+          ]
+        },
+        {
+          en: 'The miners gathered in a small shelter. They shared their tiny supply of food very carefully, so it would last as long as possible.',
+          es: 'Los mineros se reunieron en un pequeño refugio. Compartieron su escasa comida con mucho cuidado, para que durara lo más posible.',
+          vocab: [
+            { word: 'gathered', wordEs: 'reunieron', def: 'Came together in one place.', defEs: 'Se juntaron en un lugar.' },
+            { word: 'shelter', wordEs: 'refugio', def: 'A safe place that protects people.', defEs: 'Un lugar seguro que protege a las personas.' },
+            { word: 'shared', wordEs: 'compartieron', def: 'Gave part of something to others.', defEs: 'Dieron parte de algo a los demás.' },
+            { word: 'last', wordEs: 'durara', def: 'To keep going for a length of time.', defEs: 'Seguir existiendo por un tiempo.' }
+          ]
+        },
+        {
+          en: 'On the surface, engineers drilled narrow holes to search for them. On August 22, a drill came back up with a note tied to it: "Estamos bien en el refugio los 33", which means "We are fine in the shelter, the 33."',
+          es: 'En la superficie, los ingenieros perforaron agujeros angostos para buscarlos. El 22 de agosto, una sonda volvió a subir con una nota amarrada: "Estamos bien en el refugio los 33".',
+          vocab: [
+            { word: 'engineers', wordEs: 'ingenieros', def: 'People who design and build things.', defEs: 'Personas que diseñan y construyen cosas.' },
+            { word: 'drilled', wordEs: 'perforaron', def: 'Made holes with a turning tool.', defEs: 'Hicieron agujeros con una herramienta que gira.' },
+            { word: 'narrow', wordEs: 'angostos', def: 'Not wide.', defEs: 'Poco anchos.' },
+            { word: 'note', wordEs: 'nota', def: 'A short written message.', defEs: 'Un mensaje escrito corto.' }
+          ]
+        },
+        {
+          en: 'Through the small hole, rescuers sent down food, water, medicine and letters from the miners\' families, while bigger drills worked on a wider tunnel.',
+          es: 'Por el pequeño agujero, los rescatistas enviaron comida, agua, medicinas y cartas de las familias de los mineros, mientras perforadoras más grandes abrían un túnel más ancho.',
+          vocab: [
+            { word: 'rescuers', wordEs: 'rescatistas', def: 'People who save others from danger.', defEs: 'Personas que salvan a otros del peligro.' },
+            { word: 'medicine', wordEs: 'medicinas', def: 'Something that helps sick people get better.', defEs: 'Algo que ayuda a los enfermos a mejorar.' },
+            { word: 'tunnel', wordEs: 'túnel', def: 'A long passage under the ground.', defEs: 'Un pasaje largo bajo la tierra.' }
+          ]
+        },
+        {
+          en: 'Engineers built a narrow rescue capsule called Fénix. On October 13, 2010, after 69 days underground, all 33 miners were lifted to the surface, one by one.',
+          es: 'Los ingenieros construyeron una angosta cápsula de rescate llamada Fénix. El 13 de octubre de 2010, después de 69 días bajo tierra, los 33 mineros fueron subidos a la superficie, uno por uno.',
+          vocab: [
+            { word: 'capsule', wordEs: 'cápsula', def: 'A small closed container, like a tiny room.', defEs: 'Un recipiente pequeño y cerrado, como una habitación diminuta.' },
+            { word: 'lifted', wordEs: 'subidos', def: 'Raised up.', defEs: 'Levantados hacia arriba.' },
+            { word: 'surface', wordEs: 'superficie', def: 'The top or outside of something.', defEs: 'La parte de arriba o de afuera de algo.' }
+          ]
+        },
+        {
+          en: 'Millions of people around the world watched the rescue on television. It is remembered as an example of teamwork, patience and careful engineering.',
+          es: 'Millones de personas en todo el mundo vieron el rescate por televisión. Se recuerda como un ejemplo de trabajo en equipo, paciencia e ingeniería cuidadosa.',
+          vocab: [
+            { word: 'teamwork', wordEs: 'trabajo en equipo', def: 'People working together toward one goal.', defEs: 'Personas que trabajan juntas por una misma meta.' },
+            { word: 'patience', wordEs: 'paciencia', def: 'Waiting calmly without giving up.', defEs: 'Esperar con calma sin rendirse.' },
+            { word: 'engineering', wordEs: 'ingeniería', def: 'Using science to design and build things.', defEs: 'Usar la ciencia para diseñar y construir cosas.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'How many miners were trapped in the San José mine?', qEs: '¿Cuántos mineros quedaron atrapados en la mina San José?', options: ['13', '33', '23', '69'], optionsEs: ['13', '33', '23', '69'], answer: 1 },
+        { q: 'What did the note on the drill say?', qEs: '¿Qué decía la nota en la sonda?', options: ['"Estamos bien en el refugio los 33"', '"Send more drills"', '"Happy birthday"', '"We found gold"'], optionsEs: ['"Estamos bien en el refugio los 33"', '"Manden más taladros"', '"Feliz cumpleaños"', '"Encontramos oro"'], answer: 0 },
+        { q: 'What was the rescue capsule called?', qEs: '¿Cómo se llamaba la cápsula de rescate?', options: ['Beagle', 'ALMA', 'Fénix', 'Esmeralda'], optionsEs: ['Beagle', 'ALMA', 'Fénix', 'Esmeralda'], answer: 2 }
+      ]
+    },
+    {
+      id: 'rapa_nui',
+      title: 'The Moai of Rapa Nui',
+      titleEs: 'Los Moai de Rapa Nui',
+      tier: 'commander', ageMin: 10, region: 'island', icon: '🗿',
+      pages: [
+        {
+          en: 'Rapa Nui, also called Easter Island, is a small volcanic island in the middle of the Pacific Ocean. It is part of Chile and lies more than 3,500 kilometers from the mainland.',
+          es: 'Rapa Nui, también llamada Isla de Pascua, es una pequeña isla volcánica en medio del océano Pacífico. Es parte de Chile y está a más de 3.500 kilómetros del continente.',
+          vocab: [
+            { word: 'volcanic', wordEs: 'volcánica', def: 'Made by volcanoes.', defEs: 'Formada por volcanes.' },
+            { word: 'island', wordEs: 'isla', def: 'Land with water all around it.', defEs: 'Tierra rodeada de agua.' },
+            { word: 'mainland', wordEs: 'continente', def: 'The main land of a country, apart from its islands.', defEs: 'La tierra principal de un país, sin contar sus islas.' }
+          ]
+        },
+        {
+          en: 'Long ago, Polynesian navigators crossed thousands of kilometers of open ocean in large canoes. They found their way by reading the stars, the waves and the flight of seabirds.',
+          es: 'Hace mucho tiempo, navegantes polinesios cruzaron miles de kilómetros de océano abierto en grandes canoas. Se orientaban leyendo las estrellas, las olas y el vuelo de las aves marinas.',
+          vocab: [
+            { word: 'navigators', wordEs: 'navegantes', def: 'People who find the way across the sea.', defEs: 'Personas que encuentran el camino por el mar.' },
+            { word: 'canoes', wordEs: 'canoas', def: 'Long, narrow boats.', defEs: 'Botes largos y angostos.' },
+            { word: 'seabirds', wordEs: 'aves marinas', def: 'Birds that live near the sea and fish in it.', defEs: 'Aves que viven cerca del mar y pescan en él.' }
+          ]
+        },
+        {
+          en: 'The islanders carved giant stone statues called moai. Most of them were carved from soft volcanic rock at a quarry called Rano Raraku.',
+          es: 'Los isleños tallaron estatuas gigantes de piedra llamadas moai. La mayoría se talló en roca volcánica blanda en una cantera llamada Rano Raraku.',
+          vocab: [
+            { word: 'carved', wordEs: 'tallaron', def: 'Shaped something by cutting it.', defEs: 'Dieron forma a algo cortándolo.' },
+            { word: 'statues', wordEs: 'estatuas', def: 'Figures made of stone, metal or wood.', defEs: 'Figuras hechas de piedra, metal o madera.' },
+            { word: 'quarry', wordEs: 'cantera', def: 'A place where stone is cut out of the ground.', defEs: 'Un lugar donde se saca piedra del suelo.' }
+          ]
+        },
+        {
+          en: 'There are nearly 900 moai on the island. Many stand on stone platforms called ahu, and most of those face inland, with their backs to the sea.',
+          es: 'Hay casi 900 moai en la isla. Muchos están sobre plataformas de piedra llamadas ahu, y la mayoría de ellos mira hacia el interior de la isla, de espaldas al mar.',
+          vocab: [
+            { word: 'platforms', wordEs: 'plataformas', def: 'Flat, raised surfaces.', defEs: 'Superficies planas y elevadas.' },
+            { word: 'inland', wordEs: 'interior', def: 'Away from the coast.', defEs: 'Lejos de la costa.' }
+          ]
+        },
+        {
+          en: 'How did people move statues that weigh many tonnes? Scientists still study this question. One idea, tested with a copy of a moai, is that teams used ropes to "walk" the statue upright, rocking it from side to side.',
+          es: '¿Cómo movían estatuas que pesan muchas toneladas? Los científicos todavía estudian esta pregunta. Una idea, probada con una copia de un moai, es que equipos usaban cuerdas para hacer "caminar" la estatua de pie, meciéndola de lado a lado.',
+          vocab: [
+            { word: 'tonnes', wordEs: 'toneladas', def: 'Units of weight. One tonne is 1,000 kilograms.', defEs: 'Unidades de peso. Una tonelada son 1.000 kilogramos.' },
+            { word: 'tested', wordEs: 'probada', def: 'Tried out to see if it works.', defEs: 'Puesta a prueba para ver si funciona.' },
+            { word: 'upright', wordEs: 'de pie', def: 'Standing straight up.', defEs: 'Derecho, parado.' }
+          ]
+        },
+        {
+          en: 'Rapa Nui became part of Chile in 1888. Today much of the island is a national park and a World Heritage Site, and visitors travel from far away to see the moai at sunrise.',
+          es: 'Rapa Nui pasó a formar parte de Chile en 1888. Hoy gran parte de la isla es un parque nacional y Patrimonio de la Humanidad, y viajeros de lugares lejanos llegan a ver los moai al amanecer.',
+          vocab: [
+            { word: 'national park', wordEs: 'parque nacional', def: 'Land a country protects for everyone to enjoy.', defEs: 'Tierra que un país protege para que todos la disfruten.' },
+            { word: 'heritage', wordEs: 'patrimonio', def: 'Valuable things handed down from the past.', defEs: 'Cosas valiosas heredadas del pasado.' },
+            { word: 'sunrise', wordEs: 'amanecer', def: 'When the sun comes up in the morning.', defEs: 'Cuando sale el sol en la mañana.' }
+          ]
+        }
+      ],
+      quiz: [
+        { q: 'Where is Rapa Nui?', qEs: '¿Dónde está Rapa Nui?', options: ['In the middle of the Pacific Ocean', 'In the Atacama Desert', 'In Patagonia', 'High in the Andes'], optionsEs: ['En medio del océano Pacífico', 'En el desierto de Atacama', 'En la Patagonia', 'En lo alto de los Andes'], answer: 0 },
+        { q: 'Where were most moai carved?', qEs: '¿Dónde se tallaron la mayoría de los moai?', options: ['At the Rano Raraku quarry', 'On the mainland', 'At the bottom of the sea', 'In Santiago'], optionsEs: ['En la cantera de Rano Raraku', 'En el continente', 'En el fondo del mar', 'En Santiago'], answer: 0 },
+        { q: 'Which way do most moai on ahu face?', qEs: '¿Hacia dónde mira la mayoría de los moai sobre los ahu?', options: ['Out to sea', 'Inland, with their backs to the sea', 'Straight up at the sky', 'Toward the mainland'], optionsEs: ['Hacia el mar', 'Hacia el interior, de espaldas al mar', 'Hacia el cielo', 'Hacia el continente'], answer: 1 }
+      ]
     }
   ];
+
+
+  // ================================================================
+  //  Everything below drives the illustrated book. STORIES above is
+  //  pure data (tools/build-progress-catalog.js lifts it as-is).
+  // ================================================================
+  const TIERS = ['cadet', 'explorer', 'pilot', 'commander'];
+  const TIER_NAME = { cadet: ['Cadet', 'Cadete'], explorer: ['Explorer', 'Explorador'], pilot: ['Pilot', 'Piloto'], commander: ['Commander', 'Comandante'] };
+  const EXTRAS = typeof STORY_EXTRAS !== 'undefined' ? STORY_EXTRAS : {};
+  const CAST = typeof STORY_CAST !== 'undefined' ? STORY_CAST : {};
+  const ART = typeof StoryArt !== 'undefined' ? StoryArt : null;
+  const SPREAD_Q = '(min-width: 900px) and (min-height: 560px), (min-width: 700px) and (orientation: landscape) and (min-height: 560px)';
+
+  // Every vocabulary word in the library, keyed by its English form.
+  // The first story that teaches a word owns it in the Word Collector.
+  const WORDS = {};
+  STORIES.forEach(s => s.pages.forEach(p => (p.vocab || []).forEach(v => {
+    const k = String(v.word).toLowerCase();
+    if (!WORDS[k]) WORDS[k] = { v, story: s };
+  })));
 
   // ── State ──
   let currentStory = null;
   let currentPage = 0;
-  let quizIdx = 0;
   let lang = 'en';
-  let vocabCollected = [];
   let currentTier = 'cadet';
+  let ageTier = 'intermediate';
+  let run = null;          // the challenge round in progress
+  let turning = false;     // a page is mid-turn
+  let autoRead = false;    // "turn the pages for me"
+  let _autoNext = false;
+  let _vocabOpen = null;
+
+  const $ = id => document.getElementById(id);
+  const esc = s => (typeof escHtml === 'function' ? escHtml(String(s == null ? '' : s)) : String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]));
+  const tr = (en, es) => (lang === 'es' ? (es || en) : en);
+  const titleOf = s => (lang === 'es' ? s.titleEs : s.title);
+  const sfx = n => { try { if (typeof SFX !== 'undefined' && SFX[n]) SFX[n](); } catch (e) {} };
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
   // ── Storage ──
   function _key() {
@@ -743,13 +1019,45 @@ const StoryExplorer = (() => {
     if (typeof adoptLegacyAppKey === 'function') adoptLegacyAppKey('story', 'zs_story_');
     return getUserAppKey('zs_story_');
   }
-  function _load() { try { return JSON.parse(localStorage.getItem(_key())) || {}; } catch { return {}; } }
-  function _save(data) { 
-    const k = _key(); 
+  function _load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(_key()));
+      return d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+    } catch (e) { return {}; }
+  }
+  function _save(data) {
+    const k = _key();
     if (k) {
-      localStorage.setItem(k, JSON.stringify(data)); 
+      localStorage.setItem(k, JSON.stringify(data));
       if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(k);
     }
+  }
+  // wordsLearned is a list of English words. Read it tolerantly.
+  function _words(data) {
+    const out = [];
+    (Array.isArray(data.wordsLearned) ? data.wordsLearned : []).forEach(e => {
+      const w = typeof e === 'string' ? e : (e && (e.word || e.en));
+      if (w) out.push(String(w).toLowerCase());
+    });
+    return out;
+  }
+  function _collect(v) {
+    const k = String(v.word).toLowerCase();
+    const data = _load();
+    if (data.wordsLearned != null && !Array.isArray(data.wordsLearned)) return false;
+    if (_words(data).indexOf(k) !== -1) return false;
+    if (!data.wordsLearned) data.wordsLearned = [];
+    data.wordsLearned.push(k);
+    _save(data);
+    if (run) run.newWords.push(k);
+    _updateNotebookBadge();
+    return true;
+  }
+  function _storyStars(data, id) {
+    const read = Array.isArray(data.storiesRead) ? data.storiesRead : [];
+    if (read.indexOf(id) === -1) return 0;
+    const s = data.storyStars && data.storyStars[id];
+    return s > 0 ? Math.min(3, s) : 3;   // finished before stars were graded
   }
 
   // ── Init ──
@@ -761,365 +1069,920 @@ const StoryExplorer = (() => {
       CloudSync.pull(_key());
     }
 
-    currentTier = user.age <= 6 ? 'cadet' : user.age <= 9 ? 'explorer' : 'pilot';
+    const age = Number(user.age) || 8;
+    ageTier = typeof getAgeTier === 'function' ? getAgeTier(age) : (age <= 5 ? 'beginner' : age <= 8 ? 'intermediate' : age <= 11 ? 'advanced' : 'expert');
+    currentTier = age <= 6 ? 'cadet' : age <= 9 ? 'explorer' : age <= 11 ? 'pilot' : 'commander';
+    document.body.dataset.age = ageTier;
+    const d = _load();
+    if (d.prefs && (d.prefs.lang === 'es' || d.prefs.lang === 'en')) lang = d.prefs.lang;
+    _bind();
+    _applyLang();
     _renderLibrary();
     _updateGlobalStars();
+    window.addEventListener('zs:synced', () => {
+      const lib = $('screen-library');
+      if (lib && lib.classList.contains('active')) _renderLibrary();
+      _updateGlobalStars();
+    });
   }
 
+  // ── Event wiring (one delegated listener) ──
+  function _bind() {
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (!b || b.disabled) return;
+      const a = b.dataset.act;
+      switch (a) {
+        case 'story': startStory(b.dataset.id); break;
+        case 'tier': setTier(b.dataset.tier); break;
+        case 'lang': toggleLanguage(); break;
+        case 'notebook': openNotebook(); break;
+        case 'back': backToLibrary(); break;
+        case 'prev': prevPage(); break;
+        case 'next': nextPage(); break;
+        case 'read': readAloud(); break;
+        case 'vocab': _openVocab(currentStory.pages[currentPage].vocab[+b.dataset.v]); break;
+        case 'vclose': _closeVocab(); break;
+        case 'vsay': if (_vocabOpen) _sayWord(_vocabOpen, true); break;
+        case 'opt': answerQuiz(+b.dataset.i, b); break;
+        case 'seq': _seqTap(+b.dataset.p, b); break;
+        case 'who': _whoPick(b.dataset.c, b); break;
+        case 'mw': _matchWord(+b.dataset.k, b); break;
+        case 'mm': _matchMeaning(+b.dataset.k, b); break;
+        case 'choice': _choicePick(+b.dataset.i); break;
+        case 'continue': _advance(); break;
+        case 'listen': _listenStep(); break;
+        case 'say': _say(b.dataset.text, b.dataset.lang || lang, { rate: 0.85 }); break;
+        case 'nbsay': { const w = WORDS[b.dataset.w]; if (w) _sayWord(w.v, true); break; }
+        case 'again': startStory(currentStory.id); break;
+        case 'library': backToLibrary(); break;
+      }
+    });
+    const auto = $('se-auto');
+    if (auto) auto.addEventListener('change', () => {
+      autoRead = auto.checked;
+      if (autoRead && !_readActive && _ttsOk(false)) _startRead();
+      if (!autoRead) _autoNext = false;
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && _vocabOpen) { _closeVocab(); return; }
+      if (_vocabOpen || !$('screen-read').classList.contains('active')) return;
+      if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+      if (e.key === 'ArrowRight') nextPage();
+      if (e.key === 'ArrowLeft') prevPage();
+    });
+    // swipe to turn
+    const stage = $('se-stage');
+    let sx = null, sy = 0;
+    stage.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; });
+    stage.addEventListener('pointerup', e => {
+      if (sx == null) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      sx = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) { if (dx < 0) nextPage(); else prevPage(); }
+    });
+    stage.addEventListener('pointercancel', () => { sx = null; });
+    window.matchMedia(SPREAD_Q).addEventListener && window.matchMedia(SPREAD_Q).addEventListener('change', () => { if (currentStory && $('screen-read').classList.contains('active')) _fillPage(currentPage); });
+  }
+
+  // ── Library ──
   function _renderLibrary() {
-    const grid = document.getElementById('story-grid');
-    const tabs = document.getElementById('tier-select');
     const data = _load();
-    const readStories = data.storiesRead || [];
+    const read = Array.isArray(data.storiesRead) ? data.storiesRead : [];
+    const words = _words(data);
+    const sub = $('se-sub');
+    if (sub) sub.textContent = tr('Illustrated adventure tales — read, listen and collect new words!', 'Cuentos ilustrados de aventura: ¡lee, escucha y colecciona palabras nuevas!');
+    const stats = $('se-lib-stats');
+    if (stats) stats.innerHTML =
+      '<span class="se-stat"><b>' + (data.totalStars || 0) + '</b> ' + tr('stars', 'estrellas') + '</span>' +
+      '<span class="se-stat"><b>' + read.filter(id => STORIES.some(s => s.id === id)).length + '</b>/' + STORIES.length + ' ' + tr('stories', 'historias') + '</span>' +
+      '<span class="se-stat"><b>' + words.length + '</b> ' + tr('words', 'palabras') + '</span>';
+    _updateNotebookBadge(words.length);
+    const hero = $('se-hero-art');
+    if (hero && ART && !hero.firstChild) hero.innerHTML = ART.hero();
 
-    const tiers = ['cadet', 'explorer', 'pilot', 'commander'];
-    tabs.innerHTML = tiers.map(t => `
-      <div class="tier-tab ${currentTier === t ? 'active' : ''}" onclick="StoryExplorer.setTier('${t}')">
-        ${t.charAt(0).toUpperCase() + t.slice(1)}
-      </div>
-    `).join('');
+    // continue reading
+    const cont = $('se-continue');
+    const bm = data.bookmark;
+    const bs = bm && STORIES.find(s => s.id === bm.id);
+    if (cont) {
+      if (bs && bm.page > 0 && bm.page < bs.pages.length) {
+        cont.innerHTML = '<button type="button" class="se-continue" data-act="story" data-id="' + esc(bs.id) + '">' +
+          '<span class="se-continue-art">' + (ART ? ART.cover(bs.id) : '') + '</span>' +
+          '<span class="se-continue-txt"><small>' + tr('Keep reading', 'Sigue leyendo') + '</small><b>' + esc(titleOf(bs)) + '</b><span>' +
+          tr('Page', 'Página') + ' ' + (bm.page + 1) + ' / ' + bs.pages.length + '</span></span><span class="se-continue-go" aria-hidden="true">›</span></button>';
+      } else cont.innerHTML = '';
+    }
 
+    const tabs = $('tier-select');
+    tabs.innerHTML = TIERS.map(t => {
+      const inTier = STORIES.filter(s => s.tier === t);
+      const done = inTier.filter(s => read.indexOf(s.id) !== -1).length;
+      return '<button type="button" role="tab" class="tier-tab' + (currentTier === t ? ' active' : '') + '" aria-selected="' + (currentTier === t) + '" data-act="tier" data-tier="' + t + '">' +
+        '<span class="se-tab-name">' + tr(TIER_NAME[t][0], TIER_NAME[t][1]) + '</span><span class="se-tab-count">' + done + '/' + inTier.length + '</span></button>';
+    }).join('');
+
+    const grid = $('story-grid');
     const filtered = STORIES.filter(s => s.tier === currentTier);
     grid.innerHTML = filtered.map(s => {
-      const isDone = readStories.includes(s.id);
-      return `
-        <div class="story-card" onclick="StoryExplorer.startStory('${s.id}')">
-          <span class="story-icon">${s.icon}</span>
-          <div class="story-title">${lang === 'es' ? s.titleEs : s.title}</div>
-          <div class="story-meta">${s.pages.length} ${lang === 'es' ? 'páginas' : 'pages'} ${isDone ? '✅' : ''}</div>
-        </div>
-      `;
+      const stars = _storyStars(data, s.id);
+      const isNew = read.indexOf(s.id) === -1;
+      const starRow = isNew ? '<span class="se-new">' + tr('New', 'Nuevo') + '</span>'
+        : '<span class="se-card-stars" aria-hidden="true">' + [0, 1, 2].map(i => '<i class="' + (i < stars ? 'on' : '') + '">★</i>').join('') + '</span>';
+      const label = titleOf(s) + ', ' + s.pages.length + ' ' + tr('pages', 'páginas') + (isNew ? '' : ', ' + stars + ' ' + tr('stars', 'estrellas'));
+      return '<button type="button" class="story-card" data-act="story" data-id="' + esc(s.id) + '" aria-label="' + esc(label) + '">' +
+        '<span class="se-cover">' + (ART && ART.has(s.id) ? ART.cover(s.id) : '<span class="story-icon">' + esc(s.icon) + '</span>') +
+        '<span class="se-cover-band"><span class="story-title">' + esc(titleOf(s)) + '</span></span></span>' +
+        '<span class="story-meta"><span>' + s.pages.length + ' ' + tr('pages', 'páginas') + '</span>' + starRow + '</span></button>';
     }).join('');
   }
 
   function setTier(t) {
+    if (TIERS.indexOf(t) === -1) return;
     currentTier = t;
+    sfx('click');
     _renderLibrary();
   }
 
+  // ── Reader ──
   function startStory(id) {
-    currentStory = STORIES.find(s => s.id === id);
-    if (!currentStory) return;
-    currentPage = 0;
-    vocabCollected = [];
-    _renderPage();
+    const s = STORIES.find(x => x.id === id);
+    if (!s) return;
+    stopRead();
+    currentStory = s;
+    run = null;
+    const bm = _load().bookmark;
+    currentPage = bm && bm.id === id && bm.page > 0 && bm.page < s.pages.length ? bm.page : 0;
     _showScreen('read');
+    _fillPage(currentPage);
+    window.scrollTo(0, 0);
   }
 
-  function _renderPage() {
-    stopRead();
-    const page = currentStory.pages[currentPage];
-    document.getElementById('story-title').textContent = lang === 'es' ? currentStory.titleEs : currentStory.title;
-    document.getElementById('page-indicator').textContent = `${lang === 'es' ? 'Página' : 'Page'} ${currentPage + 1} / ${currentStory.pages.length}`;
-    document.getElementById('page-icon').textContent = currentStory.icon;
+  function _isSpread() { try { return window.matchMedia(SPREAD_Q).matches; } catch (e) { return false; } }
 
-    const raw = lang === 'es' ? page.es : page.en;
+  function _artHtml(idx) {
+    const svg = ART && ART.has(currentStory.id) ? ART.page(currentStory.id, idx) : '';
+    return '<div class="se-art">' + (svg || '<span class="se-art-fallback">' + esc(currentStory.icon) + '</span>') + '</div>';
+  }
 
-    // Build a vocab lookup for quick per-token enrichment.
-    const vocabMap = {};
-    if (page.vocab) {
-      page.vocab.forEach(v => {
-        const w = (lang === 'es' ? v.wordEs : v.word).toLowerCase();
-        vocabMap[w] = lang === 'es' ? v.defEs : v.def;
+  // Vocabulary words can be phrases ("tectonic plates", "bajo tierra")
+  // and appear mid-sentence. Find each one's character ranges.
+  function _vocabRanges(raw, vocab) {
+    const lower = raw.toLowerCase(), out = [];
+    (vocab || []).forEach((v, vi) => {
+      const w = String(lang === 'es' ? v.wordEs : v.word || '').toLowerCase();
+      const forms = [w, w.replace(/\s*\(.*\)\s*/g, '').trim()];
+      const m = w.match(/\(([^)]+)\)/); if (m) forms.push(m[1].trim());
+      forms.filter(Boolean).forEach(f => {
+        let from = 0, at;
+        while ((at = lower.indexOf(f, from)) !== -1) {
+          const before = at === 0 ? '' : lower[at - 1], after = lower[at + f.length] || '';
+          const isL = ch => /[a-záéíóúüñ]/i.test(ch);
+          if (!isL(before) && !isL(after) && !out.some(r => at < r.e && at + f.length > r.s)) out.push({ s: at, e: at + f.length, vi });
+          from = at + f.length;
+        }
       });
-    }
+    });
+    return out;
+  }
 
-    // Tokenise the text preserving spaces/punctuation. Each word becomes
-    // a <span class="rw-word" data-start="N"> so we can highlight during
-    // speechSynthesis' boundary events and still let vocab taps work.
-    const pageText = document.getElementById('page-text');
-    pageText.innerHTML = '';
-
+  function _textNode(idx, live) {
+    const page = currentStory.pages[idx];
+    const raw = lang === 'es' ? page.es : page.en;
+    const ranges = _vocabRanges(raw, page.vocab);
+    const wrap = document.createElement('div');
+    wrap.className = 'se-copy';
+    const p = document.createElement('p');
+    p.className = 'se-prose page-text';
+    if (live) p.id = 'page-text';
+    p.dataset.raw = raw;
+    // Each word becomes <span class="rw-word" data-start data-end> so the
+    // speech boundary events can light it up; vocabulary words are
+    // buttons so a tap opens their meaning.
     const re = /(\s+|[.,!?;:"'()¡¿—…]+|[^\s.,!?;:"'()¡¿—…]+)/g;
     let m;
     while ((m = re.exec(raw)) !== null) {
-      const chunk = m[0];
-      const start = m.index;
+      const chunk = m[0], start = m.index;
       if (/^[^\s.,!?;:"'()¡¿—…]/.test(chunk)) {
-        const span = document.createElement('span');
-        span.className = 'rw-word';
-        span.dataset.start = String(start);
-        span.dataset.end = String(start + chunk.length);
-        const key = chunk.toLowerCase().replace(/[.,!?;:"'()¡¿—…]+$/g, '');
-        if (vocabMap[key]) {
-          span.classList.add('vocab-link');
-          span.dataset.vocab = key;
-          span.dataset.def = vocabMap[key];
-          span.addEventListener('click', () => showVocab(key, vocabMap[key]));
+        const r = ranges.find(x => start >= x.s && start < x.e);
+        const el = document.createElement(r ? 'button' : 'span');
+        el.className = 'rw-word' + (r ? ' vocab-link' : '');
+        el.dataset.start = String(start);
+        el.dataset.end = String(start + chunk.length);
+        if (r) {
+          el.type = 'button';
+          el.dataset.act = 'vocab';
+          el.dataset.v = String(r.vi);
+          el.setAttribute('aria-label', chunk + ' — ' + tr('tap for meaning', 'toca para ver el significado'));
         }
-        span.textContent = chunk;
-        pageText.appendChild(span);
-      } else {
-        pageText.appendChild(document.createTextNode(chunk));
-      }
+        el.textContent = chunk;
+        p.appendChild(el);
+      } else p.appendChild(document.createTextNode(chunk));
     }
-
-    // Cache the raw text for speech + highlighting
-    pageText.dataset.raw = raw;
-  }
-
-  // ── Read-aloud state ──
-  let _readActive = false;
-  let _readUtterance = null;
-
-  function _clearHighlight() {
-    const el = document.getElementById('page-text');
-    if (!el) return;
-    el.querySelectorAll('.rw-word.speaking').forEach(n => n.classList.remove('speaking'));
-  }
-
-  function _highlightAtChar(charIndex) {
-    const el = document.getElementById('page-text');
-    if (!el) return;
-    _clearHighlight();
-    const words = el.querySelectorAll('.rw-word');
-    for (let i = 0; i < words.length; i++) {
-      const s = Number(words[i].dataset.start);
-      const e = Number(words[i].dataset.end);
-      if (charIndex >= s && charIndex < e) {
-        words[i].classList.add('speaking');
-        // Scroll into view if out of viewport
-        const r = words[i].getBoundingClientRect();
-        if (r.top < 60 || r.bottom > window.innerHeight - 60) {
-          words[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
-      }
+    wrap.appendChild(p);
+    const vocab = page.vocab || [];
+    if (vocab.length) {
+      const known = _words(_load());
+      const chips = document.createElement('div');
+      chips.className = 'se-chips';
+      chips.innerHTML = '<span class="se-chips-label">' + tr('Words to collect', 'Palabras para coleccionar') + '</span>' + vocab.map((v, vi) =>
+        '<button type="button" class="se-chip' + (known.indexOf(String(v.word).toLowerCase()) !== -1 ? ' got' : '') + '" data-act="vocab" data-v="' + vi + '">' +
+        esc(lang === 'es' ? v.wordEs : v.word) + '</button>').join('');
+      wrap.appendChild(chips);
     }
+    const folio = document.createElement('div');
+    folio.className = 'se-folio';
+    folio.textContent = String(idx + 1);
+    wrap.appendChild(folio);
+    return wrap;
   }
 
-  function stopRead() {
-    _readActive = false;
-    try {
-      if ('speechSynthesis' in window) speechSynthesis.cancel();
-    } catch (e) {}
-    _clearHighlight();
+  function _fillLeft(el, idx) { el.innerHTML = _artHtml(idx); }
+  function _fillRight(el, idx, live) { el.innerHTML = ''; el.appendChild(_textNode(idx, live !== false)); }
+  function _fillPage(idx) {
+    _fillLeft($('se-left'), idx);
+    _fillRight($('se-right'), idx);
+    _afterPage();
+  }
+  function _noIds(node) { node.removeAttribute && node.removeAttribute('id'); node.querySelectorAll && node.querySelectorAll('[id]').forEach(n => n.removeAttribute('id')); return node; }
+
+  function _afterPage() {
+    const s = currentStory, n = s.pages.length;
+    $('story-title').textContent = titleOf(s);
+    $('page-indicator').textContent = tr('Page', 'Página') + ' ' + (currentPage + 1) + ' / ' + n;
+    $('se-dots').innerHTML = s.pages.map((_, i) => '<i class="' + (i === currentPage ? 'on' : i < currentPage ? 'seen' : '') + '"></i>').join('');
+    const prev = $('se-prev'), next = $('se-next');
+    prev.disabled = currentPage === 0;
+    const last = currentPage === n - 1;
+    next.classList.toggle('se-to-quiz', last);
+    next.innerHTML = last ? '<span>' + tr('Challenges', 'Desafíos') + '</span> <b aria-hidden="true">›</b>' : '<b aria-hidden="true">›</b>';
+    next.setAttribute('aria-label', last ? tr('Start the challenges', 'Empezar los desafíos') : tr('Next page', 'Página siguiente'));
     _updateReadButton();
+    _updateGlobalStars();
+    if (_autoNext) { _autoNext = false; setTimeout(() => { if (autoRead && $('screen-read').classList.contains('active')) _startRead(); }, 450); }
   }
 
-  function _updateReadButton() {
-    const btn = document.querySelector('.audio-btn');
-    if (!btn) return;
-    btn.textContent = _readActive
-      ? (lang === 'es' ? '⏹ Detener' : '⏹ Stop')
-      : (lang === 'es' ? '🔊 Leer en voz alta' : '🔊 Read Aloud');
+  // Turn to page idx. dir > 0 turns forward, < 0 back.
+  function _goto(idx, dir) {
+    if (turning || !currentStory) return;
+    const keepReading = _autoNext;
+    stopRead();
+    _autoNext = keepReading;
+    const book = $('se-book'), left = $('se-left'), right = $('se-right'), stage = $('se-stage');
+    const reduce = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) || !book.animate;
+    currentPage = idx;
+    if (reduce) { _fillPage(idx); return; }
+    turning = true;
+    _swish();
+    const leaf = document.createElement('div');
+    leaf.className = 'se-leaf';
+    leaf.innerHTML = '<div class="se-face se-front"></div><div class="se-face se-back"></div><div class="se-leaf-shade"></div>';
+    const front = leaf.children[0], back = leaf.children[1], shade = leaf.children[2];
+    const done = () => { leaf.remove(); turning = false; };
+    const opts = { duration: 720, easing: 'cubic-bezier(.45,.05,.3,1)', fill: 'forwards' };
+    if (_isSpread()) {
+      leaf.classList.add('se-leaf-half');
+      const sheet = cls => { const d = document.createElement('div'); d.className = 'se-sheet ' + cls; return d; };
+      if (dir > 0) {
+        const f = sheet('se-right'); f.appendChild(_noIds(right.firstChild.cloneNode(true))); front.appendChild(f);
+        const b = sheet('se-left'); b.innerHTML = _artHtml(idx); back.appendChild(b);
+        _fillRight(right, idx);
+        stage.appendChild(leaf);
+        const anim = leaf.animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-180deg)' }], opts);
+        shade.animate([{ opacity: 0 }, { opacity: 0.5, offset: 0.5 }, { opacity: 0 }], opts);
+        anim.onfinish = () => { _fillLeft(left, idx); done(); _afterPage(); };
+      } else {
+        const f = sheet('se-right'); f.appendChild(_textNode(idx, false)); front.appendChild(f);
+        const b = sheet('se-left'); b.appendChild(_noIds(left.firstChild.cloneNode(true))); back.appendChild(b);
+        _fillLeft(left, idx);
+        stage.appendChild(leaf);
+        const anim = leaf.animate([{ transform: 'rotateY(-180deg)' }, { transform: 'rotateY(0deg)' }], opts);
+        shade.animate([{ opacity: 0 }, { opacity: 0.5, offset: 0.5 }, { opacity: 0 }], opts);
+        anim.onfinish = () => { _fillRight(right, idx); done(); _afterPage(); };
+      }
+    } else {
+      const clone = _noIds(book.cloneNode(true));
+      clone.classList.add('se-book-clone');
+      if (dir > 0) {
+        front.appendChild(clone);
+        _fillLeft(left, idx); _fillRight(right, idx);
+        stage.appendChild(leaf);
+        const anim = leaf.animate([{ transform: 'rotateY(0deg)', opacity: 1 }, { transform: 'rotateY(-70deg)', opacity: 1, offset: 0.6 }, { transform: 'rotateY(-105deg)', opacity: 0 }], opts);
+        shade.animate([{ opacity: 0 }, { opacity: 0.55 }], opts);
+        anim.onfinish = () => { done(); _afterPage(); };
+      } else {
+        clone.querySelector('.se-left').innerHTML = _artHtml(idx);
+        const r = clone.querySelector('.se-right'); r.innerHTML = ''; r.appendChild(_textNode(idx, false));
+        front.appendChild(clone);
+        stage.appendChild(leaf);
+        const anim = leaf.animate([{ transform: 'rotateY(-105deg)', opacity: 0 }, { transform: 'rotateY(-70deg)', opacity: 1, offset: 0.4 }, { transform: 'rotateY(0deg)', opacity: 1 }], opts);
+        shade.animate([{ opacity: 0.55 }, { opacity: 0 }], opts);
+        anim.onfinish = () => { _fillLeft(left, idx); _fillRight(right, idx); done(); _afterPage(); };
+      }
+    }
   }
 
   function nextPage() {
-    if (currentPage < currentStory.pages.length - 1) {
-      currentPage++;
-      _renderPage();
-    } else {
-      _startQuiz();
-    }
+    if (!currentStory || turning) return;
+    if (currentPage < currentStory.pages.length - 1) _goto(currentPage + 1, 1);
+    else _startChallenges();
   }
-
   function prevPage() {
-    if (currentPage > 0) {
-      currentPage--;
-      _renderPage();
+    if (!currentStory || turning || currentPage === 0) return;
+    _goto(currentPage - 1, -1);
+  }
+
+  // A short paper "swish" for the page turn (filtered noise).
+  let _actx = null;
+  function _swish() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!_actx) _actx = new AC();
+      const c = _actx, len = Math.floor(c.sampleRate * 0.32);
+      const buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) { const t = i / len; d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * t) * (1 - t * 0.6); }
+      const src = c.createBufferSource(); src.buffer = buf;
+      const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(900, c.currentTime); f.frequency.linearRampToValueAtTime(2600, c.currentTime + 0.3); f.Q.value = 0.7;
+      const g = c.createGain(); g.gain.value = 0.09;
+      src.connect(f); f.connect(g); g.connect(c.destination); src.start();
+    } catch (e) {}
+  }
+
+  // ── Speech (tts.js) ──
+  let _readActive = false, _readToken = 0, _hlTimer = null, _gotBoundary = false;
+  function _voiceLang(l) {
+    const want = l === 'es' ? ['es-cl', 'es-419', 'es-us', 'es-mx', 'es-es', 'es'] : ['en-us', 'en-gb', 'en'];
+    let voices = [];
+    try { voices = window.speechSynthesis ? window.speechSynthesis.getVoices() || [] : []; } catch (e) {}
+    for (const w of want) {
+      const v = voices.find(x => x.lang && x.lang.replace('_', '-').toLowerCase().indexOf(w) === 0);
+      if (v) return v.lang.replace('_', '-');
     }
+    return l === 'es' ? 'es-CL' : 'en-US';
   }
-
-  function showVocab(word, def) {
-    document.getElementById('vocab-word').textContent = word;
-    document.getElementById('vocab-def').textContent = def;
-    document.getElementById('vocab-overlay').classList.add('active');
-    if (typeof playSound === 'function') playSound('pop');
-  }
-
-  function _startQuiz() {
-    quizIdx = 0;
-    _renderQuizQuestion();
-  }
-
-  function _renderQuizQuestion() {
-    // Some stories ship without a quiz block — finish straight to the
-    // results screen instead of crashing on `quiz[0]` (#diag).
-    if (!currentStory || !Array.isArray(currentStory.quiz) || !currentStory.quiz.length) {
-      _showResults(2);
-      return;
+  function _ttsOk(warn) {
+    const shared = typeof ZsTTS !== 'undefined';
+    const supported = shared ? ZsTTS.supported() : ('speechSynthesis' in window);
+    if (!supported) {
+      if (warn && typeof ZsDialog !== 'undefined') ZsDialog.alert(tr('This browser does not support read-aloud.', 'Este navegador no soporta lectura en voz alta.'));
+      return false;
     }
-    const q = currentStory.quiz[quizIdx];
-    if (!q) {
-      _showResults(3);
-      return;
+    if (shared && !ZsTTS.getSettings().enabled) {
+      if (warn && typeof ZsDialog !== 'undefined') ZsDialog.alert(tr('Read-aloud is turned off. A grown-up can turn it on in the Dashboard.', 'Lectura en voz alta está desactivada. Un adulto puede activarla en el Dashboard.'));
+      return false;
     }
-    const wrap = document.getElementById('quiz-wrap');
-    const total = currentStory.quiz.length;
-    wrap.innerHTML = `
-      <div class="quiz-counter">${quizIdx + 1} / ${total}</div>
-      <div class="quiz-q">${lang === 'es' ? q.qEs : q.q}</div>
-      <div class="quiz-options">
-        ${(lang === 'es' ? q.optionsEs : q.options).map((opt, i) => `
-          <button class="quiz-opt" onclick="StoryExplorer.answerQuiz(${i})">${opt}</button>
-        `).join('')}
-      </div>
-    `;
-    _showScreen('quiz');
+    return true;
   }
-
-  function answerQuiz(selected) {
-    const q = currentStory && currentStory.quiz && currentStory.quiz[quizIdx];
-    if (!q) return;
-    document.querySelectorAll('.quiz-opt').forEach(b => { b.disabled = true; });
-    if (selected === q.answer) {
-      _showFeedback('⭐');
-      if (typeof playSound === 'function') playSound('correct');
-      quizIdx++;
-      setTimeout(() => {
-        if (!currentStory || quizIdx >= currentStory.quiz.length) _showResults(3);
-        else _renderQuizQuestion();
-      }, 700);
-    } else {
-      _showFeedback('❌');
-      if (typeof playSound === 'function') playSound('wrong');
-      setTimeout(_renderQuizQuestion, 1000);
-    }
+  function _say(text, l, opts) {
+    if (!text || !_ttsOk(false)) return null;
+    opts = opts || {};
+    if (typeof ZsTTS !== 'undefined') return ZsTTS.speak(text, Object.assign({ lang: _voiceLang(l || lang) }, opts));
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = _voiceLang(l || lang); u.rate = opts.rate || 0.9;
+      if (opts.onBoundary) u.onboundary = ev => { if (!ev.name || ev.name === 'word') opts.onBoundary(ev.charIndex); };
+      if (opts.onEnd) u.onend = opts.onEnd;
+      if (opts.onError) u.onerror = opts.onError;
+      speechSynthesis.speak(u);
+      return u;
+    } catch (e) { return null; }
   }
-
-  function _showResults(starsEarned) {
-    const wrap = document.getElementById('results-wrap');
-    wrap.innerHTML = `
-      <span class="results-emoji">🏆</span>
-      <div class="results-title">${lang === 'es' ? '¡Excelente!' : 'Great Job!'}</div>
-      <div class="results-subtitle">${lang === 'es' ? 'Has terminado la historia' : 'You completed the story'}</div>
-      <div class="results-stats">
-        <div>⭐ ${starsEarned} ${lang === 'es' ? 'estrellas ganadas' : 'stars earned'}</div>
-      </div>
-      <div>
-        <button class="action-btn btn-primary" onclick="StoryExplorer.backToLibrary()">${lang === 'es' ? 'Volver a la Biblioteca' : 'Back to Library'}</button>
-      </div>
-    `;
-    _showScreen('results');
-    _saveProgress(starsEarned);
+  function _clearHighlight() {
+    const el = $('page-text');
+    if (el) el.querySelectorAll('.rw-word.speaking').forEach(n => n.classList.remove('speaking'));
   }
-
-  function _saveProgress(starsEarned) {
-    const data = _load();
-    if (!data.storiesRead) data.storiesRead = [];
-    if (!data.storiesRead.includes(currentStory.id)) {
-      data.storiesRead.push(currentStory.id);
-      data.totalStars = (data.totalStars || 0) + starsEarned;
-      _save(data);
-      _updateGlobalStars();
-
-      if (typeof ActivityLog !== 'undefined') {
-        ActivityLog.log('Story Explorer', '📚', `Read "${currentStory.title}" — ${starsEarned} star${starsEarned !== 1 ? 's' : ''}`);
-      }
-    }
-  }
-
-  function readAloud() {
-    // Gate on the shared suite-wide TTS module if it's loaded.
-    var useShared = typeof ZsTTS !== 'undefined';
-
-    if (useShared) {
-      if (!ZsTTS.supported()) {
-        ZsDialog.alert(lang === 'es'
-          ? 'Este navegador no soporta lectura en voz alta.'
-          : 'This browser does not support read-aloud.');
+  function _highlightAtChar(ci) {
+    const el = $('page-text');
+    if (!el) return;
+    const words = el.querySelectorAll('.rw-word');
+    for (let i = 0; i < words.length; i++) {
+      const s = +words[i].dataset.start, e = +words[i].dataset.end;
+      if (ci >= s && ci < e) {
+        if (words[i].classList.contains('speaking')) return;
+        _clearHighlight();
+        words[i].classList.add('speaking');
+        const r = words[i].getBoundingClientRect();
+        if (r.top < 60 || r.bottom > window.innerHeight - 60) words[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-      if (!ZsTTS.getSettings().enabled) {
-        ZsDialog.alert(lang === 'es'
-          ? 'Lectura en voz alta está desactivada. Un adulto puede activarla en el Dashboard.'
-          : 'Read-aloud is turned off. A grown-up can turn it on in the Dashboard.');
-        return;
-      }
-    } else if (!('speechSynthesis' in window)) {
-      ZsDialog.alert(lang === 'es'
-        ? 'Este navegador no soporta lectura en voz alta.'
-        : 'This browser does not support read-aloud.');
-      return;
     }
-
-    if (_readActive) { stopRead(); return; }
-
-    const el = document.getElementById('page-text');
-    const text = (el && el.dataset.raw) || (currentStory.pages[currentPage][lang === 'es' ? 'es' : 'en']);
-
-    _readActive = true;
+  }
+  function stopRead() {
+    _readActive = false;
+    _readToken++;
+    _autoNext = false;
+    clearTimeout(_hlTimer);
+    try { if (typeof ZsTTS !== 'undefined') ZsTTS.stop(); else if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
+    _clearHighlight();
     _updateReadButton();
-
-    var ttsLang = lang === 'es' ? 'es-CL' : 'en-US';
-    var onBoundary = function(charIndex) {
-      if (!_readActive) return;
-      _highlightAtChar(charIndex);
+  }
+  function _updateReadButton() {
+    const btn = $('se-read');
+    if (!btn) return;
+    btn.classList.toggle('on', _readActive);
+    btn.innerHTML = _readActive
+      ? '<span aria-hidden="true">⏹</span> ' + tr('Stop', 'Detener')
+      : '<span aria-hidden="true">🔊</span> ' + tr('Read to me', 'Léeme');
+    btn.setAttribute('aria-pressed', String(_readActive));
+  }
+  function readAloud() {
+    if (_readActive) { stopRead(); return; }
+    if (!_ttsOk(true)) return;
+    _startRead();
+  }
+  function _startRead() {
+    const el = $('page-text');
+    if (!el || !currentStory) return;
+    const text = el.dataset.raw || currentStory.pages[currentPage][lang === 'es' ? 'es' : 'en'];
+    const token = ++_readToken;
+    _readActive = true;
+    _gotBoundary = false;
+    _updateReadButton();
+    const onBoundary = ci => {
+      if (token !== _readToken || !_readActive) return;
+      _gotBoundary = true;
+      clearTimeout(_hlTimer);
+      _highlightAtChar(ci);
     };
-    var onEnd = function() {
+    const onEnd = () => {
+      if (token !== _readToken) return;
       _readActive = false;
+      clearTimeout(_hlTimer);
       _clearHighlight();
       _updateReadButton();
+      if (autoRead && currentStory && currentPage < currentStory.pages.length - 1 && $('screen-read').classList.contains('active')) {
+        setTimeout(() => {
+          if (token !== _readToken || !autoRead || _readActive) return;
+          _autoNext = true;
+          _goto(currentPage + 1, 1);
+        }, 900);
+      }
     };
-    var onError = onEnd;
-
-    if (useShared) {
-      _readUtterance = ZsTTS.speak(text, {
-        lang: ttsLang,
-        onBoundary: onBoundary,
-        onEnd: onEnd,
-        onError: onError
-      });
-    } else {
-      try { speechSynthesis.cancel(); } catch (e) {}
-      _readUtterance = new SpeechSynthesisUtterance(text);
-      _readUtterance.lang = ttsLang;
-      _readUtterance.rate = 0.9;
-      _readUtterance.onboundary = function(ev) {
-        if (ev.name && ev.name !== 'word') return;
-        onBoundary(ev.charIndex);
-      };
-      _readUtterance.onend = onEnd;
-      _readUtterance.onerror = onError;
-      speechSynthesis.speak(_readUtterance);
-    }
+    _say(text, lang, { onBoundary, onEnd, onError: onEnd });
+    // Some voices never send word boundaries; follow along by timing.
+    const rate = (typeof ZsTTS !== 'undefined' && ZsTTS.getSettings().rate) || 0.9;
+    const cps = 14 * rate, t0 = Date.now() + 300;
+    const tick = () => {
+      if (token !== _readToken || !_readActive || _gotBoundary) return;
+      const ci = Math.max(0, (Date.now() - t0) / 1000 * cps);
+      if (ci < text.length) { _highlightAtChar(Math.floor(ci)); _hlTimer = setTimeout(tick, 90); }
+    };
+    _hlTimer = setTimeout(tick, 700);
+  }
+  function _sayWord(v, withDef) {
+    const w = lang === 'es' ? v.wordEs : v.word;
+    const def = lang === 'es' ? (v.defEs || v.def) : (v.def || v.defEs);
+    _say(withDef && def ? w + '. ' + def : w, lang, { rate: 0.8 });
   }
 
+  // ── Vocabulary card ──
+  function showVocab(word, def) {   // kept for older callers
+    const page = currentStory && currentStory.pages[currentPage];
+    const v = page && (page.vocab || []).find(x => [x.word, x.wordEs].some(w => String(w).toLowerCase() === String(word).toLowerCase()));
+    _openVocab(v || { word: word, wordEs: word, def: def, defEs: def });
+  }
+  function _openVocab(v) {
+    if (!v) return;
+    _vocabOpen = v;
+    const fresh = _collect(v);
+    const w = lang === 'es' ? v.wordEs : v.word, other = lang === 'es' ? v.word : v.wordEs;
+    const def = lang === 'es' ? (v.defEs || v.def) : (v.def || v.defEs);
+    $('vocab-word').textContent = w;
+    $('vocab-other').textContent = (lang === 'es' ? 'English: ' : 'Español: ') + other;
+    $('vocab-def').textContent = def || '';
+    $('vocab-new').hidden = !fresh;
+    const ov = $('vocab-overlay');
+    ov.classList.add('active');
+    ov.setAttribute('aria-hidden', 'false');
+    sfx(fresh ? 'star' : 'click');
+    if (fresh) document.querySelectorAll('.se-chip[data-v]').forEach(ch => { const pv = currentStory.pages[currentPage].vocab[+ch.dataset.v]; if (pv === v) ch.classList.add('got'); });
+    setTimeout(() => { const b = ov.querySelector('[data-act="vclose"]'); if (b) b.focus(); }, 30);
+    _sayWord(v, false);
+  }
+  function _closeVocab() {
+    const ov = $('vocab-overlay');
+    ov.classList.remove('active');
+    ov.setAttribute('aria-hidden', 'true');
+    _vocabOpen = null;
+  }
+
+  // ── Challenges ──
+  const STEP = {
+    quiz:   { icon: '❓', en: 'Story question', es: 'Pregunta de la historia' },
+    seq:    { icon: '🖼️', en: 'Put the story in order', es: 'Ordena la historia' },
+    who:    { icon: '🗣️', en: 'Who said it? Who did it?', es: '¿Quién lo dijo? ¿Quién lo hizo?' },
+    match:  { icon: '🔤', en: 'Match each word to its meaning', es: 'Une cada palabra con su significado' },
+    infer:  { icon: '🔍', en: 'Think deeper', es: 'Piensa más allá' },
+    choice: { icon: '💭', en: 'What would you do?', es: '¿Qué harías tú?' }
+  };
+  function _startChallenges() {
+    stopRead();
+    const s = currentStory, ex = EXTRAS[s.id] || {}, lv = ageTier;
+    // remember the place in case they come back
+    const d = _load();
+    if (d.bookmark && d.bookmark.id === s.id) { delete d.bookmark; _save(d); }
+    const steps = [];
+    (s.quiz || []).forEach(q => steps.push({ t: 'quiz', q }));
+    const seqN = { beginner: 3, intermediate: 4, advanced: 5, expert: 6 }[lv] || 4;
+    if (s.pages.length >= 3) steps.push({ t: 'seq', n: Math.min(seqN, s.pages.length) });
+    (ex.who || []).slice(0, lv === 'beginner' ? 1 : 2).forEach(w => steps.push({ t: 'who', w }));
+    if (lv !== 'beginner') {
+      const seen = {}, pool = [];
+      s.pages.forEach(p => (p.vocab || []).forEach(v => { const k = String(v.word).toLowerCase(); if ((v.def || v.defEs) && !seen[k]) { seen[k] = 1; pool.push(v); } }));
+      const k = { intermediate: 3, advanced: 4, expert: 5 }[lv] || 3;
+      if (pool.length >= 2) steps.push({ t: 'match', words: shuffle(pool).slice(0, Math.min(k, pool.length)) });
+    }
+    if (lv === 'advanced' || lv === 'expert') {
+      (ex.infer || []).slice(0, lv === 'expert' ? 3 : 1).forEach(q => steps.push({ t: 'infer', q }));
+      if (ex.choice) steps.push({ t: 'choice', c: ex.choice });
+    }
+    run = { steps, i: 0, mistakes: 0, newWords: [] };
+    _showScreen('quiz');
+    _renderStep();
+  }
+
+  function _stepper() {
+    return '<ol class="se-steps" aria-label="' + tr('Challenges', 'Desafíos') + '">' + run.steps.map((st, i) =>
+      '<li class="' + (i < run.i ? 'done' : i === run.i ? 'now' : '') + '" title="' + esc(tr(STEP[st.t].en, STEP[st.t].es)) + '"><span aria-hidden="true">' + (i < run.i ? '✓' : STEP[st.t].icon) + '</span></li>').join('') + '</ol>';
+  }
+  function _head(st, qText) {
+    return '<div class="se-q-head">' + _stepper() +
+      '<div class="quiz-counter">' + tr('Challenge', 'Desafío') + ' ' + (run.i + 1) + ' / ' + run.steps.length + ' · ' + esc(tr(STEP[st.t].en, STEP[st.t].es)) + '</div></div>' +
+      (qText ? '<div class="se-q-row"><h2 class="quiz-q" id="se-q-text">' + esc(qText) + '</h2>' +
+        '<button type="button" class="se-listen" data-act="listen" aria-label="' + tr('Listen to the question', 'Escuchar la pregunta') + '">🔊</button></div>' : '');
+  }
+  function _renderStep() {
+    if (!run) return;
+    if (run.i >= run.steps.length) { _finishRun(); return; }
+    const st = run.steps[run.i], s = currentStory, wrap = $('quiz-wrap');
+    let h = '';
+    if (st.t === 'quiz' || st.t === 'infer') {
+      const q = st.q, opts = lang === 'es' ? q.optionsEs : q.options;
+      if (!st.order) st.order = shuffle(opts.map((_, i) => i));
+      h = _head(st, lang === 'es' ? q.qEs : q.q) + '<div class="quiz-options">' + st.order.map(i =>
+        '<button type="button" class="quiz-opt" data-act="opt" data-i="' + i + '">' + esc(opts[i]) + '</button>').join('') + '</div>';
+    } else if (st.t === 'seq') {
+      if (!st.pages) {
+        const n = st.n, P = s.pages.length, pick = [];
+        for (let i = 0; i < n; i++) pick.push(Math.round(i * (P - 1) / (n - 1)));
+        st.pages = pick.filter((v, i, a) => a.indexOf(v) === i);
+        let sh; do { sh = shuffle(st.pages); } while (sh.join() === st.pages.join() && st.pages.length > 1);
+        st.shuffled = sh; st.next = 0;
+      }
+      const caps = (EXTRAS[s.id] && EXTRAS[s.id].cap) || [];
+      const cap = p => (caps[p] ? tr(caps[p][0], caps[p][1]) : tr('Page', 'Página') + ' ' + (p + 1));
+      h = _head(st, tr('Tap the pictures in the order they happened.', 'Toca los dibujos en el orden en que ocurrieron.')) +
+        '<div class="se-slots">' + st.pages.map((p, i) => '<span class="se-slot' + (i < st.next ? ' filled' : '') + '">' +
+          (i < st.next ? (ART ? ART.page(s.id, st.pages[i]) : '') : '<b>' + (i + 1) + '</b>') + '</span>').join('') + '</div>' +
+        '<div class="se-pics">' + st.shuffled.map(p => {
+          const placed = st.pages.indexOf(p) < st.next;
+          return '<button type="button" class="se-pic' + (placed ? ' placed' : '') + '" data-act="seq" data-p="' + p + '"' + (placed ? ' disabled' : '') + ' aria-label="' + esc(cap(p)) + '">' +
+            '<span class="se-pic-art">' + (ART ? ART.page(s.id, p) : '') + '</span><span class="se-pic-cap">' + esc(cap(p)) + '</span>' +
+            (placed ? '<span class="se-pic-num">' + (st.pages.indexOf(p) + 1) + '</span>' : '') + '</button>';
+        }).join('') + '</div>';
+    } else if (st.t === 'who') {
+      const w = st.w;
+      if (!st.order) st.order = shuffle(w.opts.map((_, i) => i));
+      h = _head(st, lang === 'es' ? w.qEs : w.q) + '<div class="se-whos">' + st.order.map(i => {
+        const id = w.opts[i], c = CAST[id] || { en: id, es: id };
+        return '<button type="button" class="se-who" data-act="who" data-c="' + esc(id) + '"><span class="se-who-art">' + (ART ? ART.portrait(id) : '') + '</span><span class="se-who-name">' + esc(tr(c.en, c.es)) + '</span></button>';
+      }).join('') + '</div>';
+    } else if (st.t === 'match') {
+      if (!st.mOrder) { st.wOrder = shuffle(st.words.map((_, i) => i)); st.mOrder = shuffle(st.words.map((_, i) => i)); st.done = []; st.sel = null; }
+      h = _head(st, tr('Tap a word, then tap what it means.', 'Toca una palabra y luego lo que significa.')) +
+        '<div class="se-match"><div class="se-mcol">' + st.wOrder.map(k => {
+          const v = st.words[k], d = st.done.indexOf(k) !== -1;
+          return '<button type="button" class="se-mw' + (d ? ' done c' + (st.done.indexOf(k) % 5) : '') + (st.sel === k ? ' sel' : '') + '" data-act="mw" data-k="' + k + '"' + (d ? ' disabled' : '') + '>' + esc(lang === 'es' ? v.wordEs : v.word) + '</button>';
+        }).join('') + '</div><div class="se-mcol">' + st.mOrder.map(k => {
+          const v = st.words[k], d = st.done.indexOf(k) !== -1;
+          return '<button type="button" class="se-mm' + (d ? ' done c' + (st.done.indexOf(k) % 5) : '') + '" data-act="mm" data-k="' + k + '"' + (d ? ' disabled' : '') + '>' + esc(lang === 'es' ? (v.defEs || v.def) : (v.def || v.defEs)) + '</button>';
+        }).join('') + '</div></div>';
+    } else if (st.t === 'choice') {
+      const c = st.c;
+      h = _head(st, lang === 'es' ? c.qEs : c.q) + '<p class="se-choice-note">' + tr('There is no wrong answer here. Pick what you would do!', 'Aquí no hay respuestas incorrectas. ¡Elige lo que harías tú!') + '</p>' +
+        '<div class="quiz-options">' + c.opts.map((o, i) => '<button type="button" class="quiz-opt se-choice" data-act="choice" data-i="' + i + '">' + esc(tr(o.en, o.es)) + '</button>').join('') + '</div>';
+    }
+    h += '<div class="se-feedback" id="se-fb" aria-live="polite"></div>';
+    wrap.innerHTML = '<div class="se-qcard se-q-' + st.t + '">' + h + '</div>';
+    if (ageTier === 'beginner' && (st.t === 'quiz' || st.t === 'who')) setTimeout(_listenStep, 350);
+  }
+  function _listenStep() {
+    const st = run && run.steps[run.i];
+    if (!st) return;
+    const q = $('se-q-text');
+    let text = q ? q.textContent : '';
+    if (st.t === 'quiz' || st.t === 'infer' || st.t === 'choice') {
+      const opts = [...document.querySelectorAll('#quiz-wrap .quiz-opt')].map(b => b.textContent);
+      if (opts.length) text += ' … ' + opts.join(' … ');
+    } else if (st.t === 'who') {
+      text += ' … ' + [...document.querySelectorAll('.se-who-name')].map(n => n.textContent).join(' … ');
+    }
+    _say(text, lang, { rate: 0.85 });
+  }
+  function _fb(html, kind) {
+    const el = $('se-fb');
+    if (!el) return;
+    el.className = 'se-feedback show ' + (kind || '');
+    el.innerHTML = html;
+  }
+  function _wrong(btn, hint) {
+    run.mistakes++;
+    sfx('wrong');
+    if (btn) { btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake', 'wrong'); }
+    _fb('<span class="se-fb-ic" aria-hidden="true">🤔</span> ' + esc(hint || tr('Not quite. Try again!', 'Casi. ¡Inténtalo otra vez!')), 'no');
+  }
+  function _right(btn, next) {
+    sfx('correct');
+    if (btn) btn.classList.add('correct');
+    _burst(btn);
+    document.querySelectorAll('#quiz-wrap [data-act="opt"], #quiz-wrap [data-act="who"]').forEach(b => { b.disabled = true; });
+    if (next === false) return;
+    setTimeout(_advance, 850);
+  }
+  function _advance() {
+    if (!run) return;
+    run.i++;
+    _renderStep();
+    const w = $('quiz-wrap'); if (w && w.scrollIntoView) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function _burst(el) {
+    if (!el) return;
+    const r = el.getBoundingClientRect(), b = document.createElement('div');
+    b.className = 'se-burst';
+    b.style.left = (r.left + r.width / 2) + 'px';
+    b.style.top = (r.top + r.height / 2) + 'px';
+    b.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>';
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 900);
+  }
+  // A page whose text holds the answer — for a gentle "look back" hint.
+  function _hintPage(answerText) {
+    const words = String(answerText).toLowerCase().split(/[^a-záéíóúüñ0-9]+/i).filter(w => w.length > 3);
+    let best = -1, bestN = 0;
+    currentStory.pages.forEach((p, i) => {
+      const t = (lang === 'es' ? p.es : p.en).toLowerCase();
+      const n = words.filter(w => t.indexOf(w) !== -1).length;
+      if (n > bestN) { bestN = n; best = i; }
+    });
+    return best;
+  }
+  function answerQuiz(selected, btn) {
+    const st = run && run.steps[run.i];
+    if (!st || (st.t !== 'quiz' && st.t !== 'infer')) return;
+    const q = st.q;
+    btn = btn || document.querySelector('#quiz-wrap [data-act="opt"][data-i="' + selected + '"]');
+    if (selected === q.answer) {
+      if (st.t === 'infer') {
+        _right(btn, false);
+        _fb('<span class="se-fb-ic" aria-hidden="true">🔍</span> <b>' + tr('Clue', 'Pista') + ':</b> ' + esc(tr(q.why, q.whyEs)) +
+          '<button type="button" class="se-continue-btn" data-act="continue">' + tr('Continue', 'Continuar') + ' ›</button>', 'yes');
+      } else {
+        _right(btn);
+        _fb('<span class="se-fb-ic" aria-hidden="true">⭐</span> ' + tr('Correct!', '¡Correcto!'), 'yes');
+      }
+    } else {
+      if (btn) btn.disabled = true;
+      let hint = null;
+      if (st.t === 'quiz') {
+        const p = _hintPage((lang === 'es' ? q.optionsEs : q.options)[q.answer]);
+        if (p >= 0) hint = tr('Not quite. Look back at page ' + (p + 1) + ' of the story.', 'Casi. Mira otra vez la página ' + (p + 1) + ' de la historia.');
+      }
+      _wrong(btn, hint);
+    }
+  }
+  function _seqTap(p, btn) {
+    const st = run && run.steps[run.i];
+    if (!st || st.t !== 'seq') return;
+    if (p === st.pages[st.next]) {
+      st.next++;
+      sfx(st.next === st.pages.length ? 'correct' : 'click');
+      _burst(btn);
+      if (st.next === st.pages.length) {
+        _renderStep();
+        document.querySelectorAll('.se-pic').forEach(b => { b.disabled = true; });
+        _fb('<span class="se-fb-ic" aria-hidden="true">⭐</span> ' + tr('That is the story, in order!', '¡Así es la historia, en orden!'), 'yes');
+        setTimeout(_advance, 1300);
+      } else { _renderStep(); }
+    } else {
+      run.mistakes++;
+      sfx('wrong');
+      btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+      _fb('<span class="se-fb-ic" aria-hidden="true">🤔</span> ' + (st.next === 0 ? tr('What happened first?', '¿Qué pasó primero?') : tr('What happened next?', '¿Qué pasó después?')), 'no');
+    }
+  }
+  function _whoPick(id, btn) {
+    const st = run && run.steps[run.i];
+    if (!st || st.t !== 'who') return;
+    if (id === st.w.opts[st.w.a]) { _right(btn); _fb('<span class="se-fb-ic" aria-hidden="true">⭐</span> ' + tr('Yes!', '¡Sí!'), 'yes'); }
+    else { btn.disabled = true; _wrong(btn); }
+  }
+  function _matchWord(k, btn) {
+    const st = run && run.steps[run.i];
+    if (!st || st.t !== 'match') return;
+    st.sel = k;
+    document.querySelectorAll('.se-mw').forEach(b => b.classList.toggle('sel', +b.dataset.k === k));
+    _sayWord(st.words[k], false);
+  }
+  function _matchMeaning(k, btn) {
+    const st = run && run.steps[run.i];
+    if (!st || st.t !== 'match') return;
+    if (st.sel == null) {
+      _fb('<span class="se-fb-ic" aria-hidden="true">👆</span> ' + tr('First tap a word on the left.', 'Primero toca una palabra.'), 'no');
+      return;
+    }
+    if (k === st.sel) {
+      st.done.push(k);
+      _collect(st.words[k]);
+      st.sel = null;
+      sfx(st.done.length === st.words.length ? 'correct' : 'star');
+      const finished = st.done.length === st.words.length;
+      _renderStep();
+      if (finished) {
+        document.querySelectorAll('.se-mw, .se-mm').forEach(b => { b.disabled = true; });
+        _fb('<span class="se-fb-ic" aria-hidden="true">⭐</span> ' + tr('All matched! The words are in your Word Collector.', '¡Todas unidas! Las palabras están en tu Colección.'), 'yes');
+        setTimeout(_advance, 1400);
+      }
+    } else {
+      run.mistakes++;
+      sfx('wrong');
+      btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake');
+      _fb('<span class="se-fb-ic" aria-hidden="true">🤔</span> ' + tr('Not that one. Try another meaning!', 'Esa no. ¡Prueba otro significado!'), 'no');
+    }
+  }
+  function _choicePick(i) {
+    const st = run && run.steps[run.i];
+    if (!st || st.t !== 'choice') return;
+    const o = st.c.opts[i];
+    document.querySelectorAll('.se-choice').forEach((b, j) => { b.disabled = true; b.classList.toggle('picked', j === i); });
+    sfx('star');
+    _fb('<span class="se-fb-ic" aria-hidden="true">💡</span> ' + esc(tr(o.re, o.reEs)) +
+      '<button type="button" class="se-continue-btn" data-act="continue">' + tr('Continue', 'Continuar') + ' ›</button>', 'yes');
+  }
+  function _finishRun() {
+    const scored = run.steps.filter(s => s.t !== 'choice').length;
+    const lim = ageTier === 'beginner' ? [2, 4] : [1, 3];
+    const stars = !scored ? 2 : run.mistakes <= lim[0] ? 3 : run.mistakes <= lim[1] ? 2 : 1;
+    _showResults(stars);
+  }
+
+  // ── Results ──
+  function _showResults(starsEarned) {
+    const s = currentStory;
+    const before = _storyStars(_load(), s.id);
+    const gained = _saveProgress(starsEarned);
+    const best = Math.max(before, starsEarned);
+    const nw = run ? run.newWords.length : 0;
+    const tierList = STORIES.filter(x => x.tier === s.tier);
+    const readNow = _load().storiesRead || [];
+    const nextS = tierList.find(x => readNow.indexOf(x.id) === -1 && x.id !== s.id) || STORIES.find(x => readNow.indexOf(x.id) === -1 && x.id !== s.id);
+    const msg = starsEarned === 3 ? tr('Brilliant reading!', '¡Lectura brillante!') : starsEarned === 2 ? tr('Great job!', '¡Muy bien!') : tr('Well done — you finished!', '¡Bien hecho, terminaste!');
+    $('results-wrap').innerHTML =
+      '<div class="se-results">' +
+      '<div class="se-results-cover">' + (ART ? ART.cover(s.id) : '') + '</div>' +
+      '<h2 class="results-title">' + msg + '</h2>' +
+      '<div class="se-bigstars" role="img" aria-label="' + starsEarned + ' ' + tr('stars', 'estrellas') + '">' + [0, 1, 2].map(i => '<span class="se-bigstar' + (i < starsEarned ? ' on' : '') + '" style="animation-delay:' + (0.25 + i * 0.22) + 's">★</span>').join('') + '</div>' +
+      '<p class="results-subtitle">' + tr('You finished', 'Terminaste') + ' <b>' + esc(titleOf(s)) + '</b></p>' +
+      '<ul class="se-results-facts">' +
+      '<li><b>+' + gained + '</b> ' + tr('stars added', 'estrellas sumadas') + (gained === 0 && before ? ' · ' + tr('your best is', 'tu mejor marca es') + ' ' + '★'.repeat(best) : '') + '</li>' +
+      '<li><b>' + nw + '</b> ' + tr('new words collected', 'palabras nuevas coleccionadas') + '</li>' +
+      '<li><b>' + (run ? run.steps.length : 0) + '</b> ' + tr('challenges', 'desafíos') + (run ? ' · ' + run.mistakes + ' ' + tr('tries to fix', 'intentos a corregir') : '') + '</li>' +
+      '</ul>' +
+      '<div class="se-results-btns">' +
+      (nextS ? '<button type="button" class="action-btn btn-primary" data-act="story" data-id="' + esc(nextS.id) + '">' + tr('Next story', 'Siguiente historia') + ': ' + esc(titleOf(nextS)) + '</button>' : '') +
+      '<button type="button" class="action-btn btn-secondary" data-act="notebook">📒 ' + tr('Word Collector', 'Colección de palabras') + '</button>' +
+      '<button type="button" class="action-btn btn-secondary" data-act="again">↻ ' + tr('Read it again', 'Leer otra vez') + '</button>' +
+      '<button type="button" class="action-btn btn-secondary" data-act="library">' + tr('Back to Library', 'Volver a la Biblioteca') + '</button>' +
+      '</div></div>';
+    _showScreen('results');
+    sfx('cheer');
+  }
+
+  // Stars: a story's first finish adds its stars to totalStars, as it
+  // always has. A later, better round adds only the difference, so a
+  // story is still worth at most 3. storyStars keeps each best.
+  function _saveProgress(starsEarned) {
+    const data = _load();
+    if (!Array.isArray(data.storiesRead)) data.storiesRead = [];
+    const id = currentStory.id;
+    const first = data.storiesRead.indexOf(id) === -1;
+    const prevBest = first ? 0 : _storyStars(data, id);
+    let gained = 0;
+    if (first) { data.storiesRead.push(id); gained = starsEarned; }
+    else if (starsEarned > prevBest) gained = starsEarned - prevBest;
+    if (!data.storyStars || typeof data.storyStars !== 'object') data.storyStars = {};
+    data.storyStars[id] = Math.max(prevBest, starsEarned);
+    data.totalStars = (data.totalStars || 0) + gained;
+    if (data.bookmark && data.bookmark.id === id) delete data.bookmark;
+    _save(data);
+    _updateGlobalStars();
+    if ((first || gained) && typeof ActivityLog !== 'undefined') {
+      ActivityLog.log('Story Explorer', '📚', `Read "${currentStory.title}" — ${starsEarned} star${starsEarned !== 1 ? 's' : ''}`);
+    }
+    return gained;
+  }
+
+  // ── Word Collector notebook ──
+  function _updateNotebookBadge(n) {
+    if (n == null) n = _words(_load()).length;
+    document.querySelectorAll('.se-nb-count').forEach(el => { el.textContent = String(n); });
+  }
+  function openNotebook() {
+    stopRead();
+    const known = _words(_load());
+    const total = Object.keys(WORDS).length;
+    const got = known.filter(k => WORDS[k]).length;
+    let h = '<div class="se-nb-head"><div class="se-nb-progress"><div class="se-nb-bar"><i style="width:' + Math.round(got / Math.max(1, total) * 100) + '%"></i></div>' +
+      '<span><b>' + got + '</b> / ' + total + ' ' + tr('words collected', 'palabras coleccionadas') + '</span></div>' +
+      '<p>' + tr('Tap a highlighted word while you read, or match words in the challenges, to collect it.', 'Toca una palabra destacada mientras lees, o únelas en los desafíos, para coleccionarla.') + '</p></div>';
+    const waiting = [];
+    STORIES.forEach(s => {
+      const mine = Object.keys(WORDS).filter(k => WORDS[k].story === s);
+      const have = mine.filter(k => known.indexOf(k) !== -1);
+      if (!have.length) { waiting.push({ s, n: mine.length }); return; }
+      h += '<section class="se-nb-story"><h3><span class="se-nb-thumb">' + (ART ? ART.cover(s.id) : '') + '</span><span>' + esc(titleOf(s)) + '</span><small>' + have.length + '/' + mine.length + '</small></h3><div class="se-nb-words">' +
+        mine.map(k => {
+          const v = WORDS[k].v;
+          if (known.indexOf(k) === -1) return '<span class="se-nb-word locked" aria-label="' + tr('Not found yet', 'Aún no encontrada') + '">?</span>';
+          return '<button type="button" class="se-nb-word" data-act="nbsay" data-w="' + esc(k) + '" aria-label="' + esc(tr('Hear', 'Escuchar') + ' ' + (lang === 'es' ? v.wordEs : v.word)) + '">' +
+            '<b>' + esc(lang === 'es' ? v.wordEs : v.word) + '</b><i>' + esc(lang === 'es' ? v.word : v.wordEs) + '</i>' +
+            '<span>' + esc(lang === 'es' ? (v.defEs || v.def || '') : (v.def || v.defEs || '')) + '</span><em aria-hidden="true">🔊</em></button>';
+        }).join('') + '</div></section>';
+    });
+    if (waiting.length) {
+      h += '<section class="se-nb-waiting"><h3>' + tr('Words still hiding in these stories', 'Palabras que aún se esconden en estas historias') + '</h3><div class="se-nb-chips">' +
+        waiting.map(w => '<button type="button" class="se-nb-chip" data-act="story" data-id="' + esc(w.s.id) + '">' + esc(titleOf(w.s)) + ' <b>' + w.n + '</b></button>').join('') + '</div></section>';
+    }
+    $('se-notebook').innerHTML = h;
+    _showScreen('notebook');
+    window.scrollTo(0, 0);
+  }
+
+  // ── Language ──
+  function _applyLang() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.se-lang').forEach(b => {
+      b.innerHTML = '<span class="' + (lang === 'en' ? 'on' : '') + '">EN</span><span class="' + (lang === 'es' ? 'on' : '') + '">ES</span>';
+      b.setAttribute('aria-label', lang === 'en' ? 'Cambiar a español' : 'Switch to English');
+    });
+    const st = document.querySelectorAll('[data-i18n]');
+    st.forEach(el => { const k = el.dataset.i18n.split('|'); el.textContent = tr(k[0], k[1]); });
+    const label = $('lang-label');
+    if (label) label.textContent = lang === 'en' ? 'EN / ES' : 'ES / EN';
+  }
   function toggleLanguage() {
     lang = lang === 'en' ? 'es' : 'en';
-    const label = document.getElementById('lang-label');
-    if (label) label.textContent = lang === 'en' ? 'ES / EN' : 'EN / ES';
-    if (currentStory) _renderPage();
+    stopRead();
+    const d = _load();
+    d.prefs = Object.assign({}, d.prefs && typeof d.prefs === 'object' ? d.prefs : {}, { lang });
+    _save(d);
+    _applyLang();
+    if ($('screen-read').classList.contains('active') && currentStory) _fillPage(currentPage);
+    else if ($('screen-quiz').classList.contains('active') && run) _renderStep();
+    else if ($('screen-notebook').classList.contains('active')) openNotebook();
+    else if ($('screen-results').classList.contains('active')) { /* keep */ }
     else _renderLibrary();
   }
 
   function backToLibrary() {
+    // keep the reader's place in a story they left half-way
+    if (currentStory && $('screen-read').classList.contains('active')) {
+      const d = _load();
+      if (currentPage > 0) d.bookmark = { id: currentStory.id, page: currentPage };
+      else if (d.bookmark && d.bookmark.id === currentStory.id) delete d.bookmark;
+      _save(d);
+    }
     stopRead();
+    _closeVocab();
     _showScreen('library');
     _renderLibrary();
+    window.scrollTo(0, 0);
   }
 
   function _showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const el = document.getElementById('screen-' + name);
+    const el = $('screen-' + name);
     if (el) el.classList.add('active');
+    document.body.dataset.screen = name;
   }
 
   function _updateGlobalStars() {
     const data = _load();
-    const el = document.getElementById('story-stars');
-    if (el) el.textContent = `⭐ ${data.totalStars || 0}`;
-  }
-
-  function _showFeedback(emoji) {
-    const f = document.getElementById('feedback');
-    const fe = document.getElementById('feedbackEmoji');
-    if (!f || !fe) return;
-    fe.textContent = emoji;
-    f.classList.add('active');
-    setTimeout(() => f.classList.remove('active'), 800);
+    const el = $('story-stars');
+    if (el) el.textContent = '⭐ ' + (data.totalStars || 0);
   }
 
   function getStats() {
     const data = _load();
     return {
       totalStars: data.totalStars || 0,
-      storiesReadCount: (data.storiesRead || []).length
+      storiesReadCount: (data.storiesRead || []).length,
+      wordsLearnedCount: _words(data).length
     };
   }
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { init, startStory, nextPage, prevPage, showVocab, answerQuiz, setTier, toggleLanguage, backToLibrary, readAloud, stopRead, getStats };
+  return { init, startStory, nextPage, prevPage, showVocab, answerQuiz, setTier, toggleLanguage, backToLibrary, readAloud, stopRead, getStats, openNotebook };
 })();
