@@ -1,0 +1,1229 @@
+/* ================================================================
+   MARINERO — hand-drawn graphics (js/marinero-art.js)
+
+   Everything Marinero shows is drawn here in code: no images.
+     • RopeKit  — a 3-strand laid rope renderer for <canvas>. A knot
+       is a list of control points per rope; RopeKit splines them,
+       finds every crossing, lifts the strand that goes OVER and sinks
+       the one that goes UNDER, then paints the rope level by level
+       (lowest first) with a cylinder shade, twisted strand grooves,
+       glints on each strand, cast shadows and a whipped end.
+     • Scenes   — teak deck, a dock piling, a horn cleat, harbour bokeh.
+     • Compass  — gimballed marine compass card, bowl and glass dome.
+     • Buoys    — IALA buoys floating on animated water.
+     • Flags    — International Code of Signals flags as SVG.
+     • Chart    — a practice nautical chart of a fictional bay.
+   Exposes one global: MarineroArt.
+   ================================================================ */
+
+var MarineroArt = (function() {
+  'use strict';
+
+  // ---------------------------------------------------------------
+  // Small helpers
+  // ---------------------------------------------------------------
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function mixC(c1, c2, t) {
+    return [c1[0] + (c2[0] - c1[0]) * t, c1[1] + (c2[1] - c1[1]) * t, c1[2] + (c2[2] - c1[2]) * t];
+  }
+  function rgb(c, a) {
+    var r = Math.round(clamp(c[0], 0, 255)), g = Math.round(clamp(c[1], 0, 255)), b = Math.round(clamp(c[2], 0, 255));
+    return a == null ? 'rgb(' + r + ',' + g + ',' + b + ')' : 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  }
+  function shadeC(c, k) {
+    if (k <= 1) return [c[0] * k, c[1] * k, c[2] * k];
+    var t = k - 1; // toward a warm white
+    return mixC(c, [255, 250, 238], clamp(t, 0, 1));
+  }
+  // Deterministic pseudo-random (so textures never flicker)
+  function rng(seed) {
+    var s = seed >>> 0 || 1;
+    return function() {
+      s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0;
+      return (s % 100000) / 100000;
+    };
+  }
+
+  // Canvas sized for the device's pixel ratio. Returns {ctx,w,h,dpr}.
+  function fitCanvas(cv, cssW, cssH) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    var w = Math.max(1, Math.round(cssW)), h = Math.max(1, Math.round(cssH));
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+    }
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    return { ctx: cv.getContext('2d'), w: w, h: h, dpr: dpr };
+  }
+
+  // Draw a blurred shadow of whatever path-building fn produces, without the
+  // shape itself: the shape is drawn far off-canvas and only its shadow lands.
+  // shadowOffset/shadowBlur ignore the transform, so they are given in device px.
+  function castShadow(ctx, devScale, blur, dx, dy, color, buildAndPaint) {
+    var FAR = 20000;
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = blur * devScale;
+    ctx.shadowOffsetX = (FAR + dx) * devScale;
+    ctx.shadowOffsetY = dy * devScale;
+    ctx.translate(-FAR, 0);
+    buildAndPaint(ctx);
+    ctx.restore();
+  }
+
+  // ---------------------------------------------------------------
+  // ROPE KIT
+  // ---------------------------------------------------------------
+  var ROPE_COLORS = {
+    manila: { base: [206, 166, 102], twine: [74, 50, 32],   label: 'Manila' },
+    navy:   { base: [44, 66, 118],   twine: [236, 232, 220], label: 'Navy' },
+    red:    { base: [176, 50, 42],   twine: [236, 232, 220], label: 'Red' },
+    white:  { base: [226, 221, 206], twine: [40, 52, 86],    label: 'White' },
+    green:  { base: [52, 118, 80],   twine: [236, 232, 220], label: 'Green' }
+  };
+
+  // Light from the upper left, a little in front.
+  var LX = -0.48, LY = -0.72, LZ = 0.86;
+  (function() { var m = Math.sqrt(LX * LX + LY * LY + LZ * LZ); LX /= m; LY /= m; LZ /= m; })();
+  var HX = LX, HY = LY, HZ = LZ + 1;
+  (function() { var m = Math.sqrt(HX * HX + HY * HY + HZ * HZ); HX /= m; HY /= m; HZ /= m; })();
+
+  // Centripetal Catmull-Rom through control points [x,y,z?]; z is linear.
+  function splineDense(pts, per) {
+    var out = [], cps = [0];
+    var P = pts.map(function(p) { return { x: p[0], y: p[1], z: p[2] || 0 }; });
+    var n = P.length;
+    function gp(i) {
+      if (i < 0) return { x: 2 * P[0].x - P[1].x, y: 2 * P[0].y - P[1].y, z: P[0].z };
+      if (i >= n) return { x: 2 * P[n - 1].x - P[n - 2].x, y: 2 * P[n - 1].y - P[n - 2].y, z: P[n - 1].z };
+      return P[i];
+    }
+    function tj(ti, a, b) {
+      var d = Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
+      return ti + Math.max(Math.sqrt(d), 1e-3);
+    }
+    for (var i = 0; i < n - 1; i++) {
+      var p0 = gp(i - 1), p1 = gp(i), p2 = gp(i + 1), p3 = gp(i + 2);
+      var t0 = 0, t1 = tj(t0, p0, p1), t2 = tj(t1, p1, p2), t3 = tj(t2, p2, p3);
+      for (var k = 0; k < per; k++) {
+        var t = t1 + (t2 - t1) * (k / per);
+        var a1x = (t1 - t) / (t1 - t0) * p0.x + (t - t0) / (t1 - t0) * p1.x;
+        var a1y = (t1 - t) / (t1 - t0) * p0.y + (t - t0) / (t1 - t0) * p1.y;
+        var a2x = (t2 - t) / (t2 - t1) * p1.x + (t - t1) / (t2 - t1) * p2.x;
+        var a2y = (t2 - t) / (t2 - t1) * p1.y + (t - t1) / (t2 - t1) * p2.y;
+        var a3x = (t3 - t) / (t3 - t2) * p2.x + (t - t2) / (t3 - t2) * p3.x;
+        var a3y = (t3 - t) / (t3 - t2) * p2.y + (t - t2) / (t3 - t2) * p3.y;
+        var b1x = (t2 - t) / (t2 - t0) * a1x + (t - t0) / (t2 - t0) * a2x;
+        var b1y = (t2 - t) / (t2 - t0) * a1y + (t - t0) / (t2 - t0) * a2y;
+        var b2x = (t3 - t) / (t3 - t1) * a2x + (t - t1) / (t3 - t1) * a3x;
+        var b2y = (t3 - t) / (t3 - t1) * a2y + (t - t1) / (t3 - t1) * a3y;
+        var cx = (t2 - t) / (t2 - t1) * b1x + (t - t1) / (t2 - t1) * b2x;
+        var cy = (t2 - t) / (t2 - t1) * b1y + (t - t1) / (t2 - t1) * b2y;
+        // smooth z (ease) between control points
+        var f = k / per, e = f * f * (3 - 2 * f);
+        out.push({ x: cx, y: cy, z: p1.z + (p2.z - p1.z) * e, cp: i + f });
+      }
+    }
+    out.push({ x: P[n - 1].x, y: P[n - 1].y, z: P[n - 1].z, cp: n - 1 });
+    return out;
+  }
+
+  // Resample a dense polyline to uniform spacing ds. Keeps the control
+  // point parameter (cp) so a step can say "up to control point 7.5".
+  function resample(dense, ds) {
+    var acc = [0];
+    for (var i = 1; i < dense.length; i++) {
+      var dx = dense[i].x - dense[i - 1].x, dy = dense[i].y - dense[i - 1].y;
+      acc.push(acc[i - 1] + Math.sqrt(dx * dx + dy * dy));
+    }
+    var L = acc[acc.length - 1];
+    var n = Math.max(2, Math.ceil(L / ds) + 1);
+    var step = L / (n - 1);
+    var X = new Float32Array(n), Y = new Float32Array(n), Z = new Float32Array(n), CP = new Float32Array(n);
+    var j = 0;
+    for (var k = 0; k < n; k++) {
+      var s = k * step;
+      while (j < dense.length - 2 && acc[j + 1] < s) j++;
+      var seg = acc[j + 1] - acc[j] || 1;
+      var f = clamp((s - acc[j]) / seg, 0, 1);
+      X[k] = dense[j].x + (dense[j + 1].x - dense[j].x) * f;
+      Y[k] = dense[j].y + (dense[j + 1].y - dense[j].y) * f;
+      Z[k] = dense[j].z + (dense[j + 1].z - dense[j].z) * f;
+      CP[k] = dense[j].cp + (dense[j + 1].cp - dense[j].cp) * f;
+    }
+    return { x: X, y: Y, z: Z, cp: CP, n: n, ds: step, L: L };
+  }
+
+  function segIntersect(ax, ay, bx, by, cx, cy, dx, dy) {
+    var rx = bx - ax, ry = by - ay, sx = dx - cx, sy = dy - cy;
+    var den = rx * sy - ry * sx;
+    if (Math.abs(den) < 1e-9) return null;
+    var t = ((cx - ax) * sy - (cy - ay) * sx) / den;
+    var u = ((cx - ax) * ry - (cy - ay) * rx) / den;
+    if (t < 0 || t > 1 || u < 0 || u > 1) return null;
+    return { t: t, u: u, x: ax + rx * t, y: ay + ry * t };
+  }
+
+  /* Build a drawable model from a knot definition:
+       def.W        rope diameter (design units)
+       def.ropes[]  { pts:[[x,y,zHint]], color, start, end }
+       def.ou       one letter per crossing, in the order the rope (or the
+                    later rope) reaches it: 'O' over, 'U' under, '-' leave */
+  function buildModel(def) {
+    var W = def.W || 40;
+    var ds = W / 6;
+    var ropes = def.ropes.map(function(r, ri) {
+      var dense = splineDense(r.pts, 28);
+      var rs = resample(dense, ds);
+      rs.idx = ri;
+      rs.def = r;
+      rs.bump = new Float32Array(rs.n);
+      return rs;
+    });
+
+    // --- crossings ---
+    var cr = [];
+    var minGap = Math.ceil((W * 2.2) / ds);
+    for (var a = 0; a < ropes.length; a++) {
+      for (var b = a; b < ropes.length; b++) {
+        var A = ropes[a], B = ropes[b];
+        for (var i = 0; i < A.n - 1; i++) {
+          var ax0 = A.x[i], ay0 = A.y[i], ax1 = A.x[i + 1], ay1 = A.y[i + 1];
+          var minx = Math.min(ax0, ax1), maxx = Math.max(ax0, ax1), miny = Math.min(ay0, ay1), maxy = Math.max(ay0, ay1);
+          for (var j = (a === b ? i + minGap : 0); j < B.n - 1; j++) {
+            var bx0 = B.x[j], by0 = B.y[j], bx1 = B.x[j + 1], by1 = B.y[j + 1];
+            if (Math.max(bx0, bx1) < minx || Math.min(bx0, bx1) > maxx || Math.max(by0, by1) < miny || Math.min(by0, by1) > maxy) continue;
+            var hit = segIntersect(ax0, ay0, ax1, ay1, bx0, by0, bx1, by1);
+            if (!hit) continue;
+            var sa = (i + hit.t) * A.ds, sb = (j + hit.u) * B.ds;
+            var dup = false;
+            for (var q = 0; q < cr.length; q++) {
+              var c = cr[q];
+              if (c.ra === a && c.rb === b && Math.abs(c.sa - sa) < W * 0.8 && Math.abs(c.sb - sb) < W * 0.8) { dup = true; break; }
+            }
+            if (dup) continue;
+            var tax = ax1 - ax0, tay = ay1 - ay0, tbx = bx1 - bx0, tby = by1 - by0;
+            var la = Math.sqrt(tax * tax + tay * tay) || 1, lb = Math.sqrt(tbx * tbx + tby * tby) || 1;
+            var sin = Math.abs((tax * tby - tay * tbx) / (la * lb));
+            cr.push({ ra: a, rb: b, sa: sa, sb: sb, x: hit.x, y: hit.y, sin: sin });
+          }
+        }
+      }
+    }
+    // order by when the travelling strand gets there (later rope / later arclength)
+    cr.forEach(function(c) { c.key = c.rb * 1e6 + c.sb; });
+    cr.sort(function(p, q) { return p.key - q.key; });
+    var ou = (def.ou || '').replace(/\s+/g, '');
+    cr.forEach(function(c, k) {
+      var ch = ou.charAt(k) || 'O';
+      c.over = ch === 'O' ? 'b' : ch === 'U' ? 'a' : null;
+      c.ch = ch;
+      if (!c.over) return;
+      var hw = Math.min(W * 3.4, (W * 0.52) / Math.max(c.sin, 0.18) + W * 0.45);
+      var fall = W * 0.7;
+      [['a', c.ra, c.sa], ['b', c.rb, c.sb]].forEach(function(e) {
+        var R = ropes[e[1]], sc = e[2];
+        var h = (c.over === e[0]) ? 0.5 : -0.5;
+        for (var k2 = 0; k2 < R.n; k2++) {
+          var d = Math.abs(k2 * R.ds - sc);
+          if (d > hw + fall) continue;
+          var w = d < hw ? 1 : 0.5 + 0.5 * Math.cos(Math.PI * (d - hw) / fall);
+          var v = h * w;
+          if (Math.abs(v) > Math.abs(R.bump[k2])) R.bump[k2] = v;
+        }
+      });
+    });
+
+    // --- per-sample frames: normal, highlight offset, level ---
+    ropes.forEach(function(R) {
+      R.nx = new Float32Array(R.n); R.ny = new Float32Array(R.n);
+      R.vl = new Float32Array(R.n); R.vs = new Float32Array(R.n);
+      R.lev = new Int8Array(R.n);
+      for (var k = 0; k < R.n; k++) {
+        var k0 = Math.max(0, k - 1), k1 = Math.min(R.n - 1, k + 1);
+        var tx = R.x[k1] - R.x[k0], ty = R.y[k1] - R.y[k0];
+        var m = Math.sqrt(tx * tx + ty * ty) || 1;
+        tx /= m; ty /= m;
+        var nx = -ty, ny = tx;
+        R.nx[k] = nx; R.ny[k] = ny;
+        var al = nx * LX + ny * LY;
+        R.vl[k] = al / Math.sqrt(al * al + LZ * LZ);
+        var ah = nx * HX + ny * HY;
+        R.vs[k] = ah / Math.sqrt(ah * ah + HZ * HZ);
+        var z = R.z[k] + R.bump[k];
+        R.lev[k] = Math.round(z * 2 + 1e-6);
+      }
+    });
+
+    return { W: W, ropes: ropes, crossings: cr, def: def };
+  }
+
+  // arclength for a control-point parameter u (fractional index)
+  function sAtCP(R, u) {
+    if (u <= 0) return 0;
+    var cp = R.cp;
+    if (u >= cp[R.n - 1]) return R.L;
+    var lo = 0, hi = R.n - 1;
+    while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (cp[mid] < u) lo = mid; else hi = mid; }
+    var f = (u - cp[lo]) / ((cp[hi] - cp[lo]) || 1);
+    return (lo + f) * R.ds;
+  }
+
+  // Interpolated frame at arclength s
+  function frameAt(R, s) {
+    var f = clamp(s / R.ds, 0, R.n - 1.0001);
+    var i = Math.floor(f), t = f - i;
+    var j = Math.min(R.n - 1, i + 1);
+    var nx = R.nx[i] + (R.nx[j] - R.nx[i]) * t, ny = R.ny[i] + (R.ny[j] - R.ny[i]) * t;
+    var m = Math.sqrt(nx * nx + ny * ny) || 1;
+    return {
+      x: R.x[i] + (R.x[j] - R.x[i]) * t, y: R.y[i] + (R.y[j] - R.y[i]) * t,
+      nx: nx / m, ny: ny / m,
+      vl: R.vl[i] + (R.vl[j] - R.vl[i]) * t, vs: R.vs[i] + (R.vs[j] - R.vs[i]) * t
+    };
+  }
+
+  // Path along samples [i0..i1] (+ exact end point at sEnd), offset sideways by
+  // `side` (in units of the radius, multiplied by each sample's light offset).
+  function tracePath(ctx, R, i0, i1, sEnd, W, side) {
+    var r = W / 2;
+    for (var k = i0; k <= i1; k++) {
+      var o = side ? R.vl[k] * r * side : 0;
+      var px = R.x[k] + R.nx[k] * o, py = R.y[k] + R.ny[k] * o;
+      if (k === i0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    if (sEnd != null) {
+      var F = frameAt(R, sEnd);
+      var o2 = side ? F.vl * r * side : 0;
+      ctx.lineTo(F.x + F.nx * o2, F.y + F.ny * o2);
+    }
+  }
+
+  var TUBE = (function() { // width fraction, shade, sideways shift (radius units)
+    var t = [];
+    for (var i = 0; i < 11; i++) {
+      var f = i / 10;
+      var wf = 1 - f * 0.9;
+      t.push([wf, 0.34 + 0.9 * Math.pow(f, 0.8), 0.62 * Math.pow(f, 0.9)]);
+    }
+    return t;
+  })();
+
+  function drawTube(ctx, runs, W, base) {
+    for (var L = 0; L < TUBE.length; L++) {
+      var T = TUBE[L];
+      ctx.beginPath();
+      for (var q = 0; q < runs.length; q++) {
+        var rn = runs[q];
+        tracePath(ctx, rn.R, rn.i0, rn.i1, rn.sEnd, W, T[2]);
+      }
+      ctx.lineWidth = W * T[0];
+      ctx.strokeStyle = rgb(shadeC(base, T[1]));
+      ctx.stroke();
+    }
+  }
+
+  // A helix line across the rope at strand phase s0 (a groove or a crown).
+  function helixPts(R, s0, P, W, vFrom, vTo, sLo, sHi, steps) {
+    var pts = [];
+    var r = W / 2 * 0.97;
+    for (var k = 0; k <= steps; k++) {
+      var v = vFrom + (vTo - vFrom) * (k / steps);
+      var s = s0 + Math.asin(clamp(v, -1, 1)) * P / (2 * Math.PI);
+      if (s < sLo || s > sHi) { pts.push(null); continue; }
+      var F = frameAt(R, s);
+      pts.push([F.x + F.nx * v * r, F.y + F.ny * v * r, F]);
+    }
+    return pts;
+  }
+  function strokePts(ctx, pts) {
+    var started = false;
+    for (var k = 0; k < pts.length; k++) {
+      var p = pts[k];
+      if (!p) { started = false; continue; }
+      if (!started) { ctx.moveTo(p[0], p[1]); started = true; } else ctx.lineTo(p[0], p[1]);
+    }
+  }
+
+  // Three twisted strands. Each strand is a rounded bundle of yarns, so it is
+  // dark where it dives into the groove beside its neighbour and bright on its
+  // crown; the crown is lit more on the side that faces the light.
+  var STRAND_LINES = [ // phase across one strand (0..1), kind, weight
+    [0.07, 'dark', 0.6], [0.93, 'dark', 0.6], [0.17, 'dark', 0.3], [0.83, 'dark', 0.3],
+    [0.38, 'lite', 0.5], [0.5, 'lite', 0.8], [0.62, 'lite', 0.5]
+  ];
+
+  // Offset copy of the run's centreline, `off` radii to one side.
+  function traceOffset(ctx, R, i0, i1, sEnd, W, off) {
+    var r = W / 2 * off;
+    for (var k = i0; k <= i1; k++) {
+      var px = R.x[k] + R.nx[k] * r, py = R.y[k] + R.ny[k] * r;
+      if (k === i0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    if (sEnd != null) { var F = frameAt(R, sEnd); ctx.lineTo(F.x + F.nx * r, F.y + F.ny * r); }
+  }
+
+  // Strand texture. Drawn with source-atop on the rope layer, so nothing
+  // needs to be trimmed to the rope here: lines may run past its edges.
+  function drawStrands(ctx, runs, W, base) {
+    var P = W * 3.3;          // lay length
+    var sp = P / 3;           // one strand per third of a lay
+    var dark = shadeC(base, 0.16);
+    for (var q = 0; q < runs.length; q++) {
+      var rn = runs[q], R = rn.R;
+      var sLo = rn.i0 * R.ds - P, sHi = (rn.sEnd != null ? rn.sEnd : rn.i1 * R.ds) + P;
+      var g0 = Math.floor(sLo / sp), g1 = Math.ceil(sHi / sp);
+      // flanks and crowns of every strand; the flank facing the light is
+      // brighter than the one facing away (alpha binned per strand so the
+      // shading is the same whichever run draws it)
+      STRAND_LINES.forEach(function(Ln) {
+        var ph = Ln[0], kind = Ln[1], wt = Ln[2];
+        if (kind === 'dark') {
+          var bins = [[], [], [], [], [], []];
+          for (var g = g0; g <= g1; g++) {
+            var Fm = frameAt(R, g * sp + sp * ph);
+            var lt = Fm.ny * LX - Fm.nx * LY;
+            var fl = clamp(1 + (ph < 0.5 ? -1 : 1) * lt * 1.5, 0.3, 1.8);
+            bins[Math.min(5, Math.floor((fl - 0.3) / 0.25))].push(g);
+          }
+          bins.forEach(function(list, bi) {
+            if (!list.length) return;
+            ctx.beginPath();
+            list.forEach(function(g) { strokePts(ctx, helixPts(R, g * sp + sp * ph, P, W, -1.05, 1.05, sLo, sHi, 12)); });
+            ctx.lineWidth = sp * 0.15;
+            ctx.strokeStyle = rgb(dark, (0.3 * wt * (0.425 + bi * 0.25)).toFixed(3));
+            ctx.stroke();
+          });
+        } else {
+          ctx.beginPath();
+          for (var g5 = g0; g5 <= g1; g5++) strokePts(ctx, helixPts(R, g5 * sp + sp * ph, P, W, -1.05, 1.05, sLo, sHi, 12));
+          ctx.lineWidth = sp * 0.17;
+          ctx.strokeStyle = 'rgba(255,247,228,' + (0.07 * wt).toFixed(3) + ')';
+          ctx.stroke();
+        }
+      });
+      // the groove itself
+      ctx.beginPath();
+      for (var g4 = g0; g4 <= g1; g4++) strokePts(ctx, helixPts(R, g4 * sp, P, W, -1.05, 1.05, sLo, sHi, 12));
+      ctx.lineWidth = W * 0.1; ctx.strokeStyle = rgb(dark, 0.5); ctx.stroke();
+      ctx.lineWidth = W * 0.038; ctx.strokeStyle = rgb(shadeC(base, 0.08), 0.9); ctx.stroke();
+      // yarn / fibre texture: fine lines along each strand, slightly irregular
+      ctx.beginPath();
+      for (var g2 = g0; g2 <= g1; g2++) {
+        var rr = rng(9301 + g2 * 7 + R.idx * 131);
+        for (var f = 0; f < 5; f++) {
+          var off = sp * (0.15 + rr() * 0.7);
+          var vA = -0.95 + rr() * 0.6, vB = vA + 0.45 + rr() * 0.9;
+          strokePts(ctx, helixPts(R, g2 * sp + off, P * (0.93 + rr() * 0.14), W, vA, Math.min(0.98, vB), sLo, sHi, 4));
+        }
+      }
+      ctx.lineWidth = Math.max(0.5, W * 0.016); ctx.strokeStyle = rgb(dark, 0.3); ctx.stroke();
+      // ambient occlusion along both edges (rounds the rope off)
+      ctx.beginPath();
+      traceOffset(ctx, R, rn.i0, rn.i1, rn.sEnd, W, 0.92);
+      traceOffset(ctx, R, rn.i0, rn.i1, rn.sEnd, W, -0.92);
+      ctx.lineWidth = W * 0.26; ctx.strokeStyle = rgb(dark, 0.16); ctx.stroke();
+      ctx.lineWidth = W * 0.1; ctx.strokeStyle = rgb(dark, 0.26); ctx.stroke();
+      // specular glints: a small soft highlight on each strand crown
+      ctx.beginPath();
+      for (var g3 = g0; g3 <= g1; g3++) {
+        var s0 = g3 * sp + sp * 0.5;
+        var F = frameAt(R, s0);
+        var v = clamp(F.vs, -0.85, 0.85);
+        strokePts(ctx, helixPts(R, s0, P, W, v - 0.17, v + 0.17, sLo, sHi, 3));
+      }
+      ctx.lineCap = 'round';
+      ctx.lineWidth = W * 0.11; ctx.strokeStyle = 'rgba(255,250,236,0.16)'; ctx.stroke();
+      ctx.lineWidth = W * 0.05; ctx.strokeStyle = 'rgba(255,253,245,0.45)'; ctx.stroke();
+      ctx.lineCap = 'butt';
+    }
+  }
+
+  function drawFuzz(ctx, runs, W, base) {
+    for (var q = 0; q < runs.length; q++) {
+      var rn = runs[q], R = rn.R;
+      // a little fuzz on the silhouette
+      ctx.beginPath();
+      for (var k = rn.o0 + (rn.o0 & 1); k < rn.o1; k += 2) {
+        var fz = rng(77 + R.idx * 7919 + k * 2654435761);
+        var side = fz() < 0.5 ? -1 : 1;
+        if (fz() < 0.45) continue;
+        var ex = R.x[k] + R.nx[k] * side * W * 0.49, ey = R.y[k] + R.ny[k] * side * W * 0.49;
+        var ang = (fz() - 0.5) * 1.6, len = W * (0.04 + fz() * 0.09);
+        var dx = R.nx[k] * side, dy = R.ny[k] * side;
+        var ca = Math.cos(ang), sa = Math.sin(ang);
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex + (dx * ca - dy * sa) * len, ey + (dx * sa + dy * ca) * len);
+      }
+      ctx.lineWidth = Math.max(0.4, W * 0.014); ctx.strokeStyle = rgb(shadeC(base, 0.9), 0.55); ctx.stroke();
+    }
+  }
+
+  // Whipping (tight turns of twine) near a rope end, plus the cut end.
+  function drawEnd(ctx, R, sTip, dir, kind, W, col) {
+    var base = col.base;
+    if (kind === 'whip' || kind === 'tape') {
+      var a = sTip - dir * W * 0.28, b = sTip - dir * W * (kind === 'whip' ? 1.55 : 1.25);
+      var s0 = Math.min(a, b), s1 = Math.max(a, b);
+      var tw = kind === 'whip' ? col.twine : [28, 30, 36];
+      var i0 = Math.max(0, Math.ceil(s0 / R.ds)), i1 = Math.min(R.n - 1, Math.floor(s1 / R.ds));
+      if (i1 > i0) {
+        for (var L = 0; L < TUBE.length; L++) {
+          var T = TUBE[L];
+          ctx.beginPath();
+          var F0 = frameAt(R, s0), r = W / 2;
+          ctx.moveTo(F0.x + F0.nx * F0.vl * r * T[2], F0.y + F0.ny * F0.vl * r * T[2]);
+          tracePath(ctx, R, i0, i1, s1, W, T[2]);
+          ctx.lineWidth = W * T[0] * 1.06;
+          ctx.strokeStyle = rgb(shadeC(tw, kind === 'tape' ? T[1] * 0.9 + (L === 5 ? 0.6 : 0) : T[1]));
+          ctx.stroke();
+        }
+        if (kind === 'whip') {
+          // individual turns
+          ctx.beginPath();
+          for (var s = s0 + W * 0.05; s < s1; s += W * 0.085) {
+            var F = frameAt(R, s);
+            var sk = W * 0.03;
+            ctx.moveTo(F.x - F.nx * W * 0.53 + F.ny * sk, F.y - F.ny * W * 0.53 - F.nx * sk);
+            ctx.lineTo(F.x + F.nx * W * 0.53 - F.ny * sk, F.y + F.ny * W * 0.53 + F.nx * sk);
+          }
+          ctx.lineWidth = Math.max(0.5, W * 0.022);
+          ctx.strokeStyle = rgb(shadeC(tw, 0.35), 0.65);
+          ctx.stroke();
+        }
+      }
+    }
+    // cut end: an end-on face seen slightly from the side
+    var E = frameAt(R, sTip);
+    var tx = E.ny, ty = -E.nx; // tangent
+    if (dir < 0) { tx = -tx; ty = -ty; }
+    ctx.save();
+    ctx.translate(E.x, E.y);
+    ctx.rotate(Math.atan2(ty, tx));
+    ctx.beginPath();
+    ctx.ellipse(0, 0, W * 0.13, W * 0.5, 0, -Math.PI / 2, Math.PI / 2);
+    ctx.fillStyle = rgb(shadeC(base, 0.78));
+    ctx.fill();
+    ctx.lineWidth = Math.max(0.5, W * 0.03);
+    ctx.strokeStyle = rgb(shadeC(base, 0.4), 0.8);
+    ctx.stroke();
+    // three strand ends
+    ctx.beginPath();
+    ctx.moveTo(W * 0.02, -W * 0.18); ctx.quadraticCurveTo(W * 0.11, -W * 0.02, W * 0.02, W * 0.16);
+    ctx.lineWidth = Math.max(0.5, W * 0.025);
+    ctx.strokeStyle = rgb(shadeC(base, 0.45), 0.7);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ---- scratch layer used to clip strand texture to the rope ----
+  var _layer = null;
+  function layerFor(ctx, runs, W) {
+    var cv = ctx.canvas;
+    if (!_layer) _layer = document.createElement('canvas');
+    if (_layer.width !== cv.width || _layer.height !== cv.height) { _layer.width = cv.width; _layer.height = cv.height; }
+    var lc = _layer.getContext('2d');
+    var m = ctx.getTransform ? ctx.getTransform() : null;
+    // bounding box of the runs in device pixels
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    runs.forEach(function(rn) {
+      var R = rn.R;
+      for (var k = rn.i0; k <= rn.i1; k++) {
+        if (R.x[k] < x0) x0 = R.x[k]; if (R.x[k] > x1) x1 = R.x[k];
+        if (R.y[k] < y0) y0 = R.y[k]; if (R.y[k] > y1) y1 = R.y[k];
+      }
+    });
+    var pad = W * 0.9;
+    var a = m ? m.a : 1, d = m ? m.d : 1, e = m ? m.e : 0, f = m ? m.f : 0;
+    var bx = Math.max(0, Math.floor((x0 - pad) * a + e)), by = Math.max(0, Math.floor((y0 - pad) * d + f));
+    var bw = Math.min(cv.width, Math.ceil((x1 + pad) * a + e)) - bx, bh = Math.min(cv.height, Math.ceil((y1 + pad) * d + f)) - by;
+    lc.setTransform(1, 0, 0, 1, 0, 0);
+    lc.globalCompositeOperation = 'source-over';
+    if (bw > 0 && bh > 0) lc.clearRect(bx, by, bw, bh);
+    if (m) lc.setTransform(m); else lc.setTransform(1, 0, 0, 1, 0, 0);
+    return { ctx: lc, cv: _layer, x: bx, y: by, w: bw, h: bh };
+  }
+  function stampLayer(ctx, L) {
+    if (L.w <= 0 || L.h <= 0) return;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(L.cv, L.x, L.y, L.w, L.h, L.x, L.y, L.w, L.h);
+    ctx.restore();
+  }
+
+  /* Paint a model.
+     opts.vis[r]     visible arclength of rope r (default whole rope)
+     opts.colors[r]  colour key per rope
+     opts.devScale   device pixels per design unit (for shadows)
+     opts.objects    [{level, draw(ctx)}] drawn among the rope levels
+     opts.ground     false to skip the floor shadow */
+  function drawModel(ctx, M, opts) {
+    var W = M.W;
+    var vis = opts.vis || [];
+    var levels = {};
+    var runsAll = [];
+    M.ropes.forEach(function(R, ri) {
+      var sv = vis[ri] == null ? R.L : clamp(vis[ri], 0, R.L);
+      if (sv < W * 0.3) return;
+      var iv = Math.floor(sv / R.ds);
+      var start = 0;
+      for (var k = 1; k <= iv + 1; k++) {
+        if (k > iv || R.lev[k] !== R.lev[start]) {
+          var i1 = Math.min(iv, k);
+          var run = { R: R, ri: ri, i0: Math.max(0, start - 2), i1: i1, o0: start, o1: i1, sEnd: (k > iv) ? sv : null, lev: R.lev[start] };
+          if (run.sEnd == null && i1 < iv) run.i1 = Math.min(iv, i1 + 2);
+          if (run.i1 > run.i0 || run.sEnd != null) {
+            (levels[run.lev] = levels[run.lev] || []).push(run);
+            runsAll.push(run);
+          }
+          start = k;
+        }
+      }
+      R._sv = sv;
+    });
+    var objs = (opts.objects || []).slice();
+    var keys = Object.keys(levels).map(Number);
+    objs.forEach(function(o) { if (keys.indexOf(o.level) < 0) keys.push(o.level); });
+    keys.sort(function(a, b) { return a - b; });
+    var minLev = keys.length ? keys[0] : 0;
+    var dsc = opts.devScale || 1;
+
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'butt';
+
+    // floor shadow
+    if (opts.ground !== false && runsAll.length) {
+      castShadow(ctx, dsc, W * 0.55, W * 0.22, W * 0.38, 'rgba(20,10,0,0.55)', function(c) {
+        c.beginPath();
+        runsAll.forEach(function(rn) { tracePath(c, rn.R, rn.i0, rn.i1, rn.sEnd, W, 0); });
+        c.lineWidth = W * 0.92; c.lineJoin = 'round'; c.lineCap = 'round';
+        c.strokeStyle = '#000'; c.stroke();
+      });
+    }
+
+    // Shadows are cast only by the part of a strand that actually rides over
+    // another one (the core of each crossing), so a strand never darkens its
+    // own continuation where it steps down a level.
+    var shadowBits = {};
+    M.crossings.forEach(function(c) {
+      if (!c.over) return;
+      var ri = c.over === 'a' ? c.ra : c.rb, sc = c.over === 'a' ? c.sa : c.sb;
+      var R = M.ropes[ri];
+      if (R._sv == null || sc > R._sv) return;
+      var span = Math.min(W * 2.4, (W * 0.55) / Math.max(c.sin, 0.25) + W * 0.2);
+      var a = Math.max(0, sc - span), b = Math.min(R._sv, sc + span);
+      var k = Math.round(sc / R.ds);
+      var lv = R.lev[Math.min(R.n - 1, k)];
+      (shadowBits[lv] = shadowBits[lv] || []).push({ R: R, a: a, b: b });
+    });
+
+    keys.forEach(function(lv) {
+      var runs = levels[lv] || [];
+      var sb = shadowBits[lv];
+      if (sb && sb.length && !window.__noSB) {
+        castShadow(ctx, dsc, W * 0.34, W * 0.16, W * 0.28, 'rgba(12,6,0,0.78)', function(c) {
+          c.beginPath();
+          sb.forEach(function(p) {
+            var i0 = Math.ceil(p.a / p.R.ds), i1 = Math.floor(p.b / p.R.ds);
+            if (i1 > i0) tracePath(c, p.R, i0, i1, null, W, 0);
+          });
+          c.lineWidth = W * 0.88; c.lineJoin = 'round'; c.lineCap = 'round';
+          c.strokeStyle = '#000'; c.stroke();
+        });
+      }
+      // group by rope colour
+      var byRope = {};
+      runs.forEach(function(rn) { (byRope[rn.ri] = byRope[rn.ri] || []).push(rn); });
+      Object.keys(byRope).forEach(function(ri) {
+        var col = ROPE_COLORS[(opts.colors && opts.colors[ri]) || M.ropes[ri].def.color || 'manila'] || ROPE_COLORS.manila;
+        var group = byRope[ri];
+        // Paint tube + strands on a scratch layer so the strand texture is
+        // clipped exactly to the rope (source-atop), then stamp it down.
+        var L = window.__noLayer ? { ctx: ctx, w: 0 } : layerFor(ctx, group, W);
+        var lc = L.ctx;
+        lc.lineJoin = 'round'; lc.lineCap = 'butt';
+        drawTube(lc, group, W, col.base);
+        lc.globalCompositeOperation = 'source-atop';
+        drawStrands(lc, group, W, col.base);
+        lc.globalCompositeOperation = 'source-over';
+        group.forEach(function(rn) {
+          var R = rn.R, d = R.def;
+          if (rn.sEnd != null && d.end !== 'none') {
+            var kL = Math.max(0, Math.floor(rn.sEnd / R.ds) - 1);
+            if (R.lev[kL] === lv) drawEnd(lc, R, rn.sEnd, 1, d.end || 'whip', W, col);
+          }
+          if (rn.i0 === 0 && d.start && d.start !== 'none') drawEnd(lc, R, 0, -1, d.start, W, col);
+        });
+        if (!window.__noLayer) stampLayer(ctx, L);
+        drawFuzz(ctx, group, W, col.base);
+      });
+      objs.forEach(function(o) {
+        if (o.level !== lv) return;
+        o.draw(ctx);
+        // rope that lies on top of the object darkens it (clipped to its shape)
+        if (o.clip) {
+          var above = runsAll.filter(function(rn) { return rn.lev > lv; });
+          if (!above.length) return;
+          ctx.save();
+          ctx.beginPath(); o.clip(ctx); ctx.clip();
+          castShadow(ctx, dsc, W * 0.4, W * 0.18, W * 0.3, 'rgba(10,5,0,0.6)', function(c) {
+            c.beginPath();
+            above.forEach(function(rn) { tracePath(c, rn.R, rn.o0, rn.o1, rn.sEnd, W, 0); });
+            c.lineWidth = W * 0.85; c.lineJoin = 'round'; c.lineCap = 'round';
+            c.strokeStyle = '#000'; c.stroke();
+          });
+          ctx.restore();
+        }
+      });
+    });
+
+    if (opts.debug) drawDebug(ctx, M);
+  }
+
+  function drawDebug(ctx, M) {
+    ctx.save();
+    ctx.font = 'bold 14px sans-serif';
+    M.ropes.forEach(function(R) {
+      R.def.pts.forEach(function(p, i) {
+        ctx.fillStyle = 'rgba(0,80,255,0.85)';
+        ctx.beginPath(); ctx.arc(p[0], p[1], 4, 0, 7); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+        ctx.strokeText(String(i), p[0] + 5, p[1] - 5); ctx.fillText(String(i), p[0] + 5, p[1] - 5);
+      });
+    });
+    M.crossings.forEach(function(c, k) {
+      ctx.fillStyle = c.ch === 'O' ? '#0a0' : c.ch === 'U' ? '#d00' : '#888';
+      ctx.beginPath(); ctx.arc(c.x, c.y, 9, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText(k + c.ch, c.x - 9, c.y + 5);
+    });
+    ctx.restore();
+  }
+
+  // ---------------------------------------------------------------
+  // SCENES behind the knots (cached per size)
+  // ---------------------------------------------------------------
+  var _bgCache = {};
+
+  function teakDeck(w, h, dpr) {
+    var key = 'teak' + w + 'x' + h + '@' + dpr;
+    if (_bgCache[key]) return _bgCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    var R = rng(7);
+    var plank = Math.max(34, Math.round(h / 7.5));
+    var seam = Math.max(2, plank * 0.07);
+    c.fillStyle = '#1b130d';
+    c.fillRect(0, 0, w, h);
+    for (var y = -plank * 0.4, row = 0; y < h; y += plank, row++) {
+      // planks are long; stagger the butt joints
+      var x = -R() * w * 0.6;
+      while (x < w) {
+        var len = w * (0.7 + R() * 0.8);
+        var hue = 0.85 + R() * 0.25;
+        var g = c.createLinearGradient(0, y, 0, y + plank);
+        var cBase = [150 * hue, 96 * hue, 52 * hue];
+        g.addColorStop(0, rgb(shadeC(cBase, 1.1)));
+        g.addColorStop(0.5, rgb(cBase));
+        g.addColorStop(1, rgb(shadeC(cBase, 0.82)));
+        c.fillStyle = g;
+        c.fillRect(x + seam * 0.5, y + seam * 0.5, len - seam, plank - seam);
+        // grain
+        c.save();
+        c.beginPath(); c.rect(x + seam * 0.5, y + seam * 0.5, len - seam, plank - seam); c.clip();
+        var lines = 9 + Math.floor(R() * 6);
+        for (var gI = 0; gI < lines; gI++) {
+          var gy = y + plank * (0.08 + 0.84 * R());
+          var amp = plank * (0.02 + R() * 0.07), fr = 0.004 + R() * 0.01, ph = R() * 6;
+          c.beginPath();
+          for (var gx = x; gx <= x + len; gx += 6) {
+            var yy = gy + Math.sin(gx * fr + ph) * amp + Math.sin(gx * fr * 3.1 + ph) * amp * 0.3;
+            if (gx === x) c.moveTo(gx, yy); else c.lineTo(gx, yy);
+          }
+          c.lineWidth = 0.6 + R() * 1.6;
+          c.strokeStyle = R() < 0.6 ? 'rgba(70,38,16,' + (0.12 + R() * 0.22) + ')' : 'rgba(230,180,120,' + (0.06 + R() * 0.1) + ')';
+          c.stroke();
+        }
+        // tiny pores
+        c.fillStyle = 'rgba(60,30,10,0.18)';
+        for (var pI = 0; pI < len / 9; pI++) c.fillRect(x + R() * len, y + R() * plank, 1.6, 0.7);
+        c.restore();
+        // butt joint
+        c.fillStyle = '#1b130d';
+        c.fillRect(x + len - seam * 0.5, y, seam, plank);
+        x += len;
+      }
+      // caulking highlight line
+      c.fillStyle = 'rgba(255,220,170,0.07)';
+      c.fillRect(0, y + plank - seam * 0.5 + seam, w, 1);
+    }
+    // weathering: soft light from top-left, vignette
+    var lg = c.createRadialGradient(w * 0.25, h * 0.1, 10, w * 0.4, h * 0.3, Math.max(w, h) * 0.95);
+    lg.addColorStop(0, 'rgba(255,230,190,0.18)');
+    lg.addColorStop(0.55, 'rgba(255,230,190,0)');
+    lg.addColorStop(1, 'rgba(0,0,0,0.45)');
+    c.fillStyle = lg; c.fillRect(0, 0, w, h);
+    _bgCache[key] = cv;
+    return cv;
+  }
+
+  function harbourBokeh(w, h, dpr) {
+    var key = 'harb' + w + 'x' + h + '@' + dpr;
+    if (_bgCache[key]) return _bgCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    var g = c.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#9cc3dc');
+    g.addColorStop(0.34, '#cfe0e6');
+    g.addColorStop(0.36, '#6f9aa8');
+    g.addColorStop(0.7, '#2f6276');
+    g.addColorStop(1, '#173a4b');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    // distant hills (out of focus)
+    c.fillStyle = 'rgba(90,120,110,0.55)';
+    c.beginPath(); c.moveTo(0, h * 0.35);
+    for (var x = 0; x <= w; x += 20) c.lineTo(x, h * 0.35 - (Math.sin(x * 0.006) * 0.5 + 0.6) * h * 0.08 - Math.sin(x * 0.017) * h * 0.02);
+    c.lineTo(w, h * 0.36); c.lineTo(0, h * 0.36); c.fill();
+    var R = rng(11);
+    // soft water sparkles (bokeh discs)
+    for (var i = 0; i < 70; i++) {
+      var bx = R() * w, by = h * (0.38 + R() * 0.6), br = 4 + R() * (h * 0.04);
+      var rg = c.createRadialGradient(bx, by, 0, bx, by, br);
+      rg.addColorStop(0, 'rgba(255,255,240,' + (0.08 + R() * 0.25) + ')');
+      rg.addColorStop(1, 'rgba(255,255,240,0)');
+      c.fillStyle = rg; c.beginPath(); c.arc(bx, by, br, 0, 7); c.fill();
+    }
+    for (var j = 0; j < 40; j++) {
+      var wy = h * (0.4 + R() * 0.58);
+      c.fillStyle = 'rgba(200,230,240,' + (0.04 + R() * 0.08) + ')';
+      c.fillRect(R() * w, wy, 30 + R() * 120, 1.5 + R() * 2);
+    }
+    var v = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75);
+    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,10,20,0.35)');
+    c.fillStyle = v; c.fillRect(0, 0, w, h);
+    _bgCache[key] = cv;
+    return cv;
+  }
+
+  // A weathered wooden dock piling (front view), x = centre, r = radius.
+  function drawPiling(ctx, x, top, bottom, r, devScale) {
+    castShadow(ctx, devScale, r * 0.5, r * 0.25, r * 0.1, 'rgba(0,0,0,0.35)', function(c) {
+      c.fillStyle = '#000'; c.fillRect(x - r, top, r * 2, bottom - top);
+    });
+    var g = ctx.createLinearGradient(x - r, 0, x + r, 0);
+    g.addColorStop(0, '#3b2a1e');
+    g.addColorStop(0.18, '#7a6048');
+    g.addColorStop(0.42, '#a68a6a');
+    g.addColorStop(0.62, '#8b7055');
+    g.addColorStop(0.88, '#4d3a2a');
+    g.addColorStop(1, '#2a1d14');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, top, r * 2, bottom - top);
+    // grain and cracks
+    var R = rng(3);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x - r, top, r * 2, bottom - top); ctx.clip();
+    for (var i = 0; i < 26; i++) {
+      var gx = x - r + R() * r * 2;
+      var edge = Math.abs(gx - x) / r;
+      ctx.beginPath();
+      ctx.moveTo(gx, top);
+      for (var yy = top; yy < bottom; yy += 30) ctx.lineTo(gx + Math.sin(yy * 0.01 + i) * 3 * (1 - edge), yy);
+      ctx.lineWidth = 0.8 + R() * 2.2;
+      ctx.strokeStyle = R() < 0.65 ? 'rgba(40,26,16,' + (0.18 + R() * 0.3) + ')' : 'rgba(220,200,170,' + (0.08 + R() * 0.12) + ')';
+      ctx.stroke();
+    }
+    // a couple of deep checks (cracks)
+    for (var k = 0; k < 3; k++) {
+      var cx = x - r * 0.5 + R() * r, cy = top + R() * (bottom - top) * 0.7;
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.bezierCurveTo(cx + 3, cy + 60, cx - 2, cy + 120, cx + 2, cy + 180);
+      ctx.lineWidth = 2.5; ctx.strokeStyle = 'rgba(20,12,6,0.55)'; ctx.stroke();
+    }
+    ctx.restore();
+    // rounded, weathered top (end grain)
+    ctx.beginPath();
+    ctx.ellipse(x, top, r, r * 0.28, 0, 0, Math.PI * 2);
+    var tg = ctx.createRadialGradient(x - r * 0.3, top - r * 0.1, 2, x, top, r);
+    tg.addColorStop(0, '#c8b393'); tg.addColorStop(0.7, '#9a8064'); tg.addColorStop(1, '#5a4532');
+    ctx.fillStyle = tg; ctx.fill();
+    for (var ring = 1; ring < 6; ring++) {
+      ctx.beginPath();
+      ctx.ellipse(x + 2, top, r * ring / 6.5, r * 0.28 * ring / 6.5, 0, 0, Math.PI * 2);
+      ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(80,55,35,0.35)'; ctx.stroke();
+    }
+    // light rim
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(x - r * 0.35, top, r * 0.2, bottom - top);
+  }
+
+  // Shading strip that wraps rope contact shadows around the piling edges.
+  function drawPilingEdgeShade(ctx, x, top, bottom, r) {
+    var g = ctx.createLinearGradient(x - r, 0, x + r, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0.35)');
+    g.addColorStop(0.12, 'rgba(0,0,0,0)');
+    g.addColorStop(0.88, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, top, r * 2, bottom - top);
+  }
+
+  // A cast-aluminium horn cleat seen from above. cx,cy centre; len along x.
+  function cleatPath(ctx, cx, cy, len, wid) {
+    var hl = len / 2, hw = wid / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - hl, cy);
+    ctx.bezierCurveTo(cx - hl, cy - hw * 0.55, cx - hl * 0.7, cy - hw * 0.62, cx - hl * 0.42, cy - hw * 0.72);
+    ctx.bezierCurveTo(cx - hl * 0.25, cy - hw * 1.15, cx + hl * 0.25, cy - hw * 1.15, cx + hl * 0.42, cy - hw * 0.72);
+    ctx.bezierCurveTo(cx + hl * 0.7, cy - hw * 0.62, cx + hl, cy - hw * 0.55, cx + hl, cy);
+    ctx.bezierCurveTo(cx + hl, cy + hw * 0.55, cx + hl * 0.7, cy + hw * 0.62, cx + hl * 0.42, cy + hw * 0.72);
+    ctx.bezierCurveTo(cx + hl * 0.25, cy + hw * 1.15, cx - hl * 0.25, cy + hw * 1.15, cx - hl * 0.42, cy + hw * 0.72);
+    ctx.bezierCurveTo(cx - hl * 0.7, cy + hw * 0.62, cx - hl, cy + hw * 0.55, cx - hl, cy);
+    ctx.closePath();
+  }
+  function drawCleat(ctx, cx, cy, len, wid, devScale) {
+    castShadow(ctx, devScale, wid * 0.4, wid * 0.25, wid * 0.42, 'rgba(10,5,0,0.6)', function(c) {
+      cleatPath(c, cx, cy, len, wid); c.fillStyle = '#000'; c.fill();
+    });
+    // base plate (feet) under the body
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, len * 0.22, wid * 0.62, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#5d646b'; ctx.fill();
+    cleatPath(ctx, cx, cy, len, wid);
+    var g = ctx.createLinearGradient(cx, cy - wid * 0.6, cx, cy + wid * 0.6);
+    g.addColorStop(0, '#f4f6f7');
+    g.addColorStop(0.28, '#c5cbd0');
+    g.addColorStop(0.5, '#8e979e');
+    g.addColorStop(0.72, '#b7bec4');
+    g.addColorStop(1, '#5c646b');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(40,45,50,0.7)'; ctx.stroke();
+    // ridge highlight along the top of the horns
+    ctx.beginPath();
+    ctx.moveTo(cx - len * 0.47, cy - wid * 0.05);
+    ctx.bezierCurveTo(cx - len * 0.2, cy - wid * 0.22, cx + len * 0.2, cy - wid * 0.22, cx + len * 0.47, cy - wid * 0.05);
+    ctx.lineWidth = wid * 0.12; ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.stroke();
+    ctx.lineCap = 'butt';
+    // two bolt heads
+    [-1, 1].forEach(function(s) {
+      var bx = cx + s * len * 0.13, by = cy;
+      var bg = ctx.createRadialGradient(bx - 2, by - 2, 1, bx, by, wid * 0.16);
+      bg.addColorStop(0, '#ffffff'); bg.addColorStop(1, '#6b737a');
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, by, wid * 0.15, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(30,30,30,0.6)'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx - wid * 0.09, by); ctx.lineTo(bx + wid * 0.09, by);
+      ctx.strokeStyle = 'rgba(30,30,30,0.7)'; ctx.lineWidth = 2; ctx.stroke();
+    });
+  }
+
+
+  // ---------------------------------------------------------------
+  // MARINE COMPASS
+  // ---------------------------------------------------------------
+  var POINTS16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+
+  // The card: ivory, black graduations, red north. letters: 'all'|'cardinal'|'north'
+  function compassCard(d, dpr, letters) {
+    var key = 'card' + d + '@' + dpr + letters;
+    if (_bgCache[key]) return _bgCache[key];
+    var cv = document.createElement('canvas');
+    cv.width = cv.height = Math.round(d * dpr);
+    var c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    var r = d / 2;
+    c.translate(r, r);
+    // card face
+    var g = c.createRadialGradient(-r * 0.25, -r * 0.3, r * 0.1, 0, 0, r);
+    g.addColorStop(0, '#fbf6e8'); g.addColorStop(0.75, '#efe5cb'); g.addColorStop(1, '#d9caa3');
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, 7); c.fill();
+    // outer graduation band
+    c.strokeStyle = '#1b1b1b';
+    c.lineWidth = Math.max(1, r * 0.012);
+    c.beginPath(); c.arc(0, 0, r * 0.97, 0, 7); c.stroke();
+    c.beginPath(); c.arc(0, 0, r * 0.8, 0, 7); c.stroke();
+    for (var deg = 0; deg < 360; deg++) {
+      var a = deg * Math.PI / 180;
+      var len = deg % 10 === 0 ? 0.11 : deg % 5 === 0 ? 0.075 : 0.045;
+      c.lineWidth = deg % 10 === 0 ? Math.max(1, r * 0.012) : Math.max(0.6, r * 0.006);
+      c.beginPath();
+      c.moveTo(Math.sin(a) * r * 0.97, -Math.cos(a) * r * 0.97);
+      c.lineTo(Math.sin(a) * r * (0.97 - len), -Math.cos(a) * r * (0.97 - len));
+      c.stroke();
+    }
+    // degree numbers every 30
+    c.fillStyle = '#1b1b1b';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = '700 ' + Math.round(r * 0.075) + 'px Nunito, system-ui, sans-serif';
+    for (var dn = 0; dn < 360; dn += 30) {
+      if (dn % 90 === 0) continue;
+      c.save();
+      c.rotate(dn * Math.PI / 180);
+      c.fillText(String(dn).padStart(3, '0'), 0, -r * 0.765);
+      c.restore();
+    }
+    // compass rose: 16-point star
+    function starPoint(ang, len, wid, light, dark) {
+      c.save(); c.rotate(ang);
+      c.beginPath(); c.moveTo(0, -len); c.lineTo(wid, 0); c.lineTo(0, 0); c.closePath();
+      c.fillStyle = light; c.fill();
+      c.beginPath(); c.moveTo(0, -len); c.lineTo(-wid, 0); c.lineTo(0, 0); c.closePath();
+      c.fillStyle = dark; c.fill();
+      c.restore();
+    }
+    for (var i = 0; i < 16; i++) {
+      if (i % 2) starPoint(i * Math.PI / 8, r * 0.38, r * 0.035, '#c9b27a', '#8c6f35');
+    }
+    for (var j = 0; j < 8; j++) {
+      if (j % 2) starPoint(j * Math.PI / 4, r * 0.5, r * 0.06, '#2f4f86', '#16294f');
+    }
+    for (var k = 0; k < 4; k++) {
+      starPoint(k * Math.PI / 2, r * 0.66, r * 0.09, k === 0 ? '#e0473a' : '#2a447a', k === 0 ? '#9c1f17' : '#0f1f3d');
+    }
+    c.beginPath(); c.arc(0, 0, r * 0.08, 0, 7);
+    var hub = c.createRadialGradient(-r * 0.02, -r * 0.03, 1, 0, 0, r * 0.08);
+    hub.addColorStop(0, '#fff3c4'); hub.addColorStop(0.6, '#c9a24a'); hub.addColorStop(1, '#7a5a1c');
+    c.fillStyle = hub; c.fill();
+    // letters
+    var L = [['N', 0], ['E', 90], ['S', 180], ['W', 270]];
+    var L2 = [['NE', 45], ['SE', 135], ['SW', 225], ['NW', 315]];
+    if (letters !== 'none') {
+      c.font = '800 ' + Math.round(r * 0.13) + 'px "Baloo 2", Nunito, sans-serif';
+      L.forEach(function(l) {
+        if (letters === 'north' && l[0] !== 'N') return;
+        c.save(); c.rotate(l[1] * Math.PI / 180);
+        c.fillStyle = l[0] === 'N' ? '#b3261e' : '#1b1b1b';
+        c.fillText(l[0], 0, -r * 0.89 + r * 0.12 + r * 0.005);
+        c.restore();
+      });
+      if (letters === 'all') {
+        c.font = '800 ' + Math.round(r * 0.075) + 'px "Baloo 2", Nunito, sans-serif';
+        L2.forEach(function(l) {
+          c.save(); c.rotate(l[1] * Math.PI / 180);
+          c.fillStyle = '#1b1b1b';
+          c.fillText(l[0], 0, -r * 0.71);
+          c.restore();
+        });
+      }
+    }
+    _bgCache[key] = cv;
+    return cv;
+  }
+
+  /* drawCompass(ctx, cx, cy, R, heading, opts)
+     heading in degrees: the card turns so this bearing sits under the lubber line.
+     opts.tilt (0..1) small gimbal wobble, opts.letters, opts.pointer (deg, drawn
+     over a north-up card), opts.target (deg, a brass course marker on the bezel),
+     opts.dpr */
+  function drawCompass(ctx, cx, cy, R, heading, opts) {
+    opts = opts || {};
+    var dpr = opts.dpr || 1;
+    // drop shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = R * 0.12 * dpr;
+    ctx.shadowOffsetY = R * 0.05 * dpr;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fillStyle = '#6b4c16'; ctx.fill();
+    ctx.restore();
+    // gimbal ring (outer)
+    var brass = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+    brass.addColorStop(0, '#fff0b8'); brass.addColorStop(0.25, '#d9ab48'); brass.addColorStop(0.5, '#8f6420');
+    brass.addColorStop(0.75, '#d6a443'); brass.addColorStop(1, '#5e3e10');
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.arc(cx, cy, R * 0.9, 0, 7, true);
+    ctx.fillStyle = brass; ctx.fill();
+    ctx.lineWidth = Math.max(1, R * 0.01); ctx.strokeStyle = 'rgba(60,35,5,0.7)';
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.9, 0, 7); ctx.stroke();
+    // gimbal pivots at 3 and 9 o'clock
+    [-1, 1].forEach(function(sd) {
+      var px = cx + sd * R * 0.95;
+      var pg = ctx.createRadialGradient(px - R * 0.02, cy - R * 0.03, 1, px, cy, R * 0.07);
+      pg.addColorStop(0, '#fff7d6'); pg.addColorStop(0.5, '#c99a3c'); pg.addColorStop(1, '#5a3b0e');
+      ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(px, cy, R * 0.065, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(50,30,5,0.8)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(px, cy, R * 0.02, 0, 7); ctx.fillStyle = '#3d2806'; ctx.fill();
+    });
+    // bowl rim (inner brass bezel)
+    var rim = ctx.createLinearGradient(cx, cy - R * 0.9, cx, cy + R * 0.9);
+    rim.addColorStop(0, '#f7dc8c'); rim.addColorStop(0.5, '#a87a2a'); rim.addColorStop(1, '#e7c066');
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.86, 0, 7); ctx.arc(cx, cy, R * 0.79, 0, 7, true);
+    ctx.fillStyle = rim; ctx.fill();
+    // bezel graduations (fixed, every 10°)
+    ctx.strokeStyle = 'rgba(70,40,5,0.75)';
+    for (var b = 0; b < 360; b += 10) {
+      var ba = b * Math.PI / 180;
+      ctx.lineWidth = b % 90 === 0 ? 2 : 1;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.sin(ba) * R * 0.85, cy - Math.cos(ba) * R * 0.85);
+      ctx.lineTo(cx + Math.sin(ba) * R * (b % 90 === 0 ? 0.8 : 0.82), cy - Math.cos(ba) * R * (b % 90 === 0 ? 0.8 : 0.82));
+      ctx.stroke();
+    }
+    // target marker on the bezel
+    if (opts.target != null) {
+      var ta = opts.target * Math.PI / 180;
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(ta - heading * Math.PI / 180);
+      ctx.beginPath(); ctx.moveTo(0, -R * 0.795); ctx.lineTo(-R * 0.05, -R * 0.885); ctx.lineTo(R * 0.05, -R * 0.885); ctx.closePath();
+      ctx.fillStyle = '#16a34a'; ctx.fill(); ctx.strokeStyle = '#064e1f'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.restore();
+    }
+    // bowl interior (dark, deep)
+    var bowl = ctx.createRadialGradient(cx, cy - R * 0.1, R * 0.2, cx, cy, R * 0.79);
+    bowl.addColorStop(0, '#1d2a36'); bowl.addColorStop(1, '#05080b');
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.79, 0, 7); ctx.fillStyle = bowl; ctx.fill();
+    // card
+    var cr = R * 0.72;
+    var card = compassCard(Math.round(cr * 2), dpr, opts.letters || 'all');
+    ctx.save();
+    ctx.translate(cx, cy);
+    var tilt = opts.tilt || 0;
+    ctx.scale(1, 1 - Math.abs(tilt) * 0.06);
+    ctx.translate(0, tilt * R * 0.02);
+    ctx.rotate(-heading * Math.PI / 180);
+    ctx.drawImage(card, -cr, -cr, cr * 2, cr * 2);
+    ctx.restore();
+    // shadow of the rim on the card
+    var sh = ctx.createRadialGradient(cx, cy, cr * 0.82, cx, cy, R * 0.79);
+    sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(0.7, 'rgba(0,0,0,0.25)'); sh.addColorStop(1, 'rgba(0,0,0,0.75)');
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.79, 0, 7); ctx.fillStyle = sh; ctx.fill();
+    // pointer (for naming directions)
+    if (opts.pointer != null) {
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(opts.pointer * Math.PI / 180);
+      ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = R * 0.04 * dpr; ctx.shadowOffsetY = R * 0.02 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(0, -cr * 0.93); ctx.lineTo(cr * 0.07, -cr * 0.2); ctx.lineTo(cr * 0.03, cr * 0.2);
+      ctx.lineTo(-cr * 0.03, cr * 0.2); ctx.lineTo(-cr * 0.07, -cr * 0.2); ctx.closePath();
+      var pg2 = ctx.createLinearGradient(-cr * 0.07, 0, cr * 0.07, 0);
+      pg2.addColorStop(0, '#ff7a3d'); pg2.addColorStop(0.5, '#ffb14a'); pg2.addColorStop(1, '#b8420f');
+      ctx.fillStyle = pg2; ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = '#6b2205'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, cr * 0.09, 0, 7);
+      ctx.fillStyle = '#e8c15a'; ctx.fill(); ctx.strokeStyle = '#6b4a0e'; ctx.stroke();
+      ctx.restore();
+    }
+    // lubber line (fixed, at the top = the boat's bow)
+    if (opts.lubber !== false) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 3 * dpr; ctx.shadowOffsetY = 1 * dpr;
+      ctx.fillStyle = '#e23a2e';
+      ctx.fillRect(cx - R * 0.012, cy - R * 0.8, R * 0.024, R * 0.17);
+      ctx.beginPath(); ctx.moveTo(cx, cy - R * 0.6); ctx.lineTo(cx - R * 0.035, cy - R * 0.66); ctx.lineTo(cx + R * 0.035, cy - R * 0.66); ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    // glass dome: tint, reflections, glint
+    var dome = ctx.createRadialGradient(cx - R * 0.25, cy - R * 0.3, R * 0.05, cx, cy, R * 0.8);
+    dome.addColorStop(0, 'rgba(255,255,255,0.10)'); dome.addColorStop(0.6, 'rgba(180,210,230,0.04)'); dome.addColorStop(1, 'rgba(120,160,190,0.18)');
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.79, 0, 7); ctx.fillStyle = dome; ctx.fill();
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.79, 0, 7); ctx.clip();
+    // big soft window reflection, upper left
+    ctx.beginPath();
+    ctx.ellipse(cx - R * 0.32, cy - R * 0.38, R * 0.36, R * 0.17, -0.6, 0, 7);
+    var wr = ctx.createLinearGradient(cx - R * 0.6, cy - R * 0.6, cx - R * 0.1, cy - R * 0.2);
+    wr.addColorStop(0, 'rgba(255,255,255,0.42)'); wr.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = wr; ctx.fill();
+    // curved rim highlight
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.74, Math.PI * 1.08, Math.PI * 1.42);
+    ctx.lineWidth = R * 0.025; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, R * 0.74, Math.PI * 0.12, Math.PI * 0.28);
+    ctx.lineWidth = R * 0.012; ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.stroke();
+    // sharp glint
+    var gl = ctx.createRadialGradient(cx - R * 0.45, cy - R * 0.45, 0, cx - R * 0.45, cy - R * 0.45, R * 0.06);
+    gl.addColorStop(0, 'rgba(255,255,255,0.95)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gl; ctx.fillRect(cx - R * 0.55, cy - R * 0.55, R * 0.2, R * 0.2);
+    ctx.restore();
+    ctx.lineCap = 'butt';
+  }
+
+  // A teak ship's wheel with brass hub. angle in radians.
+  function drawWheel(ctx, cx, cy, R, angle, dpr) {
+    dpr = dpr || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = R * 0.08 * dpr; ctx.shadowOffsetY = R * 0.05 * dpr;
+    ctx.rotate(angle);
+    var n = 8;
+    // spokes with turned handles
+    for (var i = 0; i < n; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI * 2 / n);
+      var g = ctx.createLinearGradient(-R * 0.05, 0, R * 0.05, 0);
+      g.addColorStop(0, '#3e2210'); g.addColorStop(0.4, '#b0723c'); g.addColorStop(0.6, '#c98a4c'); g.addColorStop(1, '#4a2a12');
+      ctx.fillStyle = g;
+      // spoke inside the rim
+      ctx.beginPath();
+      ctx.moveTo(-R * 0.035, -R * 0.12); ctx.lineTo(R * 0.035, -R * 0.12);
+      ctx.lineTo(R * 0.028, -R * 0.74); ctx.lineTo(-R * 0.028, -R * 0.74); ctx.closePath(); ctx.fill();
+      // handle beyond the rim: bulb shapes
+      ctx.beginPath();
+      ctx.moveTo(-R * 0.03, -R * 0.8);
+      ctx.bezierCurveTo(-R * 0.06, -R * 0.86, -R * 0.065, -R * 0.93, -R * 0.04, -R * 0.97);
+      ctx.quadraticCurveTo(0, -R * 1.02, R * 0.04, -R * 0.97);
+      ctx.bezierCurveTo(R * 0.065, -R * 0.93, R * 0.06, -R * 0.86, R * 0.03, -R * 0.8);
+      ctx.closePath(); ctx.fill();
+      if (i === 0) { // king spoke: brass band
+        ctx.fillStyle = '#e2b54e';
+        ctx.fillRect(-R * 0.045, -R * 0.9, R * 0.09, R * 0.035);
+      }
+      ctx.restore();
+    }
+    ctx.shadowColor = 'transparent';
+    // rim
+    var rg = ctx.createRadialGradient(0, 0, R * 0.68, 0, 0, R * 0.82);
+    rg.addColorStop(0, '#4a2810'); rg.addColorStop(0.35, '#b77840'); rg.addColorStop(0.6, '#8a5427'); rg.addColorStop(1, '#3a1e0a');
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.82, 0, 7); ctx.arc(0, 0, R * 0.68, 0, 7, true);
+    ctx.fillStyle = rg; ctx.fill();
+    ctx.strokeStyle = 'rgba(25,12,3,0.7)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.82, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.68, 0, 7); ctx.stroke();
+    // wood grain on the rim
+    for (var k = 0; k < 3; k++) {
+      ctx.beginPath(); ctx.arc(0, 0, R * (0.71 + k * 0.04), 0, 7);
+      ctx.strokeStyle = 'rgba(40,20,5,0.18)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // brass hub
+    var hg = ctx.createRadialGradient(-R * 0.04, -R * 0.05, 1, 0, 0, R * 0.16);
+    hg.addColorStop(0, '#fff2bf'); hg.addColorStop(0.5, '#d4a640'); hg.addColorStop(1, '#6e4a10');
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.16, 0, 7); ctx.fillStyle = hg; ctx.fill();
+    ctx.strokeStyle = 'rgba(60,35,5,0.8)'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.07, 0, 7); ctx.fillStyle = '#8a6118'; ctx.fill();
+    ctx.restore();
+    // static highlight on top (light does not turn with the wheel)
+    var hl = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.4, 1, cx, cy, R);
+    hl.addColorStop(0, 'rgba(255,240,210,0.16)'); hl.addColorStop(1, 'rgba(255,240,210,0)');
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fillStyle = hl; ctx.fill();
+  }
+
+  // Objects a knot is tied around, ready for drawModel's level ordering.
+  function knotObjects(K, devScale) {
+    var out = [];
+    if (K.scene === 'post' && K.post) {
+      var P = K.post;
+      out.push({ level: -1,
+        draw: function(c) { drawPiling(c, P.x, P.top, 900, P.r, devScale); },
+        clip: function(c) { c.rect(P.x - P.r, P.top, P.r * 2, 900); } });
+    }
+    if (K.scene === 'cleat' && K.cleat) {
+      var C = K.cleat;
+      out.push({ level: -1,
+        draw: function(c) { drawCleat(c, C.x, C.y, C.len, C.wid, devScale); },
+        clip: function(c) { cleatPath(c, C.x, C.y, C.len, C.wid); } });
+    }
+    return out;
+  }
+
+  return {
+    knotObjects: knotObjects, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
+    clamp: clamp, rgb: rgb, shadeC: shadeC, mixC: mixC, rng: rng,
+    fitCanvas: fitCanvas, castShadow: castShadow,
+    ROPE_COLORS: ROPE_COLORS,
+    buildModel: buildModel, drawModel: drawModel, sAtCP: sAtCP, frameAt: frameAt,
+    teakDeck: teakDeck, harbourBokeh: harbourBokeh,
+    drawPiling: drawPiling, drawPilingEdgeShade: drawPilingEdgeShade, drawCleat: drawCleat
+  };
+})();

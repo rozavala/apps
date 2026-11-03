@@ -543,7 +543,15 @@ var CocinaArt = (function() {
     x.fillStyle = mg; x.fillRect(0, counterY, W, H - counterY);
     x.save();
     x.beginPath(); x.rect(0, counterY, W, H - counterY); x.clip();
-    for (var i = 0; i < 16; i++) {
+    // soft cloudy mottling first
+    for (var cm = 0; cm < 14; cm++) {
+      var mx0 = r() * W, my0 = counterY + r() * (H - counterY), mr = 40 + r() * W * 0.25;
+      x.save(); x.translate(mx0, my0); x.scale(1, 0.35);
+      var mgc = x.createRadialGradient(0, 0, 0, 0, 0, mr);
+      mgc.addColorStop(0, 'rgba(170,162,150,' + (0.04 + r() * 0.05) + ')'); mgc.addColorStop(1, 'rgba(170,162,150,0)');
+      x.fillStyle = mgc; x.beginPath(); x.arc(0, 0, mr, 0, Math.PI * 2); x.fill(); x.restore();
+    }
+    for (var i = 0; i < 9; i++) {
       var sx = -40 + r() * (W + 80), sy = counterY + r() * (H - counterY);
       var pts = [[sx, sy]];
       var ang = (r() - 0.5) * 0.7, len = 0;
@@ -554,7 +562,7 @@ var CocinaArt = (function() {
         pts.push([p[0] + Math.cos(ang) * step, p[1] + Math.sin(ang) * step * 0.35]);
         len += step;
       }
-      var widths = [5, 3, 1.6, 0.7], alphas = [0.025, 0.04, 0.07, 0.16];
+      var widths = [16, 9, 4.5, 1.8], alphas = [0.014, 0.022, 0.032, 0.05];
       var tone = r() > 0.4 ? '120,116,110' : '150,140,120';
       for (var w = 0; w < widths.length; w++) {
         x.strokeStyle = 'rgba(' + tone + ',' + alphas[w] * (0.5 + r()) + ')';
@@ -680,7 +688,10 @@ var CocinaArt = (function() {
     // back of the glass
     ctx.save();
     _bodyPath(ctx, J, rimY, 0);
-    ctx.fillStyle = 'rgba(220,236,240,0.16)'; ctx.fill();
+    var fr = ctx.createLinearGradient(cx - rT, 0, cx + rT, 0);
+    fr.addColorStop(0, 'rgba(110,140,150,0.30)'); fr.addColorStop(0.08, 'rgba(220,236,240,0.14)');
+    fr.addColorStop(0.92, 'rgba(220,236,240,0.14)'); fr.addColorStop(1, 'rgba(110,140,150,0.30)');
+    ctx.fillStyle = fr; ctx.fill();
     ctx.beginPath(); ctx.ellipse(cx, rimY, rT - gl, kT - gl * 0.4, 0, Math.PI, Math.PI * 2);
     ctx.strokeStyle = 'rgba(70,95,105,0.30)'; ctx.lineWidth = 1.2; ctx.stroke();
     // back markings, seen faintly through the glass (mirrored)
@@ -788,7 +799,7 @@ var CocinaArt = (function() {
         }
       }
       if (o.unitL || o.unitR) {
-        var uy = J.yFor(J.cap) - J.h * 0.08;
+        var uy = J.yFor(J.cap) - J.h * 0.045;
         ctx.font = '900 ' + Math.max(10, Math.round(J.rB * 0.12)) + 'px Nunito, system-ui, sans-serif';
         ctx.fillStyle = '#B4231F';
         if (o.unitL) { ctx.textAlign = 'left'; ctx.fillText(o.unitL, cx - J.r(uy) * 0.82, uy); }
@@ -1173,7 +1184,9 @@ var CocinaArt = (function() {
     ctx.beginPath();
     ctx.moveTo(x, y + h * 0.22);
     ctx.quadraticCurveTo(x + w * 0.5, y + h * 0.3, x + w, y + h * 0.21);
-    ctx.lineTo(x + w * 0.97, y + h); ctx.lineTo(x + w * 0.03, y + h); ctx.closePath();
+    ctx.quadraticCurveTo(x + w * 1.06, y + h * 0.62, x + w * 0.97, y + h);
+    ctx.quadraticCurveTo(x + w * 0.5, y + h * 1.03, x + w * 0.03, y + h);
+    ctx.quadraticCurveTo(x - w * 0.06, y + h * 0.62, x, y + h * 0.22); ctx.closePath();
     var g = ctx.createLinearGradient(x, 0, x + w, 0);
     g.addColorStop(0, '#A9844F'); g.addColorStop(0.3, '#D9B985'); g.addColorStop(0.65, '#CBA672'); g.addColorStop(1, '#8F6B3B');
     ctx.fillStyle = g; ctx.fill();

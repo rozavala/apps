@@ -43,7 +43,7 @@ var QheArt = (function() {
 
   // Geometry shared by every layer, as fractions of the canvas size.
   function geo(S) {
-    var R = S * 0.468;
+    var R = S * 0.445;
     return { R: R, Rin: R * 0.855, Rb: R * 0.812, Rd: R * 0.80 };
   }
 
@@ -59,9 +59,9 @@ var QheArt = (function() {
     // -- cast shadow on the wall (soft + contact)
     x.save();
     x.shadowColor = 'rgba(45,22,6,0.42)';
-    x.shadowBlur = S * 0.045;
-    x.shadowOffsetX = S * 0.008;
-    x.shadowOffsetY = S * 0.022;
+    x.shadowBlur = S * 0.032;
+    x.shadowOffsetX = S * 0.006;
+    x.shadowOffsetY = S * 0.016;
     x.beginPath(); x.arc(0, 0, R, 0, TAU); x.fillStyle = '#4a2410'; x.fill();
     x.restore();
     x.save();
@@ -283,8 +283,8 @@ var QheArt = (function() {
       // past / to labels
       x.font = '800 ' + Rd * 0.06 + 'px "Nunito", system-ui, sans-serif';
       var lp = o.lang === 'es' ? 'Y' : 'PAST', lt = o.lang === 'es' ? 'MENOS' : 'TO';
-      x.fillStyle = 'rgba(21,128,61,0.75)'; x.fillText(lp, Rd * 0.36, Rd * 0.32);
-      x.fillStyle = 'rgba(194,65,12,0.75)'; x.fillText(lt, -Rd * 0.36, Rd * 0.32);
+      x.fillStyle = 'rgba(21,128,61,0.75)'; x.fillText(lp, Rd * 0.36, -Rd * 0.2);
+      x.fillStyle = 'rgba(194,65,12,0.75)'; x.fillText(lt, -Rd * 0.36, -Rd * 0.2);
     } else if (o.brand !== false && !small) {
       spaced(x, 'ZAVALA SERRA', 0, -Rd * 0.33, Rd * 0.052, '#5a4733', Rd * 0.018, '700');
       spaced(x, 'SANTIAGO', 0, Rd * 0.34, Rd * 0.04, '#7a6650', Rd * 0.02, '600');
@@ -400,8 +400,8 @@ var QheArt = (function() {
     return gr;
   }
 
-  function drawHands(x, S, Rd, aH, aM, aS, helper, showSec) {
-    var sc = S / 400;
+  function drawHands(x, S, Rd, aH, aM, aS, helper, showSec, small) {
+    var sc = S / 400, fat = small ? 1.7 : 1;
     function shadow(h) {
       x.shadowColor = 'rgba(25,12,0,0.38)';
       x.shadowBlur = S * 0.008 + h * S * 0.004;
@@ -415,7 +415,7 @@ var QheArt = (function() {
       lancePath(x, hl, hw, Rd * 0.1);
       x.fillStyle = steel(x, hw, '#1e3a8a', '#2563eb', '#93c5fd');
     } else {
-      var W = Rd * 0.026, L = Rd * 0.53;
+      var W = Rd * 0.026 * fat, L = Rd * 0.53;
       breguetPath(x, L, W, L * 0.7, Rd * 0.062, Rd * 0.11, 0);
       x.fillStyle = steel(x, W * 1.6, '#08112a', '#22417c', '#7d9be0');
     }
@@ -430,7 +430,7 @@ var QheArt = (function() {
       lancePath(x, ml, mw, Rd * 0.14);
       x.fillStyle = steel(x, mw, '#7f1d1d', '#dc2626', '#fca5a5');
     } else {
-      var W2 = Rd * 0.019, L2 = Rd * 0.82;
+      var W2 = Rd * 0.019 * fat, L2 = Rd * 0.82;
       breguetPath(x, L2, W2, L2 * 0.8, Rd * 0.045, Rd * 0.17, Rd * 0.035);
       x.fillStyle = steel(x, W2 * 1.6, '#08112a', '#22417c', '#7d9be0');
     }
@@ -557,7 +557,7 @@ var QheArt = (function() {
         ctx.closePath(); ctx.fillStyle = '#d97706'; ctx.fill();
         ctx.restore();
       }
-      drawHands(ctx, S, Rd, (m / 720) * TAU, (m / 60) * TAU, secA, o.helper, o.live || o.seconds);
+      drawHands(ctx, S, Rd, (m / 720) * TAU, (m / 60) * TAU, secA, o.helper, o.live || o.seconds, o.size < 140);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(glass, 0, 0);
       if (glow) {
@@ -846,7 +846,7 @@ var QheArt = (function() {
       '<linearGradient id="qs-woodH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a4422"/><stop offset="0.5" stop-color="#9c5e33"/><stop offset="1" stop-color="#6e3b1c"/></linearGradient>' +
       '<linearGradient id="qs-frame" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dcd6c9"/></linearGradient>' +
       '<linearGradient id="qs-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="0.35" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.5" stop-color="#fff" stop-opacity="0"/><stop offset="0.62" stop-color="#fff" stop-opacity="0.12"/><stop offset="0.7" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
-      '<linearGradient id="qs-curtain" x1="0" y1="0" x2="1" y2="0" spreadMethod="repeat"><stop offset="0" stop-color="#9f2f3b"/><stop offset="0.25" stop-color="#cf4b57"/><stop offset="0.5" stop-color="#a8323e"/><stop offset="0.75" stop-color="#7e2230"/><stop offset="1" stop-color="#9f2f3b"/></linearGradient>' +
+      '<linearGradient id="qs-curtain" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="13" y2="0" spreadMethod="repeat"><stop offset="0" stop-color="#9f2f3b"/><stop offset="0.25" stop-color="#cf4b57"/><stop offset="0.5" stop-color="#a8323e"/><stop offset="0.75" stop-color="#7e2230"/><stop offset="1" stop-color="#9f2f3b"/></linearGradient>' +
       '<linearGradient id="qs-mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d8db3"/><stop offset="1" stop-color="#9fb0c9"/></linearGradient>' +
       '<linearGradient id="qs-mtn2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5f7a6a"/><stop offset="1" stop-color="#7f9a72"/></linearGradient>' +
       '<linearGradient id="qs-grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fae4a"/><stop offset="1" stop-color="#3f7f2c"/></linearGradient>' +
@@ -856,6 +856,8 @@ var QheArt = (function() {
       '<pattern id="qs-planks" width="60" height="70" patternUnits="userSpaceOnUse"><path d="M0 0v70M30 0v35M60 0v70" stroke="#5a3418" stroke-width="1" opacity="0.5"/><path d="M0 35h30" stroke="#5a3418" stroke-width="1" opacity="0.35"/></pattern>' +
       '<pattern id="qs-check" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#fff"/><rect width="8" height="16" fill="#e86a6a" opacity="0.55"/><rect width="16" height="8" fill="#e86a6a" opacity="0.55"/></pattern>' +
       '<pattern id="qs-quilt" width="26" height="26" patternUnits="userSpaceOnUse"><rect width="26" height="26" fill="#3d6fb6"/><rect width="13" height="13" fill="#f3c55c"/><rect x="13" y="13" width="13" height="13" fill="#f3c55c"/><path d="M0 0h26v26" stroke="#fff" stroke-opacity="0.5" stroke-dasharray="2 2" fill="none"/></pattern>' +
+      '<linearGradient id="qs-fold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.28"/><stop offset="0.35" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#0b1a33" stop-opacity="0.35"/></linearGradient>' +
+      '<radialGradient id="qs-pillow" cx="0.45" cy="0.3" r="0.7"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ddd5c4"/></radialGradient>' +
       '<filter id="qs-soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>' +
       '<filter id="qs-blur6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>' +
       (extra || '') + '</defs>';
@@ -991,12 +993,14 @@ var QheArt = (function() {
       '<path d="M262 113 q0 -12 12 -12 h152 q12 0 12 12" fill="none" stroke="#c98a55" stroke-width="2" opacity="0.6"/>' +
       // mattress + quilt
       '<rect x="244" y="160" width="222" height="16" rx="6" fill="#f6f1e6"/>' +
-      '<path d="M258 140 q-4 -14 14 -16 h52 q14 2 10 16 q-4 10 -38 10 q-34 0 -38 -10Z" fill="#fbfaf6" stroke="#ddd6c8"/>' +
+      '<path d="M258 140 q-4 -14 14 -16 h52 q14 2 10 16 q-4 10 -38 10 q-34 0 -38 -10Z" fill="url(#qs-pillow)" stroke="#d6cdbb"/>' +
       '<path d="M268 138 q20 6 56 0" stroke="#e2dccf" fill="none"/>' +
       (night
         ? '<path d="M240 152 h232 v52 q-116 12 -232 0Z" fill="url(#qs-quilt)"/>'
         : '<path d="M330 150 h142 v54 q-80 10 -142 0Z" fill="url(#qs-quilt)"/><path d="M330 150 q-20 22 -6 54 l14 0 q-12 -26 6 -54Z" fill="#2e5797"/>') +
-      '<path d="M240 152 h232 v52 q-116 12 -232 0Z" fill="url(#qs-glass)" opacity="0.4"/>' +
+      '<path d="' + (night ? 'M240 152' : 'M330 150') + ' h' + (night ? 232 : 142) + ' v54 q-80 10 -' + (night ? 232 : 142) + ' 0Z" fill="url(#qs-fold)"/>' +
+      '<path d="' + (night ? 'M262 168 q30 8 60 0 t70 2 t70 -2' : 'M352 170 q30 8 60 0 t56 2') + '" stroke="#0b1a33" stroke-opacity="0.22" stroke-width="3" fill="none"/>' +
+      '<path d="M258 140 q-4 -14 14 -16 h52 q14 2 10 16" fill="none" stroke="#fff" stroke-width="2" opacity="0.8"/>' +
       '<rect x="252" y="206" width="9" height="40" fill="url(#qs-woodH)"/><rect x="452" y="206" width="9" height="40" fill="url(#qs-woodH)"/>' +
       '<rect x="240" y="202" width="232" height="8" rx="3" fill="url(#qs-wood)"/>';
   }

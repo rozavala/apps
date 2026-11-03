@@ -28,6 +28,7 @@ var EuclidArt = (function() {
   // ---- parchment sheet ------------------------------------------------
   // w, h in DEVICE pixels. Returns an offscreen canvas.
   function makePaper(w, h, dpr) {
+    w = Math.max(1, Math.round(w || 0)); h = Math.max(1, Math.round(h || 0));
     var c = canvas(w, h), g = c.getContext('2d');
     var R = rng(1729);
     dpr = dpr || 1;
@@ -173,9 +174,13 @@ var EuclidArt = (function() {
     var half = r / 2, z = Math.sqrt(Math.max(L * L - half * half, 0));
     var lift = o.lift || 0;                          // raise the whole tool (for put-down/lift)
     var mx = (cx + px) / 2, my = (cy + py) / 2;
-    var hx = mx, hy = my - z * 0.62 - lift;
-    var shx = mx + (z + lift) * 0.34, shy = my + (z + lift) * 0.16;
-    var handle = 36;
+    var k = Math.max(1, Math.min(2.1, L / 150));       // heavier build for a big opening
+    // the hand leans the compass a little in the direction it turns
+    var lean = o.lean == null ? 0.3 : o.lean;
+    var tx = r > 0.5 ? -(py - cy) / r : 0, ty = r > 0.5 ? (px - cx) / r : 0;
+    var hx = mx + tx * z * lean, hy = my + ty * z * lean - z * 0.66 - lift;
+    var shx = mx + tx * z * lean + (z + lift) * 0.36, shy = my + ty * z * lean + (z + lift) * 0.17;
+    var handle = 34 * k;
 
     g.save();
     g.globalAlpha = alpha;
@@ -184,7 +189,7 @@ var EuclidArt = (function() {
     // --- soft cast shadow ---
     var sOff = lift * 0.3;
     [[16, 'rgba(70,42,15,0.07)'], [9, 'rgba(70,42,15,0.11)'], [4, 'rgba(60,35,12,0.12)']].forEach(function(s) {
-      g.strokeStyle = s[1]; g.lineWidth = s[0];
+      g.strokeStyle = s[1]; g.lineWidth = s[0] * k;
       g.beginPath();
       g.moveTo(cx + sOff, cy + sOff * 0.5); g.lineTo(shx, shy); g.lineTo(px + sOff, py + sOff * 0.5);
       g.moveTo(shx, shy); g.lineTo(shx + handle * 0.55, shy + handle * 0.26);
@@ -196,7 +201,7 @@ var EuclidArt = (function() {
     var pfx = px + (hx - px) * 0.15, pfy = py + (hy - py) * 0.15;
 
     function drawNeedleLeg() {
-      leg(g, hx, hy, nfx, nfy, 5.2, 2.8);
+      leg(g, hx, hy, nfx, nfy, 5.4 * k, 2.8 * k);
       // steel needle
       g.strokeStyle = '#59616a'; g.lineWidth = 2.0;
       g.beginPath(); g.moveTo(nfx, nfy); g.lineTo(cx, cy); g.stroke();
@@ -204,31 +209,34 @@ var EuclidArt = (function() {
       g.beginPath(); g.moveTo(nfx, nfy); g.lineTo(cx + (nfx - cx) * 0.2, cy + (nfy - cy) * 0.2); g.stroke();
       // brass collar
       var ang = Math.atan2(hy - nfy, hx - nfx);
-      rotRect(g, nfx + (hx - nfx) * 0.04, nfy + (hy - nfy) * 0.04, ang, 9, 7.5, function(gg, w, h) {
+      rotRect(g, nfx + (hx - nfx) * 0.04, nfy + (hy - nfy) * 0.04, ang, 9 * k, 7.5 * k, function(gg, w, h) {
         return brassGrad(gg, 0, -h / 2, 0, h / 2);
       }, 'rgba(70,45,10,0.6)');
     }
     function drawPencilLeg() {
-      leg(g, hx, hy, pfx, pfy, 5.2, 3.2);
+      leg(g, hx, hy, pfx, pfy, 5.4 * k, 3.3 * k);
       var ang = Math.atan2(hy - pfy, hx - pfx);
       // graphite lead cone
       var dx = px - pfx, dy = py - pfy, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
       g.beginPath();
-      g.moveTo(pfx + nx * 2.4, pfy + ny * 2.4); g.lineTo(px, py); g.lineTo(pfx - nx * 2.4, pfy - ny * 2.4); g.closePath();
-      var lg = g.createLinearGradient(pfx + nx * 2.4, pfy + ny * 2.4, pfx - nx * 2.4, pfy - ny * 2.4);
+      var lw = 2.4 * k;
+      g.moveTo(pfx + nx * lw, pfy + ny * lw); g.lineTo(px, py); g.lineTo(pfx - nx * lw, pfy - ny * lw); g.closePath();
+      var lg = g.createLinearGradient(pfx + nx * lw, pfy + ny * lw, pfx - nx * lw, pfy - ny * lw);
       lg.addColorStop(0, '#1d1d20'); lg.addColorStop(0.45, '#7b7b82'); lg.addColorStop(1, '#202024');
       g.fillStyle = lg; g.fill();
       // brass clamp with a knurled screw
-      rotRect(g, pfx, pfy, ang, 13, 9, function(gg, w, h) { return brassGrad(gg, 0, -h / 2, 0, h / 2); }, 'rgba(70,45,10,0.65)');
-      var sx = pfx + nx * 7, sy = pfy + ny * 7;
-      var sg = g.createRadialGradient(sx - 1, sy - 1, 0.5, sx, sy, 3.6);
+      rotRect(g, pfx, pfy, ang, 13 * k, 9 * k, function(gg, w, h) { return brassGrad(gg, 0, -h / 2, 0, h / 2); }, 'rgba(70,45,10,0.65)');
+      var sx = pfx + nx * 7 * k, sy = pfy + ny * 7 * k;
+      var sg = g.createRadialGradient(sx - 1, sy - 1, 0.5, sx, sy, 3.6 * k);
       sg.addColorStop(0, '#fff3c4'); sg.addColorStop(0.5, '#c8922e'); sg.addColorStop(1, '#5a3a0c');
-      g.fillStyle = sg; g.beginPath(); g.arc(sx, sy, 3.4, 0, Math.PI * 2); g.fill();
+      g.fillStyle = sg; g.beginPath(); g.arc(sx, sy, 3.4 * k, 0, Math.PI * 2); g.fill();
     }
     // the leg nearer the viewer (lower on screen) is drawn last
     if (cy > py) { drawPencilLeg(); drawNeedleLeg(); } else { drawNeedleLeg(); drawPencilLeg(); }
 
-    // --- handle (knurled grip) ---
+    // --- handle (knurled grip) and hinge, scaled about the hinge ---
+    g.save(); g.translate(hx, hy); g.scale(k, k); g.translate(-hx, -hy);
+    handle = 34;
     var gx0 = hx - 4.2, gy0 = hy - handle;
     var hg = g.createLinearGradient(gx0, 0, gx0 + 8.4, 0);
     hg.addColorStop(0, '#5b3c0e'); hg.addColorStop(0.35, '#e8bb55'); hg.addColorStop(0.5, '#fff1b8');
@@ -258,6 +266,7 @@ var EuclidArt = (function() {
     g.fillStyle = scg; g.beginPath(); g.arc(hx, hy, 3.8, 0, Math.PI * 2); g.fill();
     g.strokeStyle = 'rgba(30,30,30,0.7)'; g.lineWidth = 1;
     g.beginPath(); g.moveTo(hx - 2.6, hy + 1.2); g.lineTo(hx + 2.6, hy - 1.2); g.stroke();
+    g.restore();
 
     g.restore();
   }

@@ -197,7 +197,7 @@ var MensajesSecretos = (function() {
   // ---------------------------------------------------------------
   //  HISTORY DETAIL
   // ---------------------------------------------------------------
-  var HIST_TOOL = { 'h-caesar': 'caesar', 'h-scytale': 'scytale', 'h-polybius': 'polybius', 'h-atbash': 'atbash', 'h-morse': 'morse', 'h-enigma': 'sub', 'h-navajo': 'morse' };
+  var HIST_TOOL = { 'h-caesar': 'caesar', 'h-scytale': 'scytale', 'h-polybius': 'polybius', 'h-atbash': 'atbash', 'h-morse': 'morse', 'h-enigma': 'sub' };
   function renderHistory(id) {
     cleanup();
     var h = null; D.HISTORY.forEach(function(x) { if (x.id === id) h = x; });
@@ -506,7 +506,7 @@ var MensajesSecretos = (function() {
         '<button type="button" class="ms-btn" data-mo="space">␣ Space</button>' +
         '<button type="button" class="ms-btn" data-mo="clear">Clear tape</button>' +
         '<button type="button" class="ms-btn" data-mo="flash" aria-pressed="false">💡 Screen lamp: off</button>' +
-        '<button type="button" class="ms-btn" data-mo="speed">🐢 Speed: ' + (st.slow ? 'slow' : 'medium') + '</button>' +
+        '<button type="button" class="ms-btn" data-mo="speed">' + (st.slow ? '🐢 Speed: slow' : '🐇 Speed: medium') + '</button>' +
       '</div>' +
       '<div class="ms-paper ms-tree-card">' + A.morseTreeSVG() + '<p class="ms-tip">Start at the top. Each dot goes <b>left</b>, each dash goes <b>right</b>. Ñ is — — · — —.</p></div>' +
       (m ? '<div class="ms-row-center"><button type="button" class="ms-btn brass" data-mo="playm">▶ Play the message</button></div>' :
@@ -534,6 +534,7 @@ var MensajesSecretos = (function() {
         if (t.sp) return '<span class="tp-sp"></span>';
         return '<span class="tp-l"><span class="tp-m">' + marks(t.code) + '</span><span class="tp-c">' + esc(t.ch || '') + '</span></span>';
       }).join('');
+      if (!html && !st.code) html = '<span class="ms-tape-empty">Your dots and dashes print here…</span>';
       if (st.code) html += '<span class="tp-l cur"><span class="tp-m">' + marks(st.code) + '</span><span class="tp-c">…</span></span>';
       var tin = $('.ms-tape-in', host); tin.innerHTML = html;
       var tp = $('.ms-tape', host); tp.scrollLeft = tp.scrollWidth;
@@ -591,7 +592,9 @@ var MensajesSecretos = (function() {
       var code = D.toMorse(text); if (!code) return;
       var token = ++st.playToken || (st.playToken = 1);
       st.play = token; st.tape = []; st.code = ''; renderTape();
+      // with the screen lamp on, keep blinks under 3 per second
       var u = st.slow ? 150 : 100, seq = [], letters = code.split(' ');
+      if (st.flash) u = Math.max(u, 180);
       letters.forEach(function(g) {
         if (g === '/') { seq.push({ gap: u * 5 }); seq.push({ sp: true }); return; }
         g.split('').forEach(function(s, i) {
@@ -678,7 +681,7 @@ var MensajesSecretos = (function() {
       var cRank = A.split('').filter(function(ch) { return lc.counts[ch] > 0; }).sort(function(a, b) { return lc.counts[b] - lc.counts[a] || (a < b ? -1 : 1); });
       var F = D.FREQ[lang], tRank = Object.keys(F).sort(function(a, b) { return F[b] - F[a]; });
       var nBars = Math.min(cRank.length, 14);
-      var W = 640, H = 210, pad = 24, bw = (W - pad * 2) / nBars, maxV = Math.max(F[tRank[0]], lc.counts[cRank[0]] / total * 100) * 1.1;
+      var W = 640, H = 210, pad = 36, bw = (W - pad * 2) / nBars, maxV = Math.max(F[tRank[0]], lc.counts[cRank[0]] / total * 100) * 1.1;
       var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="ms-freq-svg" role="img" aria-label="Letter frequency chart">';
       [5, 10].forEach(function(v) {
         var y = H - 40 - v / maxV * (H - 60);

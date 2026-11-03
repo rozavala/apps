@@ -248,6 +248,16 @@ var MensajesSecretosArt = (function() {
       g.lineWidth = 0.5; g.beginPath(); g.arc(cx, cy, rr, 0, TAU); g.stroke();
     }
     g.restore();
+    // knurled outer edge (fine milled ridges)
+    g.save();
+    g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.arc(cx, cy, R * 0.965, 0, TAU, true); g.clip('evenodd');
+    for (var kn = 0; kn < 240; kn++) {
+      var ka = kn * TAU / 240;
+      g.strokeStyle = kn % 2 ? 'rgba(60,35,5,0.45)' : 'rgba(255,245,205,0.35)';
+      g.lineWidth = 1;
+      g.beginPath(); g.moveTo(cx + Math.cos(ka) * R * 0.965, cy + Math.sin(ka) * R * 0.965); g.lineTo(cx + Math.cos(ka) * R, cy + Math.sin(ka) * R); g.stroke();
+    }
+    g.restore();
     // bevels
     function bevel(radius, w, lightFirst) {
       var lg = g.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
@@ -434,7 +444,7 @@ var MensajesSecretosArt = (function() {
       var a = -Math.PI / 2 + cols[ci] * step, sel = ci > 0;
       g.save();
       g.translate(G.cx, G.cy); g.rotate(a + Math.PI / 2);
-      var w = Math.min(G.R * 0.2, 2 * Math.sin(step / 2) * G.R * 0.75), top = -G.R * 0.975, bot = -G.R * 0.735 * 0.82;
+      var w = Math.min(G.R * 0.2, 2 * Math.sin(step / 2) * G.R * 0.75), top = -G.R * 0.975, bot = -G.R * 0.5;
       if (!sel) {
         // glass slider in a brass frame
         g.shadowColor = 'rgba(0,0,0,0.35)'; g.shadowBlur = 6; g.shadowOffsetY = 2;
@@ -456,6 +466,11 @@ var MensajesSecretosArt = (function() {
       }
       g.restore();
     }
+    // room light falling across the whole instrument
+    var lgt = g.createLinearGradient(G.cx - G.R, G.cy - G.R, G.cx + G.R, G.cy + G.R);
+    lgt.addColorStop(0, 'rgba(255,248,225,0.16)'); lgt.addColorStop(0.45, 'rgba(255,248,225,0)');
+    lgt.addColorStop(0.7, 'rgba(40,20,0,0)'); lgt.addColorStop(1, 'rgba(40,20,0,0.18)');
+    g.fillStyle = lgt; g.beginPath(); g.arc(G.cx, G.cy, G.R, 0, TAU); g.fill();
     // brass hub with engraved shift number (does not turn)
     var hr = G.R * 0.16, cx = G.cx, cy = G.cy;
     g.save();
@@ -614,7 +629,7 @@ var MensajesSecretosArt = (function() {
       '<path d="M30 186 Q34 178 44 178 L606 178 Q616 178 618 186" stroke="#e0a774" stroke-opacity="0.5" stroke-width="1.2" fill="none"/>' +
       // brass name plate on the front
       '<rect x="270" y="215" width="108" height="22" rx="3" fill="url(#' + B + ')" stroke="#4a2f08" stroke-width="0.8"/>' +
-      '<text x="324" y="230" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" letter-spacing="2" fill="#4a2f08">TELÉGRAFO</text>' +
+      '<text x="324" y="230" text-anchor="middle" font-family="Georgia,serif" font-size="10" font-weight="700" letter-spacing="1" fill="#4a2f08">TELÉGRAFO</text>' +
       screwHead(278, 226, 2.6) + screwHead(370, 226, 2.6) +
       // binding posts (wire terminals) at the back
       post(78, 156, 26, 14) + knurl(78, 142, 20, 14) + post(122, 156, 26, 14) + knurl(122, 142, 20, 14) +
@@ -649,8 +664,9 @@ var MensajesSecretosArt = (function() {
         '<path d="M504 92 Q506 70 539 68 Q572 70 574 92 Q574 104 539 106 Q504 104 504 92Z" fill="url(#' + K + ')"/>' +
         '<ellipse cx="539" cy="74" rx="26" ry="5" fill="#9a9aa3" opacity="0.35"/>' +
         '<path d="M514 80 Q522 72 538 71" stroke="#fff" stroke-opacity="0.55" stroke-width="2.4" fill="none" stroke-linecap="round"/>' +
-        '<path d="M500 100 Q539 116 578 100 L578 104 Q539 120 500 104Z" fill="#141416"/>' +
-        '<path d="M502 101 Q539 114 576 101" stroke="#55555c" stroke-width="1" fill="none"/>' +
+        '<path d="M506 99 Q539 111 572 99 L571 102 Q539 115 507 102Z" fill="#141416"/>' +
+        '<path d="M509 100 Q539 110 569 100" stroke="#6a6a72" stroke-width="0.8" fill="none"/>' +
+        '<ellipse cx="539" cy="106" rx="12" ry="2.5" fill="#000" opacity="0.35"/>' +
       '</g>' +
       '</svg>';
   }
@@ -685,7 +701,7 @@ var MensajesSecretosArt = (function() {
   // ---------------------------------------------------------------
   var TREE = ['', 'ET', 'IANM', 'SURWDKGO', 'HVF·L·PJBXCYZQ··'];
   function morseTreeSVG() {
-    var W = 640, H = 250, top = 24, dy = 54, s = '', nodes = '';
+    var W = 640, H = 262, top = 30, dy = 54, s = '', nodes = '';
     s += '<svg class="ms-tree-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Morse code tree: dot goes left, dash goes right">';
     function pos(level, i) { return { x: (i + 0.5) * W / Math.pow(2, level), y: top + level * dy }; }
     for (var L = 1; L <= 4; L++) {
@@ -703,7 +719,7 @@ var MensajesSecretosArt = (function() {
     var root = pos(0, 0);
     nodes += '<g class="ms-tree-node root" data-code=""><circle cx="' + root.x + '" cy="' + root.y + '" r="15"/><text x="' + root.x + '" y="' + (root.y + 4) + '" text-anchor="middle" class="sm">START</text></g>';
     s += nodes;
-    s += '<text x="12" y="' + (H - 8) + '" class="ms-tree-legend">· dot → left</text><text x="' + (W - 12) + '" y="' + (H - 8) + '" text-anchor="end" class="ms-tree-legend">dash → right —</text>';
+    s += '<text x="10" y="18" class="ms-tree-legend">· dot → left</text><text x="' + (W - 10) + '" y="18" text-anchor="end" class="ms-tree-legend">dash → right —</text>';
     return s + '</svg>';
   }
   function highlightTree(svg, code) {
@@ -851,7 +867,7 @@ var MensajesSecretosArt = (function() {
     g.setTransform(k, 0, 0, k, 0, 0); g.clearRect(0, 0, W, H);
     var cy = H * 0.5, x0 = W * 0.07, x1 = W * 0.95, capRx = rr * 0.26;
     var R = this.rows, n = this.strip.length, cols = Math.ceil(n / R);
-    var colW = Math.min((x1 - x0 - 40) / (cols + 0.6), 64), xs = x0 + 22;
+    var colW = Math.min((x1 - x0 - 40) / (cols + 0.6), 64), xs = x0 + 14 + colW * 0.5;
     // cast shadow on the desk
     g.save(); g.filter = 'blur(8px)'; g.fillStyle = 'rgba(0,0,0,0.45)';
     g.beginPath(); g.ellipse((x0 + x1) / 2 + 10, cy + rr + 16, (x1 - x0) / 2, rr * 0.22 + 6, 0, 0, TAU); g.fill(); g.restore();
@@ -885,7 +901,7 @@ var MensajesSecretosArt = (function() {
     for (var ri = 1; ri < 6; ri++) { g.beginPath(); g.ellipse(x0 + ri * 0.2, cy, capRx * ri / 6, rr * ri / 6, 0, 0, TAU); g.stroke(); }
     g.strokeStyle = 'rgba(40,20,5,0.6)'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(x0, cy, capRx, rr, 0, 0, TAU); g.stroke();
     // the strip: helix, one turn per column
-    var rs = rr * 1.035, bandW = colW * 0.94, steps = 16;
+    var rs = rr * 1.035, bandW = colW * 0.94, steps = 28;
     var total = n / R;
     for (var t = 0; t < total; t += 1 / (R * steps)) {
       var tA = t, tB = Math.min(total, t + 1 / (R * steps));
@@ -894,11 +910,12 @@ var MensajesSecretosArt = (function() {
       if (cA <= 0 && cB <= 0) continue;
       var yA = cy + rs * Math.sin(aA), yB = cy + rs * Math.sin(aB);
       var xA = xs + tA * colW, xB = xs + tB * colW;
-      var light = 0.55 + 0.45 * Math.max(0, Math.cos((aA + aB) / 2 + 0.55));
-      var cr = Math.round(232 * light + 10), cg2 = Math.round(212 * light + 8), cb = Math.round(168 * light + 4);
+      var light = clamp(0.3 + 0.7 * Math.pow(Math.max(0, Math.cos((aA + aB) / 2 + 0.4)), 1.5), 0, 1);
+      var cr = Math.round(128 + (246 - 128) * light), cg2 = Math.round(94 + (232 - 94) * light), cb = Math.round(54 + (192 - 54) * light);
       g.fillStyle = 'rgb(' + cr + ',' + cg2 + ',' + cb + ')';
+      var ov = yB > yA ? 0.7 : -0.7;
       g.beginPath();
-      g.moveTo(xA - bandW / 2, yA); g.lineTo(xA + bandW / 2, yA); g.lineTo(xB + bandW / 2, yB); g.lineTo(xB - bandW / 2, yB);
+      g.moveTo(xA - bandW / 2, yA - ov); g.lineTo(xA + bandW / 2, yA - ov); g.lineTo(xB + bandW / 2, yB + ov); g.lineTo(xB - bandW / 2, yB + ov);
       g.closePath(); g.fill();
       // edges
       g.strokeStyle = 'rgba(110,70,30,0.55)'; g.lineWidth = 0.9;
@@ -978,18 +995,25 @@ var MensajesSecretosArt = (function() {
     var r = rng(kind.length * 97);
     switch (kind) {
       case 'caesar': case 'wheel':
-        o += '<circle cx="80" cy="54" r="44" fill="url(#' + B + ')" stroke="#4a2f08"/>' +
+        var wh = '<circle cx="80" cy="54" r="44" fill="url(#' + B + ')" stroke="#4a2f08"/>' +
              '<circle cx="80" cy="54" r="31" fill="url(#' + P + ')" stroke="#7a4a1a" stroke-width="0.8"/>';
         for (var i = 0; i < 26; i++) {
           var a = -Math.PI / 2 + i * TAU / 26, L = String.fromCharCode(65 + i), L2 = String.fromCharCode(65 + (i + 3) % 26);
-          o += '<text x="' + (80 + Math.cos(a) * 38).toFixed(1) + '" y="' + (56.5 + Math.sin(a) * 38).toFixed(1) + '" font-size="6.4" font-weight="700" text-anchor="middle" fill="#3b2406" font-family="Georgia,serif" transform="rotate(' + (a * 180 / Math.PI + 90).toFixed(1) + ' ' + (80 + Math.cos(a) * 38).toFixed(1) + ' ' + (54 + Math.sin(a) * 38).toFixed(1) + ')">' + L + '</text>' +
-               '<text x="' + (80 + Math.cos(a) * 26).toFixed(1) + '" y="' + (56 + Math.sin(a) * 26).toFixed(1) + '" font-size="5.4" font-weight="700" text-anchor="middle" fill="#8a1e12" font-family="Georgia,serif" transform="rotate(' + (a * 180 / Math.PI + 90).toFixed(1) + ' ' + (80 + Math.cos(a) * 26).toFixed(1) + ' ' + (54 + Math.sin(a) * 26).toFixed(1) + ')">' + L2 + '</text>';
+          var ox = (80 + Math.cos(a) * 38).toFixed(1), oy = (54 + Math.sin(a) * 38).toFixed(1), ix = (80 + Math.cos(a) * 26).toFixed(1), iy = (54 + Math.sin(a) * 26).toFixed(1), rot = (a * 180 / Math.PI + 90).toFixed(1);
+          wh += '<text x="' + ox + '" y="' + (+oy + 2.3) + '" font-size="6.4" font-weight="700" text-anchor="middle" fill="#3b2406" font-family="Georgia,serif" transform="rotate(' + rot + ' ' + ox + ' ' + oy + ')">' + L + '</text>' +
+               '<text x="' + ix + '" y="' + (+iy + 2) + '" font-size="5.4" font-weight="700" text-anchor="middle" fill="#8a1e12" font-family="Georgia,serif" transform="rotate(' + rot + ' ' + ix + ' ' + iy + ')">' + L2 + '</text>';
         }
-        o += '<circle cx="80" cy="54" r="7" fill="url(#' + B + ')" stroke="#4a2f08"/><circle cx="77.5" cy="51.5" r="2" fill="#fff" opacity="0.6"/>';
+        wh += '<circle cx="80" cy="54" r="7" fill="url(#' + B + ')" stroke="#4a2f08"/><circle cx="77.5" cy="51.5" r="2" fill="#fff" opacity="0.6"/>';
         if (kind === 'caesar') {
-          // wax tablet behind
-          o = o.replace('<circle cx="80" cy="54" r="44"', '<rect x="8" y="30" width="56" height="64" rx="4" fill="#6e3d1a" transform="rotate(-10 36 62)"/><rect x="14" y="36" width="44" height="52" rx="2" fill="#2a2016" transform="rotate(-10 36 62)"/><text x="36" y="58" font-family="Courier New,monospace" font-size="8" fill="#c9b48a" text-anchor="middle" transform="rotate(-10 36 62)">DWWDFN</text><text x="36" y="72" font-family="Courier New,monospace" font-size="8" fill="#c9b48a" text-anchor="middle" transform="rotate(-10 36 62)">DW GDZQ</text><circle cx="96" cy="54" r="44"');
-        }
+          // Roman wax tablet with a shifted message, wheel resting on it
+          o += '<g transform="rotate(-9 46 60)"><rect x="10" y="24" width="72" height="70" rx="4" fill="url(#' + W + ')"/>' +
+               '<rect x="16" y="30" width="60" height="58" rx="2" fill="#2e2418"/><rect x="16" y="30" width="60" height="6" fill="#000" opacity="0.25"/>' +
+               '<text x="46" y="52" font-family="Courier New,monospace" font-size="9" font-weight="700" fill="#cdb88c" text-anchor="middle">DWWDFN</text>' +
+               '<text x="46" y="66" font-family="Courier New,monospace" font-size="9" font-weight="700" fill="#cdb88c" text-anchor="middle">DW GDZQ</text>' +
+               '<line x1="22" y1="76" x2="70" y2="76" stroke="#cdb88c" stroke-opacity="0.4" stroke-width="0.8"/></g>' +
+               '<rect x="8" y="86" width="64" height="3.5" rx="1.7" fill="url(#' + B + ')" transform="rotate(-24 40 88)"/>' +
+               '<g transform="translate(58 14) scale(0.76)"><ellipse cx="82" cy="102" rx="40" ry="5" fill="#000" opacity="0.35" filter="url(#' + S + ')"/>' + wh + '</g>';
+        } else o += wh;
         break;
       case 'scytale':
         o += '<rect x="14" y="40" width="132" height="30" rx="4" fill="url(#' + W + ')"/>' +
@@ -1057,15 +1081,20 @@ var MensajesSecretosArt = (function() {
         }
         break;
       case 'radio':
-        o += '<rect x="30" y="30" width="80" height="62" rx="4" fill="#4b5320"/><rect x="30" y="30" width="80" height="10" rx="3" fill="#5c6628"/>' +
-             '<rect x="40" y="48" width="36" height="20" rx="2" fill="#1e1f16"/>' +
-             '<path d="M42 64 L48 54 L54 60 L60 52 L66 62 L74 56" stroke="#9ad06a" stroke-width="1.2" fill="none"/>' +
-             '<circle cx="92" cy="54" r="7" fill="#1e1f16" stroke="#aaa" stroke-width="0.8"/><line x1="92" y1="54" x2="96" y2="49" stroke="#ddd" stroke-width="1.2"/>' +
-             '<circle cx="92" cy="76" r="5" fill="#1e1f16" stroke="#aaa" stroke-width="0.8"/>' +
-             '<line x1="100" y1="30" x2="132" y2="2" stroke="#333" stroke-width="2.2"/>' +
-             '<path d="M118 70 Q134 64 138 76 L142 92 Q136 100 128 94 L120 80Z" fill="#1c1c1a"/>' +
-             '<path d="M110 74 Q116 68 122 76" stroke="#222" stroke-width="2" fill="none"/>' +
-             '<rect x="44" y="76" width="30" height="8" rx="1" fill="#e6d9b4"/><text x="59" y="82.2" font-size="5" text-anchor="middle" font-family="Courier New,monospace" fill="#333">CHAY-DA-GAHI</text>';
+        o += '<defs><linearGradient id="' + id + 'od" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b7434"/><stop offset="0.5" stop-color="#4b5320"/><stop offset="1" stop-color="#2f3514"/></linearGradient>' +
+             '<linearGradient id="' + id + 'hs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a4a46"/><stop offset="1" stop-color="#121210"/></linearGradient></defs>' +
+             '<line x1="98" y1="30" x2="128" y2="4" stroke="#2a2a26" stroke-width="2.4" stroke-linecap="round"/><circle cx="128" cy="4" r="2" fill="#555"/>' +
+             '<rect x="24" y="30" width="86" height="64" rx="5" fill="url(#' + id + 'od)" stroke="#262b10"/>' +
+             '<rect x="24" y="30" width="86" height="9" rx="4" fill="#7a843c" opacity="0.6"/>' +
+             [30, 104].map(function(x5) { return '<circle cx="' + x5 + '" cy="36" r="1.6" fill="#262b10"/><circle cx="' + x5 + '" cy="88" r="1.6" fill="#262b10"/>'; }).join('') +
+             '<rect x="34" y="46" width="40" height="22" rx="2" fill="#141610" stroke="#8a8f6a" stroke-width="0.8"/>' +
+             '<path d="M37 60 Q41 50 45 58 T53 57 T61 55 T71 58" stroke="#a6d86e" stroke-width="1.2" fill="none"/>' +
+             '<circle cx="92" cy="52" r="8" fill="#1a1a16" stroke="#b9b9a8" stroke-width="1"/><line x1="92" y1="52" x2="96" y2="46.5" stroke="#eee" stroke-width="1.3"/>' +
+             '<circle cx="92" cy="76" r="5.5" fill="#1a1a16" stroke="#b9b9a8" stroke-width="1"/>' +
+             '<rect x="32" y="74" width="46" height="10" rx="1" fill="#e6d9b4"/><text x="55" y="81.4" font-size="5.6" text-anchor="middle" font-family="Courier New,monospace" font-weight="700" fill="#333">CHAY-DA-GAHI</text>' +
+             '<path d="M110 70 C118 66, 114 80, 122 76 C130 72, 126 86, 134 82" stroke="#1a1a18" stroke-width="1.8" fill="none"/>' +
+             '<path d="M128 70 Q142 64 148 78 L150 94 Q146 102 136 98 L130 86 Q126 78 128 70Z" fill="url(#' + id + 'hs)"/>' +
+             '<path d="M132 72 Q140 68 144 76" stroke="#777" stroke-width="1" fill="none" opacity="0.7"/>';
         break;
       case 'pigpen':
         o += '<rect x="22" y="14" width="116" height="80" rx="3" fill="url(#' + P + ')" stroke="#a8875a"/>' +

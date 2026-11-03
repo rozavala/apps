@@ -179,54 +179,72 @@ var MiNegocioArt = (function() {
   }
 
   // ---- background: plaza --------------------------------------------
+  // Fractal ridge line (midpoint displacement) for believable peaks.
+  function ridge(r, W, base, amp, rough) {
+    var n = 64, pts = [], i;
+    for (i = 0; i <= n; i++) pts.push(0);
+    var step = n, a = amp;
+    pts[0] = (r() - 0.5) * amp; pts[n] = (r() - 0.5) * amp;
+    while (step > 1) {
+      var half = step / 2;
+      for (i = half; i < n; i += step) pts[i] = (pts[i - half] + pts[i + half]) / 2 + (r() - 0.5) * a;
+      a *= rough; step = half;
+    }
+    var out = [];
+    for (i = 0; i <= n; i++) out.push([-20 + (W + 40) * i / n, base + pts[i]]);
+    return out;
+  }
+
   function drawAndes(x, W, weather, seed) {
     var r = rng(seed);
-    var hazeA = weather === 'rainy' ? 0.15 : weather === 'cloudy' ? 0.45 : 0.85;
+    var hazeA = weather === 'rainy' ? 0.18 : weather === 'cloudy' ? 0.5 : 0.92;
     x.save();
     x.globalAlpha = hazeA;
-    // far range
-    var pts = [], i, px = -20;
-    while (px < W + 40) { pts.push([px, 250 - r() * 90 - (Math.sin(px / 140) + 1) * 22]); px += 30 + r() * 50; }
-    var g = x.createLinearGradient(0, 150, 0, GROUND);
-    g.addColorStop(0, '#8FA6C4'); g.addColorStop(1, '#BCCBDC');
-    x.fillStyle = g;
-    x.beginPath(); x.moveTo(-20, GROUND);
-    for (i = 0; i < pts.length; i++) x.lineTo(pts[i][0], pts[i][1]);
-    x.lineTo(W + 40, GROUND); x.closePath(); x.fill();
-    // snow caps
-    x.fillStyle = 'rgba(250,252,255,0.92)';
-    for (i = 1; i < pts.length - 1; i++) {
-      var p = pts[i];
-      if (p[1] > pts[i - 1][1] || p[1] > pts[i + 1][1] || p[1] > 215) continue;
-      var dl = 0.32, l = pts[i - 1], rr2 = pts[i + 1];
-      x.beginPath();
-      x.moveTo(lerp(p[0], l[0], dl), lerp(p[1], l[1], dl));
-      x.lineTo(p[0], p[1]);
-      x.lineTo(lerp(p[0], rr2[0], dl), lerp(p[1], rr2[1], dl));
-      x.lineTo(lerp(p[0], rr2[0], dl * 0.6), lerp(p[1], rr2[1], dl * 0.6) + 8);
-      x.lineTo(p[0] + 3, p[1] + 14 + r() * 6);
-      x.lineTo(lerp(p[0], l[0], dl * 0.55), lerp(p[1], l[1], dl * 0.55) + 6);
+    // far cordillera
+    var pts = ridge(r, W, 238, 150, 0.52), i;
+    var path = function() {
+      x.beginPath(); x.moveTo(-20, GROUND);
+      for (i = 0; i < pts.length; i++) x.lineTo(pts[i][0], pts[i][1]);
+      x.lineTo(W + 20, GROUND); x.closePath();
+    };
+    var g = x.createLinearGradient(0, 140, 0, 330);
+    g.addColorStop(0, '#8C9FBF'); g.addColorStop(1, '#B9C7DA');
+    x.fillStyle = g; path(); x.fill();
+    x.save(); path(); x.clip();
+    // shaded east faces: soft wedges falling from each local peak
+    for (i = 2; i < pts.length - 2; i++) {
+      if (!(pts[i][1] < pts[i - 1][1] && pts[i][1] < pts[i + 1][1])) continue;
+      var pk = pts[i];
+      var wg = x.createLinearGradient(pk[0], pk[1], pk[0] + 40, pk[1] + 90);
+      wg.addColorStop(0, 'rgba(60,80,115,0.32)'); wg.addColorStop(1, 'rgba(60,80,115,0)');
+      x.fillStyle = wg;
+      x.beginPath(); x.moveTo(pk[0], pk[1]);
+      for (var j = i + 1; j < Math.min(pts.length, i + 5); j++) x.lineTo(pts[j][0], pts[j][1]);
+      x.lineTo(pts[Math.min(pts.length - 1, i + 4)][0] - 10, pk[1] + 120);
+      x.lineTo(pk[0] + 6, pk[1] + 130);
       x.closePath(); x.fill();
     }
-    // ridge shading (sunlit left faces)
-    x.globalAlpha = hazeA * 0.25;
-    x.fillStyle = '#5E7799';
-    for (i = 1; i < pts.length; i++) {
-      x.beginPath();
-      x.moveTo(pts[i - 1][0], pts[i - 1][1]);
-      x.lineTo(pts[i][0], pts[i][1]);
-      x.lineTo(pts[i][0] + 10, GROUND); x.lineTo(pts[i][0] - 6, GROUND);
-      x.closePath(); x.fill();
-    }
-    // nearer foothills
-    x.globalAlpha = hazeA;
+    // snow above a ragged snowline (only the higher peaks)
+    var snow = ridge(r, W, 206, 16, 0.7);
+    var sg = x.createLinearGradient(0, 130, 0, 240);
+    sg.addColorStop(0, 'rgba(255,255,255,0.97)'); sg.addColorStop(1, 'rgba(232,240,250,0.9)');
+    x.fillStyle = sg;
+    x.beginPath(); x.moveTo(-20, 0);
+    for (i = 0; i < snow.length; i++) x.lineTo(snow[i][0], snow[i][1] + ((i % 3) - 1) * 4);
+    x.lineTo(W + 20, 0); x.closePath(); x.fill();
+    x.restore();
+    // atmospheric haze at the foot
+    var hz = x.createLinearGradient(0, 250, 0, 330);
+    hz.addColorStop(0, 'rgba(210,225,240,0)'); hz.addColorStop(1, 'rgba(210,225,240,0.75)');
+    x.fillStyle = hz; x.fillRect(0, 250, W, 90);
+    // nearer foothills (cerros), greener
+    var hills = ridge(r, W, 318, 40, 0.5);
     var g2 = x.createLinearGradient(0, 280, 0, GROUND);
-    g2.addColorStop(0, '#93A98F'); g2.addColorStop(1, '#AEBDA6');
+    g2.addColorStop(0, '#8EA58C'); g2.addColorStop(1, '#A9B99F');
     x.fillStyle = g2;
     x.beginPath(); x.moveTo(-20, GROUND);
-    px = -20;
-    while (px < W + 40) { x.lineTo(px, 320 - Math.sin(px / 90 + seed) * 12 - r() * 10); px += 40; }
-    x.lineTo(W + 40, GROUND); x.closePath(); x.fill();
+    for (i = 0; i < hills.length; i++) x.lineTo(hills[i][0], hills[i][1]);
+    x.lineTo(W + 20, GROUND); x.closePath(); x.fill();
     x.restore();
   }
 
@@ -501,19 +519,20 @@ var MiNegocioArt = (function() {
       var dark = j % 3 === 0;
       x.strokeStyle = dark ? '#2F5A2A' : '#4E7D38'; x.lineWidth = 1.6;
       x.beginPath(); x.moveTo(topX, topY); x.quadraticCurveTo(mx, my, ex, ey); x.stroke();
-      // leaflets
-      for (var k = 2; k < 14; k++) {
-        var tt = k / 14;
+      // leaflets: dense, drooping, lit from the upper left
+      var lit = Math.cos(ang) < 0.2 && Math.sin(ang) < 0.3;
+      for (var k = 3; k < 26; k++) {
+        var tt = k / 26;
         var qx = (1 - tt) * (1 - tt) * topX + 2 * (1 - tt) * tt * mx + tt * tt * ex;
         var qy = (1 - tt) * (1 - tt) * topY + 2 * (1 - tt) * tt * my + tt * tt * ey;
         var dx = 2 * (1 - tt) * (mx - topX) + 2 * tt * (ex - mx), dy = 2 * (1 - tt) * (my - topY) + 2 * tt * (ey - my);
         var dl = Math.sqrt(dx * dx + dy * dy) || 1;
         var nx = -dy / dl, ny = dx / dl;
-        var ll = (1 - Math.abs(tt - 0.45) * 1.2) * 13;
-        x.strokeStyle = dark ? '#2C5427' : (k % 2 ? '#5B8E3F' : '#447332');
-        x.lineWidth = 1.3;
-        x.beginPath(); x.moveTo(qx, qy); x.lineTo(qx + nx * ll + dx / dl * 3, qy + ny * ll + 6); x.stroke();
-        x.beginPath(); x.moveTo(qx, qy); x.lineTo(qx - nx * ll + dx / dl * 3, qy - ny * ll + 6); x.stroke();
+        var ll = Math.max(2, (1 - Math.abs(tt - 0.4) * 1.35) * 16);
+        x.strokeStyle = dark ? '#2A4F25' : lit ? (k % 2 ? '#6FA048' : '#5A8D3C') : (k % 2 ? '#3F6E30' : '#335E29');
+        x.lineWidth = 1.05;
+        x.beginPath(); x.moveTo(qx, qy); x.quadraticCurveTo(qx + nx * ll * 0.6, qy + ny * ll * 0.6, qx + nx * ll + dx / dl * 3, qy + ny * ll + ll * 0.55); x.stroke();
+        x.beginPath(); x.moveTo(qx, qy); x.quadraticCurveTo(qx - nx * ll * 0.6, qy - ny * ll * 0.6, qx - nx * ll + dx / dl * 3, qy - ny * ll + ll * 0.55); x.stroke();
       }
     }
     // crown core
@@ -544,9 +563,18 @@ var MiNegocioArt = (function() {
         var base = pass === 0 ? '#2F4F25' : pass === 1 ? '#3F6A30' : '#5F8F42';
         if (pass === 2 && (px - cx) + (py - cy) > R * 0.3) continue;
         var g = x.createRadialGradient(px - pr * 0.3, py - pr * 0.4, pr * 0.1, px, py, pr);
-        g.addColorStop(0, shade(base, sunny ? 0.22 : 0.1)); g.addColorStop(1, rgba(base, pass === 0 ? 0.95 : 0.0));
+        g.addColorStop(0, shade(base, sunny ? 0.22 : 0.1)); g.addColorStop(0.78, base); g.addColorStop(1, rgba(base, 0));
         x.fillStyle = g; ellipse(x, px, py + (pass === 0 ? 6 : 0), pr, pr * 0.85); x.fill();
       }
+    }
+    // individual leaf glints on the lit side
+    for (var lf = 0; lf < 120; lf++) {
+      var la = r() * Math.PI * 2, ld = Math.sqrt(r()) * R;
+      var lx = cx + Math.cos(la) * ld * 1.1, ly = cy + Math.sin(la) * ld * 0.7;
+      var litSide = (lx - cx) + (ly - cy) < 0;
+      if (!litSide && r() < 0.7) continue;
+      x.fillStyle = litSide ? (sunny ? 'rgba(170,210,110,0.5)' : 'rgba(130,170,90,0.35)') : 'rgba(30,55,25,0.25)';
+      ellipse(x, lx, ly, 1.9, 1.1, r() * 3); x.fill();
     }
   }
 
@@ -718,7 +746,7 @@ var MiNegocioArt = (function() {
   }
 
   // Build the whole static background into one offscreen canvas.
-  function buildBackground(W, k, place, weather) {
+  function buildBackground(W, k, place, weather, sx) {
     var c = makeCanvas(W * k, H * k), x = c.getContext('2d');
     x.scale(k, k);
     var sunny = weather === 'sunny' || weather === 'hot';
@@ -732,7 +760,9 @@ var MiNegocioArt = (function() {
     } else {
       drawAndes(x, W, weather, 7);
       // a row of colonial buildings: house | tower+church | house …
-      var churchX = Math.max(260, W * 0.66);
+      // church beside the stand when there is room, else behind its left side
+      var right = sx + STAND_W / 2 + 125;
+      var churchX = right + 105 < W ? right : Math.max(150, sx - STAND_W / 2 + 10);
       var cf = churchFacade(x, churchX, sunny);
       bellTower(x, cf.x0 - 26, sunny);
       var walls = ['#E3B66B', '#D9907A', '#A9C3D1', '#E9D7AE', '#C9A27C'];
@@ -1047,7 +1077,8 @@ var MiNegocioArt = (function() {
     x.fillStyle = lg; x.fillRect(cx - w, lvl, w * 2, by - lvl);
     if (fill > 0.05) {
       x.fillStyle = '#F1E2B8';
-      for (var i = 0; i < 40; i++) { ellipse(x, cx - 20 + (i * 7.3) % 40, by - 4 - (i % 4) * 2.2, 1.3, 1); x.fill(); }
+      x.fillStyle = 'rgba(236,222,180,0.85)';
+      for (var i = 0; i < 46; i++) { ellipse(x, cx - 20 + ((i * 37.7) % 40), by - 4 - ((i * 13.1) % 8), 0.9, 0.7, i); x.fill(); }
       var nP = Math.ceil(fill * 6);
       for (var j = 0; j < nP; j++) {
         var hx = cx - 16 + j * 7, hy = lvl + 6 + (j % 2) * 9;
@@ -1241,16 +1272,16 @@ var MiNegocioArt = (function() {
     var frac = full > 0 ? stock / full : 0;
     var i;
     if (product === 'empanadas') {
-      var bw = 118;
-      basket(x, sx + 46, y, bw);
-      var vis = Math.min(stock, 15);
+      var bw = 132;
+      basket(x, sx + 50, y, bw);
+      var vis = Math.min(stock, 12);
       // pyramid rows (bottom row first)
-      var rows = [6, 5, 4];
+      var rows = [5, 4, 3];
       var idx = 0;
       for (var r = 0; r < rows.length && idx < vis; r++) {
         for (i = 0; i < rows[r] && idx < vis; i++, idx++) {
-          var ex = sx + 46 - (rows[r] - 1) * 8.5 + i * 17;
-          empanada(x, ex, y - 22 - r * 10, 0.62, (i % 2 ? 0.08 : -0.06), (idx % 3) * 0.03);
+          var ex = sx + 50 - (rows[r] - 1) * 12 + i * 24;
+          empanada(x, ex, y - 24 - r * 13, 0.86, (i % 2 ? 0.08 : -0.06), (idx % 3) * 0.03);
         }
       }
       if (old > 0) {
@@ -1266,7 +1297,7 @@ var MiNegocioArt = (function() {
     } else if (product === 'mote') {
       moteJar(x, sx + 92, y, full > 0 ? clamp(frac * 1.05, 0, 1) : 0);
       var cups = Math.min(stock, 6);
-      for (i = 0; i < cups; i++) cupMote(x, sx - 2 + i * 15 - (i >= 3 ? 38 : 0), y - (i >= 3 ? 0 : 0), 0.82);
+      for (i = 0; i < cups; i++) cupMote(x, sx - 26 + i * 15, y, 0.82);
     } else if (product === 'sopaipillas') {
       tray(x, sx + 40, y, 120);
       var vs = Math.min(stock, 24), si = 0;
@@ -1428,17 +1459,22 @@ var MiNegocioArt = (function() {
     var child = p.kind === 'child';
     var hipY = child ? -0.47 : -0.5;
     var shY = child ? -0.765 : -0.805;
-    var headR = child ? 0.078 : 0.062;
+    var headR = child ? 0.082 : 0.067;
     var headY = child ? -0.89 : -0.905;
     var walking = pose === 'walk';
     var sw = walking ? Math.sin(phase) : 0;
     var cw = walking ? Math.cos(phase) : 0;
     var bob = walking ? -Math.abs(Math.cos(phase)) * 0.008 + 0.004 : 0;
     var elder = p.kind === 'elder';
-    var stride = elder ? 0.28 : 0.42;
+    var stride = elder ? 0.24 : 0.33;
     x.translate(elder ? 0.01 : 0, bob);
     var lw = function(v) { return v; };
     var dark = function(c) { return shade(c, -0.28); };
+    var limbG = function(c) {
+      var g = x.createLinearGradient(-0.045, 0, 0.045, 0);
+      g.addColorStop(0, shade(c, -0.22)); g.addColorStop(0.6, shade(c, 0.06)); g.addColorStop(1, shade(c, -0.06));
+      return g;
+    };
     var L1 = child ? 0.24 : 0.255, L2 = child ? 0.235 : 0.25;
 
     function leg(sign, far) {
@@ -1451,10 +1487,10 @@ var MiNegocioArt = (function() {
       var cloth = far ? dark(p.bottom) : p.bottom;
       x.lineCap = 'round'; x.lineJoin = 'round';
       // bare leg
-      x.strokeStyle = skin; x.lineWidth = child ? 0.05 : 0.052;
+      x.strokeStyle = far ? skin : limbG(skin); x.lineWidth = child ? 0.06 : 0.064;
       x.beginPath(); x.moveTo(0, hipY); x.lineTo(kx, ky); x.lineTo(ax, ay); x.stroke();
       if (p.bottomType === 'pants' || (p.bottomType === 'shorts')) {
-        x.strokeStyle = cloth; x.lineWidth = child ? 0.066 : 0.072;
+        x.strokeStyle = far ? cloth : limbG(cloth); x.lineWidth = child ? 0.078 : 0.086;
         x.beginPath(); x.moveTo(0, hipY);
         if (p.bottomType === 'pants') { x.lineTo(kx, ky); x.lineTo(kx + (ax - kx) * 0.92, ky + (ay - ky) * 0.92); }
         else x.lineTo(kx * 0.85, hipY + (ky - hipY) * 0.85);
@@ -1463,7 +1499,8 @@ var MiNegocioArt = (function() {
       // shoe
       x.fillStyle = far ? dark(p.shoe) : p.shoe;
       x.save(); x.translate(ax, ay); x.rotate(walking ? clamp(-a2 * 0.6, -0.5, 0.5) : 0);
-      rrect(x, -0.022, -0.02, 0.07, 0.03, 0.012); x.fill();
+      rrect(x, -0.026, -0.024, 0.082, 0.034, 0.014); x.fill();
+      x.fillStyle = 'rgba(255,255,255,0.18)'; x.fillRect(-0.02, -0.022, 0.06, 0.006);
       x.restore();
     }
     function arm(sign, far) {
@@ -1481,9 +1518,9 @@ var MiNegocioArt = (function() {
       var sleeve = far ? dark(p.top) : p.top;
       var skin = far ? dark(p.skin) : p.skin;
       x.lineCap = 'round'; x.lineJoin = 'round';
-      x.strokeStyle = skin; x.lineWidth = 0.04;
+      x.strokeStyle = far ? skin : limbG(skin); x.lineWidth = 0.046;
       x.beginPath(); x.moveTo(sx0, sy0); x.lineTo(ex, ey); x.lineTo(hx, hy); x.stroke();
-      x.strokeStyle = sleeve; x.lineWidth = 0.05;
+      x.strokeStyle = far ? sleeve : limbG(sleeve); x.lineWidth = 0.06;
       x.beginPath(); x.moveTo(sx0, sy0);
       if (p.sleeves === 'long') { x.lineTo(ex, ey); x.lineTo(ex + (hx - ex) * 0.85, ey + (hy - ey) * 0.85); }
       else x.lineTo(sx0 + (ex - sx0) * 0.55, sy0 + (ey - sy0) * 0.55);
@@ -1502,7 +1539,7 @@ var MiNegocioArt = (function() {
     leg(1, false);
 
     // torso
-    var tw = child ? 0.058 : (p.kind === 'woman' ? 0.06 : 0.068);
+    var tw = child ? 0.07 : (p.kind === 'woman' ? 0.074 : 0.084);
     var tg = x.createLinearGradient(-tw, 0, tw, 0);
     tg.addColorStop(0, shade(p.top, -0.22)); tg.addColorStop(0.55, shade(p.top, 0.08)); tg.addColorStop(1, shade(p.top, -0.05));
     x.fillStyle = tg;
@@ -1520,6 +1557,9 @@ var MiNegocioArt = (function() {
       x.fillRect(-tw * 0.9, shY + 0.03, tw * 1.75, 0.012);
       x.fillStyle = '#1F3A93'; x.fillRect(-tw * 0.85, shY - 0.004, tw * 1.6, 0.01);
     }
+    // collar / neckline
+    x.fillStyle = shade(p.top, -0.3);
+    x.beginPath(); x.moveTo(-0.02, shY - 0.004); x.quadraticCurveTo(0.01, shY + 0.03, 0.035, shY - 0.002); x.lineTo(0.03, shY - 0.012); x.quadraticCurveTo(0.01, shY + 0.012, -0.015, shY - 0.012); x.closePath(); x.fill();
     // belt line / waist
     if (p.bottomType === 'pants' || p.bottomType === 'shorts') {
       x.fillStyle = p.bottom;
@@ -1919,6 +1959,14 @@ var MiNegocioArt = (function() {
     for (var i = people.length - 1; i >= 0; i--) {
       var p = people[i];
       var move = 0;
+      // nothing left for them: give up instead of queueing
+      if (this.mode === 'day' && (p.state === 'toQueue' || p.state === 'queue') &&
+          ((p.kind === 'want' && this.cfg.stock <= 0) || (p.kind === 'bargain' && (this.cfg.dayOld || 0) <= 0))) {
+        var qx = this.queue.indexOf(p);
+        if (qx >= 0) this.queue.splice(qx, 1);
+        p.state = 'leave'; p.bubble = '¡Agotado!'; p.bubbleCol = '#B91C1C'; p.bubbleT = 1.8;
+        if (p.dir === 0) p.dir = 1;
+      }
       if (p.state === 'walk' || p.state === 'leave') {
         move = p.speed * dt * p.dir;
       } else if (p.state === 'toQueue') {
@@ -1938,12 +1986,13 @@ var MiNegocioArt = (function() {
       } else if (p.state === 'buy') {
         p.wait -= dt;
         if (p.wait <= 0) {
-          var res = this.onSale ? this.onSale(p.c) : { sold: p.units };
+          var res = this.onSale ? this.onSale(p.c) : { sold: 1, money: this.cfg.price, happy: this.r() < 0.6 };
           this.queue.shift(); this.serving = null;
           if (res && res.sold > 0) {
             p.carry = this.cfg.product; p.state = 'leave'; p.pose = 'happy';
             this.coins += 1;
-            this.fx.push({ type: 'money', x: p.x + 20, y: p.y - p.look.h - 10, t: 0, text: '+' + money(res.money) });
+            var stackN = this.fx.filter(function(f) { return f.type === 'money' && f.t < 0.6; }).length;
+            this.fx.push({ type: 'money', x: p.x + 20, y: p.y - p.look.h - 10 - stackN * 22, t: 0, text: '+' + money(res.money) });
             this.fx.push({ type: 'coin', x: p.x + 24, y: p.y - p.look.h * 0.5, tx: this.sx - STAND_W / 2 + 38, ty: COUNTER - 10, t: 0 });
             if (res.happy) p.heart = 1.6;
             if (res.old) { p.bubble = '¡Barato!'; p.bubbleCol = '#B45309'; p.bubbleT = 1.4; }
@@ -1994,7 +2043,7 @@ var MiNegocioArt = (function() {
       var cl = this.clouds[c];
       x.drawImage(cl.img, cl.x, cl.y, cl.w, cl.h);
     }
-    if (!this.bg) this.bg = buildBackground(W, k, cfg.place, cfg.weather);
+    if (!this.bg) this.bg = buildBackground(W, k, cfg.place, cfg.weather, this.sx);
     x.setTransform(1, 0, 0, 1, 0, 0);
     x.drawImage(this.bg, 0, 0);
     x.setTransform(k, 0, 0, k, 0, 0);
@@ -2035,7 +2084,7 @@ var MiNegocioArt = (function() {
     var list = this.people.slice().sort(function(a, b) { return a.y - b.y; });
     for (var i = 0; i < list.length; i++) {
       var pp = list[i];
-      var s = 0.86 + (pp.y - 540) / 50 * 0.12;
+      var s = 0.95 + (pp.y - 540) / 50 * 0.12;
       var pose = (pp.state === 'buy') ? 'buy' : (pp.state === 'stop' ? 'look' : (pp.state === 'queue' ? 'stand' : 'walk'));
       if (pose === 'walk' && pp.pose === 'happy') pose = 'walk';
       if (pp.state === 'toQueue' || (pp.state === 'queue' && false)) pose = 'walk';
@@ -2045,7 +2094,7 @@ var MiNegocioArt = (function() {
     // bubbles & hearts
     for (var j = 0; j < list.length; j++) {
       var q = list[j];
-      var headTop = q.y - q.look.h * (0.86 + (q.y - 540) / 50 * 0.12) - 6;
+      var headTop = q.y - q.look.h * (0.95 + (q.y - 540) / 50 * 0.12) - 6;
       if (q.bubbleT > 0 && q.bubble) bubble(x, q.x, headTop, q.bubble, q.bubbleCol || '#333', clamp(q.bubbleT * 2, 0, 1));
       if (q.heart > 0) heart(x, q.x + 10 * q.dir, headTop - 10 - (1.6 - q.heart) * 18, 1.1, clamp(q.heart, 0, 1));
     }
@@ -2173,6 +2222,8 @@ var MiNegocioArt = (function() {
     var cx = W / 2, by = 80;
     var i;
     x.save();
+    var zs = { empanadas: 1.3, sopaipillas: 1.25 }[product] || 0.95;
+    x.translate(cx, by); x.scale(zs, zs); x.translate(-cx, -by);
     if (product === 'empanadas') {
       basket(x, cx, by, 70);
       empanada(x, cx - 16, by - 22, 0.75, -0.06, 0); empanada(x, cx + 14, by - 22, 0.75, 0.05, 0.03); empanada(x, cx - 1, by - 33, 0.75, 0, 0.05);
@@ -2184,7 +2235,7 @@ var MiNegocioArt = (function() {
       for (i = 0; i < 9; i++) sopaipilla(x, cx - 24 + (i % 3) * 18, by - 9 - Math.floor(i / 3) * 4.5, 0.85);
       pebreBowl(x, cx + 34, by);
     } else if (product === 'limonada') {
-      x.translate(cx + 14, by); x.scale(0.72, 0.72); lemonJug(x, 0, 0, 0.85); x.setTransform(k, 0, 0, k, 0, 0);
+      x.save(); x.translate(cx + 14, by); x.scale(0.72, 0.72); lemonJug(x, 0, 0, 0.85); x.restore();
       glassLemon(x, cx - 22, by, 1.1);
     } else {
       cooler(x, cx, by, 10);

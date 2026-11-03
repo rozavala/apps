@@ -180,14 +180,14 @@ var NaturalezaArt = (function() {
     if (o.shade) s += p('M0 0C' + n(len * 0.22) + ' ' + n(w * k) + ' ' + n(len * 0.72) + ' ' + n(w * 0.95) + ' ' + n(len) + ' 0C' +
       n(len * 0.6) + ' ' + n(w * 0.25) + ' ' + n(len * 0.3) + ' ' + n(w * 0.2) + ' 0 0Z', o.shade, 'opacity=".55"');
     var vein = o.vein || 'rgba(230,240,200,.55)';
-    s += sp('M0 0Q' + n(len * 0.5) + ' ' + n(-w * 0.08) + ' ' + n(len * 0.97) + ' 0', vein, Math.max(0.6, w * 0.08));
+    s += sp('M0 0Q' + n(len * 0.5) + ' ' + n(-w * 0.08) + ' ' + n(len * 0.97) + ' 0', vein, Math.max(0.6, w * 0.07), 'opacity=".85"');
     var nv = o.veins == null ? 5 : o.veins, vd = '';
     for (var i = 1; i <= nv; i++) {
       var t = i / (nv + 1), vx = len * t, vw = w * Math.sin(PI * Math.min(0.98, t + 0.05)) * 0.8;
       vd += 'M' + n(vx) + ' 0Q' + n(vx + len * 0.06) + ' ' + n(-vw * 0.5) + ' ' + n(vx + len * 0.14) + ' ' + n(-vw);
       vd += 'M' + n(vx) + ' 0Q' + n(vx + len * 0.06) + ' ' + n(vw * 0.5) + ' ' + n(vx + len * 0.14) + ' ' + n(vw);
     }
-    if (nv) s += sp(vd, vein, Math.max(0.4, w * 0.04), 'opacity=".8"');
+    if (nv) s += sp(vd, vein, Math.max(0.35, w * 0.03), 'opacity=".45"');
     if (o.gloss) s += p('M' + n(len * 0.12) + ' ' + n(-w * 0.25) + 'Q' + n(len * 0.45) + ' ' + n(-w * 0.85) + ' ' + n(len * 0.8) + ' ' + n(-w * 0.35) +
       'Q' + n(len * 0.45) + ' ' + n(-w * 0.5) + ' ' + n(len * 0.12) + ' ' + n(-w * 0.25) + 'Z', '#fff', 'opacity="' + o.gloss + '"');
     return '<g ' + tr(x, y, ang) + '>' + s + '</g>';
@@ -310,19 +310,18 @@ var NaturalezaArt = (function() {
 
   // Fern frond (for forest floors). base (x,y), length, angle (deg), colour
   function fern(rnd, x, y, len, ang, col) {
-    var s = '', d = '', k = 14;
+    var s = '', k = 16, hi = '';
     for (var i = 1; i < k; i++) {
-      var t = i / k, px = t * len, lw = len * 0.22 * Math.sin(PI * (0.15 + t * 0.85)) * (1 - t * 0.35);
-      d += 'M' + n(px) + ' 0q' + n(lw * 0.4) + ' ' + n(-lw * 0.3) + ' ' + n(lw * 0.5) + ' ' + n(-lw) +
-        'q' + n(-lw * 0.05) + ' ' + n(lw * 0.6) + ' ' + n(-lw * 0.5) + ' ' + n(lw) + 'Z';
-      d += 'M' + n(px) + ' 0q' + n(lw * 0.4) + ' ' + n(lw * 0.3) + ' ' + n(lw * 0.5) + ' ' + n(lw) +
-        'q' + n(-lw * 0.05) + ' ' + n(-lw * 0.6) + ' ' + n(-lw * 0.5) + ' ' + n(-lw) + 'Z';
+      var t = i / k, px = t * len, lw = len * 0.2 * Math.sin(PI * (0.12 + t * 0.88)) * (1 - t * 0.3) + 2;
+      var a1 = -58 + t * 20;
+      s += '<ellipse cx="' + n(px + Math.cos(a1 * PI / 180) * lw * 0.55) + '" cy="' + n(Math.sin(a1 * PI / 180) * lw * 0.55) + '" rx="' + n(lw * 0.58) + '" ry="' + n(Math.max(1.4, lw * 0.17)) + '" transform="rotate(' + n(a1) + ' ' + n(px + Math.cos(a1 * PI / 180) * lw * 0.55) + ' ' + n(Math.sin(a1 * PI / 180) * lw * 0.55) + ')"/>';
+      s += '<ellipse cx="' + n(px + Math.cos(-a1 * PI / 180) * lw * 0.55) + '" cy="' + n(Math.sin(-a1 * PI / 180) * lw * 0.55) + '" rx="' + n(lw * 0.58) + '" ry="' + n(Math.max(1.4, lw * 0.17)) + '" transform="rotate(' + n(-a1) + ' ' + n(px + Math.cos(-a1 * PI / 180) * lw * 0.55) + ' ' + n(Math.sin(-a1 * PI / 180) * lw * 0.55) + ')"/>';
+      hi += 'M' + n(px) + ' 0l' + n(Math.cos(a1 * PI / 180) * lw * 0.9) + ' ' + n(Math.sin(a1 * PI / 180) * lw * 0.9);
     }
-    s += p(d, col);
-    s += sp('M0 0Q' + n(len * 0.5) + ' ' + n(-len * 0.04) + ' ' + n(len) + ' 0', 'rgba(40,60,20,.6)', 1.1);
+    s = '<g fill="' + col + '">' + s + '</g>' + sp(hi, 'rgba(230,245,200,.35)', 0.6);
+    s += sp('M0 0Q' + n(len * 0.5) + ' ' + n(-len * 0.04) + ' ' + n(len) + ' 0', 'rgba(40,60,20,.7)', 1.2);
     return '<g ' + tr(x, y, ang) + '>' + s + '</g>';
   }
-
 
   // Fluffy outline (ruffs, fur tufts, flower pompoms): bumpy ellipse path
   function fluff(rnd, cx, cy, rx, ry, rot, bumps, depth) {
@@ -376,7 +375,7 @@ var NaturalezaArt = (function() {
       body += (a.shadow || '') + '<g filter="' + U('sil') + '">' + a.fg + '</g>';
     } else {
       body += el(200, 150, 190, 135, U('wash'));
-      body += (a.bg || '') + (a.shadow || '') + a.fg + (a.front || '');
+      body += (a.bg || '') + (a.shadow || '') + a.fg + (a.front || '') + (a.inset || '');
     }
     var label = opts.label ? '<title>' + String(opts.label).replace(/[<>&"]/g, '') + '</title>' : '';
     return ('<svg class="nat-plate-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img"' +
@@ -1017,6 +1016,826 @@ var NaturalezaArt = (function() {
     // small hooked bill
     s += k.p('M196 112C198 110 202 110 204 112C203 118 201 122 200 124C199 122 197 118 196 112Z', '#d8c890');
     return { wash: '#c9bfa0', defs: defs, bg: bg, shadow: k.shadow(200, 242, 40, 4, 0.5), fg: s };
+  };
+
+  // =================================================================
+  //  TREES & PLANTS · ÁRBOLES Y PLANTAS
+  //  Sprig plates (botanical style) carry a small round inset showing
+  //  the whole plant in its habitat; whole-tree plates carry a detail.
+  // =================================================================
+
+  function inset(k, id, cx, cy, R, content) {
+    return '<defs><clipPath id="§' + id + '"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath>' +
+      k.lg(id + 'g', 0, 0, 0, 1, [[0, '#f3ead2'], [1, '#e6d9b8']]) + '</defs>' +
+      k.circ(cx + 2, cy + 3, R, 'rgba(60,40,20,.18)') +
+      k.circ(cx, cy, R, k.U(id + 'g')) +
+      '<g clip-path="' + k.U(id) + '">' + content + '</g>' +
+      k.circ(cx, cy, R, 'none', 'stroke="#7a6446" stroke-width="1.6"') +
+      k.circ(cx, cy, R - 3, 'none', 'stroke="#7a6446" stroke-width=".6" opacity=".6"');
+  }
+
+  // a small tree: trunk + clumped crown of soft blobs
+  function miniTree(k, x, y, h, cols, o) {
+    o = o || {};
+    var r = k.rnd, s = '', ins = '', i;
+    var w = h * (o.wide || 0.75);
+    s += k.p('M' + (x - h * 0.04) + ' ' + y + 'L' + (x - h * 0.02) + ' ' + (y - h * 0.5) + 'L' + (x + h * 0.02) + ' ' + (y - h * 0.5) + 'L' + (x + h * 0.04) + ' ' + y + 'Z', cols[3] || '#5a4432');
+    for (i = 0; i < (o.n || 9); i++) {
+      var bx = x + (r() - 0.5) * w * 0.8, by = y - h * (0.55 + r() * 0.35), br = h * (0.14 + r() * 0.1);
+      s += k.circ(bx, by + br * 0.25, br, cols[0]);
+      s += k.circ(bx - br * 0.2, by - br * 0.1, br * 0.75, cols[1]);
+      s += k.circ(bx - br * 0.35, by - br * 0.3, br * 0.35, cols[2], 'opacity=".7"');
+    }
+    return s;
+  }
+
+  // a run of leaves along a smooth stem, alternating sides
+  function leavesAlong(k, pts, o) {
+    var s = '';
+    for (var i = 0; i < pts.length; i++) {
+      var q = pts[i];
+      s += k.leaf(q[0], q[1], q[3] || o.len, q[4] || o.w, q[2], o);
+    }
+    return s;
+  }
+
+  // ---- Monkey-puzzle tree · Araucaria (pehuén) ----
+  P.araucaria = function(k) {
+    var r = k.rnd, s = '', ins = '', bg = '', i;
+    var defs = k.lg('arT', 0, 0, 1, 0, [[0, '#3a3430'], [0.35, '#7a6e62'], [0.65, '#5a5048'], [1, '#2a2420']]) +
+      k.lg('arV', 0, 0, 0, 1, [[0, '#c9d2d8'], [1, '#8c9ca8']]) +
+      k.lg('arG', 0, 0, 0, 1, [[0, '#8a8a5a'], [1, '#5a5a38']]);
+    // snowy volcano and slope
+    bg += k.p('M60 220L170 96C178 88 190 88 198 96L320 220Z', k.U('arV'), 'opacity=".7"');
+    bg += k.p('M150 120L170 96C178 88 190 88 198 96L218 120L206 116L196 126L186 114L174 124L164 116Z', '#fbfbf8', 'opacity=".95"');
+    bg += k.sp('M184 92C182 80 190 72 186 60', '#d8d4cc', 4, 'opacity=".35"');
+    bg += k.p('M0 236C80 222 160 226 240 236C300 244 360 238 400 230L400 300L0 300Z', k.U('arG'), 'opacity=".75"');
+    bg += k.grass(r, 0, 400, 270, 70, 18, ['#7a7a48', '#9a9a5a', '#5e6038']);
+    // a young araucaria in the distance
+    bg += k.sp('M330 238L330 196', '#4a4038', 2) + k.sp('M318 204Q330 190 342 204M314 214Q330 198 346 214M312 224Q330 208 348 224', '#3c4a30', 3, 'opacity=".8"');
+    var shadowS = k.shadow(200, 270, 70, 7, 0.7);
+    // tall straight trunk with plated bark
+    s += k.p('M190 272C192 220 192 140 194 70L206 70C208 140 210 220 214 272Z', k.U('arT'));
+    var pl = '';
+    for (i = 0; i < 26; i++) { var py = 84 + i * 7.2; for (var c2 = 0; c2 < 3; c2++) { var px = 192 + c2 * 6 + (i % 2) * 3; pl += 'M' + px + ' ' + k.n(py) + 'q3 -3 6 0q-3 4 -6 0'; } }
+    s += k.sp(pl, '#22201c', 0.9, 'opacity=".5"') + k.sp('M198 76L197 270', '#a89a8a', 1.4, 'opacity=".35"');
+    s += k.p('M182 272C186 264 194 262 200 262C208 262 214 264 220 272Z', '#3a3430');
+    // umbrella crown: whorls of upturned rope-like branches covered in scale leaves
+    function arm(x0, y0, x1, y1, up, w) {
+      var d = 'M' + x0 + ' ' + y0 + 'Q' + ((x0 + x1) / 2) + ' ' + (y0 + 6) + ' ' + x1 + ' ' + y1 + 'q' + (x1 > x0 ? 6 : -6) + ' -4 ' + (x1 > x0 ? 4 : -4) + ' ' + (-up);
+      return k.sp(d, '#22301c', w + 2) + k.sp(d, '#3e5430', w) + k.sp(d, '#6a8450', w * 0.45, 'stroke-dasharray="1.5 2" opacity=".9"') +
+        k.sp(d, '#22301c', w * 0.9, 'stroke-dasharray="1 3" transform="translate(0 1.5)" opacity=".6"');
+    }
+    var whorls = [[66, 64, 10], [78, 84, 12], [92, 104, 13], [106, 120, 14], [120, 132, 12]];
+    for (i = 0; i < whorls.length; i++) {
+      var y = whorls[i][0], span = whorls[i][1], up = whorls[i][2];
+      var jl = (r() - 0.5) * 16, jr = (r() - 0.5) * 16;
+      s += arm(196, y, 196 - span + jl, y + 8 + r() * 6, up, 6) + arm(204, y, 204 + span + jr, y + 8 + r() * 6, up, 6);
+      s += arm(197, y + 2, 196 - span * 0.6, y + 16, up * 0.7, 5) + arm(203, y + 2, 204 + span * 0.6, y + 16, up * 0.7, 5);
+    }
+    s += arm(198, 56, 166, 62, 10, 6) + arm(202, 56, 234, 62, 10, 6) + k.el(200, 56, 12, 10, '#3e5430') + k.el(200, 54, 8, 6, '#5a7442');
+    // inset: a seed cone and piñones
+    var cone = k.circ(70, 78, 20, '#8a8a4a');
+    var sc = '';
+    for (i = 0; i < 40; i++) { var a = r() * Math.PI * 2, rr = r() * 18; sc += 'M' + k.n(70 + Math.cos(a) * rr) + ' ' + k.n(78 + Math.sin(a) * rr) + 'l' + k.n(Math.cos(a) * 5) + ' ' + k.n(Math.sin(a) * 5); }
+    cone += k.sp(sc, '#c9c27a', 1.6) + k.sp(sc, '#5a5a2a', 0.6, 'transform="translate(.8 .8)"') + k.circ(64, 72, 7, '#fff', 'opacity=".18"');
+    cone += k.p('M84 96C88 92 96 94 98 100C96 108 88 110 84 104Z', '#b07a4a') + k.p('M92 102C96 98 104 100 104 106C102 112 94 112 92 108Z', '#9a6a3e') +
+      k.sp('M86 98q4 2 10 2', '#e8c89a', 1);
+    ins = inset(k, 'arI', 72, 82, 38, cone);
+    return { wash: '#b9c7b6', defs: defs, bg: bg, shadow: shadowS, fg: s, inset: ins };
+  };
+
+  // ---- Soapbark tree · Quillay ----
+  P.quillay = function(k) {
+    var r = k.rnd, s = '', ins = '', i;
+    var defs = k.lg('qyL', 0, 0, 0, 1, [[0, '#5e8a44'], [1, '#2f5228']]);
+    s += k.branch(r, 'M40 280C90 240 150 200 210 170C260 146 310 124 360 92', 6, ['#4a3426', '#7a5a42', '#b08a6a']);
+    s += k.branch(r, 'M200 176C214 150 232 128 254 112', 3.5, ['#4a3426', '#7a5a42', '#b08a6a']);
+    s += k.branch(r, 'M120 226C116 200 122 178 134 160', 3, ['#4a3426', '#7a5a42', '#b08a6a']);
+    var lo = { fill: k.U('qyL'), shade: '#1e3a18', gloss: 0.22, veins: 6, vein: 'rgba(220,235,190,.55)' };
+    s += leavesAlong(k, [[86, 246, -150, 40, 13], [104, 234, 20, 44, 14], [150, 208, -130, 46, 14], [168, 196, 40, 42, 13], [236, 158, -120, 44, 14],
+      [256, 148, 30, 46, 15], [300, 128, -110, 40, 13], [318, 116, 40, 42, 13], [350, 98, -80, 36, 12], [134, 160, -100, 36, 12], [128, 176, 170, 34, 11],
+      [254, 112, -60, 38, 12], [240, 122, 200, 34, 11]], lo);
+    // star-shaped flowers: 5 white petals, a green-yellow nectar disc
+    function flower(x, y, sc, rot) {
+      var f = '', j;
+      for (j = 0; j < 5; j++) f += '<g transform="rotate(' + (j * 72) + ')">' + k.p('M0 0C3 -3 8 -6 14 -4C12 0 6 3 0 0Z', '#e8ecd6') + k.p('M0 0C4 -4 9 -14 0 -18C-9 -14 -4 -4 0 0Z', '#fbfaf2', 'stroke="#d8dcc2" stroke-width=".6"') + '</g>';
+      f += k.p('M0 -6L1.8 -2L6 -2L2.8 1L4 5.5L0 3L-4 5.5L-2.8 1L-6 -2L-1.8 -2Z', '#c9d24a') + k.circ(0, 0, 2, '#9aa830');
+      for (j = 0; j < 5; j++) { var a = (j * 72 + 36) * Math.PI / 180; f += k.circ(Math.cos(a) * 7, Math.sin(a) * 7, 1.1, '#e0b84a'); }
+      return '<g ' + k.tr(x, y, rot, sc) + '>' + f + '</g>';
+    }
+    s += k.sp('M254 112L262 96M254 112L274 106M254 112L250 92', '#5a7a3a', 1.4);
+    s += flower(262, 92, 1.0, 10) + flower(278, 104, 0.9, 40) + flower(248, 86, 0.8, -20);
+    s += k.sp('M134 160L130 142M134 160L146 148', '#5a7a3a', 1.4) + flower(128, 136, 0.95, 0) + flower(150, 144, 0.8, 30);
+    // dry star-shaped fruit (5 follicles)
+    var fr = '';
+    for (i = 0; i < 5; i++) fr += '<g transform="rotate(' + (i * 72) + ')">' + k.p('M0 0C4 -2 6 -10 0 -18C-6 -10 -4 -2 0 0Z', '#9a6a3e', 'stroke="#5a3a1e" stroke-width=".8"') + k.sp('M0 -2L0 -15', '#5a3a1e', 0.7) + '</g>';
+    s += k.sp('M300 128L312 146', '#5a4a32', 1.4) + '<g ' + k.tr(316, 154, 15, 1) + '>' + fr + k.circ(0, 0, 2.5, '#6a4626') + '</g>';
+    // inset: quillay trees on a dry central-Chile hillside
+    var hab = k.p('M0 120L400 120L400 300L0 300Z', '#d8c89a') + k.p('M260 150C290 126 330 118 380 130L380 170L260 170Z', '#b8b48a') +
+      miniTree(k, 312, 146, 34, ['#4a6a36', '#5e8244', '#8aa860', '#5a4432']) + miniTree(k, 290, 152, 22, ['#55743e', '#6a8a4a', '#94b06a', '#5a4432'], { n: 6 }) +
+      k.grass(r, 250, 360, 160, 20, 8, ['#a89a5a', '#8a8a4a']);
+    ins = '<g transform="translate(-232 -72)">' + inset(k, 'qyI', 316, 144, 36, hab) + '</g>';
+    return { wash: '#cdd0a6', defs: defs, bg: '', shadow: '', fg: s, inset: ins };
+  };
+
+  // ---- Peumo ----
+  P.peumo = function(k) {
+    var r = k.rnd, s = '', ins = '', i;
+    var defs = k.lg('pmL', 0, 0, 0, 1, [[0, '#4e8240'], [1, '#26502a']]) + k.rg('pmF', 0.35, 0.3, 0.7, [[0, '#ff8a8a'], [0.5, '#d4283a'], [1, '#7a0e1e']]);
+    s += k.branch(r, 'M30 250C90 226 150 204 210 186C270 168 320 140 372 100', 6, ['#3e3026', '#6a5444', '#9a8270']);
+    s += k.branch(r, 'M190 192C200 220 214 240 232 256', 3.5, ['#3e3026', '#6a5444', '#9a8270']);
+    var lo = { fill: k.U('pmL'), shade: '#18361a', gloss: 0.3, veins: 5, round: 1.1 };
+    s += leavesAlong(k, [[70, 236, -140, 50, 16], [96, 226, 30, 54, 17], [140, 210, -120, 52, 17], [164, 200, 50, 50, 16], [250, 176, -110, 54, 17],
+      [276, 160, 40, 50, 16], [320, 136, -100, 48, 15], [344, 118, 30, 46, 15], [372, 100, -50, 40, 14], [232, 256, 60, 44, 14], [214, 240, 160, 42, 14]], lo);
+    // cluster of oval red drupes
+    var fruits = [[214, 200, 0], [228, 206, 20], [204, 214, -15], [222, 220, 10], [240, 196, 30], [196, 200, -30]];
+    s += k.sp('M210 186L214 196M210 186L228 202M210 186L204 210M210 186L222 216M210 186L240 192M210 186L196 196', '#5a4a2a', 1.4);
+    for (i = 0; i < fruits.length; i++) {
+      var f = fruits[i];
+      s += '<g ' + k.tr(f[0], f[1], f[2]) + '>' + k.el(0, 6, 6.5, 9, k.U('pmF')) + k.el(-2, 2, 2, 3, '#fff', 'opacity=".55"') + k.el(0, -2.5, 2, 1.2, '#5a3a1a') + '</g>';
+    }
+    var hab = k.p('M0 0L400 0L400 300L0 300Z', '#dcd0a6') + k.p('M60 120C90 104 120 102 150 112L150 150L60 150Z', '#b0b890', 'opacity=".7"') +
+      k.sp('M60 140C80 134 110 136 150 132', '#7aa0b0', 3, 'opacity=".7"') +
+      miniTree(k, 104, 132, 40, ['#2f5a2e', '#3f7038', '#6a9a5a', '#4a3a2c'], { wide: 0.9 });
+    ins = inset(k, 'pmI', 92, 92, 38, hab);
+    return { wash: '#c9cfa4', defs: defs, bg: '', fg: s, inset: ins };
+  };
+
+  // ---- Boldo ----
+  P.boldo = function(k) {
+    var r = k.rnd, s = '', ins = '', i;
+    var defs = k.lg('boL', 0, 0, 0, 1, [[0, '#6a805a'], [1, '#3a5036']]);
+    s += k.branch(r, 'M200 290C200 240 204 190 206 140C208 100 212 70 220 40', 5.5, ['#4a3a2e', '#7a6656', '#a8968a']);
+    // opposite, rough, bumpy leaves with rolled edges
+    function bleaf(x, y, ang, L, W) {
+      var g0 = k.leaf(x, y, L, W, ang, { fill: k.U('boL'), shade: '#22361e', veins: 4, vein: 'rgba(220,230,200,.45)', edge: '#2a3a22' });
+      var b = '';
+      for (var j = 0; j < 22; j++) { var t = 0.12 + r() * 0.8, off = (r() - 0.5) * W * 1.3 * Math.sin(Math.PI * t); b += k.circ(t * L, off, 0.9 + r() * 0.6, 'rgba(220,226,190,.55)'); }
+      return g0 + '<g ' + k.tr(x, y, ang) + '>' + b + '</g>';
+    }
+    var pairs = [[236, 202, 54], [186, 205, 50], [136, 208, 46], [90, 212, 40]];
+    for (i = 0; i < pairs.length; i++) {
+      var y = pairs[i][0], x = pairs[i][1], L = pairs[i][2];
+      s += bleaf(x, y, -160 + i * 8, L, 17 - i) + bleaf(x + 2, y, -20 - i * 8, L, 17 - i);
+    }
+    // small cream flowers in a cluster at the tip
+    function fl(x, y, sc) {
+      var f = '';
+      for (var j = 0; j < 6; j++) f += '<g transform="rotate(' + (j * 60) + ')">' + k.el(0, -5, 2.6, 4.6, '#f4efd8', 'stroke="#d8d0a8" stroke-width=".5"') + '</g>';
+      return '<g ' + k.tr(x, y, 0, sc) + '>' + f + k.circ(0, 0, 2.6, '#d8c050') + k.circ(-0.6, -0.6, 1, '#f8e890') + '</g>';
+    }
+    s += k.sp('M220 40L206 22M220 40L232 24M220 40L222 18M220 40L240 38', '#6a5a3a', 1.1);
+    s += fl(206, 20, 1.1) + fl(232, 22, 1) + fl(221, 14, 0.9) + fl(242, 36, 0.85);
+    var hab = k.p('M0 0L400 0L400 300L0 300Z', '#e0d2a8') + k.p('M240 150C270 130 320 124 360 134L360 170L240 170Z', '#c2b88c') +
+      miniTree(k, 300, 156, 30, ['#4e6448', '#5e7656', '#8ea07a', '#5a4a3a'], { wide: 1 }) + miniTree(k, 330, 160, 20, ['#4e6448', '#5e7656', '#8ea07a', '#5a4a3a'], { n: 5 });
+    ins = inset(k, 'boI', 330, 220, 40, '<g transform="translate(30 70)">' + hab + '</g>');
+    return { wash: '#cfcca4', defs: defs, bg: '', fg: s, inset: ins };
+  };
+
+  // ---- Winter's bark · Canelo ----
+  P.canelo = function(k) {
+    var r = k.rnd, s = '', ins = '', i;
+    var defs = k.lg('caL', 0, 0, 0, 1, [[0, '#6aa04a'], [1, '#3a6a30']]) + k.lg('caU', 0, 0, 0, 1, [[0, '#c9d8c0'], [1, '#9ab09a']]);
+    s += k.branch(r, 'M60 290C110 250 150 220 190 200', 6, ['#5a3426', '#8a5a42', '#c08a6a']);
+    // whorl of long oblong leaves (some showing the whitish underside)
+    var ang = [-170, -140, -110, -80, -50, -20, 10];
+    for (i = 0; i < ang.length; i++) {
+      var under = i % 3 === 1;
+      s += k.leaf(190, 200, 96 - Math.abs(i - 3) * 6, 18, ang[i], { fill: under ? k.U('caU') : k.U('caL'), shade: under ? '#7a907a' : '#22441e', gloss: under ? 0 : 0.25, veins: 8, vein: under ? 'rgba(90,110,90,.5)' : 'rgba(220,240,200,.5)' });
+    }
+    // umbels of white flowers on long stalks
+    function fl(x, y, sc) {
+      var f = '';
+      for (var j = 0; j < 8; j++) f += '<g transform="rotate(' + (j * 45 + 10) + ')">' + k.el(0, -8, 3.2, 7.5, '#fdfcf6', 'stroke="#dcdccc" stroke-width=".6"') + '</g>';
+      f += k.circ(0, 0, 4.2, '#e8d040');
+      for (j = 0; j < 9; j++) f += k.circ(Math.cos(j * 0.7) * 2.5, Math.sin(j * 0.7) * 2.5, 0.8, '#b89a20');
+      return '<g ' + k.tr(x, y, 0, sc) + '>' + f + '</g>';
+    }
+    var fs = [[250, 210], [268, 230], [240, 238], [276, 204]];
+    for (i = 0; i < fs.length; i++) s += k.sp('M196 204Q226 200 ' + fs[i][0] + ' ' + fs[i][1], '#7a5a3a', 1.1);
+    for (i = 0; i < fs.length; i++) s += fl(fs[i][0], fs[i][1], 1.05);
+    // inset: canelo by a southern stream
+    var hab = k.p('M0 0L400 0L400 300L0 300Z', '#dbd8b8') + k.p('M0 150C30 146 60 152 90 148L90 170L0 170Z', '#8ab0b8') +
+      k.sp('M10 156q10 -2 20 0M40 160q10 -2 20 0', '#e8f4f4', 1) +
+      k.p('M44 150L46 90L50 90L52 150Z', '#7a5040') + miniTree(k, 48, 110, 46, ['#3e6a32', '#4e7e3e', '#80aa66', '#7a5040'], { wide: 0.5, n: 10 });
+    ins = inset(k, 'caI', 90, 80, 40, '<g transform="translate(44 -40)">' + hab + '</g>');
+    return { wash: '#c5d2a8', defs: defs, bg: '', fg: s, inset: ins };
+  };
+
+  // ---- Chilean wine palm · Palma chilena ----
+  P.palma = function(k) {
+    var r = k.rnd, s = '', ins = '', bg = '', i;
+    var defs = k.lg('paT', 0, 0, 1, 0, [[0, '#5a5650'], [0.3, '#a49e94'], [0.6, '#8a847a'], [1, '#4a4640']]) +
+      k.lg('paH', 0, 0, 0, 1, [[0, '#d2c290'], [1, '#a8986a']]);
+    bg += k.p('M0 210C60 180 120 176 180 196C230 212 300 186 400 194L400 300L0 300Z', k.U('paH'), 'opacity=".75"');
+    bg += miniTree(k, 70, 214, 24, ['#6a7a48', '#7a8a52', '#a0a870', '#5a4a3a'], { n: 6 }) + miniTree(k, 340, 210, 20, ['#6a7a48', '#7a8a52', '#a0a870', '#5a4a3a'], { n: 5 });
+    bg += k.grass(r, 0, 400, 280, 70, 20, ['#b0a060', '#94884e', '#c8b878']);
+    var shadowS = k.shadow(200, 272, 60, 6, 0.7);
+    // massive bottle-shaped trunk
+    var trunk = 'M162 274C150 230 154 180 162 140C168 112 176 96 182 88L218 88C224 96 232 112 238 140C246 180 250 230 238 274Z';
+    s += k.p(trunk, k.U('paT'));
+    s += '<defs>' + k.clip('paTC', trunk) + '</defs>';
+    var scars = '';
+    for (i = 0; i < 26; i++) { var y = 98 + i * 6.8; scars += 'M160 ' + k.n(y) + 'Q200 ' + k.n(y + 5) + ' 240 ' + k.n(y); }
+    var dia = '';
+    for (i = 0; i < 40; i++) { var dx = 166 + r() * 68, dy = 100 + r() * 170; dia += 'M' + k.n(dx) + ' ' + k.n(dy) + 'l4 2.5l4 -2.5l-4 -2.5Z'; }
+    s += k.g(k.sp(scars, '#3e3a34', 1, 'opacity=".22"') + k.sp(scars, '#d8d2c6', 0.7, 'opacity=".25" transform="translate(0 2)"') + k.p(dia, '#4a463e', 'opacity=".3"') + k.p('M150 80L176 80L172 280L150 280Z', '#000', 'opacity=".12"'), 'clip-path="' + k.U('paTC') + '"');
+    // crown of arching pinnate fronds
+    function frond(ang, len, droop) {
+      var a = ang * Math.PI / 180, ex = 200 + Math.cos(a) * len, ey = 86 + Math.sin(a) * len * 0.6 + droop;
+      var cx = 200 + Math.cos(a) * len * 0.5, cy = 86 + Math.sin(a) * len * 0.5 - 20;
+      var d = 'M200 86Q' + k.n(cx) + ' ' + k.n(cy) + ' ' + k.n(ex) + ' ' + k.n(ey);
+      var f = k.sp(d, '#5a6a3a', 2.4), lf = '';
+      for (var t = 0.1; t < 1; t += 0.05) {
+        var x = (1 - t) * (1 - t) * 200 + 2 * (1 - t) * t * cx + t * t * ex, y = (1 - t) * (1 - t) * 86 + 2 * (1 - t) * t * cy + t * t * ey;
+        var L = 22 * Math.sin(Math.PI * Math.min(1, t + 0.1));
+        lf += 'M' + k.n(x) + ' ' + k.n(y) + 'l' + k.n(-L * 0.3) + ' ' + k.n(L) + 'M' + k.n(x) + ' ' + k.n(y) + 'l' + k.n(L * 0.3) + ' ' + k.n(L * 0.95);
+      }
+      return f + k.sp(lf, '#3e5a2e', 1.8) + k.sp(lf, '#7a9a5a', 0.7, 'transform="translate(-.6 -.6)"');
+    }
+    var fr = [[-178, 130, 70], [-160, 128, 40], [-140, 116, 14], [-120, 100, -6], [-100, 86, -16], [-80, 86, -16], [-60, 100, -6], [-40, 116, 14], [-20, 128, 40], [-2, 130, 70], [170, 110, 60], [10, 110, 60], [150, 80, 40], [30, 80, 40]];
+    for (i = 0; i < fr.length; i++) s += frond(fr[i][0], fr[i][1], fr[i][2]);
+    // clusters of coquitos
+    s += k.sp('M192 96Q178 110 170 120M208 96Q222 110 230 120', '#a8823a', 2);
+    for (i = 0; i < 14; i++) s += k.circ(166 + (i % 7) * 3 + r() * 4 + (i > 6 ? 56 : 0), 118 + r() * 12, 3.6, i % 3 ? '#e0a030' : '#c8841a', 'stroke="#8a5a1a" stroke-width=".5"');
+    var coq = '';
+    for (i = 0; i < 3; i++) {
+      var cx2 = 56 + i * 22, cy2 = 82 + (i % 2) * 8;
+      coq += k.el(cx2, cy2, 10, 9, '#8a6040') + k.el(cx2 - 2, cy2 - 3, 4, 3, '#b89070', 'opacity=".6"');
+      coq += k.circ(cx2 - 3, cy2 + 1, 1.3, '#3a2414') + k.circ(cx2 + 2, cy2 + 2, 1.3, '#3a2414') + k.circ(cx2 - 0.5, cy2 + 5, 1.3, '#3a2414');
+    }
+    coq += k.el(78, 108, 12, 9, '#7a5034') + k.el(78, 108, 9, 6.5, '#f6f2e6');
+    ins = inset(k, 'paI', 74, 92, 36, coq);
+    return { wash: '#d4c9a0', defs: defs, bg: bg, shadow: shadowS, fg: s, inset: ins };
+  };
+
+  // ---- Patagonian cypress · Alerce ----
+  P.alerce = function(k) {
+    var r = k.rnd, s = '', ins = '', bg = '', i;
+    var defs = k.lg('alT', 0, 0, 1, 0, [[0, '#5a2e20'], [0.35, '#a85a3e'], [0.6, '#8a4a32'], [1, '#4a2418']]) +
+      k.lg('alM', 0, 0, 0, 1, [[0, '#e8ece6', 0], [0.6, '#e8ece6', 0.6], [1, '#e8ece6', 0.9]]);
+    // misty rainforest behind
+    for (i = 0; i < 7; i++) {
+      var tx = 20 + i * 60 + r() * 20;
+      bg += k.p('M' + (tx - 4) + ' 260L' + (tx - 2) + ' 80L' + (tx + 2) + ' 80L' + (tx + 4) + ' 260Z', '#7a8a78', 'opacity=".3"');
+      bg += k.el(tx, 90 + r() * 30, 18, 40, '#6a8a62', 'opacity=".25"');
+    }
+    bg += '<rect x="0" y="180" width="400" height="120" fill="' + k.U('alM') + '"/>';
+    var shadowS = k.shadow(200, 276, 70, 6, 0.6);
+    // massive straight trunk with long fibrous strips
+    s += k.p('M176 280C178 220 182 140 186 40L214 40C218 140 222 220 226 280Z', k.U('alT'));
+    var fib = '';
+    for (i = 0; i < 26; i++) { var fx = 180 + r() * 42; fib += 'M' + k.n(fx) + ' 280Q' + k.n(fx + (r() - 0.5) * 6) + ' 160 ' + k.n(200 + (fx - 200) * 0.6) + ' 40'; }
+    s += k.sp(fib, '#3a1a10', 1, 'opacity=".5"') + k.sp(fib, '#d88a68', 0.6, 'opacity=".35" transform="translate(1.5 0)"');
+    s += k.p('M164 282C172 270 184 266 200 266C216 266 228 270 236 282Z', '#5a2e20');
+    // narrow, high crown of dark green scale-leaf sprays (many small upturned tufts)
+    s += k.sp('M200 70L172 84M200 92L230 102M200 112L168 122M200 54L224 62', '#4a2418', 2.4);
+    for (i = 0; i < 60; i++) {
+      var cy = 10 + r() * 110, half = 16 + (cy - 10) * 0.32, cx = 200 + (r() - 0.5) * 2 * half;
+      var tuft = '';
+      for (var j = 0; j < 7; j++) { var a2 = -150 + j * 20 + (r() - 0.5) * 10; tuft += 'M' + k.n(cx) + ' ' + k.n(cy) + 'l' + k.n(Math.cos(a2 * Math.PI / 180) * 10) + ' ' + k.n(Math.sin(a2 * Math.PI / 180) * 8); }
+      s += k.sp(tuft, i % 3 ? '#2a4626' : '#3e5e34', 3.2) + k.sp(tuft, '#6a8a52', 0.9, 'opacity=".55" transform="translate(-.5 -1)"');
+    }
+    // ferns at the foot (nalca-like greens)
+    var front = k.fern(r, 150, 290, 80, -160, '#3e6a32') + k.fern(r, 160, 292, 74, -125, '#4e7e3a') + k.fern(r, 250, 292, 78, -25, '#3e6a32') + k.fern(r, 244, 294, 70, -60, '#4e7e3a') + k.fern(r, 120, 296, 60, -100, '#5a8a42');
+    // inset: scale-like leaves in whorls of three
+    var sc = k.sp('M40 110L100 60', '#5a3a2a', 2);
+    for (i = 0; i < 12; i++) {
+      var t = i / 12, x = 42 + t * 56, y = 108 - t * 46;
+      sc += k.leaf(x, y, 12, 3.4, -100 + (i % 2) * 20, { fill: '#3e6a36', shade: '#1e3a1a', veins: 0 }) + k.leaf(x, y, 12, 3.4, -10 - (i % 2) * 20, { fill: '#4a7a40', shade: '#1e3a1a', veins: 0 });
+    }
+    ins = inset(k, 'alI', 76, 86, 36, sc);
+    return { wash: '#b9c6b0', defs: defs, bg: bg, shadow: shadowS, fg: s, front: front, inset: ins };
+  };
+
+  // ---- Chilean bellflower · Copihue (national flower) ----
+  P.copihue = function(k) {
+    var r = k.rnd, s = '', ins = '', i;
+    var defs = k.lg('cpL', 0, 0, 0, 1, [[0, '#3e7a3a'], [1, '#1e4a22']]) +
+      k.lg('cpF', 0, 0, 1, 0, [[0, '#8a0a1e'], [0.35, '#e0283e'], [0.6, '#f04a5a'], [1, '#9a0e22']]) +
+      k.lg('cpF2', 0, 0, 1, 0, [[0, '#a01228'], [0.5, '#d42038'], [1, '#7a0a18']]);
+    // twining stem across a mossy branch
+    s += k.branch(r, 'M0 70C80 64 160 76 240 70C300 66 350 60 400 52', 9, ['#3a3a2a', '#5a5a42', '#8a8a6a']);
+    var moss = '';
+    for (i = 0; i < 40; i++) moss += k.circ(r() * 400, 60 + r() * 14, 1.5 + r() * 2.5, r() < 0.5 ? '#6a8a3a' : '#8aa84a', 'opacity=".8"');
+    s += moss;
+    var vine = 'M30 300C40 250 80 230 100 200C120 170 110 140 130 110C150 84 170 80 190 70C220 60 240 90 260 100C290 116 320 104 340 80';
+    s += k.sp(vine, '#2e4a22', 4) + k.sp(vine, '#5a8a42', 1.4, 'transform="translate(-1 -1)"');
+    var lo = { fill: k.U('cpL'), shade: '#10301a', gloss: 0.3, veins: 0, vein: 'rgba(200,230,180,.5)' };
+    s += leavesAlong(k, [[56, 244, -20, 46, 16], [92, 210, 170, 50, 17], [116, 160, -10, 48, 16], [134, 108, 190, 44, 15], [262, 102, 60, 46, 15], [320, 104, -40, 42, 14]], lo);
+    // longitudinal veins typical of the copihue leaf
+    // hanging waxy bells
+    function bell(x, y, sc, rot) {
+      var b = k.sp('M0 -30Q2 -16 0 0', '#3a5a2a', 2);
+      b += k.p('M-4 0C-16 10 -20 34 -22 58C-12 62 -4 60 0 56C4 60 12 62 22 58C20 34 16 10 4 0Z', k.U('cpF'));
+      b += k.p('M-4 2C-10 20 -12 40 -12 58C-6 60 -2 58 0 56C0 36 -2 18 -4 2Z', k.U('cpF2'), 'opacity=".7"');
+      b += k.p('M4 2C10 20 12 40 12 58C6 60 2 58 0 56C0 36 2 18 4 2Z', '#f05a68', 'opacity=".35"');
+      b += k.sp('M-14 20Q-10 40 -10 56M10 18Q12 40 12 56M0 6L0 54', '#7a0818', 0.8, 'opacity=".55"');
+      for (var j = 0; j < 16; j++) b += k.circ((r() - 0.5) * 28, 20 + r() * 36, 0.7 + r() * 0.6, '#ffd8d8', 'opacity=".8"');
+      b += k.sp('M-12 18Q-8 30 -8 46', '#fff', 1.6, 'opacity=".35"');
+      b += k.p('M-4 -2L4 -2L6 4L-6 4Z', '#4a7a3a');
+      return '<g ' + k.tr(x, y, rot, sc) + '>' + b + '</g>';
+    }
+    s += bell(200, 100, 1.25, 4) + bell(258, 130, 1.0, -8) + bell(160, 140, 0.9, 10);
+    var hab = k.p('M0 0L400 0L400 300L0 300Z', '#cfd4b4');
+    for (i = 0; i < 6; i++) hab += k.p('M' + (10 + i * 24) + ' 160L' + (12 + i * 24) + ' 40L' + (18 + i * 24) + ' 40L' + (20 + i * 24) + ' 160Z', '#6a7a5a', 'opacity=".6"') + k.el(15 + i * 24, 50, 16, 20, '#3e6a36', 'opacity=".7"');
+    hab += k.sp('M70 160C60 120 76 90 72 60', '#2e4a22', 2) + k.p('M72 96c-3 4-4 10-3 14c2 1 4 1 5 0c1-4 0-10-2-14z', '#d42038');
+    ins = inset(k, 'cpI', 330, 222, 38, '<g transform="translate(260 140)">' + hab + '</g>');
+    return { wash: '#c7d0a6', defs: defs, bg: '', fg: s, inset: ins };
+  };
+
+  // ---- Espino ----
+  P.espino = function(k) {
+    var r = k.rnd, s = '', ins = '', i;
+    // zig-zag thorny branch
+    var pts = [[30, 260], [90, 230], [130, 214], [190, 180], [236, 166], [290, 128], [340, 112], [380, 80]];
+    var d = k.smooth(pts, false);
+    s += k.branch(r, d, 6, ['#3a2a20', '#6a4a36', '#9a7a62']);
+    // paired white spines at each node
+    for (i = 1; i < pts.length - 1; i++) {
+      var q = pts[i];
+      s += k.sp('M' + q[0] + ' ' + q[1] + 'l-6 -20M' + q[0] + ' ' + q[1] + 'l8 18', '#f2ece0', 2.6) + k.sp('M' + q[0] + ' ' + q[1] + 'l-6 -20M' + q[0] + ' ' + q[1] + 'l8 18', '#b8ae9a', 0.8, 'transform="translate(1 0)"');
+    }
+    // fern-like bipinnate leaves
+    function bip(x, y, ang, len) {
+      var f = k.sp('M0 0L' + len + ' 0', '#5a6a3a', 1.2), lf = '';
+      for (var t = 6; t < len; t += 8) {
+        lf += 'M' + t + ' 0l3 -10M' + t + ' 0l3 10';
+      }
+      f += k.sp(lf, '#5a6a3a', 0.8);
+      for (t = 6; t < len; t += 8) {
+        for (var u = 2; u < 10; u += 2.2) f += k.el(t + u * 0.3, -u, 1.6, 0.8, '#6a8a42') + k.el(t + u * 0.3, u, 1.6, 0.8, '#5e7e3a');
+      }
+      return '<g ' + k.tr(x, y, ang) + '>' + f + '</g>';
+    }
+    s += bip(130, 214, -70, 50) + bip(190, 180, -100, 46) + bip(236, 166, -60, 54) + bip(290, 128, -110, 44) + bip(90, 230, -120, 44) + bip(340, 112, -70, 40);
+    // golden pompom flower heads
+    function pom(x, y, R) {
+      var f = k.circ(x, y, R, '#e0a818');
+      var st = '';
+      for (var j = 0; j < 40; j++) { var a = r() * Math.PI * 2, rr = R * (0.4 + r() * 0.7); st += 'M' + k.n(x + Math.cos(a) * rr * 0.5) + ' ' + k.n(y + Math.sin(a) * rr * 0.5) + 'L' + k.n(x + Math.cos(a) * (rr + 2)) + ' ' + k.n(y + Math.sin(a) * (rr + 2)); }
+      f += k.sp(st, '#f6d23a', 1) + k.circ(x - R * 0.3, y - R * 0.3, R * 0.4, '#fff4a0', 'opacity=".45"');
+      return f;
+    }
+    var poms = [[118, 196, 9], [140, 236, 8], [204, 160, 10], [182, 202, 8], [250, 146, 9], [300, 150, 8], [318, 100, 9], [356, 126, 7]];
+    for (i = 0; i < poms.length; i++) s += pom(poms[i][0], poms[i][1], poms[i][2]);
+    // dark woody pod
+    s += k.sp('M66 246L70 262', '#4a3426', 1.6) + '<g ' + k.tr(70, 262, 20) + '>' + k.p('M-5 0C-7 14 -6 30 0 42C6 30 7 14 5 0Z', '#3a2418') + k.sp('M-2 4C-3 16 -2 28 0 38', '#7a5a40', 1.4, 'opacity=".7"') + '</g>';
+    var hab = k.p('M0 0L400 0L400 300L0 300Z', '#e2d2a0') + k.p('M0 140L400 140L400 300L0 300Z', '#cdb880');
+    hab += k.p('M58 140L60 118L64 118L66 140Z', '#5a4030') + k.p('M30 118C40 100 80 98 94 118C80 112 44 112 30 118Z', '#6a7a3a') + k.p('M36 116C46 104 76 104 88 116', 'none', 'stroke="#d8b030" stroke-width="2" stroke-dasharray="2 3"');
+    ins = inset(k, 'esI', 88, 86, 36, '<g transform="translate(26 -30)">' + hab + '</g>');
+    return { wash: '#d9cc98', defs: '', bg: '', fg: s, inset: ins };
+  };
+
+  // =================================================================
+  //  MAMMALS · MAMÍFEROS
+  // =================================================================
+
+  // fur strokes clipped to a shape; flow angle given by fn(x,y)
+  function fur(k, clipId, cx, cy, rx, ry, count, len, fn, cols, w, op) {
+    return k.g(k.hatch(k.rnd, { cx: cx, cy: cy, rx: rx, ry: ry, n: count, len: len, ang: 0, angFn: fn, jit: 22, curve: 0.35, cols: cols, w: w || 0.9, op: op || 0.75 }),
+      'clip-path="' + k.U(clipId) + '"');
+  }
+  function forestFloor(k, y) {
+    var r = k.rnd, s = '';
+    s += '<rect x="0" y="' + y + '" width="400" height="' + (300 - y) + '" fill="#6a5a3a" opacity=".28"/>';
+    for (var i = 0; i < 40; i++) {
+      var x = r() * 400, yy = y + 4 + r() * (300 - y - 6);
+      s += k.leaf(x, yy, 9 + r() * 6, 3 + r() * 2, r() * 360, { fill: r() < 0.5 ? '#a8743a' : '#8a5a2a', veins: 0, vein: 'rgba(255,230,180,.4)' });
+    }
+    return s;
+  }
+
+  // ---- Southern pudú · Pudú (male with spike antlers) ----
+  P.pudu = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M134 156C136 130 160 116 192 114C222 110 252 100 274 112C296 124 302 156 294 182C288 200 268 204 246 202C220 202 190 204 168 200C146 196 132 178 134 156Z';
+    var head = 'M150 132C142 112 128 98 112 100C98 102 88 112 82 124C78 132 76 140 80 144C88 148 100 146 110 144C124 146 138 146 150 140Z';
+    var defs = k.lg('puB', 0.5, 0, 0.5, 1, [[0, '#7a4a2a'], [0.5, '#8e5a34'], [1, '#5a3a22']]) +
+      k.lg('puH', 0, 0, 1, 1, [[0, '#4a3020'], [0.6, '#7a4c2c'], [1, '#6a4428']]) +
+      k.clip('puBC', body) + k.clip('puHC', head);
+    bg += k.p('M30 0L44 0L46 260L28 260Z', '#6a6a50', 'opacity=".25"') + k.p('M340 0L360 0L364 260L336 260Z', '#6a6a50', 'opacity=".3"');
+    bg += k.fern(r, 330, 250, 90, -120, '#4a7a3a') + k.fern(r, 350, 252, 80, -70, '#3e6a32') + k.fern(r, 40, 252, 80, -60, '#4a7a3a') + k.fern(r, 30, 254, 70, -110, '#5a8a42');
+    bg += forestFloor(k, 240);
+    var shadowS = k.shadow(214, 248, 88, 6, 0.8);
+    // far legs (darker)
+    s += k.p('M166 180L162 214L160 244L168 246L172 214L178 184Z', '#3e2616') + k.p('M256 178L262 212L258 244L266 246L270 212L268 180Z', '#3e2616');
+    // body
+    s += k.p(body, k.U('puB'));
+    s += fur(k, 'puBC', 214, 150, 84, 44, 360, 7, function(x, y) { return y < 150 ? 175 : 200 - (x - 200) * 0.1; }, ['#b07a4a', '#4a2a18', '#9a663c'], 0.9, 0.7);
+    s += k.p(body, 'none', 'stroke="rgba(40,20,10,.25)"');
+    // near legs
+    s += k.p('M182 178L176 214L174 244L184 246L188 214L196 182Z', '#5a3820') + k.p('M272 170L282 208L276 244L286 246L292 208L290 168Z', '#5a3820');
+    s += k.p('M172 240L186 240L186 247L172 247Z', '#1e140c') + k.p('M274 240L288 240L288 247L274 247Z', '#1e140c') + k.p('M158 240L170 240L170 247L158 247Z', '#1e140c') + k.p('M256 240L268 240L268 247L256 247Z', '#1e140c');
+    // short tail
+    s += k.p('M290 130C298 128 302 134 298 140C294 140 290 136 290 130Z', '#4a2c18');
+    // head + neck
+    s += k.p('M136 150C134 136 140 124 150 120L168 128C158 136 154 148 152 160Z', '#6e4428');
+    s += k.p(head, k.U('puH'));
+    s += fur(k, 'puHC', 116, 124, 36, 24, 120, 5, function() { return 170; }, ['#a06a40', '#2e1a10'], 0.7, 0.6);
+    // round ears and spike antlers
+    s += k.p('M126 104C128 88 138 80 146 84C148 94 142 104 132 108Z', '#5a3820') + k.p('M130 102C132 92 138 86 143 88C143 96 139 102 133 105Z', '#c9a080');
+    s += k.p('M118 102L116 80L120 79L124 100Z', '#4a3a2a') + k.p('M110 104L106 84L110 83L115 102Z', '#3a2c1e');
+    s += k.sp('M118 98L117 84M110 100L108 88', 'rgba(255,240,220,.4)', 0.7);
+    // dark muzzle, nose, eye
+    s += k.p('M80 124C76 132 76 140 80 144C86 146 92 144 96 140C94 132 88 126 80 124Z', '#2a1a10');
+    s += k.el(80, 132, 3.4, 3, '#0e0a08') + k.circ(79, 131, 1, '#fff', 'opacity=".4"');
+    s += k.eye(104, 118, 4.6, '#1a100a');
+    s += k.p('M94 112C98 108 106 108 110 112', 'none', 'stroke="#2a1a10" stroke-width="1"');
+    return { wash: '#b9c4a4', defs: defs, bg: bg, shadow: shadowS, fg: s, front: k.fern(r, 120, 262, 60, -40, '#5a8a42') + k.fern(r, 290, 264, 50, -150, '#4a7a3a') };
+  };
+
+  // ---- South Andean deer · Huemul (male) ----
+  P.huemul = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M128 140C132 114 160 104 196 104C232 102 266 100 290 110C312 120 318 146 310 170C304 186 286 190 264 188C230 190 196 190 168 186C142 182 126 164 128 140Z';
+    var head = 'M128 92C126 74 114 62 100 62C86 62 74 70 66 84C62 92 62 100 66 104C76 108 90 106 102 104C114 106 124 102 128 92Z';
+    var defs = k.lg('huB', 0.5, 0, 0.5, 1, [[0, '#7a6a52'], [0.5, '#8a7a60'], [1, '#5a4c3a']]) +
+      k.lg('huH', 0, 0, 1, 1, [[0, '#6a5a46'], [1, '#8a7a62']]) +
+      k.lg('huN', 0, 0, 1, 0, [[0, '#6e5e48'], [1, '#8a7a62']]) +
+      k.clip('huBC', body) + k.clip('huHC', head);
+    bg += k.ridge(r, 'huR', 170, 60, '#a8b4bc', 0.65, 0.7);
+    bg += k.p('M0 236C80 226 160 232 240 240C300 246 350 240 400 236L400 300L0 300Z', '#8a8a62', 'opacity=".55"');
+    bg += k.rock(r, 'huRk', 60, 228, 110, 40, ['#b8b0a0', '#8a8274', '#5a5448']) + k.rock(r, 'huRk2', 350, 236, 90, 30, ['#b8b0a0', '#8a8274', '#5a5448']);
+    bg += miniTree(k, 362, 200, 56, ['#3e5a30', '#4e6e3a', '#7a9a5a', '#4a3a2a']);
+    bg += k.grass(r, 0, 400, 290, 80, 22, ['#8a8a4a', '#a8a05a', '#6a7038']);
+    var shadowS = k.shadow(220, 256, 100, 7, 0.8);
+    // far legs
+    s += k.p('M160 178L156 220L152 254L162 256L166 220L174 182Z', '#4a3e30') + k.p('M270 178L280 218L274 254L284 256L290 218L284 178Z', '#4a3e30');
+    s += k.p(body, k.U('huB'));
+    s += fur(k, 'huBC', 220, 146, 96, 46, 420, 8, function(x, y) { return y < 140 ? 172 : 196; }, ['#a8987a', '#3e3224', '#8a7a60'], 1, 0.7);
+    s += k.p('M150 170C190 182 240 184 290 176L300 186C260 192 200 194 160 188Z', '#e8e0d0', 'opacity=".25"');
+    // near legs (thick, sturdy)
+    s += k.p('M176 180L170 222L168 254L180 256L184 222L194 184Z', '#6a5a46') + k.p('M286 172L298 214L292 254L304 256L310 214L304 170Z', '#6a5a46');
+    var hooves = [[152, 254], [168, 254], [274, 254], [292, 254]];
+    for (var i = 0; i < 4; i++) s += k.p('M' + hooves[i][0] + ' ' + hooves[i][1] + 'L' + (hooves[i][0] + 12) + ' ' + hooves[i][1] + 'L' + (hooves[i][0] + 13) + ' ' + (hooves[i][1] + 5) + 'L' + (hooves[i][0] - 1) + ' ' + (hooves[i][1] + 5) + 'Z', '#1a140e');
+    s += k.p('M312 120C320 118 324 126 318 132C314 132 312 128 312 120Z', '#4a3c2c');
+    // thick neck with pale throat
+    s += k.p('M128 146C120 124 118 104 122 88L150 96C150 112 158 126 170 132Z', k.U('huN'));
+    s += k.p('M120 96C116 110 118 128 128 146L136 140C128 126 126 110 128 98Z', '#e8e0cc', 'opacity=".8"');
+    // head with the dark "Y" running up the muzzle to the forehead
+    var hd = k.p(head, k.U('huH'));
+    hd += fur(k, 'huHC', 98, 84, 34, 24, 120, 5, function() { return 175; }, ['#a8987a', '#3e3224'], 0.7, 0.6);
+    hd += k.p('M64 88C74 78 88 70 102 66L106 72C92 76 78 84 68 94Z', '#1e1812', 'opacity=".88"');
+    hd += k.p('M102 66C108 62 112 60 116 58L118 64C114 66 110 70 106 72Z', '#1e1812', 'opacity=".75"');
+    hd += k.el(66, 96, 4.4, 3.6, '#0e0a08') + k.circ(65, 95, 1.1, '#fff', 'opacity=".35"');
+    hd += k.p('M68 104C76 108 86 108 94 104', 'none', 'stroke="#e8e0cc" stroke-width="2"');
+    hd += k.p('M122 72C130 52 146 44 156 48C154 62 140 74 126 80Z', '#6a5a46') + k.p('M126 74C132 58 144 52 151 54C148 64 138 72 129 77Z', '#d8ccb8');
+    var ant = 'M112 60C110 44 104 30 96 18M106 40C114 32 118 22 118 12M118 58C124 44 132 34 142 26M128 44C128 34 124 24 120 16';
+    hd += k.sp(ant, '#6a5a44', 4.2) + k.sp(ant, '#b8a888', 1.4, 'transform="translate(-.6 -.6)"');
+    hd += k.eye(94, 82, 4.6, '#1a100a') + k.sp('M86 76C90 73 96 73 100 76', '#2a2018', 1);
+    s += '<g transform="translate(118 88) scale(1.32) translate(-118 -88)">' + hd + '</g>';
+    s = '<g transform="translate(210 258) scale(.9) translate(-210 -258)">' + s + '</g>';
+    return { wash: '#bcc4b0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Culpeo fox · Zorro culpeo ----
+  P.culpeo = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M150 148C154 128 178 120 210 120C240 120 264 122 280 132C296 142 298 160 288 174C276 184 254 182 232 180C206 180 182 182 166 176C152 170 146 160 150 148Z';
+    var tail = 'M284 140C310 140 340 156 360 182C372 198 374 218 366 226C352 230 338 218 326 204C312 188 296 170 284 160Z';
+    var head = 'M156 128C152 110 138 98 120 98C106 98 94 108 84 118C74 126 66 132 62 136C68 140 80 142 96 142C112 146 130 146 146 142Z';
+    var defs = k.lg('cuB', 0.5, 0, 0.5, 1, [[0, '#8a8478'], [0.45, '#a89a84'], [0.7, '#c98a52'], [1, '#e8dcc4']]) +
+      k.lg('cuT', 0, 0, 1, 1, [[0, '#9a8a74'], [0.7, '#6a5e50'], [1, '#2a2420']]) +
+      k.lg('cuH', 0, 0, 1, 1, [[0, '#c86a2e'], [0.6, '#d8843e'], [1, '#b0602a']]) +
+      k.clip('cuBC', body) + k.clip('cuTC', tail) + k.clip('cuHC', head);
+    bg += k.ridge(r, 'cuR', 180, 50, '#b0b8b8', 0.7, 0.6);
+    bg += k.p('M0 236C80 228 160 232 240 238C300 242 350 238 400 234L400 300L0 300Z', '#a89a70', 'opacity=".5"');
+    bg += k.rock(r, 'cuRk', 330, 222, 120, 50) + miniTree(k, 60, 240, 30, ['#6a7a48', '#7a8a52', '#a8b070', '#5a4a3a'], { n: 6, wide: 1.2 });
+    bg += k.grass(r, 0, 400, 292, 70, 22, ['#a8a05a', '#8a8a4a', '#c0b070']);
+    var shadowS = k.shadow(214, 246, 84, 6, 0.8);
+    // far legs
+    s += k.p('M172 172L168 214L164 244L172 246L176 214L182 176Z', '#8a4a22') + k.p('M262 172L270 210L266 244L274 246L278 210L274 172Z', '#8a4a22');
+    // bushy tail with dark tip
+    s += k.p(tail, k.U('cuT'));
+    s += fur(k, 'cuTC', 330, 186, 50, 44, 160, 8, function(x, y) { return 45; }, ['#c8b8a0', '#3a3028', '#8a7a68'], 1, 0.7);
+    s += k.p(body, k.U('cuB'));
+    s += fur(k, 'cuBC', 220, 150, 76, 34, 300, 7, function(x, y) { return y < 148 ? 178 : 200; }, ['#d8ccb8', '#4a4238', '#a89a84'], 0.9, 0.7);
+    // near legs (rufous) with dark paws
+    s += k.p('M186 172L180 214L178 244L188 246L192 214L200 176Z', '#c0682e') + k.p('M276 166L286 208L282 244L292 246L298 208L292 164Z', '#c0682e');
+    s += k.p('M176 240L190 240L192 247L176 247Z', '#3a2418') + k.p('M280 240L294 240L296 247L280 247Z', '#3a2418') + k.p('M162 240L174 240L175 247L162 247Z', '#3a2418') + k.p('M264 240L276 240L277 247L264 247Z', '#3a2418');
+    // neck with white throat
+    s += k.p('M150 150C146 134 150 122 158 116L178 124C170 134 168 146 170 160Z', '#b8784a');
+    s += k.p('M150 150C144 138 144 128 148 122L162 130C158 138 158 148 162 158Z', '#f2ece0', 'opacity=".9"');
+    // head: rufous, pointed ears, long muzzle, white lips
+    s += k.p(head, k.U('cuH'));
+    s += fur(k, 'cuHC', 110, 122, 50, 24, 140, 5, function() { return 175; }, ['#f0a060', '#7a3a18'], 0.7, 0.6);
+    s += k.p('M62 136C74 140 88 142 102 140C114 140 126 142 140 140L138 146C120 148 100 148 84 146C74 144 66 140 62 136Z', '#f2ece0');
+    s += k.p('M120 100L128 66L142 98Z', '#b0602a') + k.p('M124 98L129 74L137 98Z', '#3a2418', 'opacity=".55"');
+    s += k.p('M136 102L150 72L156 106Z', '#a8582a') + k.p('M140 102L149 80L152 104Z', '#3a2418', 'opacity=".5"');
+    s += k.el(63, 134, 3.6, 3, '#120c08');
+    s += k.p('M76 128C84 124 94 122 100 124', 'none', 'stroke="#7a3a18" stroke-width="1" opacity=".7"');
+    s += k.eye(108, 116, 4, '#c88a2a', { pupil: 0.45 });
+    return { wash: '#cdc1a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Guanaco ----
+  P.guanaco = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M168 148C172 128 194 120 226 120C256 118 282 118 300 128C314 136 318 152 312 166C306 176 290 178 272 176C246 176 216 178 194 176C176 172 166 162 168 148Z';
+    var neck = 'M168 152C156 130 146 104 142 78C140 66 140 58 142 52L172 54C172 72 178 94 186 112C192 122 200 130 208 134Z';
+    var head = 'M172 58C170 42 158 32 142 32C128 32 118 40 112 48C106 56 104 62 108 68C116 72 130 72 142 70C158 72 170 68 172 58Z';
+    var defs = k.lg('gB', 0.5, 0, 0.5, 1, [[0, '#b07a48'], [0.55, '#c08a54'], [0.7, '#efe6d6'], [1, '#e2d8c6']]) +
+      k.lg('gN', 0, 0, 1, 0, [[0, '#f0e8da'], [0.25, '#e8dccb'], [0.45, '#b98450'], [1, '#a87444']]) +
+      k.lg('gH', 0, 0, 1, 1, [[0, '#8a8478'], [1, '#6a645a']]) +
+      k.lg('gS', 0, 0, 0, 1, [[0, '#d8c88a'], [1, '#b0a06a']]) +
+      k.clip('gBC', body) + k.clip('gNC', neck) + k.clip('gHC', head);
+    // Patagonian steppe and granite towers far away
+    bg += k.p('M250 200L262 120L272 118L278 200Z', '#9aa4b0', 'opacity=".55"') + k.p('M280 200L290 104L302 102L308 200Z', '#8a96a4', 'opacity=".6"') + k.p('M312 200L320 130L330 128L336 200Z', '#9aa4b0', 'opacity=".5"');
+    bg += k.p('M262 120L272 118L270 134L264 136Z', '#fff', 'opacity=".7"') + k.p('M290 104L302 102L300 120L292 122Z', '#fff', 'opacity=".7"');
+    bg += k.p('M0 200C80 190 160 196 240 200C300 204 350 198 400 194L400 300L0 300Z', k.U('gS'), 'opacity=".75"');
+    var i;
+    bg += k.grass(r, 0, 400, 290, 90, 26, ['#c8b46a', '#a8984e', '#d8c88a', '#8a7e40']);
+    for (i = 0; i < 6; i++) { var cx = 30 + i * 70 + r() * 20, cy = 236 + r() * 20; bg += k.grass(r, cx - 10, cx + 10, cy, 14, 16, ['#b0a058', '#8a8040']); }
+    var shadowS = k.shadow(240, 262, 90, 6, 0.8);
+    // far legs (long and slender)
+    s += k.p('M196 172L192 216L190 260L198 262L202 216L208 174Z', '#9a6a3e') + k.p('M286 170L294 214L290 260L298 262L304 214L300 168Z', '#9a6a3e');
+    s += k.p(body, k.U('gB'));
+    s += fur(k, 'gBC', 240, 148, 76, 32, 320, 7, function(x, y) { return y < 150 ? 176 : 192; }, ['#e0b080', '#7a5028', '#c8945e'], 0.9, 0.65);
+    // near legs: cinnamon outside, pale inside
+    s += k.p('M210 170L204 216L202 260L212 262L216 216L224 172Z', '#b07a48') + k.p('M300 162L312 210L306 260L316 262L322 210L314 160Z', '#b07a48');
+    s += k.sp('M212 180L208 250M306 180L312 250', '#efe6d6', 1.6, 'opacity=".5"');
+    s += k.p('M200 258L214 258L215 264L199 264Z', '#3a2c20') + k.p('M304 258L318 258L319 264L303 264Z', '#3a2c20') + k.p('M188 258L200 258L200 264L187 264Z', '#3a2c20') + k.p('M288 258L300 258L300 264L287 264Z', '#3a2c20');
+    s += k.p('M312 132C322 132 326 142 320 152C316 150 312 142 312 132Z', '#9a6a3e');
+    // long neck
+    s += k.p(neck, k.U('gN'));
+    s += fur(k, 'gNC', 170, 96, 30, 50, 160, 6, function() { return 250; }, ['#f6eee0', '#8a6038'], 0.8, 0.55);
+    // grey head, pointed ears, split lip
+    s += k.p(head, k.U('gH'));
+    s += fur(k, 'gHC', 140, 52, 30, 18, 70, 4, function() { return 180; }, ['#b0aaa0', '#3e3a34'], 0.6, 0.6);
+    s += k.p('M150 40L156 14L164 18L160 42Z', '#7a746a') + k.p('M152 38L157 20L161 22L158 40Z', '#c9c2b6');
+    s += k.p('M160 42L170 18L176 24L168 46Z', '#6a645a');
+    s += k.p('M112 64C118 68 128 70 136 68', 'none', 'stroke="#3a3632" stroke-width="1.2"');
+    s += k.el(114, 56, 2.6, 2, '#1e1a16');
+    s += k.eye(136, 48, 4.4, '#1a120c', { ring: '#3a3632', ringR: 1.25 });
+    s += k.sp('M128 42C134 38 142 38 146 42', '#2a2622', 1.1);
+    return { wash: '#d3c7a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Mountain vizcacha · Vizcacha (sunning on a rock) ----
+  P.vizcacha = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M160 190C150 160 160 126 190 112C220 100 254 108 272 132C288 154 286 186 272 204C254 222 214 224 188 216C172 210 164 202 160 190Z';
+    var head = 'M190 118C190 98 176 84 158 84C142 84 128 94 122 108C118 116 120 126 126 132C136 138 150 138 162 136C178 136 190 130 190 118Z';
+    var defs = k.rg('vzB', 0.5, 0.35, 0.7, [[0, '#c9c0ae'], [0.7, '#a89e8a'], [1, '#7a7262']]) +
+      k.rg('vzH', 0.45, 0.4, 0.7, [[0, '#cfc6b4'], [1, '#9a907e']]) +
+      k.clip('vzBC', body) + k.clip('vzHC', head);
+    bg += k.ridge(r, 'vzR', 170, 50, '#b4b8b0', 0.7, 0.6);
+    bg += k.rock(r, 'vzRk', 210, 206, 300, 90, ['#c8bca8', '#9a8e7c', '#62584a']);
+    bg += k.rock(r, 'vzRk2', 360, 230, 110, 70, ['#b8ac98', '#8a7e6c', '#5a5042']);
+    bg += k.grass(r, 0, 80, 296, 30, 26, ['#a8a05a', '#8a8a4a']);
+    var shadowS = k.shadow(222, 222, 74, 6, 0.85);
+    // long tail curling up at the back
+    var tl = 'M270 196C300 200 322 190 330 170C336 154 330 140 320 136';
+    s += k.sp(tl, '#8a8070', 9) + k.sp(tl, '#b0a694', 4, 'transform="translate(-1 -1)"');
+    s += k.p('M320 136C312 126 316 112 326 110C334 116 334 130 326 140Z', '#2e2620');
+    s += k.p(body, k.U('vzB'));
+    s += fur(k, 'vzBC', 222, 166, 66, 60, 420, 6, function(x, y) { return 110 + (x - 220) * 0.5; }, ['#e8e0d0', '#6a6252', '#b8ae9a'], 0.8, 0.6);
+    s += k.p('M240 110C250 120 256 150 254 180', 'none', 'stroke="#5a5244" stroke-width="3" opacity=".25"');
+    // haunch and tucked paws
+    s += k.el(244, 190, 32, 24, '#a89e8a', 'opacity=".55"');
+    s += k.p('M220 208C230 212 244 214 254 212L256 218C244 220 228 220 218 216Z', '#7a7060');
+    s += k.p('M168 196C174 206 182 212 190 214L188 220C178 218 170 212 166 204Z', '#8a8070');
+    // head
+    s += k.p(head, k.U('vzH'));
+    s += fur(k, 'vzHC', 156, 112, 36, 28, 140, 4.5, function() { return 200; }, ['#efe8dc', '#6a6252'], 0.6, 0.6);
+    // long rabbit-like ears
+    s += k.p('M168 90C166 64 172 40 182 30C190 34 190 60 182 92Z', '#9a907e') + k.p('M171 88C170 66 175 46 182 38C185 44 184 64 179 88Z', '#d8b8a8');
+    s += k.p('M182 94C186 70 198 50 210 44C216 50 208 74 192 98Z', '#8a806e');
+    // muzzle, long whiskers, eye
+    s += k.el(126, 118, 5, 4, '#6a5a52') + k.p('M122 124C126 128 132 128 136 126', 'none', 'stroke="#4a3e36" stroke-width="1"');
+    s += k.sp('M130 120C110 114 92 112 76 114M130 122C110 122 94 126 80 132M132 118C116 108 102 102 88 98M132 124C118 132 106 140 96 148', '#2a2420', 0.7, 'opacity=".8"');
+    s += k.eye(150, 104, 5.2, '#1a100a');
+    return { wash: '#c9c6b0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Degu · Degú ----
+  P.degu = function(k) {
+    var r = k.rnd, s = '', bg = '';
+    var body = 'M150 200C140 176 150 148 178 136C206 124 244 128 264 148C282 166 284 192 272 210C258 226 222 230 194 226C172 222 156 214 150 200Z';
+    var head = 'M170 154C168 134 154 120 136 120C120 120 106 130 100 144C96 152 98 162 104 168C114 174 128 174 140 172C156 172 170 166 170 154Z';
+    var defs = k.rg('dgB', 0.5, 0.3, 0.7, [[0, '#b89a6a'], [0.65, '#9a7c50'], [1, '#6a5234']]) +
+      k.rg('dgH', 0.45, 0.4, 0.7, [[0, '#bca070'], [1, '#8a6e46']]) +
+      k.clip('dgBC', body) + k.clip('dgHC', head);
+    // dry central-Chile matorral: soil, burrow, a shrub
+    bg += '<rect x="0" y="216" width="400" height="84" fill="#b89a6a" opacity=".45"/>';
+    bg += k.el(330, 236, 40, 16, '#3a2a1a') + k.el(330, 240, 30, 10, '#1a120a') + k.p('M286 236C300 222 360 222 374 236C360 230 300 230 286 236Z', '#c8aa7a');
+    bg += miniTree(k, 70, 222, 60, ['#6a7a48', '#7a8a52', '#a8b070', '#5a4a3a'], { n: 10, wide: 1.1 });
+    bg += k.grass(r, 0, 400, 296, 70, 18, ['#b0a060', '#94884e', '#c8b878']);
+    for (var i = 0; i < 20; i++) bg += k.el(r() * 400, 240 + r() * 56, 2 + r() * 3, 1.4 + r() * 1.5, r() < 0.5 ? '#9a8058' : '#d0b88a');
+    var shadowS = k.shadow(210, 232, 78, 6, 0.85);
+    // tail with black brush tip
+    var tl = 'M266 200C296 210 320 222 336 214C350 206 358 190 362 176';
+    s += k.sp(tl, '#7a6040', 5) + k.p('M352 196C352 180 360 166 372 162C376 172 372 190 362 200Z', '#1a1410');
+    // hind foot
+    s += k.p('M222 222C232 228 252 230 262 228L262 234C250 236 230 236 220 230Z', '#a88a62');
+    s += k.p(body, k.U('dgB'));
+    s += fur(k, 'dgBC', 212, 180, 68, 52, 380, 5.5, function(x, y) { return 170 + (y - 180) * 0.4; }, ['#d8c098', '#4a3820', '#b0925e'], 0.8, 0.65);
+    s += k.p('M156 206C176 220 220 226 262 218L264 224C220 232 174 228 152 212Z', '#e8dcc0', 'opacity=".7"');
+    s += k.el(240, 196, 30, 24, '#8a6c46', 'opacity=".35"');
+    // front paws holding a seed
+    s += k.p('M150 186C142 186 136 180 136 174L144 172C146 178 150 180 156 180Z', '#c8aa80') + k.el(132, 172, 6, 5, '#7a5a2a') + k.el(131, 170, 2.4, 1.6, '#c8a060');
+    // head
+    s += k.p(head, k.U('dgH'));
+    s += fur(k, 'dgHC', 134, 146, 36, 28, 140, 4.5, function() { return 180; }, ['#e0c8a0', '#4a3820'], 0.6, 0.6);
+    s += k.el(102, 150, 4.2, 3.4, '#4a3428');
+    s += k.p('M100 156C104 162 112 164 118 162', 'none', 'stroke="#3a2a1e" stroke-width="1"');
+    s += k.sp('M108 152C92 146 80 144 68 146M108 154C92 156 82 160 72 166M110 150C98 140 88 136 78 132', '#2a2018', 0.6, 'opacity=".7"');
+    // round dark ears
+    s += k.el(152, 122, 12, 13, '#4a3a2e', 'transform="rotate(-20 152 122)"') + k.el(152, 123, 7.5, 8.5, '#8a6a5a', 'transform="rotate(-20 152 122)"');
+    s += k.eye(128, 138, 5.4, '#120c08', { ring: '#d8c49a', ringR: 1.3 });
+    return { wash: '#d6c69e', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // =================================================================
+  //  INSECTS & OTHERS · INSECTOS Y OTROS  (dorsal views, field-guide style)
+  // =================================================================
+
+  // jointed leg along points; widths taper w0 -> w1; optional hairs
+  function jleg(k, pts, w0, w1, col, hair, hairLen) {
+    var s = '', r = k.rnd, i, hs = '';
+    for (i = 0; i < pts.length - 1; i++) {
+      var t = i / Math.max(1, pts.length - 2), w = w0 + (w1 - w0) * t;
+      var a = pts[i], b = pts[i + 1];
+      s += k.sp('M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1], col, w);
+      s += k.sp('M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1], 'rgba(255,255,255,.22)', w * 0.3, 'transform="translate(-' + (w * 0.18) + ' -' + (w * 0.18) + ')"');
+      if (hair) {
+        var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.sqrt(dx * dx + dy * dy), nx = -dy / L, ny = dx / L;
+        for (var j = 0; j < L / 2.2; j++) {
+          var u = r(), x = a[0] + dx * u, y = a[1] + dy * u, side = r() < 0.5 ? -1 : 1, hl = (hairLen || 5) * (0.5 + r());
+          hs += 'M' + k.n(x + nx * side * w * 0.4) + ' ' + k.n(y + ny * side * w * 0.4) + 'l' + k.n(nx * side * hl + dx / L * hl * 0.6) + ' ' + k.n(ny * side * hl + dy / L * hl * 0.6);
+        }
+      }
+    }
+    if (hair) s += k.sp(hs, hair, 0.7, 'opacity=".85"');
+    return s;
+  }
+
+  // ---- Ladybird · Chinita ----
+  P.chinita = function(k) {
+    var r = k.rnd, s = '', bg = '', i;
+    var defs = k.rg('lbE', 0.38, 0.3, 0.75, [[0, '#ff7a5a'], [0.35, '#e8301e'], [0.8, '#a8140c'], [1, '#6a0a06']]) +
+      k.rg('lbG', 0.35, 0.25, 0.5, [[0, '#fff', 0.9], [0.4, '#fff', 0.25], [1, '#fff', 0]]) +
+      k.lg('lbLeaf', 0, 0, 1, 1, [[0, '#7ab04a'], [0.5, '#5a9038'], [1, '#3a6a28']]);
+    // a big leaf as the stage, with aphids
+    bg += '<g transform="translate(20 268) rotate(-28)">' + k.p('M0 0C80 -120 300 -150 400 -40C300 30 100 60 0 0Z', k.U('lbLeaf')) +
+      k.sp('M0 0C120 -50 260 -70 400 -40', '#c8e0a0', 2.4, 'opacity=".7"') +
+      k.sp('M80 -24l30 -50M150 -40l34 -54M220 -52l34 -52M290 -56l30 -40M110 -32l40 30M180 -46l44 30M250 -56l40 26', '#c8e0a0', 1.2, 'opacity=".5"') + '</g>';
+    for (i = 0; i < 6; i++) {
+      var ax = 300 + r() * 60, ay = 80 + r() * 50;
+      bg += k.el(ax, ay, 5, 3.4, '#9ac85a', 'transform="rotate(' + k.n(r() * 180) + ' ' + k.n(ax) + ' ' + k.n(ay) + ')"') + k.circ(ax - 1.5, ay - 1, 1.2, '#e8f8c0', 'opacity=".7"');
+    }
+    var shadowS = k.el(206, 166, 64, 62, '#1e3a12', 'opacity=".28"');
+    var g2 = '';
+    // legs and antennae (black), peeking out
+    var legs = [[[-40, -30], [-62, -42], [-74, -30]], [[-44, 0], [-70, 4], [-80, 22]], [[-40, 30], [-60, 46], [-66, 66]]];
+    for (i = 0; i < 3; i++) {
+      g2 += jleg(k, legs[i], 4, 2.6, '#141210') + jleg(k, legs[i].map(function(q) { return [-q[0], q[1]]; }), 4, 2.6, '#141210');
+    }
+    g2 += k.sp('M-10 -90C-16 -102 -24 -106 -30 -104M10 -90C16 -102 24 -106 30 -104', '#141210', 2);
+    g2 += k.circ(-30, -104, 2.4, '#141210') + k.circ(30, -104, 2.4, '#141210');
+    // elytra
+    g2 += k.p('M0 -60C-30 -62 -58 -44 -60 -6C-62 34 -36 66 0 68C36 66 62 34 60 -6C58 -44 30 -62 0 -60Z', k.U('lbE'));
+    var spots = [[-30, -32, 9], [-38, 14, 11], [-18, 40, 9], [30, -32, 9], [38, 14, 11], [18, 40, 9], [0, -54, 9]];
+    for (i = 0; i < spots.length; i++) g2 += k.el(spots[i][0], spots[i][1], spots[i][2], spots[i][2] * 0.92, '#140e0c');
+    g2 += k.sp('M0 -60L0 68', '#4a0a06', 1.6);
+    g2 += k.p('M0 -60C-30 -62 -58 -44 -60 -6C-62 34 -36 66 0 68C36 66 62 34 60 -6C58 -44 30 -62 0 -60Z', k.U('lbG'));
+    g2 += k.p('M-40 -40C-34 -52 -20 -56 -12 -56C-18 -48 -28 -40 -40 -34Z', '#fff', 'opacity=".75"');
+    g2 += k.circ(30, 40, 3, '#fff', 'opacity=".35"');
+    // pronotum (black, cream side patches) and head, overlapping the elytra
+    g2 += k.p('M-42 -54C-40 -74 -20 -82 0 -82C20 -82 40 -74 42 -54C28 -58 -28 -58 -42 -54Z', '#16130f');
+    g2 += k.el(-30, -64, 8, 6, '#f2ecd8', 'transform="rotate(-25 -30 -64)"') + k.el(30, -64, 8, 6, '#f2ecd8', 'transform="rotate(25 30 -64)"');
+    g2 += k.el(0, -82, 18, 11, '#141210') + k.el(-8, -86, 3.6, 2.6, '#f2ecd8') + k.el(8, -86, 3.6, 2.6, '#f2ecd8');
+    g2 += k.p('M-20 -76C-10 -80 10 -80 20 -76', 'none', 'stroke="#fff" stroke-width="1.2" opacity=".35"');
+    s += '<g transform="translate(200 150) rotate(-24) scale(1.1)">' + g2 + '</g>';
+    return { wash: '#c6d3a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Chilean stag beetle · Ciervo volante (male) ----
+  P.ciervo = function(k) {
+    var r = k.rnd, s = '', bg = '', i;
+    var defs = k.lg('svE', 0, 0, 1, 1, [[0, '#c8a040'], [0.3, '#8a7a2a'], [0.55, '#4a6a2a'], [0.8, '#8a4a1e'], [1, '#4a2410']]) +
+      k.lg('svP', 0, 0, 1, 0, [[0, '#6a4a1e'], [0.5, '#b89a3a'], [1, '#5a3a18']]) +
+      k.lg('svM', 0, 0, 0, 1, [[0, '#8a5a2a'], [0.6, '#c8902e'], [1, '#6a3e18']]) +
+      k.rg('svG', 0.4, 0.3, 0.6, [[0, '#fff', 0.45], [1, '#fff', 0]]) +
+      k.lg('svLog', 0, 0, 0, 1, [[0, '#8a7458'], [0.5, '#6a5440'], [1, '#4a3828']]);
+    // mossy log underneath
+    bg += k.p('M-10 180C80 170 300 168 410 178L410 290C300 296 80 296 -10 290Z', k.U('svLog'));
+    var lines = '';
+    for (i = 0; i < 12; i++) lines += 'M-10 ' + (186 + i * 9) + 'C120 ' + (180 + i * 9 + r() * 6) + ' 280 ' + (182 + i * 9) + ' 410 ' + (188 + i * 9);
+    bg += k.sp(lines, '#3a2a1c', 1.2, 'opacity=".4"');
+    for (i = 0; i < 50; i++) bg += k.circ(r() * 400, 172 + r() * 20, 2 + r() * 3, r() < 0.5 ? '#6a8a3a' : '#8aa84a', 'opacity=".85"');
+    var g2 = '';
+    // legs: long and slender, front pair longest
+    var L = [
+      [[-18, -26], [-60, -60], [-86, -96], [-96, -130]],
+      [[-22, 10], [-64, 0], [-98, 20], [-120, 30]],
+      [[-20, 44], [-56, 72], [-80, 110], [-92, 140]]
+    ];
+    for (i = 0; i < 3; i++) g2 += jleg(k, L[i], 6, 3, '#3a2410') + jleg(k, L[i].map(function(q) { return [-q[0], q[1]]; }), 6, 3, '#3a2410');
+    // elytra
+    g2 += k.p('M-36 -6C-42 40 -40 96 -16 110C-6 114 6 114 16 110C40 96 42 40 36 -6Z', k.U('svE'));
+    g2 += k.sp('M0 -4L0 112', '#2a1a0a', 1.4) + k.p('M-36 -6C-42 40 -40 96 -16 110C-6 114 6 114 16 110C40 96 42 40 36 -6Z', k.U('svG'));
+    g2 += k.sp('M-20 6C-24 40 -18 80 -6 100M20 6C24 40 18 80 6 100', '#e8d080', 1, 'opacity=".35"');
+    // pronotum and head
+    g2 += k.p('M-40 -12C-44 -36 -30 -50 0 -50C30 -50 44 -36 40 -12C24 -6 -24 -6 -40 -12Z', k.U('svP'));
+    g2 += k.p('M-22 -48C-26 -60 -16 -68 0 -68C16 -68 26 -60 22 -48Z', '#5a3a18') + k.circ(-22, -56, 3.6, '#1a120a') + k.circ(22, -56, 3.6, '#1a120a');
+    // huge upturned mandibles with inner teeth and fine hairs
+    var mL = 'M-14 -64C-30 -90 -46 -126 -40 -164C-36 -184 -20 -194 -6 -188C-18 -180 -28 -166 -28 -146C-28 -116 -16 -90 -4 -66Z';
+    g2 += k.p(mL, k.U('svM')) + k.p(mL, k.U('svM'), 'transform="scale(-1 1)"');
+    var teeth = '';
+    for (i = 0; i < 9; i++) { var ty = -80 - i * 11, tx = -14 - i * 1.6 - (i > 5 ? (i - 5) * 3 : 0); teeth += 'M' + k.n(tx) + ' ' + ty + 'l5 -2'; }
+    g2 += k.sp(teeth, '#5a3a18', 1.6) + k.sp(teeth, '#5a3a18', 1.6, 'transform="scale(-1 1)"');
+    var hairs = '';
+    for (i = 0; i < 30; i++) { var hy = -70 - r() * 90; hairs += 'M' + k.n(-30 - (hy + 70) * 0.12 + r() * 6) + ' ' + k.n(hy) + 'l-5 -3'; }
+    g2 += k.sp(hairs, '#d8b878', 0.6, 'opacity=".7"') + k.sp(hairs, '#d8b878', 0.6, 'opacity=".7" transform="scale(-1 1)"');
+    g2 += k.sp('M-36 -150C-34 -170 -24 -182 -12 -186', '#ffe8a0', 1.2, 'opacity=".55"') + k.sp('M36 -150C34 -170 24 -182 12 -186', '#ffe8a0', 1.2, 'opacity=".4"');
+    // short elbowed antennae
+    g2 += k.sp('M-20 -62L-34 -70L-44 -64M20 -62L34 -70L44 -64', '#3a2410', 1.6);
+    s += '<g transform="translate(206 178) rotate(14) scale(.78)">' + g2 + '</g>';
+    var shadowS = k.el(216, 200, 44, 52, k.U('shd'));
+    return { wash: '#c1c7a2', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Madre de la culebra (female longhorn beetle) ----
+  P.madreculebra = function(k) {
+    var r = k.rnd, s = '', bg = '', i;
+    var defs = k.lg('mcE', 0, 0, 1, 1, [[0, '#4a3a30'], [0.4, '#1e1814'], [1, '#0a0806']]) +
+      k.rg('mcG', 0.35, 0.3, 0.6, [[0, '#fff', 0.38], [1, '#fff', 0]]) +
+      k.lg('mcBark', 0, 0, 1, 0, [[0, '#8a7a64'], [0.5, '#a8987e'], [1, '#7a6a54']]);
+    // on bark of an old native tree
+    bg += '<rect x="0" y="0" width="400" height="300" fill="' + k.U('mcBark') + '" opacity=".55"/>';
+    var bk = '';
+    for (i = 0; i < 40; i++) { var bx = r() * 400; bk += 'M' + k.n(bx) + ' 0Q' + k.n(bx + (r() - 0.5) * 30) + ' 150 ' + k.n(bx + (r() - 0.5) * 20) + ' 300'; }
+    bg += k.sp(bk, '#4a3a2a', 1.6, 'opacity=".35"') + k.sp(bk, '#d8c8a8', 0.8, 'opacity=".3" transform="translate(3 0)"');
+    for (i = 0; i < 24; i++) bg += k.circ(r() * 400, r() * 300, 2 + r() * 5, r() < 0.5 ? 'rgba(200,200,150,.5)' : 'rgba(150,170,120,.45)');
+    var g2 = '';
+    // stout legs
+    var L = [[[-22, -24], [-52, -40], [-70, -70], [-78, -96]], [[-24, 6], [-58, 4], [-84, 24], [-98, 34]], [[-22, 36], [-52, 62], [-66, 98], [-74, 126]]];
+    for (i = 0; i < 3; i++) g2 += jleg(k, L[i], 6, 3, '#1a1410') + jleg(k, L[i].map(function(q) { return [-q[0], q[1]]; }), 6, 3, '#1a1410');
+    // thick segmented antennae (shortish for a longhorn)
+    var ant = [[-12, -66], [-26, -86], [-40, -100], [-52, -118], [-58, -138], [-60, -156]];
+    for (i = 0; i < ant.length - 1; i++) {
+      g2 += k.sp('M' + ant[i][0] + ' ' + ant[i][1] + 'L' + ant[i + 1][0] + ' ' + ant[i + 1][1], '#1a1410', 5 - i * 0.5) + k.sp('M' + -ant[i][0] + ' ' + ant[i][1] + 'L' + -ant[i + 1][0] + ' ' + ant[i + 1][1], '#1a1410', 5 - i * 0.5);
+      g2 += k.circ(ant[i + 1][0], ant[i + 1][1], 3 - i * 0.3, '#2a2018') + k.circ(-ant[i + 1][0], ant[i + 1][1], 3 - i * 0.3, '#2a2018');
+    }
+    // elytra: long, glossy black, finely wrinkled
+    var el2 = 'M-40 -10C-46 40 -44 104 -18 120C-8 125 8 125 18 120C44 104 46 40 40 -10Z';
+    g2 += k.p(el2, k.U('mcE'));
+    var wr = '';
+    for (i = 0; i < 70; i++) { var wx = (r() - 0.5) * 70, wy = -4 + r() * 120; if (Math.abs(wx) > 40 - (wy > 90 ? (wy - 90) : 0)) continue; wr += 'M' + k.n(wx) + ' ' + k.n(wy) + 'q3 -1 5 1'; }
+    g2 += k.sp(wr, '#5a4a3e', 0.8, 'opacity=".6"');
+    g2 += k.sp('M0 -8L0 122', '#000', 1.6) + k.p(el2, k.U('mcG'));
+    g2 += k.p('M-30 0C-34 30 -30 70 -18 96C-26 70 -28 30 -24 0Z', '#fff', 'opacity=".2"');
+    // pronotum with spiny side margins
+    g2 += k.p('M-34 -12L-44 -20L-38 -26L-48 -34L-38 -40L-44 -50L-30 -54C-16 -60 16 -60 30 -54L44 -50L38 -40L48 -34L38 -26L44 -20L34 -12C20 -8 -20 -8 -34 -12Z', '#1e1814');
+    g2 += k.sp('M-24 -48C-10 -54 10 -54 24 -48', '#6a5a4e', 1.2, 'opacity=".6"');
+    // head with big mandibles
+    g2 += k.p('M-22 -56C-26 -70 -14 -78 0 -78C14 -78 26 -70 22 -56Z', '#16120e') + k.circ(-18, -66, 3.4, '#3a2e24') + k.circ(18, -66, 3.4, '#3a2e24');
+    g2 += k.p('M-10 -76C-16 -86 -10 -94 -2 -92C-6 -88 -6 -82 -4 -78Z', '#2a2018') + k.p('M10 -76C16 -86 10 -94 2 -92C6 -88 6 -82 4 -78Z', '#2a2018');
+    s += '<g transform="translate(200 148) rotate(-8) scale(.92)">' + g2 + '</g>';
+    var shadowS = k.el(210, 168, 54, 72, k.U('shd'));
+    return { wash: '#c9bc9a', defs: defs, bg: bg, shadow: shadowS, fg: s };
+  };
+
+  // ---- Chilean rose tarantula · Araña pollito ----
+  P.arana = function(k) {
+    var r = k.rnd, s = '', bg = '', i;
+    var defs = k.rg('arC', 0.45, 0.4, 0.6, [[0, '#d8a08a'], [0.6, '#a8705e'], [1, '#6a4436']]) +
+      k.rg('arA', 0.45, 0.35, 0.6, [[0, '#7a5a48'], [0.7, '#4a3428'], [1, '#2a1c16']]) +
+      k.lg('arSoil', 0, 0, 0, 1, [[0, '#d8c09a'], [1, '#b89a72']]);
+    bg += '<rect x="0" y="0" width="400" height="300" fill="' + k.U('arSoil') + '" opacity=".55"/>';
+    for (i = 0; i < 40; i++) bg += k.el(r() * 400, r() * 300, 2 + r() * 4, 1.5 + r() * 3, r() < 0.5 ? '#9a8058' : '#e0caa0', 'opacity=".8"');
+    bg += k.rock(r, 'aR1', 340, 210, 110, 60) + k.rock(r, 'aR2', 60, 56, 90, 40);
+    bg += k.grass(r, 290, 380, 220, 16, 22, ['#a8a05a', '#8a8a4a']);
+    var shadowS = k.el(206, 170, 120, 90, k.U('shd'));
+    var g2 = '';
+    // eight hairy legs (4 per side), banded at the joints, plus two pedipalps
+    var legs = [
+      [[-18, -24], [-52, -58], [-74, -92], [-82, -128]],
+      [[-24, -10], [-66, -26], [-102, -30], [-132, -40]],
+      [[-24, 8], [-66, 22], [-100, 44], [-126, 62]],
+      [[-18, 22], [-46, 54], [-60, 92], [-62, 128]]
+    ];
+    for (i = 0; i < 4; i++) {
+      var Ls = legs[i], Rs = Ls.map(function(q) { return [-q[0], q[1]]; });
+      g2 += jleg(k, Ls, 13, 8, '#3e2a20', '#c8a890', 8) + jleg(k, Ls, 13, 8, '#3e2a20', '#8a6a58', 5) + jleg(k, Rs, 13, 8, '#3e2a20', '#c8a890', 8) + jleg(k, Rs, 13, 8, '#3e2a20', '#8a6a58', 5);
+      for (var j = 1; j < Ls.length - 1; j++) g2 += k.circ(Ls[j][0], Ls[j][1], 6, '#7a5a48', 'opacity=".7"') + k.circ(Rs[j][0], Rs[j][1], 6, '#7a5a48', 'opacity=".7"');
+    }
+    g2 += jleg(k, [[-10, -36], [-24, -60], [-28, -76]], 7, 5, '#4a3226', '#c8a890', 4) + jleg(k, [[10, -36], [24, -60], [28, -76]], 7, 5, '#4a3226', '#c8a890', 4);
+    // abdomen with long pale hairs
+    g2 += k.el(0, 62, 40, 46, k.U('arA'));
+    g2 += k.hatch(r, { cx: 0, cy: 62, rx: 38, ry: 44, n: 260, len: 7, ang: 90, angFn: function(x, y) { return Math.atan2(y - 40, x) * 180 / Math.PI; }, jit: 30, curve: 0.3, cols: ['#c8a890', '#e8d0b8', '#6a4a3a'], w: 0.7, op: 0.75 });
+    g2 += k.el(-12, 46, 12, 10, '#fff', 'opacity=".08"');
+    // carapace with rosy hairs radiating from the centre
+    g2 += k.el(0, -6, 34, 30, k.U('arC'));
+    g2 += k.hatch(r, { cx: 0, cy: -6, rx: 32, ry: 28, n: 200, len: 6, ang: 0, angFn: function(x, y) { return Math.atan2(y + 6, x) * 180 / Math.PI; }, jit: 20, cols: ['#f0c0a8', '#e8b098', '#7a4e40'], w: 0.7, op: 0.8 });
+    g2 += k.sp('M0 -30L0 -2M-20 -18L0 -6M20 -18L0 -6M-24 4L0 -6M24 4L0 -6', '#5a3428', 1, 'opacity=".4"');
+    // small cluster of eyes on a tubercle
+    g2 += k.el(0, -26, 6, 4, '#3a2420') + k.circ(-2, -27, 1.3, '#1a100c') + k.circ(2, -27, 1.3, '#1a100c') + k.circ(-1.6, -27.6, 0.4, '#fff') + k.circ(2.4, -27.6, 0.4, '#fff');
+    s += '<g transform="translate(200 150) rotate(-12) scale(.95)">' + g2 + '</g>';
+    return { wash: '#d8c4a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
   };
 
   return {

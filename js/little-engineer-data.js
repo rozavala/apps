@@ -91,14 +91,14 @@ var LittleEngineerData = (function() {
       tip: 'Triangles are strong! A triangle cannot change shape unless a side breaks.',
       hint: cat(road(0, 6, 2), [[0, -2, 2, 0, 'wood'], [6, -2, 4, 0, 'wood']]),
       preset: road(0, 6, 2),
-      budget: 30000, tight: 25000 },
+      budget: 28000, tight: 21000 },
 
     { id: 'l2', name: 'Pudú Crossing', es: 'Paso del Pudú', span: 8, water: -6, vehicle: 'car', time: 'noon', rock: 'south',
       anchors: [[0, 0], [8, 0]],
       tip: 'No low supports here. Build triangles ABOVE the road — a truss.',
       hint: cat(road(0, 8, 2), warren(0, 8, 2, 2, 'wood')),
       preset: cat(road(0, 8, 2), [[0, 0, 1, 2, 'wood'], [1, 2, 2, 0, 'wood']]),
-      budget: 62000, tight: 52000 },
+      budget: 65000, tight: 50000 },
 
     { id: 'l3', name: 'Fox Gorge', es: 'Quebrada del Zorro', span: 10, water: -7, vehicle: 'car', time: 'golden', rock: 'andes',
       anchors: [[0, 0], [10, 0], [0, -3], [10, -3]],
@@ -107,7 +107,7 @@ var LittleEngineerData = (function() {
             [4, -2, 6, 0, 'wood'], [4, -2, 6, -2, 'wood'], [6, -2, 6, 0, 'wood'], [6, -2, 8, -2, 'wood'], [6, -2, 4, 0, 'wood'],
             [8, -2, 8, 0, 'wood'], [8, -2, 6, 0, 'wood'], [10, -3, 8, -2, 'wood'], [0, -3, 2, 0, 'wood'], [10, -3, 8, 0, 'wood']]),
       preset: cat(road(0, 10, 2), [[0, -3, 2, -2, 'wood'], [2, -2, 2, 0, 'wood'], [0, -3, 2, 0, 'wood']]),
-      budget: 70000, tight: 58000 },
+      budget: 70000, tight: 47000 },
 
     { id: 'l4', name: 'Pangue River', es: 'Río Pangue', span: 12, water: -7, vehicle: 'pickup', time: 'morning', rock: 'south',
       anchors: [[0, 0], [12, 0], [6, -3]],
@@ -117,14 +117,14 @@ var LittleEngineerData = (function() {
             [6, -3, 3, -2, 'wood'], [3, -2, 0, 0, 'wood'], [3, -2, 2, 0, 'wood'], [3, -2, 4, 0, 'wood'],
             [6, -3, 9, -2, 'wood'], [9, -2, 12, 0, 'wood'], [9, -2, 10, 0, 'wood'], [9, -2, 8, 0, 'wood']]),
       preset: cat(road(0, 12, 2), [[6, -3, 4, 0, 'wood'], [6, -3, 8, 0, 'wood']]),
-      budget: 70000, tight: 60000 },
+      budget: 86000, tight: 66000 },
 
     { id: 'l5', name: 'Laja Falls', es: 'Salto del Laja', span: 12, water: -7, vehicle: 'pickup', time: 'noon', rock: 'volcanic',
       anchors: [[0, 0], [12, 0], [0, -2], [12, -2]],
       tip: 'A heavier pickup. Mix strong steel where the forces are biggest.',
       hint: cat(road(0, 12, 2), warren(0, 12, 2, 2, 'wood', 'steel')),
       preset: road(0, 12, 2),
-      budget: 92000, tight: 80000 },
+      budget: 104000, tight: 80000 },
 
     { id: 'l6', name: 'Cable Tower', es: 'Torre de Cables', span: 14, water: -7, vehicle: 'pickup', time: 'golden', rock: 'andes',
       anchors: [[0, 0], [14, 0], [7, 7]],
@@ -133,7 +133,7 @@ var LittleEngineerData = (function() {
       hint: cat(road(0, 6, 2), [[6, 0, 8, 0, 'road']], road(8, 14, 2),
             [[7, 7, 2, 0, 'cable'], [7, 7, 4, 0, 'cable'], [7, 7, 6, 0, 'cable'], [7, 7, 8, 0, 'cable'], [7, 7, 10, 0, 'cable'], [7, 7, 12, 0, 'cable']]),
       preset: cat(road(0, 6, 2), [[6, 0, 8, 0, 'road']], road(8, 14, 2), [[7, 7, 6, 0, 'cable'], [7, 7, 8, 0, 'cable']]),
-      budget: 66000, tight: 58000 },
+      budget: 137000, tight: 105000 },
 
     { id: 'l7', name: 'Stone Arch', es: 'Arco de Piedra', span: 14, water: -8, vehicle: 'pickup', time: 'dusk', rock: 'andes',
       anchors: [[0, 0], [14, 0], [0, -4], [14, -4]],
@@ -142,7 +142,7 @@ var LittleEngineerData = (function() {
             [2, -2, 2, 0, 'wood'], [4, -1, 4, 0, 'wood'], [10, -1, 10, 0, 'wood'], [12, -2, 12, 0, 'wood'],
             [4, -1, 6, 0, 'wood'], [7, -1, 6, 0, 'wood'], [7, -1, 8, 0, 'wood'], [10, -1, 8, 0, 'wood'], [2, -2, 4, 0, 'wood'], [12, -2, 10, 0, 'wood']]),
       preset: cat(road(0, 14, 2), [[0, -4, 2, -2, 'steel'], [2, -2, 4, -1, 'steel'], [2, -2, 2, 0, 'wood']]),
-      budget: 92000, tight: 80000 },
+      budget: 130000, tight: 100000 },
 
     { id: 'l8', name: 'Boat Channel', es: 'Canal de Lanchas', span: 14, water: -7, vehicle: 'bus', time: 'morning', rock: 'south',
       anchors: [[0, 0], [14, 0]],
@@ -150,7 +150,7 @@ var LittleEngineerData = (function() {
       tip: 'Boats pass below — nothing may hang under this road. Build up high!',
       hint: cat(road(0, 14, 2), panelTruss(0, 14, 2, 3, 'pratt', 'steel', 'steel')),
       preset: road(0, 14, 2),
-      budget: 175000, tight: 150000 },
+      budget: 240000, tight: 173000 },
 
     { id: 'l9', name: 'Biobío Viaduct', es: 'Viaducto del Biobío', span: 18, water: -7, vehicle: 'bus', time: 'noon', rock: 'south',
       anchors: [[0, 0], [18, 0], [9, -2]],
@@ -158,14 +158,14 @@ var LittleEngineerData = (function() {
       tip: 'A heavy bus and a long gap. Let the pillar carry the middle.',
       hint: cat(road(0, 18, 2), [[9, -2, 8, 0, 'steel'], [9, -2, 10, 0, 'steel']], warren(0, 8, 2, 2, 'steel'), warren(10, 18, 2, 2, 'steel'), [[7, 2, 11, 2, 'steel'], [8, 0, 10, 0, 'road']]),
       preset: road(0, 18, 2),
-      budget: 205000, tight: 180000 },
+      budget: 269000, tight: 135000 },
 
     { id: 'l10', name: 'Desert Canyon', es: 'Cañón de Tarapacá', span: 20, water: -8, vehicle: 'bus', time: 'noon', rock: 'desert',
       anchors: [[0, 0], [20, 0], [0, -3], [20, -3]],
       tip: 'The Atacama sun is hot — and the gap is wide. Deep trusses are stiffer.',
       hint: cat(road(0, 20, 2), panelTruss(0, 20, 2, 3, 'pratt', 'steel', 'steel'), [[0, -3, 2, 0, 'steel'], [0, -3, 4, 0, 'steel'], [20, -3, 18, 0, 'steel'], [20, -3, 16, 0, 'steel']]),
       preset: road(0, 20, 2),
-      budget: 245000, tight: 215000 },
+      budget: 418000, tight: 312000 },
 
     { id: 'l11', name: 'Forest Road', es: 'Camino Forestal', span: 20, water: -8, vehicle: 'truck', time: 'golden', rock: 'south',
       anchors: [[0, 0], [20, 0], [7, -3], [13, -3]],
@@ -174,7 +174,7 @@ var LittleEngineerData = (function() {
       hint: cat(road(0, 20, 2), [[7, -3, 6, 0, 'steel'], [7, -3, 8, 0, 'steel'], [13, -3, 12, 0, 'steel'], [13, -3, 14, 0, 'steel'], [7, -3, 10, -3, 'steel'], [10, -3, 13, -3, 'steel'], [10, -3, 10, 0, 'steel'],
             [7, -3, 10, 0, 'steel'], [13, -3, 10, 0, 'steel']], warren(0, 6, 2, 2, 'steel'), warren(14, 20, 2, 2, 'steel')),
       preset: road(0, 20, 2),
-      budget: 250000, tight: 220000 },
+      budget: 301000, tight: 168000 },
 
     { id: 'l12', name: 'Condor Canyon', es: 'Cañón del Cóndor', span: 24, water: -9, vehicle: 'truck', time: 'dusk', rock: 'andes',
       anchors: [[0, 0], [24, 0], [0, -4], [24, -4], [12, -4]],
@@ -183,7 +183,7 @@ var LittleEngineerData = (function() {
       hint: cat(road(0, 24, 2), panelTruss(0, 12, 2, 3, 'pratt', 'steel', 'steel'), panelTruss(12, 24, 2, 3, 'pratt', 'steel', 'steel'),
             [[12, -4, 12, 0, 'steel'], [12, -4, 10, 0, 'steel'], [12, -4, 14, 0, 'steel'], [0, -4, 2, 0, 'steel'], [24, -4, 22, 0, 'steel']]),
       preset: road(0, 24, 2),
-      budget: 360000, tight: 320000 }
+      budget: 485000, tight: 352000 }
   ];
 
   // ---- lesson cards (factual) -----------------------------------------

@@ -100,6 +100,7 @@ var MiNegocioData = (function() {
     var c = 0;
     p.ings.forEach(function(g) { c += g.cost / g.makes; });
     p.unitCost = Math.round(c);
+    p.roundCost = c >= 500 ? Math.round(c / 100) * 100 : Math.round(c / 10) * 10;
   });
 
   function product(id) {
@@ -120,7 +121,7 @@ var MiNegocioData = (function() {
   // traffic multiplies people out; fit multiplies interest per product.
   var EVENTS = {
     normal:   { icon: '🏘️', title: 'A normal day in town', es: 'Un día normal',
-                note: 'Neighbours running errands and walking the plaza.', traffic: 1.0, fit: {} },
+                note: 'Neighbours running errands and out for a walk.', traffic: 1.0, fit: {} },
     sabado:   { icon: '🛍️', title: 'Saturday', es: 'Sábado',
                 note: 'No work today — families are out shopping and strolling.', traffic: 1.4, fit: {} },
     misa:     { icon: '⛪', title: 'Sunday Mass', es: 'Misa del domingo',
