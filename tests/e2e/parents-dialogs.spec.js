@@ -2,6 +2,10 @@
 const { test, expect } = require('@playwright/test');
 const { injectMockProfile, TEST_PROFILE } = require('../helpers/utils');
 
+// These tests wait for the service worker to take control (and for
+// pwa.js's one reload) before driving the page, so they keep it on.
+test.use({ serviceWorkers: 'allow' });
+
 const KEY = TEST_PROFILE.name.toLowerCase();
 
 test.describe('Parents Corner dialogs and layering', () => {
