@@ -49,7 +49,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the capital of Argentina?', qEs: '¿Cuál es la capital de Argentina?', options: ['Buenos Aires', 'Lima', 'Bogotá', 'Santiago'], optionsEs: ['Buenos Aires', 'Lima', 'Bogotá', 'Santiago'], answer: 0 },
             { q: 'What famous dance originated in Argentina?', qEs: '¿Qué famoso baile se originó en Argentina?', options: ['Salsa', 'Tango', 'Flamenco', 'Samba'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Samba'], answer: 1 },
-            { q: 'What is the tallest peak in the Americas?', qEs: '¿Cuál es el pico más alto de América?', options: ['Everest', 'Aconcagua', 'Kilimanjaro', 'Denali'], optionsEs: ['Everest', 'Aconcagua', 'Kilimanjaro', 'Denali'], answer: 1 }
+            { q: 'What is the tallest peak in the Americas?', qEs: '¿Cuál es el pico más alto de América?', options: ['Everest', 'Aconcagua', 'Kilimanjaro', 'Denali'], optionsEs: ['Everest', 'Aconcagua', 'Kilimanjaro', 'Denali'], answer: 1 },
+            { q: 'Which famous glacier is in Argentine Patagonia?', qEs: '¿Qué famoso glaciar está en la Patagonia argentina?', options: ['Perito Moreno', 'Grey', 'Martial', 'San Rafael'], optionsEs: ['Perito Moreno', 'Grey', 'Martial', 'San Rafael'], answer: 0, tier: 'advanced', explain: { en: 'The Perito Moreno Glacier is a large ice formation in Argentine Patagonia.', es: 'El glaciar Perito Moreno es una gran formación de hielo en la Patagonia argentina.' } }
           ]
         },
         {
@@ -86,7 +87,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What was the ancient empire in Peru?', qEs: '¿Cuál fue el antiguo imperio en Perú?', options: ['Aztec', 'Inca', 'Maya', 'Olmec'], optionsEs: ['Azteca', 'Inca', 'Maya', 'Olmeca'], answer: 1 },
             { q: 'What is the capital of Peru?', qEs: '¿Cuál es la capital de Perú?', options: ['Lima', 'Cusco', 'Arequipa', 'Trujillo'], optionsEs: ['Lima', 'Cusco', 'Arequipa', 'Trujillo'], answer: 0 },
-            { q: 'What famous animal lives in the Andes of Peru?', qEs: '¿Qué famoso animal vive en los Andes de Perú?', options: ['Llama', 'Tiger', 'Elephant', 'Kangaroo'], optionsEs: ['Llama', 'Tigre', 'Elefante', 'Canguro'], answer: 0 }
+            { q: 'What famous animal lives in the Andes of Peru?', qEs: '¿Qué famoso animal vive en los Andes de Perú?', options: ['Llama', 'Tiger', 'Elephant', 'Kangaroo'], optionsEs: ['Llama', 'Tigre', 'Elefante', 'Canguro'], answer: 0 },
+            { q: 'Peru is famous for thousands of varieties of which crop?', qEs: '¿De qué cultivo tiene Perú miles de variedades?', options: ['Potato', 'Wheat', 'Rice', 'Olive'], optionsEs: ['Papa', 'Trigo', 'Arroz', 'Aceituna'], answer: 0, tier: 'intermediate', explain: { en: 'Peru grows more than 3,000 varieties of potato.', es: 'En Perú se cultivan más de 3.000 variedades de papa.' } }
           ]
         },
         {
@@ -104,7 +106,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the capital of Colombia?', qEs: '¿Cuál es la capital de Colombia?', options: ['Bogotá', 'Medellín', 'Cali', 'Cartagena'], optionsEs: ['Bogotá', 'Medellín', 'Cali', 'Cartagena'], answer: 0 },
             { q: 'Colombia is famous for producing what gem?', qEs: '¿Colombia es famosa por producir qué gema?', options: ['Diamond', 'Ruby', 'Emerald', 'Sapphire'], optionsEs: ['Diamante', 'Rubí', 'Esmeralda', 'Zafiro'], answer: 2 },
-            { q: 'Which oceans does Colombia touch?', qEs: '¿Qué océanos toca Colombia?', options: ['Atlantic only', 'Pacific only', 'Atlantic and Pacific', 'Indian'], optionsEs: ['Solo Atlántico', 'Solo Pacífico', 'Atlántico y Pacífico', 'Índico'], answer: 2 }
+            { q: 'Which oceans does Colombia touch?', qEs: '¿Qué océanos toca Colombia?', options: ['Atlantic only', 'Pacific only', 'Atlantic and Pacific', 'Indian'], optionsEs: ['Solo Atlántico', 'Solo Pacífico', 'Atlántico y Pacífico', 'Índico'], answer: 2 },
+            { q: 'Colombia is especially known for growing which crop?', qEs: '¿Qué cultivo es especialmente famoso en Colombia?', options: ['Coffee', 'Tea', 'Rice', 'Olives'], optionsEs: ['Café', 'Té', 'Arroz', 'Aceitunas'], answer: 0, tier: 'beginner', explain: { en: 'Colombia is known for its coffee-growing regions.', es: 'Colombia es conocida por sus regiones cafetaleras.' } }
           ]
         },
         {
@@ -122,7 +125,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the capital of Venezuela?', qEs: '¿Cuál es la capital de Venezuela?', options: ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto'], optionsEs: ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto'], answer: 0 },
             { q: 'What is the world\'s highest waterfall located in Venezuela?', qEs: '¿Cuál es la cascada más alta del mundo ubicada en Venezuela?', options: ['Niagara', 'Angel Falls', 'Iguazu', 'Victoria'], optionsEs: ['Niágara', 'Salto Ángel', 'Iguazú', 'Victoria'], answer: 1 },
-            { q: 'What is the official language of Venezuela?', qEs: '¿Cuál es el idioma oficial de Venezuela?', options: ['English', 'Spanish', 'Portuguese', 'French'], optionsEs: ['Inglés', 'Español', 'Portugués', 'Francés'], answer: 1 }
+            { q: 'What is the official language of Venezuela?', qEs: '¿Cuál es el idioma oficial de Venezuela?', options: ['English', 'Spanish', 'Portuguese', 'French'], optionsEs: ['Inglés', 'Español', 'Portugués', 'Francés'], answer: 1 },
+            { q: 'Which lake in Venezuela is one of the oldest on Earth?', qEs: '¿Qué lago de Venezuela es uno de los más antiguos de la Tierra?', options: ['Lake Maracaibo', 'Lake Titicaca', 'Lake Valencia', 'Lake Geneva'], optionsEs: ['Lago de Maracaibo', 'Lago Titicaca', 'Lago de Valencia', 'Lago de Ginebra'], answer: 0, tier: 'advanced', explain: { en: 'Lake Maracaibo is one of the oldest lakes on Earth.', es: 'El Lago de Maracaibo es uno de los lagos más antiguos de la Tierra.' } }
           ]
         },
         {
@@ -140,7 +144,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What islands belong to Ecuador?', qEs: '¿Qué islas pertenecen a Ecuador?', options: ['Canary', 'Galapagos', 'Falkland', 'Azores'], optionsEs: ['Canarias', 'Galápagos', 'Malvinas', 'Azores'], answer: 1 },
             { q: 'What is the capital of Ecuador?', qEs: '¿Cuál es la capital de Ecuador?', options: ['Quito', 'Guayaquil', 'Cuenca', 'Loja'], optionsEs: ['Quito', 'Guayaquil', 'Cuenca', 'Loja'], answer: 0 },
-            { q: 'Where is Ecuador located?', qEs: '¿Dónde está ubicado Ecuador?', options: ['On the Prime Meridian', 'On the Equator', 'At the North Pole', 'At the South Pole'], optionsEs: ['En el Meridiano de Greenwich', 'En el Ecuador', 'En el Polo Norte', 'En el Polo Sur'], answer: 1 }
+            { q: 'Where is Ecuador located?', qEs: '¿Dónde está ubicado Ecuador?', options: ['On the Prime Meridian', 'On the Equator', 'At the North Pole', 'At the South Pole'], optionsEs: ['En el Meridiano de Greenwich', 'En el Ecuador', 'En el Polo Norte', 'En el Polo Sur'], answer: 1 },
+            { q: 'Quito stands out as one of the world capitals that are…', qEs: 'Quito destaca por ser una de las capitales del mundo que están…', options: ['Among the highest', 'Below sea level', 'On an island', 'In a desert'], optionsEs: ['Entre las más altas', 'Bajo el nivel del mar', 'En una isla', 'En un desierto'], answer: 0, tier: 'advanced', explain: { en: 'Quito is one of the highest capital cities in the world.', es: 'Quito es una de las capitales más altas del mundo.' } }
           ]
         },
         {
@@ -158,7 +163,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'Bolivia has two capitals: Sucre and...?', qEs: 'Bolivia tiene dos capitales: Sucre y...?', options: ['La Paz', 'Santa Cruz', 'Cochabamba', 'Potosí'], optionsEs: ['La Paz', 'Santa Cruz', 'Cochabamba', 'Potosí'], answer: 0 },
             { q: 'What famous salt flat is in Bolivia?', qEs: '¿Qué famoso salar está en Bolivia?', options: ['Uyuni', 'Atacama', 'Bonneville', 'Makgadikgadi'], optionsEs: ['Uyuni', 'Atacama', 'Bonneville', 'Makgadikgadi'], answer: 0 },
-            { q: 'Is Bolivia landlocked?', qEs: '¿Es Bolivia un país sin salida al mar?', options: ['Yes', 'No', 'Partially', 'Only in winter'], optionsEs: ['Sí', 'No', 'Parcialmente', 'Solo en invierno'], answer: 0 }
+            { q: 'Is Bolivia landlocked?', qEs: '¿Es Bolivia un país sin salida al mar?', options: ['Yes', 'No', 'Partially', 'Only in winter'], optionsEs: ['Sí', 'No', 'Parcialmente', 'Solo en invierno'], answer: 0 },
+            { q: 'Which lake, shared by Bolivia and Peru, is the highest navigable lake?', qEs: '¿Qué lago, compartido por Bolivia y Perú, es el navegable más alto?', options: ['Titicaca', 'Poopó', 'Maracaibo', 'General Carrera'], optionsEs: ['Titicaca', 'Poopó', 'Maracaibo', 'General Carrera'], answer: 0, tier: 'advanced', explain: { en: 'Lake Titicaca, shared with Peru, is the highest navigable lake.', es: 'El lago Titicaca, compartido con Perú, es el lago navegable más alto.' } }
           ]
         },
         {
@@ -176,7 +182,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the capital of Paraguay?', qEs: '¿Cuál es la capital de Paraguay?', options: ['Asunción', 'Ciudad del Este', 'Encarnación', 'Luque'], optionsEs: ['Asunción', 'Ciudad del Este', 'Encarnación', 'Luque'], answer: 0 },
             { q: 'Paraguay is a bilingual nation. What are the languages?', qEs: 'Paraguay es una nación bilingüe. ¿Cuáles son los idiomas?', options: ['Spanish & English', 'Spanish & Guarani', 'Portuguese & Guarani', 'Spanish & French'], optionsEs: ['Español e Inglés', 'Español y Guaraní', 'Portugués y Guaraní', 'Español y Francés'], answer: 1 },
-            { q: 'Is Paraguay landlocked?', qEs: '¿Paraguay es un país sin salida al mar?', options: ['Yes', 'No', 'It has one coast', 'It is an island'], optionsEs: ['Sí', 'No', 'Tiene una costa', 'Es una isla'], answer: 0 }
+            { q: 'Is Paraguay landlocked?', qEs: '¿Paraguay es un país sin salida al mar?', options: ['Yes', 'No', 'It has one coast', 'It is an island'], optionsEs: ['Sí', 'No', 'Tiene una costa', 'Es una isla'], answer: 0 },
+            { q: 'The Itaipú Dam, on the border with Brazil, is a huge source of…', qEs: 'La represa de Itaipú, en la frontera con Brasil, es una enorme fuente de…', options: ['Electricity', 'Gold', 'Salt', 'Timber'], optionsEs: ['Electricidad', 'Oro', 'Sal', 'Madera'], answer: 0, tier: 'advanced', explain: { en: 'Itaipú is one of the largest hydroelectric dams in the world.', es: 'Itaipú es una de las represas hidroeléctricas más grandes del mundo.' } }
           ]
         },
         {
@@ -194,7 +201,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the capital of Uruguay?', qEs: '¿Cuál es la capital de Uruguay?', options: ['Montevideo', 'Salto', 'Paysandú', 'Maldonado'], optionsEs: ['Montevideo', 'Salto', 'Paysandú', 'Maldonado'], answer: 0 },
             { q: 'Which ocean borders Uruguay?', qEs: '¿Qué océano bordea Uruguay?', options: ['Pacific', 'Atlantic', 'Indian', 'Arctic'], optionsEs: ['Pacífico', 'Atlántico', 'Índico', 'Ártico'], answer: 1 },
-            { q: 'What is a popular drink in Uruguay?', qEs: '¿Qué bebida es popular en Uruguay?', options: ['Coffee', 'Tea', 'Mate', 'Juice'], optionsEs: ['Café', 'Té', 'Mate', 'Jugo'], answer: 2 }
+            { q: 'What is a popular drink in Uruguay?', qEs: '¿Qué bebida es popular en Uruguay?', options: ['Coffee', 'Tea', 'Mate', 'Juice'], optionsEs: ['Café', 'Té', 'Mate', 'Jugo'], answer: 2 },
+            { q: 'Which country hosted and won the first FIFA World Cup in 1930?', qEs: '¿Qué país organizó y ganó la primera Copa del Mundo de la FIFA en 1930?', options: ['Uruguay', 'Brazil', 'Argentina', 'Italy'], optionsEs: ['Uruguay', 'Brasil', 'Argentina', 'Italia'], answer: 0, tier: 'advanced', explain: { en: 'Uruguay hosted the first World Cup in 1930 and won it.', es: 'Uruguay organizó la primera Copa del Mundo en 1930 y la ganó.' } }
           ]
         },
         {
@@ -212,7 +220,8 @@ const WorldExplorer = (() => {
           quiz: [
             { q: 'What is the official language of Guyana?', qEs: '¿Cuál es el idioma oficial de Guyana?', options: ['Spanish', 'English', 'French', 'Dutch'], optionsEs: ['Español', 'Inglés', 'Francés', 'Holandés'], answer: 1 },
             { q: 'What is the capital of Guyana?', qEs: '¿Cuál es la capital de Guyana?', options: ['Georgetown', 'Linden', 'New Amsterdam', 'Bartica'], optionsEs: ['Georgetown', 'Linden', 'New Amsterdam', 'Bartica'], answer: 0 },
-            { q: 'What famous waterfall is in Guyana?', qEs: '¿Qué famosa cascada está en Guyana?', options: ['Angel', 'Niagara', 'Kaieteur', 'Iguazu'], optionsEs: ['Ángel', 'Niágara', 'Kaieteur', 'Iguazú'], answer: 2 }
+            { q: 'What famous waterfall is in Guyana?', qEs: '¿Qué famosa cascada está en Guyana?', options: ['Angel', 'Niagara', 'Kaieteur', 'Iguazu'], optionsEs: ['Ángel', 'Niágara', 'Kaieteur', 'Iguazú'], answer: 2 },
+            { q: 'About how much of Guyana is tropical rainforest?', qEs: '¿Qué parte de Guyana está cubierta de selva tropical, aproximadamente?', options: ['About 80%', 'About 10%', 'About 40%', 'None of it'], optionsEs: ['Cerca del 80%', 'Cerca del 10%', 'Cerca del 40%', 'Nada'], answer: 0, tier: 'advanced', explain: { en: 'About 80% of Guyana is covered by tropical rainforest.', es: 'Cerca del 80% de Guyana está cubierta de selva tropical.' } }
           ]
         },
         {
@@ -221,16 +230,16 @@ const WorldExplorer = (() => {
           facts: [
             { en: 'Suriname is the smallest country in South America.', es: 'Surinam es el país más pequeño de Sudamérica.' },
             { en: 'Dutch is the official language of Suriname.', es: 'El holandés es el idioma oficial de Surinam.' },
-            { en: 'Over 90% of Suriname is covered by rainforest.', es: 'Más del 90% de Surinam está cubierto por selva tropical.' }
-,
-            { en: 'Suriname has a very diverse culture.', es: 'Surinam tiene una cultura muy diversa.' }
+            { en: 'Over 90% of Suriname is covered by rainforest.', es: 'Más del 90% de Surinam está cubierto por selva tropical.' },
+            { en: 'The historic center of Paramaribo is a UNESCO World Heritage site.', es: 'El centro histórico de Paramaribo es Patrimonio de la Humanidad de la UNESCO.' }
           ],
           landmark: { name: 'Central Suriname Reserve', nameEs: 'Reserva Central de Surinam', emoji: '🌳' },
           animal: { name: 'Harpy Eagle', nameEs: 'Águila Harpía', emoji: '🦅' },
           quiz: [
             { q: 'What is the official language of Suriname?', qEs: '¿Cuál es el idioma oficial de Surinam?', options: ['Spanish', 'English', 'French', 'Dutch'], optionsEs: ['Español', 'Inglés', 'Francés', 'Holandés'], answer: 3 },
             { q: 'What is the capital of Suriname?', qEs: '¿Cuál es la capital de Surinam?', options: ['Paramaribo', 'Lelydorp', 'Nieuw Nickerie', 'Moengo'], optionsEs: ['Paramaribo', 'Lelydorp', 'Nieuw Nickerie', 'Moengo'], answer: 0 },
-            { q: 'Suriname is located on which continent?', qEs: '¿Surinam está ubicado en qué continente?', options: ['Africa', 'Europe', 'South America', 'Asia'], optionsEs: ['África', 'Europa', 'América del Sur', 'Asia'], answer: 2 }
+            { q: 'Suriname is located on which continent?', qEs: '¿Surinam está ubicado en qué continente?', options: ['Africa', 'Europe', 'South America', 'Asia'], optionsEs: ['África', 'Europa', 'América del Sur', 'Asia'], answer: 2 },
+            { q: 'About how much of Suriname is rainforest?', qEs: '¿Qué parte de Surinam es selva, aproximadamente?', options: ['Over 90%', 'About 10%', 'About half', 'None of it'], optionsEs: ['Más del 90%', 'Cerca del 10%', 'Cerca de la mitad', 'Nada'], answer: 0, tier: 'advanced', explain: { en: 'Over 90% of Suriname is covered by rainforest.', es: 'Más del 90% de Surinam está cubierto de selva.' } }
           ]
         },
       ]
@@ -328,7 +337,8 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Spain?', qEs: '¿Cuál es la capital de España?', options: ['Barcelona', 'Seville', 'Madrid', 'Valencia'], optionsEs: ['Barcelona', 'Sevilla', 'Madrid', 'Valencia'], answer: 2 },
           { q: 'What famous church is in Barcelona?', qEs: '¿Qué famosa iglesia está en Barcelona?', options: ['Notre Dame', 'Sagrada Familia', 'St. Peter\'s', 'Westminster'], optionsEs: ['Notre Dame', 'Sagrada Familia', 'San Pedro', 'Westminster'], answer: 1 },
-          { q: 'Which dance is a famous Spanish art form?', qEs: '¿Qué baile es un famoso arte español?', options: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], answer: 2 }
+          { q: 'Which dance is a famous Spanish art form?', qEs: '¿Qué baile es un famoso arte español?', options: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], optionsEs: ['Salsa', 'Tango', 'Flamenco', 'Ballet'], answer: 2 },
+          { q: 'By number of native speakers, where does Spanish rank in the world?', qEs: 'Por número de hablantes nativos, ¿en qué lugar queda el español en el mundo?', options: ['Second', 'First', 'Fifth', 'Tenth'], optionsEs: ['Segundo', 'Primero', 'Quinto', 'Décimo'], answer: 0, tier: 'expert', explain: { en: 'More people speak Mandarin as a first language. Spanish is second.', es: 'Más personas tienen el mandarín como primera lengua. El español es el segundo.' } }
         ]
       },
       {
@@ -460,7 +470,8 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What river flows through Egypt?', qEs: '¿Qué río fluye por Egipto?', options: ['Amazon', 'Nile', 'Yangtze', 'Mississippi'], optionsEs: ['Amazonas', 'Nilo', 'Yangtsé', 'Misisipi'], answer: 1, tier: 'beginner', explain: { en: 'The Nile flows through Egypt and is one of the longest rivers on Earth.', es: 'El Nilo fluye por Egipto y es uno de los ríos más largos de la Tierra.' } },
           { q: 'What famous monument is in Egypt?', qEs: '¿Qué monumento famoso está en Egipto?', options: ['Colosseum', 'Eiffel Tower', 'Pyramids', 'Taj Mahal'], optionsEs: ['Coliseo', 'Torre Eiffel', 'Pirámides', 'Taj Mahal'], answer: 2, tier: 'intermediate', explain: { en: 'The Pyramids of Giza were built as tombs for ancient Egyptian pharaohs.', es: 'Las pirámides de Guiza se construyeron como tumbas para los faraones del antiguo Egipto.' } },
-          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0, tier: 'advanced', explain: { en: 'Cairo, on the Nile, is the capital of Egypt.', es: 'El Cairo, a orillas del Nilo, es la capital de Egipto.' } }
+          { q: 'What is the capital of Egypt?', qEs: '¿Cuál es la capital de Egipto?', options: ['Cairo', 'Nairobi', 'Cape Town', 'Rabat'], optionsEs: ['El Cairo', 'Nairobi', 'Ciudad del Cabo', 'Rabat'], answer: 0, tier: 'advanced', explain: { en: 'Cairo, on the Nile, is the capital of Egypt.', es: 'El Cairo, a orillas del Nilo, es la capital de Egipto.' } },
+          { q: 'What is the official language of Egypt?', qEs: '¿Cuál es el idioma oficial de Egipto?', options: ['Arabic', 'Egyptian', 'French', 'Greek'], optionsEs: ['Árabe', 'Egipcio', 'Francés', 'Griego'], answer: 0, tier: 'intermediate', explain: { en: 'Arabic is the official language of Egypt.', es: 'El árabe es el idioma oficial de Egipto.' } }
         ]
       },
       {
@@ -547,7 +558,7 @@ const WorldExplorer = (() => {
         facts: [
           { en: 'The Great Wall of China is over 21,000 km long.', es: 'La Gran Muralla China tiene más de 21.000 km de largo.' },
           { en: 'Giant pandas are native to South Central China.', es: 'Los osos panda gigantes son nativos del centro-sur de China.' },
-          { en: 'China has the largest population in the world.', es: 'China tiene la población más grande del mundo.' },
+          { en: 'More people live in China than in any other country in East Asia.', es: 'En China vive más gente que en cualquier otro país de Asia Oriental.' },
           { en: 'The Yangtze is the longest river in Asia.', es: 'El Yangtsé es el río más largo de Asia.' }
         ],
         landmark: { name: 'Great Wall', nameEs: 'Gran Muralla', emoji: '🧱' },
@@ -555,7 +566,8 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of China?', qEs: '¿Cuál es la capital de China?', options: ['Shanghai', 'Beijing', 'Hong Kong', 'Shenzhen'], optionsEs: ['Shanghái', 'Pekín', 'Hong Kong', 'Shenzhen'], answer: 1, tier: 'beginner', explain: { en: 'Beijing has been China\'s capital for much of its history.', es: 'Pekín ha sido la capital de China durante gran parte de su historia.' } },
           { q: 'Which famous wall is located in China?', qEs: '¿Qué famosa muralla se encuentra en China?', options: ['Berlin Wall', 'Hadrian\'s Wall', 'Great Wall', 'Western Wall'], optionsEs: ['Muro de Berlín', 'Muro de Adriano', 'Gran Muralla', 'Muro de los Lamentos'], answer: 2, tier: 'intermediate', explain: { en: 'The Great Wall was built over centuries to defend China\'s borders.', es: 'La Gran Muralla se construyó durante siglos para defender las fronteras de China.' } },
-          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2, tier: 'advanced', explain: { en: 'Giant pandas live in bamboo forests of south-central China.', es: 'Los osos panda gigantes viven en bosques de bambú del centro-sur de China.' } }
+          { q: 'What black and white bear is native to China?', qEs: '¿Qué oso blanco y negro es nativo de China?', options: ['Polar Bear', 'Grizzly Bear', 'Giant Panda', 'Koala'], optionsEs: ['Oso Polar', 'Oso Grizzly', 'Oso Panda', 'Koala'], answer: 2, tier: 'advanced', explain: { en: 'Giant pandas live in bamboo forests of south-central China.', es: 'Los osos panda gigantes viven en bosques de bambú del centro-sur de China.' } },
+          { q: 'What is the longest river in Asia?', qEs: '¿Cuál es el río más largo de Asia?', options: ['The Yangtze', 'The Yellow River', 'The Ganges', 'The Mekong'], optionsEs: ['El Yangtsé', 'El río Amarillo', 'El Ganges', 'El Mekong'], answer: 0, tier: 'advanced', explain: { en: 'The Yangtze is the longest river in Asia.', es: 'El Yangtsé es el río más largo de Asia.' } }
         ]
       },
       {
@@ -685,7 +697,8 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of Australia?', qEs: '¿Cuál es la capital de Australia?', options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'], optionsEs: ['Sídney', 'Melbourne', 'Canberra', 'Perth'], answer: 2, tier: 'advanced', explain: { en: 'Canberra was chosen as the capital as a compromise between Sydney and Melbourne.', es: 'Canberra fue elegida capital como un acuerdo entre Sídney y Melbourne.' } },
           { q: 'Which animal is native to Australia?', qEs: '¿Qué animal es nativo de Australia?', options: ['Lion', 'Penguin', 'Kangaroo', 'Bear'], optionsEs: ['León', 'Pingüino', 'Canguro', 'Oso'], answer: 2, tier: 'beginner', explain: { en: 'Kangaroos are marsupials found only in Australia.', es: 'Los canguros son marsupiales que solo se encuentran en Australia.' } },
-          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0, tier: 'intermediate', explain: { en: 'The Great Barrier Reef is the world\'s largest coral reef system.', es: 'La Gran Barrera de Coral es el mayor sistema de arrecifes del mundo.' } }
+          { q: 'What famous reef is located here?', qEs: '¿Qué famoso arrecife se encuentra aquí?', options: ['Great Barrier Reef', 'Belize Barrier Reef', 'Palancar Reef', 'Ningaloo Reef'], optionsEs: ['Gran Barrera de Coral', 'Arrecife de Belice', 'Arrecife Palancar', 'Arrecife Ningaloo'], answer: 0, tier: 'intermediate', explain: { en: 'The Great Barrier Reef is the world\'s largest coral reef system.', es: 'La Gran Barrera de Coral es el mayor sistema de arrecifes del mundo.' } },
+          { q: 'Australia is both a country and a…', qEs: 'Australia es a la vez un país y un…', options: ['Continent', 'City-state', 'European island', 'Peninsula of Asia'], optionsEs: ['Continente', 'Ciudad-Estado', 'Isla europea', 'Península de Asia'], answer: 0, tier: 'beginner', explain: { en: 'Australia is both a country and a continent.', es: 'Australia es a la vez un país y un continente.' } }
         ]
       },
       {
@@ -702,7 +715,8 @@ const WorldExplorer = (() => {
         quiz: [
           { q: 'What is the capital of New Zealand?', qEs: '¿Cuál es la capital de Nueva Zelanda?', options: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton'], optionsEs: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton'], answer: 1 },
           { q: 'What is the national bird of New Zealand?', qEs: '¿Cuál es el ave nacional de Nueva Zelanda?', options: ['Eagle', 'Penguin', 'Kiwi', 'Ostrich'], optionsEs: ['Águila', 'Pingüino', 'Kiwi', 'Avestruz'], answer: 2 },
-          { q: 'How many main islands does New Zealand have?', qEs: '¿Cuántas islas principales tiene Nueva Zelanda?', options: ['One', 'Two', 'Three', 'Four'], optionsEs: ['Una', 'Dos', 'Tres', 'Cuatro'], answer: 1 }
+          { q: 'How many main islands does New Zealand have?', qEs: '¿Cuántas islas principales tiene Nueva Zelanda?', options: ['One', 'Two', 'Three', 'Four'], optionsEs: ['Una', 'Dos', 'Tres', 'Cuatro'], answer: 1 },
+          { q: 'New Zealand is famous for mountains and what steep sea inlets?', qEs: 'Nueva Zelanda es famosa por sus montañas y ¿qué entradas de mar empinadas?', options: ['Fjords', 'Deltas', 'Atolls', 'Canyons'], optionsEs: ['Fiordos', 'Deltas', 'Atolones', 'Cañones'], answer: 0, tier: 'advanced', explain: { en: 'New Zealand is known for its mountains and fjords.', es: 'Nueva Zelanda es conocida por sus montañas y fiordos.' } }
         ]
       }
     ] }

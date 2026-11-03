@@ -418,7 +418,31 @@ const CivicsLab = (() => {
       explain: { en: 'Enrolment is automatic: citizens are added to the roll when they turn 18.', es: 'La inscripción es automática: los ciudadanos entran al padrón al cumplir 18 años.' } },
     { q: { en: 'How is the President of Chile elected if no candidate wins a majority?', es: '¿Cómo se elige al Presidente de Chile si ningún candidato logra mayoría?' },
       options: { en: ['Congress decides','A runoff between the top two candidates','The oldest candidate wins','By lottery'], es: ['Decide el Congreso','Una segunda vuelta entre los dos más votados','Gana el candidato de más edad','Por sorteo'] }, answer: 1, tier: 'expert',
-      explain: { en: 'If no one wins more than half the vote, a runoff is held between the top two candidates.', es: 'Si nadie supera la mitad de los votos, hay una segunda vuelta entre los dos más votados.' } }
+      explain: { en: 'If no one wins more than half the vote, a runoff is held between the top two candidates.', es: 'Si nadie supera la mitad de los votos, hay una segunda vuelta entre los dos más votados.' } },
+    { q: { en: 'How long is one term for the President of Chile?', es: '¿Cuánto dura un período del Presidente de Chile?' },
+      options: { en: ['2 years','4 years','6 years','8 years'], es: ['2 años','4 años','6 años','8 años'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'The President of Chile serves a 4-year term.', es: 'El Presidente de Chile cumple un período de 4 años.' } },
+    { q: { en: 'Can the President of Chile run again for the very next term?', es: '¿Puede el Presidente de Chile postular de inmediato al período siguiente?' },
+      options: { en: ['Yes, with no limit','No, not for the next term','Only if Congress agrees','Only once every 2 years'], es: ['Sí, sin límite','No, no para el período siguiente','Sólo si el Congreso lo acepta','Sólo cada 2 años'] }, answer: 1, tier: 'expert',
+      explain: { en: 'The Constitution does not allow the President to be reelected for the immediately following term.', es: 'La Constitución no permite que el Presidente sea reelegido para el período siguiente.' } },
+    { q: { en: 'How many deputies sit in Chile\'s Chamber of Deputies?', es: '¿Cuántos diputados integran la Cámara de Diputados de Chile?' },
+      options: { en: ['120','155','50','200'], es: ['120','155','50','200'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'The Chamber of Deputies has 155 members, elected in 28 districts.', es: 'La Cámara de Diputados tiene 155 miembros, elegidos en 28 distritos.' } },
+    { q: { en: 'How long does a deputy serve in Chile?', es: '¿Cuánto dura el cargo de un diputado en Chile?' },
+      options: { en: ['2 years','4 years','6 years','8 years'], es: ['2 años','4 años','6 años','8 años'] }, answer: 1, tier: 'advanced',
+      explain: { en: 'Deputies are elected for 4 years.', es: 'Los diputados se eligen por 4 años.' } },
+    { q: { en: 'How many senators does Chile have?', es: '¿Cuántos senadores tiene Chile?' },
+      options: { en: ['38','43','50','155'], es: ['38','43','50','155'] }, answer: 2, tier: 'advanced',
+      explain: { en: 'The Senate has 50 members. Each region is a senatorial district.', es: 'El Senado tiene 50 miembros. Cada región es una circunscripción senatorial.' } },
+    { q: { en: 'How long does a senator serve in Chile?', es: '¿Cuánto dura el cargo de un senador en Chile?' },
+      options: { en: ['4 years','6 years','8 years','12 years'], es: ['4 años','6 años','8 años','12 años'] }, answer: 2, tier: 'expert',
+      explain: { en: 'Senators serve 8 years. Half the Senate is renewed every 4 years.', es: 'Los senadores duran 8 años. La mitad del Senado se renueva cada 4 años.' } },
+    { q: { en: 'What is the minimum age to be elected a deputy in Chile?', es: '¿Cuál es la edad mínima para ser elegido diputado en Chile?' },
+      options: { en: ['18','21','25','35'], es: ['18','21','25','35'] }, answer: 1, tier: 'expert',
+      explain: { en: 'A deputy must be at least 21 on election day and have finished secondary school.', es: 'Un diputado debe tener al menos 21 años el día de la elección y haber cursado la enseñanza media.' } },
+    { q: { en: 'In the United Kingdom, who leads the government day to day?', es: 'En el Reino Unido, ¿quién dirige el gobierno en el día a día?' },
+      options: { en: ['The King','The Prime Minister','The Supreme Court','A directly elected president'], es: ['El Rey','El Primer Ministro','La Corte Suprema','Un presidente elegido directamente'] }, answer: 1, tier: 'intermediate',
+      explain: { en: 'The United Kingdom is a parliamentary monarchy. The Prime Minister leads the government; the King is the ceremonial head of state.', es: 'El Reino Unido es una monarquía parlamentaria. El Primer Ministro dirige el gobierno; el Rey es el jefe de Estado ceremonial.' } }
   ];
 
   // ── State ──
