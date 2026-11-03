@@ -457,6 +457,7 @@ var EuclidWorkshop = (function() {
     var ex = r.x0 + r.dx * r.tmax, ey = r.y0 + r.dy * r.tmax;
     return sc.objs.some(function(o) {
       if (!isLin(o) || Math.abs(o.dx * r.dy - o.dy * r.dx) > 1e-6 || distLine(o, r.x0, r.y0) > 1e-4) return false;
+      if (r.type === 'line') return o.type === 'line';      // a short segment does not replace a full line
       if (r.type !== 'segment') return true;
       return inR(o, tOn(o, r.x0, r.y0), 1e-4) && inR(o, tOn(o, ex, ey), 1e-4);
     });
