@@ -171,10 +171,10 @@ var Naturaleza = (function() {
   // ---------------- GUIDE ----------------
   function viewGuide(gid) {
     var g = group(gid) || D.GROUPS[0];
-    var tabs = '<div class="nat-tabs" role="tablist">' + D.GROUPS.map(function(x) {
-      return '<a role="tab" aria-selected="' + (x.id === g.id) + '" class="nat-tab' + (x.id === g.id ? ' on' : '') + '" href="#guide/' + x.id + '">' +
+    var tabs = '<nav class="nat-tabs" aria-label="Groups">' + D.GROUPS.map(function(x) {
+      return '<a' + (x.id === g.id ? ' aria-current="page"' : '') + ' class="nat-tab' + (x.id === g.id ? ' on' : '') + '" href="#guide/' + x.id + '">' +
         '<span aria-hidden="true">' + x.icon + '</span> ' + x.en + '</a>';
-    }).join('') + '</div>';
+    }).join('') + '</nav>';
     var list = D.SPECIES.filter(function(s) { return s.group === g.id; });
     var spotted = {};
     data.sightings.forEach(function(x) { spotted[x.s] = 1; });
@@ -230,10 +230,10 @@ var Naturaleza = (function() {
     var cur = now(), se = season(sid) || season(cur.id), isNow = se.id === cur.id;
     var cardId = isNow ? cur.cardId : null;
     var card = (cardId && data.cards[cardId]) || { found: [] };
-    var tabs = '<div class="nat-tabs nat-stabs" role="tablist">' + D.SEASONS.map(function(x) {
-      return '<a role="tab" aria-selected="' + (x.id === se.id) + '" class="nat-tab' + (x.id === se.id ? ' on' : '') + '" href="#spot/' + x.id + '" style="--tint:' + x.tint + '">' +
+    var tabs = '<nav class="nat-tabs nat-stabs" aria-label="Seasons">' + D.SEASONS.map(function(x) {
+      return '<a' + (x.id === se.id ? ' aria-current="page"' : '') + ' class="nat-tab' + (x.id === se.id ? ' on' : '') + '" href="#spot/' + x.id + '" style="--tint:' + x.tint + '">' +
         '<span aria-hidden="true">' + x.icon + '</span> ' + x.en + (x.id === cur.id ? ' <em>now</em>' : '') + '</a>';
-    }).join('') + '</div>';
+    }).join('') + '</nav>';
     var n = card.found.length, st = n >= 9 ? 3 : n >= 6 ? 2 : n >= 3 ? 1 : 0;
     var info = isNow ?
       '<div class="nat-spot-info"><div><b>' + se.en + ' · ' + se.es + '</b> <span class="nat-pencil">' + se.range + '</span><small>' +

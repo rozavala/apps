@@ -1010,7 +1010,11 @@ var QueHoraEs = (function() {
       watchSize(area, R.clock, layout === 'scene' ? 360 : 440);
       R.flip = A.createFlip(document.getElementById('qhe-flip'));
     }
-    view.onLang = function() { renderQ(true); };
+    view.onLang = function() {
+      var tt = $('.qhe-top-title');
+      if (tt) tt.innerHTML = m.icon + ' ' + (lang === 'es' ? m.es : m.en) + ' <small>· ' + esc(tx(info)) + '</small>';
+      renderQ(true);
+    };
     view.keyHandler = onKey;
     document.addEventListener('keydown', onKey);
     renderDots();

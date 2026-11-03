@@ -1544,6 +1544,91 @@ var MarineroArt = (function() {
     });
   }
 
+
+  // ---------------------------------------------------------------
+  // SIGNAL FLAGS (International Code of Signals) as SVG
+  // ---------------------------------------------------------------
+  var FC = { r: '#d0202e', w: '#ffffff', b: '#1f4fa3', y: '#ffd400', k: '#111111' };
+  // Each design: list of [shape, colour, ...] in a 150 × 100 box.
+  function flagShapes(L) {
+    var R = function(x, y, w, h, c) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + FC[c] + '"/>'; };
+    var P = function(pts, c) { return '<polygon points="' + pts + '" fill="' + FC[c] + '"/>'; };
+    var i, out = '';
+    switch (L) {
+      case 'A': return R(0, 0, 75, 100, 'w') + R(75, 0, 75, 100, 'b');
+      case 'B': return R(0, 0, 150, 100, 'r');
+      case 'C': return R(0, 0, 150, 20, 'b') + R(0, 20, 150, 20, 'w') + R(0, 40, 150, 20, 'r') + R(0, 60, 150, 20, 'w') + R(0, 80, 150, 20, 'b');
+      case 'D': return R(0, 0, 150, 25, 'y') + R(0, 25, 150, 50, 'b') + R(0, 75, 150, 25, 'y');
+      case 'E': return R(0, 0, 150, 50, 'b') + R(0, 50, 150, 50, 'r');
+      case 'F': return R(0, 0, 150, 100, 'w') + P('75,0 150,50 75,100 0,50', 'r');
+      case 'G': for (i = 0; i < 6; i++) out += R(i * 25, 0, 25, 100, i % 2 ? 'b' : 'y'); return out;
+      case 'H': return R(0, 0, 75, 100, 'w') + R(75, 0, 75, 100, 'r');
+      case 'I': return R(0, 0, 150, 100, 'y') + '<circle cx="75" cy="50" r="25" fill="' + FC.k + '"/>';
+      case 'J': return R(0, 0, 150, 33.4, 'b') + R(0, 33.3, 150, 33.4, 'w') + R(0, 66.6, 150, 33.4, 'b');
+      case 'K': return R(0, 0, 75, 100, 'y') + R(75, 0, 75, 100, 'b');
+      case 'L': return R(0, 0, 75, 50, 'y') + R(75, 0, 75, 50, 'k') + R(0, 50, 75, 50, 'k') + R(75, 50, 75, 50, 'y');
+      case 'M': return R(0, 0, 150, 100, 'b') + P('0,0 22,0 150,85 150,100 128,100 0,15', 'w') + P('150,0 128,0 0,85 0,100 22,100 150,15', 'w');
+      case 'N': for (i = 0; i < 16; i++) out += R((i % 4) * 37.5, Math.floor(i / 4) * 25, 37.6, 25.1, ((i % 4) + Math.floor(i / 4)) % 2 ? 'w' : 'b'); return out;
+      case 'O': return P('0,0 150,100 0,100', 'y') + P('0,0 150,0 150,100', 'r');
+      case 'P': return R(0, 0, 150, 100, 'b') + R(50, 33.3, 50, 33.4, 'w');
+      case 'Q': return R(0, 0, 150, 100, 'y');
+      case 'R': return R(0, 0, 150, 100, 'r') + R(0, 40, 150, 20, 'y') + R(65, 0, 20, 100, 'y');
+      case 'S': return R(0, 0, 150, 100, 'w') + R(50, 33.3, 50, 33.4, 'b');
+      case 'T': return R(0, 0, 50, 100, 'r') + R(50, 0, 50, 100, 'w') + R(100, 0, 50, 100, 'b');
+      case 'U': return R(0, 0, 75, 50, 'r') + R(75, 0, 75, 50, 'w') + R(0, 50, 75, 50, 'w') + R(75, 50, 75, 50, 'r');
+      case 'V': return R(0, 0, 150, 100, 'w') + P('0,0 22,0 150,85 150,100 128,100 0,15', 'r') + P('150,0 128,0 0,85 0,100 22,100 150,15', 'r');
+      case 'W': return R(0, 0, 150, 100, 'b') + R(25, 16.7, 100, 66.6, 'w') + R(50, 33.3, 50, 33.4, 'r');
+      case 'X': return R(0, 0, 150, 100, 'w') + R(0, 40, 150, 20, 'b') + R(65, 0, 20, 100, 'b');
+      case 'Y':
+        out = R(0, 0, 150, 100, 'y');
+        for (i = -5; i < 11; i += 2) out += P((i * 20) + ',100 ' + (i * 20 + 20) + ',100 ' + (i * 20 + 120) + ',0 ' + (i * 20 + 100) + ',0', 'r');
+        return out;
+      case 'Z': return P('0,0 150,0 75,50', 'y') + P('150,0 150,100 75,50', 'b') + P('0,100 150,100 75,50', 'r') + P('0,0 75,50 0,100', 'k');
+    }
+    return '';
+  }
+
+  var _flagSeq = 0;
+  // A flag on its halyard, gently waving. o.w = css width, o.still = no motion
+  function flagSVG(L, o) {
+    o = o || {};
+    var id = 'mfl' + (++_flagSeq);
+    var tail = (L === 'A' || L === 'B');
+    // waving outline: the fly edge moves more than the hoist
+    function edge(y0, sign) {
+      var d = '';
+      for (var x = 0; x <= 150; x += 10) {
+        var a = (x / 150) * 4.5;
+        d += (x === 0 ? '' : ' L') + x + ',' + (y0 + sign * 0 + Math.sin(x / 150 * Math.PI * 1.6 + 0.6) * a).toFixed(1);
+      }
+      return d;
+    }
+    var top = edge(0, 1), bot = edge(100, 1);
+    var outline = 'M0,0 L' + top.replace(/^0,[^ ]+ ?L?/, '') +
+      (tail ? ' L105,' + (50 + 3).toFixed(1) : '') +
+      ' L' + bot.split(' L').reverse().join(' L') + ' Z';
+    var folds = '<linearGradient id="' + id + 'g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="75" y2="8" spreadMethod="repeat">' +
+      '<stop offset="0" stop-color="#000" stop-opacity="0.22"/><stop offset="0.3" stop-color="#fff" stop-opacity="0.18"/>' +
+      '<stop offset="0.55" stop-color="#fff" stop-opacity="0.02"/><stop offset="0.8" stop-color="#000" stop-opacity="0.12"/>' +
+      '<stop offset="1" stop-color="#000" stop-opacity="0.22"/>' +
+      (o.still ? '' : '<animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="75 8" dur="2.6s" repeatCount="indefinite"/>') +
+      '</linearGradient>';
+    var hoistShade = '<linearGradient id="' + id + 'h" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity="0.18"/><stop offset="0.12" stop-color="#000" stop-opacity="0"/></linearGradient>';
+    var w = o.w || 120;
+    return '<svg class="mar-flag" viewBox="-14 -8 172 118" width="' + w + '" height="' + Math.round(w * 118 / 172) + '" role="img" aria-label="' + (o.label || ('Flag ' + L)) + '">' +
+      '<defs><clipPath id="' + id + 'c"><path d="' + outline + '"/></clipPath>' + folds + hoistShade +
+      '<filter id="' + id + 's" x="-10%" y="-10%" width="130%" height="140%"><feDropShadow dx="2" dy="3" stdDeviation="2.2" flood-opacity="0.35"/></filter></defs>' +
+      // halyard
+      '<line x1="-6" y1="-8" x2="-6" y2="110" stroke="#c9b48a" stroke-width="2.4"/>' +
+      '<line x1="-6" y1="-8" x2="-6" y2="110" stroke="#7a6640" stroke-width="2.4" stroke-dasharray="1.5 2.5"/>' +
+      '<rect x="-9" y="-4" width="6" height="8" rx="2" fill="#7b4a24"/><rect x="-9" y="96" width="6" height="8" rx="2" fill="#7b4a24"/>' +
+      '<g filter="url(#' + id + 's)"><g clip-path="url(#' + id + 'c)">' + flagShapes(L) +
+      '<rect x="0" y="-10" width="150" height="120" fill="url(#' + id + 'g)"/>' +
+      '<rect x="0" y="-10" width="150" height="120" fill="url(#' + id + 'h)"/></g></g>' +
+      '<rect x="-2" y="0" width="3" height="100" fill="#e9e2cf"/>' +
+      '</svg>';
+  }
+
   // Objects a knot is tied around, ready for drawModel's level ordering.
   function knotObjects(K, devScale) {
     var out = [];
@@ -1563,7 +1648,7 @@ var MarineroArt = (function() {
   }
 
   return {
-    knotObjects: knotObjects, harbourBackdrop: harbourBackdrop, drawSea: drawSea, drawBuoy: drawBuoy, drawBow: drawBow, lightOn: lightOn, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
+    knotObjects: knotObjects, flagSVG: flagSVG, harbourBackdrop: harbourBackdrop, drawSea: drawSea, drawBuoy: drawBuoy, drawBow: drawBow, lightOn: lightOn, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
     clamp: clamp, rgb: rgb, shadeC: shadeC, mixC: mixC, rng: rng,
     fitCanvas: fitCanvas, castShadow: castShadow,
     ROPE_COLORS: ROPE_COLORS,
