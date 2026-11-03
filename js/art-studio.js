@@ -115,6 +115,20 @@ const ArtStudio = (() => {
         { text: 'Add an antenna line on top of the head.', type: 'line', points: [[100,40], [100,20]] },
         { text: 'Draw two leg lines under the body.', type: 'line', points: [[85,160], [85,200]] }
       ]
+    },
+    {
+      id: 'still_life',
+      title: 'Still Life',
+      description: 'Arrange an apple and a vase on a table using circles, a rectangle, and a line.',
+      icon: '🍎',
+      tier: 'intermediate',
+      steps: [
+        { text: 'Draw a wide rectangle for the table.', type: 'rect', x: 30, y: 140, w: 140, h: 40 },
+        { text: 'Draw a circle for the apple.', type: 'circle', x: 70, y: 115, r: 22 },
+        { text: 'Draw a circle for the vase.', type: 'circle', x: 130, y: 110, r: 18 },
+        { text: 'Add a short line for the apple stem.', type: 'line', points: [[70, 93], [70, 78]] },
+        { text: 'Shade the apple with the pencil.', type: 'pencil' }
+      ]
     }
   ];
 

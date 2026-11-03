@@ -11,7 +11,7 @@ const VocabularioVivo = (() => {
 
   const STORE_PREFIX = 'zs_vocab_';
 
-  // ── 30 Latin/Greek roots ─────────────────────────────────────────
+  // ── 72 Latin/Greek roots ─────────────────────────────────────────
   // tier: 1 = beginner (6-7), 2 = intermediate (8-9), 3 = advanced (10+)
   const ROOTS = [
     // ── Latin ──
@@ -551,10 +551,58 @@ const VocabularioVivo = (() => {
         { en: 'police',     es: 'policía' },
         { en: 'politics',   es: 'política' },
         { en: 'megalopolis',es: 'megalópolis' }
+      ] },
+    { id: 'form', origin: 'L', tier: 2,
+      meaning: { en: 'shape', es: 'forma' },
+      words: [
+        { en: 'form',      es: 'forma' },
+        { en: 'format',    es: 'formato' },
+        { en: 'transform', es: 'transformar' },
+        { en: 'uniform',   es: 'uniforme' }
+      ] },
+    { id: 'uni', origin: 'L', tier: 1,
+      meaning: { en: 'one', es: 'uno' },
+      words: [
+        { en: 'unit',     es: 'unidad' },
+        { en: 'unique',   es: 'único' },
+        { en: 'unicorn',  es: 'unicornio' },
+        { en: 'universe', es: 'universo' }
+      ] },
+    { id: 'ann', origin: 'L', tier: 2,
+      meaning: { en: 'year', es: 'año' },
+      words: [
+        { en: 'annual',      es: 'anual' },
+        { en: 'anniversary', es: 'aniversario' },
+        { en: 'annals',      es: 'anales' },
+        { en: 'semiannual',  es: 'semianual' }
+      ] },
+    { id: 'ject', origin: 'L', tier: 2,
+      meaning: { en: 'throw', es: 'lanzar' },
+      words: [
+        { en: 'project', es: 'proyecto' },
+        { en: 'reject',  es: 'rechazar' },
+        { en: 'inject',  es: 'inyectar' },
+        { en: 'eject',   es: 'eyectar' }
+      ] },
+    { id: 'meter', origin: 'G', tier: 2,
+      meaning: { en: 'measure', es: 'medida' },
+      words: [
+        { en: 'meter',     es: 'metro' },
+        { en: 'diameter',  es: 'diámetro' },
+        { en: 'perimeter', es: 'perímetro' },
+        { en: 'metric',    es: 'métrico' }
+      ] },
+    { id: 'log', origin: 'G', tier: 2,
+      meaning: { en: 'word, reason', es: 'palabra, razón' },
+      words: [
+        { en: 'logic',     es: 'lógica' },
+        { en: 'dialogue',  es: 'diálogo' },
+        { en: 'catalog',   es: 'catálogo' },
+        { en: 'monologue', es: 'monólogo' }
       ] }
   ];
 
-  // ── 20 build tasks: meaning + parts → assembled word ─────────────
+  // ── 32 build tasks: meaning + parts → assembled word ─────────────
   // tier matches the root's tier roughly. Pieces appear shuffled with
   // 2-3 decoys at runtime.
   const BUILDS = [
@@ -635,10 +683,28 @@ const VocabularioVivo = (() => {
       es: { meaning: 'un sentimiento compartido con otro', word: 'simpatía' } },
     { tier: 3, prefix: 'demo',  root: 'crat',   suffix: '',
       en: { meaning: 'one who supports rule by the people', word: 'democrat' },
-      es: { meaning: 'quien apoya el gobierno del pueblo', word: 'demócrata' } }
+      es: { meaning: 'quien apoya el gobierno del pueblo', word: 'demócrata' } },
+    { tier: 1, prefix: '',      root: 'uni',    suffix: 'verse',
+      en: { meaning: 'everything taken as one whole', word: 'universe' },
+      es: { meaning: 'todo tomado como un solo conjunto', word: 'universo' } },
+    { tier: 2, prefix: 'trans', root: 'form',   suffix: '',
+      en: { meaning: 'to change the shape of something', word: 'transform' },
+      es: { meaning: 'cambiar la forma de algo', word: 'transformar' } },
+    { tier: 2, prefix: '',      root: 'ann',    suffix: 'ual',
+      en: { meaning: 'happening once each year', word: 'annual' },
+      es: { meaning: 'que ocurre una vez al año', word: 'anual' } },
+    { tier: 2, prefix: 're',    root: 'ject',   suffix: '',
+      en: { meaning: 'to throw something back', word: 'reject' },
+      es: { meaning: 'lanzar algo de vuelta', word: 'rechazar' } },
+    { tier: 2, prefix: 'dia',   root: 'meter',  suffix: '',
+      en: { meaning: 'the measure straight across a circle', word: 'diameter' },
+      es: { meaning: 'la medida que cruza un círculo', word: 'diámetro' } },
+    { tier: 2, prefix: '',      root: 'log',    suffix: 'ic',
+      en: { meaning: 'reasoning from words and ideas', word: 'logic' },
+      es: { meaning: 'razonamiento a partir de palabras e ideas', word: 'lógica' } }
   ];
 
-  // ── 30 dictation pairs: definition → word ────────────────────────
+  // ── 45 dictation pairs: definition → word ────────────────────────
   // Bilingual: each entry has en/es defintion + word. The accent-
   // insensitive _normaliseWord helper means a kid typing "biologia"
   // is marked correct even without the í.
@@ -720,7 +786,19 @@ const VocabularioVivo = (() => {
     { tier: 3, en: { def: 'a tool to look at distant objects', word: 'telescope' },
                 es: { def: 'instrumento para mirar objetos lejanos', word: 'telescopio' } },
     { tier: 3, en: { def: 'the outer layer of the skin',       word: 'epidermis' },
-                es: { def: 'la capa exterior de la piel',      word: 'epidermis' } }
+                es: { def: 'la capa exterior de la piel',      word: 'epidermis' } },
+    { tier: 1, en: { def: 'a single whole counted as one',     word: 'unit' },
+                es: { def: 'un todo contado como uno',         word: 'unidad' } },
+    { tier: 2, en: { def: 'happening once each year',          word: 'annual' },
+                es: { def: 'que ocurre una vez al año',        word: 'anual' } },
+    { tier: 2, en: { def: 'to throw something back',           word: 'reject' },
+                es: { def: 'lanzar algo de vuelta',            word: 'rechazar' } },
+    { tier: 2, en: { def: 'the measure straight across a circle', word: 'diameter' },
+                es: { def: 'la medida que cruza un círculo',   word: 'diámetro' } },
+    { tier: 2, en: { def: 'reasoning from words and ideas',    word: 'logic' },
+                es: { def: 'razonamiento a partir de ideas',   word: 'lógica' } },
+    { tier: 2, en: { def: 'to change the shape of something',  word: 'transform' },
+                es: { def: 'cambiar la forma de algo',         word: 'transformar' } }
   ];
 
   // ── State ──

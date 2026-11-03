@@ -351,7 +351,9 @@ const QB={
     {q:'¿Qué estudian principalmente los científicos en la Antártica?',a:'El clima y la fauna',o:['El clima y la fauna','La agricultura','Los bosques','La minería de oro'], tier:'intermediate'},
     {q:'¿Qué tratado regula la Antártica?',a:'Tratado Antártico',o:['Tratado Antártico','Tratado de Paz','Pacto del Sur','Acuerdo Polar'], tier:'advanced'},
     {q:'¿Hay osos polares en la Antártica?',a:'No',o:['No','Sí','Solo en invierno','Solo en verano'], tier:'beginner'},
-    {q:'¿Qué porcentaje de agua dulce del mundo está en la Antártica?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'expert', explain:'Cerca del 70% del agua dulce del planeta está congelada en el hielo de la Antártica.'}
+    {q:'¿Qué porcentaje de agua dulce del mundo está en la Antártica?',a:'Alrededor del 70%',o:['Alrededor del 70%','El 10%','El 30%','El 90%'], tier:'expert', explain:'Cerca del 70% del agua dulce del planeta está congelada en el hielo de la Antártica.'},
+    {q:'¿Qué pingüino, el más grande, vive en la Antártica?',a:'El pingüino emperador',o:['El pingüino emperador','El pingüino de Humboldt','El flamenco','El cóndor'], tier:'intermediate', explain:'El pingüino emperador es el más grande y cría sobre el hielo antártico.'},
+    {q:'¿En qué año se firmó el Tratado Antártico?',a:'1959',o:['1959','1810','1945','2000'], tier:'expert', explain:'El Tratado Antártico se firmó en 1959 y reserva el continente para la paz y la ciencia.'}
   ],
   indigenous:[
     {q:'¿Qué idioma habla el pueblo mapuche?',a:'Mapudungun',o:['Mapudungun','Aymara','Quechua','Rapa Nui'], tier:'beginner'},
@@ -468,7 +470,9 @@ const QB={
     {q:'¿En qué año nació el biólogo y filósofo Francisco Varela?',a:'1946',o:['1946','1920','1980','1965'], tier:'advanced'},
     {q:'¿Qué tipo de telescopio es ALMA, en el llano de Chajnantor?',a:'Radiotelescopio',o:['Radiotelescopio','Telescopio óptico','Telescopio de rayos X','Telescopio infrarrojo casero'], tier:'expert', explain:'ALMA es un gran radiotelescopio formado por decenas de antenas en el altiplano de Chajnantor.'},
     {q:'¿Por qué el desierto de Atacama es ideal para los observatorios astronómicos?',a:'Cielos despejados y secos',o:['Cielos despejados y secos','Mucha lluvia','Bosques densos','Alta humedad'], tier:'advanced', explain:'Los cielos despejados, secos y sin contaminación lumínica de Atacama lo hacen perfecto para observar las estrellas.'},
-    {q:'¿En qué cerro del norte se construye el Telescopio Extremadamente Grande (ELT)?',a:'Cerro Armazones',o:['Cerro Armazones','Cerro Paranal','Cerro Tololo','Cerro La Silla'], tier:'expert', explain:'El ELT se construye en la cima del Cerro Armazones, en pleno desierto de Atacama.'}
+    {q:'¿En qué cerro del norte se construye el Telescopio Extremadamente Grande (ELT)?',a:'Cerro Armazones',o:['Cerro Armazones','Cerro Paranal','Cerro Tololo','Cerro La Silla'], tier:'expert', explain:'El ELT se construye en la cima del Cerro Armazones, en pleno desierto de Atacama.'},
+    {q:'¿Cómo se llama el observatorio de cuatro grandes telescopios en el cerro Paranal?',a:'VLT',o:['VLT','ALMA','ELT','Hubble'], tier:'advanced', explain:'El Very Large Telescope (VLT), en el cerro Paranal, reúne cuatro telescopios ópticos grandes.'},
+    {q:'¿Qué científico del siglo XIX estudió la geología y la minería de Chile?',a:'Ignacio Domeyko',o:['Ignacio Domeyko','Pablo Valenzuela','Claudio Arrau','Pedro de Valdivia'], tier:'expert', explain:'Ignacio Domeyko, llegado a Chile en el siglo XIX, estudió los minerales del país y enseñó geología y minería.'}
   ],
   volcanes:[
     {q:'¿En qué "cinturón" de la Tierra está ubicado Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Cinturón de Asteroides','Cinturón de Orión','Cinturón Ecuatorial'], tier:'advanced', explain:'Chile está en el Cinturón de Fuego del Pacífico, por eso tiene tantos volcanes y terremotos.'},
@@ -493,7 +497,11 @@ const QB={
     {q:'¿Dónde vive principalmente el pudú?',a:'En el sur de Chile',o:['En el sur de Chile','En el desierto','En la Isla de Pascua','En Santiago'], tier:'intermediate'},
     {q:'¿Qué animal marino se puede ver en las costas chilenas?',a:'El lobo marino',o:['El lobo marino','El oso polar','La morsa','El manatí'], tier:'beginner'},
     {q:'¿Qué animal es el huemul?',a:'Un ciervo nativo',o:['Un ciervo nativo','Un felino','Una rapaz','Un roedor'], tier:'beginner'},
-    {q:'¿Cuál es el felino más grande que habita en Chile?',a:'El puma',o:['El puma','El gato colocolo','El jaguar','El güiña'], tier:'intermediate'}
+    {q:'¿Cuál es el felino más grande que habita en Chile?',a:'El puma',o:['El puma','El gato colocolo','El jaguar','El güiña'], tier:'intermediate'},
+    {q:'¿Qué ave del escudo nacional puede vivir más de 70 años?',a:'El cóndor',o:['El cóndor','El águila','El flamenco','El pingüino'], tier:'beginner', explain:'El cóndor andino, que aparece en el escudo, puede vivir más de 70 años.'},
+    {q:'¿Cómo se llama la nutria que vive en la costa de Chile?',a:'El chungungo',o:['El chungungo','La vicuña','El huemul','El pudú'], tier:'intermediate', explain:'El chungungo es la nutria marina de la costa chilena.'},
+    {q:'¿Cuál es el felino silvestre más pequeño de América y vive en los bosques del sur de Chile?',a:'La güiña',o:['La güiña','El puma','El jaguar','El zorro culpeo'], tier:'advanced', explain:'La güiña es el felino silvestre más pequeño de América y habita los bosques del centro y sur de Chile.'},
+    {q:'¿Cuántas especies de flamenco viven en Chile?',a:'Tres',o:['Tres','Una','Cinco','Diez'], tier:'expert', explain:'En Chile viven tres especies: el flamenco chileno, el flamenco andino y el flamenco de James.'}
   ],
   volcanes_chile:[
     {q:'¿En qué región del Pacífico se encuentra Chile?',a:'Cinturón de Fuego',o:['Cinturón de Fuego','Anillo de Agua','Zona de Tormentas','Cordillera Central'], tier:'intermediate'},
@@ -504,7 +512,10 @@ const QB={
     {q:'¿Qué volcán hizo erupción en 2015 en la Región de Los Lagos?',a:'Calbuco',o:['Calbuco','Villarrica','Osorno','Llaima'], tier:'expert'},
     {q:'¿Cuál fue la magnitud del terremoto de Valdivia de 1960, el más fuerte registrado en la historia?',a:'9,5',o:['9,5','7,0','6,2','8,0'], tier:'expert', explain:'El terremoto de Valdivia de 1960, de magnitud 9,5, es el más fuerte jamás registrado por instrumentos.'},
     {q:'¿En qué año ocurrió el terremoto de Valdivia, el mayor jamás medido?',a:'1960',o:['1960','1985','2010','1939'], tier:'advanced'},
-    {q:'¿Qué gran ola provocó el terremoto de Valdivia de 1960 que cruzó el Pacífico?',a:'Un tsunami',o:['Un tsunami','Una marejada leve','Una nevada','Una sequía'], tier:'expert', explain:'El terremoto de Valdivia generó un enorme tsunami que cruzó el Pacífico y llegó hasta Japón y Hawái.'}
+    {q:'¿Qué gran ola provocó el terremoto de Valdivia de 1960 que cruzó el Pacífico?',a:'Un tsunami',o:['Un tsunami','Una marejada leve','Una nevada','Una sequía'], tier:'expert', explain:'El terremoto de Valdivia generó un enorme tsunami que cruzó el Pacífico y llegó hasta Japón y Hawái.'},
+    {q:'¿Qué volcán del norte se alza junto al lago Chungará?',a:'El Parinacota',o:['El Parinacota','El Osorno','El Villarrica','El Calbuco'], tier:'advanced', explain:'El volcán Parinacota está en el altiplano, junto al lago Chungará, en el Parque Nacional Lauca.'},
+    {q:'¿Qué servicio del Estado vigila los volcanes de Chile?',a:'SERNAGEOMIN',o:['SERNAGEOMIN','SERVEL','ALMA','SAG'], tier:'expert', explain:'El Servicio Nacional de Geología y Minería, SERNAGEOMIN, vigila la actividad de los volcanes.'},
+    {q:'¿Qué volcán del sur hizo erupción en 2008 y cubrió de ceniza el pueblo del mismo nombre?',a:'El Chaitén',o:['El Chaitén','El Osorno','El Parinacota','El Licancabur'], tier:'expert', explain:'En mayo de 2008 el volcán Chaitén, en la Región de Los Lagos, hizo erupción después de siglos de calma.'}
   ],
   folk:[
     {q:'¿Quién compuso "Gracias a la vida"?',a:'Violeta Parra',o:['Violeta Parra','Mercedes Sosa','Patricio Manns','Víctor Jara'], tier:'beginner'},
@@ -526,7 +537,11 @@ const QB={
     {q:'¿En qué año se declaró a la Cueca como baile nacional?',a:'1979',o:['1979','1810','1990','2000'], tier:'expert', explain:'La cueca fue declarada baile nacional de Chile en 1979 por decreto oficial.'},
     {q:'¿Qué animal representa el cortejo de la Cueca?',a:'Gallo y gallina',o:['Gallo y gallina','Cóndor y águila','Puma y huemul','Caballo y yegua'], tier:'intermediate'},
     {q:'¿Qué juego típico se juega elevándolo con hilo al viento?',a:'El volantín',o:['El volantín','El trompo','El emboque','Las bolitas'], tier:'beginner'},
-    {q:'¿Qué comida es tradicional en Fiestas Patrias?',a:'La empanada de pino',o:['La empanada de pino','El sushi','La pizza','Los tacos'], tier:'beginner'}
+    {q:'¿Qué comida es tradicional en Fiestas Patrias?',a:'La empanada de pino',o:['La empanada de pino','El sushi','La pizza','Los tacos'], tier:'beginner'},
+    {q:'¿Qué día sigue al 18 en el fin de semana de Fiestas Patrias?',a:'El 19 de septiembre',o:['El 19 de septiembre','El 12 de febrero','El 21 de mayo','El 1 de mayo'], tier:'beginner'},
+    {q:'¿Qué es una fonda?',a:'Un lugar de fiesta con comida y baile',o:['Un lugar de fiesta con comida y baile','Un tipo de barco','Una montaña','Un volcán'], tier:'beginner', explain:'En Fiestas Patrias las fondas son ramadas donde se come, se baila cueca y se juega.'},
+    {q:'¿Qué bebida lleva trigo cocido y duraznos secos?',a:'El mote con huesillo',o:['El mote con huesillo','El pisco sour','La chicha','El ulpo'], tier:'intermediate', explain:'El mote con huesillo es una bebida fría de mote de trigo y huesillos, los duraznos secos.'},
+    {q:'¿Qué juguete de madera se hace girar en el suelo con un cordel?',a:'El trompo',o:['El trompo','El volantín','La rayuela','El emboque'], tier:'beginner'}
   ]
 };
 
