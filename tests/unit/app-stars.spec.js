@@ -71,7 +71,12 @@ const CASES = [
   { id: 'euclid', prefix: 'zs_euclid_',
     data: { v: 1, levels: { equilateral: { stars: 3, best: 4, at: '2026-11-03' }, midpoint: { stars: 2, best: 3, at: '2026-11-03' },
             hexagon: { stars: 1, best: 12, at: '2026-11-03' } }, guided: false, last: 'hexagon' },
-    stars: 6 }
+    stars: 6 },
+  { id: 'cocina', prefix: 'zs_cocina_',
+    data: { v: 1, cooked: { 'huevos-revueltos': { stars: 3, count: 2, dates: ['2026-11-03', '2026-10-28'] },
+            pebre: { stars: 2, count: 1, dates: ['2026-11-01'] } }, measure: { m1: 3, m2: 2, m6: 1 },
+            safetyStars: 2, safetyBest: 5, eggStars: 3 },
+    stars: 16 }
 ];
 
 test.describe('per-app star rules', () => {

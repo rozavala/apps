@@ -379,6 +379,15 @@ var APP_STAR_CONFIGS = [
       var n = 0, L = d.levels || {};
       for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
       return n;
+    } },
+  // Cocina Lab: each recipe cooked (confirmed by a grown-up's PIN) and
+  // each Measuring Lab task is starred out of 3, plus the safety quiz and
+  // the egg-cracking drill.
+  { id: 'cocina', prefix: 'zs_cocina_', stars: function(d) {
+      var n = 0, k;
+      for (k in (d.cooked || {})) n += Math.min(3, (d.cooked[k] && d.cooked[k].stars) || 0);
+      for (k in (d.measure || {})) n += Math.min(3, d.measure[k] || 0);
+      return n + Math.min(3, d.safetyStars || 0) + Math.min(3, d.eggStars || 0);
     } }
 ];
 
