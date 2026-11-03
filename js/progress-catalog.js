@@ -211,7 +211,7 @@ window.ZSProgressCatalog = {
   ],
 
   lab: [
-    {"i":"colors","l":"🎨 Color Mixing Lab","g":"Chemistry","n":1},
+    {"i":"colors","l":"🎨 Color Mixing","g":"Chemistry","n":1},
     {"i":"water","l":"💧 Water Cycle","g":"Earth Science","n":1},
     {"i":"plants","l":"🌱 Plant Growth","g":"Biology","n":1},
     {"i":"physics","l":"⚙️ Simple Machines","g":"Physics","n":1},

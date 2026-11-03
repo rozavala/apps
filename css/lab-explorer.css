@@ -131,6 +131,16 @@ body {
 .exp-controls:empty { display: none; }
 .exp-instruction { font-size: 0.95rem; font-weight: 700; text-align: center; color: var(--text-muted); }
 
+/* phones and iPads: the challenge card sits right under the experiment */
+@media (max-width: 1099px) {
+  .exp-layout { gap: 12px; }
+  .exp-stage, .exp-side { display: contents; }
+  .exp-canvas-wrap { order: 1; }
+  .exp-challenge { order: 2; }
+  .exp-controls { order: 3; }
+  .exp-journal { order: 4; }
+  .exp-actions { order: 5; }
+}
 @media (min-width: 1100px) {
   .exp-layout { flex-direction: row; align-items: flex-start; }
   .exp-stage { flex: 1 1 auto; }
