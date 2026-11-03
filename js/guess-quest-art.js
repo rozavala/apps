@@ -290,6 +290,7 @@ var GuessQuestArt = (function() {
           '<linearGradient id="' + id + 'warm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6a35c"/><stop offset="0.6" stop-color="#ffd59a"/><stop offset="1" stop-color="#fff1d6"/></linearGradient>' +
           '<linearGradient id="' + id + 'mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f86a3"/><stop offset="1" stop-color="#a7b9cb"/></linearGradient>' +
           '<linearGradient id="' + id + 'asph" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4d54"/><stop offset="0.5" stop-color="#5a5d64"/><stop offset="1" stop-color="#3e4147"/></linearGradient>' +
+          '<linearGradient id="' + id + 'haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#f3f7fb" stop-opacity="0.55"/></linearGradient>' +
           '<radialGradient id="' + id + 'sun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff7d1"/><stop offset="0.35" stop-color="#ffe08a"/><stop offset="1" stop-color="#ffd166" stop-opacity="0"/></radialGradient>' +
         '</defs>' +
         '<rect width="' + W + '" height="' + H + '" fill="url(#' + id + 'cold)"/>' +
@@ -303,6 +304,7 @@ var GuessQuestArt = (function() {
           '<g class="gq-cloud" style="animation-delay:-19s"><ellipse cx="330" cy="38" rx="40" ry="9" fill="#fff" opacity="0.7"/><ellipse cx="318" cy="32" rx="16" ry="8" fill="#fff" opacity="0.7"/></g>' +
         '</g>' +
         '<g class="gq-layer gq-far" data-k="0.15">' + far + far2 + '</g>' +
+        '<rect y="120" width="' + W + '" height="70" fill="url(#' + id + 'haze)"/>' +
         '<g class="gq-layer gq-mid" data-k="0.45">' + mid + '</g>' +
         '<g class="gq-layer gq-road" data-k="1">' + road + '</g>' +
         '<g class="gq-car-pos" transform="translate(' + CAR_X + ',' + (ROAD_Y - 4) + ') scale(0.82)">' + car(opts.color, { plate: true }) + '</g>' +

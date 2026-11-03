@@ -1059,7 +1059,7 @@ const VocabularioVivo = (() => {
       card.innerHTML =
         '<span class="vv-root-art">' + _art(r.id, 46) + '</span>' +
         '<span class="vv-root-id">' + _esc(r.id.replace('_alone', '')) + '-</span>' +
-        '<span class="vv-root-origin vv-origin-' + r.origin + '">' + (r.origin === 'L' ? 'Latín' : 'Griego') + '</span>' +
+        '<span class="vv-root-origin vv-origin-' + r.origin + '">' + _origin(r) + '</span>' +
         '<span class="vv-root-meaning">' + _esc(_l(r.meaning)) + '</span>' +
         '<span class="vv-root-tier" aria-label="' + _T('level', 'nivel') + ' ' + r.tier + '">' +
           '<i class="on"></i>' + '<i' + (r.tier >= 2 ? ' class="on"' : '') + '></i>' + '<i' + (r.tier >= 3 ? ' class="on"' : '') + '></i>' +
