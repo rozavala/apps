@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/quest-adventure.css">
+  <link rel="stylesheet" href="css/quest-adventure.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -18,30 +18,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 </head>
-<body>
-  <div class="atmo" style="width:400px;height:400px;background:rgba(245,158,11,0.08);top:-100px;left:-100px;"></div>
-  <div class="atmo" style="width:350px;height:350px;background:rgba(16,185,129,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
-
-  <div class="app">
-    <div class="quest-header">
-      <span class="icon">🧗</span>
-      <h1>Quest Adventure</h1>
-      <p>Your progress across every app unlocks the world!</p>
-    </div>
-
-    <div class="map-container">
-      <div id="quest-map" class="quest-map">
-        <!-- Vertical winding path nodes -->
-      </div>
-    </div>
+<body class="qa-body">
+  <div class="app qa-app">
+    <div id="qa-root" class="qa-root"></div>
   </div>
 
-  <!-- Region Detail Overlay -->
-  <div id="quest-detail" class="dash-overlay" onclick="if(event.target===this) this.classList.remove('active')">
-    <!-- Populated by JS -->
-  </div>
+  <!-- Region card (filled by js/quest-adventure.js) -->
+  <div id="quest-detail" class="dash-overlay qa-overlay" onclick="if(event.target===this) QuestAdventure.closeRegion()"></div>
 
-  <script src="js/auth.js?v=3"></script>
+  <script src="js/auth.js?v=4"></script>
   <script src="js/off-hours.js?v=1"></script>
 
   <script src="js/a11y.js"></script>
@@ -52,8 +37,10 @@
   <script src="js/sounds.js"></script>
   <script src="js/timer.js?v=3"></script>
   <script src="js/activity-log.js"></script>
-  <script src="js/learning-checks.js?v=4"></script>
-  <script src="js/quest-adventure.js"></script>
+  <script src="js/learning-checks.js?v=5"></script>
+  <script src="js/quest-adventure-data.js?v=1"></script>
+  <script src="js/quest-adventure-art.js?v=1"></script>
+  <script src="js/quest-adventure.js?v=2"></script>
   <script src="js/pwa.js"></script>
 
 </body>

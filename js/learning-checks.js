@@ -217,30 +217,58 @@ var LearningCheck = (function() {
     _showOverlay(subject, question, onPass);
   }
 
+  // The overlay used to borrow the hub's .dash-panel / .parent-btn
+  // classes, which only css/index.css styles. Inside an app the card had
+  // no background and the answers were unreadable, so it styles itself.
+  function _ensureStyles() {
+    if (document.getElementById('lcheck-style')) return;
+    var st = document.createElement('style');
+    st.id = 'lcheck-style';
+    st.textContent =
+      '#lcheck-overlay .lcheck-card{background:#fff;color:#1c1b29;border-radius:24px;padding:26px 22px 20px;' +
+        'box-shadow:0 18px 50px rgba(0,0,0,.35);max-width:420px;width:100%;text-align:center;' +
+        'animation:popIn .5s cubic-bezier(.34,1.56,.64,1);font-family:var(--font-display,"Baloo 2",system-ui,sans-serif)}' +
+      '#lcheck-overlay h3{margin:0;font-size:1.35rem;color:#312e81}' +
+      '#lcheck-overlay .lcheck-q{font-size:1.15rem;font-weight:700;margin:16px 0 18px;color:#1c1b29;' +
+        'font-family:var(--font-body,"Nunito",system-ui,sans-serif)}' +
+      '#lcheck-overlay .lcheck-opt{min-height:52px;padding:10px 12px;border-radius:14px;border:2px solid #d6d2ea;' +
+        'background:#f6f4fd;color:#1c1b29;font:800 1rem var(--font-body,"Nunito",system-ui,sans-serif);cursor:pointer;' +
+        'transition:background .15s,border-color .15s,transform .1s}' +
+      '#lcheck-overlay .lcheck-opt:hover:not(:disabled){border-color:#6D28D9;background:#ede9fe}' +
+      '#lcheck-overlay .lcheck-opt:active:not(:disabled){transform:scale(.97)}' +
+      '#lcheck-overlay .lcheck-opt:focus-visible{outline:3px solid #6D28D9;outline-offset:2px}' +
+      '#lcheck-overlay .lcheck-opt:disabled{cursor:default;opacity:.75}' +
+      '#lcheck-overlay .lcheck-opt.is-right{background:#059669;border-color:#059669;color:#fff;opacity:1}' +
+      '#lcheck-overlay .lcheck-opt.is-wrong{background:#B91C1C;border-color:#B91C1C;color:#fff;opacity:1}' +
+      '#lcheck-overlay .lcheck-fb{margin-top:16px;min-height:24px;font-weight:800;' +
+        'font-family:var(--font-body,"Nunito",system-ui,sans-serif)}';
+    document.head.appendChild(st);
+  }
+
   function _showOverlay(subject, question, onPass) {
     var existing = document.getElementById('lcheck-overlay');
     if (existing) existing.remove();
+    _ensureStyles();
 
     var overlay = document.createElement('div');
     overlay.id = 'lcheck-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:11000;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-display);color:#fff;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,15,35,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:11000;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Quick Learning Check');
 
     var SUBJECT_ICONS = { math: '🧮', music: '🎵', chess: '♟️', history: '🇨🇱', art: '🎨', faith: '⛪', science: '🔬', geography: '🌍', general: '🌟' };
     var icon = SUBJECT_ICONS[subject] || '🌟';
 
     var card = document.createElement('div');
-    card.className = 'dash-panel';
-    card.style.maxWidth = '400px';
-    card.style.width = '100%';
-    card.style.textAlign = 'center';
-    card.style.animation = 'popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    card.className = 'lcheck-card';
 
     card.innerHTML = 
       '<div style="font-size:3rem; margin-bottom:15px;">' + icon + '</div>' +
       '<h3>Quick Learning Check!</h3>' +
-      '<p style="font-size:1.2rem; font-weight:700; margin:20px 0;">' + _escHtml(question.q) + '</p>' +
+      '<p class="lcheck-q">' + _escHtml(question.q) + '</p>' +
       '<div id="lcheck-options" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>' +
-      '<div id="lcheck-feedback" style="margin-top:20px; height:24px; font-weight:800;"></div>';
+      '<div id="lcheck-feedback" class="lcheck-fb" aria-live="polite"></div>';
 
     overlay.appendChild(card);
     document.body.appendChild(overlay);
@@ -250,8 +278,8 @@ var LearningCheck = (function() {
 
     question.options.forEach(function(opt, i) {
       var btn = document.createElement('button');
-      btn.className = 'parent-btn'; // reuse style
-      btn.style.margin = '0';
+      btn.type = 'button';
+      btn.className = 'lcheck-opt';
       btn.textContent = opt;
       btn.onclick = function() { _handleAnswer(i, question.answer, btn, optionsEl, feedbackEl, overlay, onPass); };
       optionsEl.appendChild(btn);
@@ -263,8 +291,8 @@ var LearningCheck = (function() {
     for (var i = 0; i < allBtns.length; i++) { allBtns[i].disabled = true; }
 
     if (idx === correct) {
-      btn.style.background = '#10B981';
-      feedbackEl.style.color = '#10B981';
+      btn.classList.add('is-right');
+      feedbackEl.style.color = '#059669';
       feedbackEl.textContent = 'Correct! 🌟';
       
       var data = _getData();
@@ -281,12 +309,12 @@ var LearningCheck = (function() {
         }, 500);
       }, 1000);
     } else {
-      btn.style.background = '#EF4444';
-      feedbackEl.style.color = '#EF4444';
+      btn.classList.add('is-wrong');
+      feedbackEl.style.color = '#B91C1C';
       feedbackEl.textContent = 'Try again! 💪';
       setTimeout(function() {
         for (var j = 0; j < allBtns.length; j++) { allBtns[j].disabled = false; }
-        btn.style.background = '';
+        btn.classList.remove('is-wrong');
         feedbackEl.innerHTML = '';
       }, 1500);
     }

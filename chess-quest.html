@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/chess-quest.css">
+  <link rel="stylesheet" href="css/chess-quest.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -25,60 +25,63 @@
 
   <!-- MODE SELECT -->
   <div class="screen active" id="screen-menu">
-    <div class="mode-header">
-      <span class="icon">♟️</span>
-      <h1>Chess Quest</h1>
-      <p>Learn, practice, and play!</p>
-      <div class="greeting" id="greeting"></div>
-    </div>
-    <div class="mode-grid">
-      <div class="mode-card" onclick="openLearn()">
-        <span class="m-icon">📚</span>
-        <div>
-          <div class="m-title">Learn the Pieces</div>
-          <div class="m-desc">See how each piece moves on an interactive board.</div>
-          <span class="m-badge rec" id="learnBadge"></span>
-        </div>
+    <div class="menu-wide">
+      <div class="cq-hero" id="cqHero"></div>
+      <div class="mode-header">
+        <h1>Chess Quest</h1>
+        <p>Learn, practice, and play!</p>
+        <div class="greeting" id="greeting"></div>
       </div>
-      <div class="mode-card" onclick="openPuzzleMenu()">
-        <span class="m-icon">🧩</span>
-        <div>
-          <div class="m-title">Puzzles</div>
-          <div class="m-desc">Find the best move! Checkmates & tactics.</div>
-          <span class="m-badge prog" id="puzzleBadge"></span>
-        </div>
-      </div>
-      <div class="mode-card" onclick="openPlay()">
-        <span class="m-icon">⚔️</span>
-        <div>
-          <div class="m-title">Play vs Computer</div>
-          <div class="m-desc">Challenge a friendly AI opponent.</div>
-          <span class="m-badge prog" id="playBadge"></span>
-        </div>
-      </div>
-      <div class="mode-card" onclick="ChessExtras.Rush.open()">
-        <span class="m-icon">⚡</span>
-        <div>
-          <div class="m-title">Puzzle Rush</div>
-          <div class="m-desc">How many tactics can you solve in 3 minutes?</div>
-          <span class="m-badge prog" id="rushBadge"></span>
-        </div>
-      </div>
-      <div class="mode-card" onclick="ChessExtras.Openings.open()">
-        <span class="m-icon">📖</span>
-        <div>
-          <div class="m-title">Openings Primer</div>
-          <div class="m-desc">Six classic openings and the ideas behind them.</div>
-          <span class="m-badge prog" id="openingsBadge"></span>
-        </div>
-      </div>
-      <div class="mode-card" onclick="ChessExtras.Trainer.open()">
-        <span class="m-icon">🎯</span>
-        <div>
-          <div class="m-title">Movement Trainer</div>
-          <div class="m-desc">Tap the valid path to reach the target square.</div>
-          <span class="m-badge prog" id="trainerBadge"></span>
-        </div>
+      <div class="cq-stats" id="cqStats"></div>
+      <div class="mode-grid">
+        <button type="button" class="mode-card" onclick="openLearn()">
+          <span class="m-icon" data-piece="wP" aria-hidden="true"></span>
+          <span>
+            <span class="m-title" style="display:block">Learn the Pieces</span>
+            <span class="m-desc" style="display:block">Watch each piece move, then try it — plus castling, en passant and promotion.</span>
+            <span class="m-badge rec" id="learnBadge"></span>
+          </span>
+        </button>
+        <button type="button" class="mode-card" onclick="openPuzzleMenu()">
+          <span class="m-icon dark" data-piece="wN" aria-hidden="true"></span>
+          <span>
+            <span class="m-title" style="display:block">Puzzles</span>
+            <span class="m-desc" style="display:block">Climb the ladder: checkmates, forks, pins, skewers and more.</span>
+            <span class="m-badge prog" id="puzzleBadge"></span>
+          </span>
+        </button>
+        <button type="button" class="mode-card" onclick="openPlay()">
+          <span class="m-icon" data-piece="bK" aria-hidden="true"></span>
+          <span>
+            <span class="m-title" style="display:block">Play vs Computer</span>
+            <span class="m-desc" style="display:block">Five friendly levels and a coach who helps after mistakes.</span>
+            <span class="m-badge prog" id="playBadge"></span>
+          </span>
+        </button>
+        <button type="button" class="mode-card" onclick="ChessExtras.Rush.open()">
+          <span class="m-icon dark" data-piece="wQ" aria-hidden="true"></span>
+          <span>
+            <span class="m-title" style="display:block">Puzzle Rush</span>
+            <span class="m-desc" style="display:block">How many tactics can you solve in 3 minutes?</span>
+            <span class="m-badge prog" id="rushBadge"></span>
+          </span>
+        </button>
+        <button type="button" class="mode-card" onclick="ChessExtras.Openings.open()">
+          <span class="m-icon" data-piece="bB" aria-hidden="true"></span>
+          <span>
+            <span class="m-title" style="display:block">Openings Primer</span>
+            <span class="m-desc" style="display:block">Nine classic openings, played out on the board.</span>
+            <span class="m-badge prog" id="openingsBadge"></span>
+          </span>
+        </button>
+        <button type="button" class="mode-card" onclick="ChessExtras.Trainer.open()">
+          <span class="m-icon dark" data-piece="wR" aria-hidden="true"></span>
+          <span>
+            <span class="m-title" style="display:block">Movement Trainer</span>
+            <span class="m-desc" style="display:block">Tap the valid path to reach the target square.</span>
+            <span class="m-badge prog" id="trainerBadge"></span>
+          </span>
+        </button>
       </div>
     </div>
   </div>
@@ -98,49 +101,103 @@
     <div id="openings-wrap"></div>
   </div>
 
-  <!-- LEARN: piece list -->
+  <!-- LEARN: lesson list -->
   <div class="screen" id="screen-learn">
-    <div class="learn-header"><button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><div class="learn-title">Learn the Pieces</div></div>
-    <div class="piece-grid" id="pieceGrid"></div>
+    <div class="menu-wide">
+      <div class="cq-head"><button type="button" class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><h2>Learn the Pieces<span class="cq-sub">Watch, then try it yourself</span></h2></div>
+      <div class="learn-sec">The pieces</div>
+      <div class="piece-grid" id="pieceGrid"></div>
+      <div class="learn-sec">Special moves</div>
+      <div class="piece-grid special-grid" id="specialGrid"></div>
+    </div>
   </div>
 
-  <!-- LEARN: single piece lesson -->
+  <!-- LEARN: one lesson -->
   <div class="screen" id="screen-lesson">
-    <div class="learn-header"><button class="back-btn" aria-label="Go back" onclick="showScreen('learn')">←</button><span id="lessonIcon" style="font-size:28px"></span><div class="learn-title" id="lessonTitle"></div></div>
-    <div class="lesson-info" id="lessonInfo"></div>
-    <div class="board-wrap"><div class="board" id="learnBoard"></div></div>
-    <div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
-    <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;font-weight:600;margin-top:6px" id="learnHint">Tap the piece to see where it can move!</p>
-    <div class="lesson-nav"><button class="btn-outline" onclick="showScreen('learn')">Back to Pieces</button><button class="btn-gold" id="lessonNextBtn" onclick="nextLesson()">Next Piece →</button></div>
+    <div class="cq-head"><button type="button" class="back-btn" aria-label="Back to lessons" onclick="openLearn()">←</button><span id="lessonIcon" style="width:40px;height:40px;flex-shrink:0" aria-hidden="true"></span><h2 id="lessonTitle"></h2></div>
+    <div class="split">
+      <div>
+        <div class="board-wrap"><div class="board" id="learnBoard"></div></div>
+        <div class="demo-cap" id="demoCap" aria-live="polite"></div>
+      </div>
+      <div class="side">
+        <div class="lesson-info cq-card" id="lessonInfo"></div>
+        <div class="tool-row">
+          <button type="button" class="tool" onclick="Lesson.replay()"><span class="ti" aria-hidden="true">▶</span>Watch again</button>
+          <button type="button" class="tool" onclick="Lesson.startTry()"><span class="ti" aria-hidden="true">✋</span>Try it</button>
+          <button type="button" class="tool" onclick="Lesson.resetTry()" aria-label="Start the try-it board over"><span class="ti" aria-hidden="true">↺</span>Start over</button>
+        </div>
+        <div class="btn-row"><button type="button" class="btn btn-outline" onclick="openLearn()">All lessons</button><button type="button" class="btn btn-gold" id="lessonNextBtn" onclick="nextLesson()">Next lesson →</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUZZLE LADDER -->
+  <div class="screen" id="screen-puzzle-menu">
+    <div class="menu-wide">
+      <div class="cq-head"><button type="button" class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><h2>Puzzle Ladder<span class="cq-sub">Each puzzle unlocks the next</span></h2></div>
+      <div class="ladder-top cq-card" id="ladderTop"></div>
+      <div id="ladderChapters"></div>
+    </div>
   </div>
 
   <!-- PUZZLE -->
   <div class="screen" id="screen-puzzle">
-    <div class="learn-header"><button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><div class="learn-title">Puzzles</div></div>
-    <div class="puzzle-top"><div class="puzzle-badge" id="puzzleLabel"></div><div style="color:var(--gold);font-family:var(--font-display);font-weight:700" id="puzzleScore"></div></div>
-    <div class="board-wrap"><div class="board" id="puzzleBoard"></div></div>
-    <div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
-    <div class="puzzle-hint" id="puzzleHint"></div>
-    <div class="puzzle-feedback" id="puzzleFeedback"></div>
-    <div class="lesson-nav"><button class="btn-outline" onclick="goMenu()">Back</button><button class="btn-gold" id="nextPuzzleBtn" onclick="nextPuzzle()" style="display:none">Next Puzzle →</button></div>
+    <div class="cq-head"><button type="button" class="back-btn" aria-label="Back to the puzzle ladder" onclick="openPuzzleMenu()">←</button><h2 id="puzzleLabel"></h2><span class="pill" id="puzzleTag"></span></div>
+    <div class="split">
+      <div>
+        <div class="pz-goal" id="puzzleGoal"></div>
+        <div class="board-wrap"><div class="board" id="puzzleBoard"></div></div>
+      </div>
+      <div class="side">
+        <div class="coach" id="puzzleCoach" aria-live="polite"></div>
+        <div class="puzzle-feedback" id="puzzleFeedback"></div>
+        <div class="tool-row">
+          <button type="button" class="tool" id="pzHintBtn" onclick="puzzleHint()"><span class="ti" aria-hidden="true">💡</span>Hint</button>
+          <button type="button" class="tool" onclick="resetPuzzle()"><span class="ti" aria-hidden="true">↺</span>Restart</button>
+          <button type="button" class="tool" onclick="flipPuzzle()" aria-label="Flip the board"><span class="ti" aria-hidden="true">⇅</span>Flip</button>
+        </div>
+        <div class="btn-row"><button type="button" class="btn btn-outline" onclick="openPuzzleMenu()">Ladder</button><button type="button" class="btn btn-gold" id="nextPuzzleBtn" onclick="nextPuzzle()" style="display:none">Next puzzle →</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAY: choose a level -->
+  <div class="screen" id="screen-play-setup">
+    <div class="menu-wide">
+      <div class="cq-head"><button type="button" class="back-btn" aria-label="Go back" onclick="goMenu()">←</button><h2>Play vs Computer<span class="cq-sub">Pick an opponent</span></h2></div>
+      <div class="opt-row cq-card"><label for="coachToggle">Coach on<small>Warns you when a move leaves a piece in danger, and lets you take it back.</small></label><input type="checkbox" class="switch" id="coachToggle"></div>
+      <div class="opt-row cq-card" style="margin-bottom:14px"><label for="sideToggle">Play as Black<small>The computer moves first and the board turns around.</small></label><input type="checkbox" class="switch" id="sideToggle"></div>
+      <div class="learn-sec">Choose your opponent</div>
+      <div class="level-grid" id="levelGrid"></div>
+    </div>
   </div>
 
   <!-- PLAY -->
   <div class="screen" id="screen-play">
-    <div class="play-top">
-      <button class="back-btn" aria-label="Go back" onclick="goMenu()">←</button>
-      <div class="play-status" id="playStatus">Your turn (White)</div>
+    <div class="cq-head"><button type="button" class="back-btn" aria-label="Quit the game" onclick="goMenu()">←</button><h2 class="play-status" id="playStatus" aria-live="polite">Your move</h2></div>
+    <div class="split">
+      <div>
+        <div class="player-bar" id="oppBar"><span class="pb-face" id="oppFace" aria-hidden="true"></span><span class="pb-name" id="oppName"></span><span class="captured-row" id="capOpp" aria-label="Pieces you have lost"></span><span class="pb-turn" id="oppTurn">Its move</span></div>
+        <div class="board-wrap" id="playBoardWrap"><div class="board" id="playBoard"></div></div>
+        <div class="player-bar bottom" id="youBar"><span class="pb-face light" id="youFace" aria-hidden="true"></span><span class="pb-name" id="youName"></span><span class="captured-row" id="capYou" aria-label="Pieces you have captured"></span><span class="pb-turn">Your move</span></div>
+      </div>
+      <div class="side">
+        <div class="coach" id="playCoach" aria-live="polite" style="display:none"></div>
+        <div id="gameOverWrap"></div>
+        <div class="tool-row">
+          <button type="button" class="tool" id="playHintBtn" onclick="playHint()"><span class="ti" aria-hidden="true">💡</span>Hint</button>
+          <button type="button" class="tool" id="takebackBtn" onclick="takeBack()"><span class="ti" aria-hidden="true">↩</span>Take back</button>
+          <button type="button" class="tool" onclick="flipPlay()" aria-label="Flip the board"><span class="ti" aria-hidden="true">⇅</span>Flip</button>
+        </div>
+        <div class="btn-row"><button type="button" class="btn btn-outline" onclick="goMenu()">Quit</button><button type="button" class="btn btn-gold" onclick="openPlay()">New game ♟️</button></div>
+      </div>
     </div>
-    <div class="play-info"><div>You (White) <span class="captured-row" id="capturedBlack"></span></div><div>Computer (Black) <span class="captured-row" id="capturedWhite"></span></div></div>
-    <div class="board-wrap"><div class="board" id="playBoard"></div></div>
-    <div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>
-    <div id="gameOverWrap"></div>
-    <div class="lesson-nav" style="margin-top:12px"><button class="btn-outline" onclick="goMenu()">Quit</button><button class="btn-gold" onclick="openPlay()">New Game ♟️</button></div>
   </div>
 </div>
-<div class="feedback-float" id="feedback"><span id="feedbackEmoji"></span></div>
+<div class="feedback-float" id="feedback" aria-hidden="true"><span id="feedbackEmoji"></span></div>
 
-<script src="js/auth.js?v=3"></script>
+<script src="js/auth.js?v=4"></script>
 <script src="js/off-hours.js?v=1"></script>
 
 <script src="js/a11y.js"></script>
@@ -150,10 +207,12 @@
 <script src="js/sounds.js"></script>
 <script src="js/timer.js?v=3"></script>
 <script src="js/activity-log.js"></script>
-<script src="js/learning-checks.js?v=4"></script>
+<script src="js/learning-checks.js?v=5"></script>
 <script src="js/dialog.js?v=2"></script>
-<script src="js/chess-quest.js?v=3"></script>
-<script src="js/chess-extras.js"></script>
+<script src="js/chess-quest-art.js?v=1"></script>
+<script src="js/chess-quest-data.js?v=1"></script>
+<script src="js/chess-quest.js?v=4"></script>
+<script src="js/chess-extras.js?v=2"></script>
   <script src="js/pwa.js"></script>
 
 </body>

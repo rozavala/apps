@@ -1,6 +1,14 @@
 /* ================================================================
    DESCUBRE CHILE — Full Spanish App Engine
-   Fixed: null-safe DOM access, DOMContentLoaded init
+   v3: relief map of the 16 regions (js/descubre-chile-data.js +
+   js/descubre-chile-art.js), zone / region games, illustrated
+   timeline, richer memory + ordering games, restyled quiz.
+   Saved shape (zs_chile_<user>) is unchanged; only fields are added:
+     vreg      – array of region codes opened on the map
+     memBests  – {pairs: fewest moves} per board size (memBest is still
+                 the 10-pair record)
+   New star records use the same {bestStars,bestPct,lastPlayed} shape:
+     zonas, regiones, capitales, pistas, dragregiones, ordena
    ================================================================ */
 
 let qTopic = null;
@@ -12,18 +20,16 @@ function getUserKey() {
   return typeof getUserAppKey === 'function' ? getUserAppKey('zs_chile_') : null;
 }
 function getUserProgress(){const k=getUserKey();if(!k)return{};try{return JSON.parse(localStorage.getItem(k))||{}}catch{return{}}}
+function _dcWrite(k,p){
+  try { localStorage.setItem(k,JSON.stringify(p)); } catch (e) { console.warn('[Chile] save failed:', e); }
+  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+}
 function saveTopicProgress(id,stars,pct){
   const k=getUserKey();if(!k)return;
   const p=getUserProgress();
   const prev=p[id]||{bestStars:0,bestPct:0};
-  p[id]={bestStars:Math.max(prev.bestStars,stars),bestPct:Math.max(prev.bestPct,pct),lastPlayed:new Date().toISOString()};
-  try {
-    localStorage.setItem(k,JSON.stringify(p));
-  } catch (e) {
-    console.warn('[Chile] Failed to save topic progress:', e);
-  }
-  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
-
+  p[id]={bestStars:Math.max(prev.bestStars||0,stars),bestPct:Math.max(prev.bestPct||0,pct),lastPlayed:new Date().toISOString()};
+  _dcWrite(k,p);
   if (typeof ActivityLog !== 'undefined' && stars > 0) {
     ActivityLog.log('Descubre Chile', '🇨🇱', `Completó el tema "${id}" — ${stars} estrella${stars!==1?'s':''}`);
   }
@@ -31,25 +37,32 @@ function saveTopicProgress(id,stars,pct){
 function saveVisited(id){
   const k=getUserKey();if(!k)return;
   const p=getUserProgress();
-  if(!p.vr)p.vr=[];if(!p.vr.includes(id))p.vr.push(id);
-  try {
-    localStorage.setItem(k,JSON.stringify(p));
-  } catch (e) {}
-  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
+  if(!Array.isArray(p.vr))p.vr=[];if(p.vr.includes(id))return;p.vr.push(id);
+  _dcWrite(k,p);
 }
-function saveMemBest(m){
+function saveRegionVisited(code){
   const k=getUserKey();if(!k)return;
   const p=getUserProgress();
-  if(!p.memBest||m<p.memBest)p.memBest=m;
-  try {
-    localStorage.setItem(k,JSON.stringify(p));
-  } catch (e) {}
-  if(typeof CloudSync!=='undefined'&&CloudSync.online)CloudSync.push(k);
-
+  if(!Array.isArray(p.vreg))p.vreg=[];if(p.vreg.includes(code))return;p.vreg.push(code);
+  _dcWrite(k,p);
+}
+function saveMemBest(m,pairs){
+  const k=getUserKey();if(!k)return;
+  const p=getUserProgress();
+  pairs=pairs||10;
+  if(pairs===10&&(!p.memBest||m<p.memBest))p.memBest=m;
+  if(!p.memBests||typeof p.memBests!=='object')p.memBests={};
+  if(!p.memBests[pairs]||m<p.memBests[pairs])p.memBests[pairs]=m;
+  _dcWrite(k,p);
   if (typeof ActivityLog !== 'undefined') {
     ActivityLog.log('Descubre Chile', '🇨🇱', `Completó el juego de memoria en ${m} movimientos`);
   }
 }
+
+function dcTier(){const u=typeof getActiveUser==='function'?getActiveUser():null;return typeof getAgeTier==='function'?getAgeTier(u?u.age:null):'intermediate'}
+function dcSfx(n){try{if(typeof SFX!=='undefined'&&SFX[n])SFX[n]()}catch(e){}}
+function dcShuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function dcStars(pct){return pct>=90?3:pct>=60?2:pct>0?1:0}
 
 function showFeedback(e){
   const el=document.getElementById('feedback');
@@ -60,19 +73,23 @@ function showFeedback(e){
   setTimeout(()=>el.classList.remove('show'),900);
 }
 
+const DC_GAME_IDS=['zonas','regiones','capitales','pistas','dragquiz','dragregiones','ordena'];
 function updateProgress(){
-  const p=getUserProgress();const regs=(p.vr||[]).length;
-  const topics=Object.keys(p).filter(k=>k!=='vr'&&k!=='memBest'&&p[k].bestStars>0).length;
-  const mem=p.memBest?1:0;const total=regs+topics+mem;const max=5+6+1;
-  const pct=Math.min(100,Math.round((total/max)*100));
+  const p=getUserProgress();
+  const zones=(Array.isArray(p.vr)?p.vr:[]).filter(z=>REGIONS[z]).length;
+  const regs=(Array.isArray(p.vreg)?p.vreg:[]).length;
+  const topics=TOPICS.filter(t=>p[t.id]&&p[t.id].bestStars>0).length;
+  const games=DC_GAME_IDS.filter(g=>p[g]&&p[g].bestStars>0).length+((p.memBest||(p.memBests&&Object.keys(p.memBests).length))?1:0);
+  const pct=Math.min(100,Math.round(100*(0.10*zones/5+0.35*Math.min(regs,18)/18+0.35*topics/TOPICS.length+0.20*games/(DC_GAME_IDS.length+1))));
   const pf=document.getElementById('progressFill');
   const pl=document.getElementById('progressLabel');
   if(pf)pf.style.width=pct+'%';
   if(pl)pl.textContent='Chile explorado: '+pct+'%';
-  (p.vr||[]).forEach(id=>{const el=document.getElementById('reg-'+id);if(el)el.classList.add('visited')});
+  if(typeof DCMap!=='undefined')DCMap.markVisited();
 }
 
-// ── MAP DATA ──
+// ── ZONE OVERVIEWS (the five classic zones) ──
+
 const REGIONS={
   norte:{icon:'🏜️',title:'Norte Grande',sub:'El desierto más seco del mundo',facts:[
     {t:'🏜️ Desierto de Atacama',p:'El norte de Chile alberga el Desierto de Atacama, uno de los lugares más secos del planeta. Tiene salares, géiseres y flamencos en lagos de altura.',f:'¡La NASA prueba sus robots para Marte en el Atacama porque el suelo es muy parecido!'},
@@ -110,22 +127,343 @@ const REGIONS={
   ]}
 };
 
-function openRegion(id){
-  const r=REGIONS[id];if(!r)return;
-  const titleEl=document.getElementById('rmTitle');
-  const subEl=document.getElementById('rmSub');
-  const factsEl=document.getElementById('rmFacts');
-  const modal=document.getElementById('regionModal');
-  if(titleEl)titleEl.innerHTML=r.icon+' '+r.title;
-  if(subEl)subEl.textContent=r.sub;
-  if(factsEl)factsEl.innerHTML=r.facts.map(f=>'<div class="fact-item"><h4>'+f.t+'</h4><p>'+f.p+'</p>'+(f.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+f.f+'</div>':'')+'</div>').join('');
-  if(modal)modal.classList.add('active');
-  saveVisited(id);updateProgress();
-}
-function closeRegion(){const m=document.getElementById('regionModal');if(m)m.classList.remove('active')}
 
+// ── MAP VIEW (zoomable, scrollable relief map) ──
+function DCMapView(host, opts){
+  opts=opts||{};
+  const W=DC_GEO.W,H=DC_GEO.H;
+  host.classList.add('dc-mapbox');
+  host.innerHTML='<div class="dc-view" id="'+opts.id+'View">'+DCArt.mapSVG({id:opts.id,labels:opts.labels!==false,title:opts.title})+'</div>'+
+    '<div class="dc-zoom" role="group" aria-label="Zoom del mapa">'+
+      '<button type="button" class="dc-zbtn" data-z="in" aria-label="Acercar">+</button>'+
+      '<button type="button" class="dc-zbtn" data-z="out" aria-label="Alejar">−</button>'+
+      '<button type="button" class="dc-zbtn dc-zfit" data-z="fit" aria-label="Ver todo Chile"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>'+
+    '</div>';
+  const view=host.querySelector('.dc-view'),svg=view.querySelector('svg');
+  let z=1;
+  DCArt.relief(svg);
+  function fitZ(){const vw=view.clientWidth||1,vh=view.clientHeight||1;return Math.min(1,vh/(vw*H/W))}
+  function levels(){const f=fitZ();return [f,1,1.7,2.6,3.6].filter((v,i,a)=>v>=f-1e-6&&a.indexOf(v)===i).sort((a,b)=>a-b)}
+  function applyLod(){
+    const ppu=(svg.clientWidth||1)/W;
+    host.classList.toggle('lod-2',ppu>=0.82);
+    host.classList.toggle('lod-0',ppu<0.36);
+    // keep labels readable: ~11px on screen at least, never smaller than the map design size
+    host.style.setProperty('--lbl',Math.min(Math.max(19,11.5/ppu),16/ppu,30).toFixed(1)+'px');
+    host.style.setProperty('--capf',Math.min(Math.max(13,10.5/ppu),13.5/ppu).toFixed(1)+'px');
+  }
+  function setZoom(nz,cx,cy){
+    const vw=view.clientWidth,vh=view.clientHeight;
+    const f=fitZ();nz=Math.max(f,Math.min(4,nz));
+    if(cx==null){cx=vw/2;cy=vh/2}
+    const sw=svg.clientWidth||vw,sh=svg.clientHeight||vw*H/W;
+    const fx=(view.scrollLeft+cx-(svg.offsetLeft||0))/sw,fy=(view.scrollTop+cy)/sh;
+    z=nz;svg.style.width=Math.round(z*vw)+'px';
+    const nw=svg.clientWidth,nh=svg.clientHeight;
+    view.scrollLeft=fx*nw-cx;view.scrollTop=fy*nh-cy;
+    applyLod();
+  }
+  function step(dir){const L=levels();let i=L.findIndex(v=>v>z+1e-3);if(dir<0){i=-1;for(let k=L.length-1;k>=0;k--)if(L[k]<z-1e-3){i=k;break}}if(i>=0)setZoom(L[i])}
+  host.querySelector('.dc-zoom').addEventListener('click',e=>{
+    const b=e.target.closest('[data-z]');if(!b)return;
+    if(b.dataset.z==='in')step(1);else if(b.dataset.z==='out')step(-1);else setZoom(fitZ());
+  });
+  // pinch-zoom (two fingers) + ctrl/⌘-wheel
+  let pinch=null;
+  view.addEventListener('touchstart',e=>{if(e.touches.length===2){const a=e.touches[0],b=e.touches[1];const r=view.getBoundingClientRect();pinch={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),z:z,mx:(a.clientX+b.clientX)/2-r.left,my:(a.clientY+b.clientY)/2-r.top}}},{passive:true});
+  view.addEventListener('touchmove',e=>{if(pinch&&e.touches.length===2){e.preventDefault();const a=e.touches[0],b=e.touches[1];const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);setZoom(pinch.z*d/pinch.d,pinch.mx,pinch.my)}},{passive:false});
+  view.addEventListener('touchend',e=>{if(e.touches.length<2)pinch=null});
+  view.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();const r=view.getBoundingClientRect();setZoom(z*(e.deltaY<0?1.15:0.87),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+  // taps
+  host.addEventListener('click',e=>{
+    if(e.target.closest('.dc-zoom'))return;
+    const isl=e.target.closest('[data-island]');
+    if(isl){opts.onTap&&opts.onTap(isl.dataset.island,'island',isl,e);return}
+    const r=e.target.closest('.dc-reg,.dc-lbl');
+    if(r&&r.dataset.id){opts.onTap&&opts.onTap(r.dataset.id,'region',r,e)}
+  });
+  let rz=null;
+  window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>setZoom(Math.max(z,fitZ())),120)});
+  function regEls(id){return svg.querySelectorAll('.dc-reg[data-id="'+id+'"]')}
+  function scrollToY(yUnits,smooth){
+    const ppu=svg.clientWidth/W;
+    view.scrollTo({top:Math.max(0,yUnits*ppu-view.clientHeight*0.4),left:Math.max(0,(view.scrollWidth-view.clientWidth)*0.62),behavior:smooth?'smooth':'auto'});
+  }
+  function focusRegion(id,frac){
+    const g=DCArt.geoById(id);if(!g)return;
+    const ppu=svg.clientWidth/W;const cy=(g.bb[1]+g.bb[3])/2*ppu,top=g.bb[1]*ppu,bot=g.bb[3]*ppu;
+    const vis=frac!=null?view.clientHeight*frac*2:view.clientHeight;
+    if(frac!=null||top<view.scrollTop+20||bot>view.scrollTop+vis-20){
+      view.scrollTo({top:Math.max(0,cy-(frac!=null?view.clientHeight*frac:view.clientHeight/2)),behavior:'smooth'});
+    }
+    const lft=g.bb[0]*ppu,rgt=g.bb[2]*ppu;
+    if(lft<view.scrollLeft||rgt>view.scrollLeft+view.clientWidth)view.scrollTo({left:Math.max(0,(lft+rgt)/2-view.clientWidth/2),behavior:'smooth'});
+  }
+  function init(startZ){
+    const go=()=>{if(!view.clientWidth){return setTimeout(go,120)}setZoom(startZ==='fit'?fitZ():(startZ||1));if(opts.startLat!=null)scrollToY((DC_GEO.LATTOP-opts.startLat)*DC_GEO.K)};
+    go();
+  }
+  return {host,view,svg,setZoom,fitZ,init,regEls,scrollToY,focusRegion,get zoom(){return z}};
+}
+
+// ── MAIN MAP CONTROLLER ──
+const DC_FACT_KINDS=[['geo','Geografía'],['places','Lugares'],['products','Productos'],['history','Historia']];
+const DCMap=(function(){
+  let mv=null,mode='explore',sel=null,game=null,mounted=false;
+  const $=id=>document.getElementById(id);
+  const esc=s=>(typeof escHtml==='function'?escHtml(s):DCArt.esc(s));
+  const zoneOf=id=>DC_ZONES.find(z=>z.id===id);
+  const info=id=>DC_ISLANDS[id]||DCArt.regionById(id);
+  const wide=()=>window.matchMedia('(min-width: 900px)').matches;
+
+  function mount(){
+    if(mounted)return;mounted=true;
+    const host=$('dcMap');if(!host)return;
+    mv=DCMapView(host,{id:'mm',onTap:onTap,title:'Mapa en relieve de Chile con sus 16 regiones. Toca una región.'});
+    mv.init(1);
+    $('dcModes').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(b)setMode(b.dataset.mode)});
+    $('dcJump').addEventListener('click',e=>{const b=e.target.closest('[data-lat]');if(b)mv.scrollToY((DC_GEO.LATTOP-(+b.dataset.lat))*DC_GEO.K,true)});
+    $('dcPanel').addEventListener('click',onPanelClick);
+    $('dcBanner').addEventListener('click',e=>{if(e.target.closest('[data-act="quit"]'))setMode('explore');else if(e.target.closest('[data-act="say"]')&&game&&game.spoken)say(game.spoken)});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('dcPanel').classList.contains('sheet'))closeSheet()});
+    const t=dcTier();
+    if(t==='beginner')$('dcModes').classList.add('young');
+    markVisited();
+    renderIntro();
+  }
+
+  function setMode(m){
+    mode=m;game=null;clearMarks();
+    document.querySelectorAll('#dcModes [data-mode]').forEach(b=>{const on=b.dataset.mode===m;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on)});
+    const host=$('dcMap');
+    host.classList.toggle('zones',m==='zones');
+    host.classList.toggle('nolabels',m==='find');
+    host.classList.remove('nocaps');
+    $('dcBanner').hidden=true;
+    closeSheet(true);
+    if(m==='explore')renderIntro();
+    else if(m==='zones')startZones();
+    else renderFindSetup();
+  }
+
+  function onTap(id,kind){
+    if(mode==='zones'&&game)return zoneTap(kind==='island'?(id==='RN'?'pascua':'centro'):DCArt.geoById(id).zone,id,kind);
+    if(mode==='find'&&game){if(kind==='region')findTap(id);return}
+    if(mode!=='explore')return;
+    select(id);
+  }
+
+  // ── explore ──
+  function select(id){
+    sel=id;clearMarks();
+    if(mv&&!DC_ISLANDS[id])mv.regEls(id).forEach(el=>el.classList.add('sel'));
+    renderRegion(id);
+    saveRegionVisited(id);
+    const z=DC_ISLANDS[id]?DC_ISLANDS[id].zone:DCArt.geoById(id).zone;
+    saveVisited(z);
+    updateProgress();
+    if(!wide()){
+      openSheet();
+      const host=$('dcMap'),r=host.getBoundingClientRect();
+      if(Math.abs(r.top-8)>4)window.scrollTo({top:window.scrollY+r.top-8,behavior:'smooth'});
+      // the sheet covers ~58% of the screen: centre the region in the part that stays visible
+      if(!DC_ISLANDS[id]&&mv)mv.focusRegion(id,Math.max(0.12,(window.innerHeight*0.42-24)/2/mv.view.clientHeight));
+    }else if(!DC_ISLANDS[id]&&mv)mv.focusRegion(id);
+  }
+  function openSheet(){const p=$('dcPanel');p.classList.add('sheet');p.scrollTop=0;document.body.classList.add('dc-sheet-open')}
+  function closeSheet(silent){const p=$('dcPanel');if(!p)return;p.classList.remove('sheet');document.body.classList.remove('dc-sheet-open');if(!silent&&mode==='explore'){sel=null;clearMarks();renderIntro()}}
+  function clearMarks(){if(!mv)return;mv.svg.querySelectorAll('.dc-reg').forEach(el=>el.classList.remove('sel','ok','bad','reveal','done','hint'))}
+  function markVisited(){
+    if(!mv)return;const p=getUserProgress();const v=Array.isArray(p.vreg)?p.vreg:[];
+    mv.svg.querySelectorAll('.dc-lbl').forEach(el=>el.classList.toggle('visited',v.includes(el.dataset.id)));
+  }
+
+  function regionButtons(){
+    const p=getUserProgress();const v=Array.isArray(p.vreg)?p.vreg:[];
+    return DC_ZONES.map(z=>{
+      const ids=z.id==='pascua'?['RN']:z.regions.concat(z.id==='centro'?['JF']:[]);
+      return '<div class="dc-zgroup"><button type="button" class="dc-zhead" data-zone="'+z.id+'" style="--zc:'+z.color+'"><span class="dc-zdot"></span>'+esc(REGIONS[z.id]?REGIONS[z.id].title:z.name)+'<span class="dc-zmore">ver zona ›</span></button><div class="dc-rlist">'+
+        ids.map(id=>{const r=info(id);return '<button type="button" class="dc-rbtn'+(v.includes(id)?' seen':'')+'" data-region="'+id+'">'+esc(r.short||r.name)+(v.includes(id)?'<span class="dc-tick" aria-label="visitada">✓</span>':'')+'</button>'}).join('')+'</div></div>';
+    }).join('');
+  }
+  function renderIntro(){
+    const p=getUserProgress();const v=(Array.isArray(p.vreg)?p.vreg:[]).length;
+    const t=dcTier();
+    $('dcPanel').innerHTML='<div class="dc-pn-intro">'+
+      '<h2>Chile, de norte a sur</h2>'+
+      '<p>'+(t==='beginner'?'¡Toca el mapa para descubrir cada lugar! Prueba el juego <b>Zonas</b>.':'Chile tiene <b>16 regiones</b>. Toca una en el mapa para ver su capital, su geografía y su historia. Acerca con <b>+</b> o con dos dedos.')+'</p>'+
+      '<div class="dc-meter"><div class="dc-meter-fill" style="width:'+Math.round(Math.min(v,18)/18*100)+'%"></div><span>'+Math.min(v,18)+' de 18 lugares visitados</span></div>'+
+      regionButtons()+'</div>';
+  }
+  function factIcon(k){return DCArt.icon(k)}
+  function renderRegion(id){
+    const r=info(id),isl=!!DC_ISLANDS[id];const z=zoneOf(r.zone);const t=dcTier();
+    const order=DC_REGIONS.map(x=>x.id).concat(['RN','JF']);const i=order.indexOf(id);
+    const prev=order[(i+order.length-1)%order.length],next=order[(i+1)%order.length];
+    const kinds=t==='beginner'?DC_FACT_KINDS.slice(0,2):DC_FACT_KINDS;
+    $('dcPanel').innerHTML=
+      '<button type="button" class="dc-pn-close" data-act="close" aria-label="Cerrar">✕</button>'+
+      '<div class="dc-pn-head" style="--zc:'+(z?z.color:'#888')+'">'+
+        '<div class="dc-pn-thumb">'+(isl?DCArt.islandThumb(id):DCArt.regionThumb(id,120))+'</div>'+
+        '<div><div class="dc-pn-zone">'+esc(isl?'Territorio insular · Región de Valparaíso':'Zona '+(z?z.name:''))+'</div>'+
+        '<h2>'+esc(isl?r.name:'Región de '+r.name)+'</h2>'+
+        '<div class="dc-pn-cap">'+DCArt.icon('capital')+'<span>'+(isl?'Poblado principal':'Capital')+': <b>'+esc(r.capital)+'</b></span></div></div>'+
+      '</div>'+
+      '<p class="dc-pn-tag">'+esc(r.tag)+'</p>'+
+      '<div class="dc-facts">'+kinds.map(([k,lab])=>'<div class="dc-fact dc-fact-'+k+'"><div class="dc-fact-ic">'+factIcon(k)+'</div><div><h3>'+lab+'</h3><p>'+esc(r[k])+'</p></div></div>').join('')+'</div>'+
+      (id==='RN'&&REGIONS.pascua?'<button type="button" class="dc-more" data-zone="pascua">Más sobre Rapa Nui ›</button>':'')+
+      '<div class="dc-pn-nav"><button type="button" class="btn-ghost" data-region="'+prev+'">‹ '+esc(info(prev).short||info(prev).name)+'</button><button type="button" class="btn-ghost" data-region="'+next+'">'+esc(info(next).short||info(next).name)+' ›</button></div>';
+  }
+  function renderZone(zid){
+    const r=REGIONS[zid];if(!r)return;const z=zoneOf(zid);
+    saveVisited(zid);updateProgress();
+    if(mv){clearMarks();if(z)z.regions.forEach(id=>mv.regEls(id).forEach(el=>el.classList.add('sel')))}
+    $('dcPanel').innerHTML='<button type="button" class="dc-pn-close" data-act="close" aria-label="Cerrar">✕</button>'+
+      '<div class="dc-pn-head" style="--zc:'+(z?z.color:'#888')+'"><div class="dc-pn-thumb dc-pn-zic">'+DCArt.zoneIcon(zid)+'</div><div><div class="dc-pn-zone">Zona</div><h2>'+esc(r.title)+'</h2><div class="dc-pn-cap"><span>'+esc(r.sub)+'</span></div></div></div>'+
+      '<div class="dc-facts">'+r.facts.map(f=>'<div class="dc-fact"><div><h3>'+esc(f.t)+'</h3><p>'+esc(f.p)+'</p>'+(f.f?'<div class="fun-fact"><b>¿Sabías que…?</b> '+esc(f.f)+'</div>':'')+'</div></div>').join('')+'</div>'+
+      (z&&z.regions.length?'<div class="dc-rlist dc-rlist-zone">'+z.regions.map(id=>'<button type="button" class="dc-rbtn" data-region="'+id+'">'+esc(info(id).short||info(id).name)+'</button>').join('')+'</div>':'');
+    if(!wide())openSheet();
+  }
+  function onPanelClick(e){
+    const a=e.target.closest('[data-act]');
+    if(a&&a.dataset.act==='close'){closeSheet();return}
+    if(a&&a.dataset.act==='start-find'){startFind(a.dataset.kind);return}
+    if(a&&a.dataset.act==='again'){if(mode==='zones')startZones();else renderFindSetup();return}
+    const r=e.target.closest('[data-region]');if(r){if(mode!=='explore')setMode('explore');select(r.dataset.region);return}
+    const z=e.target.closest('[data-zone]');if(z){if(mode!=='explore')setMode('explore');renderZone(z.dataset.zone);return}
+  }
+
+  // ── banner helper ──
+  function banner(html){const b=$('dcBanner');b.hidden=false;b.innerHTML=html+'<button type="button" class="dc-quit" data-act="quit" aria-label="Salir del juego">✕</button>'}
+  function dots(n,i,res){let s='<div class="dc-dots" aria-hidden="true">';for(let k=0;k<n;k++)s+='<i class="'+(k<i?(res[k]?'ok':'miss'):k===i?'cur':'')+'"></i>';return s+'</div>'}
+  function starsSVG(n){let s='<div class="dc-stars" aria-label="'+n+' estrellas">';for(let i=0;i<3;i++)s+=DCArt.star(i<n);return s+'</div>'}
+  function flash(ids,cls,ms){ids.forEach(id=>mv.regEls(id).forEach(el=>{el.classList.add(cls);if(ms)setTimeout(()=>el.classList.remove(cls),ms)}))}
+
+  // ── Zones game (youngest) ──
+  function startZones(){
+    const n=dcTier()==='beginner'?5:8;
+    let seq=dcShuffle(DC_ZONES.map(z=>z.id));while(seq.length<n)seq=seq.concat(dcShuffle(DC_ZONES.map(z=>z.id)).slice(0,n-seq.length));
+    game={type:'zones',seq:seq.slice(0,n),i:0,miss:0,res:[],tries:0,lock:false};
+    $('dcMap').classList.add('zones');
+    mv.setZoom(mv.fitZ());
+    $('dcPanel').innerHTML='<div class="dc-pn-intro"><h2>Juego de las zonas</h2><p>Chile es muy largo. Tiene un <b style="color:#C2410C">Norte</b> con desierto, un <b style="color:#B91C1C">Centro</b> con la capital, un <b style="color:#047857">Sur</b> con lagos y volcanes, la <b style="color:#1D4ED8">Patagonia</b> con hielo, y la isla <b style="color:#92400E">Rapa Nui</b> en el mar.</p><div class="dc-zlegend">'+DC_ZONES.map(z=>'<span style="--zc:'+z.color+'"><i></i>'+esc(z.name)+'</span>').join('')+'</div></div>';
+    zonePrompt();
+  }
+  function say(t){
+    try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='es-CL';u.rate=.95;speechSynthesis.speak(u)}catch(e){}
+  }
+  function zonePrompt(){
+    const z=zoneOf(game.seq[game.i]);game.tries=0;game.lock=false;
+    const spoken='Toca '+(z.id==='pascua'?'la isla Rapa Nui':'el '+z.name)+': '+z.hint;
+    if(dcTier()==='beginner')say(spoken);
+    game.spoken=spoken;
+    banner('<div class="dc-bn-ic">'+DCArt.zoneIcon(z.id)+'</div><div class="dc-bn-txt"><div class="dc-bn-q">Toca '+(z.id==='pascua'?'la isla ':'el ')+'<b style="color:'+z.color+'">'+esc(z.id==='pascua'?'Rapa Nui':z.name.toUpperCase())+'</b></div><div class="dc-bn-s">'+esc(z.hint)+'</div>'+dots(game.seq.length,game.i,game.res)+'</div>'+('speechSynthesis' in window?'<button type="button" class="dc-say" data-act="say" aria-label="Escuchar otra vez">🔊</button>':''));
+  }
+  function zoneTap(zid,id,kind){
+    if(game.lock)return;
+    const target=game.seq[game.i],z=zoneOf(target);
+    if(zid===target){
+      game.lock=true;game.res[game.i]=game.tries===0;
+      if(target!=='pascua')flash(z.regions,'ok');
+      else{const i=mv.svg.querySelector('[data-island="RN"]');if(i){i.classList.add('ok');setTimeout(()=>i.classList.remove('ok'),900)}}
+      dcSfx('correct');showFeedback('🎉');
+      setTimeout(()=>{clearMarks();game.i++;if(game.i>=game.seq.length)zonesDone();else zonePrompt()},950);
+    }else{
+      game.tries++;game.miss++;dcSfx('wrong');
+      const wz=zoneOf(zid);
+      if(wz&&wz.regions.length)flash(wz.regions,'bad',700);
+      const order=['norte','centro','sur','patagonia'];
+      const dir=target==='pascua'?'Rapa Nui es una isla: búscala en el mar, en el cuadro de la izquierda.':(order.indexOf(target)<order.indexOf(zid)?'¡Busca más arriba, hacia el norte! ⬆️':'¡Busca más abajo, hacia el sur! ⬇️');
+      const s=$('dcBanner').querySelector('.dc-bn-s');if(s)s.innerHTML='Ese es '+(zid==='pascua'?'Rapa Nui':'el '+esc(wz?wz.name:''))+'. '+dir;
+      if(game.tries>=2&&target!=='pascua')flash(z.regions,'hint',1400);
+    }
+  }
+  function zonesDone(){
+    const n=game.seq.length,miss=game.miss;
+    const stars=miss<=1?3:miss<=3?2:1;const pct=Math.max(0,Math.round(100*(n-Math.min(n,miss))/n));
+    saveTopicProgress('zonas',stars,pct);updateProgress();dcSfx('cheer');
+    banner('<div class="dc-bn-ic">'+DCArt.medal(stars)+'</div><div class="dc-bn-txt"><div class="dc-bn-q">¡Muy bien! Encontraste todas las zonas</div>'+starsSVG(stars)+'</div>');
+    $('dcPanel').innerHTML='<div class="dc-pn-intro dc-result">'+DCArt.medal(stars)+'<h2>'+(stars===3?'¡Excelente explorador!':'¡Buen trabajo!')+'</h2>'+starsSVG(stars)+'<p>'+(miss===0?'¡Sin ningún error!':'Errores: '+miss)+'</p><button type="button" class="btn-red" data-act="again">Jugar otra vez</button></div>';
+    game=null;
+  }
+
+  // ── Find-the-region game ──
+  const FIND_KINDS={regiones:{lab:'Por nombre',desc:'Te digo el nombre de la región.'},capitales:{lab:'Por capital',desc:'Te digo la capital: ¿de qué región es?'},pistas:{lab:'Por pista',desc:'Te doy una pista de geografía o historia.'}};
+  function renderFindSetup(){
+    const t=dcTier();const p=getUserProgress();
+    const def=t==='expert'?'pistas':t==='advanced'?'capitales':'regiones';
+    clearMarks();$('dcMap').classList.add('nolabels');
+    $('dcPanel').innerHTML='<div class="dc-pn-intro"><h2>Encuentra la región</h2><p>Busca en el mapa la región que te pido. Los nombres están escondidos. Si fallas, te digo si está más al norte o más al sur.</p>'+
+      '<div class="dc-kinds">'+Object.keys(FIND_KINDS).map(k=>{const st=p[k]&&p[k].bestStars||0;return '<button type="button" class="dc-kind'+(k===def?' rec':'')+'" data-act="start-find" data-kind="'+k+'"><b>'+FIND_KINDS[k].lab+'</b><span>'+FIND_KINDS[k].desc+'</span>'+starsSVG(st)+(k===def?'<em>Recomendado</em>':'')+'</button>'}).join('')+'</div></div>';
+    banner('<div class="dc-bn-ic">'+DCArt.icon('compass')+'</div><div class="dc-bn-txt"><div class="dc-bn-q">Elige cómo jugar</div><div class="dc-bn-s">'+(wide()?'Elige un modo a la derecha.':'Elige un modo debajo del mapa.')+'</div></div>');
+  }
+  function startFind(kind){
+    const t=dcTier();const n=t==='intermediate'||t==='beginner'?8:t==='advanced'?10:12;
+    game={type:'find',kind,seq:dcShuffle(DC_REGIONS.map(r=>r.id)).slice(0,n),i:0,pts:0,res:[],tries:0,lock:false};
+    $('dcMap').classList.add('nolabels');
+    $('dcMap').classList.toggle('nocaps',kind!=='capitales');
+    $('dcPanel').innerHTML='<div class="dc-pn-intro"><h2>'+FIND_KINDS[kind].lab+'</h2><p>Primer intento: 3 puntos · segundo: 2 · tercero: 1. Usa <b>+</b> para acercarte a las regiones pequeñas del centro.</p><div class="dc-score" id="dcScore">Puntos: 0</div></div>';
+    findPrompt();
+  }
+  function findPrompt(){
+    const r=DCArt.regionById(game.seq[game.i]);game.tries=0;game.lock=false;
+    let q;
+    if(game.kind==='capitales')q='¿En qué región está <b>'+esc(r.capital)+'</b>?';
+    else if(game.kind==='pistas')q=esc(r.clue);
+    else q='Encuentra: <b>'+esc(r.short?r.short:r.name)+'</b>';
+    banner('<div class="dc-bn-ic">'+DCArt.icon('pin')+'</div><div class="dc-bn-txt"><div class="dc-bn-q">'+q+'</div><div class="dc-bn-s">Pregunta '+(game.i+1)+' de '+game.seq.length+'</div>'+dots(game.seq.length,game.i,game.res)+'</div>');
+  }
+  function findTap(id){
+    if(game.lock)return;
+    const target=game.seq[game.i],tr=DCArt.regionById(target),tg=DCArt.geoById(target);
+    const s=$('dcBanner').querySelector('.dc-bn-s');
+    if(id===target){
+      game.lock=true;const pts=3-game.tries;game.pts+=pts;game.res[game.i]=game.tries===0;
+      flash([id],'ok');dcSfx('correct');
+      if(s)s.innerHTML='✓ ¡Sí! <b>'+esc(tr.name)+'</b> · capital '+esc(tr.capital)+' (+'+pts+')';
+      $('dcScore')&&($('dcScore').textContent='Puntos: '+game.pts);
+      saveRegionVisited(id);
+      setTimeout(()=>{clearMarks();game.i++;if(game.i>=game.seq.length)findDone();else findPrompt()},1300);
+    }else{
+      game.tries++;dcSfx('wrong');
+      const wr=DCArt.regionById(id),wg=DCArt.geoById(id);
+      flash([id],'bad',800);
+      const dir=tg.c[1]<wg.c[1]?'más al norte ⬆️':'más al sur ⬇️';
+      if(game.tries>=3){
+        game.lock=true;game.res[game.i]=false;
+        flash([target],'reveal');
+        if(s)s.innerHTML='Era <b>'+esc(tr.name)+'</b> (capital '+esc(tr.capital)+'). ¡La próxima vez!';
+        mv.focusRegion(target);
+        setTimeout(()=>{clearMarks();game.i++;if(game.i>=game.seq.length)findDone();else findPrompt()},2200);
+      }else if(s){
+        s.innerHTML='Esa es <b>'+esc(wr.short||wr.name)+'</b>. Busca '+dir;
+        if(game.tries===2&&dcTier()!=='expert'){const z=zoneOf(tg.zone);if(z)flash(z.regions,'hint',1600)}
+      }
+    }
+  }
+  function findDone(){
+    const max=3*game.seq.length,pct=Math.round(100*game.pts/max),stars=dcStars(pct);
+    saveTopicProgress(game.kind,stars,pct);updateProgress();if(pct>=60)dcSfx('cheer');
+    $('dcMap').classList.remove('nolabels','nocaps');
+    banner('<div class="dc-bn-ic">'+DCArt.medal(stars)+'</div><div class="dc-bn-txt"><div class="dc-bn-q">'+game.pts+' de '+max+' puntos</div>'+starsSVG(stars)+'</div>');
+    $('dcPanel').innerHTML='<div class="dc-pn-intro dc-result">'+DCArt.medal(stars)+'<h2>'+(stars===3?'¡Cartógrafo experto!':stars===2?'¡Muy bien!':'¡Sigue practicando!')+'</h2>'+starsSVG(stars)+'<p>'+game.pts+' de '+max+' puntos ('+pct+'%). Ahora los nombres vuelven a aparecer: ¡revisa las que fallaste!</p><button type="button" class="btn-red" data-act="again">Jugar otra vez</button></div>';
+    game=null;
+  }
+
+  return {mount,setMode,select,markVisited,openZone:renderZone,get view(){return mv}};
+})();
+
+// Legacy entry points (older links / tests call these with zone ids)
+function openRegion(id){
+  const tab=document.querySelector('.tab-btn[data-tab="mapa"]');if(tab)tab.click();
+  DCMap.mount();
+  if(REGIONS[id])DCMap.openZone(id);else DCMap.select(id);
+}
+function closeRegion(){const p=document.getElementById('dcPanel');if(p)p.classList.remove('sheet');document.body.classList.remove('dc-sheet-open')}
 window.openRegion = openRegion;
 window.closeRegion = closeRegion;
+
+
 window.startQuiz = startQuiz;
 window.ans = ans;
 window.initMemory = initMemory;
@@ -134,6 +472,7 @@ window.renderTopics = renderTopics;
 window.renderStories = renderStories;
 
 // ── STORIES ──
+
 const TOPICS=[
   {id:'geography',icon:'🏔️',name:'Geografía',stories:[
     {t:'🌎 La forma de Chile',p:'Chile se extiende por más de 4.300 km de norte a sur, pero en promedio solo tiene 177 km de ancho.',f:'Si pusieras a Chile sobre Europa, llegaría desde Noruega hasta el Sahara.'},
@@ -184,7 +523,7 @@ const TOPICS=[
   {id:'folk',icon:'🎶',name:'Canto y Folclor',stories:[
     {t:'🪗 Si vas para Chile',p:'Canción tradicional escrita por Chito Faró en 1942, casi un himno no oficial. "Si vas para Chile, te ruego que pases / por donde vive mi amada…"',f:'La toca cada grupo folclórico en cualquier peña chilena.'},
     {t:'🌷 Gracias a la vida',p:'Violeta Parra compuso este canto en 1966, pocos meses antes de su muerte. Un agradecimiento a la vida por el oído, la vista, los pasos y el canto. Tiene versiones en muchos idiomas.',f:'Mercedes Sosa y Joan Baez grabaron versiones famosas.'},
-    {t:'⛰️ Arriba en la cordillera',p:'Patricio Manns la escribió en 1965. Cuenta la historia de un arriero solitario. "Arriba en la cordillera / donde el viento hace empinado / anduvo una vez un hombre…"',f:'Es una de las cuecas más interpretadas fuera del género típico.'},
+    {t:'⛰️ Arriba en la cordillera',p:'Canción compuesta por Patricio Manns en 1965. Habla de la vida en la montaña y es una de las canciones chilenas más conocidas de esa década.',f:'La Cordillera de los Andes inspira muchas canciones del folclore chileno.'},
     {t:'💃 La cueca',p:'Baile nacional desde 1979. Representa el cortejo del gallo y la gallina: los bailarines se mueven en círculos, se esquivan y agitan pañuelos al aire.',f:'Hay cueca brava urbana, cueca chilota del sur y cueca nortina con quenas.'},
     {t:'🐎 Tonadas del campo',p:'La tonada es el canto rural acompañado de guitarra. Habla de la tierra, el trabajo, el amor y la fiesta. Su prima cercana es el corrido.',f:'Los Huasos Quincheros mantuvieron vivo este repertorio por más de 80 años.'},
     {t:'🪕 Instrumentos típicos',p:'La guitarra, el arpa (sí, un arpa pequeña), el bombo y las cajas andinas se escuchan en cualquier peña. En el altiplano se suma la zampoña.',f:'El charango (un tipo de guitarrita) tenía caparazón de armadillo antiguamente; hoy se hace de madera.'}
@@ -196,17 +535,23 @@ const TOPICS=[
     {t:'💃 La Cueca',p:'Es el baile nacional. Representa el cortejo del gallo y la gallina, y se baila agitando pañuelos al aire.',f:'Fue declarada baile nacional de Chile en el año 1979.'}
   ]}
 ];
+
 let curTopic=null;
+const dcEsc=s=>(typeof escHtml==='function'?escHtml(s):DCArt.esc(s));
+const dcStripIcon=s=>String(s).replace(/^[^\p{L}\p{N}¿¡"'«]+/u,'');
 
 function renderTopics(){
   const el=document.getElementById('historyTopics');
   if(!el)return;
   const prog=getUserProgress();
   el.innerHTML='';
-  TOPICS.forEach(t=>{
+  const all=[{id:'timeline',icon:'⏳',name:'Línea de tiempo'}].concat(TOPICS);
+  all.forEach(t=>{
     const done=prog[t.id]&&prog[t.id].bestStars>0;
     const btn=document.createElement('button');
-    btn.className='topic-btn'+(curTopic===t.id?' active':'');
+    btn.type='button';
+    btn.className='topic-btn'+(curTopic===t.id?' active':'')+(t.id==='timeline'?' topic-tl':'');
+    btn.setAttribute('aria-pressed',curTopic===t.id?'true':'false');
     btn.textContent=t.icon+' '+t.name+(done?' ✓':'');
     btn.onclick=()=>{curTopic=t.id;renderTopics();renderStories(t.id)};
     el.appendChild(btn);
@@ -214,20 +559,55 @@ function renderTopics(){
 }
 
 function renderStories(id){
-  const topic=TOPICS.find(t=>t.id===id);if(!topic)return;
   const el=document.getElementById('storyList');
   if(!el)return;
+  if(id==='timeline'){renderTimeline(el);return}
+  const topic=TOPICS.find(t=>t.id===id);if(!topic)return;
   el.innerHTML='';
-  topic.stories.forEach(s=>{
-    const c=document.createElement('div');
+  const head=document.createElement('div');
+  head.className='story-banner';
+  head.innerHTML=DCArt.banner(topic.id)+'<div class="story-banner-t"><h2>'+dcEsc(topic.name)+'</h2><span>'+topic.stories.length+' historia'+(topic.stories.length!==1?'s':'')+' · toca para leer</span></div>';
+  el.appendChild(head);
+  topic.stories.forEach((s,i)=>{
+    const c=document.createElement('article');
     c.className='story-card';
-    c.innerHTML='<h3>'+s.t+'</h3><p>'+s.p+'</p>'+(s.f?'<div class="fun-fact">💡 <strong>¿Sabías que…?</strong> '+s.f+'</div>':'');
-    c.onclick=()=>c.classList.toggle('expanded');
+    const bid='st-'+id+'-'+i;
+    c.innerHTML='<button type="button" class="story-toggle" aria-expanded="false" aria-controls="'+bid+'"><span class="story-num">'+(i+1)+'</span><h3>'+dcEsc(dcStripIcon(s.t))+'</h3><span class="story-chev" aria-hidden="true"></span></button>'+
+      '<div class="story-body" id="'+bid+'"><p>'+dcEsc(s.p)+'</p>'+(s.f?'<div class="fun-fact">'+DCArt.icon('bulb')+'<div><strong>¿Sabías que…?</strong> '+dcEsc(s.f)+'</div></div>':'')+'</div>';
+    const tg=c.querySelector('.story-toggle');
+    tg.onclick=()=>{const on=c.classList.toggle('expanded');tg.setAttribute('aria-expanded',on)};
     el.appendChild(c);
+  });
+  if(QB[id]){
+    const q=document.createElement('div');q.className='story-cta';
+    q.innerHTML='<span>¿Leíste todo? Pon a prueba lo que aprendiste.</span>';
+    const b=document.createElement('button');b.type='button';b.className='btn-red';b.textContent='Quiz de '+topic.name;
+    b.onclick=()=>{document.querySelector('.tab-btn[data-tab="quiz"]').click();startQuiz(id)};
+    q.appendChild(b);el.appendChild(q);
+  }
+}
+
+const DC_ERAS=[[-1e9,'Antes de los españoles','Pueblos originarios'],[1520,'Conquista y Colonia','1520 – 1810'],[1810,'Independencia','1810 – 1818'],[1819,'República','1819 – hoy']];
+function eraOf(y){let e=DC_ERAS[0];DC_ERAS.forEach(x=>{if(y>=x[0])e=x});return e}
+function renderTimeline(el){
+  let h='<div class="story-banner tl-banner">'+DCArt.banner('timeline')+'<div class="story-banner-t"><h2>Línea de tiempo de Chile</h2><span>De las momias Chinchorro al rescate de los 33</span></div></div><ol class="dc-tl">';
+  let era=null;
+  DC_TIMELINE.forEach((e,i)=>{
+    const er=eraOf(e.y);
+    if(er!==era){era=er;h+='<li class="dc-tl-era"><span>'+dcEsc(er[1])+'</span><small>'+dcEsc(er[2])+'</small></li>'}
+    const r=DC_ISLANDS[e.region]||DCArt.regionById(e.region);
+    h+='<li class="dc-tl-item'+(i%2?' alt':'')+'"><div class="dc-tl-year">'+dcEsc(e.label)+'</div><div class="dc-tl-dot" aria-hidden="true"></div>'+
+      '<div class="dc-tl-card"><div class="dc-tl-art">'+DCArt.vignette(e.art)+'</div><div class="dc-tl-txt"><h3>'+dcEsc(e.t)+'</h3><p>'+dcEsc(e.d)+'</p>'+
+      (r?'<button type="button" class="dc-tl-map" data-region="'+e.region+'">'+DCArt.icon('pin')+'<span>'+dcEsc(r.short||r.name)+'</span></button>':'')+'</div></div></li>';
+  });
+  h+='</ol>';
+  el.innerHTML=h;
+  el.querySelectorAll('.dc-tl-map').forEach(b=>b.onclick=()=>{
+    document.querySelector('.tab-btn[data-tab="mapa"]').click();
+    DCMap.mount();DCMap.setMode('explore');DCMap.select(b.dataset.region);
   });
 }
 
-// ── MEMORY ──
 const MEM_PAIRS=[
   {icon:'🗡️',name:'Pedro de Valdivia',match:'Fundó Santiago 1541'},
   {icon:'🇨🇱',name:'Bernardo O\'Higgins',match:'Padre de la Patria'},
@@ -240,42 +620,67 @@ const MEM_PAIRS=[
   {icon:'🌊',name:'Terremoto de Valdivia',match:'Magnitud 9,5 en 1960'},
   {icon:'🔭',name:'Observatorio ALMA',match:'Radiotelescopio en Atacama'}
 ];
-let memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false;
 
+// Extra pairs for older players (factual, dated)
+const MEM_PAIRS_EXTRA=[
+  {icon:'⚓',name:'Arturo Prat',match:'Combate Naval de Iquique 1879'},
+  {icon:'⛵',name:'Hernando de Magallanes',match:'Cruzó el estrecho en 1520'},
+  {icon:'🪶',name:'Lautaro',match:'Victoria en Tucapel 1553'},
+  {icon:'🐎',name:'Diego de Almagro',match:'Primera expedición 1536'},
+  {icon:'⛏️',name:'Ignacio Domeyko',match:'Geólogo del siglo XIX'},
+  {icon:'🗿',name:'Rapa Nui',match:'Se unió a Chile en 1888'}
+];
+const MEM_CAT={'Pedro de Valdivia':'his','Bernardo O\'Higgins':'his','Arturo Prat':'his','Hernando de Magallanes':'his','Diego de Almagro':'his','Lautaro':'pue','Pueblo Mapuche':'pue','Rapa Nui':'pue','Pablo Neruda':'art','Gabriela Mistral':'art','Violeta Parra':'art','Claudio Arrau':'art','Alexis Sánchez':'dep','Terremoto de Valdivia':'nat','Observatorio ALMA':'sci','Ignacio Domeyko':'sci'};
+const MEM_CAT_NAME={his:'Historia',pue:'Pueblos',art:'Arte',dep:'Deporte',nat:'Naturaleza',sci:'Ciencia'};
+let memCards=[],memFlipped=[],memMatched=0,memMoves=0,memLocked=false,memPairsN=10;
+
+function memPairCount(){const t=dcTier();return t==='beginner'?6:t==='intermediate'?8:t==='advanced'?10:12}
 function initMemory(){
   memMatched=0;memMoves=0;memLocked=false;memFlipped=[];
+  memPairsN=memPairCount();
+  const pool=memPairsN<=10?MEM_PAIRS.slice():MEM_PAIRS.concat(MEM_PAIRS_EXTRA);
+  // smaller boards keep the best-known names first
+  const pairs=memPairsN===10?MEM_PAIRS.slice():memPairsN<10?dcShuffle(MEM_PAIRS.slice(0,8)).slice(0,memPairsN):dcShuffle(pool).slice(0,memPairsN);
   const mmEl=document.getElementById('memMoves');
   const mpEl=document.getElementById('memPairs');
   const mtEl=document.getElementById('memTotal');
   const msgEl=document.getElementById('memoryMsg');
+  const bestEl=document.getElementById('memBest');
   if(mmEl)mmEl.textContent='0';
   if(mpEl)mpEl.textContent='0';
-  if(mtEl)mtEl.textContent=MEM_PAIRS.length;
-  if(msgEl)msgEl.textContent='';
+  if(mtEl)mtEl.textContent=pairs.length;
+  if(msgEl)msgEl.innerHTML='';
+  const prog=getUserProgress();const best=(prog.memBests&&prog.memBests[memPairsN])||(memPairsN===10?prog.memBest:null);
+  if(bestEl)bestEl.textContent=best?best:'—';
   const cards=[];
-  MEM_PAIRS.forEach((p,i)=>{
-    cards.push({id:i,type:'person',icon:p.icon,text:p.name,pid:i});
-    cards.push({id:i,type:'fact',icon:'🏆',text:p.match,pid:i});
+  pairs.forEach((p,i)=>{
+    const cat=MEM_CAT[p.name]||'his';
+    cards.push({type:'person',text:p.name,pid:i,cat});
+    cards.push({type:'fact',text:p.match,pid:i,cat});
   });
-  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}
-  memCards=cards;renderMem();
-}
-
-function renderMem(){
+  memCards=dcShuffle(cards);
   const g=document.getElementById('memoryGrid');
-  if(!g)return;
-  g.innerHTML='';
-  memCards.forEach((c,i)=>{
-    const d=document.createElement('div');
-    d.className='memory-card';
-    if(c.matched)d.classList.add('matched');
-    if(memFlipped.includes(i))d.classList.add('flipped');
-    d.innerHTML='<div class="memory-card-inner"><div class="memory-back">🇨🇱</div><div class="memory-front"><span class="mf-icon">'+c.icon+'</span><span class="mf-text">'+c.text+'</span></div></div>';
-    d.onclick=()=>flipCard(i);
-    g.appendChild(d);
+  if(g){g.dataset.n=memCards.length;g.innerHTML='';
+    memCards.forEach((c,i)=>{
+      const d=document.createElement('button');
+      d.type='button';d.className='memory-card mc-'+c.cat;d.dataset.i=i;
+      d.setAttribute('aria-label','Carta '+(i+1)+' (boca abajo)');
+      d.innerHTML='<div class="memory-card-inner"><div class="memory-back">'+DCArt.cardBack()+'</div><div class="memory-front">'+(c.type==='person'?
+        '<span class="mf-medal">'+DCArt.medallion(c.text,c.cat)+'</span><span class="mf-text">'+dcEsc(c.text)+'</span><span class="mf-cat">'+MEM_CAT_NAME[c.cat]+'</span>':
+        '<span class="mf-ribbon">'+DCArt.icon('laurel')+'</span><span class="mf-text mf-fact">'+dcEsc(c.text)+'</span>')+'</div></div>';
+      d.onclick=()=>flipCard(i);
+      g.appendChild(d);
+    });
+  }
+}
+function renderMem(){
+  document.querySelectorAll('#memoryGrid .memory-card').forEach(d=>{
+    const i=+d.dataset.i,c=memCards[i];
+    const up=memFlipped.includes(i)||c.matched;
+    d.classList.toggle('flipped',memFlipped.includes(i));d.classList.toggle('matched',!!c.matched);
+    d.setAttribute('aria-label',up?c.text:'Carta '+(i+1)+' (boca abajo)');
   });
 }
-
 function flipCard(i){
   if(memLocked||memFlipped.includes(i)||memCards[i].matched)return;
   memFlipped.push(i);renderMem();
@@ -290,21 +695,84 @@ function flipCard(i){
         a.matched=true;b.matched=true;memMatched++;
         const mpEl=document.getElementById('memPairs');
         if(mpEl)mpEl.textContent=memMatched;
-        memFlipped=[];memLocked=false;showFeedback('🎉');if(typeof SFX!=='undefined')SFX.correct();renderMem();
-        if(memMatched===MEM_PAIRS.length){
+        memFlipped=[];memLocked=false;showFeedback('🎉');dcSfx('correct');renderMem();
+        const n=memCards.length/2;
+        if(memMatched===n){
           const msgEl=document.getElementById('memoryMsg');
-          if(msgEl)msgEl.innerHTML='<span style="color:var(--green)">🏆 ¡Completado en '+memMoves+' movimientos!</span>';
-          saveMemBest(memMoves);updateProgress();if(typeof SFX!=='undefined')SFX.cheer();
+          const great=memMoves<=Math.round(n*1.6);
+          if(msgEl)msgEl.innerHTML='<div class="mem-done">'+DCArt.medal(great?3:memMoves<=n*2.2?2:1)+'<div><b>¡Completado en '+memMoves+' movimientos!</b><span>'+(great?'¡Memoria de cóndor!':'Récord a superar: '+memMoves)+'</span></div></div>';
+          saveMemBest(memMoves,n);updateProgress();dcSfx('cheer');
+          const bestEl=document.getElementById('memBest');const p=getUserProgress();if(bestEl&&p.memBests)bestEl.textContent=p.memBests[n]||memMoves;
         }
       },600);
     }else{
-      if(typeof SFX!=='undefined')SFX.wrong();
+      dcSfx('wrong');
       setTimeout(()=>{memFlipped=[];memLocked=false;renderMem()},900);
     }
   }
 }
 
-// ── QUIZ ──
+// ── ORDENA LA HISTORIA ──
+let ord=null;
+function ordSize(){const t=dcTier();return t==='beginner'?2:t==='intermediate'?3:t==='advanced'?4:5}
+function initOrder(){
+  const k=ordSize();
+  ord={round:0,rounds:5,k,miss:0,placed:[],cards:[],lock:false};
+  ordRound();
+}
+function ordPick(k){
+  // spread-out picks for small sets, close dates for experts
+  const ev=DC_TIMELINE.slice();
+  for(let tries=0;tries<200;tries++){
+    const pick=dcShuffle(ev).slice(0,k).sort((a,b)=>a.y-b.y);
+    let ok=true;
+    for(let i=1;i<pick.length;i++){if(pick[i].y===pick[i-1].y)ok=false;if(k<=3&&pick[i].y-pick[i-1].y<40)ok=false}
+    if(ok)return pick;
+  }
+  return dcShuffle(ev).slice(0,k).sort((a,b)=>a.y-b.y);
+}
+function ordRound(){
+  const el=document.getElementById('orderArea');if(!el)return;
+  const sorted=ordPick(ord.k);
+  ord.sorted=sorted;ord.cards=dcShuffle(sorted);ord.placed=[];ord.lock=false;
+  ordRender('Toca los hechos del <b>más antiguo</b> al <b>más reciente</b>.');
+}
+function ordRender(msg){
+  const el=document.getElementById('orderArea');
+  let h='<div class="ord-top"><span class="quiz-badge">Ronda '+(ord.round+1)+'/'+ord.rounds+'</span><span class="ord-miss">Errores: '+ord.miss+'</span></div>';
+  h+='<p class="ord-msg" aria-live="polite">'+msg+'</p><ol class="ord-track">';
+  for(let i=0;i<ord.k;i++){const e=ord.placed[i];h+='<li class="ord-slot'+(e?' filled':'')+'"><span class="ord-n">'+(i+1)+'</span>'+(e?'<span class="ord-y">'+dcEsc(e.label)+'</span><span class="ord-t">'+dcEsc(e.t)+'</span>':'<span class="ord-empty">?</span>')+'</li>'}
+  h+='</ol><div class="ord-cards">';
+  ord.cards.forEach((e,i)=>{if(ord.placed.includes(e))return;h+='<button type="button" class="ord-card" data-i="'+i+'"><span class="ord-art">'+DCArt.vignette(e.art)+'</span><span class="ord-ct"><b>'+dcEsc(e.t)+'</b>'+(ord.k>=4?'':'<small>'+dcEsc(e.d)+'</small>')+'</span></button>'});
+  h+='</div>';
+  el.innerHTML=h;
+  el.querySelectorAll('.ord-card').forEach(b=>b.onclick=()=>ordTap(+b.dataset.i,b));
+}
+function ordTap(i,btn){
+  if(ord.lock)return;
+  const e=ord.cards[i],want=ord.sorted[ord.placed.length];
+  if(e===want){
+    ord.placed.push(e);dcSfx('correct');
+    if(ord.placed.length===ord.k){
+      ord.lock=true;
+      ordRender('✓ ¡Correcto! '+dcEsc(ord.sorted.map(x=>x.label).join(' → ')));
+      setTimeout(()=>{ord.round++;if(ord.round>=ord.rounds)ordDone();else ordRound()},1600);
+    }else ordRender('¡Bien! ¿Qué vino después?');
+  }else{
+    ord.miss++;dcSfx('wrong');
+    btn.classList.add('shake');
+    const tip=dcTier()==='expert'?'':' Pista: «'+dcEsc(e.t)+'» fue en '+dcEsc(e.label)+'.';
+    setTimeout(()=>ordRender('Hay un hecho <b>más antiguo</b> que ese.'+tip),450);
+  }
+}
+function ordDone(){
+  const el=document.getElementById('orderArea');
+  const stars=ord.miss<=1?3:ord.miss<=4?2:1;const pct=Math.round(100*ord.rounds*ord.k/(ord.rounds*ord.k+ord.miss));
+  saveTopicProgress('ordena',stars,pct);updateProgress();dcSfx('cheer');
+  el.innerHTML='<div class="results-box">'+DCArt.medal(stars)+'<div class="r-title">'+(stars===3?'¡Historiador experto!':'¡Buen trabajo!')+'</div><div class="r-sub">'+ord.rounds+' rondas · '+ord.miss+' error'+(ord.miss!==1?'es':'')+'</div><div class="dc-stars">'+[0,1,2].map(i=>DCArt.star(i<stars)).join('')+'</div><button type="button" class="btn-red" onclick="initOrder()">Jugar otra vez</button></div>';
+}
+window.initOrder=initOrder;
+
 const QB={
   geography:[
     // PRUNED [2026-04-12]: Removed to stay within MAX 20 limit
@@ -375,11 +843,10 @@ const QB={
     {q:'¿Qué pueblo canoero habitó los canales del extremo sur cerca del Cabo de Hornos?',a:'Los Yaganes',o:['Los Yaganes','Los Diaguitas','Los Aymaras','Los Picunches'], tier:'advanced', explain:'Los yaganes fueron un pueblo canoero que vivió en los canales más australes, cerca del Cabo de Hornos.'}
   ],
   history:[
-    {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar',
+    {q:'¿Quién fundó Santiago?',a:'Pedro de Valdivia',o:['Pedro de Valdivia','O\'Higgins','Colón','Bolívar'], tier:'intermediate'},
     {q:'¿En qué año se fundó la ciudad de Santiago?',a:'1541',o:['1541','1810','1492','1900'], tier:'intermediate'},
     {q:'¿Quién fue el primer presidente de Chile?',a:'Manuel Blanco Encalada',o:['Manuel Blanco Encalada','Bernardo O\'Higgins','Arturo Prat','José Miguel Carrera'], tier:'advanced'},
-    {q:'¿Qué combate naval ocurrió el 21 de mayo?',a:'Combate Naval de Iquique',o:['Combate Naval de Iquique','Batalla de Maipú','Desastre de Rancagua','Batalla de Chacabuco'], tier:'beginner'}
-  ], tier:'intermediate'},
+    {q:'¿Qué combate naval ocurrió el 21 de mayo?',a:'Combate Naval de Iquique',o:['Combate Naval de Iquique','Batalla de Maipú','Desastre de Rancagua','Batalla de Chacabuco'], tier:'beginner'},
     {q:'¿Cuándo es Fiestas Patrias?',a:'18 de septiembre',o:['18 de septiembre','4 de julio','25 de diciembre','12 de febrero'], tier:'beginner'},
     {q:'¿Quién es el Padre de la Patria?',a:'Bernardo O\'Higgins',o:['Bernardo O\'Higgins','Pedro de Valdivia','Arturo Prat','Manuel Baquedano'], tier:'intermediate'},
     {q:'¿En qué año fue la independencia total?',a:'1818',o:['1818','1776','1910','1541'], tier:'expert', explain:'Chile declaró su independencia el 12 de febrero de 1818, tras años de lucha contra España.'},
@@ -422,11 +889,9 @@ const QB={
     {q:'¿Cuál es la mina de cobre a tajo abierto más grande del mundo, ubicada en Chile?',a:'Chuquicamata',o:['Chuquicamata','El Teniente','La Escondida','Andina'], tier:'expert', explain:'Chuquicamata, en el norte de Chile, es una de las minas de cobre a tajo abierto más grandes del mundo.'}
   ],
   nature:[
-    {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble',
     {q:'¿Cuál es la flor nacional de Chile?',a:'Copihue',o:['Copihue','Rosa','Margarita','Girasol'], tier:'beginner', explain:'El copihue es la flor nacional de Chile y crece en los bosques húmedos del sur.'},
     {q:'¿Qué árbol nativo chileno puede vivir miles de años?',a:'Alerce',o:['Alerce','Pino','Eucalipto','Roble'], tier:'advanced'},
-    {q:'¿Qué animal nativo es un pequeño ciervo?',a:'Pudú',o:['Pudú','Huemul','Zorro','Guanaco'], tier:'intermediate'}
-  ], tier:'advanced'},
+    {q:'¿Qué animal nativo es un pequeño ciervo?',a:'Pudú',o:['Pudú','Huemul','Zorro','Guanaco'], tier:'intermediate'},
     {q:'¿Qué animal marino se puede avistar frecuentemente en la Reserva Nacional Pingüino de Humboldt?',a:'Delfín',o:['Delfín','Tiburón blanco','Estrella de mar','Caballito de mar'], tier:'expert'},
     {q:'¿Envergadura del cóndor andino?',a:'Más de 3 metros',o:['Más de 3 metros','1 metro','50 cm','10 metros'], tier:'advanced'},
     {q:'¿Edad de la especie araucaria?',a:'200+ millones de años',o:['200+ millones de años','1.000 años','50 años','1 millón de años'], tier:'expert', explain:'La araucaria es un árbol muy antiguo: su linaje existe desde hace más de 200 millones de años, época de los dinosaurios.'},
@@ -549,10 +1014,12 @@ function renderQuizMenu(){
   const prog=getUserProgress();
   const qa=document.getElementById('quizArea');
   if(!qa)return;
-  let h='<p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:12px">Elige un tema</p><div class="topic-select">';
-  TOPICS.forEach(t=>{
-    const done=prog[t.id]&&prog[t.id].bestStars>0;
-    h+='<button class="topic-btn" onclick="startQuiz(\''+t.id+'\')">'+t.icon+' '+t.name+(done?' ⭐':'')+'</button>';
+  const t=dcTier();
+  let h='<div class="qz-head"><h2>Elige un tema</h2><p>'+({beginner:'4 preguntas fáciles',intermediate:'6 preguntas',advanced:'Todas las preguntas hasta nivel avanzado',expert:'Todas las preguntas, nivel experto'})[t]+'</p></div><div class="qz-grid">';
+  TOPICS.forEach(tp=>{
+    if(!QB[tp.id])return;
+    const st=prog[tp.id]&&prog[tp.id].bestStars||0;
+    h+='<button type="button" class="qz-topic" onclick="startQuiz(\''+tp.id+'\')"><span class="qz-thumb">'+DCArt.banner(tp.id)+'</span><span class="qz-name">'+dcEsc(tp.name)+'</span><span class="qz-st" aria-label="'+st+' de 3 estrellas">'+[0,1,2].map(i=>DCArt.star(i<st)).join('')+'</span></button>';
   });
   h+='</div>';
   qa.innerHTML=h;
@@ -560,12 +1027,11 @@ function renderQuizMenu(){
 
 function startQuiz(id) {
   qTopic = id;
-  const user = getActiveUser();
-  const tier = getAgeTier(user ? user.age : null);
+  const tier = dcTier();
 
   if (!QB[id] || !Array.isArray(QB[id]) || !QB[id].length) {
     console.warn('[Descubre Chile] No quiz bank for id:', id);
-    if (typeof showScreen === 'function') showScreen('menu');
+    renderQuizMenu();
     return;
   }
   let qs = QB[id].slice();
@@ -579,42 +1045,51 @@ function startQuiz(id) {
   });
 
   // Cap question count by age
-  if (tier === 'beginner') qs = qs.sort(() => Math.random() - 0.5).slice(0, 4);
-  else if (tier === 'intermediate') qs = qs.sort(() => Math.random() - 0.5).slice(0, 6);
-  // advanced/expert get all filtered questions
+  if (tier === 'beginner') qs = dcShuffle(qs).slice(0, 4);
+  else if (tier === 'intermediate') qs = dcShuffle(qs).slice(0, 6);
+  else qs = dcShuffle(qs); // advanced/expert get all filtered questions, shuffled
 
   qQs = qs;
   qIdx = 0;
   qScore = 0;
+  qMissed = [];
   showQ();
 }
 
-
+let qMissed=[],qOpts=[];
 function showQ(){
   const qa=document.getElementById('quizArea');
   if(!qa)return;
   if(qIdx>=qQs.length){finishQ();return}
   const q=qQs[qIdx];
-  const sh=q.o.slice().sort(()=>Math.random()-0.5);
-  let h='<div class="quiz-top"><div class="quiz-badge">Pregunta '+(qIdx+1)+'/'+qQs.length+'</div><div class="quiz-score">⭐ '+qScore+'</div></div>';
+  const tp=TOPICS.find(t=>t.id===qTopic);
+  qOpts=dcShuffle(q.o);
+  let h='<div class="quiz-top"><div class="quiz-badge">Pregunta '+(qIdx+1)+'/'+qQs.length+'</div><div class="quiz-score">'+DCArt.star(true)+' '+qScore+'</div></div>';
   h+='<div class="quiz-progress-wrap"><div class="quiz-progress-fill" style="width:'+(qIdx/qQs.length*100)+'%"></div></div>';
-  h+='<div class="quiz-card" id="qC"><div class="quiz-q-text">'+q.q+'</div></div><div class="quiz-opts">';
-  sh.forEach(o=>{h+='<button class="quiz-opt-btn" onclick="ans(this)">'+o+'</button>'});
-  h+='</div>';
+  h+='<div class="quiz-card" id="qC"><div class="quiz-art">'+DCArt.banner(qTopic)+'<span>'+dcEsc(tp?tp.name:'')+'</span></div><div class="quiz-q-text">'+dcEsc(q.q)+'</div></div><div class="quiz-opts">';
+  qOpts.forEach((o,i)=>{h+='<button type="button" class="quiz-opt-btn" data-i="'+i+'" onclick="ans(this)"><span class="qo-l">'+'ABCD'[i]+'</span><span class="qo-t">'+dcEsc(o)+'</span></button>'});
+  h+='</div><div id="qNext"></div>';
   qa.innerHTML=h;
 }
 
 function ans(btn){
-  const q=qQs[qIdx];const sel=btn.textContent;const ok=sel===q.a;
+  const q=qQs[qIdx];if(!q)return;
+  const sel=btn.dataset.i!=null?qOpts[+btn.dataset.i]:btn.textContent;
+  const ok=sel===q.a;
   document.querySelectorAll('.quiz-opt-btn').forEach(b=>{
-    b.classList.add('disabled');
-    if(b.textContent===q.a)b.classList.add('reveal');
+    b.classList.add('disabled');b.disabled=true;
+    if(qOpts[+b.dataset.i]===q.a)b.classList.add('reveal');
   });
   const qc=document.getElementById('qC');
-  if(ok){qScore++;btn.classList.add('sel-correct');if(qc)qc.classList.add('correct');showFeedback('🎉');if(typeof SFX!=='undefined')SFX.correct()}
-  else{btn.classList.add('sel-wrong');if(qc)qc.classList.add('wrong');showFeedback('🤔');if(typeof SFX!=='undefined')SFX.wrong()}
+  if(ok){qScore++;btn.classList.add('sel-correct');if(qc)qc.classList.add('correct');showFeedback('🎉');dcSfx('correct')}
+  else{btn.classList.add('sel-wrong');if(qc)qc.classList.add('wrong');showFeedback('🤔');dcSfx('wrong');qMissed.push(q)}
   if(qc&&q.explain&&!qc.querySelector('.dc-explain')){const ex=document.createElement('div');ex.className='dc-explain';ex.textContent=q.explain;qc.appendChild(ex)}
-  setTimeout(()=>{qIdx++;showQ()},1200);
+  const t=dcTier();
+  // older readers get time to read the explanation; they move on themselves
+  if(q.explain&&(t==='advanced'||t==='expert')){
+    const n=document.getElementById('qNext');
+    if(n){n.innerHTML='<button type="button" class="btn-red qz-next">Siguiente ›</button>';const b=n.querySelector('button');b.onclick=()=>{qIdx++;showQ()};b.focus()}
+  } else setTimeout(()=>{qIdx++;showQ()},q.explain?2200:1200);
 }
 
 function finishQ(){
@@ -622,16 +1097,19 @@ function finishQ(){
   if(!qa)return;
   const pct=Math.round(qScore/qQs.length*100);
   const stars=pct>=90?3:pct>=60?2:1;
-  if(typeof SFX!=='undefined'&&pct>=60)SFX.cheer();
+  if(pct>=60)dcSfx('cheer');
   saveTopicProgress(qTopic,stars,pct);updateProgress();
 
   const showResults = () => {
-    let e,t,s;
-    if(pct>=90){e='🏆';t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}
-    else if(pct>=60){e='🌟';t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}
-    else{e='💪';t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}
-    let st='';for(let i=0;i<3;i++)st+='<span>'+(i<stars?'⭐':'☆')+'</span>';
-    qa.innerHTML='<div class="results-box"><span class="r-emoji">'+e+'</span><div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="r-stars">'+st+'</div><div style="display:flex;gap:10px;justify-content:center"><button class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar 🔁</button><button class="btn-ghost" onclick="renderQuizMenu()">Otros temas 🇨🇱</button></div></div>';
+    let t,s;
+    if(pct>=90){t='¡Excelente!';s=qScore+' de '+qQs.length+' — ¡eres experto/a!'}
+    else if(pct>=60){t='¡Muy bien!';s=qScore+' de '+qQs.length+' — ¡gran conocimiento!'}
+    else{t='¡Sigue intentando!';s=qScore+' de '+qQs.length+' — lee las historias y vuelve.'}
+    let rev='';
+    if(qMissed.length&&dcTier()!=='beginner'){
+      rev='<div class="qz-review"><h3>Para repasar</h3>'+qMissed.map(q=>'<div class="qz-rv"><span>'+dcEsc(q.q)+'</span><b>'+dcEsc(q.a)+'</b></div>').join('')+'</div>';
+    }
+    qa.innerHTML='<div class="results-box">'+DCArt.medal(stars)+'<div class="r-title">'+t+'</div><div class="r-sub">'+s+'</div><div class="dc-stars r-stars">'+[0,1,2].map(i=>DCArt.star(i<stars)).join('')+'</div>'+rev+'<div class="r-btns"><button type="button" class="btn-red" onclick="startQuiz(\''+qTopic+'\')">Reintentar</button><button type="button" class="btn-ghost" onclick="renderQuizMenu()">Otros temas</button></div></div>';
   };
 
   if (typeof LearningCheck !== 'undefined') {
@@ -641,8 +1119,9 @@ function finishQ(){
   }
 }
 
-// ── MAP DRAG QUIZ ──
-let dragTimer=null, dragTime=60, dragScore=0;
+
+// ── UBICA: drag names onto the real map ──
+let dragTimer=null, dragTime=60, dragScore=0, dragMiss=0, dragMode=null, dragMV=null, dragSel=null, dragTotal=5;
 const dragRegions = [
   {id:'norte', name:'Norte', color:'#E87040'},
   {id:'centro', name:'Centro', color:'#D93636'},
@@ -652,103 +1131,145 @@ const dragRegions = [
 ];
 let activeDragEl=null, offsetX=0, offsetY=0;
 
-function initDragQuiz(){
+function dragMount(){
+  if(dragMV)return;
+  const host=document.getElementById('dcDragMap');if(!host)return;
+  dragMV=DCMapView(host,{id:'dm',labels:false,title:'Mapa de Chile para ubicar zonas y regiones',onTap:(id,kind)=>{if(dragSel)dragTryDrop(dragSel,kind==='island'?{island:id}:{region:id})}});
+  host.classList.add('nolabels','nocaps');
+  dragMV.init('fit');
+  if(!dragMode)dragSetMode(['advanced','expert'].includes(dcTier())?'regiones':'zonas',true);
+}
+function dragSetMode(m,quiet){
+  dragMode=m;
+  document.querySelectorAll('#dragModes [data-dmode]').forEach(b=>{const on=b.dataset.dmode===m;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on)});
+  dragReset();
+  const total=m==='zonas'?5:16;
+  document.getElementById('dragTotal').textContent=total;
+  document.getElementById('dragHint').textContent=m==='zonas'?'Arrastra cada zona a su lugar (o tócala y luego toca el mapa).':'Arrastra las 16 regiones a su lugar. Usa + para acercar el centro.';
+  if(dragMV){if(m==='regiones')dragMV.setZoom(Math.min(1,dragMV.fitZ()*2.4));else dragMV.setZoom(dragMV.fitZ())}
+}
+function dragReset(){
   clearInterval(dragTimer);
-  dragTime=60; dragScore=0;
-  document.getElementById('dragTime').textContent=dragTime;
+  const c=document.getElementById('dragTokens');if(c)c.innerHTML='';
+  if(dragMV){dragMV.svg.querySelectorAll('.dc-reg').forEach(z=>{z.classList.remove('filled','active-target','bad');z.style.fill=''});dragMV.svg.querySelectorAll('.dg-lbl').forEach(n=>n.remove());const i=dragMV.svg.querySelector('[data-island="RN"]');if(i)i.classList.remove('filled')}
+  const b=document.getElementById('dragStartBtn');if(b){b.style.display='inline-block';b.textContent='▶️ Comenzar Reto'}
   document.getElementById('dragScore').textContent='0';
+  document.getElementById('dragTime').textContent=dragMode==='regiones'?dragLimit():60;
+}
+function dragLimit(){const t=dcTier();return dragMode==='zonas'?(t==='beginner'?90:60):(t==='expert'?180:t==='advanced'?240:300)}
+function dragLabel(text,x,y,cls){
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('class','dg-lbl '+(cls||''));t.setAttribute('text-anchor','middle');t.textContent=text;
+  dragMV.svg.appendChild(t);
+}
+function dragTryDrop(t,hit){
+  if(!t||t.classList.contains('placed'))return false;
+  const id=t.dataset.id;let ok=false,targets=[];
+  if(dragMode==='zonas'){
+    const zone=hit.island==='RN'?'pascua':hit.island==='JF'?'centro':hit.region?DCArt.geoById(hit.region).zone:null;
+    ok=zone===id;
+    if(ok){const z=DC_ZONES.find(x=>x.id===id);targets=z.regions}
+  }else{ok=hit.region===id;targets=[id]}
+  if(ok){
+    const col=(DC_ZONES.find(z=>z.id===(dragMode==='zonas'?id:DCArt.geoById(id).zone))||{}).color;
+    targets.forEach(rid=>dragMV.regEls(rid).forEach(el=>{el.classList.add('filled');el.style.fill=col}));
+    if(id==='pascua'){const i=dragMV.svg.querySelector('[data-island="RN"]');if(i)i.classList.add('filled')}
+    if(targets.length){
+      let sx=0,sy=0;targets.forEach(rid=>{const g=DCArt.geoById(rid);sx+=g.c[0];sy+=g.c[1]});
+      dragLabel(t.textContent,Math.round(sx/targets.length),Math.round(sy/targets.length)+6,dragMode==='zonas'?'dg-zone':'');
+    }
+    t.classList.add('placed');t.setAttribute('aria-disabled','true');t.classList.remove('sel');dragSel=null;
+    dcSfx('correct');
+    dragScore++;document.getElementById('dragScore').textContent=dragScore;
+    if(dragScore===dragTotal)dragWin();
+  }else{
+    dragMiss++;dcSfx('wrong');
+    if(hit.region)dragMV.regEls(hit.region).forEach(el=>{el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),600)});
+    t.classList.add('shake');setTimeout(()=>t.classList.remove('shake'),450);
+  }
+  return ok;
+}
+function dragWin(){
+  clearInterval(dragTimer);
+  showFeedback('🏆');dcSfx('cheer');
+  if(dragMode==='zonas'){saveTopicProgress('dragquiz', 3, 100)}
+  else{const stars=dragMiss<=2?3:dragMiss<=6?2:1;saveTopicProgress('dragregiones',stars,Math.round(100*16/(16+dragMiss)))}
+  updateProgress();
+  const b=document.getElementById('dragStartBtn');b.style.display='inline-block';b.textContent='Jugar de nuevo';
+  document.getElementById('dragHint').innerHTML='¡Completado! Errores: '+dragMiss+'.';
+  if(typeof ActivityLog!=='undefined') ActivityLog.log('Descubre Chile','📍','Completó el Reto de Ubicación');
+}
+function hitAt(x,y,t){
+  t.style.visibility='hidden';const el=document.elementFromPoint(x,y);t.style.visibility='';
+  if(!el)return {};
+  const isl=el.closest&&el.closest('[data-island]');if(isl)return {island:isl.dataset.island};
+  const r=el.closest&&el.closest('#dcDragMap .dc-reg');if(r)return {region:r.dataset.id,el:r};
+  return {};
+}
+function initDragQuiz(){
+  dragMount();
+  dragReset();
+  dragScore=0;dragMiss=0;dragSel=null;dragTime=dragLimit();
+  const items=dragMode==='zonas'?dragRegions.map(r=>({id:r.id,name:r.name})):DC_REGIONS.map(r=>({id:r.id,name:r.short||r.name}));
+  dragTotal=items.length;
+  document.getElementById('dragTime').textContent=dragTime;
   document.getElementById('dragStartBtn').style.display='none';
-
-  const container = document.getElementById('dragTokens');
+  const container=document.getElementById('dragTokens');
   container.innerHTML='';
-  // reset zones
-  document.querySelectorAll('.drop-zone').forEach(z => {
-    z.classList.remove('filled');
-    z.style.fill='';
-  });
-
-  // Create tokens
-  const shuffled = dragRegions.slice().sort(()=>Math.random()-0.5);
-  shuffled.forEach(r => {
-    const t = document.createElement('div');
-    t.className='drag-token';
-    t.textContent=r.name;
-    t.dataset.id=r.id;
-    t.dataset.color=r.color;
+  dcShuffle(items).forEach(r=>{
+    const t=document.createElement('button');
+    t.type='button';t.className='drag-token';t.textContent=r.name;t.dataset.id=r.id;
     container.appendChild(t);
-
-    // Pointer events for drag
-    t.addEventListener('pointerdown', e => {
-      activeDragEl=t;
-      t.classList.add('dragging');
-      t.style.width = t.offsetWidth+'px';
-      const rect = t.getBoundingClientRect();
-      offsetX = e.clientX - rect.left;
-      offsetY = e.clientY - rect.top;
-      t.style.left = (e.clientX - offsetX)+'px';
-      t.style.top = (e.clientY - offsetY)+'px';
+    let moved=false,sx=0,sy=0;
+    t.addEventListener('pointerdown',e=>{
+      if(t.classList.contains('placed'))return;
+      activeDragEl=t;moved=false;sx=e.clientX;sy=e.clientY;
+      const rect=t.getBoundingClientRect();offsetX=e.clientX-rect.left;offsetY=e.clientY-rect.top;
       t.setPointerCapture(e.pointerId);
     });
-    t.addEventListener('pointermove', e => {
-      if(activeDragEl!==t) return;
-      t.style.left = (e.clientX - offsetX)+'px';
-      t.style.top = (e.clientY - offsetY)+'px';
-      // hit test
-      document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('active-target'));
-      t.hidden = true;
-      const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-      t.hidden = false;
-      if(elemBelow && elemBelow.classList.contains('drop-zone') && !elemBelow.classList.contains('filled')){
-        elemBelow.classList.add('active-target');
-      }
+    t.addEventListener('pointermove',e=>{
+      if(activeDragEl!==t)return;
+      if(!moved&&Math.hypot(e.clientX-sx,e.clientY-sy)<6)return;
+      if(!moved){moved=true;t.style.width=t.offsetWidth+'px';t.classList.add('dragging')}
+      t.style.left=(e.clientX-offsetX)+'px';t.style.top=(e.clientY-offsetY)+'px';
+      dragMV.svg.querySelectorAll('.active-target').forEach(z=>z.classList.remove('active-target'));
+      const h=hitAt(e.clientX,e.clientY,t);if(h.el&&!h.el.classList.contains('filled'))h.el.classList.add('active-target');
+      // auto-scroll the map view near its edges
+      const vr=dragMV.view.getBoundingClientRect();
+      if(e.clientX>vr.left&&e.clientX<vr.right){if(e.clientY<vr.top+40&&e.clientY>vr.top-30)dragMV.view.scrollTop-=14;else if(e.clientY>vr.bottom-40&&e.clientY<vr.bottom+30)dragMV.view.scrollTop+=14}
+      // and the page itself, so the top of the map can be reached from the tray
+      if(e.clientY<50)window.scrollBy(0,-14);else if(e.clientY>window.innerHeight-30)window.scrollBy(0,14);
     });
-    t.addEventListener('pointerup', e => {
-      if(activeDragEl!==t) return;
-      activeDragEl=null;
-      t.classList.remove('dragging');
-      t.releasePointerCapture(e.pointerId);
-      t.hidden = true;
-      const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-      t.hidden = false;
-
-      document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('active-target'));
-
-      if(elemBelow && elemBelow.classList.contains('drop-zone') && elemBelow.dataset.id === t.dataset.id){
-        elemBelow.classList.add('filled');
-        elemBelow.style.fill = t.dataset.color;
-        t.classList.add('placed');
-        if(typeof playSound==='function') playSound('click');
-        dragScore++;
-        document.getElementById('dragScore').textContent=dragScore;
-
-        if(dragScore===dragRegions.length){
-          clearInterval(dragTimer);
-          showFeedback('🏆');
-          if(typeof playSound==='function') playSound('success');
-          saveTopicProgress('dragquiz', 3, 100);
-          document.getElementById('dragStartBtn').style.display='inline-block';
-          document.getElementById('dragStartBtn').textContent='Jugar de nuevo';
-          if(typeof ActivityLog!=='undefined') ActivityLog.log('Descubre Chile','📍','Completó el Reto de Ubicación');
-        }
-      } else {
-        t.style.left=''; t.style.top=''; t.style.width='';
-        if(typeof playSound==='function') playSound('error');
+    const end=e=>{
+      if(activeDragEl!==t)return;activeDragEl=null;
+      try{t.releasePointerCapture(e.pointerId)}catch(_){}
+      dragMV.svg.querySelectorAll('.active-target').forEach(z=>z.classList.remove('active-target'));
+      if(!moved){ // tap-to-select
+        document.querySelectorAll('.drag-token.sel').forEach(o=>{if(o!==t){o.classList.remove('sel');o.setAttribute('aria-pressed','false')}});
+        const on=t.classList.toggle('sel');t.setAttribute('aria-pressed',on);dragSel=on?t:null;return;
       }
-    });
+      const h=hitAt(e.clientX,e.clientY,t);
+      t.classList.remove('dragging');t.style.left='';t.style.top='';t.style.width='';
+      if(h.region||h.island)dragTryDrop(t,h);
+    };
+    t.addEventListener('pointerup',end);
+    t.addEventListener('pointercancel',e=>{activeDragEl=null;t.classList.remove('dragging');t.style.left='';t.style.top='';t.style.width=''});
   });
-
-  dragTimer = setInterval(()=>{
+  dragTimer=setInterval(()=>{
     dragTime--;
     document.getElementById('dragTime').textContent=dragTime;
     if(dragTime<=0){
       clearInterval(dragTimer);
-      document.getElementById('dragStartBtn').style.display='inline-block';
-      document.getElementById('dragStartBtn').textContent='Intentar de nuevo';
-      container.innerHTML=''; // clear tokens
-      if(typeof playSound==='function') playSound('error');
+      const b=document.getElementById('dragStartBtn');b.style.display='inline-block';b.textContent='Intentar de nuevo';
+      container.querySelectorAll('.drag-token').forEach(x=>{if(!x.classList.contains('placed'))x.disabled=true});
+      if(dragMode==='regiones'&&dragScore>=8){saveTopicProgress('dragregiones',1,Math.round(100*dragScore/16));updateProgress()}
+      document.getElementById('dragHint').textContent='¡Se acabó el tiempo! Ubicaste '+dragScore+' de '+dragTotal+'.';
+      dcSfx('wrong');
     }
-  }, 1000);
+  },1000);
 }
+window.initDragQuiz=initDragQuiz;
+window.dragSetMode=dragSetMode;
 
 // ── INIT (safe — runs after DOM ready) ──
 function dcInit(){
@@ -762,18 +1283,28 @@ function dcInit(){
   const tabBar=document.getElementById('tabBar');
   if(tabBar){
     tabBar.addEventListener('click',e=>{
-      if(!e.target.dataset||!e.target.dataset.tab)return;
+      const b=e.target.closest('[data-tab]');if(!b)return;
       document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-      const target=document.getElementById('tab-'+e.target.dataset.tab);
+      document.querySelectorAll('.tab-btn').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});
+      const target=document.getElementById('tab-'+b.dataset.tab);
       if(target)target.classList.add('active');
-      e.target.classList.add('active');
-
-      if(e.target.dataset.tab === 'mapa-drag' && document.getElementById('dragScore').textContent === '0') {
-        // Ready to start
-      }
+      b.classList.add('active');b.setAttribute('aria-selected','true');
+      document.body.classList.toggle('dc-wide-tab',b.dataset.tab==='mapa'||b.dataset.tab==='mapa-drag');
+      if(b.dataset.tab!=='mapa'){const p=document.getElementById('dcPanel');if(p)p.classList.remove('sheet');document.body.classList.remove('dc-sheet-open')}
+      if(b.dataset.tab==='mapa-drag')setTimeout(dragMount,30);
+      if(b.dataset.tab==='quiz'&&!qQs.length)renderQuizMenu();
     });
   }
+  const gm=document.getElementById('gameModes');
+  if(gm)gm.addEventListener('click',e=>{
+    const b=e.target.closest('[data-game]');if(!b)return;
+    gm.querySelectorAll('[data-game]').forEach(x=>{const on=x===b;x.classList.toggle('active',on);x.setAttribute('aria-pressed',on)});
+    document.getElementById('game-memory').hidden=b.dataset.game!=='memory';
+    document.getElementById('game-order').hidden=b.dataset.game!=='order';
+    if(b.dataset.game==='order'&&!ord)initOrder();
+  });
+  const dm=document.getElementById('dragModes');
+  if(dm)dm.addEventListener('click',e=>{const b=e.target.closest('[data-dmode]');if(b){dragMount();dragSetMode(b.dataset.dmode)}});
 
   // User greeting (nav.js handles the badge)
   const user=getActiveUser();
@@ -785,12 +1316,14 @@ function dcInit(){
       else greetEl.textContent='¡Vamos, '+user.name+'!';
     }
   }
+  document.body.classList.add('dc-wide-tab');
 
-  curTopic=TOPICS[0].id;
+  curTopic='timeline';
   renderTopics();
   renderStories(curTopic);
   initMemory();
   renderQuizMenu();
+  DCMap.mount();
   updateProgress();
 }
 
@@ -799,3 +1332,4 @@ document.addEventListener('DOMContentLoaded', dcInit);
 // === NEW CONTENT ADDED 2026-03-23 by Content Guardian Agent ===
 // Math Galaxy – 12 new problems added to generators
 // Descubre Chile – 1 new topic + 10 new quiz questions
+

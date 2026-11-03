@@ -705,7 +705,12 @@
       } catch (e) {}
 
       try {
-        var ep = typeof QuestAdventure !== 'undefined' ? QuestAdventure.calculateEP() : 0;
+        // Expedition Points = every app's stars except Quest Adventure's own
+        // (how quest-adventure.js counts them). quest-adventure.js is not
+        // loaded on the hub, so the old QuestAdventure.calculateEP() call
+        // never ran and this chip never showed.
+        var ep = (stats.totalStars || 0) -
+          (typeof getAppStars === 'function' ? getAppStars('quest', appStats.quest || {}) : 0);
         if (els.quest && ep > 0) {
           els.quest.innerHTML = '<span class="cs-item active">⚡ ' + ep + ' EP</span>';
         }
@@ -1110,7 +1115,7 @@
         var totalDC = 0;
         for (var dk in dc) { if (dk !== 'vr' && dk !== 'memBest' && dc[dk]) totalDC += (dc[dk].bestStars || 0); }
         if (totalDC > 0) {
-          var pct = (totalDC / 30) * 100;
+          var pct = (totalDC / 57) * 100;   // 19 starred activities × 3 since the map upgrade
           appRows += '<div class="dash-app-row">' +
             '<span class="dash-app-icon">🇨🇱</span>' +
             '<span class="dash-app-name">Descubre Chile</span>' +
