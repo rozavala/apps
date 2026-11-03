@@ -1089,6 +1089,7 @@ const StoryExplorer = (() => {
   // ── Event wiring (one delegated listener) ──
   function _bind() {
     document.addEventListener('click', e => {
+      if (e.target && e.target.id === 'vocab-overlay') { _closeVocab(); return; }
       const b = e.target.closest('[data-act]');
       if (!b || b.disabled) return;
       const a = b.dataset.act;
