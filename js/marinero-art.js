@@ -45,8 +45,8 @@ var MarineroArt = (function() {
   }
 
   // Canvas sized for the device's pixel ratio. Returns {ctx,w,h,dpr}.
-  function fitCanvas(cv, cssW, cssH) {
-    var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  function fitCanvas(cv, cssW, cssH, maxDpr) {
+    var dpr = Math.min(window.devicePixelRatio || 1, maxDpr || 2.5);
     var w = Math.max(1, Math.round(cssW)), h = Math.max(1, Math.round(cssH));
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
       cv.width = Math.round(w * dpr);
@@ -224,7 +224,7 @@ var MarineroArt = (function() {
       var fall = W * 0.7;
       [['a', c.ra, c.sa], ['b', c.rb, c.sb]].forEach(function(e) {
         var R = ropes[e[1]], sc = e[2];
-        var h = (c.over === e[0]) ? 0.5 : -0.5;
+        var h = ((c.over === e[0]) ? 1 : -1) * (def.bump == null ? 0.5 : def.bump);
         for (var k2 = 0; k2 < R.n; k2++) {
           var d = Math.abs(k2 * R.ds - sc);
           if (d > hw + fall) continue;
@@ -302,8 +302,8 @@ var MarineroArt = (function() {
 
   var TUBE = (function() { // width fraction, shade, sideways shift (radius units)
     var t = [];
-    for (var i = 0; i < 11; i++) {
-      var f = i / 10;
+    for (var i = 0; i < 10; i++) {
+      var f = i / 9;
       var wf = 1 - f * 0.9;
       t.push([wf, 0.34 + 0.9 * Math.pow(f, 0.8), 0.62 * Math.pow(f, 0.9)]);
     }
@@ -328,11 +328,14 @@ var MarineroArt = (function() {
   function helixPts(R, s0, P, W, vFrom, vTo, sLo, sHi, steps) {
     var pts = [];
     var r = W / 2 * 0.97;
+    var F0 = frameAt(R, s0);
     for (var k = 0; k <= steps; k++) {
       var v = vFrom + (vTo - vFrom) * (k / steps);
       var s = s0 + Math.asin(clamp(v, -1, 1)) * P / (2 * Math.PI);
       if (s < sLo || s > sHi) { pts.push(null); continue; }
       var F = frameAt(R, s);
+      // in a tight hairpin the helix would jump across the bend: drop those bits
+      if (F.nx * F0.nx + F.ny * F0.ny < 0.55) { pts.push(null); continue; }
       pts.push([F.x + F.nx * v * r, F.y + F.ny * v * r, F]);
     }
     return pts;
@@ -350,8 +353,8 @@ var MarineroArt = (function() {
   // dark where it dives into the groove beside its neighbour and bright on its
   // crown; the crown is lit more on the side that faces the light.
   var STRAND_LINES = [ // phase across one strand (0..1), kind, weight
-    [0.07, 'dark', 0.6], [0.93, 'dark', 0.6], [0.17, 'dark', 0.3], [0.83, 'dark', 0.3],
-    [0.38, 'lite', 0.5], [0.5, 'lite', 0.8], [0.62, 'lite', 0.5]
+    [0.08, 'dark', 0.75], [0.92, 'dark', 0.75],
+    [0.4, 'lite', 0.6], [0.6, 'lite', 0.6]
   ];
 
   // Offset copy of the run's centreline, `off` radii to one side.
@@ -380,39 +383,39 @@ var MarineroArt = (function() {
       STRAND_LINES.forEach(function(Ln) {
         var ph = Ln[0], kind = Ln[1], wt = Ln[2];
         if (kind === 'dark') {
-          var bins = [[], [], [], [], [], []];
+          var bins = [[], [], []];
           for (var g = g0; g <= g1; g++) {
             var Fm = frameAt(R, g * sp + sp * ph);
             var lt = Fm.ny * LX - Fm.nx * LY;
             var fl = clamp(1 + (ph < 0.5 ? -1 : 1) * lt * 1.5, 0.3, 1.8);
-            bins[Math.min(5, Math.floor((fl - 0.3) / 0.25))].push(g);
+            bins[Math.min(2, Math.floor((fl - 0.3) / 0.5))].push(g);
           }
           bins.forEach(function(list, bi) {
             if (!list.length) return;
             ctx.beginPath();
-            list.forEach(function(g) { strokePts(ctx, helixPts(R, g * sp + sp * ph, P, W, -1.05, 1.05, sLo, sHi, 12)); });
-            ctx.lineWidth = sp * 0.15;
-            ctx.strokeStyle = rgb(dark, (0.3 * wt * (0.425 + bi * 0.25)).toFixed(3));
+            list.forEach(function(g) { strokePts(ctx, helixPts(R, g * sp + sp * ph, P, W, -1.05, 1.05, sLo, sHi, 7)); });
+            ctx.lineWidth = sp * 0.2;
+            ctx.strokeStyle = rgb(dark, (0.3 * wt * (0.55 + bi * 0.5)).toFixed(3));
             ctx.stroke();
           });
         } else {
           ctx.beginPath();
-          for (var g5 = g0; g5 <= g1; g5++) strokePts(ctx, helixPts(R, g5 * sp + sp * ph, P, W, -1.05, 1.05, sLo, sHi, 12));
-          ctx.lineWidth = sp * 0.17;
-          ctx.strokeStyle = 'rgba(255,247,228,' + (0.07 * wt).toFixed(3) + ')';
+          for (var g5 = g0; g5 <= g1; g5++) strokePts(ctx, helixPts(R, g5 * sp + sp * ph, P, W, -1.05, 1.05, sLo, sHi, 7));
+          ctx.lineWidth = sp * 0.22;
+          ctx.strokeStyle = 'rgba(255,247,228,' + (0.08 * wt).toFixed(3) + ')';
           ctx.stroke();
         }
       });
       // the groove itself
       ctx.beginPath();
-      for (var g4 = g0; g4 <= g1; g4++) strokePts(ctx, helixPts(R, g4 * sp, P, W, -1.05, 1.05, sLo, sHi, 12));
+      for (var g4 = g0; g4 <= g1; g4++) strokePts(ctx, helixPts(R, g4 * sp, P, W, -1.05, 1.05, sLo, sHi, 8));
       ctx.lineWidth = W * 0.1; ctx.strokeStyle = rgb(dark, 0.5); ctx.stroke();
       ctx.lineWidth = W * 0.038; ctx.strokeStyle = rgb(shadeC(base, 0.08), 0.9); ctx.stroke();
       // yarn / fibre texture: fine lines along each strand, slightly irregular
       ctx.beginPath();
       for (var g2 = g0; g2 <= g1; g2++) {
         var rr = rng(9301 + g2 * 7 + R.idx * 131);
-        for (var f = 0; f < 5; f++) {
+        for (var f = 0; f < 3; f++) {
           var off = sp * (0.15 + rr() * 0.7);
           var vA = -0.95 + rr() * 0.6, vB = vA + 0.45 + rr() * 0.9;
           strokePts(ctx, helixPts(R, g2 * sp + off, P * (0.93 + rr() * 0.14), W, vA, Math.min(0.98, vB), sLo, sHi, 4));
@@ -621,7 +624,7 @@ var MarineroArt = (function() {
     keys.forEach(function(lv) {
       var runs = levels[lv] || [];
       var sb = shadowBits[lv];
-      if (sb && sb.length && !window.__noSB) {
+      if (sb && sb.length) {
         castShadow(ctx, dsc, W * 0.34, W * 0.16, W * 0.28, 'rgba(12,6,0,0.78)', function(c) {
           c.beginPath();
           sb.forEach(function(p) {
@@ -640,7 +643,7 @@ var MarineroArt = (function() {
         var group = byRope[ri];
         // Paint tube + strands on a scratch layer so the strand texture is
         // clipped exactly to the rope (source-atop), then stamp it down.
-        var L = window.__noLayer ? { ctx: ctx, w: 0 } : layerFor(ctx, group, W);
+        var L = layerFor(ctx, group, W);
         var lc = L.ctx;
         lc.lineJoin = 'round'; lc.lineCap = 'butt';
         drawTube(lc, group, W, col.base);
@@ -655,7 +658,7 @@ var MarineroArt = (function() {
           }
           if (rn.i0 === 0 && d.start && d.start !== 'none') drawEnd(lc, R, 0, -1, d.start, W, col);
         });
-        if (!window.__noLayer) stampLayer(ctx, L);
+        stampLayer(ctx, L);
         drawFuzz(ctx, group, W, col.base);
       });
       objs.forEach(function(o) {
@@ -1287,26 +1290,33 @@ var MarineroArt = (function() {
       var on = Math.sin(t * 3 + gI * 1.7) > 0.4;
       if (on) ctx.fillRect(gx, gy, 2 + R() * 6, 1.2);
     }
-    // wave rows in perspective
-    var rows = 34;
+    // wave rows in perspective: broken crests (light) over troughs (dark)
+    var rows = 30;
+    ctx.lineCap = 'round';
     for (var i = 1; i <= rows; i++) {
       var f = i / rows;
       var y = H + (h - H) * f * f;
       var amp = 0.6 + f * f * h * 0.012;
       var len = 30 + f * w * 0.12;
       var ph = t * (0.6 + f * 0.8) + i * 1.3;
+      var dash = 8 + f * w * 0.09, gap = dash * (0.5 + ((i * 37) % 10) / 10);
       ctx.beginPath();
       for (var x = -20; x <= w + 20; x += 6) {
         var yy = y + Math.sin(x / len * TAU + ph) * amp + Math.sin(x / (len * 0.43) * TAU - ph * 1.3) * amp * 0.35;
         if (x === -20) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
       }
-      ctx.lineWidth = 0.6 + f * 2.2;
-      ctx.strokeStyle = 'rgba(200,230,240,' + (0.08 + f * 0.12) + ')';
+      ctx.setLineDash([dash, gap]);
+      ctx.lineDashOffset = -(t * (6 + f * 30) + i * 53);
+      ctx.lineWidth = 0.8 + f * 3.2;
+      ctx.strokeStyle = 'rgba(5,30,45,' + (0.08 + f * 0.14) + ')';
+      ctx.translate(0, amp * 1.4); ctx.stroke(); ctx.translate(0, -amp * 1.4);
+      ctx.setLineDash([dash * 0.6, gap + dash * 0.4]);
+      ctx.lineWidth = 0.5 + f * 1.8;
+      ctx.strokeStyle = 'rgba(210,235,245,' + (0.10 + f * 0.16) + ')';
       ctx.stroke();
-      ctx.lineWidth = 0.8 + f * 3;
-      ctx.strokeStyle = 'rgba(5,30,45,' + (0.06 + f * 0.12) + ')';
-      ctx.translate(0, amp * 1.6); ctx.stroke(); ctx.translate(0, -amp * 1.6);
     }
+    ctx.setLineDash([]);
+    ctx.lineCap = 'butt';
   }
 
   // Shaded vertical cylinder fill for colour c across [x0, x1].
@@ -1480,11 +1490,12 @@ var MarineroArt = (function() {
     ctx.save();
     ctx.beginPath(); ctx.rect(x - s * 1.5, y, s * 3, s * 2.2); ctx.clip();
     ctx.globalAlpha = 0.32;
-    for (var sl = 0; sl < 10; sl++) {
-      var sy = y + sl * s * 0.2;
+    var nSl = s < 70 ? 4 : 7, slH = s * 2 / nSl;
+    for (var sl = 0; sl < nSl; sl++) {
+      var sy = y + sl * slH;
       ctx.save();
-      ctx.beginPath(); ctx.rect(x - s * 1.5, sy, s * 3, s * 0.2); ctx.clip();
-      ctx.translate(x + Math.sin(t * 2.4 + sl * 0.9) * s * 0.04 * (1 + sl * 0.2), y + bob * 0.5);
+      ctx.beginPath(); ctx.rect(x - s * 1.5, sy, s * 3, slH + 0.5); ctx.clip();
+      ctx.translate(x + Math.sin(t * 2.4 + sl * 1.6) * s * 0.04 * (1 + sl * 0.35), y + bob * 0.5);
       ctx.scale(1, -0.8);
       ctx.rotate(-tilt);
       buoyBody(ctx, type, s, t, false);

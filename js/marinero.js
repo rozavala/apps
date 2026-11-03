@@ -254,7 +254,8 @@ var Marinero = (function() {
   function paintKnot(cv, K, M, w, opts) {
     opts = opts || {};
     var h = Math.round(w * 0.72);
-    var f = A.fitCanvas(cv, w, h), ctx = f.ctx;
+    // while the rope is moving, paint at a lower resolution; full detail when it stops
+    var f = A.fitCanvas(cv, w, h, opts.fast ? 1 : 2.5), ctx = f.ctx;
     var V = K.view || [0, 0, 1000];
     var sc = w / V[2];
     ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
@@ -373,10 +374,13 @@ var Marinero = (function() {
         var k = Math.min(N - 1, Math.ceil(t) - 1);
         return '<b>Step ' + (k + 1) + ' of ' + N + ':</b> ' + esc(steps[k].en) + ' <span class="mar-es">' + esc(steps[k].es) + '</span>';
       }
-      function draw() {
+      var sharpTmr = 0;
+      function draw(fast) {
         cssW = stage.clientWidth;
         var vis = M.ropes.map(function(R, i) { return i === (K.travel || 0) ? A.sAtCP(R, uAt(st.t)) : R.L; });
-        paintKnot(cv, K, M, cssW, { vis: vis, colors: colors, debug: debug });
+        paintKnot(cv, K, M, cssW, { vis: vis, colors: colors, debug: debug, fast: fast });
+        clearTimeout(sharpTmr);
+        if (fast) sharpTmr = setTimeout(function() { if (!st.playing) draw(false); }, 180);
         cap.innerHTML = caption(st.t);
         scrub.value = st.t;
         $all('.mar-dot', r).forEach(function(d, i) { d.classList.toggle('on', st.t >= i + 1 - 0.001); });
@@ -396,13 +400,13 @@ var Marinero = (function() {
         if (st.hold > 0) { st.hold -= dt; return true; }
         var before = Math.floor(st.t + 1e-6);
         st.t = Math.min(N, st.t + dt / 2.6);
-        if (Math.floor(st.t + 1e-6) > before && st.t < N) st.hold = 0.9;  // pause at each step
-        draw();
-        if (st.t >= N) { setPlaying(false); return false; }
+        if (Math.floor(st.t + 1e-6) > before && st.t < N) { st.hold = 0.9; draw(false); return true; }  // pause at each step
+        draw(true);
+        if (st.t >= N) { setPlaying(false); draw(false); return false; }
         return true;
       });
       play.addEventListener('click', function() { _sound('click'); setPlaying(!st.playing); });
-      scrub.addEventListener('input', function() { setPlaying(false); st.t = parseFloat(scrub.value) || 0; draw(); });
+      scrub.addEventListener('input', function() { setPlaying(false); st.t = parseFloat(scrub.value) || 0; draw(true); });
       $all('.mar-dot', r).forEach(function(d) {
         d.addEventListener('click', function() { setPlaying(false); st.t = +d.getAttribute('data-step'); draw(); });
       });
@@ -554,6 +558,7 @@ var Marinero = (function() {
   function viewSteer() {
     var tol = { beginner: 12, intermediate: 8, advanced: 5, expert: 3 }[tier];
     var direct = tier === 'beginner' || tier === 'intermediate';
+    var WL = direct ? 1e9 : 4.7; // rudder mode: about 1.5 turns lock to lock
     var TOTAL = 5;
     var st = { h: Math.floor(Math.random() * 360), shown: 0, vel: 0, wheel: 0, rate: 0, target: 0, n: 0, onFor: 0, time: 0, done: false, keyTurn: 0 };
     st.shown = st.h;
@@ -579,8 +584,8 @@ var Marinero = (function() {
       var cv = $('#mar-scv', r), wv = $('#mar-wcv', r);
       function sizes() {
         var wide = r.clientWidth > 640;
-        var cs = Math.min(wide ? 380 : r.clientWidth - 8, 420);
-        var ws = Math.min(wide ? 260 : r.clientWidth * 0.62, 260);
+        var cs = Math.min(wide ? 380 : r.clientWidth - 8, wide ? 420 : Math.max(240, window.innerHeight * 0.4));
+        var ws = Math.min(wide ? 260 : r.clientWidth * 0.5, wide ? 260 : 200);
         return [cs, ws];
       }
       function label(t) { var p = pointName(t); return (t % 22.5 === 0 ? p + ' · ' + D.POINT_ES[p] : ''); }
@@ -602,7 +607,7 @@ var Marinero = (function() {
       setFrame(function(dt) {
         if (st.done) return false;
         st.time += dt;
-        if (st.keyTurn) st.wheel = Math.max(-4.7, Math.min(4.7, st.wheel + st.keyTurn * dt * 2.2));
+        if (st.keyTurn) st.wheel = Math.max(-WL, Math.min(WL, st.wheel + st.keyTurn * dt * 2.2));
         if (direct) {
           // the wheel is the heading: half a turn of the wheel = 90°
           var want = (st.base + st.wheel * 180 / Math.PI * 0.5 + 3600) % 360;
@@ -645,7 +650,7 @@ var Marinero = (function() {
         if (drag == null) return;
         var a = ang(e), d = a - drag;
         if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU;
-        st.wheel = Math.max(-4.7, Math.min(4.7, st.wheel + d));
+        st.wheel = Math.max(-WL, Math.min(WL, st.wheel + d));
         drag = a;
       });
       var up = function() { drag = null; };
@@ -655,7 +660,7 @@ var Marinero = (function() {
         var off = function() { st.keyTurn = 0; };
         btn.addEventListener('pointerdown', on);
         btn.addEventListener('pointerup', off); btn.addEventListener('pointerleave', off); btn.addEventListener('pointercancel', off);
-        btn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { st.wheel = Math.max(-4.7, Math.min(4.7, st.wheel + dir * 0.35)); } });
+        btn.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { st.wheel = Math.max(-WL, Math.min(WL, st.wheel + dir * 0.35)); } });
       }
       holdBtn($('#mar-portb', r), -1);
       holdBtn($('#mar-stbdb', r), 1);
@@ -992,7 +997,7 @@ var Marinero = (function() {
       var acc = 0;
       setFrame(function(dt, t) {
         acc += dt;
-        if (acc < 1 / 30) return true; // 30 fps is plenty here
+        if (acc < 1 / 20) return true; // 20 fps is plenty for gently bobbing buoys
         acc = 0;
         cvs.forEach(function(c, i) {
           var id = c.getAttribute('data-buoy');
@@ -1069,9 +1074,10 @@ var Marinero = (function() {
           }
           if (q.k === 'card') {
             ctx.save();
-            ctx.font = '800 ' + Math.round(h * 0.05) + 'px "Baloo 2", sans-serif';
+            ctx.font = '800 ' + Math.round(h * 0.034) + 'px "Baloo 2", sans-serif'; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4;
             ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.textAlign = 'center';
-            ctx.fillText('▲ N', w / 2, h * 0.47);
+            ctx.textAlign = 'left';
+            ctx.fillText('▲ N  North is ahead', w * 0.03, h * 0.08);
             ctx.restore();
           }
         }
@@ -1368,7 +1374,7 @@ var Marinero = (function() {
           st.A = tA.slice(); st.B = tB.slice();
           st.phase = 'scale';
           _sound('correct');
-          $('#mar-task', r).innerHTML = '② Great! Now drag the <b>brass hinge</b> to move the dividers — without changing the opening — onto the <b>latitude scale</b> on the left edge.';
+          $('#mar-task', r).innerHTML = '② Great! Now drag the dividers — they keep the same opening and stand upright — onto the <b>latitude scale</b> (the striped band on the left edge).';
         }
       }
       function checkScale() {
@@ -1438,7 +1444,13 @@ var Marinero = (function() {
         var m = Math.min(dA, dB, dH);
         if (m > grab * 1.6) return;
         st.drag = m === dH ? 2 : m === dA ? 0 : 1;
-        if (st.phase === 'scale') st.drag = 2; // keep the opening: move the whole pair
+        if (st.phase === 'scale') {
+          // keep the opening: move the whole pair, stood upright like on the scale
+          st.drag = 2;
+          var mx = (st.A[0] + st.B[0]) / 2, my = (st.A[1] + st.B[1]) / 2;
+          var dd = Math.sqrt(Math.pow(st.A[0] - st.B[0], 2) + Math.pow(st.A[1] - st.B[1], 2));
+          st.A = [mx, my - dd / 2]; st.B = [mx, my + dd / 2];
+        }
         last = p;
         try { cv.setPointerCapture(e.pointerId); } catch (x) {}
         e.preventDefault();
@@ -1448,7 +1460,12 @@ var Marinero = (function() {
         if (st.drag < 0 || !last) return;
         var p = pos(e), dx = p[0] - last[0], dy = p[1] - last[1];
         last = p;
-        if (st.drag === 2) { st.A[0] += dx; st.A[1] += dy; st.B[0] += dx; st.B[1] += dy; }
+        if (st.drag === 2) {
+          // move the pair as one, never squeezing it against the edges
+          dx = Math.max(4 - Math.min(st.A[0], st.B[0]), Math.min(w - 4 - Math.max(st.A[0], st.B[0]), dx));
+          dy = Math.max(4 - Math.min(st.A[1], st.B[1]), Math.min(h - 4 - Math.max(st.A[1], st.B[1]), dy));
+          st.A[0] += dx; st.A[1] += dy; st.B[0] += dx; st.B[1] += dy;
+        }
         else {
           var tip = st.drag === 0 ? st.A : st.B, other = st.drag === 0 ? st.B : st.A;
           var nx = tip[0] + dx, ny = tip[1] + dy;

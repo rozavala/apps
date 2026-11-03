@@ -388,6 +388,15 @@ var APP_STAR_CONFIGS = [
       for (k in (d.cooked || {})) n += Math.min(3, (d.cooked[k] && d.cooked[k].stars) || 0);
       for (k in (d.measure || {})) n += Math.min(3, d.measure[k] || 0);
       return n + Math.min(3, d.safetyStars || 0) + Math.min(3, d.eggStars || 0);
+    } },
+  // Marinero: each knot earns up to 3 (watched the whole animation, quick
+  // check right, tied with a real rope and confirmed with the parent PIN),
+  // each quiz is starred out of 3, plus up to 3 backyard treasure hunts.
+  { id: 'marinero', prefix: 'zs_marinero_', stars: function(d) {
+      var n = 0, k, q;
+      for (k in (d.knots || {})) { q = d.knots[k] || {}; n += (q.w ? 1 : 0) + (q.c ? 1 : 0) + (q.r ? 1 : 0); }
+      for (k in (d.best || {})) n += Math.min(3, d.best[k] || 0);
+      return n + Math.min(3, d.hunts || 0);
     } }
 ];
 

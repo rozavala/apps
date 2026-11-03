@@ -76,7 +76,10 @@ const CASES = [
     data: { v: 1, cooked: { 'huevos-revueltos': { stars: 3, count: 2, dates: ['2026-11-03', '2026-10-28'] },
             pebre: { stars: 2, count: 1, dates: ['2026-11-01'] } }, measure: { m1: 3, m2: 2, m6: 1 },
             safetyStars: 2, safetyBest: 5, eggStars: 3 },
-    stars: 16 }
+    stars: 16 },
+  { id: 'marinero', prefix: 'zs_marinero_',
+    data: { knots: { fig8: { w: 1, c: 1, r: 1 }, bowline: { w: 1 } }, best: { steer: 3, names: 2, buoys: 1 }, hunts: 4 },
+    stars: 13, note: 'treasure hunts cap at 3' }
 ];
 
 test.describe('per-app star rules', () => {
