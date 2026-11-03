@@ -316,7 +316,7 @@ var PLArt = (function(){
     o = o || {};
     return '<text x="' + x + '" y="' + y + '" class="pl-sl' + (o.cls ? ' ' + o.cls : '') + '"' +
       (o.anchor ? ' text-anchor="' + o.anchor + '"' : ' text-anchor="middle"') +
-      (o.size ? ' font-size="' + o.size + '"' : '') + (o.fill ? ' fill="' + o.fill + '"' : '') +
+      (o.size ? ' font-size="' + Math.max(10, o.size) + '"' : '') + (o.fill ? ' fill="' + o.fill + '"' : '') +
       (o.rot ? ' transform="rotate(' + o.rot + ' ' + x + ' ' + y + ')"' : '') +
       (o.id ? ' data-k="' + o.id + '"' : '') + '>' + esc(txt) + '</text>';
   }
@@ -456,13 +456,13 @@ var PLArt = (function(){
       '<g class="pl-hot" data-k="eslora">' + dimH(262, 50, 372, 'ESLORA', null, 16) + '</g>' +
       '<path d="M50,130 L50,262 M372,128 L372,262" stroke="#B45309" stroke-dasharray="3 3" stroke-width="1"/>' +
       // labels
-      T(372, 116, 'PROA →', { id: 'proa', cls: 'pl-hot', anchor: 'end' }) + T(52, 118, '← POPA', { id: 'popa', cls: 'pl-hot', anchor: 'start' }) +
+      T(372, 296, 'PROA →', { id: 'proa', cls: 'pl-hot', anchor: 'end' }) + T(50, 296, '← POPA', { id: 'popa', cls: 'pl-hot', anchor: 'start' }) +
       T(150, 156, 'obra muerta', { id: 'obramuerta', cls: 'pl-hot' }) + T(170, 202, 'obra viva', { id: 'obraviva', cls: 'pl-hot pl-sl-inv', fill: '#fff' }) +
       T(392, 170, 'línea de flotación', { id: 'flotacion', cls: 'pl-hot', anchor: 'end', size: 10, fill: '#0E7490' }) +
       T(190, 242, 'quilla', { id: 'quilla', cls: 'pl-hot' }) + T(352, 214, 'roda', { id: 'roda', cls: 'pl-hot', fill: '#B45309', anchor: 'start' }) +
       T(66, 172, 'codaste', { id: 'codaste', cls: 'pl-hot', fill: '#B45309' }) +
       T(46, 250, 'timón', { id: 'timon', cls: 'pl-hot' }) + T(106, 250, 'hélice', { id: 'helice', cls: 'pl-hot' }) +
-      T(318, 150, 'casco', { id: 'casco', cls: 'pl-hot', size: 11 }) + T(200, 90, 'cubierta', { id: 'cubierta', cls: 'pl-hot', size: 10 }) +
+      T(318, 150, 'casco', { id: 'casco', cls: 'pl-hot', size: 11 }) + T(110, 124, 'cubierta', { id: 'cubierta', cls: 'pl-hot', size: 10.5 }) +
       '</svg>';
     var info = document.createElement('div'); info.className = 'pl-fig-info'; info.setAttribute('aria-live', 'polite');
     info.innerHTML = '<b>Toca una parte</b> del dibujo o un nombre.';

@@ -147,19 +147,24 @@
 .pl-step-n { display: inline-block; font-size: .68rem; font-weight: 900; color: #fff; background: var(--pl-navy); border-radius: 99px; padding: 1px 7px; margin-right: 4px; vertical-align: 1px; }
 
 /* svg text */
-.pl-sl { font-family: var(--font-body); font-weight: 800; font-size: 12px; fill: var(--pl-ink); paint-order: stroke; stroke: rgba(255,255,255,.94); stroke-width: 3.5px; stroke-linejoin: round; }
-.pl-sl-big { font-size: 14px; font-weight: 900; }
-.pl-sl-dim { font-size: 11px; font-weight: 900; }
+.pl-sl { font-family: var(--font-body); font-weight: 800; paint-order: stroke; stroke: rgba(255,255,255,.94); stroke-width: 3.5px; stroke-linejoin: round; }
+/* size/colour only when the element has no presentation attribute of its own */
+.pl-sl:not([font-size]) { font-size: 12px; }
+.pl-sl:not([fill]) { fill: var(--pl-ink); }
+.pl-sl-big { font-weight: 900; }
+.pl-sl-big:not([font-size]) { font-size: 14px; }
+.pl-sl-dim { font-weight: 900; }
+.pl-sl-dim:not([font-size]) { font-size: 11px; }
 .pl-sl-inv { stroke: rgba(60,10,8,.8); }
 .pl-sl-n { font-family: var(--font-body); font-weight: 800; font-size: 11px; fill: #cfe3f3; }
-.pl-sl-w { fill: #fff; stroke: rgba(8,24,40,.85); }
+.pl-sl-w { fill: #fff !important; stroke: rgba(8,24,40,.85); }
 .pl-lead { stroke: #475569; stroke-width: 1.1; fill: none; }
 .pl-lead-dot { fill: #475569; }
 .pl-ray { stroke: #0e7490; stroke-width: 1.4; stroke-dasharray: 2 4; }
 .pl-hot { cursor: pointer; }
-text.pl-hot:hover { fill: var(--pl-sea); }
+text.pl-hot:hover { fill: var(--pl-sea) !important; }
 .pl-hl { filter: drop-shadow(0 0 4px rgba(14,116,144,.9)) drop-shadow(0 0 2px #fde047); }
-text.pl-hl { fill: #0e7490; }
+text.pl-hl { fill: #0e7490 !important; }
 path.pl-ray.pl-hl { stroke: #f59e0b; stroke-width: 2.6; stroke-dasharray: none; }
 
 /* lights figure */
