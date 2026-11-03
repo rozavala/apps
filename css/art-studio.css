@@ -488,10 +488,12 @@ body.as-body { overflow: hidden; }
 .fr-btn { border: 0; padding: 0; background: none; cursor: pointer; position: relative; width: 100%; display: block; transition: transform .25s; }
 .fr-btn:hover { transform: translateY(-4px) !important; }
 .fr-btn:focus-visible { outline: 3px solid #a78bfa; outline-offset: 6px; }
-.fr-light { position: absolute; top: -34px; left: 12%; right: 12%; height: 90px; pointer-events: none; z-index: 2;
-  background: radial-gradient(ellipse at 50% 8%, rgba(255,244,210,.75), rgba(255,244,210,0) 70%); mix-blend-mode: screen; }
-.fr-light::before { content: ''; position: absolute; top: 0; left: 30%; right: 30%; height: 8px; border-radius: 4px;
-  background: linear-gradient(180deg, #e0c070, #8c6a24); box-shadow: 0 2px 3px rgba(0,0,0,.35); }
+.fr-light { position: absolute; top: -22px; left: 12%; right: 12%; height: 90px; pointer-events: none; z-index: 2;
+  background: radial-gradient(ellipse at 50% 6%, rgba(255,246,215,.6), rgba(255,246,215,0) 70%); }
+.fr-light::before { content: ''; position: absolute; top: 0; left: 28%; right: 28%; height: 8px; border-radius: 4px;
+  background: linear-gradient(180deg, #ecd082, #8c6a24); box-shadow: 0 2px 3px rgba(0,0,0,.35); }
+.fr-light::after { content: ''; position: absolute; top: 6px; left: calc(50% - 1.5px); width: 3px; height: 18px;
+  background: linear-gradient(90deg, #6f5418, #d9b866, #6f5418); border-radius: 2px; }
 .wall-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; color: #5a4628; }
 .wall-empty .fr { width: 220px; }
 .wall-empty h2 { font-family: var(--font-display); margin: 22px 0 4px; color: #4a3517; }
@@ -550,7 +552,7 @@ body.as-body { overflow: hidden; }
   .mxc-swatch { width: 96px; height: 86px; }
   .mxc-paint { width: 60px; min-height: 76px; font-size: .72rem; }
   .mx-well.big { width: 62px; height: 62px; }
-  .wall-grid { gap: 34px 18px; }
+  .wall-grid { gap: 56px 18px; }
   .wall-grid .fr { width: calc(50% - 10px); }
   .wall-grid .fr-mould { padding: 8px; }
   .wall-grid .fr-gold .fr-mould { padding: 11px; }

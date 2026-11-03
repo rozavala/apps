@@ -908,7 +908,7 @@ const ArtStudio = (() => {
     const pts = guidePoints();
     if (!pts.length) return;
     const unit = S.guideUnit();
-    const tol = chk === 'line' ? Math.round(unit * (L.tier === 'beginner' ? 5 : 3.6)) : Math.round(unit * 1.4);
+    const tol = chk === 'line' ? Math.round(unit * ({ beginner: 5, intermediate: 3.6, advanced: 3.2, expert: 2.8 }[L.tier] || 3.6)) : Math.round(unit * 1.4);
     const f = S.hitFraction(pts, tol);
     const was = L.score || 0;
     L.score = f;
@@ -1018,7 +1018,6 @@ const ArtStudio = (() => {
         '<div class="lp-fin-btns"><button type="button" class="lp-go alt" data-lp="hang">' + icon('save') + ' Hang it in my gallery</button>' +
         '<button type="button" class="lp-go" data-lp="done">More lessons</button></div></div>';
     };
-    showFeedback('🎨');
     if (typeof LearningCheck !== 'undefined') LearningCheck.maybePrompt('art', show);
     else show();
   }

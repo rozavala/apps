@@ -981,9 +981,10 @@ var ArtBrush = (function () {
     if (S.shape) return;
     var R = this._bboxRect(S.bbox, S.w * 2);
     if (R) {
-      this.paint.globalCompositeOperation = 'copy';
-      this.paint.drawImage(this.before, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h);
+      // ('copy' would wipe the whole canvas outside the rectangle)
       this.paint.globalCompositeOperation = 'source-over';
+      this.paint.clearRect(R.x, R.y, R.w, R.h);
+      this.paint.drawImage(this.before, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h);
       if (this.wet) this.wet.clearRect(R.x, R.y, R.w, R.h);
     }
     this.paint.globalAlpha = 1;
