@@ -799,7 +799,7 @@ var NaturalezaArt = (function() {
     bg += k.p('M160 230C158 260 156 284 150 300L262 300C256 284 252 260 252 230Z', k.U('tStump'));
     bg += k.el(206, 230, 46, 10, '#b89a78') + k.el(206, 230, 32, 6, 'none', 'stroke="#8a6e52" stroke-width="1"') + k.el(206, 230, 18, 3.5, 'none', 'stroke="#8a6e52" stroke-width=".9"');
     bg += k.sp('M172 244L168 296M196 246L194 298M226 244L230 298M244 240L248 290', '#3a2c20', 1.3, 'opacity=".5"');
-    var shadowS = k.shadow(208, 230, 30, 4, 0.7);
+    var shadowS = k.shadow(208, 231, 38, 5, 0.7);
     // long barred tail
     s += k.p('M214 196L248 276L232 282L198 204Z', '#7a5e44');
     var bars = '';
@@ -828,6 +828,7 @@ var NaturalezaArt = (function() {
     s += k.p('M174 86C178 86 182 88 182 92C178 94 174 94 172 94Z', '#d9b870');
     s += k.p('M164 98C166 101 170 101 174 99L172 96Z', '#b8a888');
     s += k.eye(182, 86, 3.8, '#5a3a1e', { ring: '#e8c47a', ringR: 1.5 });
+    s = '<g transform="translate(205 230) scale(1.28) translate(-205 -230)">' + s + '</g>';
     return { wash: '#d3c4a0', defs: defs, bg: bg, shadow: shadowS, fg: s };
   };
 

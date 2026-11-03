@@ -160,5 +160,30 @@ var MarineroData = (function() {
     }
   ];
 
-  return { KNOTS: KNOTS };
+  /* ---------------- CHART (fictional practice bay) ----------------
+     Coordinates in nautical miles from the chart's top-left corner:
+     x east, y south. 1' of latitude = 1 NM. */
+  var CHART = {
+    wNM: 16, hNM: 12,
+    latDeg: 36, lat0: 48, latMid: 36.9, lonDeg: 73, lon0: 4,
+    titleText: 'BAHÍA DEL CÓNDOR', subText: 'Practice chart · Carta de práctica (bahía ficticia)',
+    subText2: 'Soundings in metres · Not for navigation', title: [0.5, 10.6],
+    rose: [3.6, 3.4, 2.2],
+    land: [[16, -0.5], [11.2, -0.5], [10.4, 0.7], [9.4, 1.3], [9.7, 2.3], [11.0, 3.0], [12.6, 3.7], [13.5, 4.9],
+      [13.3, 6.1], [12.6, 6.9], [12.1, 7.9], [11.4, 9.1], [10.1, 10.1], [8.7, 11.0], [8.0, 12.5], [16, 12.5]],
+    islands: [[[5.4, 6.1], [6.2, 5.8], [6.6, 6.3], [6.3, 7.0], [5.6, 7.1], [5.2, 6.6]]],
+    rocks: [[7.4, 9.1], [10.4, 1.9], [6.9, 5.9]],
+    places: [
+      { id: 'muelle', name: 'Muelle Caleta Cóndor', short: 'the pier', x: 12.45, y: 6.7, sym: 'pier', lx: -0.5, ly: 0.45 },
+      { id: 'faro', name: 'Faro Punta Piedra', short: 'the lighthouse', x: 9.45, y: 1.55, sym: 'light', lx: -0.45, ly: -0.45 },
+      { id: 'isla', name: 'Isla Pájaros', short: 'Isla Pájaros', x: 5.9, y: 6.45, sym: 'dot', lx: 0.9, ly: -0.95 },
+      { id: 'roja', name: 'Boya roja', short: 'the red buoy', x: 10.9, y: 5.0, sym: 'buoyR', lx: 0.45 },
+      { id: 'verde', name: 'Boya verde', short: 'the green buoy', x: 11.6, y: 7.6, sym: 'buoyG', lx: -0.45, ly: 0.4 },
+      { id: 'fondeo', name: 'Fondeadero', short: 'the anchorage', x: 9.2, y: 7.6, sym: 'anchor', lx: -0.45, ly: 0.5 },
+      { id: 'boca', name: 'Boya de recalada', short: 'the safe-water buoy', x: 2.6, y: 7.8, sym: 'buoyS', lx: 0.45, ly: 0.35 },
+      { id: 'lobera', name: 'Roca Lobera', short: 'Roca Lobera', x: 7.4, y: 9.1, sym: 'buoyD', lx: 0.5, ly: 0.2 }
+    ]
+  };
+
+  return { KNOTS: KNOTS, CHART: CHART };
 })();

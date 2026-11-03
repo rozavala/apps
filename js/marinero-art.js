@@ -1629,6 +1629,285 @@ var MarineroArt = (function() {
       '</svg>';
   }
 
+
+  // ---------------------------------------------------------------
+  // PRACTICE NAUTICAL CHART (fictional bay; 1' of latitude = 1 NM)
+  // ---------------------------------------------------------------
+  function chartLayout(w, h, C) {
+    var scale = Math.max(22, Math.round(Math.min(w, h) * 0.07));
+    var iw = w - scale * 2, ih = h - scale * 2;
+    var ppn = Math.min(iw / C.wNM, ih / C.hNM);
+    var ox = (w - C.wNM * ppn) / 2, oy = (h - C.hNM * ppn) / 2;
+    return {
+      w: w, h: h, ppn: ppn, ox: ox, oy: oy, band: scale,
+      toPx: function(x, y) { return [ox + x * ppn, oy + y * ppn]; },
+      toNM: function(px, py) { return [(px - ox) / ppn, (py - oy) / ppn]; },
+      latScale: { x0: ox - scale * 0.62, x1: ox - scale * 0.18 }
+    };
+  }
+
+  function pip(pt, poly) {
+    var x = pt[0], y = pt[1], inside = false;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+    }
+    return inside;
+  }
+  function distPoly(pt, poly) {
+    var best = 1e9;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var ax = poly[j][0], ay = poly[j][1], bx = poly[i][0], by = poly[i][1];
+      var dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy || 1;
+      var t = clamp(((pt[0] - ax) * dx + (pt[1] - ay) * dy) / L, 0, 1);
+      var ex = ax + dx * t - pt[0], ey = ay + dy * t - pt[1];
+      best = Math.min(best, Math.sqrt(ex * ex + ey * ey));
+    }
+    return best;
+  }
+  function smoothPoly(ctx, pts, map) {
+    var P = pts.map(function(p) { return map(p[0], p[1]); });
+    ctx.moveTo((P[0][0] + P[P.length - 1][0]) / 2, (P[0][1] + P[P.length - 1][1]) / 2);
+    for (var i = 0; i < P.length; i++) {
+      var n = P[(i + 1) % P.length];
+      ctx.quadraticCurveTo(P[i][0], P[i][1], (P[i][0] + n[0]) / 2, (P[i][1] + n[1]) / 2);
+    }
+    ctx.closePath();
+  }
+
+  function chartImage(w, h, dpr, C) {
+    var key = 'chart' + w + 'x' + h + '@' + dpr;
+    if (_bgCache[key]) return _bgCache[key];
+    var Lc = chartLayout(w, h, C);
+    var cv = document.createElement('canvas');
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    var c = cv.getContext('2d');
+    c.scale(dpr, dpr);
+    var R = rng(23);
+    // paper
+    c.fillStyle = '#f7f3e6'; c.fillRect(0, 0, w, h);
+    for (var n = 0; n < w * h / 60; n++) {
+      c.fillStyle = R() < 0.5 ? 'rgba(120,100,60,0.05)' : 'rgba(255,255,255,0.25)';
+      c.fillRect(R() * w, R() * h, 1, 1);
+    }
+    var x0 = Lc.ox, y0 = Lc.oy, cw = C.wNM * Lc.ppn, ch = C.hNM * Lc.ppn;
+    c.save();
+    c.beginPath(); c.rect(x0, y0, cw, ch); c.clip();
+    var map = Lc.toPx;
+    var lands = [C.land].concat(C.islands);
+    // depth zones (20 m, 10 m, 5 m) as wide strokes around the coast
+    var zones = [[3.0, '#ffffff', '#9ab8cf', []], [1.5, '#e3f0f6', '#6f9cbe', []], [0.7, '#c4dfec', '#3f78a6', []]];
+    zones.forEach(function(z) {
+      lands.forEach(function(poly) {
+        c.beginPath(); smoothPoly(c, poly, map);
+        c.lineJoin = 'round';
+        c.setLineDash(z[3]);
+        c.lineWidth = z[0] * 2 * Lc.ppn + 2.2; c.strokeStyle = z[2]; c.stroke();
+        c.setLineDash([]);
+        c.lineWidth = z[0] * 2 * Lc.ppn; c.strokeStyle = z[1]; c.stroke();
+      });
+    });
+    // land
+    lands.forEach(function(poly) {
+      c.beginPath(); smoothPoly(c, poly, map);
+      c.fillStyle = '#ecd9a6'; c.fill();
+      c.lineWidth = 1.6; c.strokeStyle = '#5b4a26'; c.stroke();
+      // contour hatching inland
+      c.save(); c.clip();
+      for (var k = 1; k < 6; k++) {
+        c.beginPath(); smoothPoly(c, poly, map);
+        c.lineWidth = k * Lc.ppn * 0.6; c.strokeStyle = 'rgba(150,120,60,0.12)'; c.stroke();
+      }
+      c.restore();
+    });
+    // drying rocks and shoals
+    c.fillStyle = '#1d1d1d';
+    C.rocks.forEach(function(r) {
+      var p = map(r[0], r[1]);
+      c.font = '700 ' + Math.round(Lc.ppn * 0.42) + 'px sans-serif';
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText('+', p[0], p[1]);
+      c.beginPath(); c.arc(p[0], p[1], Lc.ppn * 0.32, 0, TAU);
+      c.setLineDash([2, 2]); c.lineWidth = 1; c.strokeStyle = '#1d1d1d'; c.stroke(); c.setLineDash([]);
+    });
+    // soundings (metres), deeper offshore
+    c.fillStyle = '#26303a';
+    c.font = 'italic 600 ' + Math.max(9, Math.round(Lc.ppn * 0.3)) + 'px Georgia, serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (var gy = 0.4; gy < C.hNM; gy += 0.85) {
+      for (var gx = 0.4; gx < C.wNM; gx += 0.95) {
+        var pt = [gx + (R() - 0.5) * 0.5, gy + (R() - 0.5) * 0.5];
+        var onLand = lands.some(function(pl) { return pip(pt, pl); });
+        if (onLand) continue;
+        var d = Math.min.apply(null, lands.map(function(pl) { return distPoly(pt, pl); }));
+        if (d < 0.25) continue;
+        var tooClose = C.places.some(function(pc) { var dx = pc.x - pt[0], dy = pc.y - pt[1]; return dx * dx + dy * dy < 0.5; });
+        if (tooClose) continue;
+        var rdx = pt[0] - C.rose[0], rdy = pt[1] - C.rose[1];
+        if (rdx * rdx + rdy * rdy < Math.pow(C.rose[2] * 1.2, 2)) continue;
+        if (pt[1] > C.title[1] - 0.9 && pt[0] < C.title[0] + 8.5) continue;
+        var depth = Math.round(2 + d * 5.2 + Math.pow(d, 1.4) * 0.9 + R() * 2);
+        var pp = map(pt[0], pt[1]);
+        c.fillText(String(depth), pp[0], pp[1]);
+      }
+    }
+    // compass rose (true)
+    var rp = map(C.rose[0], C.rose[1]), rr = Lc.ppn * C.rose[2];
+    c.save(); c.translate(rp[0], rp[1]);
+    c.strokeStyle = '#8a2a6e'; c.fillStyle = '#8a2a6e';
+    c.lineWidth = 1; c.beginPath(); c.arc(0, 0, rr, 0, TAU); c.stroke();
+    c.beginPath(); c.arc(0, 0, rr * 0.86, 0, TAU); c.stroke();
+    for (var dg = 0; dg < 360; dg += 5) {
+      var a = dg * Math.PI / 180, l = dg % 30 === 0 ? 0.14 : dg % 10 === 0 ? 0.09 : 0.05;
+      c.beginPath(); c.moveTo(Math.sin(a) * rr, -Math.cos(a) * rr); c.lineTo(Math.sin(a) * rr * (1 - l), -Math.cos(a) * rr * (1 - l)); c.stroke();
+    }
+    c.font = '700 ' + Math.max(8, Math.round(rr * 0.13)) + 'px sans-serif';
+    for (var dn = 0; dn < 360; dn += 30) {
+      c.save(); c.rotate(dn * Math.PI / 180); c.fillText(String(dn).padStart(3, '0'), 0, -rr * 0.73); c.restore();
+    }
+    for (var q = 0; q < 8; q++) {
+      c.save(); c.rotate(q * Math.PI / 4);
+      var L2 = q % 2 ? rr * 0.38 : rr * 0.6, W2 = q % 2 ? rr * 0.05 : rr * 0.08;
+      c.beginPath(); c.moveTo(0, -L2); c.lineTo(W2, 0); c.lineTo(0, 0); c.closePath(); c.fillStyle = '#8a2a6e'; c.fill();
+      c.beginPath(); c.moveTo(0, -L2); c.lineTo(-W2, 0); c.lineTo(0, 0); c.closePath(); c.fillStyle = '#e8c9de'; c.fill(); c.stroke();
+      c.restore();
+    }
+    c.fillStyle = '#8a2a6e'; c.font = '800 ' + Math.round(rr * 0.2) + 'px sans-serif'; c.fillText('N', 0, -rr * 1.14);
+    c.restore();
+    // places
+    C.places.forEach(function(pc) {
+      var p = map(pc.x, pc.y);
+      var r = Math.max(5, Lc.ppn * 0.17);
+      c.save(); c.translate(p[0], p[1]);
+      if (pc.sym === 'light') {
+        c.fillStyle = '#d13bb0'; c.globalAlpha = 0.85;
+        c.beginPath(); c.moveTo(0, 0); c.lineTo(r * 2.6, -r * 1.1); c.quadraticCurveTo(r * 2.9, 0, r * 2.6, r * 1.1); c.closePath(); c.fill();
+        c.globalAlpha = 1; c.fillStyle = '#111'; c.beginPath(); c.arc(0, 0, r * 0.45, 0, TAU); c.fill();
+        c.strokeStyle = '#111'; c.lineWidth = 1.2; c.beginPath(); c.arc(0, 0, r * 0.9, 0, TAU); c.stroke();
+      } else if (pc.sym === 'pier') {
+        c.fillStyle = '#5b4a26'; c.fillRect(-r * 2.2, -r * 0.3, r * 2.2, r * 0.6);
+        c.beginPath(); c.arc(0, 0, r * 0.55, 0, TAU); c.fillStyle = '#111'; c.fill();
+      } else if (pc.sym === 'anchor') {
+        c.strokeStyle = '#8a2a6e'; c.lineWidth = 1.6;
+        c.beginPath(); c.moveTo(0, -r); c.lineTo(0, r); c.moveTo(-r * 0.6, -r * 0.5); c.lineTo(r * 0.6, -r * 0.5);
+        c.moveTo(-r * 0.9, r * 0.2); c.quadraticCurveTo(0, r * 1.5, r * 0.9, r * 0.2); c.stroke();
+        c.beginPath(); c.arc(0, -r * 1.15, r * 0.25, 0, TAU); c.stroke();
+      } else if (pc.sym === 'buoyR' || pc.sym === 'buoyG' || pc.sym === 'buoyS' || pc.sym === 'buoyD') {
+        var col = pc.sym === 'buoyR' ? '#c8211b' : pc.sym === 'buoyG' ? '#14823c' : pc.sym === 'buoyS' ? '#c8211b' : '#111';
+        c.beginPath(); c.moveTo(-r * 0.9, 0); c.quadraticCurveTo(-r * 0.6, -r * 1.6, 0, -r * 1.7); c.quadraticCurveTo(r * 0.6, -r * 1.6, r * 0.9, 0); c.closePath();
+        c.fillStyle = col; c.fill(); c.strokeStyle = '#111'; c.lineWidth = 1; c.stroke();
+        if (pc.sym === 'buoyD') { c.fillStyle = '#c8211b'; c.fillRect(-r * 0.75, -r * 1.0, r * 1.5, r * 0.4); }
+        if (pc.sym === 'buoyS') { c.fillStyle = '#fff'; c.fillRect(-r * 0.15, -r * 1.6, r * 0.3, r * 1.6); }
+        c.beginPath(); c.arc(0, 0, r * 0.22, 0, TAU); c.fillStyle = '#111'; c.fill();
+      } else {
+        c.beginPath(); c.arc(0, 0, r * 0.4, 0, TAU); c.fillStyle = '#111'; c.fill();
+      }
+      c.restore();
+      // label
+      c.font = '700 ' + Math.max(10, Math.round(Lc.ppn * 0.32)) + 'px Nunito, sans-serif';
+      c.textAlign = pc.lx < 0 ? 'right' : 'left'; c.textBaseline = 'middle';
+      c.lineWidth = 3; c.strokeStyle = 'rgba(247,243,230,0.9)';
+      var tx = p[0] + (pc.lx || 0.4) * Lc.ppn, ty = p[1] + (pc.ly || 0) * Lc.ppn;
+      c.strokeText(pc.name, tx, ty);
+      c.fillStyle = '#1e2430'; c.fillText(pc.name, tx, ty);
+    });
+    // title cartouche
+    c.font = '800 ' + Math.max(11, Math.round(Lc.ppn * 0.5)) + 'px "Baloo 2", Nunito, sans-serif';
+    c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    var tp = map(C.title[0], C.title[1]);
+    c.fillStyle = '#1e2430'; c.fillText(C.titleText, tp[0], tp[1]);
+    c.font = '600 ' + Math.max(9, Math.round(Lc.ppn * 0.3)) + 'px Nunito, sans-serif';
+    c.fillText(C.subText, tp[0], tp[1] + Lc.ppn * 0.45);
+    c.fillText(C.subText2, tp[0], tp[1] + Lc.ppn * 0.85);
+    c.restore();
+    // neat line + scales
+    c.strokeStyle = '#1e2430'; c.lineWidth = 1.5; c.strokeRect(x0, y0, cw, ch);
+    var b = Lc.band;
+    c.lineWidth = 1; c.strokeRect(x0 - b * 0.62, y0 - b * 0.62, cw + b * 1.24, ch + b * 1.24);
+    // latitude scale (both sides): alternate black/white per minute, ticks every 0.1'
+    [[x0 - b * 0.62, x0 - b * 0.18], [x0 + cw + b * 0.18, x0 + cw + b * 0.62]].forEach(function(sx, side) {
+      c.strokeRect(sx[0], y0, sx[1] - sx[0], ch);
+      for (var m = 0; m < C.hNM; m++) {
+        var ya = y0 + m * Lc.ppn;
+        if (m % 2 === 0) { c.fillStyle = '#1e2430'; c.fillRect(sx[0], ya, (sx[1] - sx[0]) * 0.45, Lc.ppn); }
+        for (var tk = 1; tk < 10; tk++) {
+          var yt = ya + tk * Lc.ppn / 10;
+          var tl = tk === 5 ? 0.55 : 0.3;
+          c.beginPath();
+          if (side === 0) { c.moveTo(sx[1], yt); c.lineTo(sx[1] - (sx[1] - sx[0]) * tl, yt); }
+          else { c.moveTo(sx[0], yt); c.lineTo(sx[0] + (sx[1] - sx[0]) * tl, yt); }
+          c.stroke();
+        }
+        c.beginPath(); c.moveTo(sx[0], ya); c.lineTo(sx[1], ya); c.stroke();
+      }
+      // labels every 2'
+      c.save();
+      c.fillStyle = '#1e2430'; c.font = '700 ' + Math.max(8, Math.round(b * 0.32)) + 'px Nunito, sans-serif';
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      for (var m2 = 0; m2 <= C.hNM; m2 += 2) {
+        var lat = C.lat0 + m2, ldeg = C.latDeg + Math.floor(lat / 60);
+        var lbl = ldeg + '°' + String(lat % 60).padStart(2, '0') + "'S";
+        var lx2 = side === 0 ? x0 - b * 0.82 : x0 + cw + b * 0.82;
+        c.save(); c.translate(lx2, y0 + m2 * Lc.ppn); c.rotate(-Math.PI / 2); c.fillText(lbl, 0, 0); c.restore();
+      }
+      c.restore();
+    });
+    // longitude scale (top): minutes of longitude are shorter (× cos lat)
+    var lonMinPx = Lc.ppn * Math.cos(C.latMid * Math.PI / 180);
+    var nLon = Math.floor(cw / lonMinPx);
+    c.fillStyle = '#1e2430';
+    for (var lm = 0; lm < nLon; lm++) {
+      var xa = x0 + cw - (lm + 1) * lonMinPx;
+      if (lm % 2 === 0) c.fillRect(xa, y0 - b * 0.62, lonMinPx, b * 0.2);
+    }
+    c.font = '700 ' + Math.max(8, Math.round(b * 0.3)) + 'px Nunito, sans-serif';
+    c.textAlign = 'center'; c.textBaseline = 'top';
+    for (var lm2 = 0; lm2 <= nLon; lm2 += 4) {
+      var lon = C.lon0 + lm2;
+      var xl = x0 + cw - lm2 * lonMinPx;
+      c.fillText(C.lonDeg + '°' + String(lon).padStart(2, '0') + "'W", xl, y0 + ch + b * 0.68);
+    }
+    var out = { canvas: cv, layout: Lc };
+    _bgCache[key] = out;
+    return out;
+  }
+
+  // Brass-hinged steel dividers. a, b = tip points; hinge = top point.
+  function drawDividers(ctx, a, b, hinge, s, active) {
+    ctx.save();
+    ctx.lineCap = 'round';
+    [a, b].forEach(function(t, i) {
+      var dx = t[0] - hinge[0], dy = t[1] - hinge[1];
+      var L = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = -dy / L, ny = dx / L;
+      // shadow
+      ctx.beginPath(); ctx.moveTo(hinge[0] + 6, hinge[1] + 8); ctx.lineTo(t[0] + 2, t[1] + 3);
+      ctx.lineWidth = s * 0.16; ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.stroke();
+      // leg: tapered steel
+      ctx.beginPath();
+      ctx.moveTo(hinge[0] + nx * s * 0.11, hinge[1] + ny * s * 0.11);
+      ctx.lineTo(t[0] - dx / L * s * 0.25 + nx * s * 0.03, t[1] - dy / L * s * 0.25 + ny * s * 0.03);
+      ctx.lineTo(t[0], t[1]);
+      ctx.lineTo(t[0] - dx / L * s * 0.25 - nx * s * 0.03, t[1] - dy / L * s * 0.25 - ny * s * 0.03);
+      ctx.lineTo(hinge[0] - nx * s * 0.11, hinge[1] - ny * s * 0.11);
+      ctx.closePath();
+      var g = ctx.createLinearGradient(hinge[0] + nx * s * 0.1, hinge[1] + ny * s * 0.1, hinge[0] - nx * s * 0.1, hinge[1] - ny * s * 0.1);
+      g.addColorStop(0, '#5f6a72'); g.addColorStop(0.45, '#f2f5f7'); g.addColorStop(0.6, '#b9c2c8'); g.addColorStop(1, '#4b545a');
+      ctx.fillStyle = g; ctx.fill();
+      ctx.lineWidth = 0.8; ctx.strokeStyle = 'rgba(30,35,40,0.7)'; ctx.stroke();
+      // tip marker
+      ctx.beginPath(); ctx.arc(t[0], t[1], s * 0.07, 0, TAU);
+      ctx.fillStyle = active === i ? 'rgba(234,88,12,0.9)' : 'rgba(20,20,20,0.85)'; ctx.fill();
+    });
+    // brass hinge with knurled finger grip
+    var hg = ctx.createRadialGradient(hinge[0] - s * 0.05, hinge[1] - s * 0.06, 1, hinge[0], hinge[1], s * 0.2);
+    hg.addColorStop(0, '#fff3c2'); hg.addColorStop(0.55, '#d1a23d'); hg.addColorStop(1, '#6b4810');
+    ctx.beginPath(); ctx.arc(hinge[0], hinge[1], s * 0.19, 0, TAU); ctx.fillStyle = hg; ctx.fill();
+    ctx.strokeStyle = active === 2 ? '#ea580c' : 'rgba(60,40,5,0.8)'; ctx.lineWidth = active === 2 ? 3 : 1.2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(hinge[0], hinge[1], s * 0.06, 0, TAU); ctx.fillStyle = '#5b3d0a'; ctx.fill();
+    ctx.restore();
+  }
+
   // Objects a knot is tied around, ready for drawModel's level ordering.
   function knotObjects(K, devScale) {
     var out = [];
@@ -1648,7 +1927,7 @@ var MarineroArt = (function() {
   }
 
   return {
-    knotObjects: knotObjects, flagSVG: flagSVG, harbourBackdrop: harbourBackdrop, drawSea: drawSea, drawBuoy: drawBuoy, drawBow: drawBow, lightOn: lightOn, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
+    knotObjects: knotObjects, chartLayout: chartLayout, chartImage: chartImage, drawDividers: drawDividers, flagSVG: flagSVG, harbourBackdrop: harbourBackdrop, drawSea: drawSea, drawBuoy: drawBuoy, drawBow: drawBow, lightOn: lightOn, POINTS16: POINTS16, compassCard: compassCard, drawCompass: drawCompass, drawWheel: drawWheel,
     clamp: clamp, rgb: rgb, shadeC: shadeC, mixC: mixC, rng: rng,
     fitCanvas: fitCanvas, castShadow: castShadow,
     ROPE_COLORS: ROPE_COLORS,
