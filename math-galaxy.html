@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/math-galaxy.css">
+  <link rel="stylesheet" href="css/math-galaxy.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -18,72 +18,63 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 </head>
-<body>
-  <div class="nebula nebula-1"></div>
-  <div class="nebula nebula-2"></div>
-  <div class="nebula nebula-3"></div>
-
+<body class="mg-page">
   <div class="app">
 
-    <!-- ============ LEVEL SELECT ============ -->
+    <!-- ============ HOME: galaxy map + worlds ============ -->
     <div class="screen active" id="screen-select">
-      <div class="level-header">
-        <span class="icon">🪐</span>
+      <header class="level-header">
         <h1>Math Galaxy</h1>
-        <p>Choose your rank, space cadet!</p>
-        <div class="greeting" id="greeting"></div>
+        <p>Fly from world to world by solving math missions. <span class="greeting" id="greeting"></span></p>
+      </header>
+      <div class="mg-map-wrap">
+        <canvas id="mgMap" class="mg-map" aria-hidden="true"></canvas>
+        <div class="mg-map-labels" id="mgMapLabels"></div>
       </div>
-      <div class="level-grid">
-        <div class="level-card card-cadet" onclick="startGame('cadet')">
-          <span class="rank-icon">🛸</span>
-          <div class="rank-name">Cadet</div>
-          <div class="rank-ages">Ages 4–6</div>
-          <div class="rank-topics">Counting · Adding to 10 · Shapes</div>
-          <div class="best-badge empty" id="best-cadet">No missions yet</div>
-        </div>
-        <div class="level-card card-explorer" onclick="startGame('explorer')">
-          <span class="rank-icon">🚀</span>
-          <div class="rank-name">Explorer</div>
-          <div class="rank-ages">Ages 6–8</div>
-          <div class="rank-topics">Add & subtract to 20 · Patterns · Comparing</div>
-          <div class="best-badge empty" id="best-explorer">No missions yet</div>
-        </div>
-        <div class="level-card card-pilot" onclick="startGame('pilot')">
-          <span class="rank-icon">🌟</span>
-          <div class="rank-name">Pilot</div>
-          <div class="rank-ages">Ages 8–10</div>
-          <div class="rank-topics">Multiply · Divide · Fractions intro</div>
-          <div class="best-badge empty" id="best-pilot">No missions yet</div>
-        </div>
-        <div class="level-card card-commander" onclick="startGame('commander')">
-          <span class="rank-icon">👨‍🚀</span>
-          <div class="rank-name">Commander</div>
-          <div class="rank-ages">Ages 10–12</div>
-          <div class="rank-topics">Big numbers · Fractions · Decimals · %</div>
-          <div class="best-badge empty" id="best-commander">No missions yet</div>
-        </div>
-        <div class="level-card card-sprint" onclick="MathExtras.Sprint.open()">
-          <span class="rank-icon">⚡</span>
-          <div class="rank-name">Sprint</div>
-          <div class="rank-ages">Tablas · 60s</div>
-          <div class="rank-topics">Times-tables rapid-fire · per-kid best</div>
-          <div class="best-badge empty" id="best-sprint">Beat your first time!</div>
-        </div>
-        <div class="level-card card-words" onclick="MathExtras.Words.open()">
-          <span class="rank-icon">🧠</span>
-          <div class="rank-name">Word Problems</div>
-          <div class="rank-ages">Ages 4–12</div>
-          <div class="rank-topics">Real-world math · bilingual · 5 per tier</div>
-          <div class="best-badge empty" id="best-words">Try your first problem!</div>
-        </div>
-        <div class="level-card card-duel" onclick="MathExtras.Duel.open()">
-          <span class="rank-icon">🤝</span>
-          <div class="rank-name">Sibling Duel</div>
-          <div class="rank-ages">2 players · 60s each</div>
-          <div class="rank-topics">Pass-and-play · same problems · best score wins</div>
-          <div class="best-badge empty" id="best-duel">Pick two players to begin!</div>
-        </div>
+
+      <h2 class="mg-h2">Worlds <span>· Mundos</span></h2>
+      <div class="level-grid" id="rankGrid"></div>
+
+      <h2 class="mg-h2">More missions <span>· Más misiones</span></h2>
+      <div class="extra-grid">
+        <button type="button" class="level-card extra-card card-sprint" onclick="MathExtras.Sprint.open()">
+          <span class="extra-icon" data-icon="sprint"></span>
+          <span class="rank-body">
+            <span class="rank-name">Sprint</span>
+            <span class="rank-topics">Times tables · 60 seconds · per-kid best</span>
+            <span class="best-badge empty" id="best-sprint">Beat your first time!</span>
+          </span>
+        </button>
+        <button type="button" class="level-card extra-card card-words" onclick="MathExtras.Words.open()">
+          <span class="extra-icon" data-icon="words"></span>
+          <span class="rank-body">
+            <span class="rank-name">Word Problems</span>
+            <span class="rank-topics">Real-world math · bilingual · 5 per tier</span>
+            <span class="best-badge empty" id="best-words">Try your first problem!</span>
+          </span>
+        </button>
+        <button type="button" class="level-card extra-card card-duel" onclick="MathExtras.Duel.open()">
+          <span class="extra-icon" data-icon="duel"></span>
+          <span class="rank-body">
+            <span class="rank-name">Sibling Duel</span>
+            <span class="rank-topics">Pass-and-play · same problems · 60 s each</span>
+            <span class="best-badge empty" id="best-duel">Pick two players to begin!</span>
+          </span>
+        </button>
+        <button type="button" class="level-card extra-card card-log" id="card-log">
+          <span class="extra-icon" data-icon="log"></span>
+          <span class="rank-body">
+            <span class="rank-name">Mission Log</span>
+            <span class="rank-topics">Every skill you have practised and mastered</span>
+            <span class="best-badge empty" id="best-log">Master skills to fill your log</span>
+          </span>
+        </button>
       </div>
+    </div>
+
+    <!-- ============ WORLD (sectors) ============ -->
+    <div class="screen" id="screen-rank">
+      <div id="rank-wrap" class="rank-wrap"></div>
     </div>
 
     <!-- ============ SPRINT SCREEN ============ -->
@@ -101,35 +92,58 @@
       <div id="duel-wrap" class="duel-wrap"></div>
     </div>
 
+    <!-- ============ MISSION LOG ============ -->
+    <div class="screen" id="screen-log">
+      <div id="log-wrap" class="log-wrap"></div>
+    </div>
+
     <!-- ============ GAME SCREEN ============ -->
     <div class="screen" id="screen-game">
       <div class="game-top">
-        <div class="game-level-badge" id="gameBadge"></div>
-        <div class="game-score" id="gameScore">⭐ 0</div>
+        <button type="button" class="back-btn" id="gameBack" aria-label="Leave this mission"></button>
+        <div class="game-title">
+          <div class="game-level-badge" id="gameBadge"></div>
+          <div class="game-sector" id="gameSector"></div>
+        </div>
+        <div class="game-combo" id="gameCombo" aria-live="polite"></div>
+        <div class="game-score" id="gameScore" aria-label="Score"></div>
       </div>
-      <div class="progress-wrap">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="mg-flight-wrap">
+        <canvas id="mgFlight" class="mg-flight" aria-hidden="true"></canvas>
+        <div class="mg-pips" id="mgPips" role="img"></div>
       </div>
       <div class="question-card" id="questionCard">
-        <div class="question-label" id="qLabel"></div>
+        <div class="q-head">
+          <div class="question-label" id="qLabel"></div>
+          <button type="button" class="q-speak" id="qSpeak" aria-label="Read the question aloud" hidden></button>
+        </div>
         <div class="question-text" id="qText"></div>
-        <div class="question-hint" id="qHint"></div>
+        <div class="q-vis" id="qVis"></div>
+        <div class="question-hint" id="qHint" aria-live="polite"></div>
       </div>
       <div class="answers" id="answersWrap"></div>
+      <div class="q-actions">
+        <button type="button" class="action-btn btn-secondary hint-btn" id="hintBtn"><i data-icon="hint"></i><span>Show me</span></button>
+        <button type="button" class="action-btn btn-primary" id="checkBtn" hidden>Check ✓</button>
+        <button type="button" class="action-btn btn-primary" id="nextBtn" hidden>Next ▶</button>
+      </div>
     </div>
 
     <!-- ============ RESULTS SCREEN ============ -->
     <div class="screen" id="screen-results">
       <div class="results-wrap">
-        <span class="results-emoji" id="resultsEmoji"></span>
+        <div class="mg-arrive-wrap"><canvas id="mgArrive" class="mg-arrive" aria-hidden="true"></canvas></div>
         <div class="results-title" id="resultsTitle"></div>
         <div class="results-subtitle" id="resultsSub"></div>
         <div class="stars-row" id="starsRow"></div>
         <div id="newRecordWrap"></div>
         <div class="results-stats" id="resultsStats"></div>
-        <div>
-          <button class="action-btn btn-primary" onclick="playAgain()">Play Again 🔁</button>
-          <button class="action-btn btn-secondary" onclick="goHome()">Other Levels 🪐</button>
+        <div class="results-skills" id="resultsSkills"></div>
+        <div class="results-actions">
+          <button type="button" class="action-btn btn-primary" id="resultsNext" hidden></button>
+          <button type="button" class="action-btn btn-secondary" onclick="playAgain()">Fly again</button>
+          <button type="button" class="action-btn btn-secondary" onclick="backToRank()">Sectors</button>
+          <button type="button" class="action-btn btn-secondary" onclick="goHome()">Galaxy map</button>
         </div>
       </div>
     </div>
@@ -152,8 +166,12 @@
   <script src="js/timer.js?v=3"></script>
   <script src="js/activity-log.js?v=2"></script>
   <script src="js/learning-checks.js?v=5"></script>
-  <script src="js/math-galaxy.js?v=2"></script>
-  <script src="js/math-extras.js?v=2"></script>
+  <script src="js/tts.js"></script>
+  <script src="js/math-galaxy-art.js?v=1"></script>
+  <script src="js/math-galaxy-visuals.js?v=1"></script>
+  <script src="js/math-galaxy-data.js?v=1"></script>
+  <script src="js/math-galaxy.js?v=3"></script>
+  <script src="js/math-extras.js?v=3"></script>
   <script src="js/pwa.js?v=2"></script>
 </body>
 </html>

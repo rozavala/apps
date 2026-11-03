@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/world-atlas.css">
+  <link rel="stylesheet" href="css/world-atlas.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0D9488">
@@ -29,30 +29,30 @@
         <button class="wa-lang" id="wa-lang-toggle" aria-label="Switch language / Cambiar idioma">
           <span id="wa-lang-label">EN</span> 🌐
         </button>
-        <span class="wa-header-icon">🗺️</span>
         <h1 id="wa-title">World Atlas</h1>
         <p id="wa-subtitle">Capitals, currencies and populations of all 195 countries.</p>
       </div>
 
+      <div class="wa-hero" id="wa-hero"></div>
       <div class="wa-summary" id="wa-summary"></div>
 
       <div class="wa-modes">
         <button class="wa-mode wa-mode-browse" id="wa-mode-browse">
-          <span class="wa-mode-icon">📋</span>
+          <span class="wa-mode-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="6" width="30" height="38" rx="5" fill="#e6f4f2" stroke="#0d9488" stroke-width="2"/><rect x="17" y="3" width="14" height="7" rx="3" fill="#0d9488"/><rect x="14" y="15" width="8" height="5" rx="1" fill="#d52b1e"/><rect x="14" y="15" width="8" height="2.5" fill="#fff"/><rect x="14" y="15" width="3" height="2.5" fill="#0039a6"/><rect x="25" y="16" width="10" height="3" rx="1.5" fill="#9ccfc8"/><rect x="14" y="24" width="8" height="5" rx="1" fill="#74acdf"/><rect x="14" y="25.7" width="8" height="1.7" fill="#fff"/><rect x="25" y="25" width="10" height="3" rx="1.5" fill="#9ccfc8"/><rect x="14" y="33" width="8" height="5" rx="1" fill="#009c3b"/><path d="M15.5,35.5l2.5-1.8 2.5,1.8-2.5,1.8Z" fill="#ffdf00"/><rect x="25" y="34" width="10" height="3" rx="1.5" fill="#9ccfc8"/></svg></span>
           <span class="wa-mode-text">
             <span class="wa-mode-title" id="wa-mode-browse-title">All Countries</span>
             <span class="wa-mode-desc" id="wa-mode-browse-desc">Look up any country — search, filter and sort.</span>
           </span>
         </button>
         <button class="wa-mode wa-mode-study" id="wa-mode-study">
-          <span class="wa-mode-icon">🎴</span>
+          <span class="wa-mode-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="24" height="32" rx="4" fill="#fde2e2" stroke="#e8553d" stroke-width="2" transform="rotate(-10 18 26)"/><rect x="17" y="6" width="25" height="33" rx="4" fill="#fff" stroke="#0d9488" stroke-width="2"/><rect x="21" y="11" width="17" height="11" rx="1.5" fill="#bc002d"/><rect x="21" y="11" width="17" height="11" rx="1.5" fill="#fff" stroke="#ccc" stroke-width=".6"/><circle cx="29.5" cy="16.5" r="3.4" fill="#bc002d"/><rect x="21" y="26" width="17" height="3" rx="1.5" fill="#0d9488"/><rect x="21" y="31.5" width="11" height="2.6" rx="1.3" fill="#9ccfc8"/></svg></span>
           <span class="wa-mode-text">
             <span class="wa-mode-title" id="wa-mode-study-title">Study Cards</span>
             <span class="wa-mode-desc" id="wa-mode-study-desc">Flip cards and mark what you know.</span>
           </span>
         </button>
         <button class="wa-mode wa-mode-quiz" id="wa-mode-quiz">
-          <span class="wa-mode-icon">🏆</span>
+          <span class="wa-mode-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15,7h18v9c0,6-4,10-9,10s-9-4-9-10Z" fill="#f5b301" stroke="#b45309" stroke-width="1.6"/><path d="M15,10H9c0,6 3,9 7,9M33,10h6c0,6-3,9-7,9" fill="none" stroke="#b45309" stroke-width="2"/><rect x="21" y="26" width="6" height="7" fill="#d99a06"/><rect x="14" y="33" width="20" height="7" rx="2" fill="#7a4a1e"/><path d="M24,10.5l1.4,2.9 3.2.4-2.3,2.2.6,3.1-2.9-1.5-2.9,1.5.6-3.1-2.3-2.2 3.2-.4Z" fill="#fff6d6"/></svg></span>
           <span class="wa-mode-text">
             <span class="wa-mode-title" id="wa-mode-quiz-title">Quizzes</span>
             <span class="wa-mode-desc" id="wa-mode-quiz-desc">10 questions — earn stars for each round.</span>
@@ -176,7 +176,9 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js?v=5"></script>
   <script src="js/world-atlas-data.js"></script>
-  <script src="js/world-atlas.js"></script>
+  <script src="js/world-map-data.js?v=1"></script>
+  <script src="js/world-atlas-map.js?v=1"></script>
+  <script src="js/world-atlas.js?v=2"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>

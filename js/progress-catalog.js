@@ -183,7 +183,31 @@ window.ZSProgressCatalog = {
     {"i":"w6-3","l":"Star Corners","g":"World 6"},
     {"i":"w6-4","l":"Decision Stairs","g":"World 6"},
     {"i":"w6-5","l":"Diagonal Function","g":"World 6"},
-    {"i":"w6-6","l":"Comb Function","g":"World 6"}
+    {"i":"w6-6","l":"Comb Function","g":"World 6"},
+    {"i":"w7-1","l":"Counting Laps","g":"World 7"},
+    {"i":"w7-2","l":"Growing Steps","g":"World 7"},
+    {"i":"w7-3","l":"Spiral Out","g":"World 7"},
+    {"i":"w7-4","l":"Giant Stairs","g":"World 7"},
+    {"i":"w7-5","l":"Rising Comb","g":"World 7"},
+    {"i":"w7-6","l":"Square Spiral","g":"World 7"},
+    {"i":"w8-1","l":"Corner Crystals","g":"World 8"},
+    {"i":"w8-2","l":"Long Stairs","g":"World 8"},
+    {"i":"w8-3","l":"Chain of Squares","g":"World 8"},
+    {"i":"w8-4","l":"Castle Wall","g":"World 8"},
+    {"i":"w8-5","l":"Four Petals","g":"World 8"},
+    {"i":"w8-6","l":"Mountain Range","g":"World 8"},
+    {"i":"w9-1","l":"Rock Sensor","g":"World 9"},
+    {"i":"w9-2","l":"Drive to the Wall","g":"World 9"},
+    {"i":"w9-3","l":"Canyon Run","g":"World 9"},
+    {"i":"w9-4","l":"Spiral Canyon","g":"World 9"},
+    {"i":"w9-5","l":"Signal Maze","g":"World 9"},
+    {"i":"w9-6","l":"Rock Dodger","g":"World 9"},
+    {"i":"w10-1","l":"Wrong Turn","g":"World 10"},
+    {"i":"w10-2","l":"Off by One","g":"World 10"},
+    {"i":"w10-3","l":"Missing Turn","g":"World 10"},
+    {"i":"w10-4","l":"Wrong Order","g":"World 10"},
+    {"i":"w10-5","l":"Function Bug","g":"World 10"},
+    {"i":"w10-6","l":"Sensor Bug","g":"World 10"}
   ],
 
   guitar: [
@@ -207,7 +231,13 @@ window.ZSProgressCatalog = {
     {"i":"greensleeves","l":"Greensleeves","g":"Advanced"},
     {"i":"rowboat","l":"Row, Row, Row Your Boat","g":"Beginner"},
     {"i":"frere","l":"Frère Jacques","g":"Beginner"},
-    {"i":"mountain","l":"She'll Be Coming Round the Mountain","g":"Intermediate"}
+    {"i":"mountain","l":"She'll Be Coming Round the Mountain","g":"Intermediate"},
+    {"i":"arrozconleche","l":"Arroz con leche","g":"Beginner"},
+    {"i":"mambru","l":"Mambrú se fue a la guerra","g":"Beginner"},
+    {"i":"oldmacdonald","l":"Old MacDonald Had a Farm","g":"Beginner"},
+    {"i":"michaelrow","l":"Michael, Row the Boat Ashore","g":"Intermediate"},
+    {"i":"silentnight","l":"Noche de paz (Silent Night)","g":"Intermediate"},
+    {"i":"cueca","l":"Cueca — ritmo en 6/8","g":"Advanced"}
   ],
 
   lab: [
@@ -359,7 +389,11 @@ window.ZSProgressCatalog = {
     {"i":"darwin_patagonia","l":"🔬 Darwin in Patagonia","g":"Pilot"},
     {"i":"valdivia_1960","l":"🌊 The Great Valdivia Earthquake","g":"Pilot"},
     {"i":"crossing_andes","l":"⛰️ Crossing the Andes","g":"Commander"},
-    {"i":"atacama_stars","l":"🔭 Stargazing in the Atacama","g":"Commander"}
+    {"i":"atacama_stars","l":"🔭 Stargazing in the Atacama","g":"Commander"},
+    {"i":"penguin_coast","l":"🐧 Pipo the Penguin","g":"Cadet"},
+    {"i":"empanadas","l":"🥟 Empanadas for the Fiesta","g":"Cadet"},
+    {"i":"miners_33","l":"⛑️ The Rescue of the 33","g":"Pilot"},
+    {"i":"rapa_nui","l":"🗿 The Moai of Rapa Nui","g":"Commander"}
   ],
 
   vocab: [

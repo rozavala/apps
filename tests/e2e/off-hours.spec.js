@@ -82,8 +82,11 @@ test.describe('Off hours', () => {
     expect(await page.evaluate(() => window.__toasts)).toEqual(['🌙 Apps go to sleep at 9:00 PM — time to finish up.']);
     await page.clock.runFor('05:30');
     await expect(page.locator('#off-hours-overlay')).toBeVisible();
-    // ...and wakes up on its own in the morning
-    await page.clock.runFor('10:20:00');
+    // ...and wakes up on its own in the morning. fastForward jumps the
+    // night in one go (each due timer fires once); runFor would replay
+    // every tick of ten hours, which took most of the test's time budget.
+    await page.clock.fastForward('10:20:00');
+    await page.clock.runFor('01:00');
     await expect(page.locator('#off-hours-overlay')).toHaveCount(0);
   });
 

@@ -5,9 +5,11 @@
    Three modes:
      1. All Countries — searchable, filterable, sortable reference list
      2. Study Cards   — flip cards with per-country mastery tracking
-     3. Quizzes       — 10-question rounds, five question types
+     3. Quizzes       — 10-question rounds, six question types plus a
+                        map quiz (tap the country / name the highlighted one)
 
    Data: js/world-atlas-data.js (WORLD_ATLAS_DATA), loaded first.
+   Map + flags: js/world-map-data.js (WorldMap) via js/world-atlas-map.js.
    Storage key: zs_atlas_[username] via getUserAppKey('zs_atlas_')
 
    Requires: auth.js, sounds.js, activity-log.js
@@ -42,6 +44,8 @@ var WorldAtlas = (function() {
       dEn: 'Which country has the most people?', dEs: '¿Qué país tiene más habitantes?' },
     { id: 'flag',       icon: '🚩', en: 'Flags',           es: 'Banderas',
       dEn: 'Which country owns this flag?', dEs: '¿De qué país es esta bandera?' },
+    { id: 'map',        icon: '🗺️', en: 'Map Quiz',        es: 'Mapa',
+      dEn: 'Find countries on the map.',    dEs: 'Encuentra países en el mapa.' },
     { id: 'mixed',      icon: '🎲', en: 'Mixed',           es: 'Mezclado',
       dEn: 'A bit of everything.',          dEs: 'Un poco de todo.' }
   ];
@@ -156,9 +160,34 @@ var WorldAtlas = (function() {
   function inRegion(c, region) { return region === 'all' || c.region === region; }
 
   function sound(name) {
-    if (typeof Sounds !== 'undefined' && typeof Sounds[name] === 'function') {
-      try { Sounds[name](); } catch (e) { /* audio is optional */ }
+    var S = (typeof SFX !== 'undefined') ? SFX : (typeof Sounds !== 'undefined' ? Sounds : null);
+    if (S && typeof S[name] === 'function') {
+      try { S[name](); } catch (e) { /* audio is optional */ }
     }
+  }
+
+  function flagOf(c, cls, wave) {
+    return (typeof AtlasMap !== 'undefined') ? AtlasMap.flag(c, cls, wave) : '<span class="' + (cls || '') + '">' + escHtml(c.flag) + '</span>';
+  }
+  function byId(id) { return COUNTRIES.filter(function(x) { return x.id === id; })[0] || null; }
+  function hasMap() { return typeof AtlasMap !== 'undefined' && AtlasMap.ok; }
+  function tier() { return (typeof getAgeTier === 'function') ? getAgeTier() : 'intermediate'; }
+
+  // Map locator + neighbour chips (tap a neighbour to open it).
+  function locatorHTML(c, compact) {
+    if (!hasMap()) return '';
+    var nb = AtlasMap.neighbours(c.id).map(byId).filter(Boolean);
+    nb.sort(function(a, b) { return cName(a).localeCompare(cName(b)); });
+    var html = '<div class="wa-loc' + (compact ? ' compact' : '') + '">' +
+      AtlasMap.locator(c.id, { label: t('Map: where ', 'Mapa: dónde está ') + cName(c), aspect: compact ? 2.1 : 1.6 }) +
+      '<div class="wa-loc-key"><span class="wa-key-c"></span>' + escHtml(cName(c)) +
+      (nb.length ? '<span class="wa-key-n"></span>' + escHtml(t('Neighbours', 'Vecinos')) : '') + '</div>';
+    if (!compact) {
+      html += '<div class="wa-nb">' + (nb.length
+        ? nb.map(function(n) { return '<button type="button" class="wa-nb-chip" data-id="' + escHtml(n.id) + '">' + flagOf(n, 'wa-flag tiny') + escHtml(cName(n)) + '</button>'; }).join('')
+        : '<span class="wa-nb-none">' + escHtml(c.landlocked ? '' : t('No land borders with other countries.', 'Sin fronteras terrestres con otros países.')) + '</span>') + '</div>';
+    }
+    return html + '</div>';
   }
 
   function flash(emoji) {
@@ -253,6 +282,15 @@ var WorldAtlas = (function() {
       { value: String(data.totalStars || 0) + ' ⭐',   label: t('Stars', 'Estrellas') },
       { value: String(data.cardsStudied || 0),    label: t('Cards', 'Tarjetas') }
     ];
+    var hero = $('wa-hero');
+    if (hero && hasMap()) {
+      hero.innerHTML = AtlasMap.overview(function(code) {
+        var rec = data.countries[code];
+        if (rec && rec.m) return '#0d9488';
+        if (rec && (rec.r || rec.w)) return '#7fd1c7';
+        return null;
+      }) + '<div class="wa-hero-key"><span><i class="m"></i>' + escHtml(t('Mastered', 'Dominados')) + '</span><span><i class="s"></i>' + escHtml(t('Studied', 'Estudiados')) + '</span></div>';
+    }
     $('wa-summary').innerHTML = stats.map(function(s) {
       return '<div class="wa-stat">' +
              '<div class="wa-stat-value">' + escHtml(s.value) + '</div>' +
@@ -350,7 +388,7 @@ var WorldAtlas = (function() {
       var known = rec && rec.m ? '<span class="wa-row-known" title="' +
         escHtml(t('Mastered', 'Dominado')) + '">✅</span>' : '';
       return '<button class="wa-row" data-id="' + escHtml(c.id) + '">' +
-             '<span class="wa-row-flag">' + escHtml(c.flag) + '</span>' +
+             '<span class="wa-row-flag">' + flagOf(c, 'wa-flag row') + '</span>' +
              '<span class="wa-row-main">' +
                '<span class="wa-row-name">' + escHtml(cName(c)) + '</span>' +
                '<span class="wa-row-sub">' + escHtml(cCapital(c)) + ' · ' +
@@ -383,7 +421,7 @@ var WorldAtlas = (function() {
     ];
 
     var html =
-      '<div class="wa-detail-flag">' + escHtml(c.flag) + '</div>' +
+      '<div class="wa-detail-flag">' + flagOf(c, 'wa-flag big', true) + '</div>' +
       '<div class="wa-detail-name">' + escHtml(cName(c)) + '</div>' +
       '<div class="wa-detail-region">' + escHtml(other) + ' · ' + escHtml(cRegion(c)) +
         ' · ' + escHtml(c.subregion) + '</div>' +
@@ -404,7 +442,11 @@ var WorldAtlas = (function() {
         'Estado observador de las Naciones Unidas, no Estado miembro.')) + '</div>';
     }
 
+    html += locatorHTML(c, false);
     $('wa-detail').innerHTML = html;
+    Array.prototype.forEach.call($('wa-detail').querySelectorAll('.wa-nb-chip'), function(b) {
+      b.onclick = function() { openCountry(b.dataset.id); };
+    });
     $('wa-country-bartitle').textContent = cName(c);
     showScreen('wa-screen-country');
     // Browsing is not logged: the shared activity log keeps only the last
@@ -511,7 +553,7 @@ var WorldAtlas = (function() {
     $('wa-card-fill').style.width = ((study.index) / study.deck.length * 100) + '%';
 
     $('wa-card-front').innerHTML =
-      '<div class="wa-card-flag">' + escHtml(c.flag) + '</div>' +
+      '<div class="wa-card-flag">' + flagOf(c, 'wa-flag card', true) + '</div>' +
       '<div class="wa-card-name">' + escHtml(cName(c)) + '</div>' +
       '<div class="wa-card-region">' + escHtml(cRegion(c)) + '</div>';
 
@@ -522,6 +564,7 @@ var WorldAtlas = (function() {
     ];
     $('wa-card-backface').innerHTML =
       '<div class="wa-card-name">' + escHtml(cName(c)) + '</div>' +
+      locatorHTML(c, true) +
       '<div class="wa-card-rows">' + rows.map(function(r) {
         return '<div class="wa-card-row">' +
                '<span class="wa-card-row-label">' + escHtml(r.label) + '</span>' +
@@ -674,7 +717,8 @@ var WorldAtlas = (function() {
       q.text = t(cCapital(answer) + ' is the capital of which country?',
                  '¿' + cCapital(answer) + ' es la capital de qué país?');
       q.options = [answer].concat(_distractors(pool, answer, cName, 3));
-      q.labelOf = function(c) { return c.flag + '  ' + cName(c); };
+      q.labelOf = cName;
+      q.optFlags = true;
       q.explain = t(cCapital(answer) + ' is the capital of ' + cName(answer) + '.',
                     cCapital(answer) + ' es la capital de ' + cName(answer) + '.');
     } else if (type === 'currency') {
@@ -701,9 +745,13 @@ var WorldAtlas = (function() {
       q.country = answer;
       q.text = t('Which country has the most people?', '¿Qué país tiene más habitantes?');
       q.options = four;
-      q.labelOf = function(c) { return c.flag + '  ' + cName(c); };
+      q.labelOf = cName;
+      q.optFlags = true;
       q.explain = t(cName(answer) + ' has about ' + popShort(answer.population) + ' people.',
                     cName(answer) + ' tiene unos ' + popShort(answer.population) + ' de habitantes.');
+    } else if (type === 'map') {
+      _buildMapQuestion(q, pool);
+      answer = q.answer;
     } else { // flag
       q.text = t('Which country owns this flag?', '¿De qué país es esta bandera?');
       q.flag = answer.flag;
@@ -716,6 +764,77 @@ var WorldAtlas = (function() {
     q.answer = answer;
     q.options = shuffle(q.options);
     return q;
+  }
+
+  // ── Map quiz ─────────────────────────────────────────────────────
+  // Two kinds: "tap" (find the named country on the map) and "which"
+  // (name the highlighted country). Younger players get bigger countries
+  // and far-apart choices; older ones get neighbours as distractors.
+  function _bigEnough(c) { return (c.area || 0) >= 200000 || (c.population || 0) >= 20000000; }
+  function _buildMapQuestion(q, pool) {
+    var T = tier(), young = T === 'beginner' || T === 'intermediate';
+    var base = pool.filter(function(c) { return hasMap() && WorldMap.info(c.id); });
+    if (young) { var big = base.filter(_bigEnough); if (big.length >= 6) base = big; }
+    var answer = pick(base.length ? base : pool);
+    var tiny = hasMap() ? AtlasMap.isTiny(answer.id) : true;
+    q.kind = (!tiny && Math.random() < (young ? 0.5 : 0.6)) ? 'tap' : 'which';
+    q.answer = answer;
+    q.country = answer;
+    if (q.kind === 'tap') {
+      q.text = t('Find ' + cName(answer) + ' on the map.', 'Encuentra ' + cName(answer) + ' en el mapa.');
+      q.options = [];
+    } else {
+      q.text = t('Which country is shown in red?', '¿Qué país está marcado en rojo?');
+      var nb = hasMap() ? AtlasMap.neighbours(answer.id).map(byId).filter(Boolean) : [];
+      var near = young ? [] : shuffle(nb);
+      var cand = near.concat(shuffle(pool.filter(function(c) { return c !== answer && near.indexOf(c) < 0 && (!young || nb.indexOf(c) < 0); })));
+      // keep neighbours first (harder for older players), then fill up
+      var opts = [], seen = [cName(answer)];
+      for (var i = 0; i < cand.length && opts.length < 3; i++) {
+        if (seen.indexOf(cName(cand[i])) >= 0) continue;
+        seen.push(cName(cand[i])); opts.push(cand[i]);
+      }
+      if (opts.length < 3) opts = opts.concat(_distractors(COUNTRIES.filter(function(c) { return opts.indexOf(c) < 0; }), answer, cName, 3 - opts.length));
+      q.options = [answer].concat(opts);
+    }
+    q.labelOf = cName;
+    q.explain = t(cName(answer) + ' is in ' + answer.subregion + '. Its capital is ' + cCapital(answer) + '.',
+                  cName(answer) + ' está en ' + cRegion(answer) + '. Su capital es ' + cCapital(answer) + '.');
+  }
+
+  var liveMap = null;
+  function _setupMapQuestion(q) {
+    var host = $('wa-qmap');
+    if (!host || !hasMap()) return;
+    liveMap = new AtlasMap.Live(host, { onTap: function(code) { _mapTap(code); } });
+    var T = tier(), young = T === 'beginner' || T === 'intermediate';
+    var spread = q.kind === 'tap' ? (young ? 300 : 430) : (young ? 260 : 320);
+    requestAnimationFrame(function() {
+      liveMap.frame(q.answer.id, spread, q.kind === 'tap' ? 0.45 : 0);
+      liveMap.paint(function(code) { return { fill: (q.kind === 'which' && code === q.answer.id) ? AtlasMap.TARGET : null, cls: q.kind === 'tap' ? 'tap' : '' }; });
+      liveMap.clearMarks();
+      if (q.kind === 'which' && AtlasMap.isTiny(q.answer.id)) liveMap.ring(q.answer.id, 'target');
+    });
+    if (q.kind === 'tap') {
+      var opts = $('wa-quiz').querySelector('.wa-options');
+      if (opts) opts.hidden = true;
+      host.classList.add('tapping');
+    }
+  }
+
+  function _mapTap(code) {
+    var q = quiz.questions[quiz.index];
+    if (!q || q.type !== 'map' || q.kind !== 'tap' || quiz.answered || !code) return;
+    var right = code === q.answer.id;
+    var tapped = byId(code);
+    liveMap.flash(q.answer.id, 'hit');
+    if (!right) {
+      liveMap.flash(code, 'miss');
+      if (tapped) liveMap.label(code, cName(tapped));
+    }
+    liveMap.label(q.answer.id, cName(q.answer));
+    if (!right) q.explain = (tapped ? t('That was ' + cName(tapped) + '. ', 'Ese era ' + cName(tapped) + '. ') : '') + q.explain;
+    _resolve(right, -1);
   }
 
   function _makeQuestions(type, region) {
@@ -756,16 +875,19 @@ var WorldAtlas = (function() {
 
     var html =
       '<div class="wa-q">' +
-        (q.flag ? '<div class="wa-q-flag">' + escHtml(q.flag) + '</div>' : '') +
+        (q.flag ? '<div class="wa-q-flag">' + flagOf(q.answer, 'wa-flag quiz', true) + '</div>' : '') +
         '<div class="wa-q-text">' + escHtml(q.text) + '</div>' +
       '</div>' +
+      (q.type === 'map' ? '<div class="wa-qmap" id="wa-qmap"></div>' : '') +
       '<div class="wa-options">' + q.options.map(function(o, i) {
         return '<button class="wa-option" data-i="' + i + '">' +
-               escHtml(q.labelOf(o)) + '</button>';
+               (q.optFlags ? flagOf(o, 'wa-flag opt') : '') +
+               '<span>' + escHtml(q.labelOf(o)) + '</span></button>';
       }).join('') + '</div>' +
       '<div id="wa-after"></div>';
 
     $('wa-quiz').innerHTML = html;
+    if (q.type === 'map') _setupMapQuestion(q);
     Array.prototype.forEach.call($('wa-quiz').querySelectorAll('.wa-option'), function(btn) {
       btn.onclick = function() { _answerQuestion(parseInt(btn.dataset.i, 10)); };
     });
@@ -773,11 +895,20 @@ var WorldAtlas = (function() {
 
   function _answerQuestion(index) {
     if (quiz.answered) return;
-    quiz.answered = true;
-
     var q = quiz.questions[quiz.index];
     var chosen = q.options[index];
     var correct = chosen === q.answer;
+    if (q.type === 'map' && liveMap) {
+      liveMap.flash(q.answer.id, 'hit');
+      if (!correct && chosen) { liveMap.flash(chosen.id, 'miss'); liveMap.label(chosen.id, cName(chosen)); }
+    }
+    _resolve(correct, index);
+  }
+
+  function _resolve(correct, index) {
+    if (quiz.answered) return;
+    quiz.answered = true;
+    var q = quiz.questions[quiz.index];
 
     var buttons = $('wa-quiz').querySelectorAll('.wa-option');
     Array.prototype.forEach.call(buttons, function(btn, i) {
@@ -841,7 +972,7 @@ var WorldAtlas = (function() {
       html += '<div class="wa-missed">' +
         '<div class="wa-missed-title">' + escHtml(t('Worth reviewing', 'Para repasar')) + '</div>' +
         quiz.missed.map(function(m) {
-          return '<div class="wa-missed-item">' + escHtml(m.answer.flag + ' ' + m.explain) + '</div>';
+          return '<div class="wa-missed-item">' + flagOf(m.answer, 'wa-flag tiny') + '<span>' + escHtml(m.explain) + '</span></div>';
         }).join('') + '</div>';
     }
 

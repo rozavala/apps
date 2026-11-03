@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/code-cadet.css">
+  <link rel="stylesheet" href="css/code-cadet.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#22D3EE">
@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-<body>
+<body class="cc-page">
   <div class="atmo" style="width:400px;height:400px;background:rgba(34,211,238,0.10);top:-100px;left:-100px;"></div>
   <div class="atmo" style="width:350px;height:350px;background:rgba(99,102,241,0.07);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
 
@@ -25,9 +25,11 @@
     <!-- SCREEN: World select -->
     <div class="cc-screen active" id="cc-screen-select">
       <div class="cc-header">
-        <span class="icon">🤖</span>
+        <div class="cc-hero-wrap"><canvas id="cc-hero" class="cc-hero" aria-hidden="true"></canvas></div>
         <h1>Code Cadet</h1>
-        <p>Mueve al rover. Compón bloques. Resuelve el rompecabezas.</p>
+        <p class="cc-sub">Programa el rover · Snap blocks together and drive a rover across the desert</p>
+        <p class="cc-total" id="cc-total"></p>
+        <p class="cc-fact"><b>Real fact:</b> space agencies have tested rover prototypes in Chile's Atacama Desert, one of the driest places on Earth.</p>
       </div>
       <div class="cc-world-grid" id="cc-world-grid">
         <!-- populated by JS -->
@@ -37,50 +39,68 @@
     <!-- SCREEN: Game -->
     <div class="cc-screen" id="cc-screen-game">
       <div class="cc-game-top">
-        <button class="cc-back-btn" id="cc-back-btn" aria-label="Back to worlds">←</button>
+        <button class="cc-back-btn" id="cc-back-btn" type="button" aria-label="Back to worlds">←</button>
         <div class="cc-puzzle-info">
           <span class="cc-world-tag" id="cc-puzzle-world">World 1</span>
           <h2 id="cc-puzzle-name">First Steps</h2>
         </div>
-        <div class="cc-hud">
-          <span>🧱 <span id="cc-used">0</span>/<span id="cc-ideal">-</span></span>
-          <span id="cc-dir">➡️</span>
-        </div>
       </div>
+
+      <div class="cc-goal" id="cc-goal"></div>
 
       <div class="cc-stage">
-        <div class="cc-board-wrap">
-          <canvas id="cc-canvas" width="320" height="192"></canvas>
+        <div class="cc-left">
+          <div class="cc-board-wrap" id="cc-board-wrap">
+            <canvas id="cc-canvas" width="320" height="192" role="img" aria-label="Rover test site map"></canvas>
+            <div class="cc-hud" aria-live="polite">
+              <span class="cc-hud-item" id="cc-blocks" title="Blocks used / blocks for 3 stars"><span aria-hidden="true">🧱</span> <span id="cc-used">0</span>/<span id="cc-ideal">-</span></span>
+              <span class="cc-meter" id="cc-meter" role="img" aria-label="Up to 3 stars"></span>
+              <span class="cc-hud-item" id="cc-crystals" title="Crystals collected"><svg class="cc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 16 9 12 22 8 9z" fill="#FCD34D" stroke="#B45309" stroke-width="1.6" stroke-linejoin="round"/></svg> <b>0/0</b></span>
+              <span class="cc-hud-item cc-dir" id="cc-dir" role="img" aria-label="Rover facing east"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#fff" stroke="#CBD5E1" stroke-width="1.5"/><path d="M12 4l4 9h-8z" fill="#0891B2"/><path d="M12 20l-4-7h8z" fill="#CBD5E1"/></svg></span>
+            </div>
+          </div>
+          <div class="cc-controls">
+            <button class="cc-ctrl-btn cc-primary" id="cc-run-btn" type="button">▶ Run</button>
+            <button class="cc-ctrl-btn" id="cc-step-btn" type="button"><span aria-hidden="true">⏯</span> Step</button>
+            <button class="cc-ctrl-btn" id="cc-reset-btn" type="button"><span aria-hidden="true">↺</span> Reset</button>
+            <div class="cc-speed" role="group" aria-label="Rover speed">
+              <button type="button" data-speed="slow" aria-label="Slow speed" title="Slow">🐢</button>
+              <button type="button" data-speed="normal" aria-label="Normal speed" title="Normal">🐇</button>
+              <button type="button" data-speed="fast" aria-label="Fast speed" title="Fast">⚡</button>
+            </div>
+          </div>
         </div>
-        <div class="cc-program">
-          <div id="cc-lane-main" class="cc-lane"></div>
-          <div id="cc-lane-f1" class="cc-lane"></div>
-          <div class="cc-palette" id="cc-palette"></div>
-        </div>
-      </div>
 
-      <div class="cc-controls">
-        <button class="cc-ctrl-btn cc-primary" id="cc-run-btn">▶ Run</button>
-        <button class="cc-ctrl-btn" id="cc-step-btn">⏯ Step</button>
-        <button class="cc-ctrl-btn" id="cc-reset-btn">↺ Reset</button>
+        <div class="cc-right">
+          <div class="cc-palette-wrap">
+            <div class="cc-panel-head"><span>Blocks</span><small>tap to add · drag to place</small></div>
+            <div class="cc-palette" id="cc-palette"></div>
+          </div>
+          <div class="cc-program" id="cc-program">
+            <div class="cc-panel-head"><span>Program</span><button type="button" class="cc-link-btn" id="cc-startover-btn">Start over</button></div>
+            <div id="cc-lane-main" class="cc-root"></div>
+            <div id="cc-lane-f1" class="cc-root" hidden></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="cc-feedback" id="cc-feedback"></div>
+  <div class="cc-feedback" id="cc-feedback" role="status" aria-live="polite"></div>
 
   <div class="cc-win-overlay" id="cc-win">
-    <div class="cc-win-card">
-      <h2>¡Lo lograste! 🎉</h2>
-      <div class="cc-win-stars-big" id="cc-win-stars">⭐⭐⭐</div>
+    <div class="cc-win-card" role="dialog" aria-modal="true" aria-labelledby="cc-win-title">
+      <h2 id="cc-win-title">Mission complete!</h2>
+      <div class="cc-win-stars-big" id="cc-win-stars" role="img"></div>
+      <p class="cc-win-msg" id="cc-win-msg"></p>
       <p class="cc-win-stats">
-        Bloques usados: <strong id="cc-win-used">-</strong>
-        · Ideal: <strong id="cc-win-ideal">-</strong>
+        Blocks used: <strong id="cc-win-used">-</strong>
+        · 3 stars: <strong id="cc-win-ideal">-</strong>
       </p>
       <div class="cc-win-actions">
-        <button class="cc-ctrl-btn" id="cc-win-replay">↺ Replay</button>
-        <button class="cc-ctrl-btn cc-primary" id="cc-win-next">Next →</button>
-        <button class="cc-ctrl-btn" id="cc-win-back">Worlds</button>
+        <button class="cc-ctrl-btn" id="cc-win-replay" type="button"><span aria-hidden="true">↺</span> Replay</button>
+        <button class="cc-ctrl-btn cc-primary" id="cc-win-next" type="button">Next <span aria-hidden="true">→</span></button>
+        <button class="cc-ctrl-btn" id="cc-win-back" type="button">Worlds</button>
       </div>
     </div>
   </div>
@@ -95,7 +115,8 @@
   <script src="js/sounds.js"></script>
   <script src="js/timer.js?v=3"></script>
   <script src="js/activity-log.js"></script>
-  <script src="js/code-cadet.js"></script>
+  <script src="js/code-cadet-art.js?v=1"></script>
+  <script src="js/code-cadet.js?v=2"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>
