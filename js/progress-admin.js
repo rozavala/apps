@@ -28,10 +28,13 @@ var ProgressAdmin = (function() {
   'use strict';
 
   var MATH_LEVELS = [
-    { i: 'cadet',     l: '🚀 Cadet — addition & subtraction', g: 'Levels' },
-    { i: 'explorer',  l: '🛰 Explorer — times tables',        g: 'Levels' },
-    { i: 'pilot',     l: '✈️ Pilot — division & mixed',       g: 'Levels' },
-    { i: 'commander', l: '👑 Commander — fractions & more',   g: 'Levels' }
+    // Labels follow Math Galaxy's worlds since its space-mission upgrade;
+    // Elite (Neptune) was added at the end, so earlier places don't move.
+    { i: 'cadet',     l: '🌕 Cadet — counting and adding to 10',               g: 'Levels' },
+    { i: 'explorer',  l: '🔴 Explorer — add & subtract to 20, tens and ones',  g: 'Levels' },
+    { i: 'pilot',     l: '🪐 Pilot — multiply, divide, fractions',             g: 'Levels' },
+    { i: 'commander', l: '💍 Commander — fractions, decimals, %',              g: 'Levels' },
+    { i: 'elite',     l: '🔵 Elite — negatives, ratios, equations',            g: 'Levels' }
   ];
 
   // ── Storage ─────────────────────────────────────────────────────
