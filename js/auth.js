@@ -351,6 +351,13 @@ var APP_STAR_CONFIGS = [
       var n = 0, b = d.best || {};
       for (var k in b) if (b[k]) n += Math.min(3, b[k].stars || 0);
       return n + ((d.quizBest || 0) >= 5 ? 1 : 0);
+    } },
+  // Mensajes Secretos stars each of its 19 missions out of 3. Opening a
+  // tool or reading a history card is not an achievement.
+  { id: 'secretos', prefix: 'zs_secretos_', stars: function(d) {
+      var n = 0, m = d.missions || {};
+      for (var k in m) n += Math.min(3, (m[k] && m[k].stars) || 0);
+      return n;
     } }
 ];
 

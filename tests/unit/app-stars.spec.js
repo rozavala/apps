@@ -53,7 +53,11 @@ const CASES = [
   { id: 'negocio', prefix: 'zs_negocio_',
     data: { seasons: 3, best: { empanadas: { profit: 286000, stars: 2 }, mote: { profit: 427500, stars: 3 },
             limonada: { profit: -4000, stars: 0 } }, quizBest: 5, lastPlayed: '2026-11-03', cur: null },
-    stars: 6, note: 'a losing season scores nothing' }
+    stars: 6, note: 'a losing season scores nothing' },
+  { id: 'secretos', prefix: 'zs_secretos_',
+    data: { missions: { m01: { stars: 3, date: '2026-11-03' }, m02: { stars: 2, date: '2026-11-03' },
+            m10: { stars: 1, date: '2026-11-04' } }, tools: { caesar: '2026-11-03' }, history: ['h-caesar'] },
+    stars: 6, note: 'tools and history cards do not score' }
 ];
 
 test.describe('per-app star rules', () => {
