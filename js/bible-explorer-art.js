@@ -235,7 +235,12 @@ const BibleArt = (() => {
       (wine ? '<ellipse cx="0" cy="-29" rx="6" ry="1.6" fill="#7a1a3a"/>' : '<ellipse cx="0" cy="-29" rx="6" ry="1.6" fill="#8ab8dc"/>') + '</g>';
   }
   function tent(x, y, k, c) {
-    return '<g transform="translate(' + x + ' ' + y + ') scale(' + k + ')"><path d="M-30 0 L0 -32 L30 0 Z" fill="' + (c || '#d9c09a') + '" stroke="' + INK + '" stroke-width="1"/><path d="M0 -32 L10 0 H-6 Z" fill="#7a5a3a" opacity="0.6"/><path d="M0 -32 L30 0" stroke="#fff" stroke-width="1" opacity="0.3"/></g>';
+    c = c || '#d9c09a';
+    return '<g transform="translate(' + x + ' ' + y + ') scale(' + k + ')"><ellipse cx="4" cy="1" rx="40" ry="4" fill="#1a1008" opacity="0.2"/>' +
+      '<path d="M-38 0 L-30 -16 Q-14 -30 0 -30 Q14 -30 30 -16 L38 0 Z" fill="' + c + '" stroke="' + INK + '" stroke-width="1"/>' +
+      '<path d="M-30 -16 Q0 -10 30 -16 M-34 -8 Q0 -2 34 -8" stroke="' + shade(c, -0.25) + '" stroke-width="1.6" fill="none"/>' +
+      '<path d="M-6 0 L0 -26 L8 0 Z" fill="#4a3424"/><path d="M0 -26 L10 0 L16 0 Z" fill="' + shade(c, 0.12) + '" stroke="' + INK + '" stroke-width="0.8"/>' +
+      '<path d="M0 -30 v-6 M-38 0 l-6 -10 M38 0 l6 -10" stroke="#6a4a2e" stroke-width="1.4"/></g>';
   }
   function house(x, y, k, c) {
     c = c || '#e8d6b4';
@@ -494,7 +499,12 @@ const BibleArt = (() => {
       person(200, 128, 48, { robe: '#c9a06a', mantle: '#8e2a2a', hair: '#e0dcd2', beard: 'long', arms: 'up' }) + tablets(200, 70, 0.9) +
       ground(210, '#b8a47a') + tent(70, 228, 0.9) + tent(340, 230, 1) + crowd([[130, 232, 30, { robe: '#a85a4a' }], [270, 232, 30, { robe: '#5a7aa0' }]]),
     sheba: () => sky('gold') + sun(330, 60, 20) + '<path d="M0 160 Q100 140 200 156 T400 150 V240 H0 Z" fill="#e0c494"/>' + ground(200, '#d9b47a') +
-      '<g transform="translate(90 214)"><ellipse cx="0" cy="2" rx="36" ry="5" fill="#2a1a0a" opacity="0.2"/><path d="M-24 0 v-26 M-14 0 v-26 M14 0 v-26 M24 0 v-26" stroke="#b08a5a" stroke-width="4"/><path d="M-30 -26 Q-30 -46 -10 -44 Q-4 -58 6 -44 Q26 -46 30 -26 Z" fill="#c9a06a" stroke="' + INK + '" stroke-width="1"/><path d="M26 -34 Q40 -50 38 -64 Q46 -66 48 -58 Q48 -44 34 -30" fill="#c9a06a" stroke="' + INK + '" stroke-width="1"/><rect x="-16" y="-58" width="20" height="12" fill="#8e1022" stroke="' + INK + '" stroke-width="0.8"/></g>' +
+      '<g transform="translate(86 214)"><ellipse cx="4" cy="2" rx="40" ry="5" fill="#2a1a0a" opacity="0.2"/>' +
+      '<path d="M-22 0 Q-24 -14 -20 -28 M-12 0 Q-10 -14 -12 -28 M16 0 Q18 -14 14 -28 M26 0 Q24 -14 22 -28" stroke="#b08a5a" stroke-width="4.5" stroke-linecap="round" fill="none"/>' +
+      '<path d="M-30 -26 Q-34 -40 -20 -42 Q-12 -62 2 -46 Q8 -40 12 -44 Q20 -50 26 -40 Q34 -34 30 -24 Q0 -18 -30 -26 Z" fill="#c9a06a" stroke="' + INK + '" stroke-width="1.1"/>' +
+      '<path d="M28 -34 Q40 -38 42 -54 Q42 -64 50 -66 Q58 -66 60 -60 L56 -56 Q50 -58 50 -52 Q48 -36 32 -26 Z" fill="#c9a06a" stroke="' + INK + '" stroke-width="1.1"/><circle cx="54" cy="-61" r="1" fill="' + INK + '"/>' +
+      '<path d="M-16 -46 Q-6 -52 4 -44 L4 -36 L-16 -36 Z" fill="#8e1022" stroke="' + INK + '" stroke-width="0.8"/><path d="M-16 -38 H4" stroke="#f2c14a" stroke-width="2"/>' +
+      '<path d="M-30 -26 Q-36 -18 -34 -8" stroke="#a8804a" stroke-width="2" fill="none"/></g>' +
       person(190, 222, 72, { robe: '#e8a03a', mantle: '#6a2c91', head: 'veil', veil: '#f2e6c8', crown: true, arms: 'out' }) +
       person(300, 216, 72, { robe: '#f2e6c8', mantle: '#2457a8', hair: '#4a3020', beard: 'short', crown: true, arms: 'outL' }) +
       '<g transform="translate(244 214)"><rect x="-12" y="-14" width="24" height="14" fill="#c99a2a" stroke="#7a5a12" stroke-width="1"/><path d="M-12 -14 Q0 -24 12 -14" fill="#e0b84a" stroke="#7a5a12" stroke-width="1"/><circle cx="-4" cy="-18" r="2" fill="#2f9a5a"/><circle cx="4" cy="-19" r="2" fill="#b3122e"/></g>',
@@ -511,7 +521,7 @@ const BibleArt = (() => {
       person(140, 220, 60, { robe: '#a89a7a', hair: '#3a2a1e', arms: 'down' }) +
       person(230, 216, 66, { robe: '#5a7aa0', hair: '#4a3020', beard: 'short', arms: 'hold' }) +
       person(310, 218, 64, { robe: '#8a5a7a', hair: '#3a2a1e', arms: 'hold' }) +
-      (() => { let s = ''; [[230, 170, 5], [310, 172, 2]].forEach(g => { for (let i = 0; i < g[2]; i++) s += '<ellipse cx="' + (g[0] - (g[2] - 1) * 4 + i * 8) + '" cy="' + (g[1] - (i % 2) * 3) + '" rx="5" ry="3" fill="#f2c14a" stroke="#9a6d14" stroke-width="0.8"/>'; }); return s; })() +
+      (() => { let s = ''; [[230, 194, 5], [310, 196, 2]].forEach(g => { for (let i = 0; i < g[2]; i++) s += '<ellipse cx="' + (g[0] - (g[2] - 1) * 4 + i * 8) + '" cy="' + (g[1] - (i % 2) * 3) + '" rx="5" ry="3" fill="#f2c14a" stroke="#9a6d14" stroke-width="0.8"/>'; }); return s; })() +
       '<ellipse cx="90" cy="212" rx="5" ry="3" fill="#f2c14a" stroke="#9a6d14" stroke-width="0.8" opacity="0.8"/>',
     lazarus: () => sky('day') + sun(70, 50, 16) + hills(180, '#b8a47a', '#c9b48a') +
       '<g transform="translate(260 214)"><path d="M-90 0 C-90 -80 -40 -120 20 -120 C80 -120 110 -70 110 0 Z" fill="#a89e8e" stroke="' + INK + '" stroke-width="1.4"/><path d="M-90 0 C-90 -80 -40 -120 20 -120 C80 -120 110 -70 110 0 Z" fill="url(#' + U + 'lit)"/>' +

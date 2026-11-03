@@ -174,13 +174,13 @@ var ArtBrush = (function () {
     var a = new Float32Array(TILE * TILE);
     var r = rng(kind === 'fine' ? 11 : kind === 'coarse' ? 23 : kind === 'chalk' ? 37 : 51);
     if (kind === 'fine') {        // drawing paper: 2-4 px grain
-      _noise(TILE, 256, r, a, 0.38); _noise(TILE, 128, r, a, 0.34); _noise(TILE, 64, r, a, 0.18); _noise(TILE, 16, r, a, 0.10);
+      _noise(TILE, 256, r, a, 0.42); _noise(TILE, 128, r, a, 0.36); _noise(TILE, 64, r, a, 0.22);
     } else if (kind === 'coarse') { // crayon on cartridge paper: 6-10 px bumps
-      _noise(TILE, 64, r, a, 0.46); _noise(TILE, 128, r, a, 0.30); _noise(TILE, 256, r, a, 0.12); _noise(TILE, 24, r, a, 0.12);
+      _noise(TILE, 128, r, a, 0.44); _noise(TILE, 64, r, a, 0.36); _noise(TILE, 256, r, a, 0.20);
     } else if (kind === 'chalk') {  // pastel paper: sharp speckle
       _noise(TILE, 256, r, a, 0.50); _noise(TILE, 128, r, a, 0.28); _noise(TILE, 48, r, a, 0.22);
     } else {                        // watercolour granulation
-      _noise(TILE, 128, r, a, 0.5); _noise(TILE, 32, r, a, 0.3); _noise(TILE, 256, r, a, 0.2);
+      _noise(TILE, 128, r, a, 0.5); _noise(TILE, 64, r, a, 0.25); _noise(TILE, 256, r, a, 0.25);
     }
     _teeth[kind] = _equalise(a);
     return _teeth[kind];
@@ -474,7 +474,7 @@ var ArtBrush = (function () {
           fx.globalAlpha = 1; fx.drawImage(pc, 0, 0);
         }
         // 5. granulation: pigment settles in the paper's valleys
-        fx.globalAlpha = 0.45;
+        fx.globalAlpha = 0.3;
         fx.globalCompositeOperation = 'destination-out';
         var gp = fx.createPattern(toothTile('gran', '#000000', 0.45, 0.95), 'repeat');
         fx.save(); fx.translate(-R.x, -R.y); fx.fillStyle = gp; fx.fillRect(R.x, R.y, W, H); fx.restore();

@@ -479,3 +479,5 @@ i.m { background: var(--pl-ok); } i.s { background: #f0b35a; } i.u { background:
 .pl-fig-grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
 @media (min-width: 760px) { .pl-knot-grid { grid-template-columns: repeat(6, 1fr); } .pl-buoys { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 520px) { .pl-fig-grid { grid-template-columns: repeat(2, 1fr); padding: 8px; gap: 8px; } .pl-knot-grid { grid-template-columns: repeat(3, 1fr); } .pl-knot-grid .pl-card-s { display: none; } }
+@media (max-width: 520px) { .pl-wide { display: none; } }
+.feedback-float { font-size: 46px; top: 30%; }

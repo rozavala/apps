@@ -110,6 +110,13 @@
   /* ---------------- helpers ---------------- */
   function $(id){ return document.getElementById(id); }
   function esc(s){ return typeof escHtml === 'function' ? escHtml(s) : String(s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // Options like "a y c correctas" or "Todas las anteriores" point at other
+  // options by position, so those questions keep their original order.
+  var POSITIONAL = /\b[a-d] y [a-d]\b|anteriores|todas (son )?correctas|ninguna de/i;
+  function orderFor(q){
+    var idx = q.o.map(function(_, i){ return i; });
+    return q.o.some(function(t){ return POSITIONAL.test(t); }) ? idx : shuffle(idx);
+  }
   function shuffle(arr){ var a = arr.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function ic(n, cls){ return ART ? ART.icon(n, cls) : ''; }
   function mmss(s){ s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
@@ -300,7 +307,7 @@
     /* ----------------------- MOTOR DE QUIZ (práctica / repaso) ----------------------- */
     launch: function(questions, opts){
       var prepared = questions.map(function(q){
-        var sh = shuffle(q.o.map(function(_, i){ return i; }));
+        var sh = orderFor(q);
         return { id: q.id, mod: q.mod, cat: q.cat, q: q.q, e: q.e, o: sh.map(function(i){ return q.o[i]; }), a: sh.indexOf(q.a) };
       });
       this.quiz = { qs: prepared, i: 0, correct: 0, answers: [], opts: opts, answeredCurrent: false };
@@ -520,7 +527,7 @@
     },
     startExam: function(){
       var qs = this.examPool().map(function(q){
-        var sh = shuffle(q.o.map(function(_, i){ return i; }));
+        var sh = orderFor(q);
         return { id: q.id, mod: q.mod, cat: q.cat, q: q.q, e: q.e, o: sh.map(function(i){ return q.o[i]; }), a: sh.indexOf(q.a) };
       });
       this.exam = { qs: qs, pick: qs.map(function(){ return -1; }), flag: qs.map(function(){ return false; }), i: 0, start: Date.now(), done: false };

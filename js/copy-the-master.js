@@ -642,7 +642,6 @@ var CopyMaster = (function () {
       var t = comp.tools;
       if (t === 'shapes') state.kit.useShape('line', 'oil');
       else if (t) state.kit.setTool(t);
-      if (window.innerWidth < 600) { var n = wrap.querySelector('.cm-note'); if (n) n.open = false; }
     });
     wrap.querySelector('.cm-play').addEventListener('click', function (e) {
       var b = e.target.closest('[data-cmact]');

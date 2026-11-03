@@ -1047,7 +1047,7 @@ const ArtStudio = (() => {
       '</div>';
     play.querySelector('.mxc').addEventListener('click', onMixClick);
     play.querySelector('.mxc').addEventListener('input', e => {
-      if (e.target.matches('.mxc-ratio input')) { M.t = +e.target.value; renderMixResult(false); }
+      if (e.target.matches('.mxc-ratio input')) { M.t = +e.target.value; renderMixResult(false); const m = document.querySelector('#learn-play .mxc-msg'); if (m) { m.textContent = ''; m.className = 'mxc-msg'; } }
     });
     const over = play.querySelector('.lp-over');
     over.hidden = false;
@@ -1083,7 +1083,8 @@ const ArtStudio = (() => {
     const out = document.querySelector('#learn-play .mxc .mx-out');
     if (!out) return;
     const r = mixNow();
-    out.innerHTML = r ? blob(r, 'big' + (stir ? ' stir' : '')) : '<span class="mx-empty big">?</span>';
+    // the result stays hidden until "Mix!" so the kid has to predict it
+    out.innerHTML = r && stir ? blob(r, 'big stir') : '<span class="mx-empty big">?</span>';
     if (stir && r) out.firstChild.style.setProperty('--a', MIX_PAINTS[M.a].hex), out.firstChild.style.setProperty('--b', MIX_PAINTS[M.b].hex);
   }
   function onMixClick(e) {
