@@ -767,7 +767,7 @@ var EuclidWorkshop = (function() {
       var th = th0 + TAU * sweep;
       var lift = reduceMotion ? 0 : (t < 0.4 ? (0.4 - t) * 60 : (t > 3.6 && t < 4.4 ? Math.min(1, (t - 3.6) / 0.4) * 18 : (t >= 4.4 ? 18 : 0)));
       var alpha = reduceMotion ? 1 : (t >= 4.4 ? Math.max(0, 1 - (t - 4.4) / 0.6) : (t < 0.4 ? t / 0.4 : 1));
-      ART.drawCompass(g, B[0], B[1], B[0] + Math.cos(th) * r, B[1] + Math.sin(th) * r, { alpha: alpha, lift: lift });
+      ART.drawCompass(g, B[0], B[1], B[0] + Math.cos(th) * r, B[1] + Math.sin(th) * r, { alpha: alpha, lift: lift, minLeg: 118 * Math.min(1, s * 1.15) });
       // straightedge and pencil resting on the sheet
       ART.drawStraightedge(g, w * 0.06, h * 0.86, w * 0.42, h * 0.97, { dpr: dpr, pad: 0 });
       ART.drawPencil(g, w * 0.78, h * 0.86, { angle: -0.4 });
@@ -1652,9 +1652,7 @@ var EuclidWorkshop = (function() {
                : '<button type="button" class="ew-btn ew-btn-primary" data-act="home">All challenges</button>') +
       '</div></div>';
     side.innerHTML = h;
-    if (window.innerWidth < 900) {
-      setTimeout(function() { var el = side.querySelector('.ew-result'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }, 2600);
-    }
+
   }
 
   function buildReplay() {
@@ -1766,7 +1764,16 @@ var EuclidWorkshop = (function() {
     var R = G && G.replay;
     if (!R) return;
     if (R.i >= 0) R.done = R.i + 1;
-    if (R.done >= R.steps.length) { R.i = R.steps.length; markStep(-1); dirty = true; return; }
+    if (R.done >= R.steps.length) {
+      R.i = R.steps.length; markStep(-1); dirty = true;
+      if (!R.scrolled && window.innerWidth < 900) {
+        // on narrow screens the result card sits below the sheet: bring it up once the replay ends
+        R.scrolled = true;
+        var el = document.querySelector('.ew-result');
+        if (el && el.scrollIntoView) setTimeout(function() { el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }, 700);
+      }
+      return;
+    }
     if (R.waiting) return;
     R.waiting = true;
     setTimeout(function() {

@@ -170,7 +170,7 @@ var EuclidArt = (function() {
     var alpha = o.alpha == null ? 1 : o.alpha;
     if (alpha <= 0) return;
     var r = Math.hypot(px - cx, py - cy);
-    var L = Math.max(118, r * 0.56 + 26);           // leg length on screen
+    var L = Math.max(o.minLeg || 118, r * 0.56 + 26);           // leg length on screen
     var half = r / 2, z = Math.sqrt(Math.max(L * L - half * half, 0));
     var lift = o.lift || 0;                          // raise the whole tool (for put-down/lift)
     var mx = (cx + px) / 2, my = (cy + py) / 2;
