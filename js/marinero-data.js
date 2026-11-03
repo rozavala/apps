@@ -127,7 +127,7 @@ var MarineroData = (function() {
       ]
     },
     {
-      id: 'rolling', en: 'Rolling hitch', es: 'Vuelta de rezón', tier: 'older',
+      id: 'rolling', en: 'Rolling hitch', es: 'Ballestrinque con vuelta extra', tier: 'older',
       scene: 'post', W: 36, view: [140, 70, 720], post: { x: 500, r: 62, top: 70 },
       ropes: [{ color: 'red', start: 'none', end: 'whip', pts: [
         [-90, 600, 1], [150, 500, 1], [330, 380, 1], [400, 342, 1], [440, 330, 1], [500, 352, 1], [560, 384, 1],
@@ -160,6 +160,150 @@ var MarineroData = (function() {
     }
   ];
 
+  /* What each knot is for, common mistakes and a quick check question. */
+  var KNOT_INFO = {
+    fig8: {
+      use: 'A stopper knot. Tie it in the end of a sheet or halyard so the rope cannot run out through a block or fairlead.',
+      useEs: 'Nudo de tope: en el chicote, para que el cabo no se escape por un motón o una guía.',
+      mistakes: ['Tying a plain overhand knot instead — it is smaller and jams tight.',
+        'Leaving the tail too short. Leave about a thumb’s length.',
+        'Not dressing it: pull it snug so the 8 shape is neat.'],
+      q: 'What is the figure-eight knot for on a boat?',
+      opts: ['Stopping a rope from running out through a block', 'Tying the boat to a post', 'Joining two ropes together', 'Making a loop to throw'] },
+    reef: {
+      use: 'Ties two ends of the same rope together — sailors use it to tie in a reef (to bundle part of a sail). Not for joining two ropes that will take a big pull.',
+      useEs: 'Une dos chicotes del mismo cabo; se usa para tomar rizos en las velas.',
+      rhyme: 'Right over left and under, then left over right and under.',
+      mistakes: ['The granny knot: crossing the same way twice. The parts come out on opposite sides and it slips or jams.',
+        'Using it to join two different ropes under strain — use a sheet bend for that.'],
+      q: 'How can you tell a reef knot from a granny knot?',
+      opts: ['Each rope’s two parts lie side by side, on the same side of the other loop', 'A reef knot has three loops', 'Both ends point upwards', 'A reef knot uses only one end'] },
+    bowline: {
+      use: 'Makes a fixed loop that will not slip or tighten — for a mooring line over a bollard, or to tie a halyard to a sail.',
+      useEs: 'Forma una gaza fija que no se corre; por ejemplo, para afirmar la driza al puño de la vela.',
+      mistakes: ['Making the small loop with the working side underneath — then the knot just pulls out.',
+        'The rabbit going around the tree the wrong way: the knot falls apart.',
+        'Leaving too short a tail. Leave a good hand’s width.'],
+      q: 'What does a bowline give you?',
+      opts: ['A fixed loop that does not slip', 'A way to join two ropes', 'A stopper at the end of a rope', 'A hitch that grips along a pole'] },
+    sheet: {
+      use: 'Joins two ropes, even of different thickness. Make the bend (U) in the thicker rope.',
+      useEs: 'Une dos cabos, incluso de distinto grosor (el seno se hace en el más grueso).',
+      mistakes: ['Tucking the end under the bend instead of under itself — it slips.',
+        'Making the bend in the thinner rope. Use the thicker one.',
+        'Both short ends should finish on the same side of the knot.'],
+      q: 'When do you use a sheet bend?',
+      opts: ['To join two ropes of different thickness', 'To stop a rope running through a block', 'To make a fixed loop', 'To grip a pole lengthways'] },
+    clove: {
+      use: 'A quick hitch around a post or rail — for example to hang a fender, or to start a lashing.',
+      useEs: 'Sujeta un cabo a un poste o barandilla; sirve para colgar una defensa o empezar un amarre.',
+      mistakes: ['It can work loose if the pull keeps changing direction — add a half hitch for safety.',
+        'Taking the second turn without crossing over the first: then it is just two turns and it slides off.'],
+      q: 'What does a clove hitch look like from the front?',
+      opts: ['An X crossing over the post', 'A figure 8', 'A fixed loop', 'Two ropes lying side by side'] },
+    roundturn: {
+      use: 'Ties a mooring line to a ring, post or rail. The round turn takes the strain and the two half hitches lock it. You can untie it even while it is pulling.',
+      useEs: 'Amarra un cabo a una argolla, bita o poste. La vuelta redonda aguanta y los dos medios cotes aseguran.',
+      mistakes: ['Only one turn: a round turn goes all the way around twice.',
+        'Making the two half hitches in opposite directions. Make both the same way.'],
+      q: 'Which part takes most of the strain?',
+      opts: ['The round turn around the post', 'The two half hitches', 'The tail end', 'Nothing, it is decoration'] },
+    rolling: {
+      use: 'Grips a pole or another rope and holds against a pull ALONG it — for example to take the strain off a jammed sheet.',
+      useEs: 'Agarra un palo u otro cabo y aguanta un tirón A LO LARGO de él.',
+      mistakes: ['Putting the two gripping turns on the wrong side — they go on the side the pull comes from.',
+        'Leaving it loose: it only grips once it is pulled tight.'],
+      q: 'What is special about the rolling hitch?',
+      opts: ['It holds against a pull along the pole or rope', 'It makes a fixed loop', 'It joins two ropes', 'It is a stopper knot'] },
+    cleat: {
+      use: 'Makes a dock line fast to a horn cleat — quick to tie and quick to let go.',
+      useEs: 'Hace firme un cabo en una cornamusa: rápido de hacer y de largar.',
+      mistakes: ['Starting on the near horn — lead to the far horn first.',
+        'Piling on extra turns and hitches. One figure eight and one locking hitch is enough.',
+        'The locking hitch must lie neatly beside the turn under it.'],
+      q: 'Where does the line go first on a cleat?',
+      opts: ['Around the far horn', 'Around the near horn', 'Straight across the middle', 'Through a hole in the deck'] }
+  };
+
+  /* ---------------- COMPASS ---------------- */
+  var POINT_ES = {
+    N: 'Norte', NNE: 'Nornoreste', NE: 'Noreste', ENE: 'Estenoreste', E: 'Este', ESE: 'Estesureste',
+    SE: 'Sureste', SSE: 'Sursureste', S: 'Sur', SSW: 'Sursuroeste', SW: 'Suroeste', WSW: 'Oestesuroeste',
+    W: 'Oeste', WNW: 'Oestenoroeste', NW: 'Noroeste', NNW: 'Nornoroeste'
+  };
+  var POINT_EN = {
+    N: 'North', NNE: 'North-northeast', NE: 'Northeast', ENE: 'East-northeast', E: 'East', ESE: 'East-southeast',
+    SE: 'Southeast', SSE: 'South-southeast', S: 'South', SSW: 'South-southwest', SW: 'Southwest', WSW: 'West-southwest',
+    W: 'West', WNW: 'West-northwest', NW: 'Northwest', NNW: 'North-northwest'
+  };
+  // The 32 points of the mariner's compass, every 11.25°.
+  var POINTS32 = ['N', 'N by E', 'NNE', 'NE by N', 'NE', 'NE by E', 'ENE', 'E by N', 'E', 'E by S', 'ESE', 'SE by E',
+    'SE', 'SE by S', 'SSE', 'S by E', 'S', 'S by W', 'SSW', 'SW by S', 'SW', 'SW by W', 'WSW', 'W by S',
+    'W', 'W by N', 'WNW', 'NW by W', 'NW', 'NW by N', 'NNW', 'N by W'];
+
+  /* ---------------- BUOYS (IALA Region B — Chile) ---------------- */
+  var BUOYS = [
+    { id: 'stbd', en: 'Starboard-hand mark', es: 'Marca lateral de estribor', shape: 'Red · cone shape · red cone on top',
+      pass: 'Entering port: keep it on your STARBOARD side (right). “Red to starboard coming in.”',
+      light: 'Red light (if lit).', tier: 1 },
+    { id: 'port', en: 'Port-hand mark', es: 'Marca lateral de babor', shape: 'Green · can (cylinder) shape · green can on top',
+      pass: 'Entering port: keep it on your PORT side (left).',
+      light: 'Green light (if lit).', tier: 1 },
+    { id: 'north', en: 'North cardinal', es: 'Cardinal norte', shape: 'Black over yellow · both cones point UP',
+      pass: 'The safe water is to the NORTH of it — pass on its north side.',
+      light: 'White, quick flashes without stopping.', tier: 3 },
+    { id: 'east', en: 'East cardinal', es: 'Cardinal este', shape: 'Black-yellow-black · cones base to base',
+      pass: 'Pass on its EAST side.',
+      light: 'White, 3 quick flashes — like 3 o’clock.', tier: 3 },
+    { id: 'south', en: 'South cardinal', es: 'Cardinal sur', shape: 'Yellow over black · both cones point DOWN',
+      pass: 'Pass on its SOUTH side.',
+      light: 'White, 6 quick flashes and a long one — like 6 o’clock.', tier: 3 },
+    { id: 'west', en: 'West cardinal', es: 'Cardinal oeste', shape: 'Yellow-black-yellow · cones point to point',
+      pass: 'Pass on its WEST side.',
+      light: 'White, 9 quick flashes — like 9 o’clock.', tier: 3 },
+    { id: 'danger', en: 'Isolated danger', es: 'Peligro aislado', shape: 'Black with a red band · two black balls on top',
+      pass: 'A rock or wreck RIGHT HERE, with safe water all around it. Keep well clear.',
+      light: 'White, flashes in groups of 2.', tier: 2 },
+    { id: 'safe', en: 'Safe water', es: 'Aguas seguras', shape: 'Red and white stripes (up and down) · one red ball on top',
+      pass: 'Safe water all around — it often marks the way in to a channel (a landfall buoy, “boya de recalada”).',
+      light: 'White: a long flash every 10 seconds (or other slow rhythms).', tier: 2 },
+    { id: 'special', en: 'Special mark', es: 'Marca especial', shape: 'Yellow · a yellow X on top',
+      pass: 'Marks a special area or thing — for example a cable, a pipeline or a racing area. Check the chart.',
+      light: 'Yellow light.', tier: 2 }
+  ];
+
+  /* ---------------- SIGNAL FLAGS (International Code of Signals) ----------------
+     Single-flag meanings as given in the International Code of Signals.
+     R has no single-flag meaning in the current code. */
+  var FLAGS = [
+    ['A', 'Alfa', 'I have a diver down; keep well clear at slow speed.'],
+    ['B', 'Bravo', 'I am taking in, unloading or carrying dangerous goods.'],
+    ['C', 'Charlie', 'Yes (affirmative).'],
+    ['D', 'Delta', 'Keep clear of me; I am manoeuvring with difficulty.'],
+    ['E', 'Echo', 'I am altering my course to starboard.'],
+    ['F', 'Foxtrot', 'I am disabled; communicate with me.'],
+    ['G', 'Golf', 'I require a pilot.'],
+    ['H', 'Hotel', 'I have a pilot on board.'],
+    ['I', 'India', 'I am altering my course to port.'],
+    ['J', 'Juliett', 'I am on fire and have dangerous cargo on board; keep well clear of me.'],
+    ['K', 'Kilo', 'I wish to communicate with you.'],
+    ['L', 'Lima', 'You should stop your vessel instantly.'],
+    ['M', 'Mike', 'My vessel is stopped and making no way through the water.'],
+    ['N', 'November', 'No (negative).'],
+    ['O', 'Oscar', 'Man overboard!'],
+    ['P', 'Papa', 'In harbour: everyone report on board — the vessel is about to sail.'],
+    ['Q', 'Quebec', 'My vessel is healthy and I request free pratique (permission to come ashore).'],
+    ['R', 'Romeo', ''],
+    ['S', 'Sierra', 'I am operating astern propulsion (going backwards).'],
+    ['T', 'Tango', 'Keep clear of me; I am engaged in pair trawling.'],
+    ['U', 'Uniform', 'You are running into danger.'],
+    ['V', 'Victor', 'I require assistance.'],
+    ['W', 'Whiskey', 'I require medical assistance.'],
+    ['X', 'X-ray', 'Stop carrying out your intentions and watch for my signals.'],
+    ['Y', 'Yankee', 'I am dragging my anchor.'],
+    ['Z', 'Zulu', 'I require a tug.']
+  ].map(function(f) { return { L: f[0], name: f[1], meaning: f[2] }; });
+
   /* ---------------- CHART (fictional practice bay) ----------------
      Coordinates in nautical miles from the chart's top-left corner:
      x east, y south. 1' of latitude = 1 NM. */
@@ -185,5 +329,5 @@ var MarineroData = (function() {
     ]
   };
 
-  return { KNOTS: KNOTS, CHART: CHART };
+  return { KNOTS: KNOTS, KNOT_INFO: KNOT_INFO, POINT_ES: POINT_ES, POINT_EN: POINT_EN, POINTS32: POINTS32, BUOYS: BUOYS, FLAGS: FLAGS, CHART: CHART };
 })();

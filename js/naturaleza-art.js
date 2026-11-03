@@ -390,80 +390,99 @@ var NaturalezaArt = (function() {
   // ---- Andean condor · Cóndor andino (adult male, perched on a crag) ----
   P.condor = function(k) {
     var r = k.rnd, s = '', bg = '', i;
-    var body = 'M140 122C170 100 240 98 296 120C330 134 352 160 362 190L368 214C340 210 310 208 290 212C262 220 222 226 196 222C160 216 134 196 128 168C125 152 130 134 140 122Z';
-    var wing = 'M152 116C208 98 282 106 328 138C352 156 368 190 376 228C352 218 312 208 272 204C226 198 186 190 166 174C152 162 146 136 152 116Z';
-    var panel = 'M176 150C214 136 272 140 322 164C336 176 342 190 336 199C308 197 264 195 230 189C202 184 182 175 176 165Z';
-    var defs = k.lg('cBody', 0.2, 0, 0.5, 1, [[0, '#3a3632'], [0.45, '#1c1a17'], [1, '#090807']]) +
-      k.lg('cWing', 0, 0, 0.7, 1, [[0, '#3b3631'], [0.5, '#181614'], [1, '#0a0908']]) +
-      k.lg('cSheen', 0, 0, 0, 1, [[0, '#9fb0c4', 0.35], [0.3, '#9fb0c4', 0], [1, '#000', 0]]) +
-      k.lg('cPanel', 0, 0, 0.25, 1, [[0, '#fbfaf6'], [0.55, '#e9e5dc'], [1, '#aaa496']]) +
-      k.rg('cRuff', 0.42, 0.38, 0.7, [[0, '#ffffff'], [0.7, '#f1eee8'], [1, '#c9c3b8']]) +
-      k.rg('cHead', 0.4, 0.35, 0.75, [[0, '#94625a'], [0.55, '#5e3e3a'], [1, '#2a1d1b']]) +
-      k.lg('cNeck', 0, 0, 1, 0, [[0, '#4a302c'], [0.5, '#6e4a44'], [1, '#3a2724']]) +
-      k.lg('cBeak', 0, 0, 1, 0.4, [[0, '#2c2826'], [0.5, '#6d655c'], [1, '#ece3cc']]) +
-      k.clip('cBodyC', body) + k.clip('cWingC', wing) + k.clip('cPanelC', panel);
+    var body = 'M120 156C130 138 156 130 196 130C250 128 306 132 344 146C368 156 384 172 392 192L396 214C366 216 336 216 306 218C268 224 228 228 198 226C160 222 132 206 122 186C116 174 116 164 120 156Z';
+    var wing = 'M146 146C186 130 246 130 298 138C338 144 370 160 392 184C400 194 404 204 404 214C378 214 340 212 300 210C250 208 206 204 180 196C160 188 148 174 146 160Z';
+    var defs = k.lg('cBody', 0.3, 0, 0.5, 1, [[0, '#35312d'], [0.45, '#1a1816'], [1, '#070606']]) +
+      k.lg('cWing', 0, 0, 0.6, 1, [[0, '#3a3530'], [0.35, '#1d1b18'], [1, '#0b0a09']]) +
+      k.lg('cSheen', 0, 0, 0, 1, [[0, '#a8b8cc', 0.32], [0.28, '#a8b8cc', 0], [1, '#000', 0]]) +
+      k.lg('cSec', 0, 0, 1, 1, [[0, '#ffffff'], [0.55, '#ebe8e1'], [1, '#a9a397']]) +
+      k.rg('cRuff', 0.38, 0.35, 0.7, [[0, '#ffffff'], [0.65, '#f0ede6'], [1, '#bdb6aa']]) +
+      k.rg('cHead', 0.45, 0.35, 0.75, [[0, '#7a5450'], [0.55, '#4a3432'], [1, '#241a19']]) +
+      k.lg('cNeck', 0, 0, 1, 0, [[0, '#3e2c2a'], [0.5, '#6a4a46'], [1, '#4a3532']]) +
+      k.lg('cBeak', 0, 0, 1, 0.5, [[0, '#f0e6cc'], [0.35, '#cbbf9f'], [0.7, '#5a524a'], [1, '#2a2624']]) +
+      k.lg('cLeg', 0, 0, 1, 0, [[0, '#8a847c'], [0.5, '#6a655e'], [1, '#4a4640']]) +
+      k.clip('cBodyC', body) + k.clip('cWingC', wing);
 
-    // habitat: snowy Andes far behind, a lichen-spotted crag below
-    bg += k.ridge(r, 'cR1', 196, 72, '#a3b7c8', 0.6, 0.9);
-    bg += k.ridge(r, 'cR2', 232, 38, '#93a68f', 0, 0.55);
-    bg += k.rock(r, 'cRock', 236, 230, 300, 70, ['#cfc5b3', '#978d7c', '#5c544a']);
-    bg += k.grass(r, 70, 130, 292, 26, 26, ['#7d8a4a', '#a3a35a', '#5e6b38']);
-    var shadowS = k.shadow(250, 238, 118, 8, 0.95);
-    var front = k.grass(r, 318, 390, 294, 26, 22, ['#7d8a4a', '#a3a35a', '#5e6b38']);
+    // habitat: snowy Andes far behind, a big lichen-spotted crag below
+    bg += k.ridge(r, 'cR1', 186, 74, '#a3b7c8', 0.6, 0.9);
+    bg += k.ridge(r, 'cR2', 226, 40, '#93a68f', 0, 0.55);
+    bg += k.rock(r, 'cRock', 214, 222, 330, 80, ['#cfc5b3', '#978d7c', '#5c544a']);
+    bg += k.grass(r, 20, 70, 296, 22, 26, ['#7d8a4a', '#a3a35a', '#5e6b38']);
+    var shadowS = k.shadow(222, 230, 150, 9, 0.95);
+    var front = k.grass(r, 340, 398, 296, 22, 22, ['#7d8a4a', '#a3a35a', '#5e6b38']);
 
-    // tail (short, dark, slightly fanned) peeking past the wing tips
-    s += k.p('M330 200L384 236L372 243L360 238L346 241L304 216Z', '#12100e');
-    s += k.sp('M340 212L378 238M330 210L362 240', '#34302b', 1);
-    // legs (thick, grey) mostly hidden by belly feathers
-    s += k.p('M198 214C198 224 197 232 196 238L210 238C211 230 212 222 212 214Z', '#6f6a64');
-    s += k.p('M226 214C227 224 228 231 228 239L240 239C240 231 240 223 240 214Z', '#5c5853');
-    s += k.sp('M197 224h14M197 231h14M227 226h12M227 233h12', 'rgba(30,25,20,.4)', 0.8);
-    s += k.foot(203, 238, '#56514c', 1.7, -1) + k.foot(233, 239, '#4c4843', 1.6, -1);
-    // body + plumage strokes
+    // short wedge tail, mostly hidden under the primaries
+    s += k.p('M336 204L404 230L398 240L384 238L372 243L322 220Z', '#100e0c');
+    s += k.sp('M344 212L398 236M334 214L384 240', '#34302b', 1);
+    // legs: black-feathered thighs, short heavy grey tarsi, long toes
+    s += k.p('M196 226L212 238L222 238L226 228L250 230L256 240L266 240L268 228Z', '#0c0b0a');
+    s += k.p('M208 222C208 230 207 236 206 242L220 242C221 236 222 230 222 222Z', k.U('cLeg'));
+    s += k.p('M244 222C244 230 244 236 244 243L257 243C257 236 257 230 258 222Z', k.U('cLeg'));
+    s += k.sp('M207 230h14M207 236h14M244 231h13M244 237h13', 'rgba(30,25,20,.45)', 0.8);
+    var toes = function(x, y) {
+      var d = 'M' + x + ' ' + y + 'q-8 1 -18 3M' + x + ' ' + y + 'q-6 3 -14 7M' + x + ' ' + y + 'q-2 3 -4 8M' + (x + 4) + ' ' + y + 'q5 2 9 4';
+      return k.sp(d, '#5a554e', 4.2) + k.sp(d, '#8a847a', 1.2, 'transform="translate(0 -1)"') +
+        k.circ(x - 18, y + 3, 1.8, '#1e1a16') + k.circ(x - 14, y + 7, 1.8, '#1e1a16') + k.circ(x - 4, y + 8, 1.8, '#1e1a16');
+    };
+    s += toes(212, 242) + toes(250, 243);
+    // heavy body
     s += k.p(body, k.U('cBody'));
-    s += k.g(k.hatch(r, { cx: 200, cy: 196, rx: 80, ry: 30, n: 160, len: 9, ang: 70, jit: 30, curve: 0.3, cols: ['#4a443e', '#2d2925', '#000'], w: 1, op: 0.7 }), 'clip-path="' + k.U('cBodyC') + '"');
-    // folded wing
+    s += k.g(k.hatch(r, { cx: 190, cy: 200, rx: 80, ry: 26, n: 200, len: 8, ang: 75, jit: 30, curve: 0.3, cols: ['#4a443e', '#2d2925', '#000'], w: 1, op: 0.75 }) +
+      k.el(150, 176, 34, 30, '#5a544c', 'opacity=".18"'), 'clip-path="' + k.U('cBodyC') + '"');
+    // massive folded wing, built in feather tracts
     s += k.p(wing, k.U('cWing'));
-    s += k.g(k.scallops(r, { x0: 164, x1: 310, y0: 112, rows: 4, dx: 14, dy: 9, r: 7, fill: '#221f1c', edge: '#57504a', ew: 0.9, eop: 0.45, jit: 3, rowShift: 7 }), 'clip-path="' + k.U('cWingC') + '"');
-    // the white wing panel (upper side of the secondaries)
-    s += k.p(panel, k.U('cPanel'));
-    var pf = '';
-    for (i = 0; i < 10; i++) {
-      var x = 186 + i * 15;
-      pf += 'M' + x + ' ' + (146 + i * 2) + 'C' + (x + 9) + ' ' + (160 + i * 1.5) + ' ' + (x + 18) + ' ' + (176 + i) + ' ' + (x + 24) + ' ' + (196 + i * 0.3);
+    var wf = '';
+    // broad white panel: secondaries' upper surfaces, tips ragged along the lower edge
+    wf += k.p('M166 150C210 144 262 148 306 158C318 170 320 186 314 198C282 201 240 200 206 195C186 191 172 180 166 166Z', k.U('cSec'));
+    for (i = 0; i < 12; i++) {
+      var t = i / 11, bx = 168 + t * 132, by = 154 + t * 8;
+      wf += k.feather(bx, by, 50 + t * 10, 8.5, 38 - t * 14, k.U('cSec'), '#a39d91');
     }
-    s += k.g(k.sp(pf, '#9d978b', 1, 'opacity=".7"') + k.hatch(r, { cx: 255, cy: 172, rx: 80, ry: 20, n: 110, len: 7, ang: 30, jit: 16, cols: ['#c4beb2', '#fff'], w: 0.7, op: 0.7 }), 'clip-path="' + k.U('cPanelC') + '"');
-    // ragged lower edge of the panel: tips of the dark feathers below
-    var tips = '';
-    for (i = 0; i < 9; i++) {
-      var tx = 200 + i * 15, ty = 186 + i * 1.6;
-      tips += 'M' + tx + ' ' + (ty + 8) + 'Q' + (tx + 4) + ' ' + (ty - 2) + ' ' + (tx + 14) + ' ' + (ty + 2) + 'L' + (tx + 16) + ' ' + (ty + 10) + 'Z';
-    }
-    s += k.p(tips, '#1a1816');
-    // primaries: long black flight feathers crossing over the tail
-    for (i = 0; i < 6; i++) {
-      s += k.feather(244 + i * 9, 190 + i * 2.5, 128 - i * 11, 9, 16 - i * 1.5, i % 2 ? '#121110' : '#1a1715', '#2c2824');
+    // greater coverts: white with grey-shaded tips, overlapping the secondaries
+    wf += k.featherRow(r, 164, 150, 296, 158, 13, 22, 6, 24, '#f6f4ee', '#9d978b', 1);
+    // median coverts (black) giving a feathery black/white border
+    wf += k.featherRow(r, 154, 142, 292, 149, 14, 15, 5, 18, '#1d1b18', '#4c4740', 1);
+    // lesser coverts: small black scallops along the top of the wing
+    wf += k.scallops(r, { x0: 150, x1: 300, y0: 134, rows: 2, dx: 11, dy: 6, r: 5, fill: '#24211e', edge: '#55504a', ew: 0.8, eop: 0.45, jit: 2, rowShift: 5 });
+    s += k.g(wf, 'clip-path="' + k.U('cWingC') + '"');
+    // long black primaries crossing over the tail, tips splayed into "fingers"
+    var prim = [[252, 192, 146, 7], [260, 195, 138, 11], [268, 198, 128, 15], [276, 201, 116, 19.5], [284, 204, 104, 24], [292, 206, 90, 29]];
+    for (i = 0; i < prim.length; i++) {
+      var q = prim[i];
+      s += k.feather(q[0], q[1], q[2], 8.5, q[3], i % 2 ? '#121110' : '#191715', '#3a3630');
+      s += '<g ' + k.tr(q[0], q[1], q[3]) + '>' + k.sp('M' + (q[2] * 0.55) + ' -3L' + (q[2] * 0.97) + ' -0.5', '#4e4943', 0.8, 'opacity=".7"') + '</g>';
     }
     s += k.p(wing, k.U('cSheen'));
-    s += k.p(body, k.U('cSheen'), 'opacity=".7"');
-    // fluffy white ruff
-    s += k.p(k.fluff(r, 140, 124, 31, 22, -28, 26, 0.22), k.U('cRuff'));
-    s += k.hatch(r, { cx: 140, cy: 124, rx: 26, ry: 18, n: 70, len: 6, ang: 0, angFn: function(x, y) { return Math.atan2(y - 124, x - 140) * 180 / Math.PI + 30; }, jit: 40, curve: 0.5, cols: ['#bdb7ac', '#d8d3ca'], w: 0.8, op: 0.8 });
-    s += k.p(k.fluff(r, 150, 136, 20, 7, -25, 12, 0.2), '#a29c90', 'opacity=".35"');
-    // bare wrinkled neck and head
-    s += k.p('M134 116C124 104 114 96 106 92L90 106C100 114 110 124 122 132Z', k.U('cNeck'));
-    s += k.sp('M108 100q5 6 4 13M116 104q4 6 3 12M100 106q5 4 6 9M124 110q3 5 1 10', '#93685f', 1, 'opacity=".7"');
-    s += k.el(94, 95, 23, 16, k.U('cHead'), 'transform="rotate(-10 94 95)"');
-    // comb (caruncle) of the male
-    s += k.p('M70 90C72 79 80 74 89 76C93 69 102 69 106 76C112 75 116 81 112 87C100 85 86 87 70 92Z', '#382624');
-    s += k.sp('M75 87C79 81 86 79 92 80C96 76 102 76 106 81', '#6b4a44', 1.3, 'opacity=".8"');
-    s += k.sp('M86 103q6 3 13 1M90 109q6 2 13-1M102 88q4 3 9 2', '#2a1c1a', 0.9, 'opacity=".55"');
-    // hooked beak
-    s += k.p('M76 91C69 91 62 94 57 100C55 104 57 108 60 106C61 103 63 102 66 102C72 102 77 101 80 99Z', k.U('cBeak'));
-    s += k.p('M63 103C67 104 74 104 79 101L79 104C74 107 66 107 62 106Z', '#3b3531');
-    s += k.sp('M65 95q6-2 12-2', 'rgba(255,255,255,.45)', 0.8);
-    s += k.circ(76, 96, 1.3, '#120c0b');
-    s += k.eye(91, 92, 3.3, '#6a3a1e', { ring: '#2b1c1a', ringR: 1.5 });
+    s += k.sp('M150 145C190 131 250 131 300 139C336 145 366 160 386 180', 'rgba(255,255,255,.16)', 2.4);
+    s += k.p(body, k.U('cSheen'), 'opacity=".6"');
+    // dense white ruff
+    s += k.p(k.fluff(r, 134, 142, 34, 26, -28, 30, 0.24), k.U('cRuff'));
+    var curls = '';
+    for (i = 0; i < 70; i++) {
+      var a = r() * Math.PI * 2, rr = 0.75 + r() * 0.35;
+      var x0 = 134 + Math.cos(a) * 32 * rr, y0 = 142 + Math.sin(a) * 24 * rr;
+      curls += 'M' + k.n(x0) + ' ' + k.n(y0) + 'q' + k.n(Math.cos(a + 1.4) * 3) + ' ' + k.n(Math.sin(a + 1.4) * 3) + ' ' + k.n(Math.cos(a) * 3.5) + ' ' + k.n(Math.sin(a) * 3.5);
+    }
+    s += k.sp(curls, '#ffffff', 3) + k.sp(curls, '#b4ada2', 0.7, 'opacity=".5" transform="translate(1 1.5)"');
+    s += k.hatch(r, { cx: 140, cy: 150, rx: 22, ry: 14, n: 50, len: 5, ang: 0, angFn: function(x, y) { return Math.atan2(y - 142, x - 134) * 180 / Math.PI + 40; }, jit: 40, curve: 0.5, cols: ['#bcb5aa', '#d8d3ca'], w: 0.8, op: 0.8 });
+    // bare, wrinkled neck and head
+    s += k.p('M128 130C118 120 108 116 98 114L92 136C102 138 112 140 122 146Z', k.U('cNeck'));
+    s += k.sp('M104 118q3 8 1 16M112 120q3 8 1 16M120 124q2 7 0 14', '#2a1c1a', 1, 'opacity=".55"');
+    s += k.p('M104 116C100 108 90 104 80 106C70 108 64 114 62 120L62 132C68 138 80 140 92 138C102 136 108 128 104 116Z', k.U('cHead'));
+    s += k.sp('M70 128q8 4 18 2M74 133q8 3 16 1M92 122q5 4 10 2M88 112q6 2 12 1', '#1c1312', 0.9, 'opacity=".55"');
+    s += k.sp('M71 127q8 4 18 2M90 121q5 4 10 2', '#9a706a', 0.7, 'opacity=".5" transform="translate(0 -1.2)"');
+    // wattle under the throat
+    s += k.p('M80 138C82 146 88 150 94 146C92 142 90 139 88 137Z', '#3a2826');
+    // male comb (caruncle): flat, fleshy, wavy-edged
+    s += k.p('M62 116C62 104 68 98 76 98C80 92 88 92 92 97C97 93 104 96 104 102C106 106 104 110 100 111C88 110 74 112 62 120Z', '#2e2220');
+    s += k.sp('M64 112C66 104 72 100 77 100C81 95 87 95 91 99C96 96 101 98 102 102', '#6a4a44', 1.4, 'opacity=".85"');
+    // heavy hooked beak: dark base, pale ivory hook
+    s += k.p('M66 114C58 114 50 116 45 121C41 125 40 131 42 136C44 139 46 138 46 135C47 131 50 129 54 129C60 129 66 128 68 126Z', k.U('cBeak'));
+    s += k.p('M48 131C54 132 62 131 68 128L68 132C62 135 54 136 49 134Z', '#2e2a27');
+    s += k.sp('M64 117C57 117 50 119 46 124', 'rgba(255,255,255,.55)', 0.9);
+    s += k.el(58, 121, 2.4, 1.3, '#120c0b');
+    s += k.eye(78, 118, 3.4, '#6a3a1e', { ring: '#1e1514', ringR: 1.5 });
+    s = '<g transform="translate(225 236) scale(.92) translate(-225 -236)">' + s + '</g>';
     return { wash: '#b7c7cf', defs: defs, bg: bg, shadow: shadowS, fg: s, front: front };
   };
 
