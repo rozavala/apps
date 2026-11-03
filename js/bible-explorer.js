@@ -51,7 +51,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'What did God compare Abraham\'s descendants to?', es: '¿Con qué comparó Dios a los descendientes de Abrahán?' },
-          options: { en: ['Stars','Mountains','Trees','Fish'], es: ['Estrellas','Montañas','Árboles','Peces'] }, answer: 0 }
+          options: { en: ['Stars','Mountains','Trees','Fish'], es: ['Estrellas','Montañas','Árboles','Peces'] }, answer: 0 },
+        { q: { en: 'What is Abraham called?', es: '¿Cómo se llama a Abrahán?' },
+          options: { en: ['The father of faith','The king of Egypt','A Roman soldier','The builder of the ark'], es: ['El padre de la fe','El rey de Egipto','Un soldado romano','El constructor del arca'] }, answer: 0 }
       ]
     },
     {
@@ -91,7 +93,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'What did Solomon ask for?', es: '¿Qué pidió Salomón?' },
-          options: { en: ['Gold','Power','Wisdom','Long life'], es: ['Oro','Poder','Sabiduría','Larga vida'] }, answer: 2 }
+          options: { en: ['Gold','Power','Wisdom','Long life'], es: ['Oro','Poder','Sabiduría','Larga vida'] }, answer: 2 },
+        { q: { en: 'Whose son was Solomon?', es: '¿De quién era hijo Salomón?' },
+          options: { en: ['Moses','David','Saul','Aaron'], es: ['Moisés','David','Saúl','Aarón'] }, answer: 1 }
       ]
     },
     {
@@ -117,7 +121,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'How long was Jonah in the fish?', es: '¿Cuánto tiempo estuvo Jonás en el pez?' },
-          options: { en: ['One day','Three days','Seven days','Forty days'], es: ['Un día','Tres días','Siete días','Cuarenta días'] }, answer: 1 }
+          options: { en: ['One day','Three days','Seven days','Forty days'], es: ['Un día','Tres días','Siete días','Cuarenta días'] }, answer: 1 },
+        { q: { en: 'Where did God tell Jonah to preach?', es: '¿Adónde le dijo Dios a Jonás que predicara?' },
+          options: { en: ['Nineveh','Jerusalem','Rome','Bethlehem'], es: ['Nínive','Jerusalén','Roma','Belén'] }, answer: 0 }
       ]
     },
     {
@@ -129,7 +135,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'Who foretold a Saviour?', es: '¿Quién anunció un Salvador?' },
-          options: { en: ['Isaiah','Jeremiah','Ezekiel','Daniel'], es: ['Isaías','Jeremías','Ezequiel','Daniel'] }, answer: 0 }
+          options: { en: ['Isaiah','Jeremiah','Ezekiel','Daniel'], es: ['Isaías','Jeremías','Ezequiel','Daniel'] }, answer: 0 },
+        { q: { en: 'Who wept for Jerusalem?', es: '¿Quién lloró por Jerusalén?' },
+          options: { en: ['Jeremiah','Isaiah','Ezekiel','Daniel'], es: ['Jeremías','Isaías','Ezequiel','Daniel'] }, answer: 0 }
       ]
     },
     {
@@ -141,7 +149,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'Which angel visited Mary?', es: '¿Qué ángel visitó a María?' },
-          options: { en: ['Michael','Raphael','Gabriel','Uriel'], es: ['Miguel','Rafael','Gabriel','Uriel'] }, answer: 2 }
+          options: { en: ['Michael','Raphael','Gabriel','Uriel'], es: ['Miguel','Rafael','Gabriel','Uriel'] }, answer: 2 },
+        { q: { en: 'In which town did the angel visit Mary?', es: '¿En qué pueblo visitó el ángel a María?' },
+          options: { en: ['Nazareth','Bethlehem','Jerusalem','Cana'], es: ['Nazaret','Belén','Jerusalén','Caná'] }, answer: 0 }
       ]
     },
     {
@@ -181,7 +191,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'What prayer did Jesus teach here?', es: '¿Qué oración enseñó Jesús aquí?' },
-          options: { en: ['Hail Mary','Our Father','Glory Be','Creed'], es: ['Ave María','Padre Nuestro','Gloria','Credo'] }, answer: 1 }
+          options: { en: ['Hail Mary','Our Father','Glory Be','Creed'], es: ['Ave María','Padre Nuestro','Gloria','Credo'] }, answer: 1 },
+        { q: { en: 'Which teaching begins "Blessed are the poor in spirit"?', es: '¿Qué enseñanza empieza con "Bienaventurados los pobres de espíritu"?' },
+          options: { en: ['The Beatitudes','The Ten Commandments','The Creed','The Psalms'], es: ['Las Bienaventuranzas','Los Diez Mandamientos','El Credo','Los Salmos'] }, answer: 0 }
       ]
     },
     {
@@ -207,7 +219,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'How many days after Easter is Pentecost?', es: '¿Cuántos días después de Pascua es Pentecostés?' },
-          options: { en: ['Forty','Fifty','Seven','Three'], es: ['Cuarenta','Cincuenta','Siete','Tres'] }, answer: 1 }
+          options: { en: ['Forty','Fifty','Seven','Three'], es: ['Cuarenta','Cincuenta','Siete','Tres'] }, answer: 1 },
+        { q: { en: 'What rested on each of the apostles?', es: '¿Qué se posó sobre cada apóstol?' },
+          options: { en: ['Tongues of fire','A rainbow','A crown','A stone tablet'], es: ['Lenguas de fuego','Un arcoíris','Una corona','Una tabla de piedra'] }, answer: 0 }
       ]
     },
 
@@ -300,7 +314,9 @@ const BibleExplorer = (() => {
       },
       quiz: [
         { q: { en: 'What did Job say when he lost everything?', es: '¿Qué dijo Job cuando lo perdió todo?' },
-          options: { en: ['Blessed be the name of the Lord','It is unfair','I will never trust again','I quit'], es: ['Bendito sea el nombre del Señor','Es injusto','Nunca volveré a confiar','Renuncio'] }, answer: 0 }
+          options: { en: ['Blessed be the name of the Lord','It is unfair','I will never trust again','I quit'], es: ['Bendito sea el nombre del Señor','Es injusto','Nunca volveré a confiar','Renuncio'] }, answer: 0 },
+        { q: { en: 'What did God do for Job after the trial?', es: '¿Qué hizo Dios por Job después de la prueba?' },
+          options: { en: ['Restored everything double','Left him with nothing','Sent him to Egypt','Made him a king'], es: ['Le restauró todo el doble','Lo dejó sin nada','Lo envió a Egipto','Lo hizo rey'] }, answer: 0 }
       ]
     },
     { id: 'maccabees', testament: 'OT', icon: '🛡️', ageMin: 10,
