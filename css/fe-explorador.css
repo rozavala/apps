@@ -375,3 +375,100 @@
   .fe-rosary-stage { position: sticky; top: 12px; }
   .fe-rosary-svg { max-height: calc(100vh - 110px); }
 }
+
+/* ── Mi santo (namesake / favourite saint) ── */
+.fe-mysaint {
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 124px 1fr auto; gap: 18px; align-items: center;
+  margin: 0 0 16px; padding: 14px 22px 14px 14px; border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 0% 50%, rgba(251,191,36,.16), transparent 55%),
+    linear-gradient(180deg, #fffdf7, #fff8e8);
+  border: 1.5px solid #ecd59a;
+  box-shadow: var(--mod-shadow), inset 0 1px 0 #fff;
+}
+.fe-mysaint[hidden] { display: none; }
+.fe-ms-win {
+  border-radius: 14px; padding: 8px 10px 6px;
+  background: radial-gradient(ellipse at 50% 38%, rgba(255,226,160,.6), transparent 65%), linear-gradient(180deg, #ece5d8, #d8cfbe);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+}
+.fe-ms-win svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 8px rgba(40,30,20,.3)); }
+.fe-ms-text { min-width: 0; }
+.fe-ms-kicker { font-size: .72rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; color: var(--fe-gold-ink); }
+.fe-ms-title { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; line-height: 1.15; color: var(--fe-navy); margin: 2px 0 4px; overflow-wrap: anywhere; }
+.fe-ms-line { margin: 0; color: var(--text); font-weight: 600; font-size: .95rem; line-height: 1.4; }
+.fe-ms-line strong { color: var(--fe-wine); }
+.fe-ms-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 10px; }
+.fe-ms-change {
+  min-height: 44px; padding: 6px 4px; border: 0; background: none; cursor: pointer;
+  color: var(--fe-navy-2); font-weight: 800; font-size: .88rem; text-decoration: underline; text-underline-offset: 3px;
+}
+.fe-ms-change:hover { color: var(--fe-gold-ink); }
+
+.fe-ms-date {
+  display: flex; flex-direction: column; align-items: center; width: 92px; overflow: hidden;
+  border-radius: 14px; background: #fff; border: 1px solid #e6d7b4;
+  box-shadow: 0 6px 14px rgba(120,80,20,.16), 0 1px 0 #fff inset;
+  transform: rotate(3deg);
+}
+.fe-ms-date-m {
+  align-self: stretch; text-align: center; padding: 4px 0 3px;
+  background: linear-gradient(180deg, #b3122e, #8e1022); color: #fff;
+  font-weight: 900; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase;
+}
+.fe-ms-date-d { font-family: var(--font-display); font-weight: 800; font-size: 2.4rem; line-height: 1.05; color: var(--fe-navy); margin-top: 4px; }
+.fe-ms-date-s { font-size: .68rem; font-weight: 900; color: var(--fe-gold-ink); text-transform: uppercase; letter-spacing: .05em; padding-bottom: 7px; }
+.fe-mysaint.is-feast .fe-ms-date { animation: feWiggle 2.4s ease-in-out infinite; }
+.fe-mysaint.is-feast .fe-ms-date-s { color: #a8172f; }
+@keyframes feWiggle { 0%,100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg) scale(1.05); } }
+
+/* feast day */
+.fe-mysaint.is-feast {
+  padding-top: 30px;
+  background:
+    repeating-conic-gradient(from 0deg at 12% 60%, rgba(251,191,36,.13) 0 9deg, transparent 9deg 18deg),
+    radial-gradient(ellipse at 12% 60%, rgba(255,236,170,.9), transparent 60%),
+    linear-gradient(180deg, #fff9e6, #fff1cc);
+  border-color: #e0b54a;
+  box-shadow: 0 10px 28px rgba(180,120,20,.22), inset 0 1px 0 #fff;
+}
+.fe-ms-bunting { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 24px; }
+.fe-mysaint.is-feast .fe-ms-kicker { color: #a8172f; }
+.fe-mysaint.is-feast .fe-ms-title { font-size: 1.6rem; color: var(--fe-wine); }
+.fe-mysaint.is-feast .fe-ms-win { animation: feGlowCard 2.4s ease-in-out infinite; }
+@keyframes feGlowCard { 0%,100% { box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), 0 0 18px 4px rgba(251,191,36,.55); } }
+@media (prefers-reduced-motion: reduce) { .fe-mysaint.is-feast .fe-ms-win, .fe-mysaint.is-feast .fe-ms-date { animation: none; } }
+
+/* picker */
+.fe-mysaint.is-picking { display: block; padding: 14px 16px 6px; }
+.fe-ms-pick-head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.fe-ms-strip { margin: 0 -6px; padding: 4px 6px 10px; }
+.fe-ms-strip .fe-medallion { position: relative; }
+.fe-ms-own {
+  position: absolute; top: -2px; left: 50%; transform: translateX(-50%);
+  font-style: normal; font-size: .58rem; font-weight: 900; white-space: nowrap;
+  background: var(--fe-wine); color: #fff; padding: 1px 6px; border-radius: 99px;
+}
+
+/* saint page: feast chip + lesson */
+.fe-item-meta .fe-feast-chip { background: #fde8ec; color: #8e1022; border-color: #f3b9c4; }
+.fe-lesson {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin: 10px 0 10px; padding: 10px 14px; border-radius: 14px;
+  background: linear-gradient(180deg, #fffaf0, #fff4da); border: 1px solid #f1d79a;
+  font-size: 1rem; line-height: 1.45; color: var(--text); font-weight: 600;
+}
+.fe-lesson strong { color: var(--fe-gold-ink); font-weight: 800; }
+.fe-lesson-ico { color: var(--fe-gold); font-size: 1.1rem; line-height: 1.3; }
+
+@media (max-width: 560px) {
+  .fe-mysaint { grid-template-columns: 96px 1fr; gap: 12px; padding: 12px 12px 12px 10px; }
+  .fe-ms-date { display: none; }
+  .fe-mysaint.is-feast { padding-top: 28px; }
+  .fe-ms-title { font-size: 1.12rem; }
+  .fe-mysaint.is-feast .fe-ms-title { font-size: 1.3rem; }
+  .fe-ms-line { font-size: .86rem; }
+  .fe-ms-actions .fe-btn { padding: 8px 12px; font-size: .88rem; }
+  .fe-ms-pick-head .fe-btn { flex: 0 0 auto; }
+}

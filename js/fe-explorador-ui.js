@@ -1,5 +1,8 @@
 /* ================================================================
    FE EXPLORADOR — UI (js/fe-explorador-ui.js)
+   "Mi santo" card above the tabs: the kid's namesake saint (via
+   js/name-days.js) or the favourite they pick, with a celebration on
+   the feast day.
    Tabs: Oración (holy-card prayers, memory mode), Santos (stained
    glass windows + quiz), Rosario (interactive rosary), Herencia
    (illustrated Chilean heritage + quiz) and Desafío (age-scaled
@@ -27,7 +30,7 @@
     saintIndex: 0, saintQ: 0, saintCorrect: 0, saintAnswered: null,
     heritageIndex: 0, heritageAnswered: null,
     rosarySet: null, rosaryDecade: 0, rosaryStep: 0, rosarySalve: false, rosaryIntro: -1,
-    round: null
+    round: null, picking: false
   };
 
   // The prayers prayed in each decade of the rosary, in order:
@@ -251,7 +254,7 @@
     const learnedCount = Object.keys(learned).filter(k => learned[k] > 0).length;
 
     const strip = FM.SAINTS.map((x, i) => '<button type="button" class="fe-medallion' + (i === S.saintIndex ? ' active' : '') + (learned[x.id] ? ' is-learned' : '') + '" data-act="saint" data-i="' + i + '" aria-label="' + esc(x.name) + '">' +
-      FeArt.saintPortrait(x.id) + '<span>' + esc(x.name.replace(/^(San|Santa|Santo) /, '')) + '</span></button>').join('');
+      FeArt.saintPortrait(x.id) + '<span>' + esc(x.name.replace(/^(San|Santa|Santo|Beata) /, '')) + '</span></button>').join('');
 
     let quiz = '<div class="fe-quiz" aria-live="polite">' +
       '<div class="fe-quiz-head"><span class="fe-quiz-tag">Pregunta ' + (S.saintQ + 1) + ' de ' + qs.length + '</span></div>' +
@@ -276,12 +279,145 @@
           '<div class="fe-window-name">' + esc(s.name) + '</div></div>' +
         '<div class="fe-saint-info">' +
           '<h2 class="fe-item-title">' + esc(s.name) + '</h2>' +
-          '<div class="fe-item-meta"><span>' + esc(s.dates) + '</span><span>' + esc(s.country) + '</span></div>' +
-          '<p class="fe-bio">' + esc(s.bio) + '</p>' +
+          '<div class="fe-item-meta"><span>' + esc(s.dates) + '</span><span>' + esc(s.country) + '</span>' +
+            (s.feast ? '<span class="fe-feast-chip">🎉 Fiesta: ' + esc(FM.feastLabel(s)) + '</span>' : '') + '</div>' +
+          s.bio.split(/\n\n+/).map(par => '<p class="fe-bio">' + esc(par) + '</p>').join('') +
+          lessonHTML(s.lesson) +
           '<p class="fe-symbol">En el vitral: ' + esc(FeArt.saintSymbol(s.id)) + '.</p>' +
           quiz +
         '</div>' +
       '</article></section>';
+  }
+
+  // "Lo que podemos aprender de él: …" with the lead-in in bold.
+  function lessonHTML(t) {
+    if (!t) return '';
+    const k = t.indexOf(':');
+    return '<p class="fe-lesson"><span class="fe-lesson-ico" aria-hidden="true">✦</span><span>' +
+      (k > 0 ? '<strong>' + esc(t.slice(0, k + 1)) + '</strong>' + esc(t.slice(k + 1)) : esc(t)) + '</span></p>';
+  }
+
+  // ════════════════════════ MI SANTO ════════════════════════
+  // The active kid's saint: the one they picked (favoriteSaint) or the
+  // one that matches their name (js/name-days.js).
+  function nameSaintId() {
+    const u = user();
+    if (!u || typeof NameDays === 'undefined') return null;
+    try { const e = NameDays.forName(u.name); return e && FM.getSaint(e.saintId) ? e.saintId : null; } catch (e) { return null; }
+  }
+  function mySaint() {
+    const fav = (FM.getStatus() || {}).favoriteSaint;
+    if (fav && FM.getSaint(fav)) return { s: FM.getSaint(fav), how: 'fav' };
+    const id = nameSaintId();
+    return id ? { s: FM.getSaint(id), how: 'name' } : null;
+  }
+  function isFeastToday(s, now) {
+    now = now || new Date();
+    return !!(s && s.feast && now.getMonth() + 1 === s.feast.m && now.getDate() === s.feast.d);
+  }
+  function daysToFeast(s, now) {
+    now = now || new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let next = new Date(now.getFullYear(), s.feast.m - 1, s.feast.d);
+    if (next < today) next = new Date(now.getFullYear() + 1, s.feast.m - 1, s.feast.d);
+    return Math.round((next - today) / 86400000);
+  }
+  const art = s => s.name.replace(/ .*/, '');
+
+  function bunting() {
+    const cols = ['#d49b2a', '#a8172f', '#2457a8', '#f4f1ea', '#2f7a5e'];
+    let t = '';
+    for (let i = 0; i < 24; i++) t += '<path d="M' + (i * 25) + ' 4 l12.5 16 l12.5 -16 Z" fill="' + cols[i % 5] + '" stroke="#211a16" stroke-width="0.8" stroke-linejoin="round"/>';
+    return '<svg class="fe-ms-bunting" viewBox="0 0 600 24" preserveAspectRatio="xMidYMin slice" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M0 4 Q300 10 600 4" stroke="#8a5a0c" stroke-width="1.5" fill="none"/>' + t + '</svg>';
+  }
+
+  function renderMySaint() {
+    const el = document.getElementById('fe-mysaint');
+    if (!el) return;
+    const u = user();
+    if (!u || !FM.getStatus()) { el.innerHTML = ''; el.hidden = true; return; }
+    el.hidden = false;
+    const mine = mySaint();
+    if (!mine || S.picking) {
+      el.className = 'fe-mysaint is-picking';
+      el.innerHTML = renderPicker(mine);
+      const a = el.querySelector('.fe-medallion.active'), strip = el.querySelector('.fe-ms-strip');
+      if (a && strip) strip.scrollLeft = a.offsetLeft - strip.clientWidth / 2 + a.clientWidth / 2;
+      return;
+    }
+    const s = mine.s, today = isFeastToday(s);
+    const name = esc(u.name);
+    el.className = 'fe-mysaint' + (today ? ' is-feast' : '');
+    let text;
+    if (today) {
+      text = '<div class="fe-ms-kicker">🎉 ¡Hoy es tu santo!</div>' +
+        '<h2 class="fe-ms-title">¡Feliz santo, ' + name + '!</h2>' +
+        '<p class="fe-ms-line">Hoy, ' + esc(FM.feastLabel(s)) + ', la Iglesia celebra a <strong>' + esc(s.name) + '</strong>.</p>';
+    } else {
+      const n = daysToFeast(s);
+      text = '<div class="fe-ms-kicker">' + (mine.how === 'fav' ? 'Mi santo favorito' : 'Mi santo') + '</div>' +
+        '<h2 class="fe-ms-title">' + (mine.how === 'fav' ? 'Tu santo favorito es ' : 'Tu santo es ') + esc(s.name) + '</h2>' +
+        '<p class="fe-ms-line">Celebras tu santo el <strong>' + esc(FM.feastLabel(s)) + '</strong>' +
+        (n === 1 ? ' · ¡es mañana!' : ' · faltan ' + n + ' días') + '</p>';
+    }
+    el.innerHTML = (today ? bunting() : '') +
+      '<div class="fe-ms-win">' + FeArt.saintPortrait(s.id, { label: 'Vitral de ' + s.name }) + '</div>' +
+      '<div class="fe-ms-text">' + text +
+        '<div class="fe-ms-actions">' +
+          '<button type="button" class="fe-btn fe-btn-primary fe-btn-sm" data-act="ms-open">Ver a ' + esc(s.name) + ' ➔</button>' +
+          '<button type="button" class="fe-ms-change" data-act="ms-pick">Elegir otro santo</button>' +
+        '</div></div>' +
+      '<div class="fe-ms-date" aria-hidden="true"><span class="fe-ms-date-m">' + esc(FM.MONTHS[s.feast.m - 1].slice(0, 3)) + '</span><span class="fe-ms-date-d">' + s.feast.d + '</span>' +
+        '<span class="fe-ms-date-s">' + (today ? '¡Hoy!' : 'Mi fiesta') + '</span></div>';
+  }
+
+  function renderPicker(mine) {
+    const fav = (FM.getStatus() || {}).favoriteSaint;
+    const own = nameSaintId();
+    const list = FM.SAINTS.slice();
+    if (own) list.sort((a, b) => (b.id === own) - (a.id === own));
+    return '<div class="fe-ms-pick">' +
+      '<div class="fe-ms-pick-head">' +
+        '<div><div class="fe-ms-kicker">Mi santo</div><h2 class="fe-ms-title">Elige tu santo favorito</h2>' +
+        '<p class="fe-ms-line">Toca el santo que quieras: aparecerá aquí y celebrarás su fiesta.</p></div>' +
+        (mine ? '<button type="button" class="fe-btn fe-btn-ghost fe-btn-sm" data-act="ms-cancel">Cancelar</button>' : '') +
+      '</div>' +
+      '<div class="fe-strip fe-ms-strip" role="group" aria-label="Elige tu santo favorito">' +
+      list.map(x => '<button type="button" class="fe-medallion' + ((fav ? x.id === fav : x.id === own) ? ' active' : '') + '" data-act="ms-fav" data-id="' + esc(x.id) + '" aria-label="' + esc(x.name) + (x.id === own ? ' (el santo de tu nombre)' : '') + '">' +
+        FeArt.saintPortrait(x.id) + '<span>' + esc(x.name.replace(/^(San|Santa|Santo|Beata) /, '')) + '</span>' +
+        (x.id === own ? '<em class="fe-ms-own">Tu nombre</em>' : '') + '</button>').join('') +
+      '</div></div>';
+  }
+
+  function chooseFavorite(id) {
+    if (!FM.getSaint(id)) return;
+    const own = nameSaintId();
+    // Picking the saint of their own name simply clears the favourite.
+    FM.update(d => { if (id === own) delete d.favoriteSaint; else d.favoriteSaint = id; });
+    S.picking = false;
+    sfx('correct');
+    renderMySaint();
+    celebrateIfFeast();
+  }
+
+  function openMySaint() {
+    const mine = mySaint();
+    if (!mine) return;
+    const i = FM.SAINTS.indexOf(mine.s);
+    S.tab = 'saint';
+    S.saintIndex = i; S.saintQ = 0; S.saintCorrect = 0; S.saintAnswered = null;
+    sfx('click');
+    renderChrome(); render();
+    const card = main().querySelector('.fe-saint-card');
+    if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+
+  let _celebrated = false;
+  function celebrateIfFeast() {
+    const mine = mySaint();
+    if (_celebrated || !mine || !isFeastToday(mine.s)) return;
+    _celebrated = true;
+    setTimeout(() => { window.showConfetti(); sfx('cheer'); }, 500);
   }
 
   function answerSaint(i) {
@@ -524,6 +660,11 @@
       }
       return null;
     },
+    feast(lv) {
+      const all = FM.SAINTS.filter(x => x.feast);
+      const s = pick(all), lab = FM.feastLabel(s);
+      return { q: '¿Qué día celebra la Iglesia a ' + s.name + '?', answer: lab, opts: mkOpts(lab, all.map(FM.feastLabel), lv.opts), explain: s.name + ': ' + lab + '.' };
+    },
     heritage(lv) {
       const h = pick(FM.HERITAGE);
       return { q: h.q.indexOf('esta') >= 0 || h.q.indexOf('este') >= 0 ? h.title + ': ' + h.q : h.q, answer: h.a[h.correct], opts: mkOpts(h.a[h.correct], h.a, Math.min(lv.opts, h.a.length)), explain: h.explain };
@@ -567,8 +708,8 @@
   const MIX = {
     beginner: ['saintQ', 'saintQ', 'heritage', 'country', 'beads', 'portrait'],
     intermediate: ['saintQ', 'heritage', 'scene', 'country', 'beads', 'rosaryDay', 'attribute', 'portrait'],
-    advanced: ['saintQ', 'heritage', 'scene', 'attribute', 'earlier', 'rosaryDay', 'mysterySet', 'prayerWord', 'country'],
-    expert: ['saintQ', 'scene', 'attribute', 'earlier', 'earlier', 'mysterySet', 'mysteryOrder', 'prayerWord', 'prayerWord', 'heritage', 'rosaryDay']
+    advanced: ['saintQ', 'heritage', 'scene', 'attribute', 'earlier', 'rosaryDay', 'mysterySet', 'prayerWord', 'country', 'feast'],
+    expert: ['saintQ', 'scene', 'attribute', 'earlier', 'earlier', 'mysterySet', 'mysteryOrder', 'prayerWord', 'prayerWord', 'heritage', 'rosaryDay', 'feast']
   };
 
   function buildRound(lv) {
@@ -715,6 +856,10 @@
       case 'levels': S.round = null; render(); break;
       case 'round-ans': answerRound(b.dataset.v); break;
       case 'round-next': nextRound(); break;
+      case 'ms-open': openMySaint(); break;
+      case 'ms-pick': S.picking = true; sfx('click'); renderMySaint(); break;
+      case 'ms-cancel': S.picking = false; sfx('click'); renderMySaint(); break;
+      case 'ms-fav': chooseFavorite(b.dataset.id); break;
     }
   }
 
@@ -726,12 +871,14 @@
     }
     document.addEventListener('click', onClick);
     renderChrome();
+    renderMySaint();
     render();
+    celebrateIfFeast();
   }
 
   // Kept for anything that still calls the old global names.
   window.showTab = showTab;
-  window.FeUI = { showTab, render, _state: S };
+  window.FeUI = { showTab, render, renderMySaint, _state: S };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
