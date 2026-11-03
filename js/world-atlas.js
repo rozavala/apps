@@ -179,7 +179,7 @@ var WorldAtlas = (function() {
     var nb = AtlasMap.neighbours(c.id).map(byId).filter(Boolean);
     nb.sort(function(a, b) { return cName(a).localeCompare(cName(b)); });
     var html = '<div class="wa-loc' + (compact ? ' compact' : '') + '">' +
-      AtlasMap.locator(c.id, { label: t('Map: where ', 'Mapa: dónde está ') + cName(c), aspect: compact ? 1.9 : 1.6 }) +
+      AtlasMap.locator(c.id, { label: t('Map: where ', 'Mapa: dónde está ') + cName(c), aspect: compact ? 2.1 : 1.6 }) +
       '<div class="wa-loc-key"><span class="wa-key-c"></span>' + escHtml(cName(c)) +
       (nb.length ? '<span class="wa-key-n"></span>' + escHtml(t('Neighbours', 'Vecinos')) : '') + '</div>';
     if (!compact) {
@@ -442,7 +442,7 @@ var WorldAtlas = (function() {
         'Estado observador de las Naciones Unidas, no Estado miembro.')) + '</div>';
     }
 
-    html = html.replace('<div class="wa-facts">', locatorHTML(c, false) + '<div class="wa-facts">');
+    html += locatorHTML(c, false);
     $('wa-detail').innerHTML = html;
     Array.prototype.forEach.call($('wa-detail').querySelectorAll('.wa-nb-chip'), function(b) {
       b.onclick = function() { openCountry(b.dataset.id); };

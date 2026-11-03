@@ -771,7 +771,7 @@ const WorldExplorer = (() => {
   const VIEW = {
     south_america: { box: [-111, -57, -32, 14], code: 'sa' },
     north_america: { box: [-168, 8, -52, 72],   code: 'na' },
-    europe:        { box: [-24, 34, 42, 70],    code: 'eu' },
+    europe:        { box: [-13, 34.5, 32, 62],  code: 'eu' },
     africa:        { box: [-19, -36, 53, 38],   code: 'af' },
     asia:          { box: [26, -11, 150, 55],   code: 'as' },
     oceania:       { box: [111, -48, 179, -9],  code: 'oc' }
@@ -1169,6 +1169,8 @@ const WorldExplorer = (() => {
     currentContinent = null;
     const stage = document.getElementById('we-stage');
     if (stage) stage.className = 'we-stage world';
+    const mapHost = document.getElementById('we-stage-map');
+    if (mapHost) mapHost.style.aspectRatio = '';
     _setHud();
     if (worldMap) {
       _paintWorld();
@@ -1246,6 +1248,13 @@ const WorldExplorer = (() => {
     const c = currentContinent, v = VIEW[c.id];
     const stage = document.getElementById('we-stage');
     if (stage) stage.className = 'we-stage continent';
+    // Phones: give the stage the continent's own shape (Europe is wide,
+    // South America tall) so the map fills it.
+    const mapHost = document.getElementById('we-stage-map');
+    if (mapHost && hasMap()) {
+      const vb = WorldMap.box(v.box), ar = vb[2] / vb[3];
+      mapHost.style.aspectRatio = window.innerWidth < 700 ? String(Math.max(0.82, Math.min(1.5, ar * 0.95))) : '';
+    }
     _setHud();
     if (!worldMap) { _renderBelowContinent(); return; }
     const visited = (_load().visited) || [];
@@ -1986,7 +1995,11 @@ const WorldExplorer = (() => {
     if (active.id === 'screen-select') { if (worldMap) { worldMap.svg.setAttribute('aria-label', t('World map', 'Mapa del mundo')); } _refitMap(); _renderChallengeCards(); }
     else if (active.id === 'screen-country' && currentCountry) openCountry(currentCountry.id);
     else if (active.id === 'screen-quiz') _renderQuizQuestion();
-    else if (active.id === 'screen-challenge' && ch) { ch.answered = false; _renderChallengeQ(); }
+    else if (active.id === 'screen-challenge' && ch) {
+      // re-ask in the new language only if nothing was scored yet
+      const q = ch.qs[ch.idx];
+      if (!ch.answered && !(q && q.overDone) && !ch.tries) _renderChallengeQ(); else _chHeader();
+    }
   }
 
   function _showScreen(name) {

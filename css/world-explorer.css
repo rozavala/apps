@@ -192,7 +192,8 @@ body {
 /* ── Challenges ── */
 .we-section { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; margin: 22px 2px 8px; color: var(--we-ink); }
 .we-challenges { display: grid; grid-template-columns: 1fr; gap: 10px; }
-@media (min-width: 760px) { .we-challenges { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1000px) { .we-challenges { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 640px) and (max-width: 999px) { .we-challenges { grid-template-columns: 1fr 1fr; } }
 .we-ch-card {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; min-height: 74px;
   background: #fff; border: 1px solid var(--border-subtle); border-radius: 18px; padding: 12px 14px;

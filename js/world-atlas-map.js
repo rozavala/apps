@@ -14,7 +14,7 @@ var AtlasMap = (function() {
   'use strict';
 
   var ok = typeof WorldMap !== 'undefined';
-  var LAND = '#eeece4', NEIGH = '#c8e6d9', TARGET = '#e8553d', SEA = '#a9d6ee';
+  var LAND = '#efede5', NEIGH = '#bfe3d4', TARGET = '#e8553d', SEA = '#9fd0ea';
   // gentle continent tints for the overview map
   var CONT = { sa: '#cfe8c3', na: '#ddd3f6', eu: '#cfdff6', af: '#f6dcc3', as: '#f6e7b9', oc: '#f5d2e3', an: '#f3f7fa' };
 
@@ -65,6 +65,7 @@ var AtlasMap = (function() {
     var s = '<svg class="' + (opts.cls || 'wa-locator') + '" viewBox="' + box.map(function(n) { return n.toFixed(1); }).join(' ') + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="' + esc(opts.label || '') + '">' +
       '<rect x="' + box[0] + '" y="' + box[1] + '" width="' + box[2] + '" height="' + box[3] + '" fill="' + SEA + '"/>' +
       '<path d="' + WorldMap.graticule(10) + '" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="' + (u * 0.8).toFixed(2) + '"/>' +
+      '<path d="' + WorldMap.landPath() + '" fill="none" stroke="#d8f0fa" stroke-opacity=".7" stroke-width="' + (u * 4).toFixed(2) + '" stroke-linejoin="round"/>' +
       pathsSVG(function(code) { return code === iso ? TARGET : nb.indexOf(code) >= 0 ? NEIGH : LAND; }, (u * 0.9).toFixed(2));
     if (inf && inf.a < 45) {
       s += '<circle cx="' + inf.c[0] + '" cy="' + inf.c[1] + '" r="' + (12 * u).toFixed(1) + '" fill="none" stroke="' + TARGET + '" stroke-width="' + (2.6 * u).toFixed(2) + '"/>' +
@@ -93,6 +94,7 @@ var AtlasMap = (function() {
     host.innerHTML = '<svg class="wa-live" viewBox="' + F.join(' ') + '" preserveAspectRatio="xMidYMid meet" role="img">' +
       '<path d="' + WorldMap.outline() + '" fill="' + SEA + '"/>' +
       '<path class="wa-live-grat" d="' + WorldMap.graticule(15) + '"/>' +
+      '<path class="wa-live-shelf" d="' + WorldMap.landPath() + '"/>' +
       '<g class="wa-live-lands">' + WorldMap.codes().map(function(code) { return '<path class="wa-live-land" data-code="' + code + '" d="' + WorldMap.path(code) + '"/>'; }).join('') + '</g>' +
       '<g class="wa-live-marks"></g></svg>';
     this.svg = host.querySelector('svg');
