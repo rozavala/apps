@@ -62,7 +62,12 @@ const CASES = [
     data: { lang: 'es', helper: true, digital: true, rounds: 5, levels: {
             'set-oclock': { stars: 3, best: 10, of: 10 }, 'read-half': { stars: 2, best: 8, of: 10 },
             'day-day1': { stars: 1, best: 5, of: 8 }, 'calendar-cal1': { stars: 0, best: 3, of: 10 } } },
-    stars: 6, note: 'rounds played do not score' }
+    stars: 6, note: 'rounds played do not score' },
+  { id: 'naturaleza', prefix: 'zs_naturaleza_',
+    data: { cards: { '2026-spring': { found: ['loica', 'chincol', 'zorzal', 'jilguero', 'chinita', 'queltehue'] },
+                     '2026-winter': { found: ['picaflor', 'jilguero', 'chuncho', 'queltehue', 'tiuque', 'zorzal', 'espino', 'boldo', 'condor'] } },
+            quiz: { clues_birds: 3, tap_all: 1, shadow_bugs: 5 }, sightings: [], seen: ['pudu'] },
+    stars: 12, note: 'quiz stars cap at 3' }
 ];
 
 test.describe('per-app star rules', () => {

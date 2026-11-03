@@ -364,6 +364,15 @@ var APP_STAR_CONFIGS = [
       var n = 0, L = d.levels || {};
       for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
       return n;
+    } },
+  // Explorador de Naturaleza: each seasonal Spot it! card scores by how
+  // much of it was found outdoors (3/6/9 of 9 squares → 1/2/3 stars), and
+  // each quiz mode is starred out of 3. Opening a plate does not score.
+  { id: 'naturaleza', prefix: 'zs_naturaleza_', stars: function(d) {
+      var n = 0, c, f;
+      for (c in (d.cards || {})) { f = ((d.cards[c] || {}).found || []).length; n += f >= 9 ? 3 : f >= 6 ? 2 : f >= 3 ? 1 : 0; }
+      for (c in (d.quiz || {})) n += Math.max(0, Math.min(3, d.quiz[c] || 0));
+      return n;
     } }
 ];
 
