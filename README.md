@@ -78,6 +78,8 @@ Todo el contenido en este repositorio se adhiere a las [Pautas de Contenido](con
 
 ## 🆕 Novedades de la Semana (What's New This Week)
 
+- **Refresco de preguntas (Question refresh)**: Los controles rápidos de aprendizaje ahora tienen el doble de preguntas en cada materia, incluida geografía. Antes, World Explorer pedía geografía y mostraba preguntas generales. Invest Quest tiene el doble de preguntas de conceptos; cada intento sigue siendo de 9, tomadas al azar, así que la estrella del quiz (7 de 9) no cambia. (Learning checks now have twice the questions in every subject, including geography. World Explorer was asking for geography and showing general questions. Invest Quest's concept bank is twice as large; each sitting is still 9 questions drawn at random, so the quiz star at 7 of 9 stays the same.)
+
 - **Corrección de Calendario (Calendar Bug Fix)**: Se corrigió un problema donde el cambio de hora (horario de verano) causaba que los días del calendario se repitieran. (Fixed an issue where the daylight saving time transition could repeat a calendar day).
 
 - **Horas de Descanso (Off Hours)**: Las aplicaciones ahora se apagan automáticamente durante las noches de escuela (por defecto de 9:00 PM a 7:20 AM), mostrando una pantalla de descanso amigable para fomentar rutinas saludables. La configuración se puede ajustar en el Rincón para Padres y se puede desbloquear con el PIN de padres. (Off Hours: Apps now automatically go to sleep during school nights (9:00 PM to 7:20 AM by default), showing a friendly rest screen to encourage healthy routines. Settings can be adjusted in Parents Corner and unlocked via parent PIN.)

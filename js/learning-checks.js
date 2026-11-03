@@ -18,7 +18,15 @@ var LearningCheck = (function() {
       { q: 'What is 20 / 4?', options: ['4', '5', '6', '10'], answer: 1 },
       { q: 'What is 9 x 9?', options: ['81', '72', '90', '99'], answer: 0 },
       { q: 'What is 50 + 50?', options: ['90', '100', '110', '120'], answer: 1 },
-      { q: 'What is 6 x 6?', options: ['36', '30', '42', '48'], answer: 0 }
+      { q: 'What is 6 x 6?', options: ['36', '30', '42', '48'], answer: 0 },
+      { q: 'What is 7 x 8?', options: ['54', '56', '63', '64'], answer: 1 },
+      { q: 'What is 15 + 28?', options: ['33', '43', '45', '53'], answer: 1 },
+      { q: 'What is 100 - 37?', options: ['63', '67', '73', '137'], answer: 0 },
+      { q: 'What is 81 / 9?', options: ['7', '8', '9', '10'], answer: 2 },
+      { q: 'What is 3 x 12?', options: ['24', '30', '36', '48'], answer: 2 },
+      { q: 'What is half of 20?', options: ['5', '8', '10', '12'], answer: 2 },
+      { q: 'What is 25 + 17?', options: ['32', '40', '42', '52'], answer: 2 },
+      { q: 'What is 144 / 12?', options: ['10', '11', '12', '14'], answer: 2 }
     ],
     music: [
       { q: 'Which note is higher?', options: ['C4', 'G4', 'E4', 'D4'], answer: 1 },
@@ -28,7 +36,15 @@ var LearningCheck = (function() {
       { q: 'What is a sharp symbol (#)?', options: ['Lowers note', 'Raises note', 'Silences note', 'Lengthens note'], answer: 1 },
       { q: 'How many strings on a standard guitar?', options: ['4', '5', '6', '7'], answer: 2 },
       { q: 'What is the clef used for higher notes?', options: ['Bass', 'Treble', 'Alto', 'Tenor'], answer: 1 },
-      { q: 'What instrument has black and white keys?', options: ['Guitar', 'Violin', 'Piano', 'Drums'], answer: 2 }
+      { q: 'What instrument has black and white keys?', options: ['Guitar', 'Violin', 'Piano', 'Drums'], answer: 2 },
+      { q: 'How many beats is a half note?', options: ['1', '2', '3', '4'], answer: 1 },
+      { q: 'How many beats is a quarter note?', options: ['1', '2', '3', '4'], answer: 0 },
+      { q: 'What does a flat symbol (♭) do?', options: ['Raises the note', 'Lowers the note', 'Silences the note', 'Doubles the note'], answer: 1 },
+      { q: 'How many lines are on a music staff?', options: ['4', '5', '6', '8'], answer: 1 },
+      { q: 'What is a rest in music?', options: ['A louder note', 'A silence', 'A repeat sign', 'A high note'], answer: 1 },
+      { q: 'Which family is the trumpet in?', options: ['Strings', 'Woodwind', 'Brass', 'Percussion'], answer: 2 },
+      { q: 'After G, the musical alphabet goes back to…', options: ['H', 'A', 'Z', 'K'], answer: 1 },
+      { q: 'How many strings does a violin have?', options: ['3', '4', '5', '6'], answer: 1 }
     ],
     chess: [
       { q: 'Which piece moves in an L-shape?', options: ['Bishop', 'Rook', 'Knight', 'Pawn'], answer: 2 },
@@ -38,7 +54,15 @@ var LearningCheck = (function() {
       { q: 'Which piece can move diagonally?', options: ['Rook', 'Knight', 'Bishop', 'Pawn'], answer: 2 },
       { q: 'What is it called when a pawn reaches the other side?', options: ['Castling', 'Check', 'Promotion', 'En passant'], answer: 2 },
       { q: 'Which piece is placed in the corners at the start?', options: ['Bishop', 'Knight', 'Rook', 'Queen'], answer: 2 },
-      { q: 'How many pawns does each player start with?', options: ['6', '8', '10', '12'], answer: 1 }
+      { q: 'How many pawns does each player start with?', options: ['6', '8', '10', '12'], answer: 1 },
+      { q: 'Which piece is the most powerful?', options: ['King', 'Queen', 'Rook', 'Bishop'], answer: 1 },
+      { q: 'Which side moves first?', options: ['Black', 'White', 'Whoever captured last', 'The king'], answer: 1 },
+      { q: 'How many knights does each player start with?', options: ['1', '2', '4', '8'], answer: 1 },
+      { q: 'Which piece moves any number of squares diagonally?', options: ['Rook', 'Knight', 'Bishop', 'King'], answer: 2 },
+      { q: 'What is checkmate?', options: ['The king is attacked and cannot escape', 'A draw', 'A pawn reaches the end', 'Both queens are captured'], answer: 0 },
+      { q: 'What is a stalemate?', options: ['The king is in check', 'No legal move, and the king is not in check', 'A queen is trapped', 'A pawn is blocked'], answer: 1 },
+      { q: 'En passant is a special move for which piece?', options: ['Knight', 'Bishop', 'Pawn', 'Rook'], answer: 2 },
+      { q: 'How many bishops does each player start with?', options: ['1', '2', '4', '8'], answer: 1 }
     ],
     history: [
       { q: 'What are the colors of the Chilean flag?', options: ['Red, White, Blue', 'Green, Yellow', 'Blue, White', 'Red, Yellow'], answer: 0 },
@@ -48,7 +72,15 @@ var LearningCheck = (function() {
       { q: 'In what year did Chile declare independence?', options: ['1818', '1810', '1850', '1900'], answer: 0 },
       { q: 'What ancient civilization built Machu Picchu?', options: ['Aztecs', 'Maya', 'Inca', 'Olmec'], answer: 2 },
       { q: 'Who invented the light bulb?', options: ['Thomas Edison', 'Nikola Tesla', 'Albert Einstein', 'Isaac Newton'], answer: 0 },
-      { q: 'Who was the first person to walk on the moon?', options: ['Neil Armstrong', 'Yuri Gagarin', 'Buzz Aldrin', 'John Glenn'], answer: 0 }
+      { q: 'Who was the first person to walk on the moon?', options: ['Neil Armstrong', 'Yuri Gagarin', 'Buzz Aldrin', 'John Glenn'], answer: 0 },
+      { q: 'In what year was Chile\'s first government junta?', options: ['1492', '1810', '1818', '1900'], answer: 1 },
+      { q: 'Who was the first president of the United States?', options: ['Abraham Lincoln', 'George Washington', 'Thomas Jefferson', 'John Adams'], answer: 1 },
+      { q: 'Who built the pyramids at Giza?', options: ['The Romans', 'The ancient Egyptians', 'The Incas', 'The Vikings'], answer: 1 },
+      { q: 'In what year did people first walk on the Moon?', options: ['1957', '1961', '1969', '1975'], answer: 2 },
+      { q: 'Which ocean did Magellan name?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 3 },
+      { q: 'Who is the traditional author of the Iliad?', options: ['Homer', 'Plato', 'Virgil', 'Shakespeare'], answer: 0 },
+      { q: 'The Great Wall is in which country?', options: ['Japan', 'India', 'China', 'Egypt'], answer: 2 },
+      { q: 'In what year did Columbus reach the Americas?', options: ['1066', '1492', '1776', '1810'], answer: 1 }
     ],
     art: [
       { q: 'What are the primary colors?', options: ['Red, Blue, Yellow', 'Green, Orange, Purple', 'Black, White, Gray', 'Red, Green, Blue'], answer: 0 },
@@ -58,7 +90,15 @@ var LearningCheck = (function() {
       { q: 'Who painted the Mona Lisa?', options: ['Van Gogh', 'Picasso', 'Leonardo da Vinci', 'Monet'], answer: 2 },
       { q: 'Mixing red and yellow makes what color?', options: ['Green', 'Orange', 'Purple', 'Brown'], answer: 1 },
       { q: 'Mixing blue and yellow makes what color?', options: ['Green', 'Orange', 'Purple', 'Pink'], answer: 0 },
-      { q: 'What material is used to make pottery?', options: ['Wood', 'Clay', 'Metal', 'Glass'], answer: 1 }
+      { q: 'What material is used to make pottery?', options: ['Wood', 'Clay', 'Metal', 'Glass'], answer: 1 },
+      { q: 'Who painted The Starry Night?', options: ['Claude Monet', 'Vincent van Gogh', 'Pablo Picasso', 'Salvador Dalí'], answer: 1 },
+      { q: 'Who painted the ceiling of the Sistine Chapel?', options: ['Michelangelo', 'Raphael', 'Donatello', 'Leonardo da Vinci'], answer: 0 },
+      { q: 'A portrait is a picture of…', options: ['A mountain', 'A person', 'A building only', 'A map'], answer: 1 },
+      { q: 'A landscape is a picture of…', options: ['An outdoor place', 'A bowl of fruit', 'A letter', 'A number chart'], answer: 0 },
+      { q: 'Pointillism builds a picture from…', options: ['One thick line', 'Small dots of color', 'Torn paper only', 'Letters of the alphabet'], answer: 1 },
+      { q: 'Which colors are warm colors?', options: ['Blue, green, purple', 'Red, orange, yellow', 'Black, white, gray', 'Pink, brown, black'], answer: 1 },
+      { q: 'Which colors are cool colors?', options: ['Red, orange, yellow', 'Blue, green, purple', 'Black and white', 'Gold and silver'], answer: 1 },
+      { q: 'What do you call a picture made by pressing ink onto paper?', options: ['A print', 'A fresco', 'A mosaic', 'A collage'], answer: 0 }
     ],
     faith: [
       { q: 'Who is the foster father of Jesus?', options: ['Peter', 'Paul', 'Joseph', 'John'], answer: 2 },
@@ -68,7 +108,15 @@ var LearningCheck = (function() {
       { q: 'How many apostles did Jesus have?', options: ['10', '12', '14', '7'], answer: 1 },
       { q: 'Who was the mother of Jesus?', options: ['Elizabeth', 'Mary', 'Martha', 'Ruth'], answer: 1 },
       { q: 'In what city was Jesus born?', options: ['Jerusalem', 'Nazareth', 'Bethlehem', 'Rome'], answer: 2 },
-      { q: 'Who baptized Jesus?', options: ['Peter', 'John the Baptist', 'Matthew', 'James'], answer: 1 }
+      { q: 'Who baptized Jesus?', options: ['Peter', 'John the Baptist', 'Matthew', 'James'], answer: 1 },
+      { q: 'How many days did Jesus fast in the desert?', options: ['7', '12', '40', '100'], answer: 2 },
+      { q: 'What is the first book of the Bible?', options: ['Exodus', 'Genesis', 'Psalms', 'Matthew'], answer: 1 },
+      { q: 'Who built the ark before the flood?', options: ['Moses', 'Noah', 'Abraham', 'David'], answer: 1 },
+      { q: 'Where does the Pope live?', options: ['Jerusalem', 'Vatican City', 'Santiago', 'Nazareth'], answer: 1 },
+      { q: 'Who denied knowing Jesus three times?', options: ['Peter', 'John', 'Paul', 'Andrew'], answer: 0 },
+      { q: 'What is the last book of the Bible?', options: ['Genesis', 'Acts', 'Revelation', 'Proverbs'], answer: 2 },
+      { q: 'Easter celebrates…', options: ['The birth of Jesus', 'The Resurrection of Jesus', 'The first Christmas tree', 'The building of the ark'], answer: 1 },
+      { q: 'How many books are in the New Testament?', options: ['12', '27', '39', '66'], answer: 1 }
     ],
     general: [
       { q: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], answer: 1 },
@@ -78,7 +126,15 @@ var LearningCheck = (function() {
       { q: 'What is the largest mammal in the world?', options: ['Elephant', 'Blue Whale', 'Giraffe', 'Hippopotamus'], answer: 1 },
       { q: 'What force keeps us on the ground?', options: ['Magnetism', 'Friction', 'Gravity', 'Electricity'], answer: 2 },
       { q: 'What is the largest ocean?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 3 },
-      { q: 'How many planets in the solar system?', options: ['7', '8', '9', '10'], answer: 1 }
+      { q: 'How many planets in the solar system?', options: ['7', '8', '9', '10'], answer: 1 },
+      { q: 'How many days are in a leap year?', options: ['364', '365', '366', '367'], answer: 2 },
+      { q: 'How many sides does a hexagon have?', options: ['5', '6', '7', '8'], answer: 1 },
+      { q: 'What is the capital of the United States?', options: ['New York', 'Washington, D.C.', 'Los Angeles', 'Chicago'], answer: 1 },
+      { q: 'Which metal is liquid at room temperature?', options: ['Iron', 'Gold', 'Mercury', 'Copper'], answer: 2 },
+      { q: 'How many hours are in one day?', options: ['12', '24', '48', '60'], answer: 1 },
+      { q: 'What is H2O?', options: ['Salt', 'Air', 'Water', 'Sand'], answer: 2 },
+      { q: 'The Sun rises in which direction?', options: ['North', 'South', 'East', 'West'], answer: 2 },
+      { q: 'How many letters are in the English alphabet?', options: ['24', '25', '26', '27'], answer: 2 }
     ],
     science: [
       { q: 'What gas do plants absorb from the air?', options: ['Oxygen', 'Carbon Dioxide', 'Nitrogen', 'Hydrogen'], answer: 1 },
@@ -88,7 +144,33 @@ var LearningCheck = (function() {
       { q: 'At what temperature does water boil?', options: ['50°C', '90°C', '100°C', '120°C'], answer: 2 },
       { q: 'Which planet is closest to the Sun?', options: ['Venus', 'Earth', 'Mercury', 'Mars'], answer: 2 },
       { q: 'What is the closest star to Earth?', options: ['Sirius', 'Alpha Centauri', 'The Sun', 'Polaris'], answer: 2 },
-      { q: 'What force pulls objects toward the center of the Earth?', options: ['Magnetism', 'Friction', 'Gravity', 'Electricity'], answer: 2 }
+      { q: 'What force pulls objects toward the center of the Earth?', options: ['Magnetism', 'Friction', 'Gravity', 'Electricity'], answer: 2 },
+      { q: 'About how many bones are in an adult human body?', options: ['106', '206', '306', '506'], answer: 1 },
+      { q: 'Which planet is famous for its bright rings?', options: ['Mars', 'Venus', 'Saturn', 'Mercury'], answer: 2 },
+      { q: 'At what temperature does water freeze?', options: ['0°C', '32°C', '100°C', '−10°C'], answer: 0 },
+      { q: 'What gas do people need from the air to live?', options: ['Carbon dioxide', 'Oxygen', 'Helium', 'Hydrogen'], answer: 1 },
+      { q: 'A butterfly starts life as a…', options: ['Tadpole', 'Caterpillar', 'Fry', 'Calf'], answer: 1 },
+      { q: 'What is the center of an atom called?', options: ['The nucleus', 'The crust', 'The orbit', 'The shell'], answer: 0 },
+      { q: 'Which organ do you use to hear?', options: ['Eyes', 'Ears', 'Nose', 'Skin'], answer: 1 },
+      { q: 'What do herbivores eat?', options: ['Only meat', 'Only plants', 'Only fish', 'Only insects'], answer: 1 }
+    ],
+    geography: [
+      { q: 'What is the capital of Chile?', options: ['Valparaíso', 'Santiago', 'Lima', 'Buenos Aires'], answer: 1 },
+      { q: 'Which river carries the most water?', options: ['The Nile', 'The Amazon', 'The Mississippi', 'The Thames'], answer: 1 },
+      { q: 'Which continent is the largest?', options: ['Africa', 'Europe', 'Asia', 'North America'], answer: 2 },
+      { q: 'Which continent is the smallest?', options: ['Europe', 'Australia', 'South America', 'Antarctica'], answer: 1 },
+      { q: 'What is the capital of France?', options: ['Lyon', 'Paris', 'Madrid', 'Rome'], answer: 1 },
+      { q: 'Which mountains stand between Chile and Argentina?', options: ['The Alps', 'The Andes', 'The Rockies', 'The Himalayas'], answer: 1 },
+      { q: 'What is the largest hot desert?', options: ['The Gobi', 'The Sahara', 'The Atacama', 'The Kalahari'], answer: 1 },
+      { q: 'Which ocean lies between the Americas and Europe?', options: ['Pacific', 'Indian', 'Atlantic', 'Arctic'], answer: 2 },
+      { q: 'What is the capital of Japan?', options: ['Kyoto', 'Tokyo', 'Seoul', 'Beijing'], answer: 1 },
+      { q: 'Which country is shaped like a boot?', options: ['Spain', 'Greece', 'Italy', 'Portugal'], answer: 2 },
+      { q: 'What is the highest mountain above sea level?', options: ['Aconcagua', 'Kilimanjaro', 'Mount Everest', 'Denali'], answer: 2 },
+      { q: 'What line divides Earth into north and south?', options: ['The Equator', 'The Prime Meridian', 'The Tropic of Cancer', 'The Arctic Circle'], answer: 0 },
+      { q: 'What is the capital of Peru?', options: ['Cusco', 'Lima', 'Quito', 'La Paz'], answer: 1 },
+      { q: 'The Great Barrier Reef is off the coast of…', options: ['Brazil', 'Australia', 'South Africa', 'Mexico'], answer: 1 },
+      { q: 'What is the capital of Spain?', options: ['Barcelona', 'Seville', 'Madrid', 'Lisbon'], answer: 2 },
+      { q: 'Chile is on which continent?', options: ['Europe', 'Africa', 'South America', 'Asia'], answer: 2 }
     ]
   };
 
@@ -143,7 +225,7 @@ var LearningCheck = (function() {
     overlay.id = 'lcheck-overlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:11000;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--font-display);color:#fff;';
 
-    var SUBJECT_ICONS = { math: '🧮', music: '🎵', chess: '♟️', history: '🇨🇱', art: '🎨', faith: '⛪', general: '🌟' };
+    var SUBJECT_ICONS = { math: '🧮', music: '🎵', chess: '♟️', history: '🇨🇱', art: '🎨', faith: '⛪', science: '🔬', geography: '🌍', general: '🌟' };
     var icon = SUBJECT_ICONS[subject] || '🌟';
 
     var card = document.createElement('div');

@@ -759,21 +759,67 @@
       a: 1, why: 'All-or-nothing companies crash when their one big bet fails — that is company-specific risk.' },
     { q: 'Your stocks dropped this year. The smartest move is usually to…',
       opts: ['Panic and sell everything', 'Remember losses are normal and think long-term', 'Never invest again'],
-      a: 1, why: 'Down years happen to everyone. Staying calm and long-term is how investors win.' }
+      a: 1, why: 'Down years happen to everyone. Staying calm and long-term is how investors win.' },
+    { q: 'What is investing?',
+      opts: ['Putting money to work so it can grow', 'Spending money right away', 'Hiding money where nobody can find it'],
+      a: 0, why: 'Investing means buying something today and hoping it is worth more later.' },
+    { q: 'Compounding is when…',
+      opts: ['You spend every gain right away', 'Your gains start earning gains of their own', 'A stock is only allowed to go up'],
+      a: 1, why: 'Like a snowball, money that stays invested earns more, and that extra money earns even more.' },
+    { q: 'When banks pay higher interest, risky stocks often…',
+      opts: ['Look less tempting', 'Are required to double', 'Stop trading forever'],
+      a: 0, why: 'If a bank pays more for safe savings, fewer people need to take a risky bet.' },
+    { q: 'A stock shoots up because buyers are excited, then the price pops. That is…',
+      opts: ['A government rule', 'Hype and fear', 'A free bonus share'],
+      a: 1, why: 'Excitement can push a price too high. When the excitement fades, the price falls back.' },
+    { q: 'You invest $100 and a year later have $80. Your ROI is…',
+      opts: ['80%', '−20%', '20%'],
+      a: 1, why: 'You lost $20 of the $100 you put in. That is a −20% ROI.' },
+    { q: 'A rocket company can soar or crash even when the rest of the market is calm. That is…',
+      opts: ['Company-specific risk', 'A guarantee of profit', 'The same as a savings account'],
+      a: 0, why: 'Company-specific risk belongs to one company. It can happen whether the market is up or down.' },
+    { q: 'Why do many investors simply buy the S&P 500?',
+      opts: ['It owns only one small shop', 'Most people do not beat it by picking stocks', 'It never goes down'],
+      a: 1, why: 'The S&P 500 is the benchmark. Most stock-pickers do not beat it, so many people buy the index itself.' },
+    { q: 'Compared with a stock, a savings account usually…',
+      opts: ['Grows more slowly and with less risk', 'Doubles every week', 'Disappears if the market falls'],
+      a: 0, why: 'Safer places for money tend to grow slowly. Bigger possible rewards come with more risk.' },
+    { q: 'Compounding helps the most when you…',
+      opts: ['Sell everything after one day', 'Leave the money invested for a long time', 'Only buy on Fridays'],
+      a: 1, why: 'The snowball needs time. The longer money stays invested, the more the gains can earn gains.' }
   ];
 
   var quizState = null;
-  function quiz() { _sound('click'); quizState = { idx: 0, correct: 0 }; _renderQuiz(); }
+  // One sitting stays 9 questions, drawn from the larger bank, so a
+  // strong round is still 7 of 9 (the star rule in auth.js).
+  var QUIZ_PER_ROUND = 9;
+
+  function _quizRound() {
+    var pool = QUIZ.slice();
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var swap = pool[i];
+      pool[i] = pool[j];
+      pool[j] = swap;
+    }
+    return pool.slice(0, Math.min(QUIZ_PER_ROUND, pool.length));
+  }
+
+  function quiz() {
+    _sound('click');
+    quizState = { idx: 0, correct: 0, items: _quizRound() };
+    _renderQuiz();
+  }
 
   function _renderQuiz() {
-    var item = QUIZ[quizState.idx];
+    var item = quizState.items[quizState.idx];
     if (!item) return _renderQuizResult();
     var opts = item.opts.map(function(o, i) {
       return '<button type="button" class="iq-quiz-opt" onclick="InvestQuest._answer(this,' + i + ')">' + o + '</button>';
     }).join('');
     _root().innerHTML =
       '<div class="iq-game">' +
-        _topBar('Quiz · ' + (quizState.idx + 1) + ' of ' + QUIZ.length, true) +
+        _topBar('Quiz · ' + (quizState.idx + 1) + ' of ' + quizState.items.length, true) +
         '<div class="iq-panel">' +
           '<div class="iq-quiz-q">' + item.q + '</div>' +
           '<div class="iq-quiz-opts" id="iq-quiz-opts">' + opts + '</div>' +
@@ -783,7 +829,7 @@
   }
 
   function _answer(btn, i) {
-    var item = QUIZ[quizState.idx];
+    var item = quizState.items[quizState.idx];
     var opts = document.querySelectorAll('#iq-quiz-opts .iq-quiz-opt');
     for (var k = 0; k < opts.length; k++) {
       opts[k].disabled = true;
@@ -797,7 +843,7 @@
   }
 
   function _renderQuizResult() {
-    var n = QUIZ.length, c = quizState.correct;
+    var n = quizState.items.length, c = quizState.correct;
     var emoji = c === n ? '🏆' : c >= n * 0.6 ? '🌟' : '💪';
     var title = c === n ? 'Perfect score!' : c >= n * 0.6 ? 'Well done!' : 'Good try!';
 
