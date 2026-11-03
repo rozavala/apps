@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/trophy-room.css">
+  <link rel="stylesheet" href="css/trophy-room.css?v=1">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -22,37 +22,57 @@
   <div class="atmo" style="width:400px;height:400px;background:rgba(251,191,36,0.1);top:-100px;left:-100px;"></div>
   <div class="atmo" style="width:350px;height:350px;background:rgba(167,139,250,0.08);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
 
-  <div class="app">
+  <div class="app tr-app">
     <div class="screen active" id="screen-main">
-      <div class="tr-header">
-        <span class="tr-icon">🏆</span>
-        <h1>Trophy Room</h1>
+      <header class="tr-header">
+        <div class="tr-sign">
+          <span class="tr-icon" aria-hidden="true">🏆</span>
+          <h1>Trophy Room</h1>
+        </div>
         <p id="tr-subtitle">Every badge, every rank, every milestone</p>
-      </div>
+      </header>
 
-      <div class="tr-rank-banner" id="tr-rank-banner"></div>
+      <section class="tr-rank-banner" id="tr-rank-banner" aria-label="Rank"></section>
 
       <div class="tr-progress-strip" id="tr-progress-strip"></div>
 
-      <div class="tr-section-label">🎮 App Badges</div>
-      <div class="tr-grid" id="tr-grid">
-        <!-- Populated by JS -->
+      <h2 class="tr-section-label">App Badges</h2>
+      <div class="tr-legend" aria-hidden="true">
+        <span><i class="tr-dot bronze"></i>Bronze · first star</span>
+        <span><i class="tr-dot silver"></i>Silver · 5 stars</span>
+        <span><i class="tr-dot gold"></i>Gold trophy · 15 stars (most apps)</span>
+      </div>
+      <div class="tr-cabinet">
+        <div class="tr-cabinet-crown" aria-hidden="true"></div>
+        <div class="tr-cabinet-body">
+          <div class="tr-grid" id="tr-grid">
+            <!-- Populated by JS -->
+          </div>
+          <div class="tr-cabinet-glare" aria-hidden="true"></div>
+        </div>
+        <div class="tr-cabinet-base" aria-hidden="true"></div>
       </div>
 
-      <div class="tr-section-label" id="tr-next-label" style="display:none;">🎯 Next Up</div>
+      <h2 class="tr-section-label">Milestones</h2>
+      <div class="tr-wall">
+        <div class="tr-plaques" id="tr-milestones"></div>
+      </div>
+
+      <h2 class="tr-section-label" id="tr-next-label" style="display:none;">Next Up</h2>
       <div class="tr-next" id="tr-next"></div>
     </div>
   </div>
 
   <script src="js/dialog.js?v=2"></script>
   <script src="js/debug.js?v=3"></script>
-  <script src="js/auth.js?v=4"></script>
+  <script src="js/auth.js?v=5"></script>
   <script src="js/off-hours.js?v=1"></script>
   <script src="js/a11y.js"></script>
   <script src="js/sync.js?v=16"></script>
   <script src="js/zs-diag.js?v=3"></script>
   <script src="js/nav.js?v=3"></script>
-  <script src="js/trophy-room.js?v=2"></script>
+  <script src="js/trophy-room-art.js?v=1"></script>
+  <script src="js/trophy-room.js?v=3"></script>
   <script src="js/pwa.js"></script>
 
 </body>

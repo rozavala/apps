@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Civics Lab 🏛️</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/civics-lab.css">
+  <link rel="stylesheet" href="css/civics-lab.css?v=1">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#FBBF24">
@@ -21,50 +21,89 @@
   <div class="atmo" style="width:400px;height:400px;background:rgba(251,191,36,0.08);top:-100px;left:-100px;"></div>
   <div class="atmo" style="width:350px;height:350px;background:rgba(30,58,138,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
 
-  <div class="app">
+  <div class="app cv-app">
     <!-- SCREEN: Home -->
     <div class="cv-screen active" id="cv-screen-home">
-      <div class="cv-header">
-        <button class="cv-lang-toggle" id="cv-lang-toggle">
-          <span id="cv-lang-label">EN / ES</span> 🌐
-        </button>
-        <span class="icon">🏛️</span>
-        <h1>Civics Lab</h1>
-        <p>Cómo funciona el gobierno de Chile y otros sistemas del mundo.</p>
-      </div>
+      <section class="cv-hero" aria-labelledby="cv-title">
+        <div class="cv-hero-art" id="cv-hero-art"></div>
+        <div class="cv-hero-body">
+          <button type="button" class="cv-lang-toggle" id="cv-lang-toggle" aria-label="Switch language / Cambiar idioma">
+            <span id="cv-lang-label">EN / ES</span>
+          </button>
+          <h1 id="cv-title">Civics Lab</h1>
+          <p class="cv-hero-sub" id="cv-hero-sub">Cómo funciona el gobierno de Chile y otros sistemas del mundo.</p>
+          <div class="cv-hero-progress" id="cv-hero-progress"></div>
+        </div>
+      </section>
+      <h2 class="cv-group-label" id="cv-learn-label">Learn</h2>
       <div class="cv-tiles">
-        <button class="cv-tile" id="cv-tile-branches">
-          <span class="cv-tile-icon">🏛️</span>
-          <div class="cv-tile-title">Las Tres Ramas</div>
-          <div class="cv-tile-desc">The three branches of Chilean government</div>
-          <div class="cv-tile-stat" id="cv-branches-stat">0/0</div>
+        <button type="button" class="cv-tile" id="cv-tile-branches">
+          <span class="cv-tile-icon" data-icon="branches"></span>
+          <span class="cv-tile-text">
+            <span class="cv-tile-title">Las Tres Ramas</span>
+            <span class="cv-tile-desc" data-en="The three branches and how they check each other" data-es="Los tres poderes y cómo se controlan entre sí">The three branches and how they check each other</span>
+          </span>
+          <span class="cv-tile-stat" id="cv-branches-stat">0/0</span>
         </button>
-        <button class="cv-tile" id="cv-tile-institutions">
-          <span class="cv-tile-icon">🏢</span>
-          <div class="cv-tile-title">Instituciones</div>
-          <div class="cv-tile-desc">Key institutions of Chile</div>
-          <div class="cv-tile-stat" id="cv-institutions-stat">0/0</div>
+        <button type="button" class="cv-tile" id="cv-tile-institutions">
+          <span class="cv-tile-icon cv-tile-icon-wide" data-icon="congreso"></span>
+          <span class="cv-tile-text">
+            <span class="cv-tile-title">Instituciones</span>
+            <span class="cv-tile-desc" data-en="Key institutions of Chile" data-es="Instituciones clave de Chile">Key institutions of Chile</span>
+          </span>
+          <span class="cv-tile-stat" id="cv-institutions-stat">0/0</span>
         </button>
-        <button class="cv-tile" id="cv-tile-law">
-          <span class="cv-tile-icon">📜</span>
-          <div class="cv-tile-title">¿Cómo se hace una ley?</div>
-          <div class="cv-tile-desc">How a Chilean law is made — step by step</div>
-          <div class="cv-tile-stat" id="cv-law-stat">–</div>
+        <button type="button" class="cv-tile" id="cv-tile-law">
+          <span class="cv-tile-icon" data-icon="law"></span>
+          <span class="cv-tile-text">
+            <span class="cv-tile-title">¿Cómo se hace una ley?</span>
+            <span class="cv-tile-desc" data-en="Move a bill along the board, step by step" data-es="Lleva un proyecto por el tablero, paso a paso">Move a bill along the board, step by step</span>
+          </span>
+          <span class="cv-tile-stat" id="cv-law-stat">–</span>
         </button>
-        <button class="cv-tile" id="cv-tile-comparative">
-          <span class="cv-tile-icon">🌍</span>
-          <div class="cv-tile-title">Compara</div>
-          <div class="cv-tile-desc">Compare Chile with other government systems</div>
-          <div class="cv-tile-stat" id="cv-comp-stat">0 best</div>
+        <button type="button" class="cv-tile" id="cv-tile-comparative">
+          <span class="cv-tile-icon cv-tile-icon-wide" data-icon="compare"></span>
+          <span class="cv-tile-text">
+            <span class="cv-tile-title">Compara</span>
+            <span class="cv-tile-desc" data-en="Chile next to other government systems" data-es="Chile junto a otros sistemas de gobierno">Chile next to other government systems</span>
+          </span>
+          <span class="cv-tile-stat" id="cv-comp-stat">0 best</span>
+        </button>
+      </div>
+      <h2 class="cv-group-label" id="cv-challenge-label">Challenges</h2>
+      <div class="cv-tiles">
+        <button type="button" class="cv-tile cv-tile-challenge" id="cv-tile-sort">
+          <span class="cv-tile-icon" data-icon="sort"></span>
+          <span class="cv-tile-text">
+            <span class="cv-tile-title" data-en="Sort the powers" data-es="Ordena los poderes">Sort the powers</span>
+            <span class="cv-tile-desc" data-en="Put each power in the right branch" data-es="Pon cada facultad en su poder del Estado">Put each power in the right branch</span>
+          </span>
+          <span class="cv-tile-stat" id="cv-sort-stat"></span>
+        </button>
+        <button type="button" class="cv-tile cv-tile-challenge" id="cv-tile-order">
+          <span class="cv-tile-icon" data-icon="order"></span>
+          <span class="cv-tile-text">
+            <span class="cv-tile-title" data-en="Build the law" data-es="Arma la ley">Build the law</span>
+            <span class="cv-tile-desc" data-en="Put the steps of a law in order" data-es="Ordena los pasos de una ley">Put the steps of a law in order</span>
+          </span>
+          <span class="cv-tile-stat" id="cv-order-stat"></span>
         </button>
       </div>
     </div>
 
-    <!-- SCREEN: Branch list -->
+    <!-- SCREEN: Branches + checks and balances diagram -->
     <div class="cv-screen" id="cv-screen-branches">
-      <button class="cv-back-btn cv-home-btn" aria-label="Back to home">←</button>
-      <h2 class="cv-section-title">🏛️ Las Tres Ramas / Three Branches</h2>
-      <div class="cv-grid" id="cv-branch-grid"></div>
+      <div class="cv-toolbar">
+        <button type="button" class="cv-back-btn cv-home-btn" aria-label="Back to home">←</button>
+        <h2 class="cv-section-title" id="cv-branches-title">Las Tres Ramas / Three Branches</h2>
+      </div>
+      <div class="cv-diagram-card">
+        <div class="cv-diagram" id="cv-diagram"></div>
+        <div class="cv-check-info" id="cv-check-info" aria-live="polite"></div>
+        <p class="cv-diagram-hint" id="cv-diagram-hint"></p>
+        <div class="cv-checks" id="cv-checks" role="group"></div>
+      </div>
+      <div class="cv-grid cv-branch-grid" id="cv-branch-grid"></div>
     </div>
 
     <!-- SCREEN: Branch detail -->
@@ -74,9 +113,11 @@
 
     <!-- SCREEN: Institution list -->
     <div class="cv-screen" id="cv-screen-institutions">
-      <button class="cv-back-btn cv-home-btn" aria-label="Back to home">←</button>
-      <h2 class="cv-section-title">🏢 Instituciones / Institutions</h2>
-      <div class="cv-grid" id="cv-institution-grid"></div>
+      <div class="cv-toolbar">
+        <button type="button" class="cv-back-btn cv-home-btn" aria-label="Back to home">←</button>
+        <h2 class="cv-section-title" id="cv-inst-title">Instituciones / Institutions</h2>
+      </div>
+      <div class="cv-grid cv-inst-grid" id="cv-institution-grid"></div>
     </div>
 
     <!-- SCREEN: Institution detail -->
@@ -84,9 +125,24 @@
       <div id="cv-inst-detail"></div>
     </div>
 
-    <!-- SCREEN: Law-making walkthrough -->
+    <!-- SCREEN: Law-making board -->
     <div class="cv-screen" id="cv-screen-law">
       <div id="cv-law-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Compare cards -->
+    <div class="cv-screen" id="cv-screen-compare">
+      <div id="cv-compare-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Sort the powers -->
+    <div class="cv-screen" id="cv-screen-sort">
+      <div id="cv-sort-wrap"></div>
+    </div>
+
+    <!-- SCREEN: Build the law (order) -->
+    <div class="cv-screen" id="cv-screen-order">
+      <div id="cv-order-wrap"></div>
     </div>
 
     <!-- SCREEN: Quiz -->
@@ -100,7 +156,7 @@
     </div>
   </div>
 
-  <script src="js/auth.js?v=4"></script>
+  <script src="js/auth.js?v=5"></script>
   <script src="js/off-hours.js?v=1"></script>
   <script src="js/a11y.js"></script>
   <script src="js/dialog.js?v=2"></script>
@@ -109,7 +165,9 @@
   <script src="js/nav.js?v=3"></script>
   <script src="js/sounds.js"></script>
   <script src="js/activity-log.js"></script>
-  <script src="js/civics-lab.js?v=2"></script>
+  <script src="js/civics-lab-data.js?v=1"></script>
+  <script src="js/civics-lab-art.js?v=1"></script>
+  <script src="js/civics-lab.js?v=3"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>

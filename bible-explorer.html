@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/bible-explorer.css">
+  <link rel="stylesheet" href="css/bible-explorer.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#818CF8">
@@ -18,37 +18,39 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-  <div class="atmo" style="width:400px;height:400px;background:rgba(129,140,248,0.10);top:-100px;left:-100px;"></div>
-  <div class="atmo" style="width:350px;height:350px;background:rgba(251,191,36,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
-
-  <div class="app">
+  <div class="app bx-app">
     <!-- SCREEN: Home -->
     <div class="bx-screen active" id="bx-screen-home">
       <div class="bx-header">
-        <button class="bx-lang-toggle" id="bx-lang-toggle">
+        <button type="button" class="bx-lang-toggle" id="bx-lang-toggle" aria-label="Language / Idioma">
           <span id="bx-lang-label">EN / ES</span> 🌐
         </button>
-        <span class="icon">📖</span>
-        <h1>Bible Explorer</h1>
-        <p>Historias, versículos y los libros de la Sagrada Escritura.</p>
+        <div class="bx-hero">
+          <div class="bx-hero-art" id="bx-hero-art" aria-hidden="true"></div>
+          <div class="bx-hero-text">
+            <h1>Bible Explorer</h1>
+            <p data-l10n="Stories, verses and the books of Holy Scripture.|Historias, versículos y los libros de la Sagrada Escritura.">Historias, versículos y los libros de la Sagrada Escritura.</p>
+          </div>
+        </div>
       </div>
+      <button type="button" class="bx-review-banner" id="bx-review-banner" hidden></button>
       <div class="bx-tiles">
-        <button class="bx-tile" id="bx-tile-stories">
-          <span class="bx-tile-icon">📖</span>
-          <div class="bx-tile-title">Historias</div>
-          <div class="bx-tile-desc">Stories from the Bible</div>
+        <button type="button" class="bx-tile" id="bx-tile-stories">
+          <span class="bx-tile-icon" id="bx-ico-stories" aria-hidden="true"></span>
+          <div class="bx-tile-title" data-l10n="Stories|Historias">Historias</div>
+          <div class="bx-tile-desc" data-l10n="Illustrated stories from the Bible|Historias ilustradas de la Biblia">Stories from the Bible</div>
           <div class="bx-tile-stat" id="bx-stories-stat">0/0</div>
         </button>
-        <button class="bx-tile" id="bx-tile-verses">
-          <span class="bx-tile-icon">✨</span>
-          <div class="bx-tile-title">Memoriza</div>
-          <div class="bx-tile-desc">Memorise verses</div>
+        <button type="button" class="bx-tile" id="bx-tile-verses">
+          <span class="bx-tile-icon" id="bx-ico-verses" aria-hidden="true"></span>
+          <div class="bx-tile-title" data-l10n="Memorise|Memoriza">Memoriza</div>
+          <div class="bx-tile-desc" data-l10n="Fill the gap, word order, daily review|Huecos, ordenar palabras, repaso diario">Memorise verses</div>
           <div class="bx-tile-stat" id="bx-verses-stat">0/0</div>
         </button>
-        <button class="bx-tile" id="bx-tile-books">
-          <span class="bx-tile-icon">📚</span>
-          <div class="bx-tile-title">Libros</div>
-          <div class="bx-tile-desc">Books of the Bible</div>
+        <button type="button" class="bx-tile" id="bx-tile-books">
+          <span class="bx-tile-icon" id="bx-ico-books" aria-hidden="true"></span>
+          <div class="bx-tile-title" data-l10n="Books|Libros">Libros</div>
+          <div class="bx-tile-desc" data-l10n="The bookshelf of the 73 books|La estantería de los 73 libros">Books of the Bible</div>
           <div class="bx-tile-stat" id="bx-books-stat">0/0</div>
         </button>
       </div>
@@ -56,8 +58,8 @@
 
     <!-- SCREEN: Stories list -->
     <div class="bx-screen" id="bx-screen-stories">
-      <button class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button>
-      <h2 class="bx-section-title">📖 Historias / Stories</h2>
+      <div class="bx-topbar"><button type="button" class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button></div>
+      <h2 class="bx-section-title">Historias / Stories</h2>
       <div class="bx-story-grid" id="bx-story-grid"></div>
     </div>
 
@@ -68,8 +70,8 @@
 
     <!-- SCREEN: Story quiz -->
     <div class="bx-screen" id="bx-screen-story-quiz">
-      <button class="bx-back-btn" onclick="BibleExplorer.backToStoryList()">←</button>
-      <div id="bx-quiz-wrap"></div>
+      <div class="bx-topbar"><button type="button" class="bx-back-btn" aria-label="Back to stories" onclick="BibleExplorer.backToStoryList()">←</button></div>
+      <div class="bx-quiz-card" id="bx-quiz-wrap"></div>
     </div>
 
     <!-- SCREEN: Story quiz result -->
@@ -79,20 +81,20 @@
 
     <!-- SCREEN: Verses list -->
     <div class="bx-screen" id="bx-screen-verses">
-      <button class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button>
-      <h2 class="bx-section-title">✨ Memoriza / Memorise</h2>
+      <div class="bx-topbar"><button type="button" class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button></div>
+      <h2 class="bx-section-title">Memoriza / Memorise</h2>
       <div class="bx-verse-grid" id="bx-verse-grid"></div>
     </div>
 
-    <!-- SCREEN: Verse detail / fill-in-the-blank -->
+    <!-- SCREEN: Verse detail / fill-in-the-blank / word order -->
     <div class="bx-screen" id="bx-screen-verse-detail">
       <div id="bx-verse-detail"></div>
     </div>
 
     <!-- SCREEN: Books list -->
     <div class="bx-screen" id="bx-screen-books">
-      <button class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button>
-      <h2 class="bx-section-title">📚 Libros / Books</h2>
+      <div class="bx-topbar"><button type="button" class="bx-back-btn bx-home-btn" aria-label="Back to home">←</button></div>
+      <h2 class="bx-section-title">Libros / Books</h2>
       <div class="bx-book-grid" id="bx-book-grid"></div>
     </div>
 
@@ -102,7 +104,7 @@
     </div>
   </div>
 
-  <script src="js/auth.js?v=4"></script>
+  <script src="js/auth.js?v=5"></script>
   <script src="js/off-hours.js?v=1"></script>
   <script src="js/a11y.js"></script>
   <script src="js/dialog.js?v=2"></script>
@@ -111,7 +113,8 @@
   <script src="js/nav.js?v=3"></script>
   <script src="js/sounds.js"></script>
   <script src="js/activity-log.js"></script>
-  <script src="js/bible-explorer.js?v=2"></script>
+  <script src="js/bible-explorer-art.js?v=1"></script>
+  <script src="js/bible-explorer.js?v=3"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>

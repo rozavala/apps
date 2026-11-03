@@ -1,7 +1,8 @@
 /* ================================================================
    GUESS QUEST — guess-quest.js
-   20 Questions game for car trips.
-   Requires: auth.js, sounds.js, timer.js, activity-log.js
+   20 Questions game for car trips: drive closer to the answer with
+   every clue. Requires: auth.js, sounds.js, timer.js, activity-log.js,
+   guess-quest-art.js (optional; falls back to plain text).
    ================================================================ */
 
 const GuessQuest = (() => {
@@ -248,6 +249,130 @@ const GuessQuest = (() => {
     { id: 'object',    emoji: '🔧', name: { en: 'Objects', es: 'Objetos' } },
   ];
 
+
+  // ── Answer rules ──
+  // An item's own true/false flag always wins. Where the list leaves a
+  // flag out, these rules fill in the obvious answer so a pizza says
+  // "No" to "Is it an animal?" instead of "Maybe". Anything not covered
+  // stays "Maybe" and does not narrow the search.
+  const TYPE_ATTR = {
+    isAnimal: 'animal', isPlant: 'plant', isFood: 'food', isVehicle: 'vehicle',
+    isCharacter: 'character', isPlace: 'place', isObject: 'object'
+  };
+  const COLOR_ATTRS = ['isYellow', 'isGreen', 'isRed', 'isBlue', 'isWhite', 'isBlack', 'isBrown', 'isGrey'];
+  const ANIMAL_CLOSED = ['isMammal', 'canFly', 'hasWings', 'isPet', 'livesInWater', 'hasFur'];
+  // Honest "maybe" answers for items where yes/no would be misleading.
+  const UNSURE = {
+    hedgehog: ['hasFur'],          // spines on top, fur on face and belly
+    turtle: ['isPet'],             // some families keep small turtles
+    pirate: ['isReal', 'isFictional'], // real pirates sailed; storybook ones too
+    knight: ['isReal', 'isFictional']  // real medieval knights; storybook ones too
+  };
+  // Answers that need a short fact next to them.
+  const OVERRIDE = {
+    mushroom: { isPlant: false }
+  };
+  const NOTES = {
+    mushroom: { isPlant: { en: 'Mushrooms are fungi, not plants.', es: 'Los hongos no son plantas: son hongos.' } },
+    pirate: { isReal: { en: 'Real pirates sailed long ago, and there are storybook pirates too.', es: 'Hubo piratas reales hace mucho, y también hay piratas de cuentos.' } },
+    knight: { isReal: { en: 'Real knights lived in the Middle Ages, and there are storybook knights too.', es: 'Hubo caballeros reales en la Edad Media, y también hay caballeros de cuentos.' } }
+  };
+
+  function answerFor(item, attr) {
+    if (UNSURE[item.id] && UNSURE[item.id].indexOf(attr) !== -1) return null;
+    if (OVERRIDE[item.id] && attr in OVERRIDE[item.id]) return OVERRIDE[item.id][attr];
+    const a = item.attrs;
+    if (a[attr] === true || a[attr] === false) return a[attr];
+    if (TYPE_ATTR[attr]) return item.category === TYPE_ATTR[attr];
+    if (attr === 'isReal') return !a.isFictional;
+    if (attr === 'isFictional') return a.isReal === true || item.category !== 'character' ? false : null;
+    if (COLOR_ATTRS.indexOf(attr) !== -1) {
+      return COLOR_ATTRS.some(c => a[c] === true) ? false : null;
+    }
+    if (attr === 'isBig' && a.isSmall === true) return false;
+    if (attr === 'isSmall' && a.isBig === true) return false;
+    if (item.category === 'animal' && ANIMAL_CLOSED.indexOf(attr) !== -1) return false;
+    if (attr === 'makesSounds' && (item.category === 'food' || item.category === 'plant' || item.category === 'object')) return false;
+    if ((attr === 'isSweet' || attr === 'isFruit' || attr === 'isDangerous') && item.category === 'food') return false;
+    return null;
+  }
+
+  // Short clue labels for the highway clue board.
+  const SHORT = {
+    isAnimal: { en: 'animal', es: 'animal' }, isPlant: { en: 'plant', es: 'planta' },
+    isFood: { en: 'food', es: 'comida' }, isVehicle: { en: 'vehicle', es: 'vehículo' },
+    isCharacter: { en: 'character', es: 'personaje' }, isPlace: { en: 'place', es: 'lugar' },
+    isObject: { en: 'object', es: 'objeto' }, isBig: { en: 'big', es: 'grande' },
+    isSmall: { en: 'small', es: 'pequeño' }, isDangerous: { en: 'dangerous', es: 'peligroso' },
+    isReal: { en: 'real', es: 'real' }, isFictional: { en: 'fictional', es: 'ficticio' },
+    isRound: { en: 'round', es: 'redondo' }, makesSounds: { en: 'makes sounds', es: 'hace sonidos' },
+    isYellow: { en: 'yellow', es: 'amarillo' }, isGreen: { en: 'green', es: 'verde' },
+    isRed: { en: 'red', es: 'rojo' }, isBlue: { en: 'blue', es: 'azul' },
+    isWhite: { en: 'white', es: 'blanco' }, isBlack: { en: 'black', es: 'negro' },
+    isMammal: { en: 'mammal', es: 'mamífero' }, canFly: { en: 'flies', es: 'vuela' },
+    livesInWater: { en: 'lives in water', es: 'vive en el agua' }, hasFur: { en: 'fur', es: 'pelaje' },
+    isPet: { en: 'pet', es: 'mascota' }, hasTail: { en: 'tail', es: 'cola' },
+    hasWings: { en: 'wings', es: 'alas' }, isSweet: { en: 'sweet', es: 'dulce' },
+    isFruit: { en: 'fruit', es: 'fruta' }, foundInKitchen: { en: 'kitchen', es: 'cocina' },
+    livesInAfrica: { en: 'Africa', es: 'África' }, livesInJungle: { en: 'jungle', es: 'selva' },
+    foundInChile: { en: 'Chile', es: 'Chile' }, foundInHouse: { en: 'in a house', es: 'en una casa' }
+  };
+
+  // ── Extra round state (the trip) ──
+  let answers = {};          // attr → true / false / null, in the order asked
+  let revealed = new Set();  // letter positions bought with a hint
+  let tier = 'intermediate';
+  let lastProgress = 0;
+  let busy = false;
+
+  function _tier() {
+    return typeof getAgeTier === 'function' ? getAgeTier() : 'intermediate';
+  }
+  function _T(en, es) { return lang === 'es' ? es : en; }
+  function _esc(s) { return typeof escHtml === 'function' ? escHtml(s) : String(s).replace(/[&<>"']/g, ''); }
+
+  function _pool() {
+    return selectedCategory === 'all' ? ITEMS : ITEMS.filter(item => item.category === selectedCategory);
+  }
+  function _letters(item) {
+    return Array.from(item.name[lang].toUpperCase());
+  }
+  function _isLetter(ch) { return /[A-ZÁÉÍÓÚÜÑ]/.test(ch); }
+
+  function _compatible(item) {
+    for (const attr in answers) {
+      const s = answers[attr];
+      if (s === null) continue;
+      const v = answerFor(item, attr);
+      if (v !== null && v !== s) return false;
+    }
+    if (revealed.size) {
+      // Only the bought letters narrow the list (the tile count is a
+      // visible clue the kid can use on their own).
+      const mine = _letters(secret), theirs = _letters(item);
+      for (const i of revealed) if (theirs[i] !== mine[i]) return false;
+    }
+    return true;
+  }
+  function _remaining() { return _pool().filter(_compatible); }
+
+  function _progress() {
+    const n = _pool().length, left = Math.max(1, _remaining().length);
+    if (n <= 1) return 1;
+    return Math.max(0, Math.min(1, 1 - Math.log(left) / Math.log(n)));
+  }
+  function _heat(p) {
+    if (p >= 0.8) return { cls: 'hot', label: _T('Very hot!', '¡Muy caliente!') };
+    if (p >= 0.5) return { cls: 'warm', label: _T('Hot', 'Caliente') };
+    if (p >= 0.22) return { cls: 'cool', label: _T('Warmer', 'Tibio') };
+    return { cls: 'cold', label: _T('Cold', 'Frío') };
+  }
+
+  function _userColor() {
+    const u = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    return typeof GuessQuestArt !== 'undefined' ? GuessQuestArt.safeColor(u && u.color) : '#C2410C';
+  }
+
   // ── Init ──
   function init() {
     const user = getActiveUser();
@@ -262,23 +387,51 @@ const GuessQuest = (() => {
   }
 
   function _renderCategorySelect() {
+    const hero = document.getElementById('gq-hero-scene');
+    if (hero && typeof GuessQuestArt !== 'undefined') {
+      hero.innerHTML = GuessQuestArt.scene({ color: _userColor(), seed: 5, label: _T('The family car on a road trip', 'El auto de la familia de viaje') });
+      GuessQuestArt.setProgress(hero, 0.06);
+      hero.classList.add('gq-idle');
+    }
+    const sub = document.getElementById('gq-sub');
+    if (sub) sub.textContent = _T("I'm thinking of something... ask questions and drive closer!", 'Estoy pensando en algo... ¡haz preguntas y acércate!');
+    const routeT = document.getElementById('gq-route-title');
+    if (routeT) routeT.textContent = _T('Pick a route', 'Elige una ruta');
+    const dTitle = document.getElementById('gq-daily-title');
+    if (dTitle) dTitle.textContent = _T('Daily Word · Palabra del Día', 'Palabra del Día · Daily Word');
+    const dSub = document.getElementById('gq-daily-sub');
+    if (dSub) dSub.textContent = _T('One puzzle a day. Guess the word in 6 tries.', 'Un desafío al día. Adivina la palabra en 6 intentos.');
+
+    const data = _load();
+    const found = (data.found || []).length;
+    const log = document.getElementById('gq-trip-log');
+    if (log) {
+      log.innerHTML = (data.roundsPlayed || 0) > 0
+        ? '<span>' + _T('Trips', 'Viajes') + ' <b>' + (data.roundsWon || 0) + '/' + (data.roundsPlayed || 0) + '</b></span>' +
+          '<span>⭐ <b>' + (data.totalStars || 0) + '</b></span>' +
+          '<span>' + _T('Postcards', 'Postales') + ' <b>' + found + '/' + ITEMS.length + '</b></span>'
+        : '<span>' + _T('Your trip log fills up as you play.', 'Tu bitácora de viaje se llena al jugar.') + '</span>';
+    }
+
     const grid = document.getElementById('category-grid');
-    grid.innerHTML = CATEGORY_PACKS.map(p => `
-      <div class="category-card" onclick="GuessQuest.startRound('${p.id}')">
-        <span class="cat-emoji">${p.emoji}</span>
-        <div class="cat-name">${p.name[lang]}</div>
-      </div>
-    `).join('');
+    grid.innerHTML = CATEGORY_PACKS.map(p => {
+      const n = p.id === 'all' ? ITEMS.length : ITEMS.filter(i => i.category === p.id).length;
+      return `
+      <button type="button" class="category-card route-sign" onclick="GuessQuest.startRound('${p.id}')">
+        <span class="route-picto">${typeof GuessQuestArt !== 'undefined' ? GuessQuestArt.picto(p.id) : p.emoji}</span>
+        <span class="cat-name">${p.name[lang]}</span>
+        <span class="route-km">${n} ${_T('stops', 'paradas')}</span>
+        <span class="route-arrow" aria-hidden="true">➜</span>
+      </button>`;
+    }).join('');
   }
 
   // ── Start a round ──
   function startRound(category) {
     selectedCategory = category;
-    const pool = category === 'all'
-      ? ITEMS
-      : ITEMS.filter(item => item.category === category);
+    const pool = _pool();
 
-    const tier = typeof getAgeTier === 'function' ? getAgeTier() : 'intermediate';
+    tier = _tier();
     maxQuestions = tier === 'beginner' ? 15 : 20;
 
     secret = pool[Math.floor(Math.random() * pool.length)];
@@ -286,16 +439,76 @@ const GuessQuest = (() => {
     askedAttrs = new Set();
     confirmedTrue = {};
     confirmedFalse = {};
+    answers = {};
+    revealed = new Set();
     stars = 0;
+    busy = false;
+    // Little ones see the first letter for free.
+    if (tier === 'beginner') revealed.add(0);
+
+    const sc = document.getElementById('gq-scene');
+    if (sc && typeof GuessQuestArt !== 'undefined') {
+      sc.innerHTML = GuessQuestArt.scene({ color: _userColor(), seed: 7, label: _T('Your car on the road to the answer', 'Tu auto en el camino a la respuesta') }) +
+        '<div class="gq-heat" id="gq-heat"></div>' +
+        '<div class="answer-display" id="answer-display" aria-live="polite"><div class="answer-emoji" id="answer-emoji"></div><div class="answer-text" id="answer-text"></div><div class="answer-note" id="answer-note"></div></div>';
+      lastProgress = 0;
+      GuessQuestArt.setProgress(sc, 0);
+    }
 
     _updateQuestionCounter();
     _renderGame();
     _showScreen('game');
-    
-    document.getElementById('answer-display').classList.remove('active');
+    window.scrollTo(0, 0);
+  }
+
+  function _renderHeat(p) {
+    const el = document.getElementById('gq-heat');
+    if (!el) return;
+    const h = _heat(p);
+    const left = _remaining().length;
+    el.className = 'gq-heat gq-heat-' + h.cls;
+    el.innerHTML = (typeof GuessQuestArt !== 'undefined' ? GuessQuestArt.thermometer(p) : '') +
+      '<span class="gq-heat-label">' + h.label + '</span>' +
+      '<span class="gq-heat-left">' + left + ' ' + _T(left === 1 ? 'possible' : 'possible', left === 1 ? 'posible' : 'posibles') + '</span>';
+  }
+
+  function _renderClues() {
+    const el = document.getElementById('gq-clues');
+    if (!el) return;
+    const keys = Object.keys(answers);
+    const chips = keys.map(attr => {
+      const v = answers[attr];
+      const cls = v === true ? 'yes' : v === false ? 'no' : 'maybe';
+      const mark = v === true ? '✓' : v === false ? '✗' : '?';
+      const label = SHORT[attr] ? SHORT[attr][lang] : attr;
+      return '<span class="clue-chip clue-' + cls + '"><b>' + mark + '</b> ' + _esc(label) + '</span>';
+    }).reverse().join('');
+    el.innerHTML =
+      '<div class="gq-sign-head"><span>' + _T('CLUES', 'PISTAS') + '</span><span class="gq-sign-route">' +
+        _T('Questions left', 'Preguntas') + ' <b>' + Math.max(0, maxQuestions - questionCount) + '</b></span></div>' +
+      '<div class="gq-sign-body">' + (chips || '<span class="clue-empty">' + _T('Ask a question below to get your first clue.', 'Haz una pregunta abajo para tu primera pista.') + '</span>') + '</div>';
+  }
+
+  function _renderTiles() {
+    const el = document.getElementById('gq-tiles');
+    if (!el || !secret) return;
+    const letters = _letters(secret);
+    const canBuy = questionCount + 2 <= maxQuestions && letters.some((ch, i) => _isLetter(ch) && !revealed.has(i));
+    el.innerHTML = '<div class="gq-tile-row" aria-label="' + _T('Hidden word', 'Palabra oculta') + ', ' + letters.filter(_isLetter).length + ' ' + _T('letters', 'letras') + '">' +
+      letters.map((ch, i) => {
+        if (!_isLetter(ch)) return '<span class="gq-tile gq-gap"></span>';
+        const show = revealed.has(i);
+        return '<span class="gq-tile' + (show ? ' gq-open' : '') + '"><span>' + (show ? _esc(ch) : '') + '</span></span>';
+      }).join('') + '</div>' +
+      '<button type="button" class="gq-hint-btn" id="gq-hint-btn" onclick="GuessQuest.buyLetter()"' + (canBuy ? '' : ' disabled') + '>' +
+        _T('Show a letter', 'Ver una letra') + ' <small>−2 ' + _T('questions', 'preguntas') + '</small></button>';
   }
 
   function _renderGame() {
+    const p = _progress();
+    _renderHeat(p);
+    _renderClues();
+    _renderTiles();
     const container = document.getElementById('question-categories');
     container.innerHTML = QUESTION_CATEGORIES.map(cat => {
       // Logic for showIf
@@ -307,11 +520,13 @@ const GuessQuest = (() => {
           <div class="q-grid">
             ${cat.questions.map(q => {
               const isAsked = askedAttrs.has(q.attr);
+              const v = answers[q.attr];
+              const tag = !isAsked ? '' : v === true ? '<span class="q-ans q-yes">' + _T('YES', 'SÍ') + '</span>' : v === false ? '<span class="q-ans q-no">NO</span>' : '<span class="q-ans q-maybe">?</span>';
               return `
-                <button class="q-btn ${isAsked ? 'asked' : ''}" 
+                <button type="button" class="q-btn ${isAsked ? 'asked' : ''}"
                         onclick="GuessQuest.askQuestion('${q.attr}')"
-                        ${isAsked ? 'disabled' : ''}>
-                  ${q.text[lang]}
+                        ${isAsked || questionCount >= maxQuestions ? 'disabled' : ''}>
+                  <span>${q.text[lang]}</span>${tag}
                 </button>
               `;
             }).join('')}
@@ -321,108 +536,172 @@ const GuessQuest = (() => {
     }).join('');
   }
 
+  function _drive(p) {
+    const sc = document.getElementById('gq-scene');
+    if (!sc || typeof GuessQuestArt === 'undefined') return;
+    const moved = p - lastProgress > 0.001;
+    GuessQuestArt.setProgress(sc, p);
+    if (moved) {
+      sc.classList.remove('gq-driving'); void sc.offsetWidth; sc.classList.add('gq-driving');
+      clearTimeout(_drive._t);
+      _drive._t = setTimeout(() => sc.classList.remove('gq-driving'), 1700);
+    } else {
+      sc.classList.remove('gq-idle-shake'); void sc.offsetWidth; sc.classList.add('gq-idle-shake');
+    }
+    lastProgress = p;
+  }
+
   function askQuestion(attr) {
-    if (askedAttrs.has(attr) || questionCount >= maxQuestions) return;
+    if (!secret || askedAttrs.has(attr) || questionCount >= maxQuestions) return;
 
     askedAttrs.add(attr);
     questionCount++;
 
-    const value = secret.attrs[attr];
-    let answerText, emoji, cssClass, spokenText;
+    const value = answerFor(secret, attr);
+    answers[attr] = value;
+    let answerText, cssClass, spokenText;
 
     if (value === true) {
       answerText = lang === 'es' ? '¡SÍ!' : 'YES!';
-      emoji = '✅';
       cssClass = 'answer-yes';
       spokenText = lang === 'es' ? 'Sí' : 'Yes';
       confirmedTrue[attr] = true;
     } else if (value === false) {
       answerText = lang === 'es' ? '¡NO!' : 'NO!';
-      emoji = '❌';
       cssClass = 'answer-no';
       spokenText = lang === 'es' ? 'No' : 'No';
       confirmedFalse[attr] = true;
     } else {
       answerText = lang === 'es' ? 'QUIZÁS...' : 'MAYBE...';
-      emoji = '🤷';
       cssClass = 'answer-maybe';
       spokenText = lang === 'es' ? 'No estoy seguro' : "I'm not sure";
     }
+    const note = NOTES[secret.id] && NOTES[secret.id][attr] ? NOTES[secret.id][attr][lang] : '';
 
-    _showAnswer(emoji, answerText, cssClass);
-    _speakAnswer(spokenText);
+    _showAnswer(cssClass, answerText, note);
+    _speakAnswer(note ? spokenText + '. ' + note : spokenText);
+    if (typeof SFX !== 'undefined' && SFX.click) SFX.click();
     _updateQuestionCounter();
-    _renderGame(); // Refresh buttons
+    _renderGame(); // Refresh buttons, clues, heat
+    _drive(_progress());
 
     if (questionCount >= maxQuestions) {
-      setTimeout(() => _revealSecret(false), 2000);
+      // Out of questions: one last guess instead of an automatic miss.
+      setTimeout(() => showGuessScreen(true), 1600);
     }
   }
 
-  function _showAnswer(emoji, text, cssClass) {
-    const display = document.getElementById('answer-display');
-    display.className = 'answer-display active ' + cssClass;
-    document.getElementById('answer-emoji').textContent = emoji;
-    document.getElementById('answer-text').textContent = text;
-
-    setTimeout(() => {
-      display.classList.remove('active');
-    }, 2000);
+  function buyLetter() {
+    if (!secret) return;
+    const letters = _letters(secret);
+    const hidden = letters.map((ch, i) => i).filter(i => _isLetter(letters[i]) && !revealed.has(i));
+    if (!hidden.length || questionCount + 2 > maxQuestions) return;
+    const i = hidden[Math.floor(Math.random() * hidden.length)];
+    revealed.add(i);
+    questionCount = Math.min(maxQuestions, questionCount + 2);
+    if (typeof SFX !== 'undefined' && SFX.star) SFX.star();
+    _updateQuestionCounter();
+    _renderGame();
+    const tiles = document.querySelectorAll('#gq-tiles .gq-tile');
+    if (tiles[i]) tiles[i].classList.add('gq-flip');
+    _drive(_progress());
+    if (questionCount >= maxQuestions) setTimeout(() => showGuessScreen(true), 1400);
   }
 
-  function showGuessScreen() {
+  function _signSVG(kind) {
+    if (kind === 'answer-yes') {
+      return '<svg viewBox="0 0 60 60" width="64" height="64" aria-hidden="true"><circle cx="30" cy="30" r="27" fill="#0f8a4c" stroke="#fff" stroke-width="4"/><circle cx="30" cy="30" r="29" fill="none" stroke="#0a6236" stroke-width="1.5"/><path d="M17 31l9 9 17-19" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+    if (kind === 'answer-no') {
+      return '<svg viewBox="0 0 60 60" width="64" height="64" aria-hidden="true"><path d="M19 2h22l17 17v22L41 58H19L2 41V19z" fill="#d22f27" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M20 20l20 20M40 20L20 40" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>';
+    }
+    return '<svg viewBox="0 0 60 60" width="64" height="64" aria-hidden="true"><path d="M30 3l27 27-27 27L3 30z" fill="#f6b916" stroke="#1d1d1d" stroke-width="3" stroke-linejoin="round"/><text x="30" y="40" text-anchor="middle" font-size="28" font-weight="900" fill="#1d1d1d" font-family="Arial, sans-serif">?</text></svg>';
+  }
+
+  function _showAnswer(cssClass, text, note) {
+    const display = document.getElementById('answer-display');
+    if (!display) return;
+    display.className = 'answer-display active ' + cssClass;
+    document.getElementById('answer-emoji').innerHTML = _signSVG(cssClass);
+    document.getElementById('answer-text').textContent = text;
+    const n = document.getElementById('answer-note');
+    if (n) n.textContent = note || '';
+
+    clearTimeout(_showAnswer._t);
+    _showAnswer._t = setTimeout(() => {
+      display.classList.remove('active');
+    }, note ? 3200 : 1700);
+  }
+
+  function showGuessScreen(forced) {
+    if (!secret) return;
     const candidates = _getCandidates();
-    _renderGuessGrid(candidates);
+    _renderGuessGrid(candidates, forced === true);
     _showScreen('guess');
+    window.scrollTo(0, 0);
   }
 
   function _getCandidates() {
-    const pool = selectedCategory === 'all'
-      ? ITEMS
-      : ITEMS.filter(item => item.category === selectedCategory);
+    let filtered = _remaining();
 
-    let filtered = pool.filter(item => {
-      for (const attr in confirmedTrue) {
-        if (item.attrs[attr] !== true) return false;
-      }
-      for (const attr in confirmedFalse) {
-        if (item.attrs[attr] !== false) return false;
-      }
-      return true;
-    });
-
-    const tier = typeof getAgeTier === 'function' ? getAgeTier() : 'intermediate';
-    const numCandidates = tier === 'beginner' ? 3 : tier === 'advanced' ? 6 : 4;
+    const numCandidates = tier === 'beginner' ? 3 : tier === 'expert' ? 8 : tier === 'advanced' ? 6 : 4;
 
     if (!filtered.find(i => i.id === secret.id)) {
       filtered.push(secret);
     }
+    // Pad with look-alikes from the same pack so there is always a choice.
+    if (filtered.length < numCandidates) {
+      const extra = _shuffle(_pool().filter(i => filtered.indexOf(i) === -1));
+      filtered = filtered.concat(extra.slice(0, numCandidates - filtered.length));
+    }
 
-    const shuffled = filtered.sort(() => Math.random() - 0.5);
+    const shuffled = _shuffle(filtered);
     let picked = shuffled.slice(0, numCandidates);
     if (!picked.find(i => i.id === secret.id)) {
       picked[Math.floor(Math.random() * picked.length)] = secret;
     }
 
-    return picked.sort(() => Math.random() - 0.5);
+    return _shuffle(picked);
   }
 
-  function _renderGuessGrid(candidates) {
+  function _shuffle(arr) {
+    const out = arr.slice();
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  }
+
+  function _renderGuessGrid(candidates, forced) {
+    const head = document.getElementById('gq-guess-title');
+    if (head) head.textContent = forced
+      ? _T('Out of questions! Make your best guess.', '¡Sin preguntas! Da tu mejor respuesta.')
+      : _T('What do you think it is?', '¿Qué crees que es?');
+    const left = _remaining().length;
+    const sub = document.getElementById('gq-guess-sub');
+    if (sub) sub.textContent = _T(left + (left === 1 ? ' thing still fits your clues' : ' things still fit your clues'),
+      (left === 1 ? 'Queda 1 cosa' : 'Quedan ' + left + ' cosas') + ' que calzan con tus pistas');
+    const back = document.getElementById('gq-guess-back');
+    if (back) back.hidden = !!forced;
     const grid = document.getElementById('guess-grid');
-    grid.innerHTML = candidates.map(c => `
-      <div class="guess-card" onclick="GuessQuest.makeGuess('${c.id}')">
+    grid.innerHTML = candidates.map((c, i) => `
+      <button type="button" class="guess-card postcard" style="--tilt:${(i % 2 ? 1 : -1) * (0.6 + (i % 3) * 0.4)}deg" onclick="GuessQuest.makeGuess('${c.id}')">
+        <span class="pc-stamp" aria-hidden="true"></span>
         <span class="guess-emoji">${c.emoji}</span>
-        <div class="guess-name">${c.name[lang]}</div>
-      </div>
+        <span class="guess-name">${c.name[lang]}</span>
+      </button>
     `).join('') + `
-      <div class="guess-card" onclick="GuessQuest._revealSecret(false)">
-        <span class="guess-emoji">❓</span>
-        <div class="guess-name">${lang === 'es' ? 'Ninguno de estos' : 'None of these'}</div>
-      </div>
+      <button type="button" class="guess-card postcard pc-none" onclick="GuessQuest._revealSecret(false)">
+        <span class="guess-emoji">🤔</span>
+        <span class="guess-name">${lang === 'es' ? 'Ninguno de estos' : 'None of these'}</span>
+      </button>
     `;
   }
 
   function makeGuess(itemId) {
+    if (!secret || busy) return;
+    busy = true;
     if (itemId === secret.id) {
       stars = questionCount <= 8 ? 3 : questionCount <= 14 ? 2 : 1;
       if (typeof SFX !== 'undefined') SFX.cheer();
@@ -437,6 +716,7 @@ const GuessQuest = (() => {
   }
 
   function _revealSecret(won) {
+    if (!secret) return;
     if (!won) {
       _speakAnswer(lang === 'es'
         ? '¡Era ' + secret.name[lang] + '!'
@@ -447,27 +727,55 @@ const GuessQuest = (() => {
 
   function _showResults(won) {
     const wrap = document.getElementById('results-wrap');
-    const emoji = won ? (stars === 3 ? '🏆' : '🌟') : '💪';
     const title = won ? (lang === 'es' ? '¡Lo lograste!' : 'You Got It!') : (lang === 'es' ? '¡Casi!' : 'So Close!');
-    
+    const art = typeof GuessQuestArt !== 'undefined';
+    const letters = _letters(secret);
+    const data = _load();
+    const isNew = won && (data.found || []).indexOf(secret.id) === -1;
+
     wrap.innerHTML = `
-      <span class="results-emoji">${emoji}</span>
-      <div class="results-title">${title}</div>
-      <div class="results-subtitle">${lang === 'es' ? 'Era un ' : 'It was a '}${secret.emoji} ${secret.name[lang]}</div>
-      <div class="results-stats">
-        <div>⭐ ${stars} stars earned</div>
-        <div>❓ ${questionCount} questions asked</div>
-      </div>
-      <div>
-        <button class="action-btn btn-primary" onclick="GuessQuest.startRound('${selectedCategory}')">
-          ${lang === 'es' ? 'Jugar de nuevo' : 'Play Again'} 🔁
-        </button>
-        <button class="action-btn btn-secondary" onclick="GuessQuest.backToSelect()">
-          ${lang === 'es' ? 'Menú Principal' : 'Main Menu'} 🏠
-        </button>
+      <div class="gq-scene gq-scene-result ${won ? 'gq-won' : 'gq-lost'}" id="gq-result-scene"></div>
+      <div class="results-card">
+        <div class="results-title">${title}</div>
+        <div class="gq-tile-row gq-reveal" aria-label="${_esc(secret.name[lang])}">
+          ${letters.map((ch, i) => _isLetter(ch)
+            ? '<span class="gq-tile" style="animation-delay:' + (0.25 + i * 0.12).toFixed(2) + 's"><span>' + _esc(ch) + '</span></span>'
+            : '<span class="gq-tile gq-gap"></span>').join('')}
+        </div>
+        <div class="results-subtitle">${lang === 'es' ? 'Era: ' : 'It was: '}${secret.emoji} ${secret.name[lang]}${lang === 'es' ? '' : ''}
+          <small>· ${secret.name[lang === 'es' ? 'en' : 'es']}</small></div>
+        <div class="results-stars" aria-label="${stars} ${_T('stars', 'estrellas')}">
+          ${art ? [0, 1, 2].map(i => '<span class="rs-star" style="animation-delay:' + (0.6 + i * 0.18) + 's">' + GuessQuestArt.star(i < stars, 46) + '</span>').join('') : '⭐'.repeat(stars)}
+        </div>
+        <div class="results-stats">
+          <div><b>${stars}</b> ${_T(stars === 1 ? 'star earned' : 'stars earned', stars === 1 ? 'estrella ganada' : 'estrellas ganadas')}</div>
+          <div><b>${questionCount}</b> ${_T('questions asked', 'preguntas hechas')}</div>
+          ${isNew ? '<div class="rs-new">📮 ' + _T('New postcard for your trip log!', '¡Nueva postal para tu bitácora!') + '</div>' : ''}
+        </div>
+        <div class="results-actions">
+          <button type="button" class="action-btn btn-primary" onclick="GuessQuest.startRound('${selectedCategory}')">
+            ${lang === 'es' ? 'Jugar de nuevo' : 'Play Again'} 🔁
+          </button>
+          <button type="button" class="action-btn btn-secondary" onclick="GuessQuest.backToSelect()">
+            ${lang === 'es' ? 'Menú Principal' : 'Main Menu'} 🏠
+          </button>
+        </div>
       </div>
     `;
+    const rs = document.getElementById('gq-result-scene');
+    if (rs && art) {
+      rs.innerHTML = GuessQuestArt.scene({ color: _userColor(), seed: 7, billboard: secret.emoji, label: _T('The car reached the answer', 'El auto llegó a la respuesta') }) +
+        (won ? '<div class="gq-confetti" aria-hidden="true">' + Array.from({ length: 26 }, (_, i) =>
+          '<i style="left:' + ((i * 37) % 100) + '%;animation-delay:' + ((i % 9) * 0.12).toFixed(2) + 's;background:' + ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#a855f7'][i % 5] + '"></i>').join('') + '</div>' : '');
+      GuessQuestArt.setProgress(rs, Math.max(0, lastProgress - 0.05));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        rs.classList.add('gq-driving');
+        GuessQuestArt.setProgress(rs, 1);
+        setTimeout(() => rs.classList.remove('gq-driving'), 1800);
+      }));
+    }
     _showScreen('results');
+    window.scrollTo(0, 0);
     _saveProgress(won);
   }
 
@@ -476,6 +784,12 @@ const GuessQuest = (() => {
     data.roundsPlayed = (data.roundsPlayed || 0) + 1;
     if (won) data.roundsWon = (data.roundsWon || 0) + 1;
     data.totalStars = (data.totalStars || 0) + stars;
+    // Added in v2 (trip log). Older saves simply lack these.
+    if (won) {
+      data.found = Array.isArray(data.found) ? data.found : [];
+      if (data.found.indexOf(secret.id) === -1) data.found.push(secret.id);
+      data.bestQuestions = data.bestQuestions ? Math.min(data.bestQuestions, questionCount) : questionCount;
+    }
     _save(data);
 
     if (typeof ActivityLog !== 'undefined') {
@@ -496,8 +810,21 @@ const GuessQuest = (() => {
   }
 
   function _updateQuestionCounter() {
-    document.getElementById('question-counter').textContent = `❓ ${questionCount} / ${maxQuestions}`;
-    document.getElementById('gq-stars').textContent = `⭐ ${stars}`;
+    const left = Math.max(0, maxQuestions - questionCount);
+    const qc = document.getElementById('question-counter');
+    if (qc) {
+      const pct = Math.round(left / maxQuestions * 100);
+      qc.innerHTML = '<span class="fuel-label">' + _T('Fuel', 'Bencina') + '</span>' +
+        '<span class="fuel-bar"><span style="width:' + pct + '%"></span></span>' +
+        '<span class="fuel-num">' + questionCount + ' / ' + maxQuestions + '</span>';
+      qc.setAttribute('aria-label', _T(questionCount + ' of ' + maxQuestions + ' questions asked', questionCount + ' de ' + maxQuestions + ' preguntas hechas'));
+    }
+    const potential = questionCount <= 8 ? 3 : questionCount <= 14 ? 2 : 1;
+    const st = document.getElementById('gq-stars');
+    if (st) {
+      st.textContent = '⭐ ' + potential;
+      st.title = _T('Stars if you guess right now', 'Estrellas si adivinas ahora');
+    }
   }
 
   function _updateHubStats() {
@@ -511,17 +838,28 @@ const GuessQuest = (() => {
     if (el) el.classList.add('active');
   }
 
-  function backToSelect() { _showScreen('select'); }
+  function backToSelect() { _renderCategorySelect(); _showScreen('select'); }
   function backToGame() { _showScreen('game'); }
+
+  function openDaily() {
+    if (typeof DailyWord !== 'undefined') DailyWord.open({ lang: lang });
+  }
 
   function toggleLanguage() {
     lang = lang === 'en' ? 'es' : 'en';
     const label = document.getElementById('lang-label');
     if (label) label.textContent = lang === 'en' ? 'ES / EN' : 'EN / ES';
-    
+    document.documentElement.lang = lang;
+
     const active = document.querySelector('.screen.active');
     if (active.id === 'screen-select') _renderCategorySelect();
-    else if (active.id === 'screen-game') _renderGame();
+    else if (active.id === 'screen-game') { _renderGame(); _updateQuestionCounter(); }
+    _renderStatic();
+  }
+
+  function _renderStatic() {
+    const g = document.getElementById('gq-guess-btn-label');
+    if (g) g.textContent = _T('I want to guess!', '¡Quiero adivinar!');
   }
 
   function getStats() {
@@ -536,7 +874,8 @@ const GuessQuest = (() => {
   document.addEventListener('DOMContentLoaded', init);
 
   return {
-    init, startRound, askQuestion, showGuessScreen, makeGuess,
-    backToSelect, backToGame, toggleLanguage, getStats, _revealSecret
+    init, startRound, askQuestion, showGuessScreen, makeGuess, buyLetter,
+    backToSelect, backToGame, toggleLanguage, getStats, openDaily, _revealSecret,
+    _answerFor: answerFor, _items: ITEMS
   };
 })();

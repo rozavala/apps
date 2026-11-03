@@ -23,7 +23,14 @@ window.ZSProgressCatalog = {
     {"i":"warm_cool","l":"🔥 Warm & Cool Colors","g":"Beginner"},
     {"i":"pattern_pointillism","l":"🟣 Pattern Pointillism","g":"Intermediate"},
     {"i":"robot_shapes","l":"🤖 Build a Robot from Shapes","g":"Advanced"},
-    {"i":"still_life","l":"🍎 Still Life","g":"Intermediate"}
+    {"i":"still_life","l":"🍎 Still Life","g":"Intermediate"},
+    {"i":"cat_shapes","l":"🐱 Draw a Cat from Shapes","g":"Beginner"},
+    {"i":"colour_wheel","l":"🌈 Paint a Colour Wheel","g":"Beginner"},
+    {"i":"perspective_road","l":"🛣️ A Road in Perspective","g":"Intermediate"},
+    {"i":"shading_sphere","l":"⚪ Shading a Sphere","g":"Intermediate"},
+    {"i":"mondrian_grid","l":"🟥 Mondrian Grid","g":"Intermediate"},
+    {"i":"portrait","l":"🙂 Portrait Proportions","g":"Advanced"},
+    {"i":"hatching","l":"✏️ Hatching & Texture","g":"Intermediate"}
   ],
 
   bible: [

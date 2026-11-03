@@ -803,6 +803,36 @@ const BibleExplorer = (() => {
     Debug.warn('[Bible] Expected 73 Catholic books, got ' + TOTAL_BOOKS);
   }
 
+
+  // Spanish names of the 73 books, same order as BOOK_GROUPS.
+  const BOOK_NAMES_ES = {
+    'Genesis': 'Génesis', 'Exodus': 'Éxodo', 'Leviticus': 'Levítico', 'Numbers': 'Números', 'Deuteronomy': 'Deuteronomio',
+    'Joshua': 'Josué', 'Judges': 'Jueces', 'Ruth': 'Rut', '1 Samuel': '1 Samuel', '2 Samuel': '2 Samuel',
+    '1 Kings': '1 Reyes', '2 Kings': '2 Reyes', '1 Chronicles': '1 Crónicas', '2 Chronicles': '2 Crónicas',
+    'Ezra': 'Esdras', 'Nehemiah': 'Nehemías', 'Tobit': 'Tobías', 'Judith': 'Judit', 'Esther': 'Ester',
+    '1 Maccabees': '1 Macabeos', '2 Maccabees': '2 Macabeos',
+    'Job': 'Job', 'Psalms': 'Salmos', 'Proverbs': 'Proverbios', 'Ecclesiastes': 'Eclesiastés',
+    'Song of Songs': 'Cantar de los Cantares', 'Wisdom': 'Sabiduría', 'Sirach': 'Eclesiástico',
+    'Isaiah': 'Isaías', 'Jeremiah': 'Jeremías', 'Lamentations': 'Lamentaciones', 'Baruch': 'Baruc',
+    'Ezekiel': 'Ezequiel', 'Daniel': 'Daniel', 'Hosea': 'Oseas', 'Joel': 'Joel', 'Amos': 'Amós',
+    'Obadiah': 'Abdías', 'Jonah': 'Jonás', 'Micah': 'Miqueas', 'Nahum': 'Nahúm', 'Habakkuk': 'Habacuc',
+    'Zephaniah': 'Sofonías', 'Haggai': 'Ageo', 'Zechariah': 'Zacarías', 'Malachi': 'Malaquías',
+    'Matthew': 'Mateo', 'Mark': 'Marcos', 'Luke': 'Lucas', 'John': 'Juan',
+    'Acts of the Apostles': 'Hechos de los Apóstoles',
+    'Romans': 'Romanos', '1 Corinthians': '1 Corintios', '2 Corinthians': '2 Corintios', 'Galatians': 'Gálatas',
+    'Ephesians': 'Efesios', 'Philippians': 'Filipenses', 'Colossians': 'Colosenses',
+    '1 Thessalonians': '1 Tesalonicenses', '2 Thessalonians': '2 Tesalonicenses',
+    '1 Timothy': '1 Timoteo', '2 Timothy': '2 Timoteo', 'Titus': 'Tito', 'Philemon': 'Filemón', 'Hebrews': 'Hebreos',
+    'James': 'Santiago', '1 Peter': '1 Pedro', '2 Peter': '2 Pedro', '1 John': '1 Juan', '2 John': '2 Juan', '3 John': '3 Juan',
+    'Jude': 'Judas', 'Revelation': 'Apocalipsis'
+  };
+  // Spine colours per section (leather of the bookshelf).
+  const SHELF_COLORS = {
+    pentateuch: ['#7a1a22', '#8e2a2a'], historical: ['#6a4426', '#7a5232'], wisdom: ['#2f5a3a', '#3a6a46'],
+    prophets: ['#3a3a7a', '#4a4a8e'], gospels: ['#9a6d14', '#b4831f'], acts: ['#a2481a', '#b85a26'],
+    letters: ['#1f5a6a', '#2a6a7a'], revelation: ['#5a1a4a', '#6a2a5a']
+  };
+
   // ── State ──
   const state = {
     lang: 'en',
@@ -813,6 +843,13 @@ const BibleExplorer = (() => {
   };
 
   // ── Storage ──
+  // Saved shape (zs_bible_<user>), all fields kept as before:
+  //   stories: [storyId]            storyStars: { storyId: 1..3 }
+  //   verses:  { ref: { stars } }   books: { groupId: { stars } }
+  // ADDED (v3): verses[ref].box / .due / .reps (spaced repetition),
+  //   review: { lastDay, streak, done }, sortBest, lang.
+  // The star rule (js/auth.js) sums storyStars, verses[].stars and
+  // books[].stars only, so the added fields never change a kid's stars.
   function _storageKey() {
     return typeof getUserAppKey === 'function'
       ? getUserAppKey(STORE_PREFIX)
@@ -834,12 +871,23 @@ const BibleExplorer = (() => {
     if (typeof obj === 'string') return obj;
     return obj[state.lang] || obj.en || fallback || '';
   }
+  const L = (en, es) => (state.lang === 'es' ? es : en);
+  const esc = s => (typeof escHtml === 'function' ? escHtml(s) : String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';'));
+  const sfx = n => { try { if (typeof SFX !== 'undefined' && SFX[n]) SFX[n](); } catch (e) {} };
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  function _tier() {
+    const u = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    return typeof getAgeTier === 'function' ? getAgeTier(u ? u.age : null) : 'intermediate';
+  }
+  const bookName = n => (state.lang === 'es' ? (BOOK_NAMES_ES[n] || n) : n);
+  const starRow = (n, max) => { let s = ''; for (let i = 0; i < (max || 3); i++) s += '<span class="bx-st' + (i < n ? ' on' : '') + '">★</span>'; return s; };
 
   // ── Screens ──
   function _showScreen(id) {
     document.querySelectorAll('.bx-screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) el.classList.add('active');
+    window.scrollTo(0, 0);
   }
 
   function _renderHome() {
@@ -850,10 +898,27 @@ const BibleExplorer = (() => {
     document.getElementById('bx-stories-stat').textContent = storiesDone + '/' + STORIES.length;
     document.getElementById('bx-verses-stat').textContent = versesDone + '/' + VERSES.length;
     document.getElementById('bx-books-stat').textContent = booksDone + '/' + BOOK_GROUPS.length;
+    const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    set('bx-ico-stories', BibleArt.icon('stories'));
+    set('bx-ico-verses', BibleArt.icon('verses'));
+    set('bx-ico-books', BibleArt.icon('books'));
+    set('bx-hero-art', BibleArt.scene('creation', { thumb: true }));
+    const t = document.querySelectorAll('[data-l10n]');
+    t.forEach(el => { const k = el.getAttribute('data-l10n').split('|'); el.textContent = state.lang === 'es' ? k[1] : k[0]; });
+    // Spaced-repetition reminder on the home screen
+    const due = _dueVerses(prog).length;
+    const rv = document.getElementById('bx-review-banner');
+    if (rv) {
+      if (due) {
+        rv.hidden = false;
+        rv.innerHTML = BibleArt.icon('review') + '<span><strong>' + L('Review time', 'Hora de repasar') + '</strong> · ' +
+          due + ' ' + L(due === 1 ? 'verse is ready' : 'verses are ready', due === 1 ? 'versículo listo' : 'versículos listos') + '</span><span class="bx-review-go">' + L('Start ➔', 'Empezar ➔') + '</span>';
+      } else rv.hidden = true;
+    }
     _showScreen('bx-screen-home');
   }
 
-  // ── Stories mode ──
+  // ════════════════════ STORIES ════════════════════
   function openStories() {
     state.mode = 'stories';
     state.activeStoryIdx = 0;
@@ -864,86 +929,172 @@ const BibleExplorer = (() => {
   function _renderStoryList() {
     const grid = document.getElementById('bx-story-grid');
     if (!grid) return;
-    grid.innerHTML = '';
     const prog = _loadProgress();
     const done = new Set(prog.stories || []);
-    STORIES.forEach((s, idx) => {
-      const card = document.createElement('button');
-      card.className = 'bx-story-card' + (done.has(s.id) ? ' bx-done' : '');
-      card.innerHTML =
-        '<span class="bx-story-icon">' + s.icon + '</span>' +
-        '<span class="bx-story-title">' + _l(s.title) + '</span>' +
-        '<span class="bx-story-tag">' + (s.testament === 'OT' ? (state.lang === 'es' ? 'A.T.' : 'OT') : (state.lang === 'es' ? 'N.T.' : 'NT')) + '</span>' +
-        (done.has(s.id) ? '<span class="bx-story-star">⭐</span>' : '');
-      card.onclick = () => _openStory(idx);
-      grid.appendChild(card);
-    });
+    const stars = prog.storyStars || {};
+    const card = (s, idx) =>
+      '<button type="button" class="bx-story-card' + (done.has(s.id) ? ' bx-done' : '') + '" data-idx="' + idx + '">' +
+        '<span class="bx-story-thumb">' + BibleArt.scene(s.id, { thumb: true }) + '</span>' +
+        '<span class="bx-story-body">' +
+          '<span class="bx-story-title">' + esc(_l(s.title)) + '</span>' +
+          '<span class="bx-story-meta"><span class="bx-age">' + s.ageMin + '+</span>' +
+          (done.has(s.id) ? '<span class="bx-story-stars" aria-label="' + (stars[s.id] || 1) + ' ' + L('stars', 'estrellas') + '">' + starRow(stars[s.id] || 1) + '</span>' : '<span class="bx-story-new">' + L('Read', 'Leer') + '</span>') +
+          '</span></span></button>';
+    const sec = (t, label) => {
+      const list = STORIES.map((s, i) => [s, i]).filter(x => x[0].testament === t);
+      const n = list.filter(x => done.has(x[0].id)).length;
+      return '<section class="bx-shelf-sec"><h3 class="bx-sec-head"><span>' + label + '</span><small>' + n + ' / ' + list.length + '</small></h3>' +
+        '<div class="bx-story-cards">' + list.map(x => card(x[0], x[1])).join('') + '</div></section>';
+    };
+    grid.innerHTML = sec('OT', L('Old Testament', 'Antiguo Testamento')) + sec('NT', L('New Testament', 'Nuevo Testamento'));
+    grid.querySelectorAll('.bx-story-card').forEach(b => { b.onclick = () => { sfx('click'); _openStory(+b.dataset.idx); }; });
+  }
+
+  // Split a summary into sentences for the "put the story in order" task.
+  function _sentences(text) {
+    const m = text.match(/[^.!?]+[.!?]+["”»']?\s*/g) || [text];
+    return m.map(x => x.trim()).filter(x => x.length > 3);
   }
 
   function _openStory(idx) {
     state.activeStoryIdx = idx;
     const s = STORIES[idx];
     if (!s) return;
+    const prog = _loadProgress();
+    const st = (prog.storyStars || {})[s.id] || 0;
+    const sum = _l(s.summary);
     const wrap = document.getElementById('bx-story-detail');
+    const prev = idx > 0 ? idx - 1 : null, next = idx < STORIES.length - 1 ? idx + 1 : null;
     wrap.innerHTML =
-      '<button class="bx-back-btn" onclick="BibleExplorer.backToStoryList()">←</button>' +
-      '<div class="bx-story-detail-header">' +
-        '<span class="bx-story-detail-icon">' + s.icon + '</span>' +
-        '<h2>' + _l(s.title) + '</h2>' +
-        '<span class="bx-story-detail-tag">' + (s.testament === 'OT' ? (state.lang === 'es' ? 'Antiguo Testamento' : 'Old Testament') : (state.lang === 'es' ? 'Nuevo Testamento' : 'New Testament')) + '</span>' +
-      '</div>' +
-      '<p class="bx-story-summary">' + _l(s.summary) + '</p>' +
-      '<button class="bx-primary-btn" onclick="BibleExplorer.startStoryQuiz()">' +
-        (state.lang === 'es' ? '🎯 Cuestionario' : '🎯 Take the Quiz') + '</button>';
+      '<div class="bx-topbar"><button type="button" class="bx-back-btn" aria-label="' + L('Back to stories', 'Volver a las historias') + '" onclick="BibleExplorer.backToStoryList()">←</button>' +
+        '<span class="bx-crumb">' + L('Stories', 'Historias') + '</span></div>' +
+      '<article class="bx-book">' +
+        '<div class="bx-page bx-page-left"><figure class="bx-plate">' + BibleArt.scene(s.id, { label: _l(s.title) }) + '</figure></div>' +
+        '<div class="bx-page bx-page-right">' +
+          '<span class="bx-story-detail-tag">' + (s.testament === 'OT' ? L('Old Testament', 'Antiguo Testamento') : L('New Testament', 'Nuevo Testamento')) + '</span>' +
+          '<h2 class="bx-book-title">' + esc(_l(s.title)) + '</h2>' +
+          '<div class="bx-flourish" aria-hidden="true">❦</div>' +
+          '<p class="bx-story-summary"><span class="bx-dropcap">' + esc(sum.charAt(0)) + '</span>' + esc(sum.slice(1)) + '</p>' +
+          (st ? '<div class="bx-best">' + L('Your best', 'Tu mejor resultado') + ': ' + starRow(st) + '</div>' : '') +
+          '<div class="bx-page-actions">' +
+            '<button type="button" class="bx-primary-btn" onclick="BibleExplorer.startStoryQuiz()">' + L('🎯 Take the Quiz', '🎯 Cuestionario') + '</button>' +
+          '</div>' +
+          '<div class="bx-page-nav">' +
+            (prev !== null ? '<button type="button" class="bx-secondary-btn" data-go="' + prev + '">‹ ' + esc(_l(STORIES[prev].title)) + '</button>' : '<span></span>') +
+            (next !== null ? '<button type="button" class="bx-secondary-btn" data-go="' + next + '">' + esc(_l(STORIES[next].title)) + ' ›</button>' : '<span></span>') +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    wrap.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => { sfx('click'); _openStory(+b.dataset.go); }; });
     _showScreen('bx-screen-story-detail');
   }
 
   function backToStoryList() {
+    _renderStoryList();
     _showScreen('bx-screen-stories');
   }
 
-  let _quizIdx = 0;
-  let _quizCorrect = 0;
+  // Quiz: the story's own questions, with fewer choices for the
+  // youngest; older kids also put the story's sentences in order.
+  let _quiz = null;
   function startStoryQuiz() {
     const s = STORIES[state.activeStoryIdx];
     if (!s || !s.quiz || !s.quiz.length) return;
-    _quizIdx = 0;
-    _quizCorrect = 0;
+    const tier = _tier();
+    const nOpts = tier === 'beginner' ? 2 : tier === 'intermediate' ? 3 : 4;
+    const items = s.quiz.map(q => {
+      const opts = q.options[state.lang] || q.options.en;
+      let idx = opts.map((_, i) => i);
+      if (idx.length > nOpts) idx = [q.answer].concat(shuffle(idx.filter(i => i !== q.answer)).slice(0, nOpts - 1));
+      return { type: 'mc', q: _l(q.q), opts: shuffle(idx).map(i => opts[i]), answer: opts[q.answer] };
+    });
+    if (tier === 'advanced' || tier === 'expert') {
+      const sen = _sentences(_l(s.summary));
+      if (sen.length >= 3) items.push({ type: 'order', parts: sen.slice(0, tier === 'expert' ? 5 : 4) });
+    }
+    _quiz = { items, i: 0, correct: 0 };
     _renderQuizQuestion();
     _showScreen('bx-screen-story-quiz');
   }
 
-  function _renderQuizQuestion() {
+  function _quizHead() {
     const s = STORIES[state.activeStoryIdx];
-    const q = s.quiz[_quizIdx];
-    if (!q) return _finishStoryQuiz();
+    return '<div class="bx-quiz-head"><span class="bx-quiz-mini">' + BibleArt.scene(s.id, { thumb: true }) + '</span>' +
+      '<div><div class="bx-quiz-story">' + esc(_l(s.title)) + '</div>' +
+      '<div class="bx-dots">' + _quiz.items.map((_, i) => '<i class="' + (i < _quiz.i ? 'done' : i === _quiz.i ? 'cur' : '') + '"></i>').join('') + '</div></div></div>';
+  }
+
+  function _renderQuizQuestion() {
+    const it = _quiz.items[_quiz.i];
+    if (!it) return _finishStoryQuiz();
     const wrap = document.getElementById('bx-quiz-wrap');
-    const opts = q.options[state.lang] || q.options.en;
-    wrap.innerHTML =
-      '<div class="bx-quiz-counter">' + (_quizIdx + 1) + ' / ' + s.quiz.length + '</div>' +
-      '<h2 class="bx-quiz-q">' + _l(q.q) + '</h2>' +
-      '<div class="bx-quiz-options">' +
-        opts.map((o, i) =>
-          '<button class="bx-quiz-opt" data-idx="' + i + '" data-correct="' + (i === q.answer ? '1' : '0') + '">' + o + '</button>'
-        ).join('') +
-      '</div>';
+    if (it.type === 'order') return _renderOrderQuestion(wrap, it);
+    wrap.innerHTML = _quizHead() +
+      '<div class="bx-quiz-counter">' + (_quiz.i + 1) + ' / ' + _quiz.items.length + '</div>' +
+      '<h2 class="bx-quiz-q">' + esc(it.q) + '</h2>' +
+      '<div class="bx-quiz-options' + (it.opts.length === 2 ? ' bx-two' : '') + '">' +
+        it.opts.map(o => '<button type="button" class="bx-quiz-opt" data-v="' + esc(o) + '">' + esc(o) + '</button>').join('') +
+      '</div><div class="bx-quiz-fb" aria-live="polite"></div>';
     wrap.querySelectorAll('.bx-quiz-opt').forEach(btn => {
       btn.onclick = () => {
-        const correct = btn.dataset.correct === '1';
+        if (wrap.dataset.locked === '1') return;
+        wrap.dataset.locked = '1';
+        const correct = btn.dataset.v === it.answer;
         btn.classList.add(correct ? 'bx-correct' : 'bx-wrong');
-        if (correct) _quizCorrect++;
-        if (typeof SFX !== 'undefined') {
-          (correct && SFX.correct) ? SFX.correct() : (SFX.wrong && SFX.wrong());
-        }
-        setTimeout(() => { _quizIdx++; _renderQuizQuestion(); }, 700);
+        wrap.querySelectorAll('.bx-quiz-opt').forEach(b => { b.disabled = true; if (b.dataset.v === it.answer) b.classList.add('bx-correct'); });
+        if (correct) _quiz.correct++;
+        sfx(correct ? 'correct' : 'wrong');
+        const fb = wrap.querySelector('.bx-quiz-fb');
+        fb.className = 'bx-quiz-fb ' + (correct ? 'bx-feedback-good' : 'bx-feedback-bad');
+        fb.textContent = correct ? L('Correct!', '¡Correcto!') : L('The answer is: ', 'La respuesta es: ') + it.answer;
+        setTimeout(() => { wrap.dataset.locked = ''; _quiz.i++; _renderQuizQuestion(); }, correct ? 800 : 1600);
       };
     });
   }
 
+  function _renderOrderQuestion(wrap, it) {
+    const order = [];
+    let mistakes = 0;
+    const pool = shuffle(it.parts.map((p, i) => i));
+    const draw = () => {
+      wrap.innerHTML = _quizHead() +
+        '<div class="bx-quiz-counter">' + (_quiz.i + 1) + ' / ' + _quiz.items.length + '</div>' +
+        '<h2 class="bx-quiz-q">' + L('Put the story in order', 'Ordena la historia') + '</h2>' +
+        '<ol class="bx-order-done">' + order.map(i => '<li>' + esc(it.parts[i]) + '</li>').join('') +
+          (order.length < it.parts.length ? '<li class="bx-order-slot">' + L('Tap what happens next…', 'Toca lo que pasa después…') + '</li>' : '') + '</ol>' +
+        '<div class="bx-order-pool">' + pool.filter(i => order.indexOf(i) === -1).map(i => '<button type="button" class="bx-order-opt" data-i="' + i + '">' + esc(it.parts[i]) + '</button>').join('') + '</div>';
+      wrap.querySelectorAll('.bx-order-opt').forEach(b => {
+        b.onclick = () => {
+          const i = +b.dataset.i;
+          if (i === order.length) {
+            order.push(i); sfx('click');
+            if (order.length === it.parts.length) {
+              const ok = mistakes === 0;
+              if (ok) _quiz.correct++;
+              sfx(ok ? 'correct' : 'wrong');
+              draw();
+              const fb = document.createElement('div');
+              fb.className = 'bx-quiz-fb ' + (ok ? 'bx-feedback-good' : 'bx-feedback-bad');
+              fb.textContent = ok ? L('Perfect order!', '¡Orden perfecto!') : L('Done — with ', 'Listo — con ') + mistakes + L(' mistake(s).', ' error(es).');
+              wrap.appendChild(fb);
+              setTimeout(() => { _quiz.i++; _renderQuizQuestion(); }, 1400);
+              return;
+            }
+            draw();
+          } else {
+            mistakes++; sfx('wrong');
+            b.classList.add('bx-shake'); setTimeout(() => b.classList.remove('bx-shake'), 400);
+          }
+        };
+      });
+    };
+    draw();
+  }
+
   function _finishStoryQuiz() {
     const s = STORIES[state.activeStoryIdx];
-    const total = s.quiz.length;
-    const acc = total > 0 ? _quizCorrect / total : 0;
+    const total = _quiz.items.length;
+    const acc = total > 0 ? _quiz.correct / total : 0;
     const stars = acc >= 0.95 ? 3 : acc >= 0.80 ? 2 : 1;
 
     const prog = _loadProgress();
@@ -957,19 +1108,46 @@ const BibleExplorer = (() => {
       ActivityLog.log('Bible Explorer', '📖',
         (state.lang === 'es' ? 'Completó "' : 'Finished "') + _l(s.title) + '" ' + '⭐'.repeat(stars));
     }
-
+    sfx(stars === 3 ? 'cheer' : 'star');
+    const next = state.activeStoryIdx < STORIES.length - 1 ? state.activeStoryIdx + 1 : null;
     document.getElementById('bx-quiz-result').innerHTML =
-      '<div class="bx-quiz-stars">' + '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '</div>' +
-      '<p>' + _quizCorrect + ' / ' + total + ' ' + (state.lang === 'es' ? 'correctas' : 'correct') + '</p>' +
-      '<button class="bx-primary-btn" onclick="BibleExplorer.backToStoryList()">' +
-        (state.lang === 'es' ? '← Volver' : '← Back') + '</button>';
+      '<div class="bx-result-card">' +
+      '<div class="bx-result-art">' + BibleArt.scene(s.id, { thumb: true }) + '</div>' +
+      '<div class="bx-quiz-stars">' + starRow(stars) + '</div>' +
+      '<h2 class="bx-book-title">' + (stars === 3 ? L('Wonderful!', '¡Maravilloso!') : stars === 2 ? L('Well done!', '¡Muy bien!') : L('Good try!', '¡Buen intento!')) + '</h2>' +
+      '<p>' + _quiz.correct + ' / ' + total + ' ' + (state.lang === 'es' ? 'correctas' : 'correct') + '</p>' +
+      '<div class="bx-page-actions">' +
+        '<button type="button" class="bx-secondary-btn" onclick="BibleExplorer.backToStoryList()">' + (state.lang === 'es' ? '← Volver' : '← Back') + '</button>' +
+        (stars < 3 ? '<button type="button" class="bx-secondary-btn" onclick="BibleExplorer.startStoryQuiz()">' + L('↺ Try again', '↺ Otra vez') + '</button>' : '') +
+        (next !== null ? '<button type="button" class="bx-primary-btn" id="bx-next-story">' + L('Next story ➔', 'Siguiente historia ➔') + '</button>' : '') +
+      '</div></div>';
+    const nb = document.getElementById('bx-next-story');
+    if (nb) nb.onclick = () => _openStory(next);
     _showScreen('bx-screen-story-result');
   }
 
-  // ── Verse memorisation mode ──
+  // ════════════════════ VERSES ════════════════════
+  // Leitner boxes 1–5; a verse is due again after this many days.
+  const SRS_DAYS = [0, 1, 2, 4, 7, 14];
+  const _today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  const _addDays = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function _dueVerses(prog) {
+    const v = prog.verses || {}, t = _today();
+    return VERSES.filter(x => v[x.ref] && v[x.ref].stars > 0 && (!v[x.ref].due || v[x.ref].due <= t));
+  }
+  function _srsUpdate(rec, ok) {
+    const box = rec.box || 0;
+    rec.box = ok ? Math.min(5, Math.max(1, box + 1)) : 1;
+    rec.due = _addDays(ok ? SRS_DAYS[rec.box] : 1);
+    rec.reps = (rec.reps || 0) + 1;
+    return rec;
+  }
+
+  let _review = null; // active review session
   function openVerses() {
     state.mode = 'verses';
     state.activeVerseIdx = 0;
+    _review = null;
     _renderVerseList();
     _showScreen('bx-screen-verses');
   }
@@ -977,22 +1155,34 @@ const BibleExplorer = (() => {
   function _renderVerseList() {
     const grid = document.getElementById('bx-verse-grid');
     if (!grid) return;
-    grid.innerHTML = '';
     const prog = _loadProgress();
     const done = prog.verses || {};
-    VERSES.forEach((v, idx) => {
-      const card = document.createElement('button');
-      const isDone = done[v.ref] && done[v.ref].stars > 0;
-      card.className = 'bx-verse-card bx-tier-' + v.tier + (isDone ? ' bx-done' : '');
-      card.innerHTML =
-        '<span class="bx-verse-ref">' + v.ref + '</span>' +
-        '<span class="bx-verse-tier">' +
-          '🟢'.repeat(v.tier) + '⚪'.repeat(3 - v.tier) +
-        '</span>' +
-        (isDone ? '<span class="bx-verse-star">' + '⭐'.repeat(done[v.ref].stars) + '</span>' : '');
-      card.onclick = () => _openVerse(idx);
-      grid.appendChild(card);
-    });
+    const due = _dueVerses(prog);
+    const rv = prog.review || {};
+    const tiers = [[1, L('One word', 'Una palabra')], [2, L('Two words', 'Dos palabras')], [3, L('Three or more', 'Tres o más')]];
+    grid.innerHTML =
+      '<div class="bx-review-card' + (due.length ? ' is-due' : '') + '">' + BibleArt.icon('review') +
+        '<div class="bx-review-text"><strong>' + L('Daily review', 'Repaso diario') + '</strong><span>' +
+        (due.length ? due.length + ' ' + L('verses ready to review', 'versículos para repasar')
+          : (Object.keys(done).length ? L('All caught up! Come back tomorrow.', '¡Al día! Vuelve mañana.') : L('Memorise a verse to start your review deck.', 'Memoriza un versículo para empezar tu repaso.'))) +
+        (rv.streak ? ' · 🔥 ' + rv.streak + ' ' + L('day streak', 'días seguidos') : '') + '</span></div>' +
+        (due.length ? '<button type="button" class="bx-primary-btn" id="bx-review-start">' + L('Review', 'Repasar') + '</button>' : '') +
+      '</div>' +
+      tiers.map(t => '<section class="bx-shelf-sec"><h3 class="bx-sec-head"><span>' + t[1] + '</span></h3><div class="bx-verse-cards">' +
+        VERSES.map((v, idx) => [v, idx]).filter(x => x[0].tier === t[0]).map(x => {
+          const v = x[0], rec = done[v.ref];
+          const isDone = rec && rec.stars > 0;
+          const box = rec && rec.box ? rec.box : 0;
+          return '<button type="button" class="bx-verse-card bx-tier-' + v.tier + (isDone ? ' bx-done' : '') + '" data-idx="' + x[1] + '">' +
+            '<span class="bx-verse-ref">' + esc(v.ref) + '</span>' +
+            '<span class="bx-verse-peek">' + esc((state.lang === 'es' ? v.es : v.en).replace(/\[[^\]]+\]/g, '___').slice(0, 46)) + '…</span>' +
+            (isDone ? '<span class="bx-verse-star">' + starRow(rec.stars, Math.min(3, v.tier)) + '</span>' : '') +
+            (box ? '<span class="bx-box" title="' + L('Review level', 'Nivel de repaso') + '">' + '●'.repeat(box) + '<i>' + '●'.repeat(5 - box) + '</i></span>' : '') +
+          '</button>';
+        }).join('') + '</div></section>').join('');
+    grid.querySelectorAll('.bx-verse-card').forEach(b => { b.onclick = () => { sfx('click'); _openVerse(+b.dataset.idx); }; });
+    const rs = document.getElementById('bx-review-start');
+    if (rs) rs.onclick = startReview;
   }
 
   // Parse a string like 'In the beginning God created [heaven] and earth.'
@@ -1012,41 +1202,173 @@ const BibleExplorer = (() => {
     return { segments, blanks };
   }
 
-  function _openVerse(idx) {
+  // Distractor words for the word bank: other blank words of the same
+  // language, never equal to an answer.
+  function _distractors(answers, n) {
+    const pool = [];
+    VERSES.forEach(v => _parseVerse(state.lang === 'es' ? v.es : v.en).blanks.forEach(b => {
+      if (!answers.some(a => _normaliseWord(a) === _normaliseWord(b)) && !pool.some(p => _normaliseWord(p) === _normaliseWord(b))) pool.push(b);
+    }));
+    return shuffle(pool).slice(0, n);
+  }
+
+  function _defaultVerseMode() { const t = _tier(); return t === 'beginner' || t === 'intermediate' ? 'bank' : 'type'; }
+
+  // opts.review: called with (ok) instead of the normal end
+  function _openVerse(idx, mode, opts) {
+    opts = opts || {};
     state.activeVerseIdx = idx;
     const v = VERSES[idx];
     if (!v) return;
+    mode = mode || _defaultVerseMode();
     const text = state.lang === 'es' ? v.es : v.en;
     const parsed = _parseVerse(text);
-
     const wrap = document.getElementById('bx-verse-detail');
-    let inputCount = 0;
-    const inner = parsed.segments.map(seg => {
-      if (seg.type === 'text') return seg.value.replace(/</g, '&lt;');
-      const i = inputCount++;
-      return '<input class="bx-blank" data-idx="' + i + '" autocomplete="off" autocorrect="off" spellcheck="false">';
-    }).join('');
+    const tabs = [['bank', L('Word bank', 'Banco de palabras')], ['type', L('Type it', 'Escribir')], ['order', L('Word order', 'Ordenar')]];
+    const head =
+      '<div class="bx-topbar"><button type="button" class="bx-back-btn" aria-label="' + L('Back to verses', 'Volver a los versículos') + '" id="bx-verse-back">←</button>' +
+      '<span class="bx-crumb">' + (opts.review ? L('Review', 'Repaso') + ' · ' + opts.review.label : L('Memorise', 'Memoriza')) + '</span></div>' +
+      (opts.review ? '' : '<div class="bx-modes" role="tablist">' + tabs.map(t => '<button type="button" role="tab" class="bx-mode' + (t[0] === mode ? ' active' : '') + '" aria-selected="' + (t[0] === mode) + '" data-mode="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>');
 
-    wrap.innerHTML =
-      '<button class="bx-back-btn" onclick="BibleExplorer.backToVerseList()">←</button>' +
-      '<div class="bx-verse-ref-big">' + v.ref + '</div>' +
-      '<p class="bx-verse-text">' + inner + '</p>' +
-      '<div class="bx-verse-actions">' +
-        '<button class="bx-primary-btn" id="bx-verse-check">' +
-          (state.lang === 'es' ? '✓ Comprobar' : '✓ Check') +
-        '</button>' +
-        '<button class="bx-secondary-btn" id="bx-verse-hint">' +
-          (state.lang === 'es' ? '💡 Pista' : '💡 Hint') +
-        '</button>' +
-      '</div>' +
-      '<div class="bx-verse-feedback" id="bx-verse-feedback"></div>';
+    let body = '';
+    if (mode === 'order') {
+      body = '<div class="bx-scroll"><div class="bx-verse-ref-big">' + esc(v.ref) + '</div>' +
+        '<p class="bx-verse-text bx-order-line" id="bx-order-line"></p></div>' +
+        '<div class="bx-chips" id="bx-order-pool"></div>' +
+        '<div class="bx-verse-actions"><button type="button" class="bx-secondary-btn" id="bx-order-hint">' + L('💡 Hint', '💡 Pista') + '</button></div>';
+    } else {
+      let k = 0;
+      const inner = parsed.segments.map(seg => {
+        if (seg.type === 'text') return esc(seg.value);
+        const i = k++;
+        return mode === 'type'
+          ? '<label class="bx-sr" for="bx-blank-' + i + '">' + L('Missing word ', 'Palabra que falta ') + (i + 1) + '</label><input class="bx-blank" id="bx-blank-' + i + '" data-idx="' + i + '" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width:' + Math.max(4, seg.answer.length + 1) + 'ch">'
+          : '<button type="button" class="bx-slot" data-idx="' + i + '" aria-label="' + L('Missing word ', 'Palabra que falta ') + (i + 1) + '"> </button>';
+      }).join('');
+      body = '<div class="bx-scroll"><div class="bx-verse-ref-big">' + esc(v.ref) + '</div><p class="bx-verse-text">' + inner + '</p></div>' +
+        (mode === 'bank' ? '<div class="bx-chips" id="bx-bank"></div>' : '') +
+        '<div class="bx-verse-actions">' +
+          '<button type="button" class="bx-primary-btn" id="bx-verse-check">' + (state.lang === 'es' ? '✓ Comprobar' : '✓ Check') + '</button>' +
+          '<button type="button" class="bx-secondary-btn" id="bx-verse-hint">' + (state.lang === 'es' ? '💡 Pista' : '💡 Hint') + '</button>' +
+        '</div>';
+    }
+    wrap.innerHTML = head + body + '<div class="bx-verse-feedback" id="bx-verse-feedback" aria-live="polite"></div>';
     _showScreen('bx-screen-verse-detail');
+    document.getElementById('bx-verse-back').onclick = () => { _review = null; backToVerseList(); };
+    wrap.querySelectorAll('.bx-mode').forEach(b => { b.onclick = () => { sfx('click'); _openVerse(idx, b.dataset.mode); }; });
 
-    document.getElementById('bx-verse-check').onclick = () => _checkVerse(idx, parsed);
-    document.getElementById('bx-verse-hint').onclick = () => _hintVerse(parsed);
+    const finish = (ok) => {
+      if (opts.review) return opts.review.done(ok);
+      if (ok) _awardVerse(v, parsed.blanks.length);
+    };
+
+    if (mode === 'order') return _wireOrder(v, text, finish);
+    if (mode === 'bank') _wireBank(parsed);
+    document.getElementById('bx-verse-check').onclick = () => {
+      const ok = _checkVerse(idx, parsed, mode, !!opts.review);
+      if (ok) finish(true);
+      else if (opts.review) { opts.review.failed = true; }
+    };
+    document.getElementById('bx-verse-hint').onclick = () => { if (opts.review) opts.review.failed = true; _hintVerse(parsed, mode); };
+    if (opts.review) opts.review.finish = finish;
   }
 
-  function backToVerseList() { _showScreen('bx-screen-verses'); }
+  function _wireBank(parsed) {
+    const bank = document.getElementById('bx-bank');
+    const t = _tier();
+    const extra = t === 'beginner' ? 1 : t === 'intermediate' ? 2 : 3;
+    const words = shuffle(parsed.blanks.concat(_distractors(parsed.blanks, extra)));
+    const slots = [...document.querySelectorAll('#bx-verse-detail .bx-slot')];
+    const used = {}; // slot idx -> chip idx
+    bank.innerHTML = words.map((w, i) => '<button type="button" class="bx-chip" data-c="' + i + '">' + esc(w) + '</button>').join('');
+    const chips = [...bank.querySelectorAll('.bx-chip')];
+    chips.forEach(c => c.onclick = () => {
+      const free = slots.find(s => used[s.dataset.idx] == null);
+      if (!free) return;
+      used[free.dataset.idx] = +c.dataset.c;
+      free.textContent = words[+c.dataset.c];
+      free.classList.add('is-filled'); free.classList.remove('bx-blank-wrong', 'bx-blank-correct');
+      c.disabled = true; sfx('click');
+    });
+    slots.forEach(s => s.onclick = () => {
+      const ci = used[s.dataset.idx];
+      if (ci == null || s.classList.contains('bx-blank-correct')) return;
+      delete used[s.dataset.idx];
+      s.textContent = ' '; s.classList.remove('is-filled', 'bx-blank-wrong');
+      chips[ci].disabled = false;
+    });
+  }
+
+  function _wireOrder(v, text, finish) {
+    const t = _tier();
+    const plain = text.replace(/\[([^\]]+)\]/g, '$1');
+    const words = plain.split(/\s+/).filter(Boolean);
+    const size = t === 'beginner' ? 3 : t === 'intermediate' ? 2 : 1;
+    const parts = [];
+    for (let i = 0; i < words.length; i += size) parts.push(words.slice(i, i + size).join(' '));
+    const pool = shuffle(parts.map((p, i) => i));
+    const placed = [];
+    let mistakes = 0;
+    const allowed = t === 'beginner' ? 2 : t === 'expert' ? 0 : 1;
+    const line = document.getElementById('bx-order-line'), poolEl = document.getElementById('bx-order-pool');
+    const draw = () => {
+      line.innerHTML = placed.map(i => '<span class="bx-placed">' + esc(parts[i]) + '</span>').join(' ') + (placed.length < parts.length ? ' <span class="bx-caret" aria-hidden="true">▍</span>' : '');
+      poolEl.innerHTML = pool.filter(i => placed.indexOf(i) === -1).map(i => '<button type="button" class="bx-chip" data-i="' + i + '">' + esc(parts[i]) + '</button>').join('');
+      poolEl.querySelectorAll('.bx-chip').forEach(c => c.onclick = () => {
+        const i = +c.dataset.i;
+        // equal words are interchangeable: accept any piece with the right text
+        if (parts[i] === parts[placed.length]) {
+          placed.push(placed.length);
+          sfx('click');
+          if (placed.length === parts.length) return done();
+          draw();
+        } else {
+          mistakes++; sfx('wrong');
+          c.classList.add('bx-shake'); setTimeout(() => c.classList.remove('bx-shake'), 400);
+          const fb = document.getElementById('bx-verse-feedback');
+          fb.className = 'bx-verse-feedback bx-feedback-bad';
+          fb.textContent = L('Not that one yet — read it again.', 'Esa todavía no — léelo otra vez.');
+        }
+      });
+    };
+    const done = () => {
+      draw();
+      const ok = mistakes <= allowed;
+      const fb = document.getElementById('bx-verse-feedback');
+      fb.className = 'bx-verse-feedback ' + (ok ? 'bx-feedback-good' : 'bx-feedback-bad');
+      fb.textContent = ok ? L('Great work! ', '¡Bien hecho! ') + (mistakes ? '(' + mistakes + L(' slip)', ' error)') : '⭐')
+        : L('Finished with ', 'Terminado con ') + mistakes + L(' mistakes — try once more!', ' errores — ¡inténtalo otra vez!');
+      sfx(ok ? 'correct' : 'wrong');
+      finish(ok);
+    };
+    document.getElementById('bx-order-hint').onclick = () => {
+      mistakes++;
+      const c = poolEl.querySelector('.bx-chip[data-i="' + pool.find(i => placed.indexOf(i) === -1 && parts[i] === parts[placed.length]) + '"]');
+      if (c) { c.classList.add('bx-glow'); setTimeout(() => c.classList.remove('bx-glow'), 1200); }
+    };
+    draw();
+  }
+
+  function _awardVerse(v, total) {
+    const stars = total >= 3 ? 3 : total >= 2 ? 2 : 1;
+    const prog = _loadProgress();
+    prog.verses = prog.verses || {};
+    const prev = prog.verses[v.ref] || { stars: 0 };
+    const rec = Object.assign({}, prev, { stars: Math.max(prev.stars || 0, stars) });
+    if (!rec.box) { rec.box = 1; rec.due = _addDays(SRS_DAYS[1]); }
+    prog.verses[v.ref] = rec;
+    _saveProgress(prog);
+    const fb = document.getElementById('bx-verse-feedback');
+    if (fb && fb.className.indexOf('good') === -1) {
+      fb.className = 'bx-verse-feedback bx-feedback-good';
+      fb.textContent = (state.lang === 'es' ? '¡Bien hecho! ' : 'Great work! ') + '⭐'.repeat(stars);
+    }
+    if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
+      ActivityLog.log('Bible Explorer', '✨', (state.lang === 'es' ? 'Memorizó ' : 'Memorised ') + v.ref);
+    }
+  }
+
+  function backToVerseList() { _renderVerseList(); _showScreen('bx-screen-verses'); }
 
   function _normaliseWord(s) {
     // Strip diacritics (NFD splits "é" into "e" + combining acute), then
@@ -1058,62 +1380,128 @@ const BibleExplorer = (() => {
       .replace(/[^a-z0-9]/gi, '');
   }
 
-  function _checkVerse(idx, parsed) {
-    const inputs = document.querySelectorAll('#bx-verse-detail .bx-blank');
+  function _checkVerse(idx, parsed, mode, quiet) {
+    const fields = mode === 'type'
+      ? [...document.querySelectorAll('#bx-verse-detail .bx-blank')]
+      : [...document.querySelectorAll('#bx-verse-detail .bx-slot')];
     let correct = 0;
-    let total = parsed.blanks.length;
-    inputs.forEach((inp, i) => {
-      const expected = _normaliseWord(parsed.blanks[i]);
-      const got = _normaliseWord(inp.value);
-      if (got === expected) {
-        inp.classList.add('bx-blank-correct');
-        inp.classList.remove('bx-blank-wrong');
-        correct++;
-      } else {
-        inp.classList.add('bx-blank-wrong');
-        inp.classList.remove('bx-blank-correct');
-      }
+    const total = parsed.blanks.length;
+    fields.forEach((inp, i) => {
+      const got = _normaliseWord(mode === 'type' ? inp.value : inp.textContent);
+      const okk = got === _normaliseWord(parsed.blanks[i]);
+      inp.classList.toggle('bx-blank-correct', okk);
+      inp.classList.toggle('bx-blank-wrong', !okk);
+      if (okk) correct++;
     });
     const fb = document.getElementById('bx-verse-feedback');
-    const v = VERSES[idx];
     if (correct === total) {
+      sfx('correct');
+      fb.className = 'bx-verse-feedback bx-feedback-good';
       const stars = total >= 3 ? 3 : total >= 2 ? 2 : 1;
+      fb.textContent = (state.lang === 'es' ? '¡Bien hecho! ' : 'Great work! ') + (quiet ? '✓' : '⭐'.repeat(stars));
+      fields.forEach(f => { f.disabled = true; });
+      const ck = document.getElementById('bx-verse-check'); if (ck) ck.disabled = true;
+      return true;
+    }
+    sfx('wrong');
+    fb.className = 'bx-verse-feedback bx-feedback-bad';
+    fb.textContent = (state.lang === 'es'
+      ? correct + ' de ' + total + ' correctas. Inténtalo de nuevo o pide una pista.'
+      : correct + ' of ' + total + ' correct. Try again or tap Hint.');
+    return false;
+  }
+
+  function _hintVerse(parsed, mode) {
+    if (mode === 'type') {
+      const inputs = document.querySelectorAll('#bx-verse-detail .bx-blank');
+      for (let i = 0; i < inputs.length; i++) {
+        if (_normaliseWord(inputs[i].value) !== _normaliseWord(parsed.blanks[i])) {
+          inputs[i].value = parsed.blanks[i];
+          inputs[i].classList.add('bx-blank-hint');
+          return;
+        }
+      }
+      return;
+    }
+    // word bank: light up the chip that belongs in the first open slot
+    const slots = [...document.querySelectorAll('#bx-verse-detail .bx-slot')];
+    const first = slots.findIndex(s => _normaliseWord(s.textContent) !== _normaliseWord(parsed.blanks[+s.dataset.idx]));
+    if (first < 0) return;
+    const chip = [...document.querySelectorAll('#bx-bank .bx-chip:not([disabled])')].find(c => _normaliseWord(c.textContent) === _normaliseWord(parsed.blanks[first]));
+    if (chip) { chip.classList.add('bx-glow'); setTimeout(() => chip.classList.remove('bx-glow'), 1400); }
+  }
+
+  // ── Spaced-repetition review ──
+  function startReview() {
+    const prog = _loadProgress();
+    const due = shuffle(_dueVerses(prog)).slice(0, 8);
+    if (!due.length) return;
+    _review = { list: due, i: 0, ok: 0 };
+    _nextReview();
+  }
+  function _nextReview() {
+    const R = _review;
+    if (!R) return;
+    if (R.i >= R.list.length) return _finishReview();
+    const v = R.list[R.i];
+    const idx = VERSES.indexOf(v);
+    const t = _tier();
+    // alternate the two games; the oldest kids type the words
+    const mode = R.i % 2 ? 'order' : (t === 'advanced' || t === 'expert' ? 'type' : 'bank');
+    const item = { label: (R.i + 1) + ' / ' + R.list.length, failed: false, done: null };
+    item.done = (ok) => {
+      if (R.answered) return;
+      R.answered = true;
+      ok = ok && !item.failed;
       const prog = _loadProgress();
       prog.verses = prog.verses || {};
-      const prev = prog.verses[v.ref] || { stars: 0 };
-      prog.verses[v.ref] = { stars: Math.max(prev.stars, stars) };
+      prog.verses[v.ref] = _srsUpdate(Object.assign({}, prog.verses[v.ref] || { stars: 0 }), ok);
       _saveProgress(prog);
-      if (typeof SFX !== 'undefined' && SFX.correct) SFX.correct();
-      fb.className = 'bx-verse-feedback bx-feedback-good';
-      fb.textContent = (state.lang === 'es' ? '¡Bien hecho! ' : 'Great work! ') + '⭐'.repeat(stars);
-      if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
-        ActivityLog.log('Bible Explorer', '✨',
-          (state.lang === 'es' ? 'Memorizó ' : 'Memorised ') + v.ref);
-      }
-    } else {
-      if (typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
-      fb.className = 'bx-verse-feedback bx-feedback-bad';
-      fb.textContent = (state.lang === 'es'
-        ? correct + ' de ' + total + ' correctas. Inténtalo de nuevo o pide una pista.'
-        : correct + ' of ' + total + ' correct. Try again or tap Hint.');
+      if (ok) R.ok++;
+      const fb = document.getElementById('bx-verse-feedback');
+      const box = prog.verses[v.ref].box;
+      const msg = ok ? L('Remembered! Next review in ', '¡Lo recordaste! Próximo repaso en ') + SRS_DAYS[box] + L(SRS_DAYS[box] === 1 ? ' day.' : ' days.', SRS_DAYS[box] === 1 ? ' día.' : ' días.')
+        : L("We'll practise this one again tomorrow.", 'Lo volveremos a practicar mañana.');
+      if (fb) { fb.className = 'bx-verse-feedback ' + (ok ? 'bx-feedback-good' : 'bx-feedback-bad'); fb.textContent = msg; }
+      const act = document.querySelector('#bx-verse-detail .bx-verse-actions');
+      if (act) act.innerHTML = '<button type="button" class="bx-primary-btn" id="bx-review-next">' + (R.i < R.list.length - 1 ? L('Next verse ➔', 'Siguiente ➔') : L('Finish ✓', 'Terminar ✓')) + '</button>' +
+        '';
+      const nb = document.getElementById('bx-review-next');
+      if (nb) nb.onclick = () => { R.i++; R.answered = false; _nextReview(); };
+    };
+    // Typing / word bank: a wrong check marks the item failed but the kid
+    // can still finish it; giving up moves on.
+    _openVerse(idx, mode, { review: item });
+    const act = document.querySelector('#bx-verse-detail .bx-verse-actions');
+    if (act && mode !== 'order') {
+      const skip = document.createElement('button');
+      skip.type = 'button'; skip.className = 'bx-secondary-btn';
+      skip.textContent = L("I don't remember", 'No me acuerdo');
+      skip.onclick = () => { item.failed = true; item.done(false); };
+      act.appendChild(skip);
     }
   }
-
-  function _hintVerse(parsed) {
-    const inputs = document.querySelectorAll('#bx-verse-detail .bx-blank');
-    // Fill in the first blank that isn't yet correct.
-    for (let i = 0; i < inputs.length; i++) {
-      const expected = _normaliseWord(parsed.blanks[i]);
-      const got = _normaliseWord(inputs[i].value);
-      if (got !== expected) {
-        inputs[i].value = parsed.blanks[i];
-        inputs[i].classList.add('bx-blank-hint');
-        return;
-      }
+  function _finishReview() {
+    const R = _review; _review = null;
+    const prog = _loadProgress();
+    const rv = prog.review || {};
+    const t = _today();
+    if (rv.lastDay !== t) {
+      rv.streak = rv.lastDay === _addDays(-1) ? (rv.streak || 0) + 1 : 1;
+      rv.lastDay = t;
     }
+    rv.done = (rv.done || 0) + R.list.length;
+    prog.review = rv;
+    _saveProgress(prog);
+    sfx(R.ok === R.list.length ? 'cheer' : 'star');
+    const wrap = document.getElementById('bx-verse-detail');
+    wrap.innerHTML = '<div class="bx-result-card">' + '<div class="bx-review-big">' + BibleArt.icon('review') + '</div>' +
+      '<h2 class="bx-book-title">' + L('Review complete', 'Repaso terminado') + '</h2>' +
+      '<p>' + R.ok + ' / ' + R.list.length + ' ' + L('remembered', 'recordados') + ' · 🔥 ' + rv.streak + ' ' + L('day streak', 'días seguidos') + '</p>' +
+      '<div class="bx-page-actions"><button type="button" class="bx-primary-btn" onclick="BibleExplorer.backToVerseList()">' + L('← Verses', '← Versículos') + '</button></div></div>';
   }
 
-  // ── Books drill mode ──
+  // ════════════════════ BOOKS ════════════════════
   function openBooks() {
     state.mode = 'books';
     state.activeGroupIdx = 0;
@@ -1121,99 +1509,116 @@ const BibleExplorer = (() => {
     _showScreen('bx-screen-books');
   }
 
+  function _spine(name, g, i, extra) {
+    const c = SHELF_COLORS[g.id] || ['#6a4426', '#7a5232'];
+    const len = bookName(name).length;
+    const h = 92 + ((name.charCodeAt(0) * 7 + i * 13) % 26);
+    const w = len > 14 ? 30 : len > 9 ? 26 : 23;
+    return '<span class="bx-spine' + (len > 16 ? ' is-long' : '') + (extra || '') + '" style="--c1:' + c[0] + ';--c2:' + c[1] + ';height:' + h + 'px;width:' + w + 'px"><span class="bx-spine-txt">' + esc(bookName(name)) + '</span></span>';
+  }
+
   function _renderBookGroups() {
     const grid = document.getElementById('bx-book-grid');
     if (!grid) return;
-    grid.innerHTML = '';
     const prog = _loadProgress();
     const done = prog.books || {};
-    BOOK_GROUPS.forEach((g, idx) => {
-      const card = document.createElement('button');
-      const isDone = done[g.id] && done[g.id].stars > 0;
-      card.className = 'bx-book-card' + (isDone ? ' bx-done' : '');
-      card.innerHTML =
-        '<span class="bx-book-tag">' + (g.testament === 'OT' ? (state.lang === 'es' ? 'A.T.' : 'OT') : (state.lang === 'es' ? 'N.T.' : 'NT')) + '</span>' +
-        '<h3>' + _l(g.label) + '</h3>' +
-        '<span class="bx-book-count">' + g.books.length + ' ' + (state.lang === 'es' ? 'libros' : 'books') + '</span>' +
-        (isDone ? '<span class="bx-book-star">' + '⭐'.repeat(done[g.id].stars) + '</span>' : '');
-      card.onclick = () => _openBookGroup(idx);
-      grid.appendChild(card);
-    });
+    const shelf = (t, label) => '<section class="bx-case"><h3 class="bx-sec-head"><span>' + label + '</span></h3><div class="bx-shelves">' +
+      BOOK_GROUPS.map((g, idx) => [g, idx]).filter(x => x[0].testament === t).map(x => {
+        const g = x[0], rec = done[g.id];
+        return '<button type="button" class="bx-shelf-group' + (rec && rec.stars > 0 ? ' bx-done' : '') + '" data-idx="' + x[1] + '" aria-label="' + esc(_l(g.label)) + ', ' + g.books.length + ' ' + L('books', 'libros') + '">' +
+          '<span class="bx-spines">' + g.books.map((b, i) => _spine(b, g, i)).join('') + '</span>' +
+          '<span class="bx-plaque"><b>' + esc(_l(g.label)) + '</b><small>' + g.books.length + ' ' + (g.books.length === 1 ? L('book', 'libro') : L('books', 'libros')) + '</small>' +
+          (rec && rec.stars > 0 ? '<span class="bx-plaque-stars">' + starRow(rec.stars) + '</span>' : '') + '</span>' +
+          (rec && rec.stars > 0 ? '<span class="bx-ribbon" aria-hidden="true"></span>' : '') +
+        '</button>';
+      }).join('') + '</div></section>';
+    const best = prog.sortBest;
+    grid.innerHTML =
+      '<p class="bx-intro">' + L('Tap a section of the shelf, then put its books back in order.', 'Toca una sección de la estantería y vuelve a ordenar sus libros.') + '</p>' +
+      shelf('OT', L('Old Testament · 46 books', 'Antiguo Testamento · 46 libros')) + shelf('NT', L('New Testament · 27 books', 'Nuevo Testamento · 27 libros')) +
+      '<div class="bx-sort-card"><div><strong>' + L('Where does it go?', '¿Dónde va?') + '</strong><span>' + L('Ten books — pick the right section of the shelf.', 'Diez libros: elige la sección correcta de la estantería.') + (best ? ' · ' + L('Best', 'Mejor') + ': ' + best + '/10' : '') + '</span></div>' +
+      '<button type="button" class="bx-primary-btn" id="bx-sort-start">' + L('Play', 'Jugar') + '</button></div>';
+    grid.querySelectorAll('.bx-shelf-group').forEach(b => { b.onclick = () => { sfx('click'); _openBookGroup(+b.dataset.idx); }; });
+    document.getElementById('bx-sort-start').onclick = _startSort;
   }
 
-  // Tap-in-order drill: shuffled buttons of book names in this group,
-  // tap them in canonical order. Wrong tap loses a life. 3 lives.
+  // Put-the-shelf-in-order drill: tap the books in canonical order and
+  // each one slides onto the empty shelf. Stars: 0 mistakes = 3, one = 2.
   function _openBookGroup(idx) {
     state.activeGroupIdx = idx;
     const g = BOOK_GROUPS[idx];
     if (!g) return;
-
-    let order = 0;
-    let lives = 3;
+    const tier = _tier();
+    const maxLives = tier === 'beginner' ? 5 : 3;
+    let order = 0, lives = maxLives, mistakes = 0;
     const total = g.books.length;
-    const shuffled = g.books.slice().sort(() => Math.random() - 0.5);
-
+    const shuffled = shuffle(g.books);
     const wrap = document.getElementById('bx-book-drill');
+
     function render() {
       wrap.innerHTML =
-        '<button class="bx-back-btn" onclick="BibleExplorer.backToBookList()">←</button>' +
+        '<div class="bx-topbar"><button type="button" class="bx-back-btn" aria-label="' + L('Back to the bookshelf', 'Volver a la estantería') + '" onclick="BibleExplorer.backToBookList()">←</button><span class="bx-crumb">' + L('Bookshelf', 'Estantería') + '</span></div>' +
         '<div class="bx-drill-header">' +
-          '<h2>' + _l(g.label) + '</h2>' +
+          '<h2>' + esc(_l(g.label)) + '</h2>' +
           '<div class="bx-drill-meta">' +
             '<span class="bx-drill-progress">' + order + ' / ' + total + '</span>' +
-            '<span class="bx-drill-lives">' + '❤️'.repeat(lives) + '🤍'.repeat(3 - lives) + '</span>' +
+            '<span class="bx-drill-lives" aria-label="' + lives + ' ' + L('lives', 'vidas') + '">' + '❤️'.repeat(lives) + '🤍'.repeat(maxLives - lives) + '</span>' +
           '</div>' +
-          '<p class="bx-drill-instr">' +
-            (state.lang === 'es' ? 'Toca los libros en orden canónico.' : 'Tap the books in canonical order.') +
-          '</p>' +
+          '<p class="bx-drill-instr">' + (state.lang === 'es' ? 'Toca los libros en orden canónico.' : 'Tap the books in canonical order.') + '</p>' +
         '</div>' +
+        '<div class="bx-drill-shelf"><div class="bx-spines">' + g.books.slice(0, order).map((b, i) => _spine(b, g, i, i === order - 1 ? ' is-new' : '')).join('') +
+          (order < total ? '<span class="bx-gap-slot" aria-hidden="true">?</span>' : '') + '</div></div>' +
         '<div class="bx-drill-options">' +
-          shuffled.map((name, i) => {
-            const matchedIdx = g.books.indexOf(name);
-            const done = matchedIdx < order;
-            return '<button class="bx-drill-opt' + (done ? ' bx-done' : '') + '"' +
-              (done ? ' disabled' : '') + ' data-book="' + name + '">' + name + '</button>';
+          shuffled.map(name => {
+            const placed = g.books.indexOf(name) < order;
+            return placed ? '' : '<button type="button" class="bx-drill-opt" data-book="' + esc(name) + '" style="--c1:' + SHELF_COLORS[g.id][0] + '">' + esc(bookName(name)) + '</button>';
           }).join('') +
         '</div>';
 
       wrap.querySelectorAll('.bx-drill-opt').forEach(btn => {
         btn.onclick = () => {
-          if (btn.disabled) return;
           const book = btn.dataset.book;
-          const expected = g.books[order];
-          if (book === expected) {
+          if (book === g.books[order]) {
             order++;
-            if (typeof SFX !== 'undefined' && SFX.correct) SFX.correct();
+            sfx('correct');
             if (order === total) return _finishBookDrill();
             render();
           } else {
-            lives--;
-            if (typeof SFX !== 'undefined' && SFX.wrong) SFX.wrong();
+            lives--; mistakes++;
+            sfx('wrong');
             btn.classList.add('bx-shake');
+            if (tier !== 'expert') {
+              const right = wrap.querySelector('.bx-drill-opt[data-book="' + CSS.escape(g.books[order]) + '"]');
+              if (right && tier !== 'advanced') { right.classList.add('bx-glow'); }
+            }
             setTimeout(() => btn.classList.remove('bx-shake'), 400);
-            if (lives <= 0) return _failBookDrill();
-            render();
+            if (lives <= 0) return setTimeout(_failBookDrill, 450);
+            const lv = wrap.querySelector('.bx-drill-lives');
+            if (lv) lv.textContent = '❤️'.repeat(lives) + '🤍'.repeat(maxLives - lives);
           }
         };
       });
     }
 
     function _finishBookDrill() {
-      const stars = lives === 3 ? 3 : lives === 2 ? 2 : 1;
+      const stars = mistakes === 0 ? 3 : mistakes === 1 ? 2 : 1;
       const prog = _loadProgress();
       prog.books = prog.books || {};
       const prev = prog.books[g.id] || { stars: 0 };
-      prog.books[g.id] = { stars: Math.max(prev.stars, stars) };
+      prog.books[g.id] = Object.assign({}, prev, { stars: Math.max(prev.stars || 0, stars) });
       _saveProgress(prog);
       if (typeof ActivityLog !== 'undefined' && ActivityLog.log) {
         ActivityLog.log('Bible Explorer', '📚',
           (state.lang === 'es' ? 'Completó libros de ' : 'Completed books of ') + _l(g.label) + ' ⭐'.repeat(stars));
       }
+      sfx(stars === 3 ? 'cheer' : 'star');
       wrap.innerHTML =
+        '<div class="bx-topbar"><button type="button" class="bx-back-btn" aria-label="' + L('Back to the bookshelf', 'Volver a la estantería') + '" onclick="BibleExplorer.backToBookList()">←</button></div>' +
+        '<div class="bx-drill-shelf"><div class="bx-spines">' + g.books.map((b, i) => _spine(b, g, i)).join('') + '</div></div>' +
         '<div class="bx-drill-win">' +
-          '<div class="bx-quiz-stars">' + '⭐'.repeat(stars) + '☆'.repeat(3 - stars) + '</div>' +
-          '<p>' + (state.lang === 'es' ? '¡Excelente!' : 'Well done!') + '</p>' +
-          '<button class="bx-primary-btn" onclick="BibleExplorer.backToBookList()">' +
+          '<div class="bx-quiz-stars">' + starRow(stars) + '</div>' +
+          '<p>' + (state.lang === 'es' ? '¡Excelente!' : 'Well done!') + ' ' + _l(g.label) + ' ' + L('is back in order.', 'está en orden.') + '</p>' +
+          '<button type="button" class="bx-primary-btn" onclick="BibleExplorer.backToBookList()">' +
             (state.lang === 'es' ? '← Volver' : '← Back') +
           '</button>' +
         '</div>';
@@ -1223,10 +1628,11 @@ const BibleExplorer = (() => {
       wrap.innerHTML =
         '<div class="bx-drill-fail">' +
           '<p>' + (state.lang === 'es' ? 'Inténtalo otra vez.' : 'Try again!') + '</p>' +
-          '<button class="bx-primary-btn" onclick="BibleExplorer._retryBookDrill(' + idx + ')">' +
+          '<p class="bx-drill-instr">' + L('The order is: ', 'El orden es: ') + g.books.map(bookName).map(esc).join(' · ') + '</p>' +
+          '<button type="button" class="bx-primary-btn" onclick="BibleExplorer._retryBookDrill(' + idx + ')">' +
             (state.lang === 'es' ? '↺ Reintentar' : '↺ Retry') +
           '</button> ' +
-          '<button class="bx-secondary-btn" onclick="BibleExplorer.backToBookList()">' +
+          '<button type="button" class="bx-secondary-btn" onclick="BibleExplorer.backToBookList()">' +
             (state.lang === 'es' ? '← Volver' : '← Back') +
           '</button>' +
         '</div>';
@@ -1236,14 +1642,60 @@ const BibleExplorer = (() => {
     _showScreen('bx-screen-book-drill');
   }
 
-  function backToBookList() { _showScreen('bx-screen-books'); }
+  // "Where does it go?": name a book, pick its section.
+  function _startSort() {
+    const all = [];
+    BOOK_GROUPS.forEach(g => g.books.forEach(b => all.push({ b, g })));
+    const qs = shuffle(all).slice(0, 10);
+    const nOpts = _tier() === 'beginner' ? 2 : _tier() === 'intermediate' ? 3 : 4;
+    let i = 0, score = 0;
+    const wrap = document.getElementById('bx-book-drill');
+    _showScreen('bx-screen-book-drill');
+    const draw = () => {
+      if (i >= qs.length) {
+        const prog = _loadProgress();
+        prog.sortBest = Math.max(prog.sortBest || 0, score);
+        _saveProgress(prog);
+        sfx(score >= 8 ? 'cheer' : 'star');
+        wrap.innerHTML = '<div class="bx-drill-win"><div class="bx-quiz-stars">' + starRow(score >= 9 ? 3 : score >= 7 ? 2 : score >= 4 ? 1 : 0) + '</div><p>' + score + ' / 10</p>' +
+          '<button type="button" class="bx-secondary-btn" id="bx-sort-again">' + L('↺ Again', '↺ Otra vez') + '</button> <button type="button" class="bx-primary-btn" onclick="BibleExplorer.backToBookList()">' + L('← Bookshelf', '← Estantería') + '</button></div>';
+        document.getElementById('bx-sort-again').onclick = _startSort;
+        return;
+      }
+      const q = qs[i];
+      const opts = shuffle([q.g].concat(shuffle(BOOK_GROUPS.filter(g => g !== q.g)).slice(0, nOpts - 1)));
+      wrap.innerHTML = '<div class="bx-topbar"><button type="button" class="bx-back-btn" aria-label="' + L('Back to the bookshelf', 'Volver a la estantería') + '" onclick="BibleExplorer.backToBookList()">←</button><span class="bx-crumb">' + (i + 1) + ' / 10</span></div>' +
+        '<div class="bx-sort-q"><div class="bx-drill-shelf bx-one">' + _spine(q.b, q.g, 0, ' is-new is-mystery') + '</div><h2 class="bx-quiz-q">' + L('Where does ', '¿Dónde va ') + '<em>' + esc(bookName(q.b)) + '</em>' + L(' go?', '?') + '</h2></div>' +
+        '<div class="bx-quiz-options">' + opts.map(g => '<button type="button" class="bx-quiz-opt" data-g="' + g.id + '">' + esc(_l(g.label)) + ' <small>(' + (g.testament === 'OT' ? L('OT', 'A.T.') : L('NT', 'N.T.')) + ')</small></button>').join('') + '</div><div class="bx-quiz-fb" aria-live="polite"></div>';
+      wrap.querySelectorAll('.bx-quiz-opt').forEach(b => b.onclick = () => {
+        if (wrap.dataset.locked === '1') return;
+        wrap.dataset.locked = '1';
+        const ok = b.dataset.g === q.g.id;
+        if (ok) score++;
+        b.classList.add(ok ? 'bx-correct' : 'bx-wrong');
+        wrap.querySelectorAll('.bx-quiz-opt').forEach(x => { x.disabled = true; if (x.dataset.g === q.g.id) x.classList.add('bx-correct'); });
+        sfx(ok ? 'correct' : 'wrong');
+        setTimeout(() => { wrap.dataset.locked = ''; i++; draw(); }, ok ? 700 : 1400);
+      });
+    };
+    draw();
+  }
+
+  function backToBookList() { _renderBookGroups(); _showScreen('bx-screen-books'); }
   function _retryBookDrill(idx) { _openBookGroup(idx); }
 
   // ── Language toggle ──
-  function toggleLanguage() {
-    state.lang = state.lang === 'en' ? 'es' : 'en';
+  function _applyLangLabel() {
     const lbl = document.getElementById('bx-lang-label');
     if (lbl) lbl.textContent = state.lang === 'es' ? 'ES / EN' : 'EN / ES';
+    document.documentElement.lang = state.lang;
+  }
+  function toggleLanguage() {
+    state.lang = state.lang === 'en' ? 'es' : 'en';
+    const prog = _loadProgress();
+    prog.lang = state.lang;
+    _saveProgress(prog);
+    _applyLangLabel();
     // Re-render current mode
     if (state.mode === 'stories') _renderStoryList();
     else if (state.mode === 'verses') _renderVerseList();
@@ -1253,10 +1705,15 @@ const BibleExplorer = (() => {
 
   // ── Init ──
   function init() {
+    const saved = _loadProgress().lang;
+    if (saved === 'es' || saved === 'en') state.lang = saved;
+    _applyLangLabel();
     document.getElementById('bx-tile-stories').onclick = openStories;
     document.getElementById('bx-tile-verses').onclick = openVerses;
     document.getElementById('bx-tile-books').onclick = openBooks;
     document.getElementById('bx-lang-toggle').onclick = toggleLanguage;
+    const rb = document.getElementById('bx-review-banner');
+    if (rb) rb.onclick = () => { openVerses(); startReview(); };
     document.querySelectorAll('.bx-home-btn').forEach(b => { b.onclick = _renderHome; });
     _renderHome();
   }
@@ -1265,7 +1722,7 @@ const BibleExplorer = (() => {
     init,
     openStories, openVerses, openBooks,
     backToStoryList, backToVerseList, backToBookList,
-    startStoryQuiz,
+    startStoryQuiz, startReview,
     toggleLanguage,
     _retryBookDrill
   };

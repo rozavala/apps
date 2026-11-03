@@ -6,8 +6,8 @@
   <title>Art Studio 🎨</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/art-studio.css">
-  <link rel="stylesheet" href="css/copy-the-master.css">
+  <link rel="stylesheet" href="css/art-studio.css?v=6">
+  <link rel="stylesheet" href="css/copy-the-master.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -16,166 +16,69 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-<body>
-  <div class="app">
+<body class="as-body">
+  <div class="app as-app">
     <!-- Top navigation managed by nav.js -->
     <div class="screen active" id="screen-studio">
-    <button class="cm-entry-btn" onclick="CopyMaster.open()">🖼 Copy the Master</button>
-    <div class="tabs-bar">
-      <button class="tab active" data-tab="draw">Draw</button>
-      <button class="tab" data-tab="learn">Learn</button>
-      <button class="tab" data-tab="gallery">Gallery</button>
-    </div>
+      <header class="as-head">
+        <h1 class="as-title"><span id="as-logo" class="as-logo-wrap" aria-hidden="true"></span><span>Art Studio</span></h1>
+        <nav class="as-tabs" role="tablist" aria-label="Art Studio">
+          <button type="button" class="as-tab active" role="tab" aria-selected="true" data-tab="draw"><span data-ico="draw"></span><b>Draw</b></button>
+          <button type="button" class="as-tab" role="tab" aria-selected="false" data-tab="learn"><span data-ico="learn"></span><b>Learn</b></button>
+          <button type="button" class="as-tab" role="tab" aria-selected="false" data-tab="gallery"><span data-ico="gallery"></span><b>Gallery</b></button>
+          <button type="button" class="as-tab" role="tab" aria-selected="false" data-tab="master"><span data-ico="master"></span><b>Masters</b></button>
+        </nav>
+      </header>
 
-    <div class="content-container">
-      <div id="tab-draw" class="tab-content active">
-        <div class="canvas-wrap">
-          <canvas id="main-canvas"></canvas>
-          <canvas id="temp-canvas"></canvas>
-        </div>
-        
-        <div class="toolbar">
-          <div class="tool-section palette-section">
-            <div id="color-palette" class="color-palette"></div>
-          </div>
-          
-          <div class="tool-section brush-section">
-            <button class="brush-size" data-size="3" style="--size: 6px;"></button>
-            <button class="brush-size active" data-size="8" style="--size: 12px;"></button>
-            <button class="brush-size" data-size="16" style="--size: 20px;"></button>
-          </div>
+      <main class="as-panes">
+        <section id="tab-draw" class="as-pane active" aria-label="Draw">
+          <div id="draw-host" class="as-kit-host"></div>
+        </section>
 
-          <div class="tool-section tool-buttons">
-            <button class="tool-btn active" data-tool="pencil" title="Pencil" aria-label="Pencil tool">✏️</button>
-            <button class="tool-btn" data-tool="line" title="Line" aria-label="Line tool">📏</button>
-            <button class="tool-btn" data-tool="rectangle" title="Rectangle" aria-label="Rectangle tool">⬜</button>
-            <button class="tool-btn" data-tool="circle" title="Circle" aria-label="Circle tool">⭕</button>
-            <button class="tool-btn" data-tool="fill" title="Fill" aria-label="Fill tool">🪣</button>
-          </div>
+        <section id="tab-learn" class="as-pane" aria-label="Learn">
+          <div id="learn-list" class="as-scroll"></div>
+          <div id="learn-play" class="as-learn-play" hidden></div>
+        </section>
 
-          <div class="tool-section action-buttons">
-            <button id="undo-btn" class="action-btn" title="Undo" aria-label="Undo">↩️</button>
-            <button id="redo-btn" class="action-btn" title="Redo" aria-label="Redo">↪️</button>
-            <button id="clear-btn" class="action-btn" title="Clear" aria-label="Clear canvas">🗑️</button>
-            <button id="save-btn" class="action-btn primary" title="Save to Gallery" aria-label="Save to gallery">💾</button>
-          </div>
-        </div>
-      </div>
+        <section id="tab-gallery" class="as-pane" aria-label="Gallery">
+          <div id="gallery-wall" class="wall as-scroll"></div>
+        </section>
 
-      <div id="tab-learn" class="tab-content">
-        <div id="lesson-select-screen" class="lesson-select-screen">
-          <h2 style="font-family: var(--font-display); margin-bottom: 20px; text-align: center;">Guided Lessons</h2>
-          <div id="lesson-list" class="lesson-grid"></div>
-        </div>
-
-        <div id="lesson-game-screen" class="lesson-game-screen" style="display:none;">
-          <div class="lesson-header">
-            <button class="lesson-back" onclick="ArtStudio.exitLesson()">← Lessons</button>
-            <div id="lesson-title" class="lesson-title">Lesson Title</div>
-            <div id="lesson-step-counter" class="lesson-step-counter">Step 1/5</div>
-          </div>
-          
-          <div id="instruction-banner" class="instruction-banner">
-            Draw a big circle!
-          </div>
-
-          <div class="toolbar lesson-toolbar">
-            <div class="tool-section palette-section">
-              <div id="lesson-color-palette" class="color-palette"></div>
-            </div>
-            
-            <div class="tool-section brush-section">
-              <button class="brush-size" data-size="3" style="--size: 4px;"></button>
-              <button class="brush-size active" data-size="8" style="--size: 8px;"></button>
-              <button class="brush-size" data-size="16" style="--size: 14px;"></button>
-            </div>
-
-            <div class="tool-section tool-buttons">
-              <button class="tool-btn active" data-tool="pencil" title="Pencil" aria-label="Pencil tool">✏️</button>
-              <button class="tool-btn" data-tool="line" title="Line" aria-label="Line tool">📏</button>
-              <button class="tool-btn" data-tool="rectangle" title="Rectangle" aria-label="Rectangle tool">⬜</button>
-              <button class="tool-btn" data-tool="circle" title="Circle" aria-label="Circle tool">⭕</button>
-              <button class="tool-btn" data-tool="fill" title="Fill" aria-label="Fill tool">🪣</button>
-            </div>
-
-            <div class="tool-section action-buttons">
-              <button id="lesson-undo-btn" class="action-btn" title="Undo" aria-label="Undo">↩️</button>
-              <button id="lesson-redo-btn" class="action-btn" title="Redo" aria-label="Redo">↪️</button>
-              <button id="lesson-clear-btn" class="action-btn" title="Clear" aria-label="Clear canvas">🗑️</button>
-            </div>
-          </div>
-
-          <div class="lesson-main">
-            <div class="canvas-wrap lesson-canvas-wrap">
-              <canvas id="lesson-main-canvas"></canvas>
-              <canvas id="lesson-guide-canvas"></canvas>
-              <canvas id="lesson-temp-canvas"></canvas>
-            </div>
-          </div>
-
-          <div class="lesson-footer">
-            <button id="lesson-next-btn" class="lesson-next-btn" onclick="ArtStudio.nextLessonStep()">Next Step →</button>
-          </div>
-        </div>
-
-        <!-- Color Mixing Special UI -->
-        <div id="color-mixing-screen" class="color-mixing-screen" style="display:none;">
-          <div class="lesson-header">
-            <button class="lesson-back" onclick="ArtStudio.exitLesson()">← Lessons</button>
-            <div class="lesson-title">Color Mixing</div>
-          </div>
-          <div class="mixing-area">
-            <div class="mixing-pots">
-              <div id="mix-pot-1" class="mix-pot empty" onclick="ArtStudio.pickMixColor(1)">?</div>
-              <div class="mix-plus">+</div>
-              <div id="mix-pot-2" class="mix-pot empty" onclick="ArtStudio.pickMixColor(2)">?</div>
-              <div class="mix-equals">=</div>
-              <div id="mix-result" class="mix-pot result">?</div>
-            </div>
-            <div id="mix-palette" class="mix-palette"></div>
-            <button id="mix-btn" class="mix-btn" disabled onclick="ArtStudio.performMix()">Mix!</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-gallery" class="tab-content">
-        <div id="gallery-grid" class="gallery-grid"></div>
-      </div>
+        <section id="tab-master" class="as-pane" aria-label="Copy the Master">
+          <div id="cm-wrap"></div>
+        </section>
+      </main>
     </div>
   </div>
-</div>
-
-    <!-- Copy the Master screen (rendered by js/copy-the-master.js) -->
-    <div class="screen" id="screen-copy-master">
-      <div id="cm-wrap"></div>
-    </div>
 
   <!-- Save Dialog Overlay -->
-  <div id="save-dialog" class="modal-overlay">
+  <div id="save-dialog" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="save-h">
     <div class="modal-card">
-      <h3>Save Artwork</h3>
-      <input type="text" id="art-title" aria-label="Artwork Title" placeholder="Title your masterpiece..." maxlength="20">
+      <h3 id="save-h">Hang it in your gallery</h3>
+      <div class="fr fr-gold fr-sm"><span class="fr-mould"><span class="fr-mat"><img id="save-preview" alt="Your artwork"></span></span></div>
+      <label for="art-title" class="save-label">Give it a title</label>
+      <input type="text" id="art-title" placeholder="My Masterpiece" maxlength="20" autocomplete="off">
       <div class="modal-btns">
-        <button class="modal-btn" onclick="ArtStudio.closeSaveDialog()">Cancel</button>
-        <button class="modal-btn primary" onclick="ArtStudio.confirmSave()">Save ✓</button>
+        <button type="button" class="modal-btn" onclick="ArtStudio.closeSaveDialog()">Cancel</button>
+        <button type="button" class="modal-btn primary" onclick="ArtStudio.confirmSave()">Save ✓</button>
       </div>
     </div>
   </div>
 
   <!-- Gallery Viewer Overlay -->
-  <div id="gallery-viewer" class="modal-overlay">
+  <div id="gallery-viewer" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
     <div class="viewer-card">
-      <button class="viewer-close" aria-label="Close Gallery Viewer" onclick="ArtStudio.closeViewer()">✕</button>
-      <img id="viewer-img" src="" alt="Artwork">
-      <div id="viewer-title" class="viewer-title">Title</div>
-      <button id="viewer-delete" class="viewer-delete">🗑 Delete Artwork</button>
+      <button type="button" class="viewer-close" aria-label="Close the picture" onclick="ArtStudio.closeViewer()">✕</button>
+      <div class="viewer-frame fr fr-gold"><span class="fr-mould"><span class="fr-mat"><img id="viewer-img" src="" alt="Artwork"></span></span></div>
+      <div class="fr-plaque viewer-plaque"><b id="viewer-title">Title</b><span id="viewer-date"></span></div>
+      <button type="button" id="viewer-delete" class="viewer-delete">Take it down (delete)</button>
     </div>
   </div>
 
   <!-- Common Feedback Overlay -->
   <div id="feedback" class="feedback-float"><span></span></div>
 
-  <script src="js/auth.js?v=4"></script>
+  <script src="js/auth.js?v=5"></script>
   <script src="js/off-hours.js?v=1"></script>
 
   <script src="js/a11y.js"></script>
@@ -187,8 +90,10 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js?v=5"></script>
   <script src="js/dialog.js?v=2"></script>
-  <script src="js/art-studio.js?v=5"></script>
-  <script src="js/copy-the-master.js?v=2"></script>
+  <script src="js/art-studio-brushes.js?v=1"></script>
+  <script src="js/art-studio-art.js?v=1"></script>
+  <script src="js/art-studio.js?v=6"></script>
+  <script src="js/copy-the-master.js?v=3"></script>
   <script src="js/pwa.js"></script>
 </body>
 </html>
