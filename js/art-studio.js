@@ -822,6 +822,7 @@ const ArtStudio = (() => {
 
   function renderGuides() {
     const lesson = L.lesson, step = lesson.steps[L.idx], S = L.kit.surface;
+    let top = '';
     let svg = '<svg class="lg" viewBox="-4 -4 108 108" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
       '<defs><pattern id="lg-hatch" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.1" height="3" fill="#6d5fd6" opacity="0.5"/></pattern></defs>';
     if (step.type === 'pixelgrid') {
@@ -839,19 +840,23 @@ const ArtStudio = (() => {
     if (step.guide) {
       const chk = stepCheck(step);
       if (chk === 'area' || chk === 'fill') svg += '<path class="lg-area" d="' + step.guide + '"/>';
-      svg += '<path class="lg-halo" d="' + step.guide + '"/><path class="lg-now" id="lg-now" d="' + step.guide + '"/>';
-      svg += '<path class="lg-demo" d="' + step.guide + '" style="stroke:' + esc(safeHex(step.color || '#4A4744')) + '"/>';
-      svg += '<g class="lg-pen" hidden><path d="M0 0 L2.2 -1.2 L11 -9.5 L12.8 -7.7 L3.5 1.1 Z" fill="#f0cf9e" stroke="#7a5a2f" stroke-width="0.3"/><path d="M0 0 L2.2 -1.2 L3.5 1.1 Z" fill="#333"/><path d="M8.6 -7.3 L11 -9.5 L12.8 -7.7 L10.4 -5.4 Z" fill="' + esc(safeHex(step.color || '#D9352A')) + '"/></g>';
+      svg += '<path class="lg-now" id="lg-now" d="' + step.guide + '"/>';
+      top += '<path class="lg-demo" d="' + step.guide + '" style="stroke:' + esc(safeHex(step.color || '#4A4744')) + '"/>';
+      top += '<g class="lg-pen" style="display:none"><path d="M0 0 L2.2 -1.2 L11 -9.5 L12.8 -7.7 L3.5 1.1 Z" fill="#f0cf9e" stroke="#7a5a2f" stroke-width="0.3"/><path d="M0 0 L2.2 -1.2 L3.5 1.1 Z" fill="#333"/><path d="M8.6 -7.3 L11 -9.5 L12.8 -7.7 L10.4 -5.4 Z" fill="' + esc(safeHex(step.color || '#D9352A')) + '"/></g>';
     }
     svg += '</svg>';
-    S.over.innerHTML = svg;
+    // The ghost guide lies under the paint, like light pencil lines on
+    // the sheet: paint covers it as the kid traces. The demonstration
+    // stroke and its pencil travel above.
+    S.under.innerHTML = svg;
+    S.over.innerHTML = top ? '<svg class="lg" viewBox="-4 -4 108 108" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' + top + '</svg>' : '';
   }
 
   // Sample the guide into paper points for checking.
   function guidePoints() {
     if (L.pts) return L.pts;
     const step = L.lesson.steps[L.idx], S = L.kit.surface;
-    const path = S.over.querySelector('#lg-now');
+    const path = S.under.querySelector('#lg-now');
     const pts = [];
     if (!path || !path.getTotalLength) return (L.pts = pts);
     const chk = stepCheck(step);
@@ -936,7 +941,7 @@ const ArtStudio = (() => {
     demo.style.strokeDasharray = len + ' ' + len;
     demo.style.strokeDashoffset = len;
     demo.classList.add('on');
-    pen.removeAttribute('hidden');
+    pen.style.display = '';
     const t0 = performance.now();
     function frame(now) {
       if (!L || !L.demo) return;
@@ -957,7 +962,7 @@ const ArtStudio = (() => {
     if (!S) return;
     const demo = S.over.querySelector('.lg-demo'), pen = S.over.querySelector('.lg-pen');
     if (demo) demo.classList.remove('on');
-    if (pen) pen.setAttribute('hidden', '');
+    if (pen) pen.style.display = 'none';
     if (fade) {} // CSS fades the demo line out
   }
 

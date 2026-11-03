@@ -197,7 +197,7 @@ var PLArt = (function(){
     // sails
     var mast = -L * 0.12;
     var bl = L * 0.5, bx = Math.sin(boom) * bl, by = mast + Math.cos(boom) * bl;
-    var belly = (boom >= 0 ? 1 : -1) * L * 0.14;
+    var belly = (boom >= 0 ? 1 : -1) * L * 0.17;
     function sail(x0, y0, x1, y1, bel, col){
       var mx = (x0 + x1) / 2, my = (y0 + y1) / 2, dx = x1 - x0, dy = y1 - y0, n = Math.sqrt(dx * dx + dy * dy) || 1;
       var cx = mx + (-dy / n) * bel * -1, cy = my + (dx / n) * bel * -1;
@@ -718,8 +718,8 @@ var PLArt = (function(){
     var qBtn = btn(f.ctrl, '🌙 ¿Qué buque es? (prueba)', function(){ quiz ? endQuiz() : startQuiz(); }, 'pl-mini-btn-alt');
     f.fig.insertBefore(qBox, f.cap);
     var qScore = 0, qN = 0;
-    function startQuiz(){ quiz = {}; qScore = 0; qN = 0; qBtn.textContent = 'Salir de la prueba'; sel.disabled = true; bearBtns.style.display = 'none'; nextQ(); }
-    function endQuiz(){ quiz = null; qBox.innerHTML = ''; qBtn.textContent = '🌙 ¿Qué buque es? (prueba)'; sel.disabled = false; bearBtns.style.display = ''; drawSectors(); update(); }
+    function startQuiz(){ quiz = {}; qScore = 0; qN = 0; qBtn.textContent = 'Salir de la prueba'; sel.parentNode.style.display = 'none'; bearBtns.style.display = 'none'; nextQ(); }
+    function endQuiz(){ quiz = null; qBox.innerHTML = ''; qBtn.textContent = '🌙 ¿Qué buque es? (prueba)'; sel.parentNode.style.display = ''; bearBtns.style.display = ''; drawSectors(); update(); }
     function nextQ(){
       var bears = [0, 20, 45, 70, 90, 180, 270, 300, 340];
       var tries = 0, V, sig, opts;
@@ -733,7 +733,7 @@ var PLArt = (function(){
         opts = shuffle(pool).slice(0, 3).concat([V]);
         tries++;
       } while ((opts.length < 4 || visibleLights(V, th).length === 0) && tries < 40);
-      quiz.V = V; opts = shuffle(opts);
+      quiz.V = V; opts = shuffle(opts); sel.value = String(vi);
       gSec.innerHTML = '<text x="150" y="150" class="pl-sl-n" text-anchor="middle">¿Qué buque es?</text><text x="150" y="168" class="pl-sl-n" text-anchor="middle" font-size="10">Lo ves ' + esc(bearingName(th)) + '</text>';
       gVes.innerHTML = ''; gObs.innerHTML = '';
       tag.textContent = 'Lo ves ' + bearingName(th);
@@ -1131,7 +1131,7 @@ var PLArt = (function(){
     var s = '<svg viewBox="0 0 400 210" class="pl-svg" role="img" aria-label="Marcas de día: una esfera fondeado, dos sin gobierno, tres varado, cono vértice abajo velero a motor, bola rombo bola maniobra restringida"><defs>' + shapeDefs(p) + '</defs>' +
       '<rect width="400" height="210" fill="url(#' + p + 'sky)"/>';
     items.forEach(function(it, i){
-      var x = 38 + i * 79;
+      var x = 42 + i * 76;
       s += '<path d="M' + x + ',10 L' + x + ',142" stroke="#8b6b3d" stroke-width="3"/><path d="M' + (x + 3) + ',14 L' + (x + 3) + ',126" stroke="#475569" stroke-width=".8"/>' +
         '<rect x="' + (x - 22) + '" y="142" width="44" height="8" rx="3" fill="#cbd5e1"/>' +
         shapes(it[0], x + 18, 22, p) +
@@ -1312,7 +1312,7 @@ var PLArt = (function(){
       var gg = ctx.createLinearGradient(0, y0 - A, 0, y0 + A * 1.5 + 6);
       gg.addColorStop(0, mixHex('#5aa9cc', '#6c7d88', q)); gg.addColorStop(1, mixHex('#1c6589', '#23323c', q));
       ctx.fillStyle = gg; ctx.fill();
-      if (F > 0){ ctx.strokeStyle = 'rgba(255,255,255,' + (0.08 + k * 0.12) + ')'; ctx.lineWidth = 1; ctx.stroke(); }
+      if (F > 1){ ctx.strokeStyle = 'rgba(255,255,255,' + (0.08 + k * 0.12) + ')'; ctx.lineWidth = 1; ctx.stroke(); }
       // whitecaps
       if (foam > 0){
         var rr = rng(i * 31 + 7);
@@ -2099,7 +2099,7 @@ var PLArt = (function(){
     var C = canvasIn(f.stage, 0.9, 460);
     var R = [[0, 'proa al viento', 'zona muerta', 0, 1], [45, 'ceñida', '', 0.18], [90, 'de través', '', 0.7], [135, 'a un largo', '', 1.05], [180, 'en popa', '', 1.45]];
     function draw(t){
-      var o = C.size(), ctx = o.ctx, w = o.w, h = o.h, cx = w / 2, cy = h * 0.5, Rr = Math.min(w, h) * 0.34;
+      var o = C.size(), ctx = o.ctx, w = o.w, h = o.h, cx = w / 2, cy = h * 0.5, Rr = Math.min(w, h) * 0.335;
       drawWater(ctx, w, h, t * 0.5, { scale: 0.8 });
       // sectors
       function sec(a0, a1, col){ ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, Rr * 1.2, (a0 - 90) * D2R, (a1 - 90) * D2R); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); }
@@ -2111,7 +2111,7 @@ var PLArt = (function(){
       // wind
       arrow(ctx, 26, 8, 26, 62, '#1e3a8a', 5);
       label(ctx, 'VIENTO', 34, 76, { size: 12, color: '#1e3a8a', align: 'left' });
-      var L = Math.min(w, h) * 0.15;
+      var L = Math.min(w, h) * 0.19;
       [1, -1].forEach(function(side){
         R.forEach(function(r, k){
           if (side < 0 && (r[0] === 0 || r[0] === 180)) return;

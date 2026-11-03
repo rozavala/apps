@@ -505,7 +505,7 @@ var ArtBrush = (function () {
           });
         }
         B.nx = 0; B.ny = -1; B.has = false; B.dist = 0;
-        B.reach = S.w * 16 * (0.7 + 0.6 * p.p);
+        B.reach = (S.w * 45 + 500) * (0.75 + 0.5 * p.p);
         S.mark(p.x, p.y, S.w);
       },
       seg: function (S, B, a, b) {
