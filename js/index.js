@@ -477,7 +477,16 @@
       { name: 'Lab Explorer', icon: '🔬', href: 'lab-explorer.html', key: 'zs_lab_' + key, schedId: 'lab' },
       { name: 'World Explorer', icon: '🌍', href: 'world-explorer.html', key: 'zs_world_' + key, schedId: 'world' },
       { name: 'World Atlas', icon: '🗺️', href: 'world-atlas.html', key: 'zs_atlas_' + key, schedId: 'atlas' },
-      { name: 'Story Explorer', icon: '📚', href: 'story-explorer.html', key: 'zs_story_' + key, schedId: 'story' }
+      { name: 'Story Explorer', icon: '📚', href: 'story-explorer.html', key: 'zs_story_' + key, schedId: 'story' },
+      { name: 'Circuit Lab', icon: '⚡', href: 'circuit-lab.html', key: 'zs_circuit_' + key, schedId: 'circuit' },
+      { name: 'Little Engineer', icon: '🌉', href: 'little-engineer.html', key: 'zs_engineer_' + key, schedId: 'engineer' },
+      { name: 'Mi Negocio', icon: '🥟', href: 'mi-negocio.html', key: 'zs_negocio_' + key, schedId: 'negocio' },
+      { name: "Euclid's Workshop", icon: '📐', href: 'euclid-workshop.html', key: 'zs_euclid_' + key, schedId: 'euclid' },
+      { name: 'Cocina Lab', icon: '👩‍🍳', href: 'cocina-lab.html', key: 'zs_cocina_' + key, schedId: 'cocina' },
+      { name: 'Marinero', icon: '🪢', href: 'marinero.html', key: 'zs_marinero_' + key, schedId: 'marinero' },
+      { name: 'Explorador de Naturaleza', icon: '🦅', href: 'naturaleza.html', key: 'zs_naturaleza_' + key, schedId: 'naturaleza' },
+      { name: 'Mensajes Secretos', icon: '🔐', href: 'mensajes-secretos.html', key: 'zs_secretos_' + key, schedId: 'secretos' },
+      { name: '¿Qué Hora Es?', icon: '🕰️', href: 'que-hora-es.html', key: 'zs_clock_' + key, schedId: 'clock' }
     ];
 
     var visibleApps = apps.filter(function(app) {
@@ -507,6 +516,8 @@
         else if (app.name === 'World Explorer') hasProg = (data.totalStars || 0) > 0;
         else if (app.name === 'World Atlas') hasProg = (data.totalStars || 0) + (data.cardsStudied || 0) > 0;
         else if (app.name === 'Story Explorer') hasProg = (data.totalStars || 0) > 0;
+        // Everything else scores through its shared star rule in auth.js.
+        else if (typeof getAppStars === 'function') hasProg = getAppStars(app.schedId, data) > 0;
 
         if (!hasProg) noProgress.push(app);
       } catch (e) { noProgress.push(app); }

@@ -11,6 +11,11 @@ module.exports = defineConfig({
   use: {
     trace: 'on-first-retry',
     baseURL: 'http://127.0.0.1:8080',
+    // pwa.js reloads the page the first time the service worker takes
+    // control; mid-test, that reload destroyed the execution context and
+    // failed a different handful of tests on every run. Suites that test
+    // the reload path itself opt back in with serviceWorkers: 'allow'.
+    serviceWorkers: 'block',
   },
   projects: [
     {

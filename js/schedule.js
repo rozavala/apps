@@ -26,17 +26,34 @@ var AppSchedule = (function() {
     { id: 'money',   card: '.card-money' },
     { id: 'bmcheck', card: '.card-bmcheck', alwaysVisible: true },
     { id: 'trophy',  card: '.card-trophy',  alwaysVisible: true },
-    { id: 'move',    card: '.card-move',    alwaysVisible: true }
+    { id: 'move',    card: '.card-move',    alwaysVisible: true },
+    // Learn-by-doing apps (two days each, matched to the day's theme)
+    { id: 'circuit',    card: '.card-circuit' },
+    { id: 'engineer',   card: '.card-engineer' },
+    { id: 'negocio',    card: '.card-negocio' },
+    { id: 'euclid',     card: '.card-euclid' },
+    { id: 'cocina',     card: '.card-cocina' },
+    { id: 'marinero',   card: '.card-marinero' },
+    { id: 'naturaleza', card: '.card-naturaleza' },
+    { id: 'secretos',   card: '.card-secretos' },
+    { id: 'clock',      card: '.card-clock' }
   ];
 
   var SMART_SCHEDULE = {
-    0: ['piano', 'math', 'art', 'world', 'atlas', 'guess'],            // Sunday
-    1: ['piano', 'math', 'chile', 'lab', 'guess', 'money'],   // Monday
-    2: ['piano', 'chess', 'guitar', 'story', 'guess'],        // Tuesday
-    3: ['piano', 'math', 'art', 'world', 'atlas', 'guess', 'money'],   // Wednesday
-    4: ['piano', 'math', 'chile', 'lab', 'guess'],            // Thursday
-    5: ['piano', 'chess', 'guitar', 'story', 'guess', 'money'], // Friday
-    6: ['piano', 'math', 'art', 'world', 'atlas', 'guess']             // Saturday
+    0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
+        'cocina', 'marinero', 'naturaleza'],                           // Sunday
+    1: ['piano', 'math', 'chile', 'lab', 'guess', 'money',
+        'circuit', 'negocio', 'clock'],                                // Monday
+    2: ['piano', 'chess', 'guitar', 'story', 'guess',
+        'engineer', 'euclid', 'secretos'],                             // Tuesday
+    3: ['piano', 'math', 'art', 'world', 'atlas', 'guess', 'money',
+        'marinero', 'clock'],                                          // Wednesday
+    4: ['piano', 'math', 'chile', 'lab', 'guess',
+        'circuit', 'naturaleza'],                                      // Thursday
+    5: ['piano', 'chess', 'guitar', 'story', 'guess', 'money',
+        'negocio', 'euclid', 'secretos'],                              // Friday
+    6: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
+        'cocina', 'engineer']                                          // Saturday
   };
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
@@ -195,6 +212,7 @@ var AppSchedule = (function() {
 
   return {
     getTodayApps: getTodayApps,
+    getScheduleForDay: getScheduleForDay,
     applyToHub: applyToHub,
     getTodayMessage: getTodayMessage,
     renderScheduleConfig: renderScheduleConfig,
