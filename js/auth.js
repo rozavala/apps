@@ -344,6 +344,13 @@ var APP_STAR_CONFIGS = [
       var n = 0, L = d.levels || {};
       for (var k in L) n += Math.min(3, Math.max(0, (L[k] && L[k].stars) | 0));
       return n + (d.realBuild ? 1 : 0);
+    } },
+  // Mi Negocio stars each product's best season out of 3, plus one for
+  // a strong concept quiz (5+ of 6).
+  { id: 'negocio', prefix: 'zs_negocio_', stars: function(d) {
+      var n = 0, b = d.best || {};
+      for (var k in b) if (b[k]) n += Math.min(3, b[k].stars || 0);
+      return n + ((d.quizBest || 0) >= 5 ? 1 : 0);
     } }
 ];
 

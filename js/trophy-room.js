@@ -31,7 +31,8 @@ var TrophyRoom = (function() {
     { id: 'codecadet', name: 'Code Cadet',    emoji: '🤖', color: '#94A3B8', threshold: 1 },
     { id: 'vocab',   name: 'Vocabulario Vivo', emoji: '📚', color: '#FB923C', threshold: 1 },
     { id: 'circuit', name: 'Circuit Lab',     emoji: '⚡', color: '#F59E0B', threshold: 1 },
-    { id: 'engineer', name: 'Little Engineer', emoji: '🌉', color: '#D97706', threshold: 1 }
+    { id: 'engineer', name: 'Little Engineer', emoji: '🌉', color: '#D97706', threshold: 1 },
+    { id: 'negocio', name: 'Mi Negocio', emoji: '🥟', color: '#D9480F', threshold: 1 }
   ];
 
   // Mirror of RANKS in auth.js so we can show the progression strip.

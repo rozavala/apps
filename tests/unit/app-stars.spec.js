@@ -49,7 +49,11 @@ const CASES = [
   { id: 'engineer', prefix: 'zs_engineer_',
     data: { v: 1, levels: { l1: { stars: 3, best: 20800 }, l2: { stars: 2, best: 52000 }, l5: { stars: 1, best: 110000 } },
             designs: {}, realBuild: { date: '2026-11-03', coins: 23 } },
-    stars: 7, note: 'real build adds one' }
+    stars: 7, note: 'real build adds one' },
+  { id: 'negocio', prefix: 'zs_negocio_',
+    data: { seasons: 3, best: { empanadas: { profit: 286000, stars: 2 }, mote: { profit: 427500, stars: 3 },
+            limonada: { profit: -4000, stars: 0 } }, quizBest: 5, lastPlayed: '2026-11-03', cur: null },
+    stars: 6, note: 'a losing season scores nothing' }
 ];
 
 test.describe('per-app star rules', () => {
