@@ -1465,7 +1465,7 @@ const StoryExplorer = (() => {
         _clearHighlight();
         words[i].classList.add('speaking');
         const r = words[i].getBoundingClientRect();
-        if (r.top < 60 || r.bottom > window.innerHeight - 60) words[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (r.top < 0 || r.bottom > window.innerHeight - 10) words[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         return;
       }
     }
@@ -1848,7 +1848,7 @@ const StoryExplorer = (() => {
       '<ul class="se-results-facts">' +
       '<li><b>+' + gained + '</b> ' + tr('stars added', 'estrellas sumadas') + (gained === 0 && before ? ' · ' + tr('your best is', 'tu mejor marca es') + ' ' + '★'.repeat(best) : '') + '</li>' +
       '<li><b>' + nw + '</b> ' + tr('new words collected', 'palabras nuevas coleccionadas') + '</li>' +
-      '<li><b>' + (run ? run.steps.length : 0) + '</b> ' + tr('challenges', 'desafíos') + (run ? ' · ' + run.mistakes + ' ' + tr('tries to fix', 'intentos a corregir') : '') + '</li>' +
+      '<li><b>' + (run ? run.steps.length : 0) + '</b> ' + tr('challenges', 'desafíos') + (run && run.mistakes ? ' · ' + run.mistakes + ' ' + tr(run.mistakes === 1 ? 'second try' : 'second tries', run.mistakes === 1 ? 'segundo intento' : 'segundos intentos') : '') + '</li>' +
       '</ul>' +
       '<div class="se-results-btns">' +
       (nextS ? '<button type="button" class="action-btn btn-primary" data-act="story" data-id="' + esc(nextS.id) + '">' + tr('Next story', 'Siguiente historia') + ': ' + esc(titleOf(nextS)) + '</button>' : '') +
@@ -1972,6 +1972,9 @@ const StoryExplorer = (() => {
     const data = _load();
     const el = $('story-stars');
     if (el) el.textContent = '⭐ ' + (data.totalStars || 0);
+    // the suite-wide counter nav.js drew at load
+    const nav = $('zs-star-count');
+    if (nav && typeof getTotalStars === 'function') { try { nav.textContent = '⭐ ' + getTotalStars(); } catch (e) {} }
   }
 
   function getStats() {

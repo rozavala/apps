@@ -619,7 +619,7 @@ var StoryArt = (function () {
   function diver(c, x, y, s, o) {
     o = o || {};
     const suit = o.suit || '#23272E', acc = o.acc || '#F28C28';
-    return G(T(x, y, s) + (o.flip ? ' scale(-1,1)' : '') + (o.rot ? ' rotate(' + o.rot + ')' : ''),
+    return G(T(x, y, s) + (o.flip ? ' scale(-1,1)' : '') + (o.rot ? ' rotate(' + o.rot + ')' : '') + ' scale(1.08,1.32)',
       // fins + legs (behind)
       limb('-10,2 -30,6 -46,2', 7.5, dk(suit, 0.1)) + P('M-46,2 L-62,-6 L-60,8Z', dk(acc, 0.2)) +
       limb('-10,-2 -28,-6 -44,-12', 7.5, suit) + P('M-44,-12 L-58,-24 L-62,-10Z', acc) +
@@ -748,12 +748,30 @@ var StoryArt = (function () {
     let s = P('M' + (x - w / 2) + ',' + base + ' Q' + (x - w * 0.2) + ',' + (base - h * 0.45) + ' ' + (ax - w * 0.04) + ',' + ay + ' L' + (ax + w * 0.04) + ',' + ay + ' Q' + (x + w * 0.2) + ',' + (base - h * 0.45) + ' ' + (x + w / 2) + ',' + base + 'Z', c.side(pal[0], 0.25));
     s += P('M' + (ax + w * 0.04) + ',' + ay + ' Q' + (x + w * 0.2) + ',' + (base - h * 0.45) + ' ' + (x + w / 2) + ',' + base + ' L' + (x + w * 0.1) + ',' + base + ' Q' + (x + w * 0.05) + ',' + (base - h * 0.5) + ' ' + (ax + w * 0.01) + ',' + ay + 'Z', pal[1], 'opacity=".55"');
     if (snow) {
-      const sh = h * snow, k = sh / h;
-      const xl = ax - w * 0.04 - (w * 0.24) * k * 1.4, xr = ax + w * 0.04 + (w * 0.24) * k * 1.4, yy = ay + sh;
-      s += P('M' + (ax - w * 0.04) + ',' + ay + ' L' + (ax + w * 0.04) + ',' + ay + ' Q' + (xr - 2) + ',' + (yy - sh * 0.4) + ' ' + xr + ',' + yy +
-        ' L' + (xr - w * 0.05) + ',' + (yy - sh * 0.2) + ' L' + (xr - w * 0.1) + ',' + (yy + sh * 0.1) + ' L' + (ax + w * 0.02) + ',' + (yy - sh * 0.25) + ' L' + (xl + w * 0.12) + ',' + (yy + sh * 0.12) +
-        ' L' + (xl + w * 0.05) + ',' + (yy - sh * 0.18) + ' L' + xl + ',' + yy + ' Q' + (xl + 2) + ',' + (yy - sh * 0.4) + ' ' + (ax - w * 0.04) + ',' + ay + 'Z', c.side('#FFFFFF', 0.12)) +
-        P('M' + (ax + w * 0.04) + ',' + ay + ' Q' + (xr - 2) + ',' + (yy - sh * 0.4) + ' ' + xr + ',' + yy + ' L' + (xr - w * 0.05) + ',' + (yy - sh * 0.2) + ' L' + (ax + w * 0.03) + ',' + (ay + sh * 0.5) + 'Z', '#B9CCE6', 'opacity=".7"');
+      // follow the cone's own curved sides down to the snow line
+      const cy = base - h * 0.45, yy = ay + h * snow;
+      const side = (x0, cxp, x1) => {
+        const pts = [];
+        for (let i = 0; i <= 12; i++) {
+          const t = i / 12 * 0.6, u = 1 - t;
+          const X = u * u * x0 + 2 * u * t * cxp + t * t * x1, Y = u * u * ay + 2 * u * t * cy + t * t * base;
+          pts.push([X, Y]);
+          if (Y >= yy) break;
+        }
+        return pts;
+      };
+      const L0 = side(ax - w * 0.04, x - w * 0.2, x - w / 2), R0 = side(ax + w * 0.04, x + w * 0.2, x + w / 2);
+      const xl = L0[L0.length - 1][0], xr = R0[R0.length - 1][0], yl = L0[L0.length - 1][1];
+      let d = 'M' + L0.map(q => f1(q[0]) + ',' + f1(q[1])).join(' L') + ' ';
+      const n = 7;
+      for (let i = 1; i < n; i++) {
+        const X = xl + (xr - xl) * i / n, dip = i % 2 ? h * 0.07 : -h * 0.02;
+        d += 'Q' + f1(X - (xr - xl) / (2 * n)) + ',' + f1(yl + dip + h * 0.04) + ' ' + f1(X) + ',' + f1(yl + (i % 2 ? h * 0.02 : -h * 0.03)) + ' ';
+      }
+      d += 'L' + R0.slice().reverse().map(q => f1(q[0]) + ',' + f1(q[1])).join(' L') + 'Z';
+      s += P(d, c.side('#FFFFFF', 0.14)) +
+        P('M' + f1(ax + w * 0.04) + ',' + f1(ay) + ' L' + R0.map(q => f1(q[0]) + ',' + f1(q[1])).join(' L') + ' Q' + f1(xr - w * 0.04) + ',' + f1(yl + h * 0.05) + ' ' + f1(ax + w * 0.06) + ',' + f1(yl - h * 0.02) + 'Z', '#B9CCE6', 'opacity=".6"') +
+        S('M' + f1(ax - w * 0.04) + ',' + f1(ay) + ' L' + f1(ax + w * 0.04) + ',' + f1(ay), '#9AA8C0', 2, 'opacity=".6"');
     }
     return s;
   }
@@ -1227,7 +1245,7 @@ var StoryArt = (function () {
   // ── New: Empanadas for the Fiesta ──────────────────────────────
   function kitchen(c) {
     return Rc(-2, -2, 404, 304, c.lin([[0, '#F7E6C8'], [1, '#EBCFA4']])) + Rc(-2, -2, 404, 304, c.rad([[0, '#FFF6E0', 0.6], [1, '#FFF6E0', 0]], 0.8, 0.3, 0.6)) +
-      Rc(262, 40, 106, 88, c.lin([[0, '#9FD3F2'], [1, '#E9F4DA']])) + E(300, 132, 60, 26, '#8EB45E') + E(350, 136, 50, 22, '#7FA052') + roundTree(c, 340, 118, 0.5, '#5E8A3E') +
+      Rc(262, 40, 106, 88, c.lin([[0, '#9FD3F2'], [1, '#E9F4DA']])) + P('M262,112 Q290,98 320,108 T368,102 L368,128 L262,128Z', '#8EB45E') + P('M262,120 Q300,110 340,118 T368,116 L368,128 L262,128Z', '#6E9A48') + roundTree(c, 338, 120, 0.42, '#4E7A3A') +
       Rc(262, 40, 106, 88, 'none', 'stroke="#8A5A3A" stroke-width="6"') + S('M315,40 L315,128', '#8A5A3A', 4) + Rc(254, 126, 122, 7, '#9A6A40', 'rx="2"') +
       garland(c, 10, 20, 240, 26, 12) + garland(c, 250, 22, 400, 18, 8) + Rc(-2, 236, 404, 70, '#C9A27A');
   }
@@ -1236,13 +1254,13 @@ var StoryArt = (function () {
       S('M-2,' + (y + 30) + ' L402,' + (y + 30) + ' M-2,' + (y + 62) + ' L402,' + (y + 62), '#5E3A20', 1.2, 'opacity=".5"');
   }
   SC.empanadas = [
-    c => kitchen(c) + who(c, 'abuela', { x: 120, y: 252, s: 1.3, la: 100, lb: -20, ra: 30, rb: 10, face: 'smile' }) + who(c, 'sofia', { x: 276, y: 252, s: 1.0, flip: true, la: 150, lb: 10, ra: 30, rb: 10, face: 'big' }) +
-      counter(c, 206) + G(T(200, 216), E(0, 0, 30, 8, '#F4ECDC') + E(0, -4, 22, 8, '#8A4A2A') + C(-6, -8, 2.4, '#3A5A2A') + C(4, -7, 2.6, '#F4E8B0')) +
-      G(T(90, 218), E(0, 0, 16, 6, '#F6E2B4')) + G(T(310, 222), C(-6, -4, 5, '#F4F0E6') + C(6, -4, 5, '#F4F0E6') + E(0, -12, 6, 4, '#C9A27A')),
-    c => kitchen(c) + who(c, 'abuela', { x: 110, y: 252, s: 1.3, la: 80, lb: 0, ra: 70, rb: 0, face: 'smile' }) +
-      who(c, 'sofia', { x: 300, y: 252, s: 1.0, flip: true, la: 70, lb: 10, ra: 30, rb: 10, prop: 'spoon', face: 'smile' }) + counter(c, 206) + G(T(150, 200), Rc(-30, -4, 60, 8, c.side('#D9A66E', 0.3), 'rx="4"') + Rc(-40, -2, 10, 4, '#8A5A3A', 'rx="2"') + Rc(30, -2, 10, 4, '#8A5A3A', 'rx="2"')) +
-      E(150, 214, 34, 7, '#F6E2B4') + E(230, 218, 18, 6, '#F6E2B4') + E(270, 220, 18, 6, '#F6E2B4') + G(T(230, 214), E(0, 0, 8, 3, '#8A4A2A')) +
-G(T(340, 214), E(0, 0, 20, 7, '#F4ECDC') + E(0, -3, 15, 6, '#8A4A2A')),
+    c => kitchen(c) + who(c, 'abuela', { x: 120, y: 262, s: 1.3, la: 100, lb: -20, ra: 30, rb: 10, face: 'smile' }) + who(c, 'sofia', { x: 276, y: 262, s: 1.05, flip: true, la: 150, lb: 10, ra: 30, rb: 10, face: 'big' }) +
+      counter(c, 228) + G(T(200, 240), E(0, 0, 30, 8, '#F4ECDC') + E(0, -4, 22, 8, '#8A4A2A') + C(-6, -8, 2.4, '#3A5A2A') + C(4, -7, 2.6, '#F4E8B0')) +
+      G(T(90, 242), E(0, 0, 16, 6, '#F6E2B4')) + G(T(330, 244), C(-6, -4, 5, '#F4F0E6') + C(6, -4, 5, '#F4F0E6') + C(0, -11, 5, '#F4F0E6')),
+    c => kitchen(c) + who(c, 'abuela', { x: 110, y: 262, s: 1.3, la: 80, lb: 0, ra: 70, rb: 0, face: 'smile' }) +
+      who(c, 'sofia', { x: 300, y: 262, s: 1.0, flip: true, la: 70, lb: 10, ra: 30, rb: 10, prop: 'spoon', face: 'smile' }) + counter(c, 228) + G(T(150, 224), Rc(-30, -4, 60, 8, c.side('#D9A66E', 0.3), 'rx="4"') + Rc(-40, -2, 10, 4, '#8A5A3A', 'rx="2"') + Rc(30, -2, 10, 4, '#8A5A3A', 'rx="2"')) +
+      E(150, 238, 34, 7, '#F6E2B4') + E(230, 242, 18, 6, '#F6E2B4') + E(270, 244, 18, 6, '#F6E2B4') + G(T(230, 238), E(0, 0, 8, 3, '#8A4A2A')) +
+G(T(340, 240), E(0, 0, 20, 7, '#F4ECDC') + E(0, -3, 15, 6, '#8A4A2A')),
     c => sky(c, 'day') + ground(c, 220, '#A9C27A', '#7FA052') + roundTree(c, 360, 230, 1.4, '#5E8A3E') + garland(c, 0, 40, 200, 50, 10) +
       G(T(240, 246), shadow(c, 10, 0, 70) + P('M-56,0 Q-60,-60 0,-70 Q60,-60 56,0Z', c.rad([[0, '#D9A070'], [1, '#9E6440']], 0.35, 0.3, 0.8)) +
         P('M-22,0 Q-22,-34 0,-34 Q22,-34 22,0Z', '#2A1810') + C(0, -10, 30, c.rad([[0, '#FFB13B', 0.8], [1, '#FF6A2E', 0]])) + P('M-10,0 q4,-16 8,-6 q4,-14 8,0Z', '#FFB13B')) +
@@ -1255,9 +1273,8 @@ G(T(340, 214), E(0, 0, 20, 7, '#F4ECDC') + E(0, -3, 15, 6, '#8A4A2A')),
       emp(c, 120, 230, 0.8) + emp(c, 160, 226, 0.8) + emp(c, 200, 230, 0.8) + emp(c, 240, 226, 0.8) + emp(c, 280, 230, 0.8) +
       G(T(330, 226), C(-4, 0, 3, '#7E3A7A') + C(2, -2, 3, '#7E3A7A') + C(0, 3, 3, '#6E2A6A'))
   ];
-  SC.empanadas.cover = c => Rc(-2, -2, 404, 304, c.lin([[0, '#F7E6C8'], [1, '#E9C694']])) + garland(c, 0, 20, 400, 22, 16) +
-    who(c, 'abuela', { x: 90, y: 236, s: 1.25, la: 110, lb: -20 }) + who(c, 'sofia', { x: 320, y: 240, s: 1.0, flip: true, la: 150, lb: 10, face: 'big' }) +
-    E(200, 250, 90, 22, '#F4F0E6') + E(200, 248, 80, 18, '#EAE2D2') + emp(c, 170, 240, 1.2) + emp(c, 225, 238, 1.2) + emp(c, 198, 222, 1.2) + Rc(-2, 270, 404, 34, '#B07A4A');
+  SC.empanadas.cover = c => kitchen(c) + who(c, 'abuela', { x: 92, y: 268, s: 1.35, la: 110, lb: -20, face: 'smile' }) + who(c, 'sofia', { x: 316, y: 268, s: 1.1, flip: true, la: 150, lb: 10, face: 'big' }) +
+    counter(c, 232) + E(200, 252, 92, 20, '#F4F0E6') + E(200, 250, 80, 15, '#EAE2D2') + emp(c, 168, 246, 1.2) + emp(c, 230, 244, 1.2) + emp(c, 199, 232, 1.2);
 
   // ── New: The 33 Miners ─────────────────────────────────────────
   function mineSection(c, extra) {

@@ -368,13 +368,13 @@ var STORY_EXTRAS = {
   },
 
   penguin_coast: {
-    cap: [['Pipo on the rocky coast', 'Pipo en la costa rocosa'], ['A black band on his chest', 'Una franja negra en el pecho'], ['Swimming after little fish', 'Nadando tras pececitos'], ['Home to the cozy burrow', 'De vuelta a su cueva']],
+    cap: [['Pipo on the rocky coast', 'Pipo en la costa rocosa'], ['A black band on his chest', 'Una franja negra en el pecho'], ['Swimming after little fish', 'Nadando tras pececitos'], ['Home to the cozy burrow', 'De vuelta a su madriguera']],
     who: [{ q: 'Who has a black band across a white chest?', qEs: '¿Quién tiene una franja negra en el pecho blanco?', opts: ['pipo', 'ciro', 'pablito'], a: 0 }],
     infer: [{
-      q: 'Why does Pipo go home to a burrow?', qEs: '¿Por qué Pipo vuelve a una cueva?',
+      q: 'Why does Pipo go home to a burrow?', qEs: '¿Por qué Pipo vuelve a una madriguera?',
       options: ['It is a safe, sheltered place for his family', 'He is looking for fish there', 'Penguins sleep in trees', 'To get away from the water forever'],
       optionsEs: ['Es un lugar seguro y protegido para su familia', 'Busca peces ahí', 'Los pingüinos duermen en árboles', 'Para alejarse del agua para siempre'], answer: 0,
-      why: 'Page 4: his family waits in the cozy burrow, a sheltered nest.', whyEs: 'Página 4: su familia lo espera en la cueva, un nido protegido.'
+      why: 'Page 4: his family waits in the cozy burrow, a sheltered nest.', whyEs: 'Página 4: su familia lo espera en la acogedora madriguera, un nido protegido.'
     }],
     choice: {
       q: 'If you visited Pipo\'s beach, what would you do?', qEs: 'Si visitaras la playa de Pipo, ¿qué harías?',
