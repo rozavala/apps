@@ -211,16 +211,16 @@ window.ZSProgressCatalog = {
   ],
 
   lab: [
-    {"i":"colors","l":"undefined Color Mixing","n":1},
-    {"i":"water","l":"undefined Water Cycle","n":1},
-    {"i":"plants","l":"undefined Plant Growth","n":1},
-    {"i":"physics","l":"undefined Simple Machines","n":1},
-    {"i":"magnets","l":"undefined Magnets","n":1},
-    {"i":"weather","l":"undefined Weather Station","n":1},
-    {"i":"astronomy","l":"undefined Night Sky","n":1},
-    {"i":"sound","l":"undefined Sound Waves","n":1},
-    {"i":"crystals","l":"undefined Crystal Growing","n":1},
-    {"i":"static","l":"undefined Static Electricity","n":1}
+    {"i":"colors","l":"🎨 Color Mixing Lab","g":"Chemistry","n":1},
+    {"i":"water","l":"💧 Water Cycle","g":"Earth Science","n":1},
+    {"i":"plants","l":"🌱 Plant Growth","g":"Biology","n":1},
+    {"i":"physics","l":"⚙️ Simple Machines","g":"Physics","n":1},
+    {"i":"magnets","l":"🧲 Magnets","g":"Physics","n":1},
+    {"i":"weather","l":"☁️ Weather Station","g":"Earth Science","n":1},
+    {"i":"astronomy","l":"🌙 Night Sky","g":"Astronomy","n":1},
+    {"i":"sound","l":"🔊 Sound Waves","g":"Physics","n":1},
+    {"i":"crystals","l":"💎 Crystal Growing","g":"Chemistry","n":1},
+    {"i":"static","l":"⚡ Static Electricity","g":"Physics","n":1}
   ],
 
   piano: [
