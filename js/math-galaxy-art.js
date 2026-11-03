@@ -17,6 +17,22 @@
 var MGArt = (function() {
   'use strict';
 
+  // Idle pause shared by every animated canvas on the page.
+  var IDLE_MS = 20000;      // stop drawing after this long without input
+  var BUSY_MS = 3000;       // full 60 fps for this long after an input, then 30
+  var _lastInput = (typeof performance !== 'undefined' ? performance.now() : 0);
+  var _idleWaiters = [];
+  function _onInput() {
+    _lastInput = performance.now();
+    if (!_idleWaiters.length) return;
+    var w = _idleWaiters; _idleWaiters = [];
+    w.forEach(function(fn) { try { fn(); } catch (e) {} });
+  }
+  ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'].forEach(function(ev) {
+    document.addEventListener(ev, _onInput, { passive: true, capture: true });
+  });
+
+
   var TAU = Math.PI * 2;
 
   function reduceMotion() {
@@ -533,7 +549,7 @@ var MGArt = (function() {
     };
     for (var k in opts) o[k] = opts[k];
     var W = 0, H = 0, R = 1, st = { stars: [], neb: null }, layout = null;
-    var raf = 0, alive = true, t0 = performance.now(), last = t0;
+    var raf = 0, lastDraw = 0, alive = true, t0 = performance.now(), last = t0;
     var still = reduceMotion();
     var fx = { boost: 0, wobble: 0, warp: 0, beam: 0, sparks: [], chunks: [] };
     var fly = null; // map: { from, to, start, dur }
@@ -601,6 +617,22 @@ var MGArt = (function() {
       // Hidden screen (display:none): stop; the ResizeObserver restarts us.
       if (!canvas.offsetParent && !canvas.getClientRects().length) return;
       if (!W && !resize()) return;
+      // Asleep behind the Off Hours screen: stop drawing (it is hidden
+      // anyway, and this keeps an iPad cool overnight); look again in a
+      // minute (or on the next touch, which is how a parent unlocks).
+      if (typeof OffHours !== 'undefined' && OffHours.isOff && OffHours.isOff()) {
+        _idleWaiters.push(kick);
+        setTimeout(kick, 60000);
+        return;
+      }
+      // Nobody has touched the page for a while (an iPad left open on the
+      // galaxy): keep the last frame and stop; the next input restarts it.
+      if (now - _lastInput > IDLE_MS) { _idleWaiters.push(kick); return; }
+      if (now - _lastInput > BUSY_MS && now - lastDraw < 30) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      lastDraw = now;
       var dt = Math.min(0.05, (now - last) / 1000); last = now;
       var t = (now - t0) / 1000;
       if (still) t = 1.3;
