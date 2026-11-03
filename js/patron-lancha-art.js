@@ -197,14 +197,17 @@ var PLArt = (function(){
     // sails
     var mast = -L * 0.12;
     var bl = L * 0.5, bx = Math.sin(boom) * bl, by = mast + Math.cos(boom) * bl;
-    var belly = (boom >= 0 ? 1 : -1) * L * 0.09;
+    var belly = (boom >= 0 ? 1 : -1) * L * 0.14;
     function sail(x0, y0, x1, y1, bel, col){
       var mx = (x0 + x1) / 2, my = (y0 + y1) / 2, dx = x1 - x0, dy = y1 - y0, n = Math.sqrt(dx * dx + dy * dy) || 1;
       var cx = mx + (-dy / n) * bel * -1, cy = my + (dx / n) * bel * -1;
       if (Math.abs(boom) < 0.02) { cx = mx; cy = my; }
-      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(cx, cy, x1, y1);
-      ctx.strokeStyle = 'rgba(30,40,50,0.35)'; ctx.lineWidth = L * 0.05; ctx.lineCap = 'round'; ctx.stroke();
-      ctx.strokeStyle = col; ctx.lineWidth = L * 0.035; ctx.stroke();
+      // sail cloth seen from above: a thin crescent between the chord (boom) and the curved belly
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(cx, cy, x1, y1); ctx.lineTo(x0, y0); ctx.closePath();
+      ctx.save(); ctx.shadowColor = 'rgba(0,20,40,0.35)'; ctx.shadowBlur = L * 0.08; ctx.shadowOffsetX = L * 0.03; ctx.shadowOffsetY = L * 0.05;
+      ctx.fillStyle = col; ctx.fill(); ctx.restore();
+      ctx.strokeStyle = 'rgba(30,40,50,0.45)'; ctx.lineWidth = Math.max(0.8, L * 0.014); ctx.lineCap = 'round'; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.strokeStyle = '#4b5563'; ctx.lineWidth = Math.max(1, L * 0.025); ctx.stroke();
     }
     if (opts.luff){ // flapping sails
       var fl = Math.sin((opts.t || 0) * 18) * L * 0.04;
@@ -567,7 +570,7 @@ var PLArt = (function(){
     for (k = 0; k <= 16; k++){
       a = -1 + 2 * k / 16;
       bb = a > 0.2 ? (1 - Math.pow((a - 0.2) / 0.8, 1.6)) : 1;
-      [[a, bb], [a, -bb]].forEach(function(q){ pts.push(P(q[0], q[1], 0)); pts.push(P(q[0], q[1], V.hull === 'ship' ? 0.22 : 0.12)); });
+      [[a, bb], [a, -bb]].forEach(function(q){ pts.push(P(q[0], q[1], 0)); pts.push(P(q[0], q[1], V.hull === 'ship' ? 0.26 : 0.18)); });
     }
     var hullPts = convexHull(pts);
     ctx.beginPath(); hullPts.forEach(function(p0, i){ if (i) ctx.lineTo(p0.x, p0.y); else ctx.moveTo(p0.x, p0.y); }); ctx.closePath();
@@ -766,7 +769,7 @@ var PLArt = (function(){
   var RIPA = [
     { name: 'Cruce', rule: 'Regla 15', dur: 10.5,
       boats: [
-        { type: 'motor', stripe: '#B91C1C', x: 430, y: 700, spd: 70, hdg: function(t){ return 42 * ramp(t, 1.9, 1.1) - 42 * ramp(t, 6.6, 1.3); }, role: 'CEDE', col: '#B91C1C', blast: 1.9, blastTxt: '1 corta' },
+        { type: 'motor', stripe: '#B91C1C', x: 430, y: 700, spd: 70, hdg: function(t){ return 55 * ramp(t, 1.9, 1.1) - 55 * ramp(t, 6.4, 1.4); }, role: 'CEDE', col: '#B91C1C', blast: 1.9, blastTxt: '1 corta' },
         { type: 'motor', stripe: '#047857', x: 830, y: 300, spd: 70, hdg: function(){ return 270; }, role: 'SIGUE', col: '#047857' }
       ],
       wedge: { boat: 0, a0: 0, a1: 112.5, col: 'rgba(44,255,106,0.20)', stroke: 'rgba(44,255,106,0.7)', until: 3.2, txt: 'su estribor' },
@@ -822,7 +825,7 @@ var PLArt = (function(){
       drawWater(ctx, w, h, t * 0.6);
       var sc = Math.min(w / 1000, h / 700);
       ctx.save(); ctx.translate((w - 1000 * sc) / 2, (h - 700 * sc) / 2); ctx.scale(sc, sc);
-      var L = 84;
+      var L = w < 560 ? 112 : 92, PF = w < 560 ? 26 : 19;
       // risk marker
       if (S.risk && tt < S.risk.until){
         ctx.save(); ctx.globalAlpha = 0.85 * (1 - ramp(tt, S.risk.until - 0.5, 0.5));
@@ -875,9 +878,9 @@ var PLArt = (function(){
           ctx.save(); ctx.strokeStyle = 'rgba(253,224,71,' + (1 - q) + ')'; ctx.lineWidth = 4;
           for (var rr = 0; rr < 2; rr++){ ctx.beginPath(); ctx.arc(P.x[i], P.y[i], 30 + (q + rr * 0.3) * 70, 0, TAU); ctx.stroke(); }
           ctx.restore();
-          pill(ctx, '📯 ' + B.blastTxt, P.x[i] + 70, P.y[i] + 10, '#854d0e', '#fff', 20);
+          pill(ctx, '📯 ' + B.blastTxt, P.x[i] + L * 0.95, P.y[i] + 10, '#854d0e', '#fff', PF);
         }
-        pill(ctx, B.role, P.x[i], P.y[i] - L * 0.95, B.col, '#fff', 19);
+        pill(ctx, B.role, P.x[i], P.y[i] - L * 0.95, B.col, '#fff', PF);
       });
       ctx.restore();
       label(ctx, S.rule, w - 10, 14, { align: 'right', size: 12, color: '#0b2545' });
@@ -1124,15 +1127,15 @@ var PLArt = (function(){
   FIG.marcas = function(el){
     var f = frame(el, 'Marcas de día', 'Se izan donde mejor se vean. El cono con el vértice hacia abajo lo muestra un velero que navega a vela y además usa su motor.', 'Diagrama');
     var p = uid();
-    var items = [[1, 'Fondeado', '1 esfera'], [2, 'Sin gobierno', '2 esferas'], [3, 'Varado', '3 esferas'], ['cone', 'Velero a motor y vela', 'cono ▼'], ['ram', 'Maniobra restringida', 'bola–rombo–bola']];
-    var s = '<svg viewBox="0 0 400 190" class="pl-svg" role="img" aria-label="Marcas de día: una esfera fondeado, dos sin gobierno, tres varado, cono vértice abajo velero a motor, bola rombo bola maniobra restringida"><defs>' + shapeDefs(p) + '</defs>' +
-      '<rect width="400" height="190" fill="url(#' + p + 'sky)"/>';
+    var items = [[1, ['Fondeado'], '1 esfera'], [2, ['Sin', 'gobierno'], '2 esferas'], [3, ['Varado'], '3 esferas'], ['cone', ['Velero a', 'motor y vela'], 'cono ▼'], ['ram', ['Maniobra', 'restringida'], 'bola–rombo–bola']];
+    var s = '<svg viewBox="0 0 400 210" class="pl-svg" role="img" aria-label="Marcas de día: una esfera fondeado, dos sin gobierno, tres varado, cono vértice abajo velero a motor, bola rombo bola maniobra restringida"><defs>' + shapeDefs(p) + '</defs>' +
+      '<rect width="400" height="210" fill="url(#' + p + 'sky)"/>';
     items.forEach(function(it, i){
-      var x = 40 + i * 80;
+      var x = 38 + i * 79;
       s += '<path d="M' + x + ',10 L' + x + ',142" stroke="#8b6b3d" stroke-width="3"/><path d="M' + (x + 3) + ',14 L' + (x + 3) + ',126" stroke="#475569" stroke-width=".8"/>' +
         '<rect x="' + (x - 22) + '" y="142" width="44" height="8" rx="3" fill="#cbd5e1"/>' +
         shapes(it[0], x + 18, 22, p) +
-        T(x, 166, it[1], { size: 10.5 }) + T(x, 180, it[2], { size: 9.5, fill: '#475569' });
+        it[1].map(function(l, j){ return T(x, 164 + j * 13, l, { size: 10.5 }); }).join('') + T(x, 164 + it[1].length * 13 + 2, it[2], { size: 9, fill: '#475569' });
     });
     f.stage.innerHTML = s + '</svg>';
   };
@@ -1203,7 +1206,7 @@ var PLArt = (function(){
     }
     function drawBig(fast){
       var K = knotDef(KNOTS[cur][0]); if (!K) return;
-      var w = big.parentNode.clientWidth || 320;
+      var w = Math.min(640, big.parentNode.clientWidth || 320);
       var M = _models[K.id] || (_models[K.id] = MA.buildModel(K));
       paintKnot(big, K, w, prog >= 1 ? null : vis(K, M, prog), fast);
       cap.innerHTML = '<b>' + esc(KNOTS[cur][1]) + '</b> · ' + esc(KNOTS[cur][2]);
@@ -1299,7 +1302,8 @@ var PLArt = (function(){
       var step = Math.max(3, lam / 18), crest = [];
       for (var x = -lam; x <= w + lam; x += step){
         var th = (x / lam) * TAU - t * spd + ph;
-        var yy = y0 - A * Math.cos(th) - A * 0.35 * Math.cos(2 * th + 0.6) * q;
+        var am = 0.72 + 0.28 * Math.sin(x / (lam * 2.7) + i * 2.1 - t * 0.3);
+        var yy = y0 - A * am * Math.cos(th) - A * am * 0.35 * Math.cos(2 * th + 0.6) * q;
         var xx = x + A * 0.45 * Math.sin(th) * (0.4 + q);
         ctx.lineTo(xx, yy);
         if (Math.cos(th) > 0.93) crest.push([xx, yy, th]);
@@ -1316,10 +1320,12 @@ var PLArt = (function(){
           var seed = Math.floor((cp[2] + t * spd) / TAU * 7 + i * 13);
           var rnd = (Math.sin(seed * 12.9898) * 43758.5453) % 1; rnd = rnd < 0 ? -rnd : rnd;
           if (rnd > foam) return;
-          var fw = (6 + k * 26) * (0.6 + foam), fh = 2 + k * 5 * (0.5 + foam);
-          ctx.fillStyle = 'rgba(255,255,255,' + (0.55 + 0.4 * foam) + ')';
-          ctx.beginPath(); ctx.ellipse(cp[0] + fw * 0.2, cp[1] + fh * 0.4, fw, fh, 0, 0, TAU); ctx.fill();
-          if (F >= 7){ ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1 + k * 2; ctx.beginPath(); ctx.moveTo(cp[0] + fw, cp[1] + fh); ctx.lineTo(cp[0] + fw * 3.5, cp[1] + fh * 1.6); ctx.stroke(); }
+          var fw = (4 + k * 18) * (0.55 + foam), fh = 1 + k * 3 * (0.5 + foam), cx2 = cp[0], cy2 = cp[1];
+          ctx.strokeStyle = 'rgba(255,255,255,' + (0.6 + 0.35 * foam) + ')'; ctx.lineWidth = 1 + k * 2.6 * (0.4 + foam); ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(cx2 - fw, cy2 + fh * 1.2); ctx.quadraticCurveTo(cx2 - fw * 0.2, cy2 - fh * 0.6, cx2 + fw * 0.7, cy2 + fh * 1.6); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,' + (0.35 + 0.3 * foam) + ')';
+          for (var sp2 = 0; sp2 < 3 + foam * 6; sp2++){ var sx2 = cx2 + (rr() - 0.3) * fw * 1.8, sy2 = cy2 + fh + rr() * (2 + k * 7); ctx.fillRect(sx2, sy2, 1 + k * 2 * rr(), 1 + k * 1.2 * rr()); }
+          if (F >= 7){ ctx.strokeStyle = 'rgba(255,255,255,0.32)'; ctx.lineWidth = 1 + k * 1.6; ctx.beginPath(); ctx.moveTo(cx2 + fw * 0.6, cy2 + fh * 2); ctx.lineTo(cx2 + fw * 3.2, cy2 + fh * 3.2 + k * 6); ctx.stroke(); }
         });
       }
     }
@@ -1583,12 +1589,12 @@ var PLArt = (function(){
       '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="#0b2545" stroke-width="1.2"/>' +
       '<circle cx="' + G.x.toFixed(1) + '" cy="' + G.y.toFixed(1) + '" r="3.5" fill="#fff" stroke="#e11d48" stroke-width="1.5"/>' +
       T(V.x - 10, V.y + 22, 'Valparaíso', { anchor: 'middle', size: 11 }) +
-      T((E.x + V.x) / 2 - 30, (E.y + V.y) / 2 + 4, 'latitud 33° S', { anchor: 'end', size: 10.5, fill: '#854d0e' }) +
+      T(V.x + 12, (E.y + V.y) / 2 + 4, 'latitud 33° S', { anchor: 'start', size: 10.5, fill: '#854d0e' }) +
       T((E.x + G.x) / 2, E.y - 8, 'longitud 71,6° O', { size: 10.5, fill: '#0b2545' }) +
       T(G.x + 6, G.y - 30, 'Greenwich 0°', { anchor: 'start', size: 10.5, fill: '#be123c' }) +
-      T(cx + R + 8, cy - 30, 'ECUADOR 0°', { anchor: 'start', size: 10.5, fill: '#b45309' }) +
+      T(cx + R + 6, cy + 14, 'ECUADOR 0°', { anchor: 'start', size: 10.5, fill: '#b45309' }) +
       T(NP.x, NP.y - 8, 'Polo Norte', { size: 10 }) +
-      '<g transform="translate(300,200)"><text class="pl-sl" x="0" y="0" text-anchor="start" font-size="10">— meridianos (N–S)</text><text class="pl-sl" x="0" y="16" text-anchor="start" font-size="10">— paralelos (E–O)</text></g>' +
+      '<g transform="translate(286,250)"><text class="pl-sl" x="0" y="0" text-anchor="start" font-size="10">— meridianos (N–S)</text><text class="pl-sl" x="0" y="16" text-anchor="start" font-size="10">— paralelos (E–O)</text></g>' +
       '</svg>';
     f.stage.innerHTML = s;
   };
@@ -1649,7 +1655,7 @@ var PLArt = (function(){
     f.stage.innerHTML = '<svg viewBox="0 0 400 150" class="pl-svg" role="img" aria-label="Balance, cabeceo y escora">' + defs + '<rect width="400" height="150" fill="#eef6fa"/>' +
       panels.map(function(q, i){ var x = 68 + i * 132; return '<g><rect x="' + (x - 62) + '" y="8" width="124" height="134" rx="12" fill="#fff" stroke="#dbe5ec"/>' +
         '<path class="pl-mv-sea" data-i="' + i + '" d="" fill="url(#' + p + 'w)"/>' +
-        '<g class="pl-mv-boat" data-i="' + i + '" transform="translate(' + x + ',86)">' + q[1] + '</g>' +
+        '<g class="pl-mv-boat" data-i="' + i + '" transform="translate(' + x + ',86)"><g transform="scale(1.25)">' + q[1] + '</g></g>' +
         (q[2] === 'esc' ? '<path d="M' + (x - 50) + ',38 L' + (x - 20) + ',38" stroke="#1e3a8a" stroke-width="2.5"/><path d="M' + (x - 18) + ',38 l-7,-4 v8 z" fill="#1e3a8a"/><text x="' + (x - 40) + '" y="32" class="pl-sl" font-size="9">viento</text>' : '') +
         '<text x="' + x + '" y="132" class="pl-sl" text-anchor="middle" font-size="12">' + q[0] + '</text></g>'; }).join('') + '</svg>';
     var seas = f.stage.querySelectorAll('.pl-mv-sea'), boats = f.stage.querySelectorAll('.pl-mv-boat');
@@ -1677,34 +1683,36 @@ var PLArt = (function(){
   FIG.estructura = function(el){
     var f = frame(el, 'Estructura del casco', 'La <b>quilla</b> es la columna; las <b>cuadernas</b>, las costillas; los <b>baos</b> sostienen la cubierta y los <b>mamparos</b> dividen el interior.', 'Diagrama');
     var p = uid();
-    var s = '<svg viewBox="0 0 400 230" class="pl-svg" role="img" aria-label="Esqueleto del casco y sección transversal"><defs>' +
+    var s = '<svg viewBox="0 0 400 344" class="pl-svg" role="img" aria-label="Esqueleto del casco de perfil y sección transversal"><defs>' +
       '<linearGradient id="' + p + 'wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6a66a"/><stop offset="1" stop-color="#9a6a33"/></linearGradient>' +
       '<linearGradient id="' + p + 'shell" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a7b4be"/><stop offset=".5" stop-color="#eef2f5"/><stop offset="1" stop-color="#a7b4be"/></linearGradient></defs>' +
-      '<rect width="400" height="230" fill="#f6fafc"/>';
-    // longitudinal skeleton (left)
-    s += '<g transform="translate(10,20)">' +
-      '<path d="M20,110 L200,110 C214,108 222,90 230,40" fill="none" stroke="url(#' + p + 'wood)" stroke-width="8" stroke-linecap="round"/>' +
-      '<path d="M20,110 L14,44" stroke="url(#' + p + 'wood)" stroke-width="7" stroke-linecap="round"/>';
-    for (var i = 0; i < 8; i++){
-      var x = 36 + i * 22, top = 44 - (i > 5 ? (i - 5) * 3 : 0), botY = 110;
-      s += '<path d="M' + x + ',' + botY + ' C' + (x - 4) + ',' + (botY - 30) + ' ' + (x - 2) + ',' + (top + 20) + ' ' + x + ',' + top + '" fill="none" stroke="#b07a40" stroke-width="3"/>';
+      '<rect width="400" height="344" fill="#f6fafc"/>' +
+      '<text x="12" y="20" class="pl-sl" text-anchor="start" font-size="11" fill="#0e7490">Esqueleto (de costado) · proa →</text>';
+    // longitudinal skeleton: keel y=150 from x=50..320, stem (roda) up to (372,52), sternpost (codaste) at x=50 up to 62
+    var sheer = function(x){ return 62 - (x - 50) / 322 * 10; };
+    s += '<path d="M50,150 L320,150 C344,148 360,112 372,52" fill="none" stroke="url(#' + p + 'wood)" stroke-width="9" stroke-linecap="round"/>' +
+      '<path d="M50,150 L44,60" stroke="url(#' + p + 'wood)" stroke-width="8" stroke-linecap="round"/>';
+    for (var i = 0; i < 11; i++){
+      var x = 72 + i * 24, top = sheer(x), bot = 150;
+      if (x > 300) bot = 150 - (x - 300) * 1.4;
+      s += '<path d="M' + x + ',' + bot + ' C' + (x - 5) + ',' + (bot - 34) + ' ' + (x - 3) + ',' + (top + 24) + ' ' + x + ',' + top + '" fill="none" stroke="#b07a40" stroke-width="3.2"/>';
     }
-    s += '<path d="M14,44 L228,40" stroke="#8a5a2a" stroke-width="3"/>' +
-      '<rect x="120" y="44" width="6" height="64" fill="#64748b" opacity=".85"/>' +
-      T(110, 132, 'quilla', { size: 11 }) + T(236, 36, 'roda', { anchor: 'start', size: 11 }) + T(6, 36, 'codaste', { anchor: 'start', size: 11 }) +
-      T(78, 30, 'cuadernas', { size: 11 }) + leader(78, 34, 80, 56) + T(150, 30, 'mamparo', { size: 11 }) + leader(140, 34, 123, 60) +
-      '</g>';
-    // cross-section (right)
-    s += '<g transform="translate(300,120)">' +
-      '<path d="M-70,-60 C-70,0 -50,40 0,58 C50,40 70,0 70,-60" fill="none" stroke="url(#' + p + 'shell)" stroke-width="9"/>' +
-      '<path d="M-64,-60 C-64,0 -45,34 0,50 C45,34 64,0 64,-60" fill="none" stroke="#b07a40" stroke-width="4"/>' +
-      '<path d="M-74,-62 L74,-62" stroke="#c99a62" stroke-width="7"/><path d="M-64,-54 L64,-54" stroke="#8a5a2a" stroke-width="4"/>' +
-      '<rect x="-9" y="50" width="18" height="18" rx="2" fill="url(#' + p + 'wood)"/>' +
-      '<path d="M-40,30 Q0,44 40,30" fill="#5fb3d0" opacity=".35"/>' +
-      T(0, 84, 'quilla', { size: 10.5 }) + T(0, -70, 'cubierta', { size: 10.5 }) + T(0, -40, 'bao', { size: 10.5 }) + leader(0, -44, 0, -54) +
-      T(-78, -10, 'cuaderna', { anchor: 'end', size: 10.5 }) + leader(-76, -14, -64, -14) + T(78, -10, 'casco', { anchor: 'start', size: 10.5 }) + leader(76, -14, 70, -14) +
-      T(0, 26, 'sentina', { size: 9.5, fill: '#0e7490' }) + T(0, -88, 'Sección', { size: 11, fill: '#0b2545' }) +
-      '</g></svg>';
+    s += '<path d="M44,62 L372,52" stroke="#8a5a2a" stroke-width="3.4"/>' +
+      '<rect x="185" y="60" width="7" height="88" fill="#64748b" opacity=".85"/>' +
+      T(180, 172, 'quilla', { size: 11.5 }) + T(372, 40, 'roda', { size: 11.5 }) + T(44, 48, 'codaste', { size: 11.5 }) +
+      T(112, 40, 'cuadernas', { size: 11.5 }) + leader(112, 44, 120, 80) + T(250, 40, 'mamparo', { size: 11.5 }) + leader(244, 44, 192, 84) + T(300, 72, 'cubierta', { anchor: 'start', size: 10 });
+    // cross-section
+    s += '<text x="12" y="200" class="pl-sl" text-anchor="start" font-size="11" fill="#0e7490">Sección transversal</text>' +
+      '<g transform="translate(200,262) scale(.82)">' +
+      '<path d="M-90,-62 C-90,0 -64,46 0,66 C64,46 90,0 90,-62" fill="none" stroke="url(#' + p + 'shell)" stroke-width="10"/>' +
+      '<path d="M-82,-62 C-82,0 -58,40 0,58 C58,40 82,0 82,-62" fill="none" stroke="#b07a40" stroke-width="5"/>' +
+      '<path d="M-96,-66 L96,-66" stroke="#c99a62" stroke-width="8"/><path d="M-82,-56 L82,-56" stroke="#8a5a2a" stroke-width="5"/>' +
+      '<rect x="-11" y="58" width="22" height="20" rx="2" fill="url(#' + p + 'wood)"/>' +
+      '<path d="M-48,34 Q0,52 48,34" fill="#5fb3d0" opacity=".35"/>' +
+      '</g>' +
+      T(200, 340, 'quilla', { size: 11 }) + T(200, 200, 'cubierta', { size: 11 }) + T(200, 228, 'bao', { size: 11 }) + leader(200, 232, 200, 216) +
+      T(104, 246, 'cuaderna', { anchor: 'end', size: 11 }) + leader(106, 244, 134, 244) + T(296, 246, 'casco (forro)', { anchor: 'start', size: 11 }) + leader(294, 244, 274, 244) +
+      T(200, 294, 'sentina', { size: 10, fill: '#0e7490' }) + '</svg>';
     f.stage.innerHTML = s;
   };
 
@@ -1744,7 +1752,415 @@ var PLArt = (function(){
     f.stage.innerHTML = s;
   };
 
-  /*__MORE__*/
+  /* =====================================================================
+     16. MOTOR DE 4 TIEMPOS — ciclo animado
+     ===================================================================== */
+  FIG.cuatro = function(el){
+    var f = frame(el, 'Ciclo de 4 tiempos', 'Dos vueltas del cigüeñal = un ciclo: <b>admisión → compresión → combustión → escape</b>. El de <b>2 tiempos</b> hace lo mismo en una sola vuelta (dos carreras).', 'Animación');
+    var p = uid(), playing = !REDUCED, ang = 30;
+    var PH = [['1. Admisión', 'Baja el pistón; abre la válvula de admisión y entra la mezcla.', '#60a5fa'], ['2. Compresión', 'Sube el pistón con las válvulas cerradas y comprime la mezcla.', '#3b82f6'], ['3. Combustión', 'Salta la chispa de la bujía: la explosión empuja el pistón hacia abajo.', '#f97316'], ['4. Escape', 'Sube el pistón; abre la válvula de escape y salen los gases.', '#9ca3af']];
+    f.stage.innerHTML = '<div class="pl-eng"><svg viewBox="0 0 240 280" class="pl-svg" role="img" aria-label="Pistón, biela, cigüeñal y válvulas de un motor de 4 tiempos"><defs>' +
+      '<linearGradient id="' + p + 'm" x1="0" x2="1"><stop offset="0" stop-color="#6b7280"/><stop offset=".45" stop-color="#e5e7eb"/><stop offset="1" stop-color="#4b5563"/></linearGradient>' +
+      '<linearGradient id="' + p + 'blk" x1="0" x2="1"><stop offset="0" stop-color="#9aa3ad"/><stop offset=".5" stop-color="#cfd6dd"/><stop offset="1" stop-color="#8b949e"/></linearGradient></defs>' +
+      '<rect width="240" height="280" fill="#f6fafc"/>' +
+      '<path d="M60,40 L180,40 L180,168 L164,168 L164,58 L76,58 L76,168 L60,168 Z" fill="url(#' + p + 'blk)" stroke="#4b5563"/>' +
+      '<path d="M40,26 L200,26 L200,46 L40,46 Z" fill="#8b949e" stroke="#4b5563"/>' +
+      '<rect class="e-gas" x="76" y="58" width="88" height="40" fill="#60a5fa" opacity=".5"/>' +
+      '<path d="M40,30 L86,30 L86,40" fill="none" stroke="#3b82f6" stroke-width="7" opacity=".55"/><path d="M200,30 L154,30 L154,40" fill="none" stroke="#9ca3af" stroke-width="7" opacity=".7"/>' +
+      '<g class="e-vi"><path d="M94,8 L94,50" stroke="#4b5563" stroke-width="3"/><path d="M84,50 L104,50 L100,56 L88,56 Z" fill="url(#' + p + 'm)"/></g>' +
+      '<g class="e-ve"><path d="M146,8 L146,50" stroke="#4b5563" stroke-width="3"/><path d="M136,50 L156,50 L152,56 L140,56 Z" fill="url(#' + p + 'm)"/></g>' +
+      '<g><rect x="115" y="10" width="10" height="44" rx="2" fill="#f8fafc" stroke="#64748b"/><path d="M120,54 v5" stroke="#374151" stroke-width="2"/><circle class="e-spark" cx="120" cy="62" r="7" fill="#fde047" opacity="0"/></g>' +
+      '<path class="e-rod" d="" stroke="url(#' + p + 'm)" stroke-width="12" stroke-linecap="round"/>' +
+      '<g class="e-pis"><rect x="78" y="0" width="84" height="38" rx="4" fill="url(#' + p + 'm)" stroke="#4b5563"/><path d="M78,8 H162 M78,14 H162" stroke="#4b5563" stroke-width="1"/><circle cx="120" cy="24" r="5" fill="#4b5563"/></g>' +
+      '<circle cx="120" cy="222" r="40" fill="#e5e7eb" stroke="#9aa3ad"/>' +
+      '<g class="e-crank"><path d="M120,222 L120,190" stroke="#4b5563" stroke-width="18" stroke-linecap="round"/><circle cx="120" cy="222" r="10" fill="#374151"/><path d="M104,236 a22,22 0 0 0 32,0 L128,226 L112,226 Z" fill="#6b7280"/></g>' +
+      T(24, 22, 'admisión', { anchor: 'start', size: 9.5, fill: '#1d4ed8' }) + T(216, 22, 'escape', { anchor: 'end', size: 9.5, fill: '#4b5563' }) +
+      T(134, 14, 'bujía', { anchor: 'start', size: 9 }) + T(200, 120, 'pistón', { anchor: 'start', size: 10 }) + T(200, 178, 'biela', { anchor: 'start', size: 10 }) + T(176, 252, 'cigüeñal', { anchor: 'start', size: 10 }) +
+      '</svg><div class="pl-eng-ph"></div></div>';
+    var q = function(c){ return f.stage.querySelector(c); };
+    var pis = q('.e-pis'), rod = q('.e-rod'), crank = q('.e-crank'), vi = q('.e-vi'), ve = q('.e-ve'), gas = q('.e-gas'), spark = q('.e-spark'), ph = q('.pl-eng-ph');
+    var segsW = segs(f.ctrl, PH.map(function(x){ return x[0]; }), function(i){ ang = i * 180 + 90; playing = false; setB(); draw(); }, -1, 'Fase');
+    var pb = btn(f.ctrl, '', function(){ playing = !playing; setB(); resume(an); });
+    function setB(){ pb.textContent = playing ? '❚❚ Pausa' : '▶ Animar'; }
+    setB();
+    var lastPh = -1;
+    function draw(){
+      var a = ang * D2R, r = 32, L = 96, cx = 120, cy = 222;
+      var px = cx + r * Math.sin(a), py = cy - r * Math.cos(a);
+      var pinY = py - Math.sqrt(L * L - Math.pow(px - cx, 2));
+      pis.setAttribute('transform', 'translate(0,' + (pinY - 24).toFixed(1) + ')');
+      rod.setAttribute('d', 'M120,' + pinY.toFixed(1) + ' L' + px.toFixed(1) + ',' + py.toFixed(1));
+      crank.setAttribute('transform', 'rotate(' + (ang % 360).toFixed(1) + ' 120 222)');
+      var cyc = ((ang % 720) + 720) % 720, k = Math.floor(cyc / 180);
+      var top = pinY - 24;
+      gas.setAttribute('y', 58); gas.setAttribute('height', Math.max(2, top - 58).toFixed(1));
+      gas.setAttribute('fill', PH[k][2]); gas.setAttribute('opacity', k === 2 ? 0.75 : 0.45);
+      var u = (cyc % 180) / 180, lift = Math.sin(u * Math.PI) * 8;
+      vi.setAttribute('transform', 'translate(0,' + (k === 0 ? lift : 0).toFixed(1) + ')');
+      ve.setAttribute('transform', 'translate(0,' + (k === 3 ? lift : 0).toFixed(1) + ')');
+      spark.setAttribute('opacity', k === 2 && u < 0.15 ? (1 - u / 0.15).toFixed(2) : 0);
+      if (k !== lastPh){ lastPh = k; ph.innerHTML = '<b style="color:' + PH[k][2] + '">' + PH[k][0] + '</b><span>' + PH[k][1] + '</span>'; segsW.querySelectorAll('.pl-seg-b').forEach(function(b, j){ b.classList.toggle('on', j === k); }); }
+    }
+    var an = addAnim(f.stage, function(t, dt){ if (playing) ang += dt * 110; draw(); return playing; });
+    draw();
+  };
+
+  /* =====================================================================
+     17. MOTOR FUERABORDA — partes y chequeos
+     ===================================================================== */
+  FIG.fueraborda = function(el){
+    var f = frame(el, 'Motor fuera de borda', 'Si deja de salir el <b>chorro testigo</b>, la bomba no está refrigerando: apaga el motor.', 'Diagrama');
+    var p = uid();
+    var s = '<svg viewBox="0 0 400 330" class="pl-svg" role="img" aria-label="Partes de un motor fuera de borda"><defs>' +
+      '<linearGradient id="' + p + 'cw" x1="0" x2="1"><stop offset="0" stop-color="#111827"/><stop offset=".4" stop-color="#4b5563"/><stop offset=".6" stop-color="#374151"/><stop offset="1" stop-color="#0b0f14"/></linearGradient>' +
+      '<linearGradient id="' + p + 'leg" x1="0" x2="1"><stop offset="0" stop-color="#1f2937"/><stop offset=".5" stop-color="#6b7280"/><stop offset="1" stop-color="#111827"/></linearGradient>' +
+      '<linearGradient id="' + p + 'w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6cb8d6" stop-opacity=".85"/><stop offset="1" stop-color="#1d5c7e"/></linearGradient>' +
+      '<linearGradient id="' + p + 'hull" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c7d1d8"/><stop offset="1" stop-color="#fff"/></linearGradient>' +
+      '<linearGradient id="' + p + 'zn" x1="0" x2="1"><stop offset="0" stop-color="#9ca3af"/><stop offset=".5" stop-color="#f3f4f6"/><stop offset="1" stop-color="#9ca3af"/></linearGradient></defs>' +
+      '<rect width="400" height="330" fill="#eef6fa"/><rect x="0" y="196" width="400" height="134" fill="url(#' + p + 'w)"/>' +
+      // boat stern (transom) on the right
+      '<path d="M236,92 L400,92 L400,232 L262,232 C250,228 240,210 236,196 Z" fill="url(#' + p + 'hull)" stroke="#64748b"/>' +
+      '<path d="M236,92 L246,92 L246,214" fill="none" stroke="#94a3b8" stroke-width="2"/>' +
+      // fuel tank with vent + hose + primer bulb
+      '<rect x="318" y="58" width="66" height="34" rx="6" fill="#dc2626" stroke="#7f1d1d"/><rect x="330" y="52" width="10" height="8" rx="2" fill="#111"/><circle cx="364" cy="56" r="3" fill="#111"/>' +
+      '<path d="M330,60 C300,40 250,40 214,70" fill="none" stroke="#111" stroke-width="3"/><ellipse cx="270" cy="47" rx="10" ry="6" fill="#111"/>' +
+      // clamp + cowling + leg
+      '<rect x="222" y="86" width="22" height="30" rx="4" fill="#374151"/><circle cx="233" cy="96" r="3.5" fill="#cbd5e1"/><circle cx="233" cy="108" r="3.5" fill="#cbd5e1"/>' +
+      '<path d="M140,50 C140,30 156,22 186,22 L222,24 C236,26 240,40 238,62 L232,104 L150,104 C142,90 140,70 140,50 Z" fill="url(#' + p + 'cw)"/>' +
+      '<path d="M150,40 C170,32 210,32 226,40" stroke="#9ca3af" stroke-width="2" fill="none" opacity=".7"/>' +
+      '<rect x="166" y="104" width="52" height="16" fill="#1f2937"/>' +
+      '<path d="M176,120 L208,120 L206,226 L180,226 Z" fill="url(#' + p + 'leg)"/>' +
+      '<path d="M156,226 L230,226 L226,236 L160,236 Z" fill="#374151"/>' +
+      '<path d="M166,236 L224,236 C232,240 234,252 224,258 L170,258 C160,252 160,242 166,236 Z" fill="url(#' + p + 'leg)"/>' +
+      '<path d="M190,258 L198,258 L196,282 L190,286 Z" fill="#1f2937"/>' +
+      '<g fill="#111"><path d="M168,240 h6 v12 h-6z M178,240 h6 v12 h-6z" opacity=".55"/></g>' +
+      '<rect x="160" y="228" width="12" height="7" rx="2" fill="url(#' + p + 'zn)"/>' +
+      // propeller
+      '<g transform="translate(152,248)"><ellipse cx="0" cy="-16" rx="5" ry="14" fill="#9ca3af" stroke="#374151"/><ellipse cx="0" cy="16" rx="5" ry="14" fill="#6b7280" stroke="#374151"/><rect x="-2" y="-4" width="14" height="8" fill="#374151"/></g>' +
+      // tiller, shift lever, start rope, kill cord
+      '<path d="M222,96 L300,124" stroke="#111" stroke-width="6" stroke-linecap="round"/><path d="M300,124 L322,132" stroke="#374151" stroke-width="9" stroke-linecap="round"/>' +
+      '<path d="M224,80 L246,66" stroke="#b91c1c" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M150,64 C132,66 128,74 132,84" stroke="#e5e7eb" stroke-width="2" fill="none"/><rect x="124" y="82" width="14" height="6" rx="3" fill="#111"/>' +
+      '<path d="M200,98 C214,118 232,130 262,126" stroke="#dc2626" stroke-width="1.6" fill="none" stroke-dasharray="3 2"/>' +
+      // tell-tale water jet
+      '<path class="pl-jet" d="M150,112 C136,118 128,130 124,150" stroke="#38bdf8" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="6 5"/>' +
+      // labels
+      T(186, 14, 'capot', { size: 10.5 }) + T(118, 108, 'chorro', { anchor: 'end', size: 10.5, fill: '#0369a1' }) + T(118, 120, 'testigo', { anchor: 'end', size: 10.5, fill: '#0369a1' }) +
+      T(112, 76, 'piola de', { anchor: 'end', size: 9.5 }) + T(112, 86, 'arranque', { anchor: 'end', size: 9.5 }) +
+      T(270, 34, 'pera de cebado', { size: 9.5 }) + T(350, 108, 'estanque', { size: 9.5 }) + T(394, 44, 'respiradero', { anchor: 'end', size: 9 }) +
+      T(330, 152, 'caña / acelerador', { size: 9.5 }) + T(252, 70, 'palanca de cambios', { anchor: 'start', size: 9.5, fill: '#b91c1c' }) +
+      T(266, 128, 'corta-corriente', { anchor: 'start', size: 9, fill: '#b91c1c' }) + T(262, 196, 'trincado al espejo', { anchor: 'start', size: 9 }) + leader(260, 192, 240, 112) +
+      T(110, 160, 'pata', { anchor: 'end', size: 10.5 }) + leader(112, 158, 180, 170) +
+      T(120, 300, 'hélice', { size: 10.5 }) + leader(132, 294, 150, 268) +
+      T(214, 300, 'toma de agua', { size: 10.5 }) + leader(206, 294, 180, 250) +
+      T(310, 262, 'ánodo de zinc', { size: 10.5 }) + leader(266, 262, 172, 232) +
+      '</svg>';
+    f.stage.innerHTML = s;
+    var jet = f.stage.querySelector('.pl-jet');
+    addAnim(f.stage, function(t){ jet.setAttribute('stroke-dashoffset', (-t * 40).toFixed(1)); return !REDUCED; });
+  };
+  FIG.tercio = function(el){
+    var f = frame(el, 'Regla del tercio', 'Planifica el combustible: <b>⅓ para ir, ⅓ para volver y ⅓ de reserva</b> ante viento, corriente o imprevistos.', 'Diagrama');
+    var s = '<svg viewBox="0 0 400 120" class="pl-svg" role="img" aria-label="Un tercio para ir, un tercio para volver y un tercio de reserva">' +
+      '<rect width="400" height="120" fill="#f6fafc"/>' +
+      '<rect x="30" y="34" width="340" height="44" rx="12" fill="#e2e8f0" stroke="#94a3b8"/>' +
+      '<rect x="34" y="38" width="108" height="36" rx="9" fill="#0e7490"/><rect x="146" y="38" width="108" height="36" rx="9" fill="#1d4ed8"/><rect x="258" y="38" width="108" height="36" rx="9" fill="#b45309"/>' +
+      '<text x="88" y="61" text-anchor="middle" fill="#fff" font-weight="900" font-size="13" font-family="Nunito,sans-serif">⅓ IDA</text>' +
+      '<text x="200" y="61" text-anchor="middle" fill="#fff" font-weight="900" font-size="13" font-family="Nunito,sans-serif">⅓ VUELTA</text>' +
+      '<text x="312" y="61" text-anchor="middle" fill="#fff" font-weight="900" font-size="13" font-family="Nunito,sans-serif">⅓ RESERVA</text>' +
+      T(30, 24, 'estanque lleno', { anchor: 'start', size: 10 }) + T(370, 24, 'vacío', { anchor: 'end', size: 10 }) +
+      T(200, 104, 'Nunca planees usar la reserva', { size: 11, fill: '#b45309' }) + '</svg>';
+    f.stage.innerHTML = s;
+  };
+
+  /* =====================================================================
+     18. METEOROLOGÍA — brisas, nubes, olas y mareas
+     ===================================================================== */
+  FIG.brisas = function(el){
+    var f = frame(el, 'Virazón y terral', 'De <b>día</b> la tierra se calienta más rápido: el aire sube sobre ella y entra brisa del mar (<b>virazón</b>). De <b>noche</b> la tierra se enfría antes y la brisa va de tierra al mar (<b>terral</b>).', 'Animación');
+    var p = uid(), night = 0;
+    f.stage.innerHTML = '<svg viewBox="0 0 400 220" class="pl-svg" role="img" aria-label="Circulación de la brisa de mar y de tierra"><defs>' +
+      '<linearGradient id="' + p + 'd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc4ec"/><stop offset="1" stop-color="#dff1fb"/></linearGradient>' +
+      '<linearGradient id="' + p + 'n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1a33"/><stop offset="1" stop-color="#2a3f63"/></linearGradient>' +
+      '<marker id="' + p + 'a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#fff"/></marker></defs>' +
+      '<rect class="b-sky" width="400" height="220" fill="url(#' + p + 'd)"/>' +
+      '<g class="b-sun"></g>' +
+      '<path d="M0,160 L200,160 L200,220 L0,220 Z" fill="#2f86a8"/><path d="M0,162 q10,-3 20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0" fill="none" stroke="#fff" stroke-opacity=".5"/>' +
+      '<path d="M200,160 C230,150 260,148 300,140 C330,134 360,128 400,124 L400,220 L200,220 Z" fill="#a3b86c"/><path d="M200,160 C230,150 260,148 300,140" fill="none" stroke="#e8dcb5" stroke-width="5"/>' +
+      '<g class="b-flow"><path class="b-low" d="" fill="none" stroke="#fff" stroke-width="3" marker-end="url(#' + p + 'a)" stroke-dasharray="10 8"/>' +
+      '<path class="b-up" d="" fill="none" stroke="#fff" stroke-width="2" stroke-opacity=".7" marker-end="url(#' + p + 'a)" stroke-dasharray="6 8"/>' +
+      '<path class="b-high" d="" fill="none" stroke="#fff" stroke-width="2" stroke-opacity=".7" marker-end="url(#' + p + 'a)" stroke-dasharray="6 8"/>' +
+      '<path class="b-down" d="" fill="none" stroke="#fff" stroke-width="2" stroke-opacity=".7" marker-end="url(#' + p + 'a)" stroke-dasharray="6 8"/></g>' +
+      '<text class="b-t1 pl-sl" x="100" y="196" text-anchor="middle"></text><text class="b-t2 pl-sl" x="300" y="196" text-anchor="middle"></text><text class="b-t3 pl-sl" x="200" y="150" text-anchor="middle" font-size="13"></text></svg>';
+    var q = function(c){ return f.stage.querySelector(c); };
+    function set(){
+      q('.b-sky').setAttribute('fill', 'url(#' + p + (night ? 'n' : 'd') + ')');
+      q('.b-sun').innerHTML = night ? '<circle cx="330" cy="40" r="14" fill="#f1f5f9"/><circle cx="336" cy="36" r="12" fill="#1c2e4d"/>' : '<circle cx="330" cy="40" r="18" fill="#fde047"/><circle cx="330" cy="40" r="28" fill="#fde047" opacity=".25"/>';
+      var low = night ? 'M300,128 C250,140 180,150 90,148' : 'M90,148 C180,150 250,140 300,128';
+      var up = night ? 'M90,140 C80,120 80,90 90,70' : 'M310,120 C320,100 320,80 310,60';
+      var high = night ? 'M100,60 C170,48 240,48 300,56' : 'M300,56 C240,48 170,48 100,60';
+      var down = night ? 'M310,64 C320,84 320,104 310,118' : 'M90,70 C80,90 80,120 90,138';
+      q('.b-low').setAttribute('d', low); q('.b-up').setAttribute('d', up); q('.b-high').setAttribute('d', high); q('.b-down').setAttribute('d', down);
+      q('.b-t1').textContent = night ? 'mar más tibio' : 'mar más fresco';
+      q('.b-t2').textContent = night ? 'tierra más fría' : 'tierra más caliente';
+      q('.b-t3').textContent = night ? 'TERRAL (tierra → mar)' : 'VIRAZÓN (mar → tierra)';
+      q('.b-t3').setAttribute('class', 'b-t3 pl-sl' + (night ? ' pl-sl-w' : ''));
+    }
+    segs(f.ctrl, ['☀️ Día', '🌙 Noche'], function(i){ night = i; set(); }, 0, 'Momento');
+    set();
+    var flows = f.stage.querySelectorAll('.b-flow path');
+    addAnim(f.stage, function(t){ flows.forEach(function(pth){ pth.setAttribute('stroke-dashoffset', (-t * 30).toFixed(1)); }); return !REDUCED; });
+  };
+  FIG.nubes = function(el){
+    var f = frame(el, 'Tipos de nubes', '<b>Cirros</b>: altos, de hielo, en filamentos. <b>Cúmulos</b>: blancos, como algodón. <b>Estratos</b>: bajos y grises, como una sábana. <b>Nimbos</b>: grises oscuros, dan lluvia.', 'Diagrama');
+    var p = uid();
+    function puff(x, y, s, col, op){ var o = ''; [[0, 0, 1], [-0.8, 0.25, 0.75], [0.85, 0.2, 0.8], [-0.35, -0.45, 0.8], [0.45, -0.4, 0.7], [0, 0.35, 0.9]].forEach(function(b){ o += '<ellipse cx="' + (x + b[0] * s * 22) + '" cy="' + (y + b[1] * s * 18) + '" rx="' + (b[2] * s * 22) + '" ry="' + (b[2] * s * 17) + '" fill="' + col + '" opacity="' + (op || 1) + '"/>'; }); return o; }
+    var s = '<svg viewBox="0 0 400 260" class="pl-svg" role="img" aria-label="Cirros altos, cúmulos, estratos bajos y nimbos con lluvia"><defs>' +
+      '<linearGradient id="' + p + 'sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f9bd1"/><stop offset="1" stop-color="#d8edf8"/></linearGradient>' +
+      '<filter id="' + p + 'bl"><feGaussianBlur stdDeviation="2.2"/></filter><filter id="' + p + 'bl2"><feGaussianBlur stdDeviation="1"/></filter>' +
+      '<radialGradient id="' + p + 'cu" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".7" stop-color="#eef3f7"/><stop offset="1" stop-color="#b9c6d2"/></radialGradient>' +
+      '<radialGradient id="' + p + 'nb" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#8b95a1"/><stop offset="1" stop-color="#3c444e"/></radialGradient></defs>' +
+      '<rect width="400" height="260" fill="url(#' + p + 'sky)"/>' +
+      '<g filter="url(#' + p + 'bl2)" stroke="#fff" stroke-linecap="round" fill="none" opacity=".9"><path d="M30,40 C70,30 100,36 140,22" stroke-width="2.5"/><path d="M50,52 C90,44 120,48 160,36" stroke-width="1.6"/><path d="M200,30 C240,20 270,28 310,16 l12,-4" stroke-width="2.2"/><path d="M230,46 C260,40 290,44 330,32" stroke-width="1.4"/></g>' +
+      '<g filter="url(#' + p + 'bl)">' + puff(90, 128, 1.25, 'url(#' + p + 'cu)') + puff(170, 120, 0.9, 'url(#' + p + 'cu)') + '</g>' +
+      '<g filter="url(#' + p + 'bl)"><rect x="0" y="182" width="230" height="22" rx="11" fill="#c9d2da"/><rect x="20" y="176" width="180" height="16" rx="8" fill="#d6dde3"/></g>' +
+      '<g filter="url(#' + p + 'bl)">' + puff(320, 150, 1.5, 'url(#' + p + 'nb)') + puff(285, 160, 1.1, 'url(#' + p + 'nb)') + '</g>' +
+      '<g stroke="#5b7da3" stroke-width="1.4" opacity=".8">' + [270, 282, 294, 306, 318, 330, 342, 354].map(function(x, i){ return '<path d="M' + x + ',' + (186 + (i % 2) * 6) + ' l-6,' + (40 + (i % 3) * 8) + '"/>'; }).join('') + '</g>' +
+      '<path d="M0,240 L400,240 L400,260 L0,260 Z" fill="#2f86a8"/>' +
+      '<path d="M380,20 V230" stroke="#0b2545" stroke-opacity=".3"/><text x="386" y="34" class="pl-sl" font-size="9" text-anchor="end">alto</text><text x="386" y="124" class="pl-sl" font-size="9" text-anchor="end">medio</text><text x="386" y="200" class="pl-sl" font-size="9" text-anchor="end">bajo</text>' +
+      T(90, 70, 'CIRROS', { size: 11.5 }) + T(120, 98, 'CÚMULOS', { size: 11.5 }) + T(110, 222, 'ESTRATOS', { size: 11.5 }) + T(310, 118, 'NIMBOS', { size: 11.5 }) + '</svg>';
+    f.stage.innerHTML = s;
+  };
+  FIG.ola = function(el){
+    var f = frame(el, 'Partes de una ola', 'Mira la boya: sube y baja (y gira un poco) pero <b>no avanza</b> con la ola. El agua oscila; lo que viaja es la onda.', 'Animación');
+    var p = uid();
+    f.stage.innerHTML = '<svg viewBox="0 0 400 220" class="pl-svg" role="img" aria-label="Ola con cresta, seno, altura y longitud"><defs>' +
+      '<linearGradient id="' + p + 'w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4aa3c8"/><stop offset="1" stop-color="#14567a"/></linearGradient></defs>' +
+      '<rect width="400" height="220" fill="#eaf5fb"/><path class="o-w" d="" fill="url(#' + p + 'w)"/><path class="o-l" d="" fill="none" stroke="#fff" stroke-width="2"/>' +
+      '<path d="M0,120 H400" stroke="#0b2545" stroke-opacity=".3" stroke-dasharray="4 4"/>' +
+      '<g class="o-dim"></g><g class="o-buoy"><path d="M-8,0 L8,0 L5,10 L-5,10 Z" fill="#f97316" stroke="#7c2d12"/><path d="M0,0 V-14" stroke="#111" stroke-width="1.6"/><path d="M0,-14 L9,-11 L0,-8 Z" fill="#dc2626"/></g>' +
+      '<path class="o-orb" d="" fill="none" stroke="#f97316" stroke-dasharray="2 3"/></svg>';
+    var q = function(c){ return f.stage.querySelector(c); };
+    var A = 30, lam = 200, BX = 250;
+    function yAt(x, t){ return 120 - A * Math.cos((x / lam) * TAU - t * 1.6); }
+    addAnim(f.stage, function(t){
+      var d = 'M0,220 ', l = '';
+      for (var x = 0; x <= 400; x += 5){ var y = yAt(x, t); d += 'L' + x + ',' + y.toFixed(1) + ' '; l += (x ? 'L' : 'M') + x + ',' + y.toFixed(1) + ' '; }
+      q('.o-w').setAttribute('d', d + 'L400,220 Z'); q('.o-l').setAttribute('d', l);
+      var ph = (BX / lam) * TAU - t * 1.6, bx = BX + A * 0.5 * Math.sin(ph), by = yAt(BX, t) - 8;
+      q('.o-buoy').setAttribute('transform', 'translate(' + bx.toFixed(1) + ',' + by.toFixed(1) + ') rotate(' + (Math.sin(ph) * 16).toFixed(1) + ')');
+      q('.o-orb').setAttribute('d', 'M' + (BX - A * 0.5) + ',' + (120 - 8) + ' a' + (A * 0.5) + ',' + A + ' 0 1 0 ' + A + ',0 a' + (A * 0.5) + ',' + A + ' 0 1 0 ' + (-A) + ',0');
+      // crest positions for labels
+      var c0 = ((t * 1.6) / TAU * lam) % lam, cx = c0 < 40 ? c0 + lam : c0, tx = cx - lam / 2;
+      q('.o-dim').innerHTML = dimV(cx, 90, 150, 'altura', -1, '#0b2545') + '<path d="M' + cx + ',150 H' + (tx < 0 ? tx + lam : tx) + '" stroke="#0b2545" stroke-dasharray="2 3"/>' +
+        dimH(66, cx - lam < 0 ? cx : cx - lam, cx - lam < 0 ? cx + lam : cx, 'longitud', '#b45309') +
+        T(cx, 84, 'cresta', { size: 11 }) + T(tx < 0 ? tx + lam : tx, 170, 'seno', { size: 11 });
+      return !REDUCED;
+    });
+  };
+  FIG.marea = function(el){
+    var f = frame(el, 'Marea mixta (ejemplo)', 'En Chile hay normalmente <b>2 pleamares y 2 bajamares</b> en cada día-marea (unas 24 h 50 min), de alturas distintas. Curva <b>ilustrativa</b>: para navegar usa la <b>tabla de mareas del SHOA</b>.', 'Diagrama');
+    var W = 400, H = 200, X0 = 36, X1 = 384, Y0 = 26, Y1 = 160, T0 = 25;
+    function h(tt){ return 0.9 + 0.55 * Math.cos(TAU * (tt - 3) / 12.42) + 0.22 * Math.cos(TAU * (tt - 5) / 24.84); }
+    function X(tt){ return X0 + (X1 - X0) * tt / T0; } function Y(v){ return Y1 - (Y1 - Y0) * v / 1.9; }
+    var d = '', area = 'M' + X(0) + ',' + Y1 + ' ', ext = [];
+    for (var tt = 0; tt <= T0; tt += 0.1){ var v = h(tt); d += (tt ? 'L' : 'M') + X(tt).toFixed(1) + ',' + Y(v).toFixed(1) + ' '; area += 'L' + X(tt).toFixed(1) + ',' + Y(v).toFixed(1) + ' '; var a = h(tt - 0.1), b = h(tt + 0.1); if ((v > a && v > b) || (v < a && v < b)) ext.push([tt, v, v > a]); }
+    area += 'L' + X(T0) + ',' + Y1 + ' Z';
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="pl-svg" role="img" aria-label="Curva de marea con dos pleamares y dos bajamares"><rect width="400" height="200" fill="#f6fafc"/>' +
+      '<path d="' + area + '" fill="#5fb3d0" opacity=".35"/><path d="' + d + '" fill="none" stroke="#0e7490" stroke-width="2.6"/>' +
+      '<path d="M' + X0 + ',' + Y1 + ' H' + X1 + ' M' + X0 + ',' + Y0 + ' V' + Y1 + '" stroke="#64748b"/>';
+    for (var k = 0; k <= 24; k += 6) s += '<text x="' + X(k) + '" y="' + (Y1 + 14) + '" font-size="9" text-anchor="middle" fill="#475569" font-family="Nunito,sans-serif" font-weight="800">' + ('0' + k).slice(-2) + ':00</text>';
+    ext.forEach(function(e){ s += '<circle cx="' + X(e[0]).toFixed(1) + '" cy="' + Y(e[1]).toFixed(1) + '" r="4" fill="' + (e[2] ? '#0b2545' : '#b45309') + '"/>' + T(X(e[0]), Y(e[1]) + (e[2] ? -10 : 18), e[2] ? 'pleamar' : 'bajamar', { size: 10, fill: e[2] ? '#0b2545' : '#b45309' }); });
+    s += '<text x="12" y="' + ((Y0 + Y1) / 2) + '" font-size="9" fill="#475569" font-weight="800" font-family="Nunito,sans-serif" text-anchor="middle" transform="rotate(-90 12 ' + ((Y0 + Y1) / 2) + ')">altura (m)</text>' +
+      T(200, 190, 'hora del día (ejemplo)', { size: 10 }) + '</svg>';
+    f.stage.innerHTML = s;
+  };
+
+  /* =====================================================================
+     19. SEGURIDAD — equipo mínimo de bahía
+     ===================================================================== */
+  FIG.equipo = function(el){
+    var f = frame(el, 'Equipo mínimo en bahía', 'Un <b>chaleco salvavidas por persona</b>, un <b>pito</b> y un <b>achicador</b>. El mejor chaleco es el que llevas puesto.', 'Diagrama');
+    var p = uid();
+    var s = '<svg viewBox="0 0 400 200" class="pl-svg" role="img" aria-label="Chaleco salvavidas, pito y achicador"><defs>' +
+      '<linearGradient id="' + p + 'o" x1="0" x2="1"><stop offset="0" stop-color="#c2410c"/><stop offset=".4" stop-color="#fb923c"/><stop offset="1" stop-color="#c2410c"/></linearGradient>' +
+      '<linearGradient id="' + p + 'y" x1="0" x2="1"><stop offset="0" stop-color="#ca8a04"/><stop offset=".45" stop-color="#fde047"/><stop offset="1" stop-color="#a16207"/></linearGradient>' +
+      '<linearGradient id="' + p + 'b" x1="0" x2="1"><stop offset="0" stop-color="#1e3a8a"/><stop offset=".45" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient>' +
+      '<filter id="' + p + 'sh"><feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity=".25"/></filter></defs>' +
+      '<rect width="400" height="200" fill="#f6fafc"/>' +
+      // life jacket
+      '<g filter="url(#' + p + 'sh)" transform="translate(30,16)"><path d="M30,10 C40,4 50,4 56,14 L58,40 L76,40 L78,14 C84,4 94,4 104,10 L118,40 L114,150 C90,160 44,160 20,150 L16,40 Z" fill="url(#' + p + 'o)" stroke="#7c2d12"/>' +
+      '<path d="M58,40 C60,60 74,60 76,40" fill="#f6fafc"/><path d="M67,60 V156" stroke="#7c2d12" stroke-width="1.5"/>' +
+      '<path d="M18,96 H116 M19,124 H115" stroke="#111827" stroke-width="6"/><rect x="58" y="90" width="18" height="12" rx="2" fill="#374151"/><rect x="58" y="118" width="18" height="12" rx="2" fill="#374151"/>' +
+      '<path d="M26,30 L44,24 M90,24 L108,30" stroke="#e5e7eb" stroke-width="5"/><circle cx="96" cy="70" r="5" fill="none" stroke="#111" stroke-width="1.5"/></g>' +
+      // whistle
+      '<g filter="url(#' + p + 'sh)" transform="translate(186,80)"><path d="M0,10 L40,10 C56,10 66,18 66,30 C66,44 54,52 40,50 C30,50 24,42 24,32 L0,32 Z" fill="url(#' + p + 'y)" stroke="#854d0e"/><rect x="6" y="14" width="10" height="5" fill="#854d0e" opacity=".6"/><circle cx="44" cy="31" r="9" fill="#a16207" opacity=".5"/>' +
+      '<path d="M62,20 C76,6 84,-6 96,-10" stroke="#111" stroke-width="1.5" fill="none"/></g>' +
+      // bailer
+      '<g filter="url(#' + p + 'sh)" transform="translate(290,60)"><path d="M0,30 L70,20 L78,90 C60,104 20,104 8,90 Z" fill="url(#' + p + 'b)" stroke="#1e3a8a"/><path d="M0,30 L70,20" stroke="#93c5fd" stroke-width="3"/><path d="M30,26 C30,0 52,-4 58,22" stroke="#1e3a8a" stroke-width="7" fill="none"/></g>' +
+      T(97, 192, 'chaleco salvavidas', { size: 11 }) + T(220, 160, 'pito', { size: 11 }) + T(330, 180, 'achicador', { size: 11 }) +
+      '</svg>';
+    f.stage.innerHTML = s;
+  };
+
+  /* =====================================================================
+     20. HOMBRE AL AGUA — maniobra animada
+     ===================================================================== */
+  FIG.mob = function(el){
+    var f = frame(el, 'Hombre al agua', 'Lo importante: <b>no perderla de vista</b>, acercarse <b>despacio por sotavento</b> y poner el motor en <b>neutro</b> antes de llegar a la persona.', 'Animación');
+    var tt = REDUCED ? 15 : 0, playing = !REDUCED, DUR = 15;
+    var C = canvasIn(f.stage, 0.7, 440);
+    var step = document.createElement('div'); step.className = 'pl-step'; f.stage.appendChild(step);
+    var STEPS = [[0, 'Cae una persona por la banda.'], [0.6, 'Grita "<b>¡Hombre al agua!</b>", lanza un <b>aro salvavidas</b> y que alguien la <b>señale</b> con el brazo sin dejar de mirarla.'], [1.4, 'Antes de virar, comprueba que no haya <b>cabos en el agua</b> que enreden la hélice. Vira para volver.'], [4.4, 'Sin perderla de vista, pasa a <b>sotavento</b> de la persona y vira para quedar con la proa al viento.'], [9.8, 'Acércate <b>despacio</b> por <b>sotavento</b> (con la proa al viento), con la nave frenada.'], [12.6, 'Motor en <b>neutro</b> junto a la persona y recógela cuanto antes.']];
+    // path: north, then a wide turn to starboard and back south, then turn to come up from leeward (south of the person) heading north
+    // tuned so the boat loops downwind and comes back up into the wind, stopping with the person at its port bow
+    var B = { x: 360, y: 380, spd: function(t){ return t < 9.8 ? 85 : t < 12.6 ? 85 - 60 * ramp(t, 9.8, 2.4) : 25 * (1 - ramp(t, 12.6, 1.6)); },
+      hdg: function(t){ return 180 * ramp(t, 1.6, 2.6) + 180 * ramp(t, 7.6, 2.6); } };
+    var sim = simBoat(B, DUR), mob = { x: 360, y: 640 - 85 * 0.5 };
+    var i0 = Math.round(0.4 / sim.dt); mob.x = sim.x[i0] - 24; mob.y = sim.y[i0];
+    var lastS = -1;
+    var pb = btn(f.ctrl, '', function(){ playing = !playing; if (playing && tt >= DUR) tt = 0; setB(); resume(an); });
+    btn(f.ctrl, '↺ Repetir', function(){ tt = 0; playing = true; setB(); resume(an); });
+    function setB(){ pb.textContent = playing ? '❚❚ Pausa' : '▶ Ver'; }
+    setB();
+    var an = addAnim(C.cv, function(t, dt){
+      if (playing){ tt += dt; if (tt >= DUR){ tt = DUR; playing = false; setB(); } }
+      var o = C.size(), ctx = o.ctx, w = o.w, h = o.h;
+      drawWater(ctx, w, h, t * 0.6);
+      var sc = Math.min(w / 1000, h / 700);
+      ctx.save(); ctx.translate((w - 1000 * sc) / 2, (h - 700 * sc) / 2); ctx.scale(sc, sc);
+      // wind
+      ctx.save(); ctx.translate(880, 90); ctx.fillStyle = 'rgba(255,255,255,.88)'; rrect(ctx, -62, -62, 124, 124, 18); ctx.fill();
+      arrow(ctx, 0, -40, 0, 30, '#1e3a8a', 6); label(ctx, 'VIENTO', 0, 48, { size: 18, color: '#1e3a8a', halo: 0 }); ctx.restore();
+      label(ctx, 'barlovento ↑', 120, 50, { size: 22, color: '#fff', haloColor: 'rgba(0,30,50,.5)' });
+      label(ctx, 'sotavento ↓', 120, 670, { size: 22, color: '#fff', haloColor: 'rgba(0,30,50,.5)' });
+      var i = sampleAt(sim, tt), L = 84, trail = [];
+      for (var j = Math.max(0, i - 200); j <= i; j += 6){ var hj = sim.h[j] * D2R; trail.push([sim.x[j] - Math.sin(hj) * L * 0.5, sim.y[j] + Math.cos(hj) * L * 0.5, sim.h[j]]); }
+      drawWake(ctx, trail, L * 0.6, clamp(sim.v[i] / 70, 0.2, 1.3));
+      if (tt > 0.3){
+        // ring buoy + person
+        if (tt > 0.8){ ctx.save(); ctx.translate(mob.x + 26, mob.y - 8); ctx.lineWidth = 9; ctx.strokeStyle = '#f97316'; ctx.beginPath(); ctx.arc(0, 0, 14, 0, TAU); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.setLineDash([7, 15]); ctx.stroke(); ctx.restore(); }
+        var bob = Math.sin(t * 3) * 2;
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.beginPath(); ctx.arc(mob.x, mob.y, 18 + Math.sin(t * 2) * 3, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#f97316'; ctx.beginPath(); ctx.arc(mob.x, mob.y + bob, 11, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#f2c9a0'; ctx.beginPath(); ctx.arc(mob.x, mob.y - 6 + bob, 7, 0, TAU); ctx.fill();
+        // pointing line from boat
+        if (tt > 0.6 && tt < 12.6){ ctx.save(); ctx.setLineDash([8, 8]); ctx.strokeStyle = 'rgba(253,224,71,.85)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sim.x[i], sim.y[i]); ctx.lineTo(mob.x, mob.y); ctx.stroke(); ctx.restore(); }
+      }
+      ctx.save(); ctx.translate(sim.x[i], sim.y[i]); ctx.rotate(sim.h[i] * D2R); lanchaTop(ctx, L, { stripe: '#1d4ed8' }); ctx.restore();
+      if (tt > 12.6) pill(ctx, 'NEUTRO', sim.x[i], sim.y[i] + 70, '#047857', '#fff', 19);
+      if (tt > 0.6 && tt < 3) pill(ctx, '¡HOMBRE AL AGUA!', mob.x, mob.y - 52, '#b91c1c', '#fff', 19);
+      ctx.restore();
+      var si = 0; STEPS.forEach(function(st, k){ if (tt >= st[0]) si = k; });
+      if (si !== lastS){ lastS = si; step.innerHTML = '<span class="pl-step-n">' + (si + 1) + '/' + STEPS.length + '</span> ' + STEPS[si][1]; }
+      return true;
+    });
+  };
+
+  /* =====================================================================
+     21. MAYDAY — radio VHF y orden del mensaje (con práctica)
+     ===================================================================== */
+  var MAYDAY = ['MAYDAY, MAYDAY, MAYDAY', 'AQUÍ "ALBATROS", "ALBATROS", "ALBATROS"', 'Posición: 33° 02\' S, 71° 38\' O', 'Vía de agua, nos hundimos; necesitamos auxilio inmediato', '3 personas a bordo', 'CAMBIO'];
+  FIG.mayday = function(el){
+    var f = frame(el, 'Llamada de socorro por VHF', 'Canal <b>16</b>. Nombre y posición de ejemplo (ficticios). Toca <b>Ordenar el mensaje</b> para practicar.', 'Interactivo');
+    var p = uid();
+    var radio = '<svg viewBox="0 0 200 140" class="pl-svg pl-vhf" role="img" aria-label="Radio VHF en el canal 16"><defs>' +
+      '<linearGradient id="' + p + 'r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#374151"/><stop offset="1" stop-color="#0b0f14"/></linearGradient>' +
+      '<linearGradient id="' + p + 'lcd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9f99d"/><stop offset="1" stop-color="#a3c27a"/></linearGradient></defs>' +
+      '<rect x="8" y="22" width="184" height="110" rx="14" fill="url(#' + p + 'r)"/><rect x="24" y="36" width="96" height="56" rx="6" fill="url(#' + p + 'lcd)" stroke="#111"/>' +
+      '<text x="72" y="82" text-anchor="middle" font-size="40" font-weight="900" fill="#1a2e05" font-family="Baloo 2,Nunito,sans-serif">16</text><text x="30" y="48" font-size="8" fill="#1a2e05" font-weight="800" font-family="Nunito,sans-serif">CH</text>' +
+      '<rect x="132" y="36" width="44" height="56" rx="6" fill="#1f2937"/>' + [0, 1, 2, 3, 4].map(function(k){ return '<path d="M138,' + (44 + k * 10) + ' H170" stroke="#4b5563" stroke-width="3"/>'; }).join('') +
+      '<rect x="24" y="102" width="40" height="18" rx="5" fill="#b91c1c"/><text x="44" y="115" text-anchor="middle" font-size="8.5" fill="#fff" font-weight="900" font-family="Nunito,sans-serif">DISTRESS</text>' +
+      '<circle cx="90" cy="111" r="9" fill="#4b5563"/><circle cx="116" cy="111" r="9" fill="#4b5563"/><circle cx="160" cy="111" r="12" fill="#6b7280"/>' +
+      '<path d="M40,22 L40,4" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>';
+    f.stage.innerHTML = '<div class="pl-may"><div class="pl-may-r">' + radio + '</div><ol class="pl-may-msg">' + MAYDAY.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('') + '</ol></div><div class="pl-may-game"></div>';
+    var game = f.stage.querySelector('.pl-may-game'), list = f.stage.querySelector('.pl-may-msg');
+    var gb = btn(f.ctrl, '🧩 Ordenar el mensaje', function(){
+      if (game.innerHTML){ game.innerHTML = ''; list.style.display = ''; gb.textContent = '🧩 Ordenar el mensaje'; return; }
+      gb.textContent = 'Ver el mensaje'; list.style.display = 'none';
+      var order = [], sh = shuffle(MAYDAY.map(function(_, i){ return i; }));
+      game.innerHTML = '<p class="pl-may-h">Toca las partes en el orden correcto:</p><div class="pl-may-picked"></div><div class="pl-may-opts">' + sh.map(function(i){ return '<button type="button" class="pl-lq-opt" data-i="' + i + '">' + esc(MAYDAY[i]) + '</button>'; }).join('') + '</div>';
+      var picked = game.querySelector('.pl-may-picked');
+      game.querySelectorAll('.pl-may-opts button').forEach(function(b){
+        b.addEventListener('click', function(){
+          var i = +b.getAttribute('data-i');
+          if (i === order.length){ order.push(i); b.classList.add('ok'); b.disabled = true; picked.insertAdjacentHTML('beforeend', '<div>' + (i + 1) + '. ' + esc(MAYDAY[i]) + '</div>'); if (order.length === MAYDAY.length) picked.insertAdjacentHTML('beforeend', '<div class="pl-may-ok">✅ ¡Mensaje completo! Recuerda: la posición es el dato más importante.</div>'); }
+          else { b.classList.add('bad'); setTimeout(function(){ b.classList.remove('bad'); }, 600); }
+        });
+      });
+    }, 'pl-mini-btn-alt');
+  };
+
+  /* =====================================================================
+     22. VELA — rumbos respecto al viento y partes de la vela
+     ===================================================================== */
+  FIG.vela = function(el){
+    var f = frame(el, 'Rumbos respecto al viento', 'No se puede navegar contra el viento (zona muerta, unos 45° a cada lado). La botavara va hacia <b>sotavento</b> y se abre más cuanto más a popa entra el viento.', 'Diagrama');
+    var C = canvasIn(f.stage, 0.9, 460);
+    var R = [[0, 'proa al viento', 'zona muerta', 0, 1], [45, 'ceñida', '', 0.18], [90, 'de través', '', 0.7], [135, 'a un largo', '', 1.05], [180, 'en popa', '', 1.45]];
+    function draw(t){
+      var o = C.size(), ctx = o.ctx, w = o.w, h = o.h, cx = w / 2, cy = h * 0.5, Rr = Math.min(w, h) * 0.34;
+      drawWater(ctx, w, h, t * 0.5, { scale: 0.8 });
+      // sectors
+      function sec(a0, a1, col){ ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, Rr * 1.2, (a0 - 90) * D2R, (a1 - 90) * D2R); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); }
+      sec(-45, 45, 'rgba(248,113,113,0.35)');
+      sec(45, 70, 'rgba(34,211,238,0.22)'); sec(-70, -45, 'rgba(34,211,238,0.22)');
+      sec(70, 110, 'rgba(52,211,153,0.22)'); sec(-110, -70, 'rgba(52,211,153,0.22)');
+      sec(110, 160, 'rgba(251,191,36,0.22)'); sec(-160, -110, 'rgba(251,191,36,0.22)');
+      sec(160, 200, 'rgba(167,139,250,0.28)');
+      // wind
+      arrow(ctx, 26, 8, 26, 62, '#1e3a8a', 5);
+      label(ctx, 'VIENTO', 34, 76, { size: 12, color: '#1e3a8a', align: 'left' });
+      var L = Math.min(w, h) * 0.15;
+      [1, -1].forEach(function(side){
+        R.forEach(function(r, k){
+          if (side < 0 && (r[0] === 0 || r[0] === 180)) return;
+          var a = r[0] * side, x = cx + Rr * Math.sin(a * D2R), y = cy - Rr * Math.cos(a * D2R);
+          ctx.save(); ctx.translate(x, y); ctx.rotate(a * D2R);
+          // wind from north: boom to leeward = toward the side away from the wind
+          var boom = side * r[3];
+          if (r[0] === 180) boom = 1.45;
+          veleroTop(ctx, L, boom, { luff: r[4], t: t, wingJib: r[0] === 180 });
+          ctx.restore();
+          label(ctx, r[1], x, y + (r[0] === 0 ? L * 0.95 : r[0] === 180 ? -L * 0.9 : L * 0.82), { size: w < 500 ? 10.5 : 12 });
+          if (r[2]) label(ctx, r[2], cx, cy - Rr * 0.45, { size: 12, color: '#b91c1c' });
+        });
+      });
+      label(ctx, 'viento por estribor', cx - Rr * 0.95, h - 12, { size: 10.5, color: '#334155' });
+      label(ctx, 'viento por babor', cx + Rr * 0.95, h - 12, { size: 10.5, color: '#334155' });
+    }
+    addAnim(C.cv, function(t){ draw(t); return !REDUCED; });
+    requestAnimationFrame(function(){ draw(0); });
+  };
+  FIG.velas = function(el){
+    var f = frame(el, 'Aparejo y partes de la vela', '<b>Jarcia firme</b> (obenques, estay) sostiene el palo. <b>Jarcia de labor</b>: drizas para izar y escotas para cazar o lascar las velas.', 'Diagrama');
+    var p = uid();
+    var s = '<svg viewBox="0 0 400 320" class="pl-svg" role="img" aria-label="Velero con mayor, foque, palo, botavara, estay y obenques; partes de la vela"><defs>' +
+      '<linearGradient id="' + p + 'sail" x1="0" x2="1"><stop offset="0" stop-color="#f8f7f0"/><stop offset=".6" stop-color="#ffffff"/><stop offset="1" stop-color="#e5e2d6"/></linearGradient>' +
+      '<linearGradient id="' + p + 'jib" x1="0" x2="1"><stop offset="0" stop-color="#ecebe2"/><stop offset="1" stop-color="#ffffff"/></linearGradient>' +
+      '<linearGradient id="' + p + 'h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#c3ced6"/></linearGradient>' +
+      '<linearGradient id="' + p + 'w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb3d0"/><stop offset="1" stop-color="#1f6f96"/></linearGradient></defs>' +
+      '<rect width="400" height="320" fill="#eef6fa"/><rect y="262" width="400" height="58" fill="url(#' + p + 'w)"/>' +
+      '<path d="M70,250 L300,250 C290,268 270,276 240,276 L110,276 C90,272 78,262 70,250 Z" fill="url(#' + p + 'h)" stroke="#475569"/><path d="M70,250 L300,250" stroke="#0b2545" stroke-width="3"/>' +
+      '<path d="M170,250 L170,30" stroke="#64748b" stroke-width="4"/>' +
+      '<path d="M170,32 L296,248" stroke="#475569" stroke-width="1.4"/><path d="M170,40 L120,250 M170,40 L214,250" stroke="#94a3b8" stroke-width="1.1"/>' +
+      '<path d="M176,226 L118,228" stroke="#475569" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M171,42 C150,110 128,170 118,226 L171,226 Z" fill="url(#' + p + 'sail)" stroke="#94a3b8"/>' +
+      '<path d="M180,62 L284,232 L210,236 C220,180 210,110 180,62 Z" fill="url(#' + p + 'jib)" stroke="#94a3b8"/>' +
+      '<path d="M210,236 L234,250 M118,228 L132,250" stroke="#b45309" stroke-width="1.4" stroke-dasharray="3 2"/>' +
+      '<path d="M166,40 L160,250" stroke="#b45309" stroke-width="1" stroke-dasharray="2 3" opacity=".8"/>' +
+      T(70, 120, 'MAYOR', { size: 12 }) + T(240, 150, 'FOQUE', { size: 12 }) +
+      T(150, 24, 'palo', { size: 10.5 }) + T(262, 132, 'estay', { anchor: 'start', size: 10.5 }) + leader(260, 130, 238, 168) + T(100, 196, 'obenque', { anchor: 'end', size: 10 }) + leader(102, 194, 134, 190) +
+      T(110, 244, 'botavara', { anchor: 'end', size: 10.5 }) + leader(112, 240, 130, 228) +
+      T(150, 74, 'grátil', { anchor: 'end', size: 10.5, fill: '#0e7490' }) + leader(152, 72, 160, 82, '#0e7490') +
+      T(100, 160, 'baluma', { anchor: 'end', size: 10.5, fill: '#0e7490' }) + leader(102, 158, 132, 168, '#0e7490') +
+      T(146, 216, 'pujamen', { size: 10.5, fill: '#0e7490' }) +
+      T(190, 34, 'puño de driza', { anchor: 'start', size: 9.5, fill: '#b45309' }) + T(176, 238, 'puño de amura', { anchor: 'start', size: 9.5, fill: '#b45309' }) + T(14, 206, 'puño de escota', { anchor: 'start', size: 9.5, fill: '#b45309' }) + leader(60, 210, 116, 226, '#b45309') +
+      T(256, 262, 'escota', { size: 10, fill: '#b45309' }) + T(150, 140, 'driza', { anchor: 'end', size: 9.5, fill: '#b45309' }) +
+      '<text x="30" y="300" class="pl-sl" font-size="10" text-anchor="start">← popa</text><text x="370" y="300" class="pl-sl" font-size="10" text-anchor="end">proa →</text>' +
+      '</svg>';
+    f.stage.innerHTML = s;
+  };
 
   /* ---------------- mount ---------------- */
   function mount(root){

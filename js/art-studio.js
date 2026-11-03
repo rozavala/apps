@@ -575,7 +575,7 @@ const ArtStudio = (() => {
       b.querySelector('.tool-art').innerHTML = ArtArt.tool(b.dataset.tool, hex);
     });
     this.el.querySelectorAll('.khelp[data-tool]').forEach(b => {
-      b.querySelector('.khelp-art').innerHTML = ArtArt.tool(b.dataset.tool, hex);
+      b.querySelector('.khelp-art').innerHTML = ArtArt.tool(b.dataset.tool, hex, b.dataset.tool === 'fill' ? '0 34 48 112' : '0 18 48 128');
     });
   };
 
@@ -601,7 +601,8 @@ const ArtStudio = (() => {
     const mx = this.el.querySelector('.kit-mixer');
     if (!mx.hidden) {
       if (this.mixSlot === 0) { this.mixA = hex; this.mixSlot = 1; }
-      else { this.mixB = hex; this.mixSlot = this.mixA ? 1 : 0; }
+      else if (!this.mixA) { this.mixA = hex; }
+      else { this.mixB = hex; }
       sfx('click');
       this._renderMixer();
       return;
@@ -618,7 +619,7 @@ const ArtStudio = (() => {
     const b = this.el.querySelector('.pan-mix');
     if (b) b.setAttribute('aria-expanded', open);
     if (open) {
-      if (!this.mixA) { this.mixA = this.colour; this.mixSlot = 1; }
+      if (!this.mixA) this.mixSlot = 0;
       this._renderMixer();
     }
   };

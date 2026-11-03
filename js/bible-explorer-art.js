@@ -267,10 +267,12 @@ const BibleArt = (() => {
   const SCENES = {
     creation: () => sky('dawn') + sun(300, 70, 26, '#fff1b0') + rays(300, 70, 22, 200, '#fff6d8', 0.25) +
       '<circle cx="86" cy="56" r="16" fill="#f4efd8" opacity="0.85"/>' + stars(10, 3, 80) +
-      sea(170, '#4f8fc4', '#2f5f96') + hills(178, '#86b46a', '#6aa050') +
+      sea(160, '#4f8fc4', '#2f5f96') +
+      '<path d="M0 150 Q60 124 130 140 T250 150 Q270 170 262 240 H0 Z" fill="#86b46a"/><path d="M0 150 Q60 124 130 140 T250 150 Q270 170 262 240 H0 Z" fill="url(#' + U + 'haze)"/>' +
+      '<path d="M0 182 Q90 166 200 180 Q250 190 300 240 H0 Z" fill="#6aa050"/><path d="M0 182 Q90 166 200 180 Q250 190 300 240 H0 Z" fill="url(#' + U + 'vf)"/>' +
       tree(70, 196, 1.1, '#4f8a3c') + tree(340, 190, 0.9, '#5f9a44') + palm(118, 196, 0.8) +
-      sheep(170, 214, 1.1) + sheep(196, 218, 0.9, true) + lion(268, 214, 0.9, true, true) +
-      fish(230, 186, 1, '#e0a050') + fish(258, 192, 0.8, '#8ac0e0', true) + bird(150, 70, 1.4) + bird(176, 84, 1) + bird(210, 60, 1.2) +
+      sheep(170, 214, 1.1) + sheep(196, 218, 0.9, true) + lion(236, 214, 0.9, true, true) +
+      fish(330, 196, 1.2, '#e0a050') + fish(360, 214, 1, '#8ac0e0', true) + fish(300, 222, 0.9, '#f0c060') + bird(150, 70, 1.4) + bird(176, 84, 1) + bird(210, 60, 1.2) +
       grass(232, 30, '#3f7a34'),
     noah: () => sky('day') + clouds([[60, 50, 1], [300, 40, 1.2]], '#fdfdfd') +
       '<g opacity="0.85">' + ['#e53935', '#fb8c00', '#fdd835', '#43a047', '#1e88e5', '#5e35b1'].map((c, i) => '<path d="M40 190 A170 150 0 0 1 380 190" stroke="' + c + '" stroke-width="7" fill="none" transform="translate(0 ' + (i * 7) + ') scale(1 ' + (1 - i * 0.02) + ')"/>').join('') + '</g>' +
@@ -279,10 +281,11 @@ const BibleArt = (() => {
       '<path d="M-78 -6 H84 M-76 2 H80" stroke="#6a4224" stroke-width="1.2"/>' +
       '<rect x="-46" y="-44" width="86" height="30" fill="#b07a48" stroke="' + INK + '" stroke-width="1.2"/><path d="M-52 -44 L-4 -66 L46 -44 Z" fill="#7a4a2a" stroke="' + INK + '" stroke-width="1.2"/>' +
       '<rect x="-30" y="-36" width="12" height="10" fill="#4a3020"/><rect x="18" y="-36" width="12" height="10" fill="#4a3020"/>' +
-      '<g transform="translate(-24 -36) scale(0.5)"><ellipse cx="6" cy="6" rx="6" ry="5" fill="#d9a04a"/></g>' +
       '</g>' +
-      '<g transform="translate(140 152)"><path d="M0 0 v-22 M0 -22 q6 -10 12 -14" stroke="#c9a86a" stroke-width="3" fill="none"/><circle cx="13" cy="-37" r="4" fill="#c9a86a"/></g>' +
-      '<g transform="translate(228 158) scale(0.8)"><ellipse cx="0" cy="-8" rx="14" ry="10" fill="#9a9ea8" stroke="' + INK + '" stroke-width="1"/><path d="M12 -12 q8 4 6 14" stroke="#9a9ea8" stroke-width="4" fill="none"/></g>' +
+      // a giraffe looking out of the roof, pairs of animals on deck
+      '<g transform="translate(150 152)"><path d="M0 0 C0 -14 2 -26 8 -36" stroke="#e0b25a" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M0 -6 l3 -1 M2 -18 l3 -1 M5 -28 l3 -1" stroke="#a8702a" stroke-width="2"/>' +
+      '<ellipse cx="12" cy="-38" rx="7" ry="4.5" fill="#e0b25a" stroke="' + INK + '" stroke-width="0.9"/><path d="M8 -42 v-5 M11 -42 v-5" stroke="' + INK + '" stroke-width="1.4"/><circle cx="13" cy="-39" r="0.9" fill="' + INK + '"/></g>' +
+      sheep(110, 182, 0.55) + sheep(124, 183, 0.5, true) + lion(246, 183, 0.42, true, true) + lion(262, 183, 0.38, true, true) +
       dove(300, 90, 1.2, -10) + '<path d="M312 88 q6 -2 8 -6" stroke="#4f8a3c" stroke-width="2" fill="none"/>',
     abraham: () => sky('night') + stars(90, 11, 170, true) + moon(330, 50, 14) +
       hills(196, '#3b4466', '#4a4a5a') + tent(110, 206, 1.3, '#c9b08a') + tent(160, 210, 0.9, '#b9a07a') +
@@ -302,7 +305,7 @@ const BibleArt = (() => {
       '<path d="M96 148 q-14 -20 -6 -30" stroke="#7a5236" stroke-width="1.6" fill="none"/><circle cx="90" cy="117" r="3.5" fill="#8a8a8a" stroke="' + INK + '" stroke-width="0.8"/>' +
       sheep(48, 226, 0.8) +
       person(290, 228, 150, { robe: '#7a6a4a', mantle: '#5a5f6a', hair: '#3a2a1e', beard: 'short', helmet: true, arms: 'staff' }) +
-      '<path d="M316 228 L322 52" stroke="#5a4a3a" stroke-width="5"/><path d="M322 52 l-5 14 h10 Z" fill="#b9bec8" stroke="' + INK + '" stroke-width="1"/>' +
+      '<path d="M320 100 l-6 -2 l6 -22 l6 22 Z" fill="#b9bec8" stroke="' + INK + '" stroke-width="1"/>' +
       '<ellipse cx="258" cy="168" rx="16" ry="22" fill="#b9a46a" stroke="' + INK + '" stroke-width="1.4"/><circle cx="258" cy="168" r="5" fill="#8a7a4a"/>',
     solomon: () => sky('gold') + '<rect width="400" height="240" fill="#e9d4a8"/>' +
       [60, 120, 280, 340].map(x => '<rect x="' + (x - 9) + '" y="40" width="18" height="170" fill="#efe2c4" stroke="#b9a47a" stroke-width="1"/><rect x="' + (x - 9) + '" y="40" width="18" height="170" fill="url(#' + U + 'lit)"/><rect x="' + (x - 13) + '" y="34" width="26" height="8" fill="#d9c49a"/><rect x="' + (x - 13) + '" y="206" width="26" height="8" fill="#d9c49a"/>').join('') +
@@ -312,7 +315,7 @@ const BibleArt = (() => {
       person(200, 206, 70, { robe: '#f2e6c8', mantle: '#6a2c91', hair: '#4a3020', beard: 'short', crown: true, arms: 'hold' }) +
       lion(140, 214, 0.5, false, true) + lion(260, 214, 0.5, true, true),
     daniel: () => sky('night') + '<rect width="400" height="240" fill="#5a4a3a"/>' +
-      '<path d="M0 0 H400 V60 Q200 30 0 60 Z" fill="#3a2e26"/><circle cx="200" cy="30" r="30" fill="#1d2b5c"/><circle cx="200" cy="30" r="30" fill="none" stroke="#2a2018" stroke-width="6"/>' + stars(8, 5, 50) +
+      '<path d="M0 0 H400 V60 Q200 30 0 60 Z" fill="#3a2e26"/><circle cx="200" cy="30" r="30" fill="#3b5a9a"/><circle cx="214" cy="22" r="7" fill="#f4efd8"/><path d="M180 6 V56 M200 0 V60 M220 6 V56" stroke="#2a2018" stroke-width="3"/><circle cx="200" cy="30" r="30" fill="none" stroke="#2a2018" stroke-width="6"/>' +
       rays(200, 40, 14, 220, '#fff3c4', 0.18) +
       '<rect y="200" width="400" height="40" fill="#7a6650"/><rect y="200" width="400" height="40" fill="url(#' + U + 'vf)"/>' +
       '<path d="M0 60 Q40 120 20 200 M400 60 Q360 120 380 200" stroke="#3a2e26" stroke-width="40" fill="none"/>' +
@@ -322,10 +325,11 @@ const BibleArt = (() => {
     jonah: () => sky('storm') + clouds([[80, 40, 1.4], [200, 30, 1.6], [330, 46, 1.3]], '#8a96a8') +
       '<path d="M120 20 l-10 30 h10 l-8 26" stroke="#fff3c4" stroke-width="2.4" fill="none"/>' +
       sea(120, '#3f6f96', '#1f3f66', true) + boat(300, 132, 0.8, { sail: true }) +
-      '<g transform="translate(160 182)"><path d="M-110 10 C-80 -40 40 -50 90 -10 C100 0 104 6 120 -8 L114 12 L124 30 C108 18 100 22 90 28 C40 60 -80 50 -110 10 Z" fill="#5a7a9a" stroke="' + INK + '" stroke-width="1.4"/>' +
+      '<g transform="translate(250 186) scale(0.85)"><path d="M-110 10 C-80 -40 40 -50 90 -10 C100 0 104 6 120 -8 L114 12 L124 30 C108 18 100 22 90 28 C40 60 -80 50 -110 10 Z" fill="#5a7a9a" stroke="' + INK + '" stroke-width="1.4"/>' +
       '<path d="M-100 16 C-60 36 30 40 80 24" stroke="#c9d6e0" stroke-width="8" fill="none" opacity="0.6"/><circle cx="-80" cy="-4" r="3" fill="#1a2a3a"/><path d="M-110 10 Q-96 14 -86 10" stroke="' + INK + '" stroke-width="1.4" fill="none"/>' +
       '<path d="M-60 -34 q-6 -14 4 -22 M-56 -34 q4 -16 16 -18" stroke="#bfe4f6" stroke-width="2.4" fill="none"/></g>' +
-      person(118, 158, 36, { robe: '#c9a06a', hair: '#4a3020', beard: 'short', arms: 'up' }),
+      '<path d="M0 196 Q60 180 130 196 Q150 210 150 240 H0 Z" fill="#e2cc96"/><path d="M0 196 Q60 180 130 196 Q150 210 150 240 H0 Z" fill="url(#' + U + 'vf)"/>' +
+      person(64, 226, 52, { robe: '#c9a06a', hair: '#4a3020', beard: 'short', arms: 'up' }),
     prophets: () => sky('soft') + hills(186, '#b9a87a', '#d9c49a') +
       '<g transform="translate(76 190)">' + '<path d="M-40 0 V-80 H40 V0 Z" fill="#e8d6b4" stroke="' + INK + '" stroke-width="1"/><path d="M-40 -80 L0 -98 L40 -80" fill="#c9a46a" stroke="' + INK + '" stroke-width="1"/><path d="M-10 0 V-26 a10 10 0 0 1 20 0 V0" fill="#6a4a2e"/></g>' +
       person(190, 222, 72, { robe: '#a8845a', mantle: '#4a6a3a', hair: '#d8d2c6', beard: 'long', arms: 'out' }) +
@@ -477,8 +481,12 @@ const BibleArt = (() => {
       hills(186, '#c9b07a', '#d9c08a') +
       '<g transform="translate(340 172) scale(0.7)">' + house(0, 0, 1) + house(-40, 4, 0.8) + '</g>' +
       '<path d="M0 220 Q150 200 400 186" stroke="#e8d6a8" stroke-width="26" fill="none"/>' +
-      '<g transform="translate(190 216)"><ellipse cx="0" cy="2" rx="40" ry="5" fill="#2a1a0a" opacity="0.2"/><path d="M-34 0 Q-28 -16 0 -16 Q24 -16 32 -4 L34 0 Z" fill="#8e2a2a" stroke="' + INK + '" stroke-width="1"/><circle cx="-30" cy="-16" r="8" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="1"/><path d="M-38 -14 q8 6 16 0" stroke="#3a2a1e" stroke-width="5" fill="none"/>' +
-      '<path d="M-20 -14 L-34 -34 M-10 -14 L-4 -36" stroke="#8e2a2a" stroke-width="5" stroke-linecap="round"/></g>' +
+      '<g transform="translate(196 214)"><ellipse cx="4" cy="3" rx="46" ry="6" fill="#2a1a0a" opacity="0.22"/>' +
+      '<path d="M40 0 Q20 -4 0 -6 L-6 0 Z" fill="#6a4a2e" stroke="' + INK + '" stroke-width="1"/>' +
+      '<path d="M-30 -6 Q-28 -26 -12 -28 Q6 -26 10 -12 Q30 -8 44 -2 L40 2 Q10 2 -30 2 Z" fill="#8e2a2a" stroke="' + INK + '" stroke-width="1.2"/><path d="M-30 -6 Q-28 -26 -12 -28 Q6 -26 10 -12 Q30 -8 44 -2 L40 2 Q10 2 -30 2 Z" fill="url(#' + U + 'lit)"/>' +
+      '<circle cx="-18" cy="-36" r="8" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="1"/><path d="M-25 -38 Q-24 -46 -16 -45 Q-10 -44 -11 -38" fill="#3a2a1e"/><path d="M-24 -32 Q-18 -26 -12 -32 Q-14 -26 -18 -25 Q-22 -26 -24 -32 Z" fill="#3a2a1e"/>' +
+      '<path d="M-8 -24 L-14 -40" stroke="#8e2a2a" stroke-width="6" stroke-linecap="round"/><circle cx="-15" cy="-41" r="3.4" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="0.8"/>' +
+      '<path d="M-26 -18 L-38 -4" stroke="#8e2a2a" stroke-width="6" stroke-linecap="round"/><circle cx="-39" cy="-3" r="3.4" fill="' + SKIN + '" stroke="' + INK + '" stroke-width="0.8"/></g>' +
       crowd([[90, 214, 46, { robe: '#7a6a5a', arms: 'up' }], [300, 210, 44, { robe: '#6a5a6a', arms: 'up' }]]),
     commandments: () => sky('storm') + clouds([[120, 60, 1.6], [280, 50, 1.6], [200, 40, 1.4]], '#7a8494') +
       mountain(200, 210, 420, 160, '#8a7a6a') + '<path d="M160 60 l-8 24 h8 l-6 20 M250 52 l-6 20 h8 l-6 18" stroke="#fde68a" stroke-width="2" fill="none"/>' +

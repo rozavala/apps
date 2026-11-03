@@ -153,9 +153,9 @@ var ArtArt = (function () {
     }
   };
 
-  function tool(kind, hex) {
+  function tool(kind, hex, viewBox) {
     var fn = TOOLS[kind] || TOOLS.pencil;
-    return '<svg class="tool-svg" viewBox="0 0 48 144" aria-hidden="true" focusable="false">' + fn(safeHex(hex || '#333333')) + '</svg>';
+    return '<svg class="tool-svg" viewBox="' + (viewBox || '0 0 48 144') + '" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">' + fn(safeHex(hex || '#333333')) + '</svg>';
   }
 
   // Small line icons (24 x 24) for tabs and buttons.
@@ -224,6 +224,7 @@ var ArtArt = (function () {
       } else {
         var wdt = s.tool === 'oil' || s.tool === 'watercolour' || s.tool === 'line' ? 2.6 : 1.8;
         out += '<path d="' + s.guide + '" fill="none" stroke="' + col + '" stroke-width="' + wdt + '" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>';
+        if (s.type === 'symmetry') out += '<path d="' + s.guide + '" transform="translate(100 0) scale(-1 1)" fill="none" stroke="' + col + '" stroke-width="' + wdt + '" stroke-linecap="round" opacity="0.92"/><path d="M50 26 V76" stroke="#3a3632" stroke-width="3" stroke-linecap="round"/>';
       }
     });
     return '<svg viewBox="-4 -4 108 108" aria-hidden="true">' + out + '</svg>';

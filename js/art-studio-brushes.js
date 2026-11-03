@@ -219,7 +219,7 @@ var ArtBrush = (function () {
     var ctx = c.getContext('2d'), img = ctx.createImageData(TILE, TILE), d = img.data;
     var mot = new Float32Array(TILE * TILE); _noise(TILE, 8, rng(5), mot, 1);
     for (var p = 0, q = 0; p < t.length; p++, q += 4) {
-      var s = (1 - t[p]) * 13 + (1 - co[p]) * 5 + mot[p] * 6;
+      var s = (1 - t[p]) * 9 + (1 - co[p]) * 3 + mot[p] * 3;
       d[q] = PAPER_RGB.r - s; d[q + 1] = PAPER_RGB.g - s * 1.02; d[q + 2] = PAPER_RGB.b - s * 1.1; d[q + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
@@ -323,14 +323,14 @@ var ArtBrush = (function () {
     crayon: {
       begin: function (S, B, p) {
         var ctx = S.paint;
-        B.light = ctx.createPattern(toothTile('coarse', S.hex, 0.56, 0.70), 'repeat');
-        B.heavy = ctx.createPattern(toothTile('coarse', S.hex, 0.30, 0.50), 'repeat');
+        B.light = ctx.createPattern(toothTile('coarse', S.hex, 0.40, 0.56), 'repeat');
+        B.heavy = ctx.createPattern(toothTile('coarse', S.hex, 0.16, 0.36), 'repeat');
         B.rem = 0; B.r = S.rand;
         this._stamp(S, B, p.x, p.y, p.p, 1, 0);
       },
       _stamp: function (S, B, x, y, p, dx, dy) {
         var ctx = S.paint, r = S.w * 0.5 * (0.82 + 0.25 * p) * (0.92 + B.r() * 0.12);
-        ctx.globalAlpha = 0.5 + 0.45 * p;
+        ctx.globalAlpha = 0.6 + 0.4 * p;
         ctx.fillStyle = p > 0.58 ? B.heavy : B.light;
         ctx.beginPath();
         // a crayon tip is a worn, slightly flattened oval
@@ -497,11 +497,11 @@ var ArtBrush = (function () {
         B.pick = pick; B.pickK = pick ? 0.42 : 0;
         B.br = [];
         for (var i = 0; i < n; i++) {
-          var c = shade(S.rgb, (R() - 0.5) * 0.16);
+          var c = shade(S.rgb, (R() - 0.5) * 0.24);
           B.br.push({
-            o: ((i + 0.5) / n - 0.5) + (R() - 0.5) * 0.6 / n,
+            o: ((i + 0.5) / n - 0.5) + (R() - 0.5) * 1.1 / n,
             t: Math.max(1, S.w / n * (1.3 + R() * 0.9)),
-            c: c, load: 0.85 + R() * 0.3, rate: 0.7 + R() * 0.7
+            c: c, load: 0.85 + R() * 0.3, rate: 0.7 + R() * 0.7, ridge: R() < 0.28, a: 0.7 + R() * 0.3
           });
         }
         B.nx = 0; B.ny = -1; B.has = false; B.dist = 0;
@@ -534,17 +534,17 @@ var ArtBrush = (function () {
           var c = pk > 0 ? lerpRgb(q.c, B.pick, pk) : q.c;
           var x0 = a.x + pnx * q.o * spreadA, y0 = a.y + pny * q.o * spreadA;
           var x1 = b.x + B.nx * q.o * spreadB, y1 = b.y + B.ny * q.o * spreadB;
-          ctx.globalAlpha = Math.min(1, 0.55 + ld * 0.5);
+          ctx.globalAlpha = Math.min(1, (0.55 + ld * 0.5) * q.a);
           ctx.strokeStyle = rgbStr(c);
           ctx.lineWidth = q.t * (ld < 0.4 ? 0.7 : 1);
           ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
-          if (i % 3 === 0 && ld > 0.3) {          // ridge highlight + shadow
+          if (q.ridge && ld > 0.3) {          // ridge highlight + shadow
             var off = q.t * 0.35 * lightSide;
-            ctx.globalAlpha = 0.32;
+            ctx.globalAlpha = 0.26;
             ctx.strokeStyle = rgbStr(shade(c, 0.45));
             ctx.lineWidth = Math.max(0.6, q.t * 0.3);
             ctx.beginPath(); ctx.moveTo(x0 + pnx * off, y0 + pny * off); ctx.lineTo(x1 + B.nx * off, y1 + B.ny * off); ctx.stroke();
-            ctx.globalAlpha = 0.22;
+            ctx.globalAlpha = 0.18;
             ctx.strokeStyle = rgbStr(shade(c, -0.35));
             ctx.beginPath(); ctx.moveTo(x0 - pnx * off, y0 - pny * off); ctx.lineTo(x1 - B.nx * off, y1 - B.ny * off); ctx.stroke();
           }
