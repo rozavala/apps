@@ -705,7 +705,12 @@
       } catch (e) {}
 
       try {
-        var ep = typeof QuestAdventure !== 'undefined' ? QuestAdventure.calculateEP() : 0;
+        // Expedition Points = every app's stars except Quest Adventure's own
+        // (how quest-adventure.js counts them). quest-adventure.js is not
+        // loaded on the hub, so the old QuestAdventure.calculateEP() call
+        // never ran and this chip never showed.
+        var ep = (stats.totalStars || 0) -
+          (typeof getAppStars === 'function' ? getAppStars('quest', appStats.quest || {}) : 0);
         if (els.quest && ep > 0) {
           els.quest.innerHTML = '<span class="cs-item active">⚡ ' + ep + ' EP</span>';
         }

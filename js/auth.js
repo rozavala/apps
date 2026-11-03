@@ -449,6 +449,13 @@ function getPlayerStats(userName) {
   return { totalStars: totalStars, appsWithStars: appsWithStars, appStats: appStats };
 }
 
+// The kid's total stars across every app — the same number the Explorer
+// Rank uses. nav.js shows it in every app's top bar; it was called for
+// years but never defined, so that counter always read 0.
+function getTotalStars(userName) {
+  try { return getPlayerStats(userName).totalStars || 0; } catch (e) { return 0; }
+}
+
 function getAgeTier(age) {
   var a = age;
   if (!a) {
