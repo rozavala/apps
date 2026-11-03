@@ -62,7 +62,12 @@ const SONGS = [
   { id: 'saints', title: 'When the Saints Go Marching In', tier: 'beginner', bpm: 110, progression: [['G', 12], ['G', 4], ['D7', 8], ['D7', 12], ['G', 8], ['G', 4], ['C', 8], ['G', 4], ['D7', 4], ['G', 8]] },
   { id: 'auldlang', title: 'Auld Lang Syne', tier: 'intermediate', bpm: 90, progression: [['G', 4], ['C', 4], ['G', 4], ['D7', 4], ['G', 4], ['C', 4], ['G', 4], ['D7', 4], ['G', 8]] },
   { id: 'redriver', title: 'Red River Valley', tier: 'intermediate', bpm: 100, progression: [['G', 8], ['C', 8], ['G', 8], ['D7', 8], ['G', 8], ['C', 4], ['D7', 4], ['G', 8]] },
-  { id: 'greensleeves', title: 'Greensleeves', tier: 'advanced', bpm: 90, progression: [['Am', 4], ['C', 4], ['G', 4], ['Em', 4], ['Am', 4], ['E', 4], ['Am', 4], ['C', 4], ['G', 4], ['Em', 4], ['Am', 2], ['E', 2], ['Am', 4]] }
+  { id: 'greensleeves', title: 'Greensleeves', tier: 'advanced', bpm: 90, progression: [['Am', 4], ['C', 4], ['G', 4], ['Em', 4], ['Am', 4], ['E', 4], ['Am', 4], ['C', 4], ['G', 4], ['Em', 4], ['Am', 2], ['E', 2], ['Am', 4]] },
+  // Traditional tunes. Chord charts only — no lyrics. Each chord name
+  // is already in CHORDS. Beginner charts stay on C and G.
+  { id: 'rowboat', title: 'Row, Row, Row Your Boat', tier: 'beginner', bpm: 110, progression: [['C', 4], ['C', 4], ['C', 4], ['G', 4], ['C', 8]] },
+  { id: 'frere', title: 'Frère Jacques', tier: 'beginner', bpm: 100, progression: [['C', 4], ['C', 4], ['G', 4], ['C', 8], ['C', 4], ['C', 4], ['G', 4], ['C', 8]] },
+  { id: 'mountain', title: "She'll Be Coming Round the Mountain", tier: 'intermediate', bpm: 120, progression: [['G', 8], ['G', 8], ['D', 8], ['G', 8], ['G', 4], ['G', 4], ['D', 4], ['G', 8]] }
 ];
 
 const GuitarJam = (() => {
