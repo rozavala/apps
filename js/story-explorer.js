@@ -13,7 +13,7 @@ const StoryExplorer = (() => {
       id: 'ocean_dive',
       title: 'The Ocean Dive',
       titleEs: 'El Buceo en el Océano',
-      tier: 'intermediate', ageMin: 7, region: 'ocean', icon: '🤿',
+      tier: 'explorer', ageMin: 7, region: 'ocean', icon: '🤿',
       pages: [
         {
           en: 'The divers jumped into the deep blue water.',
@@ -49,7 +49,7 @@ const StoryExplorer = (() => {
       id: 'andes_rescue',
       title: 'The Andes Rescue',
       titleEs: 'El Rescate en los Andes',
-      tier: 'advanced', ageMin: 8, region: 'south', icon: '🚁',
+      tier: 'pilot', ageMin: 8, region: 'south', icon: '🚁',
       pages: [
         {
           en: 'The helicopter flew over the snowy peaks. A climber was lost.',
@@ -83,6 +83,10 @@ const StoryExplorer = (() => {
             { word: 'team', wordEs: 'equipo' }
           ]
         }
+      ],
+      quiz: [
+        { q: 'What was flying over the snowy peaks?', qEs: '¿Qué volaba sobre los picos nevados?', options: ['A helicopter', 'An eagle', 'An airplane', 'A kite'], optionsEs: ['Un helicóptero', 'Un águila', 'Un avión', 'Un volantín'], answer: 0 },
+        { q: 'What did the rescue team throw down?', qEs: '¿Qué lanzó el equipo de rescate?', options: ['A rope', 'A map', 'A blanket', 'A flag'], optionsEs: ['Una cuerda', 'Un mapa', 'Una manta', 'Una bandera'], answer: 0 }
       ]
     },
     {
@@ -123,6 +127,10 @@ const StoryExplorer = (() => {
             { word: 'dark', wordEs: 'oscuro', def: 'Without light.', defEs: 'Sin luz.' }
           ]
         }
+      ],
+      quiz: [
+        { q: 'What did Leo lose?', qEs: '¿Qué perdió Leo?', options: ['His compass', 'His tent', 'His map', 'His horse'], optionsEs: ['Su brújula', 'Su carpa', 'Su mapa', 'Su caballo'], answer: 0 },
+        { q: 'Where did he find it?', qEs: '¿Dónde la encontró?', options: ['Under a big rock', 'In the river', 'On a tree', 'In his pocket'], optionsEs: ['Bajo una gran roca', 'En el río', 'En un árbol', 'En su bolsillo'], answer: 0 }
       ]
     },
     {
@@ -163,6 +171,10 @@ const StoryExplorer = (() => {
             { word: 'fortress', wordEs: 'fortaleza', def: 'A strong building used for defense.', defEs: 'Un edificio fuerte usado para defensa.' }
           ]
         }
+      ],
+      quiz: [
+        { q: 'Where did Leo find the old map?', qEs: '¿Dónde encontró Leo el mapa viejo?', options: ['The Atacama desert', 'The ocean', 'A city library', 'A glacier'], optionsEs: ['El desierto de Atacama', 'El océano', 'Una biblioteca', 'Un glaciar'], answer: 0 },
+        { q: 'What did he discover at the top of the trail?', qEs: '¿Qué descubrió en la cima del sendero?', options: ['An ancient stone fortress', 'A red tent', 'A coral reef', 'A rocket'], optionsEs: ['Una antigua fortaleza de piedra', 'Una carpa roja', 'Un arrecife de coral', 'Un cohete'], answer: 0 }
       ]
     },
     {
@@ -234,7 +246,8 @@ const StoryExplorer = (() => {
         }
       ],
       quiz: [
-        { q: 'What kind of animal is Rayo?', qEs: '¿Qué tipo de animal es Rayo?', options: ['A cow', 'A horse', 'A dog', 'A sheep'], optionsEs: ['Una vaca', 'Un caballo', 'Un perro', 'Una oveja'], answer: 1 }
+        { q: 'What kind of animal is Rayo?', qEs: '¿Qué tipo de animal es Rayo?', options: ['A cow', 'A horse', 'A dog', 'A sheep'], optionsEs: ['Una vaca', 'Un caballo', 'Un perro', 'Una oveja'], answer: 1 },
+        { q: 'Where does Rayo live?', qEs: '¿Dónde vive Rayo?', options: ['The central valley of Chile', 'The Atacama Desert', 'Patagonia', 'An island'], optionsEs: ['El valle central de Chile', 'El desierto de Atacama', 'La Patagonia', 'Una isla'], answer: 0 }
       ]
     },
     {
@@ -717,6 +730,7 @@ const StoryExplorer = (() => {
   // ── State ──
   let currentStory = null;
   let currentPage = 0;
+  let quizIdx = 0;
   let lang = 'en';
   let vocabCollected = [];
   let currentTier = 'cadet';
@@ -915,35 +929,52 @@ const StoryExplorer = (() => {
   }
 
   function _startQuiz() {
+    quizIdx = 0;
+    _renderQuizQuestion();
+  }
+
+  function _renderQuizQuestion() {
     // Some stories ship without a quiz block — finish straight to the
     // results screen instead of crashing on `quiz[0]` (#diag).
     if (!currentStory || !Array.isArray(currentStory.quiz) || !currentStory.quiz.length) {
       _showResults(2);
       return;
     }
+    const q = currentStory.quiz[quizIdx];
+    if (!q) {
+      _showResults(3);
+      return;
+    }
     const wrap = document.getElementById('quiz-wrap');
-    const q = currentStory.quiz[0]; // Simple: one question for now or loop through all
-
+    const total = currentStory.quiz.length;
     wrap.innerHTML = `
+      <div class="quiz-counter">${quizIdx + 1} / ${total}</div>
       <div class="quiz-q">${lang === 'es' ? q.qEs : q.q}</div>
       <div class="quiz-options">
         ${(lang === 'es' ? q.optionsEs : q.options).map((opt, i) => `
-          <button class="quiz-opt" onclick="StoryExplorer.answerQuiz(${i}, ${q.answer})">${opt}</button>
+          <button class="quiz-opt" onclick="StoryExplorer.answerQuiz(${i})">${opt}</button>
         `).join('')}
       </div>
     `;
     _showScreen('quiz');
   }
 
-  function answerQuiz(selected, correct) {
-    if (selected === correct) {
+  function answerQuiz(selected) {
+    const q = currentStory && currentStory.quiz && currentStory.quiz[quizIdx];
+    if (!q) return;
+    document.querySelectorAll('.quiz-opt').forEach(b => { b.disabled = true; });
+    if (selected === q.answer) {
       _showFeedback('⭐');
       if (typeof playSound === 'function') playSound('correct');
-      _showResults(3);
+      quizIdx++;
+      setTimeout(() => {
+        if (!currentStory || quizIdx >= currentStory.quiz.length) _showResults(3);
+        else _renderQuizQuestion();
+      }, 700);
     } else {
       _showFeedback('❌');
       if (typeof playSound === 'function') playSound('wrong');
-      setTimeout(_startQuiz, 1000);
+      setTimeout(_renderQuizQuestion, 1000);
     }
   }
 
