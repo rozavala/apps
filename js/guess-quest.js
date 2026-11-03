@@ -154,7 +154,14 @@ const GuessQuest = (() => {
     { id: 'umbrella', emoji: '☂️', category: 'object', name: { en: 'Umbrella', es: 'Paraguas' }, attrs: { isObject: true, isReal: true, foundInHouse: true } },
     { id: 'lantern', emoji: '🏮', category: 'object', name: { en: 'Lantern', es: 'Farol' }, attrs: { isObject: true, isReal: true, isRed: true, foundInHouse: true } },
     { id: 'drum', emoji: '🥁', category: 'object', name: { en: 'Drum', es: 'Tambor' }, attrs: { isObject: true, isReal: true, makesSounds: true, isRound: true, foundInHouse: true } },
-    { id: 'key', emoji: '🔑', category: 'object', name: { en: 'Key', es: 'Llave' }, attrs: { isObject: true, isReal: true, isSmall: true, isYellow: true, foundInHouse: true } }
+    { id: 'key', emoji: '🔑', category: 'object', name: { en: 'Key', es: 'Llave' }, attrs: { isObject: true, isReal: true, isSmall: true, isYellow: true, foundInHouse: true } },
+    // True flags only. An omitted flag answers "maybe" and does not filter,
+    // which matches the rest of this list. An explicit false would wipe out
+    // every older item that simply left that flag off.
+    { id: 'llama', emoji: '🦙', category: 'animal', name: { en: 'Llama', es: 'Llama' }, attrs: { isAlive: true, isReal: true, isAnimal: true, isMammal: true, hasFur: true, livesOnLand: true, hasTail: true, hasLegs: true, makesSounds: true, foundInChile: true } },
+    { id: 'araucaria', emoji: '🌲', category: 'plant', name: { en: 'Araucaria', es: 'Araucaria' }, attrs: { isAlive: true, isReal: true, isPlant: true, isBig: true, isGreen: true, hasLeaves: true, foundInChile: true } },
+    { id: 'glacier', emoji: '🧊', category: 'place', name: { en: 'Glacier', es: 'Glaciar' }, attrs: { isPlace: true, isReal: true, isBig: true, isWhite: true, isDangerous: true, foundInChile: true } },
+    { id: 'violin', emoji: '🎻', category: 'object', name: { en: 'Violin', es: 'Violín' }, attrs: { isObject: true, isReal: true, makesSounds: true, foundInHouse: true } }
   ];
 
   // (Adding more items to reach ~200+ would go here, but starting with these core sets)
@@ -234,6 +241,7 @@ const GuessQuest = (() => {
     { id: 'all',       emoji: '🌟', name: { en: 'Everything', es: 'Todo' } },
     { id: 'animal',    emoji: '🐾', name: { en: 'Animals', es: 'Animales' } },
     { id: 'food',      emoji: '🍕', name: { en: 'Food', es: 'Comida' } },
+    { id: 'plant',     emoji: '🌿', name: { en: 'Plants', es: 'Plantas' } },
     { id: 'vehicle',   emoji: '🚗', name: { en: 'Vehicles', es: 'Vehículos' } },
     { id: 'character', emoji: '🦸', name: { en: 'Characters', es: 'Personajes' } },
     { id: 'place',     emoji: '🏔️', name: { en: 'Places', es: 'Lugares' } },
