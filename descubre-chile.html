@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/descubre-chile.css">
+  <link rel="stylesheet" href="css/descubre-chile.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -21,77 +21,81 @@
 <body>
 <div class="atmo atmo-1"></div><div class="atmo atmo-2"></div>
 <div class="app">
-  <div class="app-header"><span class="flag">🇨🇱</span><h1>Descubre Chile</h1><p>¡Aprende jugando sobre un país increíble!</p><div class="greeting" id="greeting"></div></div>
+  <div class="app-header">
+    <span class="flag" aria-hidden="true"><svg viewBox="0 0 90 60" width="72" height="48"><defs><linearGradient id="dcFlagShade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".12"/><stop offset=".3" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#000" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient><clipPath id="dcFlagClip"><path d="M4 6q20-6 41 0t41 0v48q-20 6-41 0t-41 0z"/></clipPath></defs><g clip-path="url(#dcFlagClip)"><rect width="90" height="60" fill="#fff"/><rect y="30" width="90" height="30" fill="#d52b1e"/><rect width="34" height="30" fill="#0039a6"/><path d="M17 7.5l2.6 8 8.4.1-6.8 5 2.6 8-6.8-4.9-6.8 4.9 2.6-8-6.8-5 8.4-.1z" fill="#fff"/><rect width="90" height="60" fill="url(#dcFlagShade)"/></g><path d="M4 6q20-6 41 0t41 0v48q-20 6-41 0t-41 0z" fill="none" stroke="#000" stroke-opacity=".12"/></svg></span>
+    <h1>Descubre Chile</h1><p>¡Aprende jugando sobre un país increíble!</p><div class="greeting" id="greeting"></div></div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   <div class="progress-label" id="progressLabel">Chile explorado: 0%</div>
-  <div class="tab-bar" id="tabBar">
-    <button class="tab-btn active" data-tab="mapa">🗺️ Mapa</button>
-    <button class="tab-btn" data-tab="historia">📖 Historia</button>
-    <button class="tab-btn" data-tab="juegos">🎮 Juegos</button>
-    <button class="tab-btn" data-tab="quiz">⭐ Quiz</button>
-    <button class="tab-btn" data-tab="mapa-drag">📍 Ubica</button>
+  <div class="tab-bar" id="tabBar" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="mapa" role="tab" aria-selected="true">🗺️ Mapa</button>
+    <button type="button" class="tab-btn" data-tab="historia" role="tab" aria-selected="false">📖 Historia</button>
+    <button type="button" class="tab-btn" data-tab="juegos" role="tab" aria-selected="false">🎮 Juegos</button>
+    <button type="button" class="tab-btn" data-tab="quiz" role="tab" aria-selected="false">⭐ Quiz</button>
+    <button type="button" class="tab-btn" data-tab="mapa-drag" role="tab" aria-selected="false">📍 Ubica</button>
   </div>
   <!-- MAPA -->
   <div class="tab-content active" id="tab-mapa">
-    <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;font-weight:600;margin-bottom:12px">¡Toca una región para explorarla!</p>
-    <div class="map-wrap">
-      <svg viewBox="0 0 200 600" class="map-svg">
-        <path class="map-region" id="reg-norte" d="M70,10 L130,10 L135,50 L140,100 L130,140 L110,150 L90,145 L75,130 L65,90 L60,50 Z" fill="#E87040" onclick="openRegion('norte')"/>
-        <text class="region-label" x="100" y="80">Norte</text>
-        <path class="map-region" id="reg-centro" d="M90,145 L110,150 L130,140 L125,200 L120,250 L105,260 L85,255 L80,220 L78,180 Z" fill="#D93636" onclick="openRegion('centro')"/>
-        <text class="region-label" x="102" y="200">Centro</text>
-        <path class="map-region" id="reg-sur" d="M85,255 L105,260 L120,250 L115,330 L108,370 L95,380 L80,365 L75,320 L78,280 Z" fill="#2CB5A0" onclick="openRegion('sur')"/>
-        <text class="region-label" x="97" y="315">Sur</text>
-        <path class="map-region" id="reg-patagonia" d="M80,365 L95,380 L108,370 L105,440 L100,500 L95,540 L85,555 L78,530 L72,480 L70,430 L75,390 Z" fill="#0039A6" onclick="openRegion('patagonia')"/>
-        <text class="region-label" x="90" y="465">Patagonia</text>
-        <ellipse class="map-region" id="reg-pascua" cx="170" cy="280" rx="22" ry="18" fill="#E8A838" onclick="openRegion('pascua')"/>
-        <text class="region-label" x="170" y="283" style="font-size:6px">Rapa Nui</text>
-        <path d="M130,10 L140,100 L130,140 L125,200 L120,250 L115,330 L108,370 L105,440 L100,500 L95,540" fill="none" stroke="rgba(232,168,56,0.4)" stroke-width="3" stroke-dasharray="6,4"/>
-        <text x="148" y="200" style="font-size:6px;fill:var(--andes-gold);font-weight:700" transform="rotate(10,148,200)">Los Andes</text>
-      </svg>
+    <div class="dc-modes" id="dcModes" role="group" aria-label="Modo del mapa">
+      <button type="button" class="dc-mode active" data-mode="explore" aria-pressed="true"><b>Explorar</b><span>16 regiones</span></button>
+      <button type="button" class="dc-mode dc-mode-z" data-mode="zones" aria-pressed="false"><b>Zonas</b><span>norte · centro · sur</span></button>
+      <button type="button" class="dc-mode" data-mode="find" aria-pressed="false"><b>Encuentra la región</b><span>juego</span></button>
     </div>
-    <div class="map-legend">
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#E87040"></div>Norte</div>
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#D93636"></div>Centro</div>
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#2CB5A0"></div>Sur</div>
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#0039A6"></div>Patagonia</div>
-      <div class="map-legend-item"><div class="map-legend-dot" style="background:#E8A838"></div>Rapa Nui</div>
+    <div class="dc-map-layout">
+      <div class="dc-map-col">
+        <div class="dc-banner-bar" id="dcBanner" hidden aria-live="polite"></div>
+        <div id="dcMap"></div>
+        <div class="dc-jump" id="dcJump" role="group" aria-label="Ir a una zona del mapa">
+          <span>Ir a:</span>
+          <button type="button" data-lat="-21.5">Norte Grande</button>
+          <button type="button" data-lat="-29.5">Norte Chico</button>
+          <button type="button" data-lat="-34">Centro</button>
+          <button type="button" data-lat="-39.5">Sur</button>
+          <button type="button" data-lat="-50">Patagonia</button>
+        </div>
+      </div>
+      <aside class="dc-panel" id="dcPanel" aria-live="polite"></aside>
     </div>
   </div>
   <!-- HISTORIA -->
   <div class="tab-content" id="tab-historia"><div class="topic-select" id="historyTopics"></div><div class="story-list" id="storyList"></div></div>
   <!-- JUEGOS -->
   <div class="tab-content" id="tab-juegos">
-    <p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px">🃏 Memoria de Pioneros</p>
-    <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;font-weight:600;margin-bottom:12px">Encuentra las parejas: personaje ↔ logro</p>
-    <div class="memory-stats">Movimientos: <span id="memMoves">0</span> &nbsp;|&nbsp; Parejas: <span id="memPairs">0</span>/<span id="memTotal">0</span></div>
-    <div class="memory-grid" id="memoryGrid"></div>
-    <div class="memory-msg" id="memoryMsg"></div>
-    <div style="text-align:center;margin-top:12px"><button class="btn-red" onclick="initMemory()">🔄 Jugar de nuevo</button></div>
+    <div class="dc-seg" id="gameModes" role="group" aria-label="Elige un juego">
+      <button type="button" class="active" data-game="memory" aria-pressed="true">🃏 Memoria de Pioneros</button>
+      <button type="button" data-game="order" aria-pressed="false">⏳ Ordena la historia</button>
+    </div>
+    <div id="game-memory" class="game-pane">
+      <p class="game-sub">Encuentra las parejas: personaje ↔ logro</p>
+      <div class="memory-stats"><span class="ms">Movimientos <b id="memMoves">0</b></span><span class="ms">Parejas <b><span id="memPairs">0</span>/<span id="memTotal">0</span></b></span><span class="ms">Récord <b id="memBest">—</b></span></div>
+      <div class="memory-grid" id="memoryGrid"></div>
+      <div class="memory-msg" id="memoryMsg" aria-live="polite"></div>
+      <div style="text-align:center;margin-top:12px"><button type="button" class="btn-red" onclick="initMemory()">🔄 Jugar de nuevo</button></div>
+    </div>
+    <div id="game-order" class="game-pane" hidden>
+      <p class="game-sub">¿Qué pasó primero? Ordena los hechos de la historia de Chile.</p>
+      <div id="orderArea"></div>
+    </div>
   </div>
   <!-- QUIZ -->
   <div class="tab-content" id="tab-quiz"><div id="quizArea"></div></div>
   <!-- DRAG MAPA -->
   <div class="tab-content" id="tab-mapa-drag">
-    <p style="text-align:center;font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px">📍 Ubica la Región</p>
-    <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;font-weight:600;margin-bottom:12px">Arrastra los nombres al lugar correcto</p>
-    <div class="drag-stats">Tiempo: <span id="dragTime">60</span>s &nbsp;|&nbsp; Zonas: <span id="dragScore">0</span>/5</div>
+    <h2 class="game-title">📍 Ubica en el mapa</h2>
+    <div class="dc-seg" id="dragModes" role="group" aria-label="Qué ubicar">
+      <button type="button" class="active" data-dmode="zonas" aria-pressed="true">5 zonas</button>
+      <button type="button" data-dmode="regiones" aria-pressed="false">16 regiones</button>
+    </div>
+    <p class="game-sub" id="dragHint">Arrastra cada zona a su lugar (o tócala y luego toca el mapa).</p>
+    <div class="drag-stats">Tiempo: <span id="dragTime">60</span>s &nbsp;|&nbsp; Ubicadas: <span id="dragScore">0</span>/<span id="dragTotal">5</span></div>
     <div class="map-drag-wrap">
-      <svg viewBox="0 0 200 600" class="map-svg" id="dragMapSvg">
-        <path class="drop-zone" id="dz-norte" data-id="norte" d="M70,10 L130,10 L135,50 L140,100 L130,140 L110,150 L90,145 L75,130 L65,90 L60,50 Z"/>
-        <path class="drop-zone" id="dz-centro" data-id="centro" d="M90,145 L110,150 L130,140 L125,200 L120,250 L105,260 L85,255 L80,220 L78,180 Z"/>
-        <path class="drop-zone" id="dz-sur" data-id="sur" d="M85,255 L105,260 L120,250 L115,330 L108,370 L95,380 L80,365 L75,320 L78,280 Z"/>
-        <path class="drop-zone" id="dz-patagonia" data-id="patagonia" d="M80,365 L95,380 L108,370 L105,440 L100,500 L95,540 L85,555 L78,530 L72,480 L70,430 L75,390 Z"/>
-        <ellipse class="drop-zone" id="dz-pascua" data-id="pascua" cx="170" cy="280" rx="22" ry="18"/>
-      </svg>
+      <div id="dcDragMap"></div>
       <div class="drag-tokens-container" id="dragTokens"></div>
     </div>
-    <div style="text-align:center;margin-top:12px"><button class="btn-red" id="dragStartBtn" onclick="initDragQuiz()">▶️ Comenzar Reto</button></div>
+    <div style="text-align:center;margin-top:12px"><button type="button" class="btn-red" id="dragStartBtn" onclick="initDragQuiz()">▶️ Comenzar Reto</button></div>
   </div>
 </div>
-<div class="region-modal" id="regionModal" onclick="if(event.target===this)closeRegion()"><div class="region-card"><button class="close-modal" aria-label="Close" onclick="closeRegion()">✕</button><h2 id="rmTitle"></h2><div class="region-sub" id="rmSub"></div><div id="rmFacts"></div><div style="text-align:center;margin-top:16px"><button class="btn-red" onclick="closeRegion()">¡Entendido! ✓</button></div></div></div>
 <div class="feedback-float" id="feedback"><span id="feedbackEmoji"></span></div>
-<script src="js/auth.js?v=3"></script>
+<script src="js/auth.js?v=4"></script>
 <script src="js/off-hours.js?v=1"></script>
 <script src="js/a11y.js"></script>
 <script src="js/dialog.js?v=2"></script>
@@ -102,7 +106,9 @@
 <script src="js/timer.js?v=3"></script>
 <script src="js/activity-log.js"></script>
 <script src="js/learning-checks.js?v=4"></script>
-<script src="js/descubre-chile.js?v=2"></script>
+<script src="js/descubre-chile-data.js?v=1"></script>
+<script src="js/descubre-chile-art.js?v=1"></script>
+<script src="js/descubre-chile.js?v=3"></script>
   <script src="js/pwa.js"></script>
 
 </body>

@@ -1,7 +1,7 @@
 /* ================================================================
-   CHESS QUEST — extras: Puzzle Rush + Openings Primer
-   Lives alongside chess-quest.js. Reuses the existing renderBoard,
-   PUZZLES array, and related globals that module exposes.
+   CHESS QUEST — extras: Puzzle Rush + Openings Primer + Trainer
+   Lives alongside chess-quest.js. Reuses its renderBoard, PUZZLES,
+   CQPuzzle and CQE (engine) globals.
 
    Storage: augments zs_chess_<userkey> with
      data.rushBest = { score, playedAt }
@@ -104,18 +104,20 @@
           '<div class="rush-chip rush-strikes" id="rush-strikes">❤️❤️❤️</div>' +
         '</div>' +
         '<div class="board-wrap"><div class="board" id="rushBoard"></div></div>' +
-        '<div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>' +
-        '<div class="rush-hint" id="rush-hint"></div>' +
+        '<div class="rush-hint" id="rush-hint" aria-live="polite"></div>' +
         '<div class="rush-feedback" id="rush-feedback"></div>';
     }
 
     function _loadCurrent() {
-      if (!state || typeof newBoard !== 'function' || typeof renderBoard !== 'function') return;
+      if (!state || typeof CQPuzzle === 'undefined' || typeof renderBoard !== 'function') return;
       var pz = state.pool[state.idx % state.pool.length];
-      state.board = Array(8).fill(null).map(function() { return Array(8).fill(null); });
-      pz.board(state.board);
+      state.pos = CQPuzzle.setup(pz);
+      state.board = posToBoard(state.pos);
       state.selected = null;
       state.solved = false;
+      state.last = null;
+      var bEl = document.getElementById('rushBoard');
+      if (bEl) bEl._cqPrev = null;
 
       var hintEl = document.getElementById('rush-hint');
       if (hintEl) hintEl.textContent = pz.hint || 'Encuentra la mejor jugada';
@@ -128,37 +130,34 @@
       if (!el) return;
       var sel = state.selected;
       var dots = [], caps = [];
-      if (sel && typeof getMoves === 'function') {
-        var moves = getMoves(state.board, sel[0], sel[1]);
-        moves.forEach(function(m) {
-          var target = state.board[m.tr][m.tc];
-          (target ? caps : dots).push([m.tr, m.tc]);
+      if (sel) {
+        movesFromPos(state.pos, sel[0] * 8 + sel[1], true).forEach(function(m) {
+          (m.type === 'capture' ? caps : dots).push([m.tr, m.tc]);
         });
       }
-      renderBoard(el, state.board, {
+      renderBoard(el, posToBoard(state.pos), {
         selected: sel,
         moveDots: dots,
         captureDots: caps,
+        lastMove: lastMoveObj(state.last),
+        checkSquare: checkSquareOf(state.pos),
         onClick: _onSquareClick
       });
     }
 
     function _onSquareClick(r, c) {
       if (!state || state.solved) return;
-      var sq = state.board[r][c];
+      var sq = posToBoard(state.pos)[r][c];
       var pz = state.pool[state.idx % state.pool.length];
 
       if (state.selected) {
         var fr = state.selected[0], fc = state.selected[1];
-        // Only allow moving the piece at fr,fc
-        var piece = state.board[fr][fc];
-        if (!piece) { state.selected = null; _renderBoard(); return; }
-
-        var moves = typeof getMoves === 'function' ? getMoves(state.board, fr, fc) : [];
-        var legal = moves.some(function(m) { return m.tr === r && m.tc === c; });
-        if (!legal) {
+        var moves = movesFromPos(state.pos, fr * 8 + fc, true);
+        var mv = null;
+        moves.forEach(function(m) { if (m.tr === r && m.tc === c) mv = m; });
+        if (!mv) {
           // Re-select if tapping another of our pieces
-          if (sq && sq.color === piece.color) {
+          if (sq && sq.color === 'w') {
             state.selected = [r, c];
             _renderBoard();
           } else {
@@ -168,10 +167,12 @@
           return;
         }
 
-        // Evaluate: did we play the puzzle's solution?
-        var correct = pz.solution &&
-          pz.solution.fr === fr && pz.solution.fc === fc &&
-          pz.solution.tr === r && pz.solution.tc === c;
+        // Evaluate: is this the puzzle's solution (or an equally good move)?
+        var correct = CQPuzzle.firstMoveOK(pz, state.pos, mv.m);
+        CQE.make(state.pos, mv.m);
+        state.last = mv.m;
+        state.selected = null;
+        _renderBoard();
 
         if (correct) {
           state.score++;
@@ -191,7 +192,7 @@
           if (state.strikes >= MAX_STRIKES) { _finish('strikes'); return; }
           state.idx++;
           _loadCurrent();
-        }, 650);
+        }, 900);
       } else if (sq && sq.color === 'w') {
         state.selected = [r, c];
         _renderBoard();
@@ -405,7 +406,7 @@
       var progress = data.openings || {};
       var cards = OPENINGS.map(function(o, i) {
         var done = progress[o.id] && progress[o.id].viewed ? '✅' : '';
-        return '<button class="op-card" onclick="ChessExtras.Openings._start(' + i + ')">' +
+        return '<button type="button" class="op-card" onclick="ChessExtras.Openings._start(' + i + ')">' +
           '<span class="op-emoji">' + o.emoji + '</span>' +
           '<div class="op-name">' + _esc(o.name) + ' ' + done + '</div>' +
           '<div class="op-era">' + _esc(o.era) + '</div>' +
@@ -413,11 +414,11 @@
       }).join('');
 
       wrap.innerHTML =
-        '<div class="learn-header">' +
-          '<button class="back-btn" aria-label="Back" onclick="goMenu()">←</button>' +
-          '<div class="learn-title">Openings Primer</div>' +
+        '<div class="cq-head">' +
+          '<button type="button" class="back-btn" aria-label="Back" onclick="goMenu()">←</button>' +
+          '<h2>Openings Primer</h2>' +
         '</div>' +
-        '<p style="text-align:center;color:var(--text-muted);font-weight:700;font-size:0.85rem;margin:8px 0 14px;">Seis aperturas clásicas. Pulsa una para conocer las primeras jugadas.</p>' +
+        '<p style="text-align:center;color:var(--cq-muted);font-weight:700;font-size:0.85rem;margin:0 0 14px;">' + OPENINGS.length + ' aperturas clásicas. Pulsa una para ver las primeras jugadas en el tablero.</p>' +
         '<div class="op-grid">' + cards + '</div>';
     }
 
@@ -434,23 +435,50 @@
       var total = o.moves.length;
       var m = o.moves[state.move];
 
+      var fresh = !document.getElementById('openingBoard');
       wrap.innerHTML =
-        '<div class="learn-header">' +
-          '<button class="back-btn" aria-label="Back" onclick="ChessExtras.Openings._back()">←</button>' +
-          '<div class="learn-title">' + o.emoji + ' ' + _esc(o.name) + '</div>' +
+        '<div class="cq-head">' +
+          '<button type="button" class="back-btn" aria-label="Back" onclick="ChessExtras.Openings._back()">←</button>' +
+          '<h2>' + o.emoji + ' ' + _esc(o.name) + '</h2>' +
         '</div>' +
-        '<div class="op-card-view">' +
-          '<div class="op-idea">💡 ' + _esc(o.idea) + '</div>' +
-          '<div class="op-step-badge">' + (state.move + 1) + ' / ' + total + '</div>' +
-          '<div class="op-move">' + _esc(m.san) + '</div>' +
-          '<div class="op-note">' + _esc(m.note) + '</div>' +
-          '<div class="op-nav">' +
-            (state.move > 0 ? '<button class="btn-outline" onclick="ChessExtras.Openings._prev()">← Anterior</button>' : '<span></span>') +
-            (state.move < total - 1
-              ? '<button class="btn-gold" onclick="ChessExtras.Openings._next()">Siguiente →</button>'
-              : '<button class="btn-gold" onclick="ChessExtras.Openings._finish()">Terminar ✓</button>') +
+        '<div class="split">' +
+          '<div><div class="board-wrap"><div class="board" id="openingBoard"></div></div></div>' +
+          '<div class="side op-card-view">' +
+            '<div class="op-idea">💡 ' + _esc(o.idea) + '</div>' +
+            '<div class="op-step"><span class="op-step-badge">' + (state.move + 1) + ' / ' + total + '</span><span class="op-move">' + _esc(m.san) + '</span></div>' +
+            '<div class="op-note">' + _esc(m.note) + '</div>' +
+            '<div class="op-nav">' +
+              (state.move > 0 ? '<button type="button" class="btn btn-outline" onclick="ChessExtras.Openings._prev()">← Anterior</button>' : '<span></span>') +
+              (state.move < total - 1
+                ? '<button type="button" class="btn btn-gold" onclick="ChessExtras.Openings._next()">Siguiente →</button>'
+                : '<button type="button" class="btn btn-gold" onclick="ChessExtras.Openings._finish()">Terminar ✓</button>') +
+            '</div>' +
           '</div>' +
         '</div>';
+      _renderOpeningBoard(o, fresh);
+    }
+
+    // Play the opening's moves up to the current step on a real board.
+    var _boardMemo = null;
+    function _renderOpeningBoard(o, fresh) {
+      var el = document.getElementById('openingBoard');
+      if (!el || typeof CQE === 'undefined') return;
+      var pos = CQE.fromFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+      var last = 0;
+      for (var i = 0; i <= state.move; i++) {
+        var mv = CQE.parseSan(pos, o.moves[i].san);
+        if (!mv) break;
+        CQE.make(pos, mv);
+        last = mv;
+      }
+      // keep the previous position so the newest move animates
+      if (_boardMemo && !fresh) { el._cqPrev = _boardMemo.prev; el._cqPrevFlip = false; }
+      var f = last & 63, t = (last >> 6) & 63;
+      renderBoard(el, posToBoard(pos), {
+        lastMove: lastMoveObj(last),
+        arrows: last ? [{ from: [f >> 3, f & 7], to: [t >> 3, t & 7], color: 'rgba(180,83,9,0.75)' }] : null
+      });
+      _boardMemo = { prev: el._cqPrev };
     }
 
     function _next() { if (state) { state.move++; _renderCard(); } }
@@ -491,11 +519,10 @@
       if (opWrap) opWrap.innerHTML = '';
       var wrap = document.getElementById('trainer-wrap');
       if (!wrap) return;
-      wrap.innerHTML = '<div class="learn-header"><button class="back-btn" onclick="ChessExtras.Trainer._back()">←</button><div class="learn-title">Movement Trainer</div></div>' +
-        '<div class="puzzle-top"><div class="puzzle-badge" id="trainerLabel">Level 1</div><div style="color:var(--gold);font-family:var(--font-display);font-weight:700" id="trainerScore">Moves: 0</div></div>' +
+      wrap.innerHTML = '<div class="cq-head"><button type="button" class="back-btn" aria-label="Back" onclick="ChessExtras.Trainer._back()">←</button><h2>Movement Trainer</h2></div>' +
+        '<div class="cq-bar"><span class="pill" id="trainerLabel" style="font-size:0.9rem;padding:6px 14px">Level 1</span><span class="pill" style="--pill:#b45309;font-size:0.9rem;padding:6px 14px" id="trainerScore">Moves: 0</span></div>' +
         '<div class="board-wrap"><div class="board" id="trainerBoard"></div></div>' +
-        '<div class="board-labels"><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span></div>' +
-        '<div class="puzzle-hint" style="margin-top:10px;text-align:center;">Move the piece to the target square!</div>';
+        '<div class="demo-cap try">Move the piece to the glowing blue target square!</div>';
       if (typeof window.showScreen === 'function') window.showScreen('trainer');
       _render();
     }
@@ -511,6 +538,7 @@
           moveDots: moveDots,
           hintSquares: [[state.tr, state.tc]],
           onClick: function(r, c) {
+            if (state.busy) return;
             if (moves.some(function(m) { return m.tr === r && m.tc === c; })) {
               state.r = r;
               state.c = c;
@@ -519,7 +547,20 @@
               if (scoreEl) scoreEl.textContent = 'Moves: ' + state.moves;
               if (typeof window.SFX !== 'undefined' && window.SFX.click) window.SFX.click();
 
-              if (r === state.tr && c === state.tc) {
+              if (r === state.tr && c === state.tc && !state.busy) {
+                state.busy = true;
+                _render();      // show the piece arriving first
+                setTimeout(function() { if (state) { state.busy = false; _nextLevel(); } }, 700);
+                return;
+              }
+              _render();
+            }
+          }
+        });
+      }
+    }
+    function _nextLevel() {
+              {
                 if (typeof window.showFeedback === 'function') window.showFeedback('✨');
                 if (typeof window.SFX !== 'undefined' && window.SFX.correct) window.SFX.correct();
                 state.level++;
@@ -543,11 +584,9 @@
                   _save(d);
                 }
               }
+              var bEl = document.getElementById('trainerBoard');
+              if (bEl) bEl._cqPrev = null;
               _render();
-            }
-          }
-        });
-      }
     }
     function _back() {
       if (typeof ActivityLog !== 'undefined' && ActivityLog.log && state && state.level > 1) {

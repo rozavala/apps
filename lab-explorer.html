@@ -2,23 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lab Explorer 🔬</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/lab-explorer.css">
+  <link rel="stylesheet" href="css/lab-explorer.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#7C3AED">
+  <meta name="theme-color" content="#059669">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
   <link rel="apple-touch-icon" href="icons/icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 </head>
-<body>
+<body class="lx-page">
   <div class="atmo" style="width:400px;height:400px;background:rgba(16,185,129,0.08);top:-100px;left:-100px;"></div>
   <div class="atmo" style="width:350px;height:350px;background:rgba(59,130,246,0.06);bottom:-80px;right:-80px;animation-delay:-8s;"></div>
 
@@ -26,34 +26,49 @@
     <!-- TOPIC SELECT -->
     <div class="screen active" id="screen-select">
       <div class="lab-header">
-        <span class="icon">🔬</span>
+        <div class="lx-hero" id="lx-hero" aria-hidden="true"></div>
         <h1>Lab Explorer</h1>
-        <p>Pick a lab and start experimenting!</p>
+        <p>Laboratorio de ciencias · Real experiments you can try with your hands</p>
         <div class="greeting" id="greeting"></div>
+        <div class="lx-summary" id="lx-summary"></div>
       </div>
       <div class="lab-grid" id="lab-grid">
-        <!-- Populated by JS: one card per lab topic -->
+        <!-- Populated by JS: one illustrated card per lab -->
       </div>
     </div>
 
     <!-- EXPERIMENT SCREEN -->
     <div class="screen" id="screen-experiment">
       <div class="exp-header">
-        <button class="back-btn" aria-label="Go back" onclick="LabExplorer.backToTopics()">←</button>
-        <div class="exp-title" id="exp-title"></div>
-        <div class="exp-stars" id="exp-stars">⭐ 0</div>
+        <button type="button" class="back-btn" aria-label="Back to all labs" onclick="LabExplorer.backToTopics()">←</button>
+        <div class="exp-title-wrap">
+          <span class="exp-title-ic" id="exp-title-ic" aria-hidden="true"></span>
+          <div>
+            <div class="exp-title" id="exp-title"></div>
+            <div class="exp-sub" id="exp-sub"></div>
+          </div>
+        </div>
+        <div class="exp-stars" id="exp-stars">★ 0</div>
       </div>
-      <div class="exp-canvas-wrap">
-        <canvas id="exp-canvas" width="600" height="400"></canvas>
-      </div>
-      <div class="exp-controls" id="exp-controls">
-        <!-- Dynamic controls per experiment -->
-      </div>
-      <div class="exp-journal" id="exp-journal">
-        <!-- Discovery journal entries -->
-      </div>
-      <div class="exp-actions">
-        <button class="action-btn btn-primary" id="next-btn" onclick="LabExplorer.nextExperiment()" style="display:none;">Next Experiment 🧪</button>
+      <div class="exp-layout">
+        <div class="exp-stage">
+          <div class="exp-canvas-wrap" id="exp-canvas-wrap">
+            <canvas id="exp-canvas" width="600" height="420" aria-label="Experiment"></canvas>
+            <div class="exp-toast" id="exp-toast" role="status" aria-live="polite"></div>
+          </div>
+          <div class="exp-controls" id="exp-controls">
+            <!-- Dynamic controls per experiment -->
+          </div>
+        </div>
+        <div class="exp-side">
+          <div class="exp-challenge" id="exp-challenge"></div>
+          <div class="exp-journal" id="exp-journal">
+            <!-- Discovery journal entries -->
+          </div>
+          <div class="exp-actions">
+            <button type="button" class="action-btn btn-primary" id="next-btn" onclick="LabExplorer.nextExperiment()" style="display:none;">Lab report 📋</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -65,7 +80,7 @@
 
   <div class="feedback" id="feedback"><span class="feedback-emoji" id="feedbackEmoji"></span></div>
 
-  <script src="js/auth.js?v=3"></script>
+  <script src="js/auth.js?v=4"></script>
   <script src="js/off-hours.js?v=1"></script>
 
   <script src="js/a11y.js"></script>
@@ -77,7 +92,11 @@
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js?v=4"></script>
   <script src="js/dialog.js?v=2"></script>
-  <script src="js/lab-explorer.js?v=2"></script>
+  <script src="js/lab-explorer-art.js?v=1"></script>
+  <script src="js/lab-explorer-data.js?v=1"></script>
+  <script src="js/lab-explorer-labs1.js?v=1"></script>
+  <script src="js/lab-explorer-labs2.js?v=1"></script>
+  <script src="js/lab-explorer.js?v=3"></script>
   <script src="js/pwa.js"></script>
 
 </body>
