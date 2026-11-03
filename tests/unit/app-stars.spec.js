@@ -39,7 +39,13 @@ const CASES = [
     data: { 'w1-1': { stars: 3 }, 'w1-2': { stars: 2 } }, stars: 5 },
   { id: 'vocab', prefix: 'zs_vocab_',
     data: { seenRoots: ['aqua', 'bio', 'geo'], matchStars: 3, dictationStars: 2, builds: [0, 1] },
-    stars: 7, note: 'browsing roots does not score' }
+    stars: 7, note: 'browsing roots does not score' },
+
+  // Learn-by-doing apps
+  { id: 'circuit', prefix: 'zs_circuit_',
+    data: { v: 1, levels: { loop: { stars: 3, date: '2026-11-03' }, switch: { stars: 2, date: '2026-11-03' },
+            motor: { stars: 1, date: '2026-11-04' } }, facts: ['safety', 'volta', 'bulb'], electrons: false },
+    stars: 6, note: 'fact cards read do not score' }
 ];
 
 test.describe('per-app star rules', () => {

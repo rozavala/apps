@@ -74,6 +74,13 @@ var CircuitLabArt = (function() {
     for (var i = 0; i < 3; i++) c[i] = Math.round(f < 0 ? c[i] * (1 + f) : c[i] + (255 - c[i]) * f);
     return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
   }
+  // Rotate text 180° when the part's frame would draw it upside down.
+  function upright(ctx, x, y) {
+    var m = ctx.getTransform ? ctx.getTransform() : null;
+    ctx.save();
+    ctx.translate(x, y);
+    if (m && m.a < -0.01 * Math.abs(m.b) - 1e-6) ctx.rotate(Math.PI);
+  }
   var BRASS = [[0, '#fbe7a6'], [0.35, '#d9a948'], [0.7, '#a8761f'], [1, '#6e4a12']];
   var CHROME = [[0, '#f4f6f8'], [0.3, '#c3c9cf'], [0.55, '#8a9299'], [0.8, '#d7dce0'], [1, '#6c737a']];
 
@@ -197,16 +204,21 @@ var CircuitLabArt = (function() {
       if (rnd() < 0.8) {
         var kx = horiz ? bx + bw * (0.15 + rnd() * 0.7) : bx + bw * (0.3 + rnd() * 0.4);
         var ky = horiz ? by + bh * (0.3 + rnd() * 0.4) : by + bh * (0.15 + rnd() * 0.7);
-        var kr = u * (0.06 + rnd() * 0.05);
-        for (var k = 6; k >= 0; k--) {
-          ctx.strokeStyle = 'rgba(110,62,25,' + (0.06 + 0.05 * (6 - k)) + ')';
-          ctx.lineWidth = 1.2;
+        var kr = u * (0.035 + rnd() * 0.03);
+        // grain flowing around the knot: stretched, irregular, fading out
+        for (var k = 5; k >= 1; k--) {
+          ctx.strokeStyle = 'rgba(120,70,30,' + (0.03 + 0.025 * (5 - k)) + ')';
+          ctx.lineWidth = 0.8 + rnd() * 0.8;
           ctx.beginPath();
-          ctx.ellipse(kx, ky, kr * (1 + k * 0.7) * (horiz ? 1.8 : 1), kr * (1 + k * 0.7) * (horiz ? 1 : 1.8), 0, 0, Math.PI * 2);
+          var ex = kr * (1 + k * 0.9) * (horiz ? 3.2 : 1), ey = kr * (1 + k * 0.6) * (horiz ? 1 : 3.2);
+          for (var a2 = 0; a2 <= 6.3; a2 += 0.3) {
+            var wob = 1 + Math.sin(a2 * 3 + k) * 0.08;
+            ctx.lineTo(kx + Math.cos(a2) * ex * wob, ky + Math.sin(a2) * ey * wob);
+          }
           ctx.stroke();
         }
-        ctx.fillStyle = 'rgba(95,50,18,0.55)';
-        ctx.beginPath(); ctx.ellipse(kx, ky, kr * (horiz ? 1.6 : 0.9), kr * (horiz ? 0.9 : 1.6), 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = rad(ctx, kx, ky, 0, kx, ky, kr * 1.4, [[0, 'rgba(85,42,12,0.6)'], [0.7, 'rgba(110,60,22,0.35)'], [1, 'rgba(120,70,30,0)']]);
+        ctx.beginPath(); ctx.ellipse(kx, ky, kr * (horiz ? 1.7 : 1), kr * (horiz ? 1 : 1.7), 0, 0, Math.PI * 2); ctx.fill();
       }
       // seam between planks
       if (p > 0) {
@@ -428,7 +440,7 @@ var CircuitLabArt = (function() {
   }
 
   function drawAA(ctx, u, st) {
-    var hl = u * 0.36, hw = u * 0.14, lw = Math.max(2.5, u * 0.045);
+    var hl = u * 0.37, hw = u * 0.16, lw = Math.max(2.5, u * 0.045);
     flyLead(ctx, [-u * 0.5, 0, -hl + 2, 0], '#d62828', lw);
     flyLead(ctx, [hl - 2, 0, u * 0.5, 0], '#222831', lw);
     ctx.save();
@@ -453,7 +465,7 @@ var CircuitLabArt = (function() {
     ctx.fillStyle = lin(ctx, 0, -hw, 0, hw, CHROME);
     ctx.fillRect(-hl + u * 0.03, -u * 0.06, u * 0.012, u * 0.12);
     // cell
-    var x0 = -hl + u * 0.06, x1 = hl - u * 0.09, r = u * 0.088;
+    var x0 = -hl + u * 0.06, x1 = hl - u * 0.09, r = u * 0.105;
     var cut = x0 + (x1 - x0) * 0.34;
     ctx.fillStyle = lin(ctx, 0, -r, 0, r, [[0, '#7a4a12'], [0.3, '#f0b25a'], [0.55, '#c27a22'], [1, '#5a3206']]);
     ctx.fillRect(x0 + u * 0.02, -r, cut - x0 - u * 0.02, r * 2);
@@ -464,7 +476,7 @@ var CircuitLabArt = (function() {
       ctx.fillStyle = '#f2f2f2';
       ctx.font = '800 ' + (u * 0.075).toFixed(1) + 'px Nunito, sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('1.5V', (cut + x1) / 2, 0);
+      upright(ctx, (cut + x1) / 2, 0); ctx.fillText('1.5V', 0, 0); ctx.restore();
       ctx.fillStyle = '#3a2004';
       ctx.font = '900 ' + (u * 0.1).toFixed(1) + 'px Nunito, sans-serif';
       ctx.fillText('+', (x0 + cut) / 2 + u * 0.01, 0);
@@ -507,7 +519,7 @@ var CircuitLabArt = (function() {
       ctx.fillStyle = '#fff';
       ctx.font = '900 ' + (u * 0.12).toFixed(1) + 'px "Baloo 2", sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.save(); ctx.translate(bx0 + u * 0.29, 0);
+      upright(ctx, bx0 + u * 0.29, 0);
       ctx.fillText('9V', 0, u * 0.005);
       ctx.restore();
     }
@@ -540,11 +552,11 @@ var CircuitLabArt = (function() {
   function drawBulb(ctx, u, st) {
     var g = (st && st.glow) || 0, burnt = st && st.burnt;
     var lw = Math.max(2, u * 0.028);
-    lead(ctx, -u * 0.5, -u * 0.2, 0, lw);
-    lead(ctx, u * 0.2, u * 0.5, 0, lw);
+    lead(ctx, -u * 0.5, -u * 0.24, 0, lw);
+    lead(ctx, u * 0.24, u * 0.5, 0, lw);
     ctx.save();
     // bakelite base
-    var bw = u * 0.29, bh = u * 0.16;
+    var bw = u * 0.31, bh = u * 0.19;
     shadow(ctx, u * 0.08, u * 0.03, u * 0.06);
     ctx.fillStyle = lin(ctx, 0, -bh, 0, bh, [[0, '#3f3a38'], [0.4, '#24201f'], [1, '#100d0c']]);
     rr(ctx, -bw, -bh, bw * 2, bh * 2, u * 0.07); ctx.fill();
@@ -552,17 +564,17 @@ var CircuitLabArt = (function() {
     ctx.strokeStyle = 'rgba(255,255,255,0.14)'; ctx.lineWidth = 1;
     rr(ctx, -bw + 0.5, -bh + 0.5, bw * 2 - 1, bh * 2 - 1, u * 0.07); ctx.stroke();
     // brass terminal screws
-    screwHead(ctx, -u * 0.215, 0, u * 0.042, 0.5);
-    screwHead(ctx, u * 0.215, 0, u * 0.042, 2.1);
+    screwHead(ctx, -u * 0.245, 0, u * 0.042, 0.5);
+    screwHead(ctx, u * 0.245, 0, u * 0.042, 2.1);
     // brass socket ring
-    var sr = u * 0.135;
+    var sr = u * 0.165;
     ctx.fillStyle = rad(ctx, -sr * 0.3, -sr * 0.3, 0, 0, 0, sr, BRASS);
     circle(ctx, 0, 0, sr); ctx.fill();
     ctx.strokeStyle = 'rgba(90,55,10,0.7)'; ctx.lineWidth = Math.max(0.6, u * 0.006);
     circle(ctx, 0, 0, sr * 0.92); ctx.stroke();
     circle(ctx, 0, 0, sr * 0.82); ctx.stroke();
     // glass envelope
-    var gr = u * 0.12;
+    var gr = u * 0.15;
     shadow(ctx, u * 0.06, u * 0.035, u * 0.05, 'rgba(20,10,0,0.35)');
     ctx.fillStyle = burnt
       ? rad(ctx, -gr * 0.3, -gr * 0.3, 0, 0, 0, gr, [[0, 'rgba(200,195,185,0.55)'], [0.6, 'rgba(110,100,90,0.6)'], [1, 'rgba(60,50,45,0.75)']])
@@ -649,17 +661,17 @@ var CircuitLabArt = (function() {
     ctx.lineWidth = Math.max(2, u * 0.03);
     lead(ctx, -u * 0.5, -u * 0.27, 0, Math.max(2, u * 0.03));
     lead(ctx, u * 0.27, u * 0.5, 0, Math.max(2, u * 0.03));
-    porcelainBase(ctx, -u * 0.36, -u * 0.15, u * 0.72, u * 0.3, u);
+    porcelainBase(ctx, -u * 0.37, -u * 0.18, u * 0.74, u * 0.36, u);
     // screws holding the base
-    screwHead(ctx, -u * 0.3, -u * 0.095, u * 0.022, 1);
-    screwHead(ctx, u * 0.3, u * 0.095, u * 0.022, 2);
+    screwHead(ctx, -u * 0.31, -u * 0.12, u * 0.026, 1);
+    screwHead(ctx, u * 0.31, u * 0.12, u * 0.026, 2);
     // brass hinge block and contact jaws
     ctx.fillStyle = lin(ctx, 0, -u * 0.06, 0, u * 0.06, BRASS);
-    rr(ctx, -u * 0.3, -u * 0.055, u * 0.1, u * 0.11, u * 0.015); ctx.fill();
-    rr(ctx, u * 0.18, -u * 0.075, u * 0.1, u * 0.032, u * 0.01); ctx.fill();
-    rr(ctx, u * 0.18, u * 0.043, u * 0.1, u * 0.032, u * 0.01); ctx.fill();
-    ctx.translate(-u * 0.24, 0);
-    blade(ctx, u, u * 0.56, open, u * 0.05);
+    rr(ctx, -u * 0.3, -u * 0.065, u * 0.11, u * 0.13, u * 0.015); ctx.fill();
+    rr(ctx, u * 0.18, -u * 0.09, u * 0.11, u * 0.038, u * 0.01); ctx.fill();
+    rr(ctx, u * 0.18, u * 0.052, u * 0.11, u * 0.038, u * 0.01); ctx.fill();
+    ctx.translate(-u * 0.245, 0);
+    blade(ctx, u, u * 0.56, open, u * 0.065);
     ctx.restore();
   }
 
@@ -671,9 +683,11 @@ var CircuitLabArt = (function() {
     lead(ctx, 0, u * 0.2, 0, lw);
     ctx.lineCap = 'round';
     ctx.strokeStyle = lin(ctx, 0, 0, u, u, [[0, '#9aa1a8'], [0.5, '#eef1f3'], [1, '#6c737a']]);
-    ctx.lineWidth = lw;
+    ctx.lineWidth = lw * 1.3;
+    shadow(ctx, u * 0.02, u * 0.01, u * 0.02);
     ctx.beginPath(); ctx.moveTo(u * 0.64, u * 0.36); ctx.lineTo(u, u); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(u * 0.64, -u * 0.36); ctx.lineTo(u, -u); ctx.stroke();
+    noShadow(ctx);
     porcelainBase(ctx, u * 0.1, -u * 0.5, u * 0.66, u * 1.0, u);
     screwHead(ctx, u * 0.68, 0, u * 0.025, 1.2);
     // contact jaws at both throws
@@ -706,13 +720,13 @@ var CircuitLabArt = (function() {
     // flange
     shadow(ctx, u * 0.07, u * 0.03, u * 0.05);
     ctx.fillStyle = lin(ctx, 0, -u * 0.08, 0, u * 0.08, [[0, '#3a3a3d'], [1, '#121214']]);
-    rr(ctx, -u * 0.3, -u * 0.075, u * 0.6, u * 0.15, u * 0.07); ctx.fill();
+    rr(ctx, -u * 0.33, -u * 0.085, u * 0.66, u * 0.17, u * 0.08); ctx.fill();
     noShadow(ctx);
     ctx.fillStyle = 'rgba(200,170,110,0.9)';
-    circle(ctx, -u * 0.245, 0, u * 0.022); ctx.fill();
-    circle(ctx, u * 0.245, 0, u * 0.022); ctx.fill();
+    circle(ctx, -u * 0.275, 0, u * 0.024); ctx.fill();
+    circle(ctx, u * 0.275, 0, u * 0.024); ctx.fill();
     // cylinder
-    var r = u * 0.19;
+    var r = u * 0.22;
     shadow(ctx, u * 0.08, u * 0.035, u * 0.06);
     ctx.fillStyle = rad(ctx, -r * 0.35, -r * 0.4, r * 0.1, 0, 0, r, [[0, '#4b4c50'], [0.6, '#232427'], [1, '#0b0b0c']]);
     circle(ctx, 0, 0, r); ctx.fill();
@@ -732,7 +746,7 @@ var CircuitLabArt = (function() {
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
       ctx.font = '800 ' + (u * 0.045).toFixed(1) + 'px Nunito, sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('BUZZER', 0, r * 0.5);
+      upright(ctx, 0, 0); ctx.fillText('BUZZER', 0, r * 0.5); ctx.restore();
     }
     ctx.restore();
   }
@@ -812,12 +826,12 @@ var CircuitLabArt = (function() {
     green: '#2b8a3e', blue: '#1e4fc7', violet: '#7a3fc4', grey: '#888', white: '#f4f4f4', gold: '#c9a233' };
 
   function drawResistor(ctx, u, st) {
-    var lw = Math.max(1.8, u * 0.022);
-    lead(ctx, -u * 0.5, -u * 0.18, 0, lw);
-    lead(ctx, u * 0.18, u * 0.5, 0, lw);
+    var lw = Math.max(2, u * 0.026);
+    lead(ctx, -u * 0.5, -u * 0.22, 0, lw);
+    lead(ctx, u * 0.22, u * 0.5, 0, lw);
     var bands = (st && st.bands) || ['brown', 'black', 'black', 'gold'];
     ctx.save();
-    var hx = u * 0.2, eb = u * 0.062, mb = u * 0.047;
+    var hx = u * 0.25, eb = u * 0.078, mb = u * 0.06;
     function body() {
       ctx.beginPath();
       ctx.moveTo(-hx + eb, -eb);
@@ -840,7 +854,7 @@ var CircuitLabArt = (function() {
     var bx = [-hx + eb * 0.9, -hx + eb * 2.6, -hx + eb * 3.7, hx - eb * 1.5];
     for (var i = 0; i < 4; i++) {
       ctx.fillStyle = BAND_HEX[bands[i]] || '#000';
-      ctx.fillRect(bx[i], -eb, u * 0.026, eb * 2);
+      ctx.fillRect(bx[i], -eb, u * 0.032, eb * 2);
     }
     ctx.fillStyle = lin(ctx, 0, -eb, 0, eb, [[0, 'rgba(0,0,0,0.45)'], [0.25, 'rgba(255,255,255,0.5)'], [0.42, 'rgba(255,255,255,0.08)'], [0.8, 'rgba(0,0,0,0.18)'], [1, 'rgba(0,0,0,0.5)']]);
     ctx.fillRect(-hx, -eb, hx * 2, eb * 2);
@@ -853,7 +867,10 @@ var CircuitLabArt = (function() {
       ctx.fillStyle = 'rgba(60,35,10,0.85)';
       ctx.font = '800 ' + (u * 0.085).toFixed(1) + 'px Nunito, sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText(st.label, 0, eb + u * 0.03);
+      upright(ctx, 0, 0);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(st.label, 0, (eb + u * 0.075) * ((ctx.getTransform && ctx.getTransform().a < -1e-6) ? -1 : 1));
+      ctx.restore();
     }
     ctx.restore();
   }
@@ -869,8 +886,8 @@ var CircuitLabArt = (function() {
     ctx.beginPath();
     ctx.moveTo(-u * 0.5, 0); ctx.lineTo(-u * 0.3, 0); ctx.lineTo(-u * 0.25, -u * 0.04); ctx.lineTo(-u * 0.2, 0); ctx.lineTo(-u * 0.05, 0);
     ctx.stroke();
-    lead(ctx, u * 0.05, u * 0.5, 0, lw);
-    var r = u * 0.105, fl = u * 0.122;
+    lead(ctx, u * 0.06, u * 0.5, 0, lw);
+    var r = u * 0.13, fl = u * 0.15;
     // flange with the flat on the cathode side
     shadow(ctx, u * 0.06, u * 0.03, u * 0.05);
     ctx.fillStyle = burnt ? '#3a1a14' : (g > 0.05 ? '#ff5a3c' : '#8d1c14');

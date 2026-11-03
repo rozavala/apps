@@ -329,6 +329,14 @@ var APP_STAR_CONFIGS = [
   // achievement, so seenRoots does not count.
   { id: 'vocab', prefix: 'zs_vocab_', stars: function(d) {
       return (d.matchStars || 0) + (d.dictationStars || 0) + (d.builds || []).length;
+    } },
+
+  // ── Learn-by-doing apps ─────────────────────────────────────────
+  // Circuit Lab stars each of its 16 challenges out of 3.
+  { id: 'circuit', prefix: 'zs_circuit_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
+      return n;
     } }
 ];
 
