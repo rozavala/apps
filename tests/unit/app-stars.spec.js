@@ -39,7 +39,47 @@ const CASES = [
     data: { 'w1-1': { stars: 3 }, 'w1-2': { stars: 2 } }, stars: 5 },
   { id: 'vocab', prefix: 'zs_vocab_',
     data: { seenRoots: ['aqua', 'bio', 'geo'], matchStars: 3, dictationStars: 2, builds: [0, 1] },
-    stars: 7, note: 'browsing roots does not score' }
+    stars: 7, note: 'browsing roots does not score' },
+
+  // Learn-by-doing apps
+  { id: 'circuit', prefix: 'zs_circuit_',
+    data: { v: 1, levels: { loop: { stars: 3, date: '2026-11-03' }, switch: { stars: 2, date: '2026-11-03' },
+            motor: { stars: 1, date: '2026-11-04' } }, facts: ['safety', 'volta', 'bulb'], electrons: false },
+    stars: 6, note: 'fact cards read do not score' },
+  { id: 'engineer', prefix: 'zs_engineer_',
+    data: { v: 1, levels: { l1: { stars: 3, best: 20800 }, l2: { stars: 2, best: 52000 }, l5: { stars: 1, best: 110000 } },
+            designs: {}, realBuild: { date: '2026-11-03', coins: 23 } },
+    stars: 7, note: 'real build adds one' },
+  { id: 'negocio', prefix: 'zs_negocio_',
+    data: { seasons: 3, best: { empanadas: { profit: 286000, stars: 2 }, mote: { profit: 427500, stars: 3 },
+            limonada: { profit: -4000, stars: 0 } }, quizBest: 5, lastPlayed: '2026-11-03', cur: null },
+    stars: 6, note: 'a losing season scores nothing' },
+  { id: 'secretos', prefix: 'zs_secretos_',
+    data: { missions: { m01: { stars: 3, date: '2026-11-03' }, m02: { stars: 2, date: '2026-11-03' },
+            m10: { stars: 1, date: '2026-11-04' } }, tools: { caesar: '2026-11-03' }, history: ['h-caesar'] },
+    stars: 6, note: 'tools and history cards do not score' },
+  { id: 'clock', prefix: 'zs_clock_',
+    data: { lang: 'es', helper: true, digital: true, rounds: 5, levels: {
+            'set-oclock': { stars: 3, best: 10, of: 10 }, 'read-half': { stars: 2, best: 8, of: 10 },
+            'day-day1': { stars: 1, best: 5, of: 8 }, 'calendar-cal1': { stars: 0, best: 3, of: 10 } } },
+    stars: 6, note: 'rounds played do not score' },
+  { id: 'naturaleza', prefix: 'zs_naturaleza_',
+    data: { cards: { '2026-spring': { found: ['loica', 'chincol', 'zorzal', 'jilguero', 'chinita', 'queltehue'] },
+                     '2026-winter': { found: ['picaflor', 'jilguero', 'chuncho', 'queltehue', 'tiuque', 'zorzal', 'espino', 'boldo', 'condor'] } },
+            quiz: { clues_birds: 3, tap_all: 1, shadow_bugs: 5 }, sightings: [], seen: ['pudu'] },
+    stars: 12, note: 'quiz stars cap at 3' },
+  { id: 'euclid', prefix: 'zs_euclid_',
+    data: { v: 1, levels: { equilateral: { stars: 3, best: 4, at: '2026-11-03' }, midpoint: { stars: 2, best: 3, at: '2026-11-03' },
+            hexagon: { stars: 1, best: 12, at: '2026-11-03' } }, guided: false, last: 'hexagon' },
+    stars: 6 },
+  { id: 'cocina', prefix: 'zs_cocina_',
+    data: { v: 1, cooked: { 'huevos-revueltos': { stars: 3, count: 2, dates: ['2026-11-03', '2026-10-28'] },
+            pebre: { stars: 2, count: 1, dates: ['2026-11-01'] } }, measure: { m1: 3, m2: 2, m6: 1 },
+            safetyStars: 2, safetyBest: 5, eggStars: 3 },
+    stars: 16 },
+  { id: 'marinero', prefix: 'zs_marinero_',
+    data: { knots: { fig8: { w: 1, c: 1, r: 1 }, bowline: { w: 1 } }, best: { steer: 3, names: 2, buoys: 1 }, hunts: 4 },
+    stars: 13, note: 'treasure hunts cap at 3' }
 ];
 
 test.describe('per-app star rules', () => {

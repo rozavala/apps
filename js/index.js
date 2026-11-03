@@ -285,7 +285,9 @@
       'zs_mathgalaxy_', 'zs_chile_', 'zs_chess_', 'zs_chess_plays_',
       'zs_timer_', 'zs_chores_', 'zs_fe_', 'zs_guitar_', 'zs_art_',
       'zs_sports_', 'zs_move_', 'zs_lab_', 'zs_world_', 'zs_story_', 'zs_quest_',
-      'zs_lcheck_', 'zs_lastrank_', 'littlemaestro_'
+      'zs_lcheck_', 'zs_lastrank_', 'littlemaestro_',
+      'zs_circuit_', 'zs_engineer_', 'zs_negocio_', 'zs_euclid_', 'zs_cocina_',
+      'zs_marinero_', 'zs_naturaleza_', 'zs_secretos_', 'zs_clock_'
     ];
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
@@ -738,6 +740,18 @@
           }
         }
       } catch (e) {}
+
+      // Learn-by-doing apps: one star count each, from the shared rule
+      // in auth.js, so the card and the Explorer Rank always agree.
+      ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
+       'marinero', 'naturaleza', 'secretos', 'clock'].forEach(function(id) {
+        try {
+          var el = document.getElementById('stats-' + id);
+          if (!el || typeof getAppStars !== 'function') return;
+          var n = getAppStars(id, appStats[id] || {});
+          if (n > 0) el.innerHTML = '<span class="cs-item active">⭐ ' + n + '</span>';
+        } catch (e) {}
+      });
 
     } catch(err) {}
   }

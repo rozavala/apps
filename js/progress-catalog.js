@@ -22,7 +22,8 @@ window.ZSProgressCatalog = {
     {"i":"styles","l":"🖼️ Art Styles","g":"Advanced"},
     {"i":"warm_cool","l":"🔥 Warm & Cool Colors","g":"Beginner"},
     {"i":"pattern_pointillism","l":"🟣 Pattern Pointillism","g":"Intermediate"},
-    {"i":"robot_shapes","l":"🤖 Build a Robot from Shapes","g":"Advanced"}
+    {"i":"robot_shapes","l":"🤖 Build a Robot from Shapes","g":"Advanced"},
+    {"i":"still_life","l":"🍎 Still Life","g":"Intermediate"}
   ],
 
   bible: [
@@ -81,7 +82,9 @@ window.ZSProgressCatalog = {
     {"i":14,"l":"Pin and Win the Queen","g":"Advanced"},
     {"i":15,"l":"Endgame: Queen Mate","g":"Advanced"},
     {"i":16,"l":"Endgame: Rook Mate","g":"Expert"},
-    {"i":17,"l":"Endgame: Two-Rook Ladder Mate","g":"Expert"}
+    {"i":17,"l":"Endgame: Two-Rook Ladder Mate","g":"Expert"},
+    {"i":18,"l":"Back-Rank Lift","g":"Intermediate"},
+    {"i":19,"l":"Queen Takes the Rook","g":"Beginner"}
   ],
 
   chile: [
@@ -167,7 +170,10 @@ window.ZSProgressCatalog = {
     {"i":"saints","l":"When the Saints Go Marching In","g":"Beginner"},
     {"i":"auldlang","l":"Auld Lang Syne","g":"Intermediate"},
     {"i":"redriver","l":"Red River Valley","g":"Intermediate"},
-    {"i":"greensleeves","l":"Greensleeves","g":"Advanced"}
+    {"i":"greensleeves","l":"Greensleeves","g":"Advanced"},
+    {"i":"rowboat","l":"Row, Row, Row Your Boat","g":"Beginner"},
+    {"i":"frere","l":"Frère Jacques","g":"Beginner"},
+    {"i":"mountain","l":"She'll Be Coming Round the Mountain","g":"Intermediate"}
   ],
 
   lab: [
@@ -304,8 +310,8 @@ window.ZSProgressCatalog = {
   ],
 
   story: [
-    {"i":"ocean_dive","l":"🤿 The Ocean Dive","g":"Intermediate"},
-    {"i":"andes_rescue","l":"🚁 The Andes Rescue","g":"Advanced"},
+    {"i":"ocean_dive","l":"🤿 The Ocean Dive","g":"Explorer"},
+    {"i":"andes_rescue","l":"🚁 The Andes Rescue","g":"Pilot"},
     {"i":"lost_compass","l":"🧭 The Lost Compass","g":"Explorer"},
     {"i":"inca_trail","l":"⛰️ The Secret Inca Trail","g":"Explorer"},
     {"i":"condor_flight","l":"🦅 The Condor's First Flight","g":"Cadet"},
@@ -388,7 +394,13 @@ window.ZSProgressCatalog = {
     {"i":"scope","l":"scope- · look at, examine","g":"Tier 3"},
     {"i":"derm","l":"derm- · skin","g":"Tier 3"},
     {"i":"cycl","l":"cycl- · circle, wheel","g":"Tier 3"},
-    {"i":"polis","l":"polis- · city","g":"Tier 3"}
+    {"i":"polis","l":"polis- · city","g":"Tier 3"},
+    {"i":"form","l":"form- · shape","g":"Tier 2"},
+    {"i":"uni","l":"uni- · one","g":"Tier 1"},
+    {"i":"ann","l":"ann- · year","g":"Tier 2"},
+    {"i":"ject","l":"ject- · throw","g":"Tier 2"},
+    {"i":"meter","l":"meter- · measure","g":"Tier 2"},
+    {"i":"log","l":"log- · word, reason","g":"Tier 2"}
   ],
 
   world: [

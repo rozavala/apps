@@ -73,6 +73,15 @@ var CloudSync = (function() {
     'zs_worldcup_': 'worldcup',
     'zs_patron_': 'patron',
     'zs_vacquiz_': 'vacquiz',
+    'zs_circuit_': 'circuit',
+    'zs_engineer_': 'engineer',
+    'zs_negocio_': 'negocio',
+    'zs_euclid_': 'euclid',
+    'zs_cocina_': 'cocina',
+    'zs_marinero_': 'marinero',
+    'zs_naturaleza_': 'naturaleza',
+    'zs_secretos_': 'secretos',
+    'zs_clock_': 'clock',
     'littlemaestro_': 'littlemaestro',
   };
 

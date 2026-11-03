@@ -329,6 +329,74 @@ var APP_STAR_CONFIGS = [
   // achievement, so seenRoots does not count.
   { id: 'vocab', prefix: 'zs_vocab_', stars: function(d) {
       return (d.matchStars || 0) + (d.dictationStars || 0) + (d.builds || []).length;
+    } },
+
+  // ── Learn-by-doing apps ─────────────────────────────────────────
+  // Circuit Lab stars each of its 16 challenges out of 3.
+  { id: 'circuit', prefix: 'zs_circuit_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
+      return n;
+    } },
+  // Little Engineer stars each of its 12 bridges out of 3, plus one for
+  // the real spaghetti bridge a parent confirmed.
+  { id: 'engineer', prefix: 'zs_engineer_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, Math.max(0, (L[k] && L[k].stars) | 0));
+      return n + (d.realBuild ? 1 : 0);
+    } },
+  // Mi Negocio stars each product's best season out of 3, plus one for
+  // a strong concept quiz (5+ of 6).
+  { id: 'negocio', prefix: 'zs_negocio_', stars: function(d) {
+      var n = 0, b = d.best || {};
+      for (var k in b) if (b[k]) n += Math.min(3, b[k].stars || 0);
+      return n + ((d.quizBest || 0) >= 5 ? 1 : 0);
+    } },
+  // Mensajes Secretos stars each of its 19 missions out of 3. Opening a
+  // tool or reading a history card is not an achievement.
+  { id: 'secretos', prefix: 'zs_secretos_', stars: function(d) {
+      var n = 0, m = d.missions || {};
+      for (var k in m) n += Math.min(3, (m[k] && m[k].stars) || 0);
+      return n;
+    } },
+  // ¿Qué Hora Es? stars each of its 29 levels out of 3.
+  { id: 'clock', prefix: 'zs_clock_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
+      return n;
+    } },
+  // Explorador de Naturaleza: each seasonal Spot it! card scores by how
+  // much of it was found outdoors (3/6/9 of 9 squares → 1/2/3 stars), and
+  // each quiz mode is starred out of 3. Opening a plate does not score.
+  { id: 'naturaleza', prefix: 'zs_naturaleza_', stars: function(d) {
+      var n = 0, c, f;
+      for (c in (d.cards || {})) { f = ((d.cards[c] || {}).found || []).length; n += f >= 9 ? 3 : f >= 6 ? 2 : f >= 3 ? 1 : 0; }
+      for (c in (d.quiz || {})) n += Math.max(0, Math.min(3, d.quiz[c] || 0));
+      return n;
+    } },
+  // Euclid's Workshop stars each of its 18 constructions out of 3.
+  { id: 'euclid', prefix: 'zs_euclid_', stars: function(d) {
+      var n = 0, L = d.levels || {};
+      for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
+      return n;
+    } },
+  // Cocina Lab: each recipe cooked (confirmed by a grown-up's PIN) and
+  // each Measuring Lab task is starred out of 3, plus the safety quiz and
+  // the egg-cracking drill.
+  { id: 'cocina', prefix: 'zs_cocina_', stars: function(d) {
+      var n = 0, k;
+      for (k in (d.cooked || {})) n += Math.min(3, (d.cooked[k] && d.cooked[k].stars) || 0);
+      for (k in (d.measure || {})) n += Math.min(3, d.measure[k] || 0);
+      return n + Math.min(3, d.safetyStars || 0) + Math.min(3, d.eggStars || 0);
+    } },
+  // Marinero: each knot earns up to 3 (watched the whole animation, quick
+  // check right, tied with a real rope and confirmed with the parent PIN),
+  // each quiz is starred out of 3, plus up to 3 backyard treasure hunts.
+  { id: 'marinero', prefix: 'zs_marinero_', stars: function(d) {
+      var n = 0, k, q;
+      for (k in (d.knots || {})) { q = d.knots[k] || {}; n += (q.w ? 1 : 0) + (q.c ? 1 : 0) + (q.r ? 1 : 0); }
+      for (k in (d.best || {})) n += Math.min(3, d.best[k] || 0);
+      return n + Math.min(3, d.hunts || 0);
     } }
 ];
 
