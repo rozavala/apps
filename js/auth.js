@@ -327,8 +327,11 @@ var APP_STAR_CONFIGS = [
   // Vocabulario Vivo: the match and dictation games are scored, and
   // each word build is a finished exercise. Browsing a root is not an
   // achievement, so seenRoots does not count.
+  // Detective (spot the root) and Cognados joined later; blobs without
+  // them score exactly as before.
   { id: 'vocab', prefix: 'zs_vocab_', stars: function(d) {
-      return (d.matchStars || 0) + (d.dictationStars || 0) + (d.builds || []).length;
+      return (d.matchStars || 0) + (d.dictationStars || 0) + (d.builds || []).length +
+             (d.spotStars || 0) + (d.cogStars || 0);
     } },
 
   // ── Learn-by-doing apps ─────────────────────────────────────────

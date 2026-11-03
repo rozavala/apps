@@ -717,8 +717,11 @@
       } catch (e) {}
 
       try {
-        if (els.guess && typeof GuessQuest !== 'undefined') {
-          var gs = GuessQuest.getStats();
+        // guess-quest.js is not loaded on the hub, so read its blob
+        // directly (the same three fields GuessQuest.getStats returns).
+        if (els.guess) {
+          var gq = appStats.guess || {};
+          var gs = { totalStars: gq.totalStars || 0, roundsPlayed: gq.roundsPlayed || 0, roundsWon: gq.roundsWon || 0 };
           if (gs.roundsPlayed > 0) {
             els.guess.innerHTML = '<span class="cs-item active">⭐ ' + gs.totalStars + '</span><span class="cs-item">🎮 ' + gs.roundsWon + '/' + gs.roundsPlayed + '</span>';
           }

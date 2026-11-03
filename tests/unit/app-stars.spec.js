@@ -40,6 +40,9 @@ const CASES = [
   { id: 'vocab', prefix: 'zs_vocab_',
     data: { seenRoots: ['aqua', 'bio', 'geo'], matchStars: 3, dictationStars: 2, builds: [0, 1] },
     stars: 7, note: 'browsing roots does not score' },
+  { id: 'vocab', prefix: 'zs_vocab_',
+    data: { matchStars: 3, dictationStars: 2, builds: [0], spotStars: 2, cogStars: 1 },
+    stars: 9, note: 'Detective and Cognados count' },
 
   // Learn-by-doing apps
   { id: 'circuit', prefix: 'zs_circuit_',
