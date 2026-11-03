@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/guess-quest.css">
+  <link rel="stylesheet" href="css/guess-quest.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -25,25 +25,32 @@
   <div class="app">
     <!-- SCREEN: Category Select -->
     <div class="screen active" id="screen-select">
-      <div class="gq-header">
-        <span class="icon">🎯</span>
-        <h1>Guess Quest</h1>
-        <p>I'm thinking of something... Can you guess it?</p>
-        <div class="lang-toggle" onclick="GuessQuest.toggleLanguage()">
-          <span id="lang-label">EN / ES</span> 🌐
+      <div class="gq-header gq-hero">
+        <div class="gq-hero-scene gq-scene" id="gq-hero-scene" aria-hidden="true"></div>
+        <div class="gq-hero-title">
+          <h1>Guess Quest</h1>
+          <p id="gq-sub">I'm thinking of something... ask questions and drive closer!</p>
         </div>
+        <button type="button" class="lang-toggle" onclick="GuessQuest.toggleLanguage()" aria-label="Switch language / Cambiar idioma">
+          <span id="lang-label">EN / ES</span> 🌐
+        </button>
       </div>
+
+      <div class="gq-trip-log" id="gq-trip-log"></div>
 
       <!-- Daily Word entry point -->
-      <div class="dw-daily-card" onclick="DailyWord.open()" role="button" tabindex="0">
-        <span class="dw-dc-emoji">🌟</span>
-        <div class="dw-dc-body">
-          <div class="dw-dc-title">Daily Word · Palabra del Día</div>
-          <div class="dw-dc-sub">One puzzle a day. Guess the word in 6 tries.</div>
-        </div>
-        <span class="dw-dc-arrow">→</span>
-      </div>
+      <button type="button" class="dw-daily-card" onclick="GuessQuest.openDaily()">
+        <span class="dw-dc-emoji" aria-hidden="true">
+          <svg viewBox="0 0 40 40" width="40" height="40"><rect x="3" y="3" width="34" height="34" rx="6" fill="#1d4ed8" stroke="#fff" stroke-width="2.5"/><rect x="9" y="11" width="9" height="9" rx="1.5" fill="#fbbf24"/><rect x="22" y="11" width="9" height="9" rx="1.5" fill="#10b981"/><rect x="9" y="23" width="9" height="9" rx="1.5" fill="#fff"/><rect x="22" y="23" width="9" height="9" rx="1.5" fill="#fbbf24"/></svg>
+        </span>
+        <span class="dw-dc-body">
+          <span class="dw-dc-title" id="gq-daily-title">Daily Word · Palabra del Día</span>
+          <span class="dw-dc-sub" id="gq-daily-sub">One puzzle a day. Guess the word in 6 tries.</span>
+        </span>
+        <span class="dw-dc-arrow" aria-hidden="true">➜</span>
+      </button>
 
+      <h2 class="gq-route-title" id="gq-route-title">Pick a route</h2>
       <div class="category-grid" id="category-grid">
         <!-- Populated by JS -->
       </div>
@@ -52,26 +59,29 @@
     <!-- SCREEN: Game (questions) -->
     <div class="screen" id="screen-game">
       <div class="game-header">
-        <button class="back-btn" aria-label="Go back" onclick="GuessQuest.backToSelect()">←</button>
-        <div class="question-counter" id="question-counter">❓ 0 / 20</div>
-        <div class="gq-stars" id="gq-stars">⭐ 0</div>
+        <button type="button" class="back-btn" aria-label="Go back" onclick="GuessQuest.backToSelect()">←</button>
+        <div class="question-counter" id="question-counter">0 / 20</div>
+        <div class="gq-stars" id="gq-stars">⭐ 3</div>
       </div>
 
-      <!-- Big answer display (hidden until question asked) -->
-      <div class="answer-display" id="answer-display">
-        <div class="answer-emoji" id="answer-emoji"></div>
-        <div class="answer-text" id="answer-text"></div>
-      </div>
+      <!-- Road scene: the car drives closer as the clues narrow it down -->
+      <div class="gq-scene gq-scene-game" id="gq-scene"></div>
 
-      <!-- Question categories (scrollable) -->
+      <!-- Highway clue board -->
+      <div class="gq-sign" id="gq-clues" aria-live="polite"></div>
+
+      <!-- Hidden word letter tiles -->
+      <div class="gq-tiles" id="gq-tiles"></div>
+
+      <!-- Question categories -->
       <div class="question-categories" id="question-categories">
         <!-- Populated by JS: category groups with question buttons -->
       </div>
 
       <!-- Guess button (always visible) -->
       <div class="guess-bar">
-        <button class="action-btn btn-guess" onclick="GuessQuest.showGuessScreen()">
-          💡 I want to guess!
+        <button type="button" class="action-btn btn-guess" onclick="GuessQuest.showGuessScreen()">
+          💡 <span id="gq-guess-btn-label">I want to guess!</span>
         </button>
       </div>
     </div>
@@ -79,11 +89,12 @@
     <!-- SCREEN: Guess (pick from candidates) -->
     <div class="screen" id="screen-guess">
       <div class="guess-header">
-        <button class="back-btn" aria-label="Go back" onclick="GuessQuest.backToGame()">←</button>
-        <h2>What do you think it is?</h2>
+        <button type="button" class="back-btn" id="gq-guess-back" aria-label="Go back" onclick="GuessQuest.backToGame()">←</button>
+        <h2 id="gq-guess-title">What do you think it is?</h2>
+        <p id="gq-guess-sub"></p>
       </div>
       <div class="guess-grid" id="guess-grid">
-        <!-- Populated by JS: candidate cards -->
+        <!-- Populated by JS: candidate postcards -->
       </div>
     </div>
 
@@ -107,7 +118,8 @@
   <script src="js/timer.js?v=3"></script>
   <script src="js/activity-log.js"></script>
   <script src="js/learning-checks.js?v=5"></script>
-  <script src="js/guess-quest.js?v=1"></script>
+  <script src="js/guess-quest-art.js?v=1"></script>
+  <script src="js/guess-quest.js?v=2"></script>
   <script src="js/daily-word.js"></script>
   <script src="js/pwa.js"></script>
 

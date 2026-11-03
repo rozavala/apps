@@ -562,36 +562,65 @@ const FeManager = (() => {
     return typeof getUserAppKey === 'function' ? getUserAppKey('zs_fe_') : null;
   }
 
+  // Saved shape (zs_fe_<user>): { totalStars, completed: [] } plus,
+  // since v2, these ADDED fields (all optional; old blobs load as-is):
+  //   saintsLearned    { saintId: best number of correct answers }
+  //   heritageLearned  { itemId: true }
+  //   prayersPrayed    { prayerId: times prayed to the end }
+  //   prayersMemorized { prayerId: true }   (memory mode finished)
+  //   decades          number of rosary decades prayed
+  //   rosaries         number of full rosaries finished
+  //   rosaryMaterial   'madera' | 'cristal'
+  //   challengeBest    { tier: { score, total, stars } }
+  // The star rule (js/auth.js) reads totalStars only.
+  function _fresh() { return { totalStars: 0, completed: [] }; }
+
   function _getData() {
     const key = _key();
     if (!key) return null;
     try {
-      return JSON.parse(localStorage.getItem(key)) || { totalStars: 0, completed: [] };
-    } catch { return { totalStars: 0, completed: [] }; }
+      const d = JSON.parse(localStorage.getItem(key)) || _fresh();
+      if (typeof d.totalStars !== 'number') d.totalStars = Number(d.totalStars) || 0;
+      if (!Array.isArray(d.completed)) d.completed = d.completed || [];
+      return d;
+    } catch { return _fresh(); }
   }
 
   function _saveData(data) {
     const key = _key();
     if (key) {
-      localStorage.setItem(key, JSON.stringify(data));
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
       if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(key);
     }
   }
 
-  function addStar() {
+  // Load, change and save in one step. fn may return false to skip saving.
+  function update(fn) {
     const data = _getData();
-    data.totalStars++;
+    if (!data) return null;
+    if (fn(data) === false) return data;
+    _saveData(data);
+    return data;
+  }
+
+  function addStar(n) {
+    n = Math.max(1, Math.floor(n || 1));
+    const data = _getData();
+    if (!data) return;
+    data.totalStars += n;
     _saveData(data);
     if (typeof showConfetti === 'function') showConfetti();
 
     if (typeof ActivityLog !== 'undefined') {
-      ActivityLog.log('Fe Explorador', '⛪', 'Ganó una estrella en Fe Explorador');
+      ActivityLog.log('Fe Explorador', '⛪', n > 1 ? 'Ganó ' + n + ' estrellas en Fe Explorador' : 'Ganó una estrella en Fe Explorador');
     }
   }
 
+  function getSaint(id) { return SAINTS.find(s => s.id === id) || null; }
+
   return {
     PRAYERS, SAINTS, MYSTERIES, ROSARY_SETS, HERITAGE, addStar,
-    getRosarySetIndexForDay, DAY_NAMES, getPrayer,
-    getStatus: _getData
+    getRosarySetIndexForDay, DAY_NAMES, getPrayer, getSaint,
+    getStatus: _getData, update
   };
 })();
