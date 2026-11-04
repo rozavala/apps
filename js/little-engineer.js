@@ -1198,7 +1198,9 @@ var LittleEngineer = (function() {
     var mat = S.tool;
     if (dr.moved && dr.to) {
       var plan = _plan(dr.from, dr.to, mat);
-      if (plan.error) { if (plan.error) { toast(plan.error); sfx('wrong'); } }
+      // A drag that ends back on its start point plans { error: '' }: no
+      // message, but no pieces either. Only add when there are pieces.
+      if (!plan.pieces) { if (plan.error) { toast(plan.error); sfx('wrong'); } }
       else { _addPieces(plan.pieces); S.sel = null; }
       _chainNote();
       return;
@@ -1208,7 +1210,7 @@ var LittleEngineer = (function() {
     if (S.sel) {
       if (S.sel.x === q.x && S.sel.y === q.y) { S.sel = null; _chainNote(); return; }
       var plan2 = _plan(S.sel, q, mat);
-      if (plan2.error) { toast(plan2.error); sfx('wrong'); return; }
+      if (!plan2.pieces) { if (plan2.error) { toast(plan2.error); sfx('wrong'); } return; }
       _addPieces(plan2.pieces);
       S.sel = q;
     } else {
@@ -1510,11 +1512,11 @@ var LittleEngineer = (function() {
     if (!from && S.sel && S.hover && S.tool !== 'erase') { from = S.sel; to = S.hover; }
     if (from && to && (from.x !== to.x || from.y !== to.y)) {
       var plan = _plan(from, to, S.tool);
-      if (plan.error) A.drawMember(g, cam, from.x, from.y, to.x, to.y, S.tool, { bad: true });
+      if (!plan.pieces) A.drawMember(g, cam, from.x, from.y, to.x, to.y, S.tool, { bad: true });
       else plan.pieces.forEach(function(m) { A.drawMember(g, cam, m[0], m[1], m[2], m[3], m[4], { tintA: 0.35, tint: '#ffffff' }); });
       var L = Math.hypot(to.x - from.x, to.y - from.y);
-      var label = (Math.round(L * 10) / 10) + ' m' + (plan.error ? ' ✗' : ' · ' + clp(L * D.MATERIALS[S.tool].cost));
-      _label(g, (A.X(cam, from.x) + A.X(cam, to.x)) / 2, (A.Y(cam, from.y) + A.Y(cam, to.y)) / 2 - 18, label, plan.error ? '#b91c1c' : 'rgba(14,52,112,0.92)');
+      var label = (Math.round(L * 10) / 10) + ' m' + (!plan.pieces ? ' ✗' : ' · ' + clp(L * D.MATERIALS[S.tool].cost));
+      _label(g, (A.X(cam, from.x) + A.X(cam, to.x)) / 2, (A.Y(cam, from.y) + A.Y(cam, to.y)) / 2 - 18, label, !plan.pieces ? '#b91c1c' : 'rgba(14,52,112,0.92)');
     }
     designJoints(lv, S.members).forEach(function(j) {
       var st = S.sel && S.sel.x === j.x && S.sel.y === j.y ? 'sel' : (S.hover && S.hover.x === j.x && S.hover.y === j.y ? 'hot' : '');
