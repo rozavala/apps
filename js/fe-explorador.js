@@ -369,7 +369,7 @@ const FeManager = (() => {
       id: 'ambrosio',
       name: 'San Ambrosio de Milán',
       dates: '340–397',
-      country: 'Tréveris 🇮🇹',
+      country: 'Milán 🇮🇹',
       bio: 'Obispo de Milán y uno de los Padres de la Iglesia. Fue un gran predicador e himnógrafo, y bautizó a San Agustín.',
       questions: [
         { q: '¿De qué ciudad fue obispo San Ambrosio?', a: ['Milán', 'Roma', 'Nápoles'], correct: 0, explain: 'San Ambrosio (340–397) fue obispo de Milán, Padre de la Iglesia, y bautizó a San Agustín.' },
