@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T15:35:24.999Z",
+  "generatedAt": "2026-11-04T03:24:17.504Z",
   "windowHours": 72,
   "days": [
     {
@@ -29,6 +29,37 @@
           "lastTs": 1793719932807,
           "users": [
             "u-3bda7c"
+          ]
+        }
+      ]
+    },
+    {
+      "day": "2026-11-04",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mw1jpe2c_rrrc5n",
+            "ts": 1793762208372,
+            "clientTs": 1793762208372,
+            "kind": "error",
+            "app": "little-engineer",
+            "page": "little-engineer.html",
+            "message": "TypeError: undefined is not an object (evaluating 'pieces.forEach')",
+            "filename": "https://rozavala.github.io/apps/js/little-engineer.js?v=1",
+            "lineno": 1058,
+            "colno": 11,
+            "stack": "_addPieces@https://rozavala.github.io/apps/js/little-engineer.js:1058:11\n_onUp@https://rozavala.github.io/apps/js/little-engineer.js:1202:24",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1793762208372,
+          "lastTs": 1793762208372,
+          "users": [
+            "u-9b4aef"
           ]
         }
       ]
