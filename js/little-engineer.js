@@ -596,6 +596,7 @@ var LittleEngineer = (function() {
     var total = starsOf(d), max = D.LEVELS.length * 3 + 1;
     var done = 0;
     D.LEVELS.forEach(function(l) { if (d.levels[l.id] && d.levels[l.id].stars > 0) done++; });
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-home">' +
         '<header class="le-header">' +
@@ -625,10 +626,12 @@ var LittleEngineer = (function() {
   function _drawHero(cv) {
     if (!cv) return;
     var lv = Object.assign({}, D.LEVELS[4], { id: 'hero', water: -4.6, anchors: [[0, 0], [12, 0]], time: 'morning' });
-    var g = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1);
+    var dpr = ZsCanvas.dpr();
     var W = cv.clientWidth, H = cv.clientHeight;
     if (!W || !H) return;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = ZsCanvas.get2d(cv);
+    if (!g) return;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     var sc = A.buildScene(lv);
     var xm = -5, xM = lv.span + 5, ym = lv.water - 1.0, top = 3.6;
@@ -669,6 +672,7 @@ var LittleEngineer = (function() {
           (rec.best ? '<span class="le-lvl-best">Best ' + clp(rec.best) + '</span>' : '<span class="le-lvl-best">Budget ' + clp(l.budget) + '</span>') +
         '</span></button>';
     }).join('');
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' +
         _topBar('Choose a gorge · Elige un desafío') +
@@ -738,6 +742,7 @@ var LittleEngineer = (function() {
     var rec = d.levels[level.id] || {};
     var p2 = Math.min(100, level.budget / (level.budget * 1.25) * 100), p3 = level.tight / (level.budget * 1.25) * 100;
 
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-play">' +
         '<div class="le-bar">' +
@@ -885,7 +890,7 @@ var LittleEngineer = (function() {
     var H = Math.round(Math.max(270, Math.min(maxH, ideal * 1.04)));
     stage.style.height = H + 'px';
     var cv = $('le-canvas');
-    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var dpr = ZsCanvas.dpr();
     S.W = W; S.H = H; S.dpr = dpr;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -924,12 +929,15 @@ var LittleEngineer = (function() {
     function mk(c) {
       c = c || document.createElement('canvas');
       c.width = Math.round(S.W * S.dpr); c.height = Math.round(S.H * S.dpr);
-      var g = c.getContext('2d'); g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0); g.clearRect(0, 0, S.W, S.H);
+      var g = ZsCanvas.get2d(c);
+      if (g) { g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0); g.clearRect(0, 0, S.W, S.H); }
       return c;
     }
     S.back = mk(S.back); S.front = mk(S.front);
-    A.drawBack(S.back.getContext('2d'), S.scene, cam, S.W, S.H);
-    A.drawFront(S.front.getContext('2d'), S.scene, cam, S.W, S.H);
+    var bg = ZsCanvas.get2d(S.back), fg = ZsCanvas.get2d(S.front);
+    if (bg) A.drawBack(bg, S.scene, cam, S.W, S.H);
+    if (fg) A.drawFront(fg, S.scene, cam, S.W, S.H);
+    if (!bg || !fg) S.cacheKey = ''; // try again next frame
   }
 
   window.addEventListener('resize', function() {
@@ -1466,7 +1474,8 @@ var LittleEngineer = (function() {
     if (S.mode === 'test' && !S.paused) _stepDrops(S.slow ? dt * 0.3 : dt);
     if (S.shake > 0) S.shake = Math.max(0, S.shake - dt);
 
-    var g = cv.getContext('2d');
+    var g = ZsCanvas.get2d(cv);
+    if (!g) return; // no canvas memory: skip this frame
     var cam = _cam();
     _ensureCaches(cam);
     g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
@@ -1616,6 +1625,7 @@ var LittleEngineer = (function() {
         '<span class="le-lesson-icon" aria-hidden="true">' + l.icon + '</span>' +
         '<span class="le-lesson-t">' + esc(l.title) + '</span><span class="le-lesson-es">' + esc(l.es) + '</span></button>';
     }).join('');
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' + _topBar('Bridge school · Escuela de puentes') +
         '<p class="le-lead">How bridges really work — the same ideas engineers use.</p>' +
@@ -1631,6 +1641,7 @@ var LittleEngineer = (function() {
     if (!l) return learn();
     var i = D.LESSONS.indexOf(l), nxt = D.LESSONS[i + 1];
     var canSpeak = typeof ZsTTS !== 'undefined' && ZsTTS.supported() && ZsTTS.getSettings().enabled;
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' + _topBar(esc(l.title), 'learn') +
         '<article class="le-lesson">' +
@@ -1665,6 +1676,7 @@ var LittleEngineer = (function() {
     _stop();
     S.screen = 'real';
     var d = _load(), R = D.REAL_BUILD, rb = d.realBuild;
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' + _topBar(esc(R.title)) +
         '<article class="le-lesson le-real">' +

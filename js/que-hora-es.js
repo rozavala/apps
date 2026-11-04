@@ -1330,14 +1330,16 @@ var QueHoraEs = (function() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = cv.clientWidth || 300, h = cv.clientHeight || 300;
     cv.width = w * dpr; cv.height = h * dpr;
-    var x = cv.getContext('2d'); x.scale(dpr, dpr);
+    var x = ZsCanvas.get2d(cv);
+    if (!x) return;
+    x.scale(dpr, dpr);
     var cols = ['#f6c33b', '#2563eb', '#dc2626', '#16a34a', '#db2777', '#f97316'];
     var bits = [];
     for (var i = 0; i < 90; i++) bits.push({ x: w / 2 + (Math.random() - 0.5) * 60, y: h * 0.35, vx: (Math.random() - 0.5) * 9, vy: -4 - Math.random() * 7,
       r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.4, c: pick(cols), s: 4 + Math.random() * 5 });
     var t0 = performance.now();
     (function frame(now) {
-      if (!cv.isConnected) return;
+      if (!cv.isConnected) { ZsCanvas.release(cv); return; }
       var age2 = now - t0;
       x.clearRect(0, 0, w, h);
       bits.forEach(function(b) {
@@ -1348,6 +1350,7 @@ var QueHoraEs = (function() {
         x.restore();
       });
       if (age2 < 2800) requestAnimationFrame(frame);
+      else ZsCanvas.release(cv); // faded out: free its memory
     })(t0);
   }
 

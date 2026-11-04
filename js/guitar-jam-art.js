@@ -76,7 +76,7 @@ const GJArt = (() => {
   class Guitar {
     constructor(canvas, opts) {
       this.cv = canvas;
-      this.ctx = canvas.getContext('2d');
+      this.ctx = ZsCanvas.get2d(canvas);
       this.o = Object.assign({
         orient: 'auto', minFretPx: 34, vFretPx: 50, maxFret: 12, minFret: 5,
         headstock: true, body: true, tapStrum: false, hHeight: null,
@@ -172,7 +172,7 @@ const GJArt = (() => {
       L.bridgeU = L.Lc + L.bodyLen * 1.1 + 40;
       this.L = L;
 
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const dpr = ZsCanvas.dpr();
       this.dpr = dpr;
       this.cv.style.height = L.cssH + 'px';
       this.cv.width = Math.round(L.cssW * dpr);
@@ -208,7 +208,8 @@ const GJArt = (() => {
 
     // ── Static layer ────────────────────────────────────────────
     _drawStatic() {
-      const ctx = this.static.getContext('2d');
+      const ctx = ZsCanvas.get2d(this.static);
+      if (!ctx) return; // no canvas memory: the strings and dots still draw
       const L = this.L, o = this.o;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.static.width, this.static.height);
@@ -618,6 +619,7 @@ const GJArt = (() => {
     // ── Dynamic render ──────────────────────────────────────────
     render() {
       if (!this.L) return;
+      if (!this.ctx && !(this.ctx = ZsCanvas.get2d(this.cv))) return; // no canvas memory: skip
       const ctx = this.ctx, L = this.L;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.cv.width, this.cv.height);
@@ -912,7 +914,7 @@ const GJArt = (() => {
   // ════════════════════════════════════════════════════════════════
   class Lane {
     constructor(canvas) {
-      this.cv = canvas; this.ctx = canvas.getContext('2d');
+      this.cv = canvas; this.ctx = ZsCanvas.get2d(canvas);
       this.bg = document.createElement('canvas');
       this.resize();
       if (window.ResizeObserver) { this._ro = new ResizeObserver(() => this.resize()); this._ro.observe(canvas.parentElement); }
@@ -921,12 +923,13 @@ const GJArt = (() => {
       const W = Math.round(this.cv.parentElement.clientWidth);
       if (W < 40) return;
       const H = W < 560 ? 124 : 148;
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const dpr = ZsCanvas.dpr();
       this.W = W; this.H = H; this.dpr = dpr;
       this.cv.style.height = H + 'px';
       this.cv.width = W * dpr; this.cv.height = H * dpr;
       this.bg.width = W * dpr; this.bg.height = H * dpr;
-      const c = this.bg.getContext('2d');
+      const c = ZsCanvas.get2d(this.bg);
+      if (!c) return;
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
       const g = c.createLinearGradient(0, 0, 0, H);
       g.addColorStop(0, '#2a170f'); g.addColorStop(0.5, '#43261a'); g.addColorStop(1, '#22120b');
@@ -952,6 +955,7 @@ const GJArt = (() => {
     // st: {beat, segs:[{name,start,beats}], targets:[{beat,dir,res}], bpb, pxPerBeat, mode}
     render(st) {
       this._last = st;
+      if (!this.ctx && !(this.ctx = ZsCanvas.get2d(this.cv))) return; // no canvas memory: skip
       const c = this.ctx, W = this.W, H = this.H;
       if (!W) return;
       c.setTransform(1, 0, 0, 1, 0, 0);

@@ -36,7 +36,7 @@ var PLArt = (function(){
     if (cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
     cv.style.height = h + 'px';
     var ctx = cv.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // null when iPad Safari is out of canvas memory
     return { ctx: ctx, w: w, h: h, dpr: dpr };
   }
   function rrect(ctx, x, y, w, h, r){
@@ -703,6 +703,7 @@ var PLArt = (function(){
     function paint(t){
       var w = cv.parentNode.clientWidth || 300, h = Math.round(w * 0.62);
       var o = fit(cv, w, h);
+      if (!o.ctx) return;   // out of canvas memory: skip this frame
       drawNight(o.ctx, w, h, VESSELS[vi], th, t);
     }
     sel.addEventListener('change', function(){ vi = +sel.value; drawSectors(); update(); });
@@ -979,7 +980,9 @@ var PLArt = (function(){
       acc += dt; if (acc < 1 / 20) return true; acc = 0;
       cvs.forEach(function(c, i){
         var w = c.parentNode.clientWidth || 150, h = Math.round(w * 0.86), o = fit(c, w, h), ctx = o.ctx;
-        ctx.drawImage(MA.harbourBackdrop(w, h, o.dpr, 0.4), 0, 0, w, h);
+        if (!ctx) return;
+        var hb = MA.harbourBackdrop(w, h, o.dpr, 0.4);
+        if (hb) ctx.drawImage(hb, 0, 0, w, h);
         MA.drawSea(ctx, w, h, t, 0.4);
         MA.drawBuoy(ctx, c.getAttribute('data-b'), w / 2, h * 0.78, h * 0.25, t, { seed: i * 1.3 });
       });
@@ -1179,9 +1182,11 @@ var PLArt = (function(){
     var MA = window.MarineroArt;
     var M = _models[K.id] || (_models[K.id] = MA.buildModel(K));
     var h = Math.round(w * 0.72), o = MA.fitCanvas(cv, w, h, fast ? 1 : 2), ctx = o.ctx;
+    if (!ctx) return M; // no canvas memory: skip this frame
     var V = K.view || [0, 0, 1000], sc = w / V[2];
     ctx.setTransform(o.dpr, 0, 0, o.dpr, 0, 0);
-    ctx.drawImage(K.scene === 'post' ? MA.harbourBokeh(w, h, o.dpr) : MA.teakDeck(w, h, o.dpr), 0, 0, w, h);
+    var bg = K.scene === 'post' ? MA.harbourBokeh(w, h, o.dpr) : MA.teakDeck(w, h, o.dpr);
+    if (bg) ctx.drawImage(bg, 0, 0, w, h);
     ctx.setTransform(o.dpr * sc, 0, 0, o.dpr * sc, -V[0] * sc * o.dpr, -V[1] * sc * o.dpr);
     MA.drawModel(ctx, M, { vis: vis, devScale: o.dpr * sc, objects: MA.knotObjects(K, o.dpr * sc), ground: K.scene !== 'post' });
     ctx.setTransform(1, 0, 0, 1, 0, 0);

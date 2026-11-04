@@ -50,8 +50,13 @@ var QheArt = (function() {
   // ---------------------------------------------------------------
   // Static face: wood bezel, brass ring, enamel dial, track, numerals
   // ---------------------------------------------------------------
-  function drawFace(S, o) {
-    var c = mk(S, S), x = c.getContext('2d');
+  // Both static layers paint into a canvas the clock passes in (reused on
+  // rebuild) and return it, or null when there is no canvas memory.
+  function drawFace(S, o, c) {
+    c = c || mk(S, S);
+    c.width = S; c.height = S;
+    var x = ZsCanvas.get2d(c);
+    if (!x) return null;
     var g = geo(S), R = g.R, Rin = g.Rin, Rb = g.Rb, Rd = g.Rd;
     var small = o.size < 140;
     x.translate(S / 2, S / 2);
@@ -307,8 +312,11 @@ var QheArt = (function() {
   // ---------------------------------------------------------------
   // Glass dome reflection (cached)
   // ---------------------------------------------------------------
-  function drawGlass(S) {
-    var c = mk(S, S), x = c.getContext('2d');
+  function drawGlass(S, c) {
+    c = c || mk(S, S);
+    c.width = S; c.height = S;
+    var x = ZsCanvas.get2d(c);
+    if (!x) return null;
     var g = geo(S), Rg = g.Rin * 0.995;
     x.translate(S / 2, S / 2);
     x.save();
@@ -497,29 +505,33 @@ var QheArt = (function() {
       step: 5, brand: true, time: 0, onChange: null, onRelease: null, onTick: null, label: 'Clock'
     };
     for (var k in opts) if (Object.prototype.hasOwnProperty.call(opts, k)) o[k] = opts[k];
-    var dpr = Math.min(window.devicePixelRatio || 1, 3);
-    var S = 0, face = null, glass = null;
+    var dpr = ZsCanvas.dpr();
+    var S = 0, face = null, glass = null, faceC = null, glassC = null;
     var T = o.time, disp = o.time;
     var anim = null, drag = null, dirty = true;
     var elapsedFrom = null, marker = null, glow = null;
     var lastTickBucket = null;
-    var ctx = canvas.getContext('2d');
+    var ctx = null;
 
     function build() {
       S = Math.max(40, Math.round(o.size * dpr));
       canvas.width = S; canvas.height = S;
       canvas.style.width = o.size + 'px';
       canvas.style.height = o.size + 'px';
-      face = drawFace(S, o);
-      glass = drawGlass(S);
+      ctx = ZsCanvas.get2d(canvas);
+      // the face and glass canvases are repainted in place, not replaced
+      faceC = faceC || mk(S, S); glassC = glassC || mk(S, S);
+      face = drawFace(S, o, faceC);
+      glass = drawGlass(S, glassC);
       dirty = true; kick();
     }
 
     function render(now) {
+      if (!ctx && !(ctx = ZsCanvas.get2d(canvas))) return;
       var g = geo(S), Rd = g.Rd;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, S, S);
-      ctx.drawImage(face, 0, 0);
+      if (face) ctx.drawImage(face, 0, 0);
       ctx.translate(S / 2, S / 2);
       var m = disp, secA = 0;
       if (o.live) {
@@ -559,7 +571,7 @@ var QheArt = (function() {
       }
       drawHands(ctx, S, Rd, (m / 720) * TAU, (m / 60) * TAU, secA, o.helper, o.live || o.seconds, o.size < 140);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.drawImage(glass, 0, 0);
+      if (glass) ctx.drawImage(glass, 0, 0);
       if (glow) {
         var gt = (now - glow.t0) / 900;
         if (gt >= 1) { glow = null; }
@@ -622,6 +634,9 @@ var QheArt = (function() {
       destroy: function() {
         var i = clocks.indexOf(api);
         if (i >= 0) clocks.splice(i, 1);
+        // free the memory now; the canvas is about to leave the page
+        ZsCanvas.release(faceC); ZsCanvas.release(glassC); ZsCanvas.release(canvas);
+        faceC = glassC = face = glass = ctx = null;
       }
     };
 

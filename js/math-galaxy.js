@@ -160,6 +160,7 @@ function buildHome() {
   if (!grid) return;
   const user = typeof getActiveUser === 'function' ? getActiveUser() : null;
   const rec = recommendedRank(user && user.age);
+  ZsCanvas.releaseIn(grid); // free the old planet thumbnails now
   grid.innerHTML = MGData.RANKS.map(r => {
     const isRec = r.id === rec;
     return '<button type="button" class="level-card card-' + r.id + (isRec ? ' recommended' : '') + '" data-rank="' + r.id + '" style="--card-color:' + r.color + '">' +
@@ -669,6 +670,7 @@ function openLog() {
   const wrap = document.getElementById('log-wrap');
   const all = Object.keys(MGData.SKILLS);
   const done = all.filter(id => log[id] && log[id].m).length;
+  ZsCanvas.releaseIn(wrap);
   wrap.innerHTML =
     '<div class="mg-bar">' +
       '<button type="button" class="back-btn" id="logBack" aria-label="Back to the galaxy map">' + MGArt.icon('back') + '</button>' +

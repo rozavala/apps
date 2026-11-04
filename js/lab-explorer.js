@@ -196,7 +196,7 @@ const LabExplorer = (() => {
 
     canvas = document.getElementById('exp-canvas');
     wrap = document.getElementById('exp-canvas-wrap');
-    if (canvas) ctx = canvas.getContext('2d');
+    if (canvas) ctx = ZsCanvas.get2d(canvas);
   }
 
   // ── Experiment screen ──
@@ -254,7 +254,7 @@ const LabExplorer = (() => {
     const W = 600, H = narrow ? 640 : 420;
     const cssH = Math.round(cssW * H / W);
     canvas.style.height = cssH + 'px';
-    const dpr = Math.min(2.5, window.devicePixelRatio || 1);
+    const dpr = ZsCanvas.dpr();
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
     view = { W, H, narrow, scale: canvas.width / W, cssW };
@@ -279,6 +279,7 @@ const LabExplorer = (() => {
 
   function _loop(t) {
     raf = requestAnimationFrame(_loop);
+    if (!ctx && canvas) ctx = ZsCanvas.get2d(canvas); // retry after a memory shortage
     if (!currentLab || !mod || !ctx) return;
     if (document.hidden) { lastT = t; return; }
     const dt = Math.min(0.05, Math.max(0, (t - lastT) / 1000));

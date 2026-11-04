@@ -19,7 +19,7 @@ var MensajesSecretosArt = (function() {
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-  function dpr() { return Math.min(window.devicePixelRatio || 1, 3); }
+  function dpr() { return ZsCanvas.dpr(); }
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
   // ---------------------------------------------------------------
@@ -48,7 +48,9 @@ var MensajesSecretosArt = (function() {
   function paperTile(seed, base) {
     var S = 320, c = document.createElement('canvas');
     c.width = c.height = S;
-    var g = c.getContext('2d');
+    var g = ZsCanvas.get2d(c);
+    // no canvas memory: a transparent pixel (the plain CSS colour shows)
+    if (!g) { ZsCanvas.release(c); return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; }
     var col = base || [241, 230, 204];
     var img = g.createImageData(S, S), d = img.data, fb = makeNoise(seed || 7), r = rng(seed || 7);
     for (var y = 0; y < S; y++) for (var x = 0; x < S; x++) {
@@ -71,7 +73,9 @@ var MensajesSecretosArt = (function() {
                          fx + Math.cos(a) * len, fy + Math.sin(a) * len);
       g.stroke();
     }
-    return c.toDataURL('image/png');
+    var url = c.toDataURL('image/png');
+    ZsCanvas.release(c);
+    return url;
   }
 
   // ---------------------------------------------------------------
@@ -83,7 +87,8 @@ var MensajesSecretosArt = (function() {
     var w = Math.ceil(W * scale), h = Math.ceil(H * scale);
     canvas.width = w; canvas.height = h;
     canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    var g = canvas.getContext('2d');
+    var g = ZsCanvas.get2d(canvas);
+    if (!g) return;
     var img = g.createImageData(w, h), d = img.data;
     var fb = makeNoise(31), fb2 = makeNoise(77), r = rng(5);
     var plankH = 150 * scale, seams = [];
@@ -171,7 +176,7 @@ var MensajesSecretosArt = (function() {
   //  CAESAR WHEEL (canvas). Outer brass ring = plain, inner paper = secret.
   // ---------------------------------------------------------------
   function CaesarWheel(canvas, opts) {
-    this.c = canvas; this.g = canvas.getContext('2d');
+    this.c = canvas; this.g = ZsCanvas.get2d(canvas);
     this.opts = opts || {};
     this.alpha = this.opts.alphabet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     this.phi = 0; this.omega = 0; this.drag = null; this.sel = -1;
@@ -207,6 +212,7 @@ var MensajesSecretosArt = (function() {
     var S = Math.max(200, Math.round(rect.width || 320));
     this.S = S; this.k = dpr();
     this.c.width = Math.round(S * this.k); this.c.height = Math.round(S * this.k);
+    if (!this.g) this.g = ZsCanvas.get2d(this.c);
     this._build(); this.kick();
   };
   CaesarWheel.prototype._geom = function() {
@@ -215,10 +221,15 @@ var MensajesSecretosArt = (function() {
   };
   CaesarWheel.prototype._build = function() {
     var k = this.k, G = this._geom(), n = this.N(), step = TAU / n, self = this;
+    // free the previous layers now (iPad Safari has one canvas memory budget)
+    ZsCanvas.release(this.ring); ZsCanvas.release(this.disc);
+    this.ring = this.disc = null;
     // ---- static ring layer ----
     var ring = document.createElement('canvas');
     ring.width = ring.height = Math.round(this.S * k);
-    var g = ring.getContext('2d'); g.scale(k, k);
+    var g = ZsCanvas.get2d(ring);
+    if (!g) { ZsCanvas.release(ring); return; }
+    g.scale(k, k);
     var cx = G.cx, cy = G.cy, R = G.R, rIn = G.rIn;
     // cast shadow on desk/paper
     g.save();
@@ -297,7 +308,9 @@ var MensajesSecretosArt = (function() {
     // ---- rotating paper disc layer ----
     var D = Math.round(G.rDisc * 2 * k) + 2, disc = document.createElement('canvas');
     disc.width = disc.height = D;
-    var p = disc.getContext('2d'); p.scale(k, k);
+    var p = ZsCanvas.get2d(disc);
+    if (!p) { ZsCanvas.release(disc); return; }
+    p.scale(k, k);
     var rc = G.rDisc + 1 / k, rD = G.rDisc;
     p.save(); p.beginPath(); p.arc(rc, rc, rD, 0, TAU); p.clip();
     var pg = p.createRadialGradient(rc - rD * 0.2, rc - rD * 0.25, rD * 0.1, rc, rc, rD);
@@ -426,17 +439,19 @@ var MensajesSecretosArt = (function() {
     }
   };
   CaesarWheel.prototype._draw = function() {
+    if (!this.g && !(this.g = ZsCanvas.get2d(this.c))) return; // no canvas memory: skip
+    if (!this.ring || !this.disc) this._build();
     var g = this.g, k = this.k, G = this._geom(), step = this.step(), n = this.N();
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, this.c.width, this.c.height);
-    g.drawImage(this.ring, 0, 0);
+    if (this.ring) g.drawImage(this.ring, 0, 0);
     g.setTransform(k, 0, 0, k, 0, 0);
     // detent feel while dragging: pull gently toward the nearest notch
     var phi = this.phi;
     if (this.drag) { var nearest = Math.round(phi / step) * step; phi += (nearest - phi) * 0.3; }
     g.save();
     g.translate(G.cx, G.cy); g.rotate(phi);
-    g.drawImage(this.disc, -this.discR, -this.discR, this.discR * 2, this.discR * 2);
+    if (this.disc) g.drawImage(this.disc, -this.discR, -this.discR, this.discR * 2, this.discR * 2);
     g.restore();
     // reading window at 12 o'clock + selected column highlight
     var cols = [0]; if (this.sel >= 0) cols.push(this.sel);
@@ -551,6 +566,7 @@ var MensajesSecretosArt = (function() {
   CaesarWheel.prototype.destroy = function() {
     this.alive = false; if (this.raf) cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this._rs);
+    ZsCanvas.release(this.ring); ZsCanvas.release(this.disc); this.ring = this.disc = null;
   };
 
   // ---------------------------------------------------------------
@@ -803,7 +819,7 @@ var MensajesSecretosArt = (function() {
   //  SCYTALE (canvas): helical strip on a turning wooden rod.
   // ---------------------------------------------------------------
   function Scytale(canvas, opts) {
-    this.c = canvas; this.g = canvas.getContext('2d'); this.opts = opts || {};
+    this.c = canvas; this.g = ZsCanvas.get2d(canvas); this.opts = opts || {};
     this.strip = 'SCYTALE'; this.rows = 3; this.rot = 0; this.omega = 0;
     this.rr = null; this.drag = null; this.raf = 0; this.alive = true;
     this.grain = []; var r = rng(400);
@@ -863,6 +879,7 @@ var MensajesSecretosArt = (function() {
     return busy;
   };
   Scytale.prototype._draw = function() {
+    if (!this.g && !(this.g = ZsCanvas.get2d(this.c))) return; // no canvas memory: skip
     var g = this.g, W = this.W, H = this.H, k = this.k, rr = this.rr || this._targetRR();
     g.setTransform(k, 0, 0, k, 0, 0); g.clearRect(0, 0, W, H);
     var cy = H * 0.5, x0 = W * 0.07, x1 = W * 0.95, capRx = rr * 0.26;

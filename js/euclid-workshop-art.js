@@ -29,7 +29,8 @@ var EuclidArt = (function() {
   // w, h in DEVICE pixels. Returns an offscreen canvas.
   function makePaper(w, h, dpr) {
     w = Math.max(1, Math.round(w || 0)); h = Math.max(1, Math.round(h || 0));
-    var c = canvas(w, h), g = c.getContext('2d');
+    var c = canvas(w, h), g = ZsCanvas.get2d(c);
+    if (!g) { ZsCanvas.release(c); return null; } // no canvas memory: callers use a flat colour
     var R = rng(1729);
     dpr = dpr || 1;
 
@@ -42,7 +43,9 @@ var EuclidArt = (function() {
     // low-frequency mottling: tiny random canvases scaled up smoothly
     [[70, 0.10], [22, 0.07], [9, 0.05]].forEach(function(o) {
       var cw = Math.max(2, Math.ceil(w / (o[0] * dpr))), ch = Math.max(2, Math.ceil(h / (o[0] * dpr)));
-      var m = canvas(cw, ch), mg = m.getContext('2d'), id = mg.createImageData(cw, ch);
+      var m = canvas(cw, ch), mg = ZsCanvas.get2d(m);
+      if (!mg) { ZsCanvas.release(m); return; }
+      var id = mg.createImageData(cw, ch);
       for (var i = 0; i < cw * ch; i++) {
         var v = R();
         id.data[i * 4] = 150 + v * 60; id.data[i * 4 + 1] = 110 + v * 50; id.data[i * 4 + 2] = 60 + v * 30;
@@ -51,6 +54,7 @@ var EuclidArt = (function() {
       mg.putImageData(id, 0, 0);
       g.save(); g.globalAlpha = o[1]; g.imageSmoothingEnabled = true;
       g.drawImage(m, 0, 0, w, h); g.restore();
+      ZsCanvas.release(m);
     });
 
     // fine grain
@@ -98,7 +102,9 @@ var EuclidArt = (function() {
   var _graphite = null;
   function graphitePattern(g) {
     if (!_graphite) {
-      var N = 96, c = canvas(N, N), cg = c.getContext('2d'), id = cg.createImageData(N, N), R = rng(314);
+      var N = 96, c = canvas(N, N), cg = ZsCanvas.get2d(c);
+      if (!cg) { ZsCanvas.release(c); return '#4a4a52'; } // plain graphite colour
+      var id = cg.createImageData(N, N), R = rng(314);
       for (var i = 0; i < N * N; i++) {
         var v = R(), sh = 46 + v * 40;
         id.data[i * 4] = sh; id.data[i * 4 + 1] = sh; id.data[i * 4 + 2] = sh + 6;

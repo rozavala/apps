@@ -195,7 +195,9 @@ var ArtBrush = (function () {
     for (var i = 0; i < _tileCache.length; i++) if (_tileCache[i].key === key) return _tileCache[i].c;
     var t = tooth(kind), c = document.createElement('canvas');
     c.width = c.height = TILE;
-    var ctx = c.getContext('2d'), img = ctx.createImageData(TILE, TILE), d = img.data, rgb = hexToRgb(hex);
+    var ctx = ZsCanvas.get2d(c);
+    if (!ctx) { ZsCanvas.release(c); return null; }
+    var img = ctx.createImageData(TILE, TILE), d = img.data, rgb = hexToRgb(hex);
     for (var p = 0, q = 0; p < t.length; p++, q += 4) {
       var v = invert ? 1 - t[p] : t[p];
       var a = v <= lo ? 0 : v >= hi ? 1 : (v - lo) / (hi - lo);
@@ -204,7 +206,7 @@ var ArtBrush = (function () {
     }
     ctx.putImageData(img, 0, 0);
     _tileCache.unshift({ key: key, c: c });
-    if (_tileCache.length > 36) _tileCache.pop();
+    if (_tileCache.length > 36) ZsCanvas.release(_tileCache.pop().c);
     return c;
   }
 
@@ -216,7 +218,10 @@ var ArtBrush = (function () {
     if (_paperUrl) return _paperUrl;
     var t = tooth('fine'), co = tooth('coarse');
     var c = document.createElement('canvas'); c.width = c.height = TILE;
-    var ctx = c.getContext('2d'), img = ctx.createImageData(TILE, TILE), d = img.data;
+    var ctx = ZsCanvas.get2d(c);
+    // no canvas memory: plain paper colour this time, grain next time
+    if (!ctx) { ZsCanvas.release(c); return 'data:image/gif;base64,R0lGODlhAQABAIAAAPv48AAAACwAAAAAAQABAAACAkQBADs='; }
+    var img = ctx.createImageData(TILE, TILE), d = img.data;
     var mot = new Float32Array(TILE * TILE); _noise(TILE, 8, rng(5), mot, 1);
     for (var p = 0, q = 0; p < t.length; p++, q += 4) {
       var s = (1 - t[p]) * 9 + (1 - co[p]) * 3 + mot[p] * 3;
@@ -235,6 +240,7 @@ var ArtBrush = (function () {
       ctx.stroke();
     }
     _paperUrl = c.toDataURL('image/png');
+    ZsCanvas.release(c);
     return _paperUrl;
   }
 
@@ -242,8 +248,11 @@ var ArtBrush = (function () {
   var _soft = null;
   function softSprite() {
     if (_soft) return _soft;
-    _soft = document.createElement('canvas'); _soft.width = _soft.height = 128;
-    var x = _soft.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var x = ZsCanvas.get2d(c);
+    if (!x) { ZsCanvas.release(c); return null; }
+    _soft = c;
+    var g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
     g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.55, 'rgba(0,0,0,0.85)'); g.addColorStop(1, 'rgba(0,0,0,0)');
     x.fillStyle = g; x.fillRect(0, 0, 128, 128);
     return _soft;
@@ -262,22 +271,36 @@ var ArtBrush = (function () {
     eraser:      { label: 'Eraser',      widths: [9, 17, 28, 44, 66] }
   };
 
+  // Scratch canvases, reused by index. _work2d returns [canvas, ctx], or
+  // null when there is no canvas memory (the caller then skips the effect).
   function _work(n, w, h) {
     var c = _work.pool[n] || (_work.pool[n] = document.createElement('canvas'));
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
-    else c.getContext('2d').clearRect(0, 0, w, h);
+    else { var x = ZsCanvas.get2d(c); if (x) x.clearRect(0, 0, w, h); }
     return c;
   }
   _work.pool = [];
+  function _work2d(n, w, h) {
+    var c = _work(n, w, h), x = ZsCanvas.get2d(c);
+    return x ? [c, x] : null;
+  }
+  // Under memory pressure: drop the scratch canvases and pattern tiles
+  // (they are made again on the next stroke).
+  ZsCanvas.onPressure(function () {
+    if (!_work.busy) { _work.pool.forEach(ZsCanvas.release); _work.pool = []; }
+    _tileCache.forEach(function (t) { ZsCanvas.release(t.c); });
+    _tileCache = [];
+  });
 
   // Blur by shrinking and growing again (bilinear) — no ctx.filter.
   function _blurInto(dst, src, k) {
     var w = src.width, h = src.height;
     var sw = Math.max(1, Math.round(w / k)), sh = Math.max(1, Math.round(h / k));
-    var s = _work(9, sw, sh), sx = s.getContext('2d');
+    var s = _work(9, sw, sh), sx = ZsCanvas.get2d(s);
+    var dx = ZsCanvas.get2d(dst);
+    if (!sx || !dx) return;
     sx.imageSmoothingEnabled = true;
     sx.drawImage(src, 0, 0, sw, sh);
-    var dx = dst.getContext('2d');
     dx.imageSmoothingEnabled = true;
     dx.drawImage(s, 0, 0, sw, sh, 0, 0, w, h);
   }
@@ -297,12 +320,15 @@ var ArtBrush = (function () {
     B.rem = t - len;
   }
 
+  // A grain pattern, or the flat colour when the tile could not be made.
+  function _pat(ctx, tile, hex) { return tile ? ctx.createPattern(tile, 'repeat') : hex; }
+
   var ENGINE = {
     pencil: {
       begin: function (S, B, p) {
         var ctx = S.paint;
-        B.light = ctx.createPattern(toothTile('fine', S.hex, 0.50, 0.92), 'repeat');
-        B.heavy = ctx.createPattern(toothTile('fine', S.hex, 0.16, 0.62), 'repeat');
+        B.light = _pat(ctx, toothTile('fine', S.hex, 0.50, 0.92), S.hex);
+        B.heavy = _pat(ctx, toothTile('fine', S.hex, 0.16, 0.62), S.hex);
         B.rem = 0;
         this._stamp(S, B, p.x, p.y, p.p);
       },
@@ -323,8 +349,8 @@ var ArtBrush = (function () {
     crayon: {
       begin: function (S, B, p) {
         var ctx = S.paint;
-        B.light = ctx.createPattern(toothTile('coarse', S.hex, 0.40, 0.56), 'repeat');
-        B.heavy = ctx.createPattern(toothTile('coarse', S.hex, 0.16, 0.36), 'repeat');
+        B.light = _pat(ctx, toothTile('coarse', S.hex, 0.40, 0.56), S.hex);
+        B.heavy = _pat(ctx, toothTile('coarse', S.hex, 0.16, 0.36), S.hex);
         B.rem = 0; B.r = S.rand;
         this._stamp(S, B, p.x, p.y, p.p, 1, 0);
       },
@@ -350,8 +376,8 @@ var ArtBrush = (function () {
     chalk: {
       begin: function (S, B, p) {
         var ctx = S.paint;
-        B.light = ctx.createPattern(toothTile('chalk', S.hex, 0.52, 0.64), 'repeat');
-        B.heavy = ctx.createPattern(toothTile('chalk', S.hex, 0.30, 0.48), 'repeat');
+        B.light = _pat(ctx, toothTile('chalk', S.hex, 0.52, 0.64), S.hex);
+        B.heavy = _pat(ctx, toothTile('chalk', S.hex, 0.30, 0.48), S.hex);
         B.rem = 0; B.r = S.rand;
         this._stamp(S, B, p.x, p.y, p.p);
       },
@@ -443,19 +469,29 @@ var ArtBrush = (function () {
       commit: function (S, R) {
         var W = R.w, H = R.h;
         if (W < 2 || H < 2) return;
-        var m = _work(0, W, H), mx = m.getContext('2d');
+        _work.busy = true;
+        try { this._commit(S, R, W, H); } finally { _work.busy = false; }
+      },
+      _commit: function (S, R, W, H) {
+        var w0 = _work2d(0, W, H), w3 = _work2d(3, W, H), w4 = _work2d(4, W, H);
+        if (!w0 || !w3 || !w4) {
+          // no memory for the wash effects: keep the plain wet stroke
+          ENGINE.marker.commit(S, R);
+          return;
+        }
+        var m = w0[0], mx = w0[1];
         mx.drawImage(S.wet, R.x, R.y, W, H, 0, 0, W, H);
 
         var soft = _work(1, W, H); _blurInto(soft, m, Math.max(4, S.w / 3));
         var inner = _work(2, W, H); _blurInto(inner, m, Math.max(2, S.w / 9));
 
-        var f = _work(3, W, H), fx = f.getContext('2d');
+        var f = w3[0], fx = w3[1];
         // 1. soft bloom where the water spread into the paper
         fx.globalAlpha = 0.20; fx.drawImage(soft, 0, 0);
         // 2. the thin wash itself
         fx.globalAlpha = 0.30; fx.drawImage(m, 0, 0);
         // 3. pigment drying darker at the edge of the wet area
-        var rim = _work(4, W, H), rx = rim.getContext('2d');
+        var rim = w4[0], rx = w4[1];
         rx.drawImage(m, 0, 0);
         rx.globalCompositeOperation = 'destination-out'; rx.drawImage(inner, 0, 0);
         rx.globalCompositeOperation = 'source-in'; rx.fillStyle = rgbStr(shade(S.rgb, -0.22)); rx.fillRect(0, 0, W, H);
@@ -463,8 +499,9 @@ var ArtBrush = (function () {
         fx.globalAlpha = 0.75; fx.drawImage(rim, 0, 0);
         // 4. pools where the brush rested
         var pools = S.pools || [];
-        if (pools.length) {
-          var pc = _work(5, W, H), px = pc.getContext('2d');
+        var w5 = pools.length ? _work2d(5, W, H) : null;
+        if (w5) {
+          var pc = w5[0], px = w5[1];
           pools.forEach(function (q) {
             var g = px.createRadialGradient(q.x - R.x, q.y - R.y, 0, q.x - R.x, q.y - R.y, q.r);
             g.addColorStop(0, rgbStr(shade(S.rgb, -0.12), 0.5)); g.addColorStop(1, rgbStr(S.rgb, 0));
@@ -476,8 +513,11 @@ var ArtBrush = (function () {
         // 5. granulation: pigment settles in the paper's valleys
         fx.globalAlpha = 0.3;
         fx.globalCompositeOperation = 'destination-out';
-        var gp = fx.createPattern(toothTile('gran', '#000000', 0.45, 0.95), 'repeat');
-        fx.save(); fx.translate(-R.x, -R.y); fx.fillStyle = gp; fx.fillRect(R.x, R.y, W, H); fx.restore();
+        var gt = toothTile('gran', '#000000', 0.45, 0.95);
+        if (gt) {
+          var gp = fx.createPattern(gt, 'repeat');
+          fx.save(); fx.translate(-R.x, -R.y); fx.fillStyle = gp; fx.fillRect(R.x, R.y, W, H); fx.restore();
+        }
         fx.globalCompositeOperation = 'source-over'; fx.globalAlpha = 1;
 
         var ctx = S.paint;
@@ -587,7 +627,9 @@ var ArtBrush = (function () {
         var ctx = S.paint, r = S.w / 2;
         ctx.globalCompositeOperation = 'destination-out';
         ctx.globalAlpha = 0.9;
-        ctx.drawImage(softSprite(), x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
+        var sp = softSprite();
+        if (sp) ctx.drawImage(sp, x - r * 1.2, y - r * 1.2, r * 2.4, r * 2.4);
+        else { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill(); }
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = 'source-over';
         S.mark(x, y, r * 1.3);
@@ -654,7 +696,7 @@ var ArtBrush = (function () {
     this.wetC = host.querySelector('.as-c-wet');
     this.paintC.width = this.wetC.width = this.W;
     this.paintC.height = this.wetC.height = this.H;
-    this.paint = this.paintC.getContext('2d', { willReadFrequently: false });
+    this.paint = ZsCanvas.get2d(this.paintC, { willReadFrequently: false });
     this.wet = null;
     this.before = document.createElement('canvas');
     this.before.width = this.W; this.before.height = this.H;
@@ -697,7 +739,8 @@ var ArtBrush = (function () {
     if (this._onWin) window.removeEventListener('resize', this._onWin);
     window.removeEventListener('keydown', this._key);
     window.removeEventListener('keyup', this._keyUp);
-    this.paintC.width = this.wetC.width = this.before.width = 1;
+    ZsCanvas.release(this.paintC); ZsCanvas.release(this.wetC); ZsCanvas.release(this.before);
+    this.paint = this.wet = null;
     this.undoStack = []; this.redoStack = [];
     this.host.innerHTML = '';
     this.destroyed = true;
@@ -751,8 +794,18 @@ var ArtBrush = (function () {
   Surface.prototype.paperScale = function () { return this.W / (this.cssW * this.zoom); };
 
   Surface.prototype.wetCtx = function () {
-    if (!this.wet) this.wet = this.wetC.getContext('2d');
+    if (!this.wet && !this.destroyed) this.wet = ZsCanvas.get2d(this.wetC);
     return this.wet;
+  };
+  // The paint and "before" contexts. Either can be missing when iPad
+  // Safari is out of canvas memory; they are asked for again each time,
+  // and drawing waits until they exist.
+  Surface.prototype._ctx = function () {
+    if (!this.paint && !this.destroyed) this.paint = ZsCanvas.get2d(this.paintC, { willReadFrequently: false });
+    return this.paint;
+  };
+  Surface.prototype._bx = function () {
+    return this.destroyed ? null : ZsCanvas.get2d(this.before);
   };
 
   Surface.prototype.squareGrid = function (n) {
@@ -896,7 +949,8 @@ var ArtBrush = (function () {
   // ── Strokes ────────────────────────────────────────────────────
   Surface.prototype._beginStroke = function (e) {
     var self = this;
-    var bx = this.before.getContext('2d');
+    var bx = this._bx(), eng0 = ENGINE[this.media];
+    if (!this._ctx() || !bx || (!this.shape && eng0 && eng0.wetStyle && !this.wetCtx())) { this.stroke = null; return; }
     bx.clearRect(0, 0, this.W, this.H);
     bx.drawImage(this.paintC, 0, 0);
     var p0 = this.toPaper(e);
@@ -1066,6 +1120,7 @@ var ArtBrush = (function () {
     this.toPaper = function (e) { return e._p ? { x: e._p.x, y: e._p.y } : toPaper.call(self, e); };
     try {
       this._beginStroke(fake(pts[0]));
+      if (!this.stroke) return;
       for (var i = 1; i < pts.length; i++) this._addPoint(fake(pts[i]));
       this._endStroke();
     } finally {
@@ -1084,6 +1139,8 @@ var ArtBrush = (function () {
   Surface.prototype.fillPaper = function (px, py, hex) {
     var W = this.W, H = this.H, sx = Math.floor(px), sy = Math.floor(py);
     if (sx < 0 || sy < 0 || sx >= W || sy >= H) return false;
+    var bx = this._bx();
+    if (!this._ctx() || !bx) return false;
     var img = this.paint.getImageData(0, 0, W, H), d = img.data, N = W * H, i;
     var region = new Uint8Array(N);
     var seed = sy * W + sx, sa = d[seed * 4 + 3];
@@ -1108,10 +1165,11 @@ var ArtBrush = (function () {
     }
     if (x1 < 0) return false;
     var R = { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
-    var bx = this.before.getContext('2d');
+    var w6 = _work2d(6, R.w, R.h);
+    if (!w6) return false;
     bx.clearRect(0, 0, W, H); bx.drawImage(this.paintC, 0, 0);
 
-    var fc = _work(6, R.w, R.h), fx = fc.getContext('2d'), fi = fx.createImageData(R.w, R.h), fd = fi.data;
+    var fc = w6[0], fx = w6[1], fi = fx.createImageData(R.w, R.h), fd = fi.data;
     var rgb = hexToRgb(hex), t = tooth('fine');
     for (y = 0; y < R.h; y++) for (x = 0; x < R.w; x++) {
       var gi = (y + R.y) * W + x + R.x;
@@ -1171,7 +1229,7 @@ var ArtBrush = (function () {
   // ── Undo / redo (stores only the changed rectangle) ────────────
   Surface.prototype._pushUndo = function (R) {
     var before;
-    try { before = this.before.getContext('2d').getImageData(R.x, R.y, R.w, R.h); } catch (e) { return; }
+    try { before = this._bx().getImageData(R.x, R.y, R.w, R.h); } catch (e) { return; }
     this.undoStack.push({ R: R, img: before });
     this.undoBytes += R.w * R.h * 4;
     this.redoStack = [];
@@ -1182,6 +1240,7 @@ var ArtBrush = (function () {
     this.emit('history');
   };
   Surface.prototype._swap = function (from, to) {
+    if (!this._ctx()) return false;
     var u = from.pop();
     if (!u) return false;
     var now = this.paint.getImageData(u.R.x, u.R.y, u.R.w, u.R.h);
@@ -1201,7 +1260,8 @@ var ArtBrush = (function () {
   Surface.prototype.canRedo = function () { return this.redoStack.length > 0; };
 
   Surface.prototype.clear = function () {
-    var bx = this.before.getContext('2d');
+    var bx = this._bx();
+    if (!this._ctx() || !bx) return;
     bx.clearRect(0, 0, this.W, this.H); bx.drawImage(this.paintC, 0, 0);
     this.paint.clearRect(0, 0, this.W, this.H);
     this._pushUndo({ x: 0, y: 0, w: this.W, h: this.H });
@@ -1210,6 +1270,7 @@ var ArtBrush = (function () {
 
   // ── Reading the picture ────────────────────────────────────────
   Surface.prototype.inkStats = function () {
+    if (!this._ctx()) return { coverage: 0 };
     var d = this.paint.getImageData(0, 0, this.W, this.H).data, n = 0;
     for (var i = 3; i < d.length; i += 16) if (d[i] > 30) n++;
     return { coverage: n / (d.length / 16) };
@@ -1224,7 +1285,7 @@ var ArtBrush = (function () {
       if (pts[i].y < y0) y0 = pts[i].y; if (pts[i].y > y1) y1 = pts[i].y;
     }
     var R = this._bboxRect({ x0: x0, y0: y0, x1: x1, y1: y1 }, tol + 1);
-    if (!R) return 0;
+    if (!R || !this._ctx()) return 0;
     var d = this.paint.getImageData(R.x, R.y, R.w, R.h).data, hit = 0, st = Math.max(1, Math.round(tol / 4));
     for (i = 0; i < pts.length; i++) {
       var px = Math.round(pts[i].x - R.x), py = Math.round(pts[i].y - R.y), found = false;
@@ -1249,7 +1310,8 @@ var ArtBrush = (function () {
       if (w >= h) { h = Math.round(maxDim / w * h); w = maxDim; } else { w = Math.round(maxDim / h * w); h = maxDim; }
     }
     var c = document.createElement('canvas'); c.width = w; c.height = h;
-    var x = c.getContext('2d');
+    var x = ZsCanvas.get2d(c);
+    if (!x) { c.width = c.height = 1; return c; }
     x.fillStyle = rgbStr(PAPER_RGB); x.fillRect(0, 0, w, h);
     x.imageSmoothingEnabled = true;
     if (x.imageSmoothingQuality) x.imageSmoothingQuality = 'high';
@@ -1259,7 +1321,8 @@ var ArtBrush = (function () {
 
   // Put an existing image (e.g. reopened art) onto the paper.
   Surface.prototype.loadImage = function (img) {
-    var bx = this.before.getContext('2d');
+    var bx = this._bx();
+    if (!this._ctx() || !bx) return;
     bx.clearRect(0, 0, this.W, this.H); bx.drawImage(this.paintC, 0, 0);
     this.paint.drawImage(img, 0, 0, this.W, this.H);
     this._pushUndo({ x: 0, y: 0, w: this.W, h: this.H });

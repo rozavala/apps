@@ -949,7 +949,7 @@ var CocinaLab = (function() {
     function start(t, canvas) {
       stop();
       if (!canvas) return;
-      L = { t: t, cv: canvas, ctx: canvas.getContext('2d'), time: 0, last: 0, done: false,
+      L = { t: t, cv: canvas, ctx: null, time: 0, last: 0, done: false,
         drops: [], ripples: [], bubbles: [], grains: [], hold: false, tilt: 0 };
       if (t.scene === 'jug') { L.vol = 0; L.shown = 0; }
       if (t.scene === 'cups') { L.bowl = 0; L.scoops = []; L.active = null; L.knifeX = null; L.dragKnife = false; }
@@ -966,17 +966,20 @@ var CocinaLab = (function() {
       raf = 0;
       _pourSound(0);
       if (L && L.ro) { try { L.ro.disconnect(); } catch (e) {} }
+      if (L) ZsCanvas.release(L.bg); // free the backdrop now
       L = null;
     }
 
     function _size() {
       var cv = L.cv, W = Math.max(280, cv.clientWidth || cv.parentNode.clientWidth || 360);
       var H = W < 520 ? Math.round(W * 1.0) : Math.round(Math.min(560, W * 0.62));
-      var dpr = Math.min(3, window.devicePixelRatio || 1);
+      var dpr = ZsCanvas.dpr();
       cv.style.height = H + 'px';
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      L.ctx = ZsCanvas.get2d(cv);
       L.W = W; L.H = H; L.dpr = dpr;
       L.counterY = Math.round(H * (W < 520 ? 0.52 : 0.58));
+      ZsCanvas.release(L.bg); // free the old backdrop before making the new one
       L.bg = A.makeBackdrop(W, H, L.counterY, dpr);
       _layout();
     }
@@ -1118,7 +1121,7 @@ var CocinaLab = (function() {
       var dt = Math.min(0.05, (now - L.last) / 1000);
       L.last = now; L.time += dt;
       _update(dt);
-      _draw();
+      if (L.ctx || (L.ctx = ZsCanvas.get2d(L.cv))) _draw(); // no canvas memory: skip the frame
       raf = requestAnimationFrame(_frame);
     }
 
@@ -1203,7 +1206,8 @@ var CocinaLab = (function() {
       var ctx = L.ctx;
       ctx.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
       ctx.clearRect(0, 0, L.W, L.H);
-      ctx.drawImage(L.bg, 0, 0, L.W, L.H);
+      if (L.bg) ctx.drawImage(L.bg, 0, 0, L.W, L.H);
+      else { ctx.fillStyle = '#EFEBE5'; ctx.fillRect(0, 0, L.W, L.H); }
     }
 
     function _draw() {

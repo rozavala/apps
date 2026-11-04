@@ -695,7 +695,8 @@ LXLabs.astronomy = (() => {
     if (S.dirty || !S.mwc) {
       const q = 4;
       const mwc = S.mwc || A.offscreen(W / q, H / q);
-      const m = mwc.getContext('2d');
+      const m = ZsCanvas.get2d(mwc);
+      if (m) {
       m.setTransform(1, 0, 0, 1, 0, 0);
       m.clearRect(0, 0, mwc.width, mwc.height);
       m.scale(1 / q, 1 / q);
@@ -724,6 +725,7 @@ LXLabs.astronomy = (() => {
         m.fillStyle = g; m.beginPath(); m.arc(s[0], s[1], p.s * pxDeg, 0, Math.PI * 2); m.fill();
       });
       m.globalCompositeOperation = 'source-over';
+      } // (no canvas memory: the sky is drawn without the Milky Way)
       S.mwc = mwc;
       // background speckle
       S.bgp = [];
@@ -864,7 +866,7 @@ LXLabs.astronomy = (() => {
   }
 
   function stop() { if (S) S.run = null; }
-  function resize() { S.mwc = null; S.dirty = true; }
+  function resize() { ZsCanvas.release(S.mwc); S.mwc = null; S.dirty = true; }
   return { challenges, start, frame, down, move, up, stop, resize, onActive, _S: () => S, _lst: lst, _altaz: altaz, _tapStar: id => { const q = S.proj.find(p => p.s.id === id); if (q) tap({ x: q.x, y: q.y }); return !!q; } };
 })();
 

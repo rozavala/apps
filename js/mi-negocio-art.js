@@ -150,7 +150,8 @@ var MiNegocioArt = (function() {
 
   // ---- clouds (cached sprites) --------------------------------------
   function makeCloud(w, h, seed, tone, k) {
-    var c = makeCanvas(w * k, h * k), x = c.getContext('2d');
+    var c = makeCanvas(w * k, h * k), x = ZsCanvas.get2d(c);
+    if (!x) { ZsCanvas.release(c); return null; } // no canvas memory: no cloud
     x.scale(k, k);
     var r = rng(seed);
     var n = 16 + Math.floor(r() * 10);
@@ -747,7 +748,8 @@ var MiNegocioArt = (function() {
 
   // Build the whole static background into one offscreen canvas.
   function buildBackground(W, k, place, weather, sx) {
-    var c = makeCanvas(W * k, H * k), x = c.getContext('2d');
+    var c = makeCanvas(W * k, H * k), x = ZsCanvas.get2d(c);
+    if (!x) { ZsCanvas.release(c); return null; } // no canvas memory: sky only
     x.scale(k, k);
     var sunny = weather === 'sunny' || weather === 'hot';
     var rr = rng(2024);
@@ -1787,7 +1789,7 @@ var MiNegocioArt = (function() {
   // ---- the scene director ------------------------------------------
   function Scene(canvas, opts) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = ZsCanvas.get2d(canvas);
     this.cfg = {
       place: 'plaza', weather: 'sunny', event: null, product: 'empanadas',
       price: 2000, label: 'Empanadas', short: 'Empanadas', stock: 12, made: 12, dayOld: 0
@@ -1821,28 +1823,39 @@ var MiNegocioArt = (function() {
       if ((k === 'place' || k === 'weather') && this.cfg[k] !== o[k]) rebuild = true;
       this.cfg[k] = o[k];
     }
-    if (rebuild) { this.bg = null; this._makeWeather(); }
+    if (rebuild) { this._freeBg(); this._makeWeather(); }
+  };
+
+  // The cached background and cloud sprites, freed at once when they are
+  // replaced (iPad Safari has one memory budget for all canvases).
+  Scene.prototype._freeBg = function() {
+    ZsCanvas.release(this.bg); this.bg = null;
+  };
+  Scene.prototype._freeClouds = function() {
+    (this.clouds || []).forEach(function(cl) { ZsCanvas.release(cl.img); });
+    this.clouds = [];
   };
 
   Scene.prototype.resize = function() {
     var rect = this.canvas.getBoundingClientRect();
     var cw = Math.max(200, rect.width || this.canvas.clientWidth || 600);
     var ch = Math.max(160, rect.height || this.canvas.clientHeight || 400);
-    var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    var dpr = ZsCanvas.dpr();
     this.canvas.width = Math.round(cw * dpr);
     this.canvas.height = Math.round(ch * dpr);
+    this.ctx = ZsCanvas.get2d(this.canvas);
     this.k = (ch * dpr) / H;
     this.W = cw / ch * H;
     this.sx = clamp(this.W * 0.52, STAND_W / 2 + 150, this.W - STAND_W / 2 - 110);
     if (this.W < STAND_W + 260) this.sx = this.W - STAND_W / 2 - 100;
-    this.bg = null;
+    this._freeBg();
     this._makeWeather();
   };
 
   Scene.prototype._makeWeather = function() {
     var w = this.cfg.weather, W = this.W || 1000, k = this.k || 1;
     var r = rng(77);
-    this.clouds = [];
+    this._freeClouds();
     var n = w === 'rainy' ? 7 : w === 'cloudy' ? 7 : w === 'hot' ? 1 : 3;
     var tone = w === 'rainy' ? 'storm' : w === 'cloudy' ? 'grey' : 'white';
     for (var i = 0; i < n; i++) {
@@ -1866,10 +1879,11 @@ var MiNegocioArt = (function() {
   Scene.prototype.start = function() {
     if (this.running) return;
     this.running = true;
+    if (this._freed) { this._freed = false; this._makeWeather(); } // clouds freed by stop()
     this._last = performance.now();
     requestAnimationFrame(this._loop);
   };
-  Scene.prototype.stop = function() { this.running = false; };
+  Scene.prototype.stop = function() { this.running = false; this._freeBg(); this._freeClouds(); this._freed = true; };
 
   Scene.prototype.idle = function() {
     this.mode = 'idle';
@@ -2033,6 +2047,7 @@ var MiNegocioArt = (function() {
   };
 
   Scene.prototype._draw = function() {
+    if (!this.ctx && !(this.ctx = ZsCanvas.get2d(this.canvas))) return; // no canvas memory: skip
     var x = this.ctx, W = this.W, k = this.k, cfg = this.cfg, t = this.time;
     var nowS = performance.now() / 1000;
     x.setTransform(k, 0, 0, k, 0, 0);
@@ -2041,11 +2056,11 @@ var MiNegocioArt = (function() {
     // clouds
     for (var c = 0; c < this.clouds.length; c++) {
       var cl = this.clouds[c];
-      x.drawImage(cl.img, cl.x, cl.y, cl.w, cl.h);
+      if (cl.img) x.drawImage(cl.img, cl.x, cl.y, cl.w, cl.h);
     }
     if (!this.bg) this.bg = buildBackground(W, k, cfg.place, cfg.weather, this.sx);
     x.setTransform(1, 0, 0, 1, 0, 0);
-    x.drawImage(this.bg, 0, 0);
+    if (this.bg) x.drawImage(this.bg, 0, 0);
     x.setTransform(k, 0, 0, k, 0, 0);
     if (cfg.place === 'playa') this._drawWaves(x, W, nowS);
     if (cfg.event && cfg.event.bunting) drawBunting(x, W, nowS);
@@ -2205,9 +2220,10 @@ var MiNegocioArt = (function() {
   function drawThumb(canvas, product) {
     var rect = canvas.getBoundingClientRect();
     var cw = rect.width || 120, ch = rect.height || 90;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    var dpr = ZsCanvas.dpr();
     canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
-    var x = canvas.getContext('2d');
+    var x = ZsCanvas.get2d(canvas);
+    if (!x) return;
     var k = dpr * ch / 100;
     x.setTransform(k, 0, 0, k, 0, 0);
     var W = cw / ch * 100;

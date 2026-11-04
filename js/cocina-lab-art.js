@@ -509,7 +509,8 @@ var CocinaArt = (function() {
   function makeBackdrop(W, H, counterY, dpr) {
     var c = document.createElement('canvas');
     c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
-    var x = c.getContext('2d');
+    var x = ZsCanvas.get2d(c);
+    if (!x) { ZsCanvas.release(c); return null; } // no canvas memory: plain wall colour
     x.setTransform(dpr, 0, 0, dpr, 0, 0);
     var r = rng(7 + Math.round(W));
 

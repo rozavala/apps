@@ -41,7 +41,7 @@ var MGArt = (function() {
       return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     } catch (e) { return false; }
   }
-  function dpr() { return Math.min(2, window.devicePixelRatio || 1); }
+  function dpr() { return ZsCanvas.dpr(); }
 
   // Small seeded RNG so every planet looks the same on every visit.
   function rng(seed) {
@@ -125,17 +125,34 @@ var MGArt = (function() {
     g.beginPath(); g.arc(x, y, cr * 0.95, 0.1 * Math.PI, 0.7 * Math.PI); g.stroke();
   }
 
-  var texCache = {};
+  // Planet textures, most recently used last. iPad Safari caps the
+  // memory of all canvases on a page, so the cache is small, textures
+  // are at most 512 px across (drawn larger they are smooth gradients
+  // anyway), evicted canvases are released at once, and the whole cache
+  // empties when memory runs short.
+  var TEX_MAX_R = 256, TEX_CACHE_MAX = 12;
+  var texCache = {}, texOrder = [];
+  function dropTex(key) {
+    ZsCanvas.release(texCache[key]);
+    delete texCache[key];
+    var i = texOrder.indexOf(key);
+    if (i >= 0) texOrder.splice(i, 1);
+  }
+  ZsCanvas.onPressure(function() { texOrder.slice().forEach(dropTex); });
   function planetTex(kind, R) {
     // Quantise the size so a growing planet reuses a few textures.
-    R = R <= 32 ? Math.max(4, Math.round(R)) : Math.min(720, Math.ceil(R / 24) * 24);
+    R = R <= 32 ? Math.max(4, Math.round(R)) : Math.min(TEX_MAX_R, Math.ceil(R / 24) * 24);
     var key = kind + ':' + R;
-    if (texCache[key]) return texCache[key];
-    var keys = Object.keys(texCache);
-    if (keys.length > 48) keys.slice(0, 16).forEach(function(k) { delete texCache[k]; });
+    if (texCache[key]) {
+      var at = texOrder.indexOf(key);
+      if (at < texOrder.length - 1) { texOrder.splice(at, 1); texOrder.push(key); }
+      return texCache[key];
+    }
+    while (texOrder.length >= TEX_CACHE_MAX) dropTex(texOrder[0]);
     var c = document.createElement('canvas');
     c.width = c.height = R * 2;
-    var g = c.getContext('2d');
+    var g = ZsCanvas.get2d(c);
+    if (!g) { ZsCanvas.release(c); return null; }
     var rnd = rng(BODIES[kind].seed * 7919);
     g.translate(R, R);
     g.save();
@@ -213,6 +230,7 @@ var MGArt = (function() {
     g.fillStyle = lg; g.fillRect(-R, -R, 2 * R, 2 * R);
     g.restore();
     texCache[key] = c;
+    texOrder.push(key);
     return c;
   }
 
@@ -268,7 +286,13 @@ var MGArt = (function() {
     ctx.beginPath(); ctx.arc(x, y, R * 1.28, 0, TAU); ctx.fill();
     var px = R * (opts.ratio || dpr());
     var tex = planetTex(kind, px);
-    ctx.drawImage(tex, x - R, y - R, R * 2, R * 2);
+    if (tex) ctx.drawImage(tex, x - R, y - R, R * 2, R * 2);
+    else {
+      // out of canvas memory: a plain lit disc instead of the texture
+      var fg = ctx.createRadialGradient(x - R * 0.4, y - R * 0.4, R * 0.1, x, y, R);
+      fg.addColorStop(0, '#d9d4c8'); fg.addColorStop(1, '#3a3f52');
+      ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+    }
     if (b.rings && !opts.noRings) {
       // ring shadow on the globe
       ctx.save();
@@ -451,11 +475,14 @@ var MGArt = (function() {
     }
     return out;
   }
-  function makeNebula(w, h, seed, palette) {
-    var c = document.createElement('canvas');
+  // Paints into `c` (reused across resizes) and returns it, or null
+  // when there is no canvas memory left (the sky is then drawn without it).
+  function makeNebula(w, h, seed, palette, c) {
+    c = c || document.createElement('canvas');
     var s = 0.5;
     c.width = Math.max(2, Math.round(w * s)); c.height = Math.max(2, Math.round(h * s));
-    var g = c.getContext('2d'), r = rng(seed || 99);
+    var g = ZsCanvas.get2d(c), r = rng(seed || 99);
+    if (!g) { ZsCanvas.release(c); return null; }
     var W = c.width, H = c.height;
     g.globalCompositeOperation = 'lighter';
     palette = palette || ['109,40,217', '190,24,93', '14,116,144', '37,99,235'];
@@ -542,13 +569,14 @@ var MGArt = (function() {
   var ROUTE_SIZE = { earth: 0.55, moon: 0.48, mars: 0.55, jupiter: 1.0, saturn: 0.78, neptune: 0.7 };
 
   function scene(canvas, opts) {
-    var ctx = canvas.getContext('2d');
+    var ctx = null;
     var o = {
       mode: 'map', color: '#7C3AED', current: 0, progress: 0, planet: 'moon', from: 'earth',
       beacons: [], rocketAt: 0, boss: false, hp: 1, stars: 0, onLayout: null
     };
     for (var k in opts) o[k] = opts[k];
     var W = 0, H = 0, R = 1, st = { stars: [], neb: null }, layout = null;
+    var nebC = null; // the nebula's offscreen canvas, reused on resize
     var raf = 0, lastDraw = 0, alive = true, t0 = performance.now(), last = t0;
     var still = reduceMotion();
     var fx = { boost: 0, wobble: 0, warp: 0, beam: 0, sparks: [], chunks: [] };
@@ -562,8 +590,10 @@ var MGArt = (function() {
       R = dpr();
       W = r.width; H = r.height;
       canvas.width = Math.round(W * R); canvas.height = Math.round(H * R);
+      ctx = ZsCanvas.get2d(canvas);
       st.stars = makeStars(W, H, o.mode === 'flight' ? 777 : 4242);
-      st.neb = makeNebula(W, H, o.mode === 'orbit' ? 131 : 99, o.palette);
+      nebC = nebC || document.createElement('canvas');
+      st.neb = makeNebula(W, H, o.mode === 'orbit' ? 131 : 99, o.palette, nebC);
       computeLayout();
       return true;
     }
@@ -641,6 +671,8 @@ var MGArt = (function() {
     }
 
     function draw(t, dt) {
+      // a context lost to memory pressure: try again, else skip this frame
+      if (!ctx && !(ctx = ZsCanvas.get2d(canvas))) return;
       ctx.setTransform(R, 0, 0, R, 0, 0);
       pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 3);
       pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 3);
@@ -879,6 +911,9 @@ var MGArt = (function() {
       if (ro) ro.disconnect();
       canvas.removeEventListener('pointermove', onMove);
       document.removeEventListener('visibilitychange', onVis);
+      // free the backing stores now (a new scene resizes the canvas again)
+      ZsCanvas.release(nebC); nebC = null; st.neb = null;
+      ZsCanvas.release(canvas);
     }
     requestAnimationFrame(function() { if (resize()) kick(); else kick(); });
     return { set: set, pulse: pulse, flyTo: flyTo, destroy: destroy, layout: function() { return layout; }, size: function() { return { w: W, h: H }; } };
@@ -891,7 +926,8 @@ var MGArt = (function() {
     var r = canvas.getBoundingClientRect();
     var w = r.width || canvas.width, h = r.height || canvas.height, d = dpr();
     canvas.width = Math.round(w * d); canvas.height = Math.round(h * d);
-    var c = canvas.getContext('2d');
+    var c = ZsCanvas.get2d(canvas);
+    if (!c) return;
     c.setTransform(d, 0, 0, d, 0, 0);
     var rad = BODIES[kind] && BODIES[kind].rings ? Math.min(w, h) * 0.26 : Math.min(w, h) * 0.4;
     drawPlanet(c, kind, w / 2, h / 2, rad, { ratio: d });
@@ -901,7 +937,8 @@ var MGArt = (function() {
     var r = canvas.getBoundingClientRect(), d = dpr();
     var w = r.width || 80, h = r.height || 80;
     canvas.width = Math.round(w * d); canvas.height = Math.round(h * d);
-    var c = canvas.getContext('2d');
+    var c = ZsCanvas.get2d(canvas);
+    if (!c) return;
     c.setTransform(d, 0, 0, d, 0, 0);
     drawRocket(c, w * 0.55, h * 0.55, Math.min(w, h) * 0.75, -Math.PI / 4, { color: color, flame: 0.8, t: 0.4 });
   }
