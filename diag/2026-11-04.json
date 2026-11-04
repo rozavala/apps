@@ -108,6 +108,58 @@
     },
     {
       "entry": {
+        "id": "e_mw2axt0m_hecpm1",
+        "ts": 1793807950630,
+        "clientTs": 1793807950630,
+        "kind": "console.error",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "Sync failed Load failed",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 3,
+      "firstTs": 1793807950630,
+      "lastTs": 1793807950630,
+      "users": [
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mw2axt0k_fqrx45",
+        "ts": 1793807950628,
+        "clientTs": 1793807950628,
+        "kind": "console.warn",
+        "app": "world-cup",
+        "page": "world-cup.html",
+        "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Load failed",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 3,
+      "firstTs": 1793807950628,
+      "lastTs": 1793807950628,
+      "users": [
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
         "id": "e_mw28qvun_0iq8jl",
         "ts": 1793804268479,
         "clientTs": 1793804268479,

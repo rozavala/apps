@@ -1,9 +1,35 @@
 {
-  "generatedAt": "2026-11-04T15:59:08.750Z",
+  "generatedAt": "2026-11-04T16:14:18.070Z",
   "windowHours": 72,
-  "totalGroups": 19,
-  "totalEvents": 78,
+  "totalGroups": 21,
+  "totalEvents": 84,
   "topGroups": [
+    {
+      "app": "world-cup",
+      "kind": "console.error",
+      "page": "world-cup.html",
+      "message": "Sync failed Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 3,
+      "firstTs": 1793807950630,
+      "lastTs": 1793807950630,
+      "users": 1
+    },
+    {
+      "app": "world-cup",
+      "kind": "console.warn",
+      "page": "world-cup.html",
+      "message": "ESPN scoreboard fetch failed, falling back to OpenFootball: Load failed",
+      "filename": null,
+      "lineno": null,
+      "colno": null,
+      "count": 3,
+      "firstTs": 1793807950628,
+      "lastTs": 1793807950628,
+      "users": 1
+    },
     {
       "app": "math-galaxy",
       "kind": "error",
@@ -106,32 +132,6 @@
       "count": 1,
       "firstTs": 1793807114230,
       "lastTs": 1793807114230,
-      "users": 1
-    },
-    {
-      "app": "que-hora-es",
-      "kind": "error",
-      "page": "que-hora-es.html",
-      "message": "TypeError: null is not an object (evaluating 'x.translate')",
-      "filename": "https://rozavala.github.io/apps/js/que-hora-es-art.js?v=1",
-      "lineno": 57,
-      "colno": 6,
-      "count": 7,
-      "firstTs": 1793803634963,
-      "lastTs": 1793807106456,
-      "users": 2
-    },
-    {
-      "app": "que-hora-es",
-      "kind": "error",
-      "page": "que-hora-es.html",
-      "message": "TypeError: null is not an object (evaluating 'x.translate')",
-      "filename": "https://rozavala.github.io/apps/js/que-hora-es-art.js?v=1",
-      "lineno": 313,
-      "colno": 6,
-      "count": 1,
-      "firstTs": 1793806985153,
-      "lastTs": 1793806985153,
       "users": 1
     }
   ]
