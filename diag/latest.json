@@ -1,9 +1,22 @@
 {
-  "generatedAt": "2026-11-04T14:58:23.968Z",
+  "generatedAt": "2026-11-04T15:13:26.366Z",
   "windowHours": 72,
   "totalGroups": 7,
-  "totalEvents": 17,
+  "totalEvents": 22,
   "topGroups": [
+    {
+      "app": "code-cadet",
+      "kind": "error",
+      "page": "code-cadet.html",
+      "message": "TypeError: null is not an object (evaluating 'x.scale')",
+      "filename": "https://rozavala.github.io/apps/js/code-cadet-art.js?v=1",
+      "lineno": 867,
+      "colno": 151,
+      "count": 3,
+      "firstTs": 1793804268479,
+      "lastTs": 1793804306153,
+      "users": 2
+    },
     {
       "app": "code-cadet",
       "kind": "error",
@@ -12,7 +25,7 @@
       "filename": "https://rozavala.github.io/apps/js/code-cadet-art.js?v=1",
       "lineno": 1164,
       "colno": 8,
-      "count": 8,
+      "count": 12,
       "firstTs": 1793804279022,
       "lastTs": 1793804292830,
       "users": 1
@@ -28,19 +41,6 @@
       "count": 1,
       "firstTs": 1793804286291,
       "lastTs": 1793804286291,
-      "users": 1
-    },
-    {
-      "app": "code-cadet",
-      "kind": "error",
-      "page": "code-cadet.html",
-      "message": "TypeError: null is not an object (evaluating 'x.scale')",
-      "filename": "https://rozavala.github.io/apps/js/code-cadet-art.js?v=1",
-      "lineno": 867,
-      "colno": 151,
-      "count": 2,
-      "firstTs": 1793804268479,
-      "lastTs": 1793804272624,
       "users": 1
     },
     {

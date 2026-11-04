@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T14:58:23.968Z",
+  "generatedAt": "2026-11-04T15:13:26.366Z",
   "windowHours": 72,
   "days": [
     {
@@ -55,11 +55,38 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 8,
+          "count": 12,
           "firstTs": 1793804279022,
           "lastTs": 1793804292830,
           "users": [
             "u-46a6e4"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw28qvun_0iq8jl",
+            "ts": 1793804268479,
+            "clientTs": 1793804268479,
+            "kind": "error",
+            "app": "code-cadet",
+            "page": "code-cadet.html",
+            "message": "TypeError: null is not an object (evaluating 'x.scale')",
+            "filename": "https://rozavala.github.io/apps/js/code-cadet-art.js?v=1",
+            "lineno": 867,
+            "colno": 151,
+            "stack": "mk@https://rozavala.github.io/apps/js/code-cadet-art.js:867:151\nbuild@https://rozavala.github.io/apps/js/code-cadet-art.js:868:28\n@https://rozavala.github.io/apps/js/code-cadet-art.js:916:12\n_fitHero@https://rozavala.github.io/apps/js/code-cadet.js:1940:13\n_startHero@https://rozavala.github.io/apps/js/code-cadet.js:1911:13\n_showScreen@https://rozavala.github.io/apps/js/code-cadet.js:1729:47\ninit@https://rozavala.github.io/apps/js/code-cadet.js:1977:16\n@https://rozavala.github.io/apps/js/code-cadet.js:2009:57",
+            "user": "u-46a6e4",
+            "age": 7,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 3,
+          "firstTs": 1793804268479,
+          "lastTs": 1793804306153,
+          "users": [
+            "u-46a6e4",
+            "u-3bda7c"
           ]
         },
         {
@@ -86,32 +113,6 @@
           "lastTs": 1793803654282,
           "users": [
             "u-3bda7c"
-          ]
-        },
-        {
-          "entry": {
-            "id": "e_mw28qvun_0iq8jl",
-            "ts": 1793804268479,
-            "clientTs": 1793804268479,
-            "kind": "error",
-            "app": "code-cadet",
-            "page": "code-cadet.html",
-            "message": "TypeError: null is not an object (evaluating 'x.scale')",
-            "filename": "https://rozavala.github.io/apps/js/code-cadet-art.js?v=1",
-            "lineno": 867,
-            "colno": 151,
-            "stack": "mk@https://rozavala.github.io/apps/js/code-cadet-art.js:867:151\nbuild@https://rozavala.github.io/apps/js/code-cadet-art.js:868:28\n@https://rozavala.github.io/apps/js/code-cadet-art.js:916:12\n_fitHero@https://rozavala.github.io/apps/js/code-cadet.js:1940:13\n_startHero@https://rozavala.github.io/apps/js/code-cadet.js:1911:13\n_showScreen@https://rozavala.github.io/apps/js/code-cadet.js:1729:47\ninit@https://rozavala.github.io/apps/js/code-cadet.js:1977:16\n@https://rozavala.github.io/apps/js/code-cadet.js:2009:57",
-            "user": "u-46a6e4",
-            "age": 7,
-            "guest": false,
-            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-            "trail": []
-          },
-          "count": 2,
-          "firstTs": 1793804268479,
-          "lastTs": 1793804272624,
-          "users": [
-            "u-46a6e4"
           ]
         },
         {
