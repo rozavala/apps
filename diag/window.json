@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T15:43:48.578Z",
+  "generatedAt": "2026-11-04T15:59:08.750Z",
   "windowHours": 72,
   "days": [
     {
@@ -36,6 +36,58 @@
     {
       "day": "2026-11-04",
       "groups": [
+        {
+          "entry": {
+            "id": "e_mw2auxlg_c11njy",
+            "ts": 1793807816596,
+            "clientTs": 1793807816596,
+            "kind": "error",
+            "app": "math-galaxy",
+            "page": "math-galaxy.html",
+            "message": "TypeError: null is not an object (evaluating 'g.translate')",
+            "filename": "https://rozavala.github.io/apps/js/math-galaxy-art.js?v=1",
+            "lineno": 140,
+            "colno": 6,
+            "stack": "planetTex@https://rozavala.github.io/apps/js/math-galaxy-art.js:140:6\ndrawPlanet@https://rozavala.github.io/apps/js/math-galaxy-art.js:270:24\ndrawFlight@https://rozavala.github.io/apps/js/math-galaxy-art.js:786:17\ndraw@https://rozavala.github.io/apps/js/math-galaxy-art.js:660:47\nframe@https://rozavala.github.io/apps/js/math-galaxy-art.js:639:11",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 21,
+          "firstTs": 1793807816596,
+          "lastTs": 1793807915537,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw2ahgxy_0u5rz3",
+            "ts": 1793807188486,
+            "clientTs": 1793807188486,
+            "kind": "error",
+            "app": "art-studio",
+            "page": "art-studio.html",
+            "message": "TypeError: null is not an object (evaluating 'bx.clearRect')",
+            "filename": "https://rozavala.github.io/apps/js/art-studio-brushes.js?v=1",
+            "lineno": 900,
+            "colno": 7,
+            "stack": "@https://rozavala.github.io/apps/js/art-studio-brushes.js:900:7\n@https://rozavala.github.io/apps/js/art-studio-brushes.js:836:22\n@https://rozavala.github.io/apps/js/art-studio-brushes.js:783:65",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 19,
+          "firstTs": 1793807188486,
+          "lastTs": 1793807798773,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
         {
           "entry": {
             "id": "e_mw28r3zi_9jt6v9",
@@ -81,9 +133,9 @@
             "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
             "trail": []
           },
-          "count": 6,
+          "count": 7,
           "firstTs": 1793803634963,
-          "lastTs": 1793807009405,
+          "lastTs": 1793807106456,
           "users": [
             "u-3bda7c",
             "u-9b4aef"
@@ -118,6 +170,32 @@
         },
         {
           "entry": {
+            "id": "e_mw2ax6jf_c1blfp",
+            "ts": 1793807921500,
+            "clientTs": 1793807921500,
+            "kind": "error",
+            "app": "math-galaxy",
+            "page": "math-galaxy.html",
+            "message": "TypeError: null is not an object (evaluating 'g.globalCompositeOperation = 'lighter'')",
+            "filename": "https://rozavala.github.io/apps/js/math-galaxy-art.js?v=1",
+            "lineno": 460,
+            "colno": 6,
+            "stack": "makeNebula@https://rozavala.github.io/apps/js/math-galaxy-art.js:460:6\nresize@https://rozavala.github.io/apps/js/math-galaxy-art.js:566:26\n@https://rozavala.github.io/apps/js/math-galaxy-art.js:833:54",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1793807921500,
+          "lastTs": 1793807930761,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
             "id": "e_mw2acq97_rl4qhk",
             "ts": 1793806967275,
             "clientTs": 1793806967275,
@@ -138,6 +216,136 @@
           "count": 2,
           "firstTs": 1793806967275,
           "lastTs": 1793806972033,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw2axdoo_m6l0bl",
+            "ts": 1793807930760,
+            "clientTs": 1793807930760,
+            "kind": "error",
+            "app": "math-galaxy",
+            "page": "math-galaxy.html",
+            "message": "TypeError: null is not an object (evaluating 'g.globalCompositeOperation = 'lighter'')",
+            "filename": "https://rozavala.github.io/apps/js/math-galaxy-art.js?v=1",
+            "lineno": 460,
+            "colno": 6,
+            "stack": "makeNebula@https://rozavala.github.io/apps/js/math-galaxy-art.js:460:6\nresize@https://rozavala.github.io/apps/js/math-galaxy-art.js:566:26\n@https://rozavala.github.io/apps/js/math-galaxy-art.js:883:50",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1793807930760,
+          "lastTs": 1793807930760,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw2ax6lg_4v6s61",
+            "ts": 1793807921572,
+            "clientTs": 1793807921572,
+            "kind": "error",
+            "app": "math-galaxy",
+            "page": "math-galaxy.html",
+            "message": "TypeError: null is not an object (evaluating 'g.translate')",
+            "filename": "https://rozavala.github.io/apps/js/math-galaxy-art.js?v=1",
+            "lineno": 140,
+            "colno": 6,
+            "stack": "planetTex@https://rozavala.github.io/apps/js/math-galaxy-art.js:140:6\ndrawPlanet@https://rozavala.github.io/apps/js/math-galaxy-art.js:270:24\ndrawArrive@https://rozavala.github.io/apps/js/math-galaxy-art.js:818:17\ndraw@https://rozavala.github.io/apps/js/math-galaxy-art.js:661:22\nframe@https://rozavala.github.io/apps/js/math-galaxy-art.js:639:11",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1793807921572,
+          "lastTs": 1793807921572,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw2auvhg_lvg73h",
+            "ts": 1793807813860,
+            "clientTs": 1793807813860,
+            "kind": "error",
+            "app": "math-galaxy",
+            "page": "math-galaxy.html",
+            "message": "TypeError: null is not an object (evaluating 'g.translate')",
+            "filename": "https://rozavala.github.io/apps/js/math-galaxy-art.js?v=1",
+            "lineno": 140,
+            "colno": 6,
+            "stack": "planetTex@https://rozavala.github.io/apps/js/math-galaxy-art.js:140:6\ndrawPlanet@https://rozavala.github.io/apps/js/math-galaxy-art.js:270:24\ndrawOrbit@https://rozavala.github.io/apps/js/math-galaxy-art.js:746:17\ndraw@https://rozavala.github.io/apps/js/math-galaxy-art.js:659:45\nframe@https://rozavala.github.io/apps/js/math-galaxy-art.js:639:11",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1793807813860,
+          "lastTs": 1793807813860,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw2ahx1m_ixrfzx",
+            "ts": 1793807209354,
+            "clientTs": 1793807209354,
+            "kind": "error",
+            "app": "art-studio",
+            "page": "art-studio.html",
+            "message": "TypeError: null is not an object (evaluating 'this.paint.getImageData')",
+            "filename": "https://rozavala.github.io/apps/js/art-studio-brushes.js?v=1",
+            "lineno": 1087,
+            "colno": 25,
+            "stack": "@https://rozavala.github.io/apps/js/art-studio-brushes.js:1087:25\n@https://rozavala.github.io/apps/js/art-studio-brushes.js:835:72\n@https://rozavala.github.io/apps/js/art-studio-brushes.js:783:65",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1793807209354,
+          "lastTs": 1793807209354,
+          "users": [
+            "u-9b4aef"
+          ]
+        },
+        {
+          "entry": {
+            "id": "e_mw2afvna_fz4o7s",
+            "ts": 1793807114230,
+            "clientTs": 1793807114230,
+            "kind": "error",
+            "app": "art-studio",
+            "page": "art-studio.html",
+            "message": "TypeError: null is not an object (evaluating 'ctx.createImageData')",
+            "filename": "https://rozavala.github.io/apps/js/art-studio-brushes.js?v=1",
+            "lineno": 219,
+            "colno": 44,
+            "stack": "paperDataUrl@https://rozavala.github.io/apps/js/art-studio-brushes.js:219:44\nSurface@https://rozavala.github.io/apps/js/art-studio-brushes.js:661:61\nKit@https://rozavala.github.io/apps/js/art-studio.js:433:40\ninitDraw@https://rozavala.github.io/apps/js/art-studio.js:685:22\ninit@https://rozavala.github.io/apps/js/art-studio.js:1355:13",
+            "user": "u-9b4aef",
+            "age": 9,
+            "guest": false,
+            "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+            "trail": []
+          },
+          "count": 1,
+          "firstTs": 1793807114230,
+          "lastTs": 1793807114230,
           "users": [
             "u-9b4aef"
           ]
