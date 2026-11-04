@@ -20,6 +20,7 @@
 
   <link rel="stylesheet" href="css/little-maestro.css?v=9">
   <link rel="stylesheet" href="css/zs-theme.css">
+  <link rel="stylesheet" href="css/lm-art.css?v=1">
   <script src="js/dialog.js?v=2"></script>
   <script src="js/debug.js?v=3"></script>
 
@@ -10954,15 +10955,12 @@ document.addEventListener('DOMContentLoaded', () => {
                          'C3','D3','E3','F3','G3','A3','B3',
                          'C4','D4','E4','F4','G4','A4','B4',
                          'C5','D5','E5','F5','G5','A5','B5','C6'];
+    // Same offsets as PianoKeyboard.BLACK_KEYS (real-keyboard spacing)
     const BLACK_KEYS  = [
-      {note:'C#2',offset:0.65},{note:'D#2',offset:1.65},
-      {note:'F#2',offset:3.65},{note:'G#2',offset:4.65},{note:'A#2',offset:5.65},
-      {note:'C#3',offset:7.65},{note:'D#3',offset:8.65},
-      {note:'F#3',offset:10.65},{note:'G#3',offset:11.65},{note:'A#3',offset:12.65},
-      {note:'C#4',offset:14.65},{note:'D#4',offset:15.65},
-      {note:'F#4',offset:17.65},{note:'G#4',offset:18.65},{note:'A#4',offset:19.65},
-      {note:'C#5',offset:21.65},{note:'D#5',offset:22.65},
-      {note:'F#5',offset:24.65},{note:'G#5',offset:25.65},{note:'A#5',offset:26.65},
+      {note:'C#2',offset:0.60},{note:'D#2',offset:1.80},{note:'F#2',offset:3.57},{note:'G#2',offset:4.71},{note:'A#2',offset:5.86},
+      {note:'C#3',offset:7.60},{note:'D#3',offset:8.80},{note:'F#3',offset:10.57},{note:'G#3',offset:11.71},{note:'A#3',offset:12.86},
+      {note:'C#4',offset:14.60},{note:'D#4',offset:15.80},{note:'F#4',offset:17.57},{note:'G#4',offset:18.71},{note:'A#4',offset:19.86},
+      {note:'C#5',offset:21.60},{note:'D#5',offset:22.80},{note:'F#5',offset:24.57},{note:'G#5',offset:25.71},{note:'A#5',offset:26.86},
     ];
     const ENHARMONIC = {Db:'C#',Eb:'D#',Fb:'E',Gb:'F#',Ab:'G#',Bb:'A#',Cb:'B'};
     const NOTE_COLORS = {
@@ -11003,7 +11001,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const wi = WHITE_NOTES.indexOf(n);
       if (wi >= 0) return (wi + 0.5) / NUM_WHITE;
       const bk = BLACK_KEYS.find(k => k.note === n);
-      if (bk) return (bk.offset + 0.285) / NUM_WHITE;
+      if (bk) return (bk.offset + 0.29) / NUM_WHITE;  // centre of a 0.58-wide black key
       return 0.5;
     }
 
@@ -11457,28 +11455,30 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
 
       // Black keys: note name + offset (in white-key units from left edge of container)
-      // Offset = whiteKeyIndex + 0.65 → positions black key 65% across the preceding white key
+      // Offsets follow a real keyboard: C#/D# split the C–E span into five equal
+      // parts and F#/G#/A# split F–B into seven, so the groups of two and three
+      // sit slightly apart (visual only; every key keeps its note).
       const BLACK_KEYS = [
-        { note: 'C#2', offset: 0.65 },
-        { note: 'D#2', offset: 1.65 },
-        { note: 'F#2', offset: 3.65 },
-        { note: 'G#2', offset: 4.65 },
-        { note: 'A#2', offset: 5.65 },
-        { note: 'C#3', offset: 7.65 },
-        { note: 'D#3', offset: 8.65 },
-        { note: 'F#3', offset: 10.65 },
-        { note: 'G#3', offset: 11.65 },
-        { note: 'A#3', offset: 12.65 },
-        { note: 'C#4', offset: 14.65 },
-        { note: 'D#4', offset: 15.65 },
-        { note: 'F#4', offset: 17.65 },
-        { note: 'G#4', offset: 18.65 },
-        { note: 'A#4', offset: 19.65 },
-        { note: 'C#5', offset: 21.65 },
-        { note: 'D#5', offset: 22.65 },
-        { note: 'F#5', offset: 24.65 },
-        { note: 'G#5', offset: 25.65 },
-        { note: 'A#5', offset: 26.65 },
+        { note: 'C#2', offset: 0.60 },
+        { note: 'D#2', offset: 1.80 },
+        { note: 'F#2', offset: 3.57 },
+        { note: 'G#2', offset: 4.71 },
+        { note: 'A#2', offset: 5.86 },
+        { note: 'C#3', offset: 7.60 },
+        { note: 'D#3', offset: 8.80 },
+        { note: 'F#3', offset: 10.57 },
+        { note: 'G#3', offset: 11.71 },
+        { note: 'A#3', offset: 12.86 },
+        { note: 'C#4', offset: 14.60 },
+        { note: 'D#4', offset: 15.80 },
+        { note: 'F#4', offset: 17.57 },
+        { note: 'G#4', offset: 18.71 },
+        { note: 'A#4', offset: 19.86 },
+        { note: 'C#5', offset: 21.60 },
+        { note: 'D#5', offset: 22.80 },
+        { note: 'F#5', offset: 24.57 },
+        { note: 'G#5', offset: 25.71 },
+        { note: 'A#5', offset: 26.86 },
       ];
 
       // Enharmonic normalization (flat → sharp)
@@ -11540,7 +11540,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const keyMap = {};
         const whiteKeyWidthPct  = 100 / NUM_WHITE;  // 6.6667%
-        const blackKeyWidthPct  = (0.57 / NUM_WHITE) * 100; // ~3.8%
+        const blackKeyWidthPct  = (0.58 / NUM_WHITE) * 100; // ~2%: real black keys are ~0.58 of a white key
 
         // ── White keys ──────────────────────────────────────────────
         WHITE_NOTES.forEach((note, idx) => {
@@ -12436,6 +12436,8 @@ document.addEventListener('DOMContentLoaded', () => {
             : tab === 'mybook'  ? _myBookHtml(progress)
             : _pathHtml(tab, progress);
       container.innerHTML = html;
+      // Illustrated worlds, trail and medallions (drawing only, js/lm-art.js)
+      if (typeof LMArt !== 'undefined') LMArt.decorateQuestMap(container, tab);
 
       // Bring the song they're on into view
       const cur = container.querySelector('.qm-node--current:not(.qm-node--bonus)');
@@ -12747,6 +12749,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }).join('')}
         </div>
       `;
+      // Drawn card icons (js/lm-art.js)
+      if (typeof LMArt !== 'undefined') LMArt.decorateHome(container);
     }
 
     window.QuestMap = window.QuestMap || {};
@@ -13068,6 +13072,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Update count badge
       const countEl = document.getElementById('trophy-count');
       if (countEl) countEl.textContent = `${completedEntries.length} Songs`;
+
+      // The drawn cabinet (js/lm-art.js); the card grid below is the fallback
+      if (typeof LMArt !== 'undefined' && LMArt.trophyRoom(container)) return;
 
       // Empty state
       if (completedEntries.length === 0) {
@@ -16502,6 +16509,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/lm-lessons.js?v=1"></script>
 <script src="js/lm-practice.js?v=3"></script>
 <script src="js/lm-builder.js?v=9"></script>
+<script src="js/lm-art.js?v=1"></script>
 <script>if (typeof LMPractice !== 'undefined') LMPractice.start();</script>
 <script>
   window.addEventListener('load', function() {
