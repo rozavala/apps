@@ -29,6 +29,33 @@
     },
     {
       "entry": {
+        "id": "e_mw28db0z_9jwbjq",
+        "ts": 1793803634963,
+        "clientTs": 1793803634963,
+        "kind": "error",
+        "app": "que-hora-es",
+        "page": "que-hora-es.html",
+        "message": "TypeError: null is not an object (evaluating 'x.translate')",
+        "filename": "https://rozavala.github.io/apps/js/que-hora-es-art.js?v=1",
+        "lineno": 57,
+        "colno": 6,
+        "stack": "drawFace@https://rozavala.github.io/apps/js/que-hora-es-art.js:57:6\nbuild@https://rozavala.github.io/apps/js/que-hora-es-art.js:513:22\ncreateClock@https://rozavala.github.io/apps/js/que-hora-es-art.js:697:10\nexplore@https://rozavala.github.io/apps/js/que-hora-es.js:344:30\nonClick@https://rozavala.github.io/apps/js/que-hora-es.js:1365:44",
+        "user": "u-3bda7c",
+        "age": 11,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 6,
+      "firstTs": 1793803634963,
+      "lastTs": 1793807009405,
+      "users": [
+        "u-3bda7c",
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
         "id": "e_mw28qvun_0iq8jl",
         "ts": 1793804268479,
         "clientTs": 1793804268479,
@@ -56,28 +83,106 @@
     },
     {
       "entry": {
-        "id": "e_mw28db0z_9jwbjq",
-        "ts": 1793803634963,
-        "clientTs": 1793803634963,
+        "id": "e_mw2acq97_rl4qhk",
+        "ts": 1793806967275,
+        "clientTs": 1793806967275,
+        "kind": "console.error",
+        "app": "marinero",
+        "page": "marinero.html",
+        "message": "null is not an object (evaluating 'ctx.setTransform')",
+        "filename": null,
+        "lineno": null,
+        "colno": null,
+        "stack": null,
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 2,
+      "firstTs": 1793806967275,
+      "lastTs": 1793806972033,
+      "users": [
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mw2ad41t_ka67lu",
+        "ts": 1793806985153,
+        "clientTs": 1793806985153,
         "kind": "error",
         "app": "que-hora-es",
         "page": "que-hora-es.html",
         "message": "TypeError: null is not an object (evaluating 'x.translate')",
         "filename": "https://rozavala.github.io/apps/js/que-hora-es-art.js?v=1",
-        "lineno": 57,
+        "lineno": 313,
         "colno": 6,
-        "stack": "drawFace@https://rozavala.github.io/apps/js/que-hora-es-art.js:57:6\nbuild@https://rozavala.github.io/apps/js/que-hora-es-art.js:513:22\ncreateClock@https://rozavala.github.io/apps/js/que-hora-es-art.js:697:10\nexplore@https://rozavala.github.io/apps/js/que-hora-es.js:344:30\nonClick@https://rozavala.github.io/apps/js/que-hora-es.js:1365:44",
-        "user": "u-3bda7c",
-        "age": 11,
+        "stack": "drawGlass@https://rozavala.github.io/apps/js/que-hora-es-art.js:313:6\nbuild@https://rozavala.github.io/apps/js/que-hora-es-art.js:514:24\ncreateClock@https://rozavala.github.io/apps/js/que-hora-es-art.js:697:10\nhome@https://rozavala.github.io/apps/js/que-hora-es.js:252:30\ninit@https://rozavala.github.io/apps/js/que-hora-es.js:1412:9",
+        "user": "u-9b4aef",
+        "age": 9,
         "guest": false,
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 3,
-      "firstTs": 1793803634963,
-      "lastTs": 1793803654282,
+      "count": 1,
+      "firstTs": 1793806985153,
+      "lastTs": 1793806985153,
       "users": [
-        "u-3bda7c"
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mw2acrgq_i49imp",
+        "ts": 1793806968842,
+        "clientTs": 1793806968842,
+        "kind": "error",
+        "app": "marinero",
+        "page": "marinero.html",
+        "message": "TypeError: null is not an object (evaluating 'ctx.setTransform')",
+        "filename": "https://rozavala.github.io/apps/js/marinero.js?v=1",
+        "lineno": 261,
+        "colno": 8,
+        "stack": "paintKnot@https://rozavala.github.io/apps/js/marinero.js:261:8\ndraw@https://rozavala.github.io/apps/js/marinero.js:381:18\n@https://rozavala.github.io/apps/js/marinero.js:478:11\nrender@https://rozavala.github.io/apps/js/marinero.js:185:21\nviewKnot@https://rozavala.github.io/apps/js/marinero.js:358:11\n@https://rozavala.github.io/apps/js/marinero.js:289:69",
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1793806968842,
+      "lastTs": 1793806968842,
+      "users": [
+        "u-9b4aef"
+      ]
+    },
+    {
+      "entry": {
+        "id": "e_mw2aclw8_1zrryq",
+        "ts": 1793806961624,
+        "clientTs": 1793806961624,
+        "kind": "error",
+        "app": "marinero",
+        "page": "marinero.html",
+        "message": "TypeError: null is not an object (evaluating 'c.scale')",
+        "filename": "https://rozavala.github.io/apps/js/marinero-art.js?v=1",
+        "lineno": 718,
+        "colno": 6,
+        "stack": "teakDeck@https://rozavala.github.io/apps/js/marinero-art.js:718:6\npaintKnot@https://rozavala.github.io/apps/js/marinero.js:262:75\ndrawKnotStatic@https://rozavala.github.io/apps/js/marinero.js:273:14\n@https://rozavala.github.io/apps/js/marinero.js:235:21\nrender@https://rozavala.github.io/apps/js/marinero.js:185:21\nviewHome@https://rozavala.github.io/apps/js/marinero.js:232:11\ninit@https://rozavala.github.io/apps/js/marinero.js:1506:13",
+        "user": "u-9b4aef",
+        "age": 9,
+        "guest": false,
+        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
+        "trail": []
+      },
+      "count": 1,
+      "firstTs": 1793806961624,
+      "lastTs": 1793806961624,
+      "users": [
+        "u-9b4aef"
       ]
     },
     {
