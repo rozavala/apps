@@ -596,6 +596,7 @@ var LittleEngineer = (function() {
     var total = starsOf(d), max = D.LEVELS.length * 3 + 1;
     var done = 0;
     D.LEVELS.forEach(function(l) { if (d.levels[l.id] && d.levels[l.id].stars > 0) done++; });
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-home">' +
         '<header class="le-header">' +
@@ -625,10 +626,12 @@ var LittleEngineer = (function() {
   function _drawHero(cv) {
     if (!cv) return;
     var lv = Object.assign({}, D.LEVELS[4], { id: 'hero', water: -4.6, anchors: [[0, 0], [12, 0]], time: 'morning' });
-    var g = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1);
+    var dpr = ZsCanvas.dpr();
     var W = cv.clientWidth, H = cv.clientHeight;
     if (!W || !H) return;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = ZsCanvas.get2d(cv);
+    if (!g) return;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     var sc = A.buildScene(lv);
     var xm = -5, xM = lv.span + 5, ym = lv.water - 1.0, top = 3.6;
@@ -669,6 +672,7 @@ var LittleEngineer = (function() {
           (rec.best ? '<span class="le-lvl-best">Best ' + clp(rec.best) + '</span>' : '<span class="le-lvl-best">Budget ' + clp(l.budget) + '</span>') +
         '</span></button>';
     }).join('');
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' +
         _topBar('Choose a gorge · Elige un desafío') +
@@ -738,6 +742,7 @@ var LittleEngineer = (function() {
     var rec = d.levels[level.id] || {};
     var p2 = Math.min(100, level.budget / (level.budget * 1.25) * 100), p3 = level.tight / (level.budget * 1.25) * 100;
 
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-play">' +
         '<div class="le-bar">' +
@@ -885,7 +890,7 @@ var LittleEngineer = (function() {
     var H = Math.round(Math.max(270, Math.min(maxH, ideal * 1.04)));
     stage.style.height = H + 'px';
     var cv = $('le-canvas');
-    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var dpr = ZsCanvas.dpr();
     S.W = W; S.H = H; S.dpr = dpr;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -924,12 +929,15 @@ var LittleEngineer = (function() {
     function mk(c) {
       c = c || document.createElement('canvas');
       c.width = Math.round(S.W * S.dpr); c.height = Math.round(S.H * S.dpr);
-      var g = c.getContext('2d'); g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0); g.clearRect(0, 0, S.W, S.H);
+      var g = ZsCanvas.get2d(c);
+      if (g) { g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0); g.clearRect(0, 0, S.W, S.H); }
       return c;
     }
     S.back = mk(S.back); S.front = mk(S.front);
-    A.drawBack(S.back.getContext('2d'), S.scene, cam, S.W, S.H);
-    A.drawFront(S.front.getContext('2d'), S.scene, cam, S.W, S.H);
+    var bg = ZsCanvas.get2d(S.back), fg = ZsCanvas.get2d(S.front);
+    if (bg) A.drawBack(bg, S.scene, cam, S.W, S.H);
+    if (fg) A.drawFront(fg, S.scene, cam, S.W, S.H);
+    if (!bg || !fg) S.cacheKey = ''; // try again next frame
   }
 
   window.addEventListener('resize', function() {
@@ -1198,7 +1206,9 @@ var LittleEngineer = (function() {
     var mat = S.tool;
     if (dr.moved && dr.to) {
       var plan = _plan(dr.from, dr.to, mat);
-      if (plan.error) { if (plan.error) { toast(plan.error); sfx('wrong'); } }
+      // A drag that ends back on its start point plans { error: '' }: no
+      // message, but no pieces either. Only add when there are pieces.
+      if (!plan.pieces) { if (plan.error) { toast(plan.error); sfx('wrong'); } }
       else { _addPieces(plan.pieces); S.sel = null; }
       _chainNote();
       return;
@@ -1208,7 +1218,7 @@ var LittleEngineer = (function() {
     if (S.sel) {
       if (S.sel.x === q.x && S.sel.y === q.y) { S.sel = null; _chainNote(); return; }
       var plan2 = _plan(S.sel, q, mat);
-      if (plan2.error) { toast(plan2.error); sfx('wrong'); return; }
+      if (!plan2.pieces) { if (plan2.error) { toast(plan2.error); sfx('wrong'); } return; }
       _addPieces(plan2.pieces);
       S.sel = q;
     } else {
@@ -1464,7 +1474,8 @@ var LittleEngineer = (function() {
     if (S.mode === 'test' && !S.paused) _stepDrops(S.slow ? dt * 0.3 : dt);
     if (S.shake > 0) S.shake = Math.max(0, S.shake - dt);
 
-    var g = cv.getContext('2d');
+    var g = ZsCanvas.get2d(cv);
+    if (!g) return; // no canvas memory: skip this frame
     var cam = _cam();
     _ensureCaches(cam);
     g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
@@ -1510,11 +1521,11 @@ var LittleEngineer = (function() {
     if (!from && S.sel && S.hover && S.tool !== 'erase') { from = S.sel; to = S.hover; }
     if (from && to && (from.x !== to.x || from.y !== to.y)) {
       var plan = _plan(from, to, S.tool);
-      if (plan.error) A.drawMember(g, cam, from.x, from.y, to.x, to.y, S.tool, { bad: true });
+      if (!plan.pieces) A.drawMember(g, cam, from.x, from.y, to.x, to.y, S.tool, { bad: true });
       else plan.pieces.forEach(function(m) { A.drawMember(g, cam, m[0], m[1], m[2], m[3], m[4], { tintA: 0.35, tint: '#ffffff' }); });
       var L = Math.hypot(to.x - from.x, to.y - from.y);
-      var label = (Math.round(L * 10) / 10) + ' m' + (plan.error ? ' ✗' : ' · ' + clp(L * D.MATERIALS[S.tool].cost));
-      _label(g, (A.X(cam, from.x) + A.X(cam, to.x)) / 2, (A.Y(cam, from.y) + A.Y(cam, to.y)) / 2 - 18, label, plan.error ? '#b91c1c' : 'rgba(14,52,112,0.92)');
+      var label = (Math.round(L * 10) / 10) + ' m' + (!plan.pieces ? ' ✗' : ' · ' + clp(L * D.MATERIALS[S.tool].cost));
+      _label(g, (A.X(cam, from.x) + A.X(cam, to.x)) / 2, (A.Y(cam, from.y) + A.Y(cam, to.y)) / 2 - 18, label, !plan.pieces ? '#b91c1c' : 'rgba(14,52,112,0.92)');
     }
     designJoints(lv, S.members).forEach(function(j) {
       var st = S.sel && S.sel.x === j.x && S.sel.y === j.y ? 'sel' : (S.hover && S.hover.x === j.x && S.hover.y === j.y ? 'hot' : '');
@@ -1614,6 +1625,7 @@ var LittleEngineer = (function() {
         '<span class="le-lesson-icon" aria-hidden="true">' + l.icon + '</span>' +
         '<span class="le-lesson-t">' + esc(l.title) + '</span><span class="le-lesson-es">' + esc(l.es) + '</span></button>';
     }).join('');
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' + _topBar('Bridge school · Escuela de puentes') +
         '<p class="le-lead">How bridges really work — the same ideas engineers use.</p>' +
@@ -1629,6 +1641,7 @@ var LittleEngineer = (function() {
     if (!l) return learn();
     var i = D.LESSONS.indexOf(l), nxt = D.LESSONS[i + 1];
     var canSpeak = typeof ZsTTS !== 'undefined' && ZsTTS.supported() && ZsTTS.getSettings().enabled;
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' + _topBar(esc(l.title), 'learn') +
         '<article class="le-lesson">' +
@@ -1663,6 +1676,7 @@ var LittleEngineer = (function() {
     _stop();
     S.screen = 'real';
     var d = _load(), R = D.REAL_BUILD, rb = d.realBuild;
+    ZsCanvas.releaseIn(_root()); // free the old screen's canvases now
     _root().innerHTML =
       '<div class="le-page">' + _topBar(esc(R.title)) +
         '<article class="le-lesson le-real">' +

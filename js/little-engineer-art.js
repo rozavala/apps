@@ -87,7 +87,13 @@ var LittleEngineerArt = (function() {
       var w = 360, h = 150;
       var cv = document.createElement('canvas');
       cv.width = w; cv.height = h;
-      var g = cv.getContext('2d');
+      var g = ZsCanvas.get2d(cv);
+      if (!g) {
+        // no canvas memory: no clouds this time, try again later
+        _cloudSprites.forEach(ZsCanvas.release); ZsCanvas.release(cv);
+        _cloudSprites = null;
+        return [];
+      }
       var puffs = [];
       var n = 9 + Math.floor(R() * 5);
       for (var i = 0; i < n; i++) {
@@ -1171,10 +1177,11 @@ var LittleEngineerArt = (function() {
 
   // ---- static vehicle portrait (level cards, results) --------------------
   function vehicleThumb(cv, type, V) {
-    var g = cv.getContext('2d');
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = ZsCanvas.dpr();
     var W = cv.clientWidth || 120, H = cv.clientHeight || 60;
     cv.width = W * dpr; cv.height = H * dpr;
+    var g = ZsCanvas.get2d(cv);
+    if (!g) return;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     var s = Math.min(W / (V.len + 1), H / 3.8);
     var cam = { s: s, ox: W / 2, oy: H - 6 };
@@ -1386,10 +1393,11 @@ var LittleEngineerArt = (function() {
   }
 
   function levelThumb(cv, level) {
-    var g = cv.getContext('2d');
-    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var dpr = ZsCanvas.dpr();
     var W = cv.clientWidth || 200, H = cv.clientHeight || 110;
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    var g = ZsCanvas.get2d(cv);
+    if (!g) return;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     var sc = buildScene(level);
     var top = Math.max(4, level.tower ? level.tower.top + 1 : 3.5);

@@ -187,7 +187,8 @@ const CodeCadetArt = (() => {
     const c = document.createElement('canvas');
     const SW = T * 1.5, SH = T * 1.55;
     c.width = Math.ceil(SW * dpr); c.height = Math.ceil(SH * dpr);
-    const ctx = c.getContext('2d');
+    const ctx = ZsCanvas.get2d(c);
+    if (!ctx) { ZsCanvas.release(c); return null; }
     ctx.scale(dpr, dpr);
     const rnd = rng(seed);
     const ox = SW / 2, oy = SH - T * 0.5;     // tile-centre anchor
@@ -847,7 +848,7 @@ const CodeCadetArt = (() => {
   //  BOARD
   // ================================================================
   function createBoard(canvas) {
-    const ctx = canvas.getContext('2d');
+    let ctx = ZsCanvas.get2d(canvas);
     const B = {
       world: null, G: null, dpr: 1, seed: 1,
       ground: null, front: null, tracks: null, rocks: {},
@@ -864,15 +865,28 @@ const CodeCadetArt = (() => {
       canvas.height = Math.round(G.H * dpr);
       canvas.style.width = G.W + 'px';
       canvas.style.height = G.H + 'px';
-      const mk = () => { const c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height; const x = c.getContext('2d'); x.scale(dpr, dpr); return [c, x]; };
-      const [gc, gctx] = mk();
-      const [fc, fctx] = mk();
-      paintGround(gctx, G, B.world, B.seed);
-      paintRim(gctx, fctx, G, B.seed);
-      B.ground = gc; B.front = fc;
-      const [tc] = mk();
-      B.tracks = tc;
+      ctx = ZsCanvas.get2d(canvas);
+      // The offscreen layers are reused (resizing clears them) and the old
+      // rock sprites are released, so screen after screen does not pile up
+      // canvas memory (iPad Safari has one budget for all canvases).
+      const mk = (c) => {
+        c = c || document.createElement('canvas');
+        c.width = canvas.width; c.height = canvas.height;
+        const x = ZsCanvas.get2d(c);
+        if (x) x.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return [c, x];
+      };
+      Object.keys(B.rocks).forEach(k => { if (B.rocks[k]) ZsCanvas.release(B.rocks[k].canvas); });
       B.rocks = {};
+      const [gc, gctx] = mk(B.ground);
+      const [fc, fctx] = mk(B.front);
+      if (gctx && fctx) {
+        paintGround(gctx, G, B.world, B.seed);
+        paintRim(gctx, fctx, G, B.seed);
+      }
+      B.ground = gc; B.front = fc;
+      const [tc] = mk(B.tracks);
+      B.tracks = tc;
       for (let y = 0; y < G.h; y++) for (let x = 0; x < G.w; x++) {
         if (B.world.tiles[y][x] === '#') B.rocks[x + ',' + y] = makeRockSprite(G.T, dpr, B.seed + x * 131 + y * 977);
       }
@@ -894,7 +908,8 @@ const CodeCadetArt = (() => {
         build();
       } else {
         // same terrain: just wipe the tracks
-        if (B.tracks) B.tracks.getContext('2d').clearRect(0, 0, B.tracks.width, B.tracks.height);
+        const tx = B.tracks && ZsCanvas.get2d(B.tracks);
+        if (tx) { tx.save(); tx.setTransform(1, 0, 0, 1, 0, 0); tx.clearRect(0, 0, B.tracks.width, B.tracks.height); tx.restore(); }
         B.lastStamp = null;
         draw(performance.now());
       }
@@ -909,7 +924,7 @@ const CodeCadetArt = (() => {
       const byW = maxW / (w + 1.24);
       const byH = maxH ? maxH / (h * SY + 1.0 + 0.55 * SY + 0.54) : 999;
       const T = Math.floor(clamp(Math.min(byW, byH, 84), 22, 84));
-      const dpr = clamp(window.devicePixelRatio || 1, 1, 2.5);
+      const dpr = Math.max(1, ZsCanvas.dpr());
       if (B.G && B.G.T === T && B.dpr === dpr && canvas.width) return;
       B.dpr = dpr;
       B.G = makeGeom(w, h, T);
@@ -989,7 +1004,8 @@ const CodeCadetArt = (() => {
       const pos = { x: d.x, y: d.y };
       if (B.lastStamp && Math.hypot(pos.x - B.lastStamp.x, pos.y - B.lastStamp.y) < 0.05) return;
       B.lastStamp = pos;
-      const tc = B.tracks.getContext('2d');
+      const tc = ZsCanvas.get2d(B.tracks);
+      if (!tc) return;
       tc.save();
       tc.setTransform(B.dpr, 0, 0, B.dpr, 0, 0);
       const pr = makeProj(G.cx(d.x), G.cy(d.y), T * ROVER_SCALE, d.a, 0);
@@ -1086,6 +1102,7 @@ const CodeCadetArt = (() => {
 
     function draw(now) {
       if (!B.G || !B.ground) return;
+      if (!ctx && !(ctx = ZsCanvas.get2d(canvas))) return;
       const G = B.G, T = G.T, t = now / 1000;
       const sx = B.shake ? Math.sin(now / 18) * 3 * B.shake : 0;
       ctx.setTransform(B.dpr, 0, 0, B.dpr, sx * B.dpr, 0);
@@ -1156,11 +1173,12 @@ const CodeCadetArt = (() => {
     const h = rows.length, w = rows[0].length;
     const s = Math.max(3, Math.floor(Math.min(62 / w, 38 / h)));
     const pad = 3;
-    const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+    const dpr = Math.max(1, ZsCanvas.dpr());
     const W = w * s + pad * 2, H = h * s + pad * 2;
     canvas.width = W * dpr; canvas.height = H * dpr;
     canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    const ctx = canvas.getContext('2d');
+    const ctx = ZsCanvas.get2d(canvas);
+    if (!ctx) return;
     ctx.scale(dpr, dpr);
     ctx.fillStyle = '#C98C5C';
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(0, 0, W, H, 4) : ctx.rect(0, 0, W, H); ctx.fill();

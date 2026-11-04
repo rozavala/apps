@@ -136,7 +136,8 @@ var CircuitLabArt = (function() {
     var c = document.createElement('canvas');
     c.width = Math.max(1, Math.round(cw * DPR));
     c.height = Math.max(1, Math.round(ch * DPR));
-    var ctx = c.getContext('2d');
+    var ctx = ZsCanvas.get2d(c);
+    if (!ctx) { ZsCanvas.release(c); return null; } // no canvas memory: no board image
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     var rnd = mulberry(7);
     var i, j;
@@ -1152,11 +1153,12 @@ var CircuitLabArt = (function() {
 
   // ---------------- tray thumbnails ----------------
   function thumb(canvas, type, opts) {
-    var dpr = window.devicePixelRatio || 1;
+    var dpr = ZsCanvas.dpr();
     var cw = canvas.clientWidth || parseInt(canvas.getAttribute('width'), 10) || 64;
     var ch = canvas.clientHeight || parseInt(canvas.getAttribute('height'), 10) || 48;
     canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
-    var ctx = canvas.getContext('2d');
+    var ctx = ZsCanvas.get2d(canvas);
+    if (!ctx) return;
     var old = DPR; DPR = dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cw, ch);

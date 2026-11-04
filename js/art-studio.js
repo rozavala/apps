@@ -679,6 +679,15 @@ const ArtStudio = (() => {
   // ================================================================
   // DRAW
   // ================================================================
+  // The picture as a data URL; the export canvas is freed straight away
+  // (iPad Safari counts every live canvas against one memory budget).
+  function exportUrl(surface, maxDim, type, q) {
+    const c = surface.exportCanvas(maxDim);
+    const url = c.toDataURL(type, q);
+    ZsCanvas.release(c);
+    return url;
+  }
+
   let drawKit = null;
   function initDraw() {
     if (drawKit) { drawKit.surface.fit(); return; }
@@ -900,7 +909,7 @@ const ArtStudio = (() => {
     next.disabled = L.strokes < 1;
     if (step.preview) {
       const img = root.querySelector('.lp-preview');
-      img.src = S.exportCanvas(110).toDataURL('image/png');
+      img.src = exportUrl(S, 110, 'image/png');
       img.hidden = false;
     }
     const chk = stepCheck(step);
@@ -1005,7 +1014,7 @@ const ArtStudio = (() => {
     const pct = Math.round(avg * 100);
     completeLesson(lesson, L.scores.length ? pct : undefined);
     const stars = avg >= 0.75 ? 3 : avg >= 0.5 ? 2 : 1;
-    const art = L.kit.surface.exportCanvas(520).toDataURL('image/jpeg', 0.8);
+    const art = exportUrl(L.kit.surface, 520, 'image/jpeg', 0.8);
     const show = () => {
       if (!L || L.lesson !== lesson) return;
       const over = document.querySelector('#learn-play .lp-over');
@@ -1234,7 +1243,7 @@ const ArtStudio = (() => {
     const inp = document.getElementById('art-title');
     inp.value = (title || '').slice(0, 20);
     const prev = document.getElementById('save-preview');
-    if (prev) prev.src = surface.exportCanvas(360).toDataURL('image/jpeg', 0.8);
+    if (prev) prev.src = exportUrl(surface, 360, 'image/jpeg', 0.8);
     document.getElementById('save-dialog').classList.add('active');
     setTimeout(() => inp.focus(), 30);
   }
@@ -1250,7 +1259,7 @@ const ArtStudio = (() => {
     // per kid filled the device and everything else silently stopped
     // saving. 720px is still sharper than the gallery thumbnails and
     // the viewer, and costs about half as much.
-    const dataUrl = saveSource.exportCanvas(720).toDataURL('image/jpeg', 0.6);
+    const dataUrl = exportUrl(saveSource, 720, 'image/jpeg', 0.6);
     const hook = saveHook;
 
     const full = getProgress();

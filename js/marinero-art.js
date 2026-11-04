@@ -45,8 +45,9 @@ var MarineroArt = (function() {
   }
 
   // Canvas sized for the device's pixel ratio. Returns {ctx,w,h,dpr}.
+  // ctx is null when iPad Safari has no canvas memory left; callers skip drawing.
   function fitCanvas(cv, cssW, cssH, maxDpr) {
-    var dpr = Math.min(window.devicePixelRatio || 1, maxDpr || 2.5);
+    var dpr = Math.min(ZsCanvas.dpr(), maxDpr || 2);
     var w = Math.max(1, Math.round(cssW)), h = Math.max(1, Math.round(cssH));
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
       cv.width = Math.round(w * dpr);
@@ -54,7 +55,7 @@ var MarineroArt = (function() {
     }
     cv.style.width = w + 'px';
     cv.style.height = h + 'px';
-    return { ctx: cv.getContext('2d'), w: w, h: h, dpr: dpr };
+    return { ctx: ZsCanvas.get2d(cv), w: w, h: h, dpr: dpr };
   }
 
   // Draw a blurred shadow of whatever path-building fn produces, without the
@@ -526,7 +527,9 @@ var MarineroArt = (function() {
     var cv = ctx.canvas;
     if (!_layer) _layer = document.createElement('canvas');
     if (_layer.width !== cv.width || _layer.height !== cv.height) { _layer.width = cv.width; _layer.height = cv.height; }
-    var lc = _layer.getContext('2d');
+    var lc = ZsCanvas.get2d(_layer);
+    // no memory for the scratch layer: paint straight onto the canvas
+    if (!lc) return { ctx: ctx, cv: null, x: 0, y: 0, w: 0, h: 0 };
     var m = ctx.getTransform ? ctx.getTransform() : null;
     // bounding box of the runs in device pixels
     var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
@@ -707,15 +710,48 @@ var MarineroArt = (function() {
   // ---------------------------------------------------------------
   // SCENES behind the knots (cached per size)
   // ---------------------------------------------------------------
-  var _bgCache = {};
+  // Backdrops and compass cards, most recently used last. The cache is
+  // bounded, evicted canvases are released at once, and it empties under
+  // memory pressure (iPad Safari has one budget for all canvases on a page).
+  var _bgCache = {}, _bgOrder = [], _bgBytes = 0, BG_MAX = 16, BG_MAX_BYTES = 48 * 1024 * 1024;
+  function _bgCanvas(v) { return v && v.canvas ? v.canvas : v; }
+  function _bgSize(v) { var c = _bgCanvas(v); return c ? c.width * c.height * 4 : 0; }
+  function _bgDrop(key) {
+    _bgBytes -= _bgSize(_bgCache[key]);
+    ZsCanvas.release(_bgCanvas(_bgCache[key]));
+    delete _bgCache[key];
+    var i = _bgOrder.indexOf(key);
+    if (i >= 0) _bgOrder.splice(i, 1);
+  }
+  function bgGet(key) {
+    var v = _bgCache[key];
+    if (!v) return null;
+    var i = _bgOrder.indexOf(key);
+    if (i < _bgOrder.length - 1) { _bgOrder.splice(i, 1); _bgOrder.push(key); }
+    return v;
+  }
+  function bgPut(key, v) {
+    _bgCache[key] = v; _bgOrder.push(key); _bgBytes += _bgSize(v);
+    while (_bgOrder.length > 1 && (_bgOrder.length > BG_MAX || _bgBytes > BG_MAX_BYTES)) _bgDrop(_bgOrder[0]);
+    return v;
+  }
+  // A new offscreen canvas of w x h css px at dpr, with its scaled context,
+  // or null when there is no canvas memory.
+  function bgCanvas(w, h, dpr) {
+    var cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.round(w * dpr)); cv.height = Math.max(1, Math.round(h * dpr));
+    var c = ZsCanvas.get2d(cv);
+    if (!c) { ZsCanvas.release(cv); return null; }
+    c.scale(dpr, dpr);
+    return { cv: cv, c: c };
+  }
+  ZsCanvas.onPressure(function() { _bgOrder.slice().forEach(_bgDrop); });
 
   function teakDeck(w, h, dpr) {
     var key = 'teak' + w + 'x' + h + '@' + dpr;
-    if (_bgCache[key]) return _bgCache[key];
-    var cv = document.createElement('canvas');
-    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-    var c = cv.getContext('2d');
-    c.scale(dpr, dpr);
+    var hit = bgGet(key); if (hit) return hit;
+    var B = bgCanvas(w, h, dpr); if (!B) return null;
+    var cv = B.cv, c = B.c;
     var R = rng(7);
     var plank = Math.max(34, Math.round(h / 7.5));
     var seam = Math.max(2, plank * 0.07);
@@ -769,17 +805,14 @@ var MarineroArt = (function() {
     lg.addColorStop(0.55, 'rgba(255,230,190,0)');
     lg.addColorStop(1, 'rgba(0,0,0,0.45)');
     c.fillStyle = lg; c.fillRect(0, 0, w, h);
-    _bgCache[key] = cv;
-    return cv;
+    return bgPut(key, cv);
   }
 
   function harbourBokeh(w, h, dpr) {
     var key = 'harb' + w + 'x' + h + '@' + dpr;
-    if (_bgCache[key]) return _bgCache[key];
-    var cv = document.createElement('canvas');
-    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-    var c = cv.getContext('2d');
-    c.scale(dpr, dpr);
+    var hit = bgGet(key); if (hit) return hit;
+    var B = bgCanvas(w, h, dpr); if (!B) return null;
+    var cv = B.cv, c = B.c;
     var g = c.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, '#9cc3dc');
     g.addColorStop(0.34, '#cfe0e6');
@@ -809,8 +842,7 @@ var MarineroArt = (function() {
     var v = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.max(w, h) * 0.75);
     v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,10,20,0.35)');
     c.fillStyle = v; c.fillRect(0, 0, w, h);
-    _bgCache[key] = cv;
-    return cv;
+    return bgPut(key, cv);
   }
 
   // A weathered wooden dock piling (front view), x = centre, r = radius.
@@ -934,11 +966,9 @@ var MarineroArt = (function() {
   // The card: ivory, black graduations, red north. letters: 'all'|'cardinal'|'north'
   function compassCard(d, dpr, letters) {
     var key = 'card' + d + '@' + dpr + letters;
-    if (_bgCache[key]) return _bgCache[key];
-    var cv = document.createElement('canvas');
-    cv.width = cv.height = Math.round(d * dpr);
-    var c = cv.getContext('2d');
-    c.scale(dpr, dpr);
+    var hit = bgGet(key); if (hit) return hit;
+    var B = bgCanvas(d, d, dpr); if (!B) return null;
+    var cv = B.cv, c = B.c;
     var r = d / 2;
     c.translate(r, r);
     // card face
@@ -1014,8 +1044,7 @@ var MarineroArt = (function() {
         });
       }
     }
-    _bgCache[key] = cv;
-    return cv;
+    return bgPut(key, cv);
   }
 
   /* drawCompass(ctx, cx, cy, R, heading, opts)
@@ -1086,7 +1115,7 @@ var MarineroArt = (function() {
     ctx.scale(1, 1 - Math.abs(tilt) * 0.06);
     ctx.translate(0, tilt * R * 0.02);
     ctx.rotate(-heading * Math.PI / 180);
-    ctx.drawImage(card, -cr, -cr, cr * 2, cr * 2);
+    if (card) ctx.drawImage(card, -cr, -cr, cr * 2, cr * 2);
     ctx.restore();
     // shadow of the rim on the card
     var sh = ctx.createRadialGradient(cx, cy, cr * 0.82, cx, cy, R * 0.79);
@@ -1207,11 +1236,9 @@ var MarineroArt = (function() {
   // Static part of the harbour view (sky, clouds, coast, town, lighthouse).
   function harbourBackdrop(w, h, dpr, hz) {
     var key = 'hb' + w + 'x' + h + '@' + dpr + ':' + hz;
-    if (_bgCache[key]) return _bgCache[key];
-    var cv = document.createElement('canvas');
-    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-    var c = cv.getContext('2d');
-    c.scale(dpr, dpr);
+    var hit = bgGet(key); if (hit) return hit;
+    var B = bgCanvas(w, h, dpr); if (!B) return null;
+    var cv = B.cv, c = B.c;
     var H = h * hz;
     var sky = c.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, '#5f9cc9'); sky.addColorStop(0.7, '#b9d7e8'); sky.addColorStop(1, '#e4eef0');
@@ -1272,8 +1299,7 @@ var MarineroArt = (function() {
     c.fillStyle = '#7d7a70';
     c.beginPath(); c.moveTo(0, H + 1); c.lineTo(0, H - h * 0.012); c.lineTo(w * 0.3, H - h * 0.008); c.lineTo(w * 0.32, H + 1); c.fill();
     c.fillStyle = 'rgba(255,255,255,0.15)'; c.fillRect(0, H - h * 0.012, w * 0.3, h * 0.003);
-    _bgCache[key] = cv;
-    return cv;
+    return bgPut(key, cv);
   }
 
   // Animated sea below the horizon at fraction hz of the height.
@@ -1688,12 +1714,11 @@ var MarineroArt = (function() {
 
   function chartImage(w, h, dpr, C) {
     var key = 'chart' + w + 'x' + h + '@' + dpr;
-    if (_bgCache[key]) return _bgCache[key];
+    var hit = bgGet(key); if (hit) return hit;
     var Lc = chartLayout(w, h, C);
-    var cv = document.createElement('canvas');
-    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-    var c = cv.getContext('2d');
-    c.scale(dpr, dpr);
+    var B = bgCanvas(w, h, dpr);
+    if (!B) return { canvas: null, layout: Lc };
+    var cv = B.cv, c = B.c;
     var R = rng(23);
     // paper
     c.fillStyle = '#f7f3e6'; c.fillRect(0, 0, w, h);
@@ -1878,9 +1903,7 @@ var MarineroArt = (function() {
       var xl = x0 + cw - lm2 * lonMinPx;
       c.fillText(C.lonDeg + '°' + String(lon).padStart(2, '0') + "'W", xl, y0 + ch + b * 0.68);
     }
-    var out = { canvas: cv, layout: Lc };
-    _bgCache[key] = out;
-    return out;
+    return bgPut(key, { canvas: cv, layout: Lc });
   }
 
   // Brass-hinged steel dividers. a, b = tip points; hinge = top point.

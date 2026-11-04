@@ -810,8 +810,10 @@ LXLabs.water = (() => {
 
   function drawStatic() {
     const W = api.W, H = api.H;
+    ZsCanvas.release(bg); // free the previous backdrop now
     bg = A.offscreen(W * 2, H * 2);
-    const x = bg.getContext('2d');
+    const x = ZsCanvas.get2d(bg);
+    if (!x) { ZsCanvas.release(bg); bg = null; return; } // no canvas memory: no backdrop
     x.scale(2, 2);
     // far range of the Andes, hazy blue with snowy tops
     const He = Math.min(H, 440);
@@ -867,7 +869,7 @@ LXLabs.water = (() => {
     sk.addColorStop(0, A.mix('#3F5E86', '#3E8EDB', b)); sk.addColorStop(1, A.mix('#A7B4C4', '#D4EEFB', b));
     ctx.fillStyle = sk; ctx.fillRect(0, 0, W, H);
     A.sun(ctx, S.sunX, S.sunY, 28, S.sun, t);
-    ctx.drawImage(bg, 0, 0, W, H);
+    if (bg) ctx.drawImage(bg, 0, 0, W, H);
     // snow cap
     if (S.snow > 0.01 || S.cold) drawSnow(ctx);
     // rivers and lake
@@ -992,8 +994,8 @@ LXLabs.water = (() => {
     ctx.beginPath(); ctx.ellipse(L.x - L.rx * 0.2, L.y - 2, L.rx * lv * 0.4, 1.5, 0, 0, Math.PI * 2); ctx.stroke();
   }
 
-  function stop() { bg = null; }
-  function resize() { geom(); bg = null; }
+  function stop() { ZsCanvas.release(bg); bg = null; }
+  function resize() { geom(); ZsCanvas.release(bg); bg = null; }
   return { challenges, start, frame, stop, resize, _S: () => S };
 })();
 
@@ -2075,7 +2077,7 @@ LXLabs.magnets = (() => {
           // weak field far away: the filings barely turn
           f.a = f.a0 + d * ease * Math.min(1, f.s * 5e4);
         });
-        if (S.settle === 0) { S.filings.forEach(f => { f.tgt = undefined; }); S.fcache = null; }
+        if (S.settle === 0) { S.filings.forEach(f => { f.tgt = undefined; }); ZsCanvas.release(S.fcache); S.fcache = null; }
       }
     }
     draw(api.ctx, t);
@@ -2092,8 +2094,10 @@ LXLabs.magnets = (() => {
     // filings
     if (S.filings) {
       if (S.settle > 0 || !S.fcache) {
-        const fc = S.settle > 0 ? null : A.offscreen(W * 2, H * 2);
-        const c2 = fc ? fc.getContext('2d') : ctx;
+        let fc = S.settle > 0 ? null : A.offscreen(W * 2, H * 2);
+        const fx = fc && ZsCanvas.get2d(fc);
+        if (fc && !fx) { ZsCanvas.release(fc); fc = null; } // no memory: draw them directly
+        const c2 = fc ? fx : ctx;
         if (fc) c2.scale(2, 2);
         c2.lineCap = 'round';
         c2.lineWidth = 1.05;
@@ -2108,7 +2112,7 @@ LXLabs.magnets = (() => {
           });
           c2.stroke();
         });
-        if (fc) S.fcache = fc;
+        if (fc) { ZsCanvas.release(S.fcache); S.fcache = fc; }
       }
       if (S.fcache && S.settle === 0) ctx.drawImage(S.fcache, 0, 0, W, H);
     }

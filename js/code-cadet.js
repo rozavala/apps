@@ -1735,6 +1735,7 @@ const CodeCadet = (() => {
   function _renderWorldSelect() {
     const grid = $('cc-world-grid');
     if (!grid) return;
+    ZsCanvas.releaseIn(grid); // free the old puzzle thumbnails now
     grid.innerHTML = '';
     const progress = _loadProgress();
     const byWorld = {};

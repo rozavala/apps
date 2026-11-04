@@ -178,6 +178,7 @@ var Marinero = (function() {
   function render(section, inner, after) {
     leaveView();
     current.section = section;
+    ZsCanvas.releaseIn(root()); // free the old view's canvases now
     root().innerHTML = shell(section, inner);
     $all('[data-go]', root()).forEach(function(b) {
       b.addEventListener('click', function() { _sound('click'); go(b.getAttribute('data-go')); });
@@ -255,12 +256,14 @@ var Marinero = (function() {
     opts = opts || {};
     var h = Math.round(w * 0.72);
     // while the rope is moving, paint at a lower resolution; full detail when it stops
-    var f = A.fitCanvas(cv, w, h, opts.fast ? 1 : 2.5), ctx = f.ctx;
+    var f = A.fitCanvas(cv, w, h, opts.fast ? 1 : 2), ctx = f.ctx;
+    if (!ctx) return; // no canvas memory left: skip this frame
     var V = K.view || [0, 0, 1000];
     var sc = w / V[2];
     ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
     var bg = K.scene === 'post' ? A.harbourBokeh(w, h, f.dpr) : A.teakDeck(w, h, f.dpr);
-    ctx.drawImage(bg, 0, 0, w, h);
+    if (bg) ctx.drawImage(bg, 0, 0, w, h);
+    else { ctx.fillStyle = K.scene === 'post' ? '#6f9aa8' : '#8a5a32'; ctx.fillRect(0, 0, w, h); }
     ctx.setTransform(f.dpr * sc, 0, 0, f.dpr * sc, -V[0] * sc * f.dpr, -V[1] * sc * f.dpr);
     A.drawModel(ctx, M, {
       vis: opts.vis, colors: opts.colors, devScale: f.dpr * sc,
@@ -531,9 +534,11 @@ var Marinero = (function() {
       function size() { return Math.min(320, cv.parentNode.clientWidth - 8); }
       function draw() {
         var s = size(), f = A.fitCanvas(cv, s, s);
-        f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
-        f.ctx.clearRect(0, 0, s, s);
-        A.drawCompass(f.ctx, s / 2, s / 2, s * 0.48, shown, { dpr: f.dpr, tilt: vel * 0.02 });
+        if (f.ctx) {
+          f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
+          f.ctx.clearRect(0, 0, s, s);
+          A.drawCompass(f.ctx, s / 2, s / 2, s * 0.48, shown, { dpr: f.dpr, tilt: vel * 0.02 });
+        }
         $('#mar-ci-h', r).textContent = pad3(h) + '°';
         $('#mar-ci-n', r).textContent = pointName(h) + ' · ' + D.POINT_ES[pointName(h)];
       }
@@ -592,11 +597,15 @@ var Marinero = (function() {
       function draw() {
         var s = sizes();
         var f = A.fitCanvas(cv, s[0], s[0]);
-        f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0); f.ctx.clearRect(0, 0, s[0], s[0]);
-        A.drawCompass(f.ctx, s[0] / 2, s[0] / 2, s[0] * 0.48, st.shown, { dpr: f.dpr, tilt: st.vel * 0.03, target: st.target });
+        if (f.ctx) {
+          f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0); f.ctx.clearRect(0, 0, s[0], s[0]);
+          A.drawCompass(f.ctx, s[0] / 2, s[0] / 2, s[0] * 0.48, st.shown, { dpr: f.dpr, tilt: st.vel * 0.03, target: st.target });
+        }
         var g = A.fitCanvas(wv, s[1], s[1]);
-        g.ctx.setTransform(g.dpr, 0, 0, g.dpr, 0, 0); g.ctx.clearRect(0, 0, s[1], s[1]);
-        A.drawWheel(g.ctx, s[1] / 2, s[1] / 2, s[1] * 0.47, st.wheel, g.dpr);
+        if (g.ctx) {
+          g.ctx.setTransform(g.dpr, 0, 0, g.dpr, 0, 0); g.ctx.clearRect(0, 0, s[1], s[1]);
+          A.drawWheel(g.ctx, s[1] / 2, s[1] / 2, s[1] * 0.47, st.wheel, g.dpr);
+        }
         var err = angDiff(st.h, st.target);
         $('#mar-hr', r).innerHTML = 'Heading <b>' + pad3(st.h) + '°</b>' +
           (Math.abs(err) <= tol ? ' <span class="mar-ok">On course! Hold it…</span>' : ' <span class="mar-off">' + (err > 0 ? 'turn to PORT ◀' : 'turn to STARBOARD ▶') + '</span>');
@@ -697,6 +706,7 @@ var Marinero = (function() {
       function size() { return Math.min(r.clientWidth > 640 ? 400 : r.clientWidth - 8, 420); }
       function drawC() {
         var s = size(), f = A.fitCanvas(cv, s, s);
+        if (!f.ctx) return;
         f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0); f.ctx.clearRect(0, 0, s, s);
         A.drawCompass(f.ctx, s / 2, s / 2, s * 0.48, 0, { dpr: f.dpr, letters: letters, pointer: st.shown, lubber: false });
       }
@@ -766,6 +776,7 @@ var Marinero = (function() {
       function size() { return Math.min(r.clientWidth > 640 ? 380 : r.clientWidth - 8, 400); }
       function drawC() {
         var s = size(), f = A.fitCanvas(cv, s, s);
+        if (!f.ctx) return;
         f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0); f.ctx.clearRect(0, 0, s, s);
         A.drawCompass(f.ctx, s / 2, s / 2, s * 0.48, 0, { dpr: f.dpr, letters: 'cardinal', pointer: st.shown, lubber: false, target: st.back });
       }
@@ -913,6 +924,7 @@ var Marinero = (function() {
       function draw() {
         var leg = legs[st.i];
         var s = size(), f = A.fitCanvas(cv, s, s);
+        if (!f.ctx) return;
         f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0); f.ctx.clearRect(0, 0, s, s);
         if (st.live) A.drawCompass(f.ctx, s / 2, s / 2, s * 0.48, st.shown, { dpr: f.dpr, target: leg.b, tilt: st.vel * 0.02 });
         else A.drawCompass(f.ctx, s / 2, s / 2, s * 0.48, 0, { dpr: f.dpr, pointer: leg.b, lubber: false, letters: 'all' });
@@ -1004,9 +1016,11 @@ var Marinero = (function() {
           if (visible[id] === false) return;
           var w = c.clientWidth || 200, h = Math.round(w * 0.82);
           var f = A.fitCanvas(c, w, h), ctx = f.ctx;
+          if (!ctx) return;
           ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
           var hz = 0.4;
-          ctx.drawImage(A.harbourBackdrop(w, h, f.dpr, hz), 0, 0, w, h);
+          var hb = A.harbourBackdrop(w, h, f.dpr, hz);
+          if (hb) ctx.drawImage(hb, 0, 0, w, h);
           A.drawSea(ctx, w, h, t, hz);
           A.drawBuoy(ctx, id, w / 2, h * 0.76, h * 0.26, t, { seed: i * 1.3 });
         });
@@ -1048,9 +1062,11 @@ var Marinero = (function() {
         tNow = t;
         var w = cv.parentNode.clientWidth, h = Math.round(w * (w < 560 ? 0.8 : 0.56));
         var f = A.fitCanvas(cv, w, h), ctx = f.ctx;
+        if (!ctx) return;
         ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
         var hz = 0.4;
-        ctx.drawImage(A.harbourBackdrop(w, h, f.dpr, hz), 0, 0, w, h);
+        var hb = A.harbourBackdrop(w, h, f.dpr, hz);
+        if (hb) ctx.drawImage(hb, 0, 0, w, h);
         A.drawSea(ctx, w, h, t, hz);
         var q = st.q;
         if (q) {
@@ -1322,9 +1338,12 @@ var Marinero = (function() {
         return [mx + nx * hgt, my + ny * hgt];
       }
       function draw() {
-        var ctx = cv.getContext('2d');
+        // the chart image can be freed under memory pressure: make it again
+        if (!img || !img.width) layout();
+        var ctx = ZsCanvas.get2d(cv);
+        if (!ctx || !L) return;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.drawImage(img, 0, 0, w, h);
+        if (img) ctx.drawImage(img, 0, 0, w, h);
         var t = tasks[st.i];
         if (t) {
           [t.a, t.b].forEach(function(p, k) {

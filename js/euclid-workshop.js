@@ -656,6 +656,7 @@ var EuclidWorkshop = (function() {
     });
     h += '</div></section>';
 
+    ZsCanvas.releaseIn(r); // free the old screen's canvases now
     r.innerHTML = '<div class="ew-home">' + h + '</div>';
     drawThumbs();
     startHero();
@@ -671,9 +672,10 @@ var EuclidWorkshop = (function() {
       var L = levelById(c.getAttribute('data-thumb'));
       var w = c.clientWidth || 140, h = c.clientHeight || 92;
       c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
-      var g = c.getContext('2d');
+      var g = ZsCanvas.get2d(c);
+      if (!g) return;
       if (!thumbPaper) thumbPaper = ART.makePaper(280, 184, 1);
-      g.drawImage(thumbPaper, 0, 0, c.width, c.height);
+      if (thumbPaper) g.drawImage(thumbPaper, 0, 0, c.width, c.height);
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       var b = buildScene(L), alts = L.goal(b.P);
       var xs = [], ys = [];
@@ -729,19 +731,24 @@ var EuclidWorkshop = (function() {
     var w = c.clientWidth, h = c.clientHeight;
     if (w < 20 || h < 20) return;
     c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
-    var g = c.getContext('2d');
+    var g = ZsCanvas.get2d(c);
+    if (!g) return;
     var paper = ART.makePaper(c.width, c.height, dpr);
     var pat = ART.graphitePattern(g);
     var s = Math.min(w / 520, h / 230);
     var ox = w * 0.5, oy = h * 0.62;
     var r = 82 * s;
     var A = [ox - r / 2, oy], B = [ox + r / 2, oy], C = [ox, oy - r * Math.sqrt(3) / 2];
-    hero = { t0: performance.now(), id: 0 };
+    var mine = hero = { t0: performance.now(), id: 0 };
     function frame(now) {
-      if (!hero || !document.getElementById('ew-hero')) { hero = null; return; }
+      if (hero !== mine || !document.getElementById('ew-hero')) {
+        if (hero === mine) hero = null;
+        ZsCanvas.release(paper); // this hero is done: free its paper now
+        return;
+      }
       var t = ((now - hero.t0) / 1000) % 6.5;
       g.setTransform(1, 0, 0, 1, 0, 0);
-      g.drawImage(paper, 0, 0);
+      if (paper) g.drawImage(paper, 0, 0); else { g.fillStyle = '#f0e2c1'; g.fillRect(0, 0, c.width, c.height); }
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.lineCap = 'round';
       // circle around A, already drawn in pencil
@@ -850,6 +857,7 @@ var EuclidWorkshop = (function() {
         '<aside class="ew-side" id="ew-side"></aside>' +
       '</div>' +
     '</section>';
+    ZsCanvas.releaseIn(r); // free the old screen's canvases now
     r.innerHTML = h;
     renderSide();
   }
@@ -946,7 +954,7 @@ var EuclidWorkshop = (function() {
   function setupCanvas() {
     cv = document.getElementById('ew-canvas');
     if (!cv) return;
-    ctx = cv.getContext('2d');
+    ctx = ZsCanvas.get2d(cv);
     sizeCanvas();
     if (typeof ResizeObserver !== 'undefined') {
       var ro = new ResizeObserver(function() { if (cv && document.body.contains(cv)) { sizeCanvas(); dirty = true; } else ro.disconnect(); });
@@ -958,16 +966,19 @@ var EuclidWorkshop = (function() {
   function sizeCanvas() {
     var box = cv.parentNode.getBoundingClientRect();
     var oldW = W, oldH = H;
-    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    DPR = ZsCanvas.dpr();
     W = Math.max(50, Math.round(box.width)); H = Math.max(50, Math.round(box.height));
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
     cv.style.width = W + 'px'; cv.style.height = H + 'px';
     var key = cv.width + 'x' + cv.height;
     if (key !== paperKey) {
       paperKey = key;
+      ZsCanvas.release(paperImg); // free the old sheet now
       paperImg = ART.makePaper(cv.width, cv.height, DPR);
+      if (!paperImg) paperKey = '';
     }
-    graphite = ART.graphitePattern(ctx);
+    if (!ctx) ctx = ZsCanvas.get2d(cv);
+    if (ctx) graphite = ART.graphitePattern(ctx);
     if (oldW && oldH && G && !G.userMovedView) fitView();
   }
 
@@ -1139,6 +1150,7 @@ var EuclidWorkshop = (function() {
   }
 
   function draw(now) {
+    if (!ctx && cv && G && (ctx = ZsCanvas.get2d(cv))) graphite = ART.graphitePattern(ctx);
     if (!ctx || !G) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (paperImg) ctx.drawImage(paperImg, 0, 0); else { ctx.fillStyle = '#f0e2c1'; ctx.fillRect(0, 0, cv.width, cv.height); }

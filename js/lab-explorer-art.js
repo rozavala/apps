@@ -87,12 +87,32 @@ const LXArt = (() => {
     return { x: bx, y: y - h / 2, w: w + padX * 2, h };
   }
 
+  // Texture caches: bounded, evicted canvases released at once, emptied
+  // under memory pressure (iPad Safari has one budget for all canvases).
+  // With no canvas memory a texture is a blank 1x1 canvas (draws nothing).
+  const _blank = document.createElement('canvas');
+  _blank.width = _blank.height = 1;
+  function _texCache(max) {
+    const map = new Map();
+    ZsCanvas.onPressure(() => { map.forEach(c => ZsCanvas.release(c)); map.clear(); });
+    return {
+      get(k) { const c = map.get(k); if (c) { map.delete(k); map.set(k, c); } return c; },
+      put(k, c) {
+        map.set(k, c);
+        while (map.size > max) { const k0 = map.keys().next().value; ZsCanvas.release(map.get(k0)); map.delete(k0); }
+        return c;
+      }
+    };
+  }
+
   // ── Wood grain (cached offscreen) ──
-  const _woodCache = {};
+  const _woodCache = _texCache(12);
   function wood(w, h, tone, seed) {
     const key = [w, h, tone, seed].join(':');
-    if (_woodCache[key]) return _woodCache[key];
-    const c = offscreen(w, h), x = c.getContext('2d');
+    const hit = _woodCache.get(key);
+    if (hit) return hit;
+    const c = offscreen(w, h), x = ZsCanvas.get2d(c);
+    if (!x) { ZsCanvas.release(c); return _blank; }
     const base = tone || '#C8955A';
     const g = x.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, shade(base, 0.12)); g.addColorStop(0.5, base); g.addColorStop(1, shade(base, -0.12));
@@ -116,24 +136,24 @@ const LXArt = (() => {
       x.fillStyle = rgba(shade(base, -0.5), 0.4);
       x.beginPath(); x.ellipse(kx, ky, kr * 0.6, kr * 0.25, 0, 0, Math.PI * 2); x.fill();
     }
-    _woodCache[key] = c;
-    return c;
+    return _woodCache.put(key, c);
   }
 
   // ── Paper / noise texture ──
-  const _paperCache = {};
+  const _paperCache = _texCache(6);
   function paper(w, h, tint) {
     const key = w + ':' + h + ':' + tint;
-    if (_paperCache[key]) return _paperCache[key];
-    const c = offscreen(w, h), x = c.getContext('2d');
+    const hit = _paperCache.get(key);
+    if (hit) return hit;
+    const c = offscreen(w, h), x = ZsCanvas.get2d(c);
+    if (!x) { ZsCanvas.release(c); return _blank; }
     x.fillStyle = tint || '#FBF8F1'; x.fillRect(0, 0, w, h);
     const r = rng(99);
     for (let i = 0; i < w * h / 40; i++) {
       x.fillStyle = 'rgba(120,100,70,' + (r() * 0.05) + ')';
       x.fillRect(r() * w, r() * h, 1 + r(), 1 + r());
     }
-    _paperCache[key] = c;
-    return c;
+    return _paperCache.put(key, c);
   }
 
   // ── Sun with glow ──

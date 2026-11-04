@@ -406,8 +406,9 @@ var DCArt = (function () {
     function slices(from, to, fn, next) { var y = from; (function step() { var end = Math.min(to, y + 140); for (; y < end; y++) fn(y); if (y < to) setTimeout(step, 0); else next(); })(); }
     slices(0, ch, heightRow, function () { slices(1, ch - 1, shadeRow, function () {
         ctx.putImageData(img, 0, 0);
-        if (cv.toBlob) cv.toBlob(function (b) { done(b ? URL.createObjectURL(b) : cv.toDataURL()); }, 'image/png');
-        else done(cv.toDataURL());
+        // the relief lives on as an image URL; free the 5.6 MB canvas at once
+        if (cv.toBlob) cv.toBlob(function (b) { var u = b ? URL.createObjectURL(b) : cv.toDataURL(); ZsCanvas.release(cv); done(u); }, 'image/png');
+        else { var u = cv.toDataURL(); ZsCanvas.release(cv); done(u); }
     }); });
   }
 

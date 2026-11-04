@@ -386,7 +386,7 @@ var CircuitLab = (function() {
     var stage = V.canvas.parentNode;
     var w = stage.clientWidth, h = stage.clientHeight;
     if (w < 10 || h < 10) return;
-    V.dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    V.dpr = ZsCanvas.dpr();
     V.w = w; V.h = h;
     V.canvas.width = Math.round(w * V.dpr); V.canvas.height = Math.round(h * V.dpr);
     V.canvas.style.width = w + 'px'; V.canvas.style.height = h + 'px';
@@ -406,8 +406,9 @@ var CircuitLab = (function() {
       if (y + 1 < st.circ.rows) { var q2 = toScreen(x, y + 1); edges.push([p.x, p.y, q2.x, q2.y]); }
     }
     var mpx = m * V.S;
+    ZsCanvas.release(V.board); // free the previous board image now
     V.board = A.makeBoard(w, h, { x: V.ox - mpx, y: V.oy - mpx, w: vw + 2 * mpx, h: vh + 2 * mpx }, posts, edges, V.S);
-    V.ctx = V.canvas.getContext('2d');
+    V.ctx = ZsCanvas.get2d(V.canvas);
     rebuildGeo();
   }
 
@@ -482,7 +483,9 @@ var CircuitLab = (function() {
   // ---------------- drawing ----------------
   function frame(ts) {
     V.raf = 0;
-    if (st.screen !== 'play' || !V.ctx) return;
+    if (st.screen !== 'play') return;
+    if (!V.ctx && V.canvas) V.ctx = ZsCanvas.get2d(V.canvas);
+    if (!V.ctx) { if (V.canvas) V.raf = requestAnimationFrame(frame); return; } // no canvas memory yet
     var dt = V.last ? Math.min(0.05, (ts - V.last) / 1000) : 0.016;
     V.last = ts; V.t += dt;
     step(dt);
@@ -1350,7 +1353,7 @@ var CircuitLab = (function() {
     if (!tdrag || e.pointerId !== tdrag.id) return;
     var td = tdrag;
     tdrag = null;
-    if (td.ghost && td.ghost.parentNode) td.ghost.parentNode.removeChild(td.ghost);
+    if (td.ghost && td.ghost.parentNode) { td.ghost.parentNode.removeChild(td.ghost); ZsCanvas.release(td.ghost); }
     var dg = drag && drag.mode === 'tray' ? drag : null;
     if (drag && drag.mode === 'tray') drag = null;
     if (td.obj) {
@@ -1412,6 +1415,7 @@ var CircuitLab = (function() {
     setPlaying(false);
     st.screen = 'menu';
     if (V.ro) { try { V.ro.disconnect(); } catch (e) {} V.ro = null; }
+    ZsCanvas.release(V.board); V.board = null;
     V.canvas = null; V.ctx = null;
   }
 
@@ -1421,6 +1425,7 @@ var CircuitLab = (function() {
     var d = _load(), u = _user();
     if (!d.facts || d.facts.indexOf('safety') < 0) { unlockFact('safety'); unlockFact('volta'); d = _load(); }
     var done = Object.keys(d.levels || {}).length;
+    ZsCanvas.releaseIn(root()); // free the old screen's canvases now
     root().innerHTML =
       '<header class="cl-header">' +
         '<canvas class="cl-hero" id="cl-hero" aria-hidden="true"></canvas>' +
@@ -1448,10 +1453,11 @@ var CircuitLab = (function() {
   function drawHero() {
     var c = document.getElementById('cl-hero');
     if (!c) return;
-    var w = c.clientWidth || 300, h = c.clientHeight || 150, dpr = Math.min(2.5, window.devicePixelRatio || 1);
+    var w = c.clientWidth || 300, h = c.clientHeight || 150, dpr = ZsCanvas.dpr();
     c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    var ctx = ZsCanvas.get2d(c);
+    if (!ctx) return;
     A.setDpr(dpr);
-    var ctx = c.getContext('2d');
     var u = Math.min(h * 0.72, w * 0.3);
     var x0 = w / 2 - u * 1.1, y0 = h / 2 - u * 0.5;
     var posts = [{ x: x0, y: y0 }, { x: x0, y: y0 + u }, { x: x0 + u * 2.2, y: y0 }, { x: x0 + u * 2.2, y: y0 + u }];
@@ -1510,6 +1516,7 @@ var CircuitLab = (function() {
       });
       html += '</div></section>';
     });
+    ZsCanvas.releaseIn(root()); // free the old screen's canvases now
     root().innerHTML = html;
     root().querySelector('[data-act="home"]').addEventListener('click', function() { _sound('click'); showHome(); });
     root().querySelectorAll('[data-li]').forEach(function(b) {
@@ -1539,6 +1546,7 @@ var CircuitLab = (function() {
         '<p>' + _esc(open ? f.text : from) + '</p></article>';
     });
     html += '</div>';
+    ZsCanvas.releaseIn(root()); // free the old screen's canvases now
     root().innerHTML = html;
     root().querySelector('[data-act="home"]').addEventListener('click', function() { _sound('click'); showHome(); });
     window.scrollTo(0, 0);
@@ -1613,6 +1621,7 @@ var CircuitLab = (function() {
         '<div class="cl-goal-text">' + _esc(young && lvl.young ? lvl.young : lvl.text) + '</div>'
       : '<div class="cl-goal-title"><span class="cl-chip">Free Build</span> Construcción libre</div>' +
         '<div class="cl-goal-text">Drag parts onto the board, drag from post to post for wires. Try series, parallel, a short circuit — or the 9 V battery on a bulb!</div>';
+    ZsCanvas.releaseIn(root()); // free the old screen's canvases now
     root().innerHTML =
       '<div class="cl-play">' +
         '<div class="cl-topbar">' +
@@ -1705,6 +1714,7 @@ var CircuitLab = (function() {
         '<canvas class="cl-tthumb" data-th="' + k + '"></canvas><span class="cl-tlabel">' + LABEL[k] + '</span><span class="cl-tcount" data-count="' + k + '"></span></button>';
     });
     html += '<button type="button" class="cl-titem cl-bin" id="cl-bin" aria-label="Bin: drag a part here, or tap to remove the selected part"><span class="cl-bin-ic" aria-hidden="true"></span><span class="cl-tlabel">Bin</span></button>';
+    ZsCanvas.releaseIn(tray);
     tray.innerHTML = html;
     tray.querySelectorAll('.cl-titem[data-item]').forEach(function(b) {
       var k = b.getAttribute('data-item');
@@ -1749,6 +1759,7 @@ var CircuitLab = (function() {
       D.MATERIALS.forEach(function(m) {
         html += '<button type="button" class="cl-obj" data-obj="' + m.id + '" aria-label="' + _esc(m.name + ' · ' + m.es) + '" title="' + _esc(m.name + ' · ' + m.es) + '"><canvas data-oth="' + m.id + '"></canvas><span class="cl-obj-n">' + _esc(m.name) + '</span><span class="cl-obj-r" data-res="' + m.id + '"></span></button>';
       });
+      ZsCanvas.releaseIn(sh);
       sh.innerHTML = html;
       sh.querySelectorAll('[data-obj]').forEach(function(b) {
         var id = b.getAttribute('data-obj');
