@@ -163,12 +163,20 @@ var Vacation = (function() {
   }
 
   // ── Public actions ──
+  // The hub's PIN modal (requestPinThen) only exists on index.html; on
+  // this page the old fallback unlocked with no PIN at all. Ask for the
+  // parent PIN in an in-page dialog instead.
   function unlockParent() {
-    if (typeof requestPinThen === 'function') {
-      requestPinThen(function() { _parentUnlocked = true; _render(); });
-    } else {
-      _parentUnlocked = true; _render();
-    }
+    var done = function() { _parentUnlocked = true; _render(); };
+    if (typeof requestPinThen === 'function') { requestPinThen(done); return; }
+    var pin = typeof getParentPin === 'function' ? getParentPin() : null;
+    if (!pin || typeof ZsDialog === 'undefined') return;
+    ZsDialog.prompt({ title: '🔒 Parent PIN', message: 'Enter the parent PIN to edit trips.', inputType: 'password', inputMode: 'numeric', confirmLabel: 'Unlock' })
+      .then(function(v) {
+        if (v == null) return;
+        if (String(v) === String(pin)) done();
+        else ZsDialog.toast('Wrong PIN.');
+      });
   }
 
   function newTrip() {

@@ -589,7 +589,8 @@
         quest:  document.getElementById('stats-quest'),
         guess:  document.getElementById('stats-guess'),
         money:  document.getElementById('stats-money'),
-        invest: document.getElementById('stats-invest')
+        invest: document.getElementById('stats-invest'),
+        bank:   document.getElementById('stats-bank')
       };
 
       var stats = precalculatedStats || (typeof getPlayerStats === 'function' ? getPlayerStats(user.name) : { appStats: {} });
@@ -794,6 +795,23 @@
             var iBest = idata.bestRoi != null ? Math.round(idata.bestRoi * 100) : 0;
             els.invest.innerHTML = '<span class="cs-item active">📈 ' + (iBest > 0 ? '+' : '') + iBest + '%</span><span class="cs-item">🎮 ' + iGames + '</span>';
           }
+        }
+      } catch (e) {}
+
+      // Banco Familia: the kid's own account balance (real money, so
+      // only shown when they have one).
+      try {
+        if (els.bank && typeof BankEngine !== 'undefined') {
+          var bk = JSON.parse(localStorage.getItem('zs_bank') || 'null');
+          var bev = bk && Array.isArray(bk.events) ? bk.events : [];
+          var bpr = (JSON.parse(localStorage.getItem('zs_bank_spx') || 'null') || {}).prices || {};
+          var bTotal = 0, bAny = false;
+          BankEngine.accounts(bev).forEach(function(a) {
+            if (a.archived || !BankEngine.isMember(a, user.name)) return;
+            var bs = BankEngine.compute(bev, a.id, bpr);
+            if (bs.deposits > 0) { bAny = true; if (a.kind === 'own') bTotal += bs.value; }
+          });
+          if (bAny) els.bank.innerHTML = '<span class="cs-item active">🐷 $' + bTotal.toFixed(2) + '</span>';
         }
       } catch (e) {}
 

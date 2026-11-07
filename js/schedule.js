@@ -27,6 +27,7 @@ var AppSchedule = (function() {
     { id: 'bmcheck', card: '.card-bmcheck', alwaysVisible: true },
     { id: 'trophy',  card: '.card-trophy',  alwaysVisible: true },
     { id: 'move',    card: '.card-move',    alwaysVisible: true },
+    { id: 'bank',    card: '.card-bank',    alwaysVisible: true },
     // Learn-by-doing apps (two days each, matched to the day's theme)
     { id: 'circuit',    card: '.card-circuit' },
     { id: 'engineer',   card: '.card-engineer' },
