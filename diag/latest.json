@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-07T15:03:34.498Z",
+  "generatedAt": "2026-11-07T15:49:05.622Z",
   "windowHours": 72,
-  "totalGroups": 15,
-  "totalEvents": 62,
+  "totalGroups": 8,
+  "totalEvents": 39,
   "topGroups": [
     {
       "app": "world-cup",
@@ -103,35 +103,9 @@
       "filename": "https://rozavala.github.io/apps/js/art-studio-brushes.js?v=1",
       "lineno": 900,
       "colno": 7,
-      "count": 19,
-      "firstTs": 1793807188486,
+      "count": 7,
+      "firstTs": 1793807780846,
       "lastTs": 1793807798773,
-      "users": 1
-    },
-    {
-      "app": "art-studio",
-      "kind": "error",
-      "page": "art-studio.html",
-      "message": "TypeError: null is not an object (evaluating 'this.paint.getImageData')",
-      "filename": "https://rozavala.github.io/apps/js/art-studio-brushes.js?v=1",
-      "lineno": 1087,
-      "colno": 25,
-      "count": 1,
-      "firstTs": 1793807209354,
-      "lastTs": 1793807209354,
-      "users": 1
-    },
-    {
-      "app": "art-studio",
-      "kind": "error",
-      "page": "art-studio.html",
-      "message": "TypeError: null is not an object (evaluating 'ctx.createImageData')",
-      "filename": "https://rozavala.github.io/apps/js/art-studio-brushes.js?v=1",
-      "lineno": 219,
-      "colno": 44,
-      "count": 1,
-      "firstTs": 1793807114230,
-      "lastTs": 1793807114230,
       "users": 1
     }
   ]
