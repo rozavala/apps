@@ -111,6 +111,57 @@ var Vacation = (function() {
     return _daysBetween(_today(), trip.endDate) >= 0;
   }
 
+  var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var WEEKDAYS_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function _fmtDate(iso, long) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return String(iso || '');
+    var d = new Date(iso + 'T00:00:00');
+    return (long ? WEEKDAYS_LONG : WEEKDAYS)[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate();
+  }
+  function _fmtRange(trip) {
+    if (!trip.startDate) return '';
+    var a = _fmtDate(trip.startDate);
+    return trip.endDate && trip.endDate !== trip.startDate ? a + ' – ' + _fmtDate(trip.endDate) : a;
+  }
+  function _tripDays(trip) {
+    if (!trip.startDate) return 0;
+    return Math.max(1, _daysBetween(trip.startDate, trip.endDate || trip.startDate) + 1);
+  }
+  // Scene for a trip's banner: its own `hero`, else a guess from where it's going.
+  function _heroArt(trip) {
+    if (typeof VacArt === 'undefined') return '';
+    var name = VacArt.pick(trip.hero, [trip.destination, trip.name, trip.country].join(' ')) || 'plane';
+    return VacArt.svg(name, { cls: 'vc-art' });
+  }
+  function _art(art, text, cls) {
+    if (typeof VacArt === 'undefined') return '';
+    var name = VacArt.pick(art, text);
+    return name ? VacArt.svg(name, { cls: cls || 'vc-art' }) : '';
+  }
+  // Big kid-sized countdown: "15 sleeps to go", "Day 2 of 6", "We went!".
+  function _bigCountdown(trip) {
+    if (!trip.startDate) return '';
+    var d = _daysBetween(_today(), trip.startDate);
+    var total = _tripDays(trip);
+    if (d > 0) {
+      return '<div class="vc-big-cd upcoming"><b>' + d + '</b><span>' + (d === 1 ? 'sleep' : 'sleeps') + ' to go!</span></div>';
+    }
+    var e = trip.endDate ? _daysBetween(_today(), trip.endDate) : 0;
+    if (d === 0) return '<div class="vc-big-cd now"><b>🎉</b><span>Today\'s the day!</span></div>';
+    if (e >= 0) return '<div class="vc-big-cd now"><b>' + (1 - d) + '</b><span>day ' + (1 - d) + ' of ' + total + '</span></div>';
+    return '<div class="vc-big-cd past"><b>📸</b><span>We went!</span></div>';
+  }
+  // Adds an id to the first .vc-section in a renderer's output, so the
+  // chip bar can jump to it.
+  function _withId(html, id) {
+    return html ? html.replace('<div class="vc-section">', '<div class="vc-section" id="vc-sec-' + id + '">') : '';
+  }
+  function jumpTo(id) {
+    var el = document.getElementById('vc-sec-' + id);
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   // ── Public actions ──
   function unlockParent() {
     if (typeof requestPinThen === 'function') {
@@ -378,10 +429,12 @@ var Vacation = (function() {
 
     var lockTxt = _parentUnlocked ? '🔓 Editing' : '🔒 Unlock to edit';
     wrap.innerHTML =
-      '<div class="vc-header">' +
-        '<span class="vc-icon">✈️</span>' +
-        '<h1>Vacation Planner</h1>' +
-        '<p>Countdowns, packing lists, and day-by-day plans for upcoming trips.</p>' +
+      '<div class="vc-banner">' +
+        (typeof VacArt !== 'undefined' ? VacArt.svg('travel', { cls: 'vc-art' }) : '') +
+        '<div class="vc-banner-text">' +
+          '<h1>Vacation Planner</h1>' +
+          '<p>Countdowns, packing lists and day-by-day plans for our trips.</p>' +
+        '</div>' +
       '</div>' +
       '<div class="vc-toolbar">' +
         (_parentUnlocked
@@ -402,16 +455,21 @@ var Vacation = (function() {
   function _tripCardHtml(trip) {
     var cd = _countdown(trip);
     var cls = cd ? cd.kind : 'upcoming';
-    return '<div class="vc-trip ' + cls + (trip.hidden ? ' surprise' : '') + '" onclick="Vacation.openTrip(\'' + trip.id + '\')">' +
-      '<div class="vc-trip-head">' +
-        '<span class="vc-trip-icon">' + _esc(trip.icon || '✈️') + '</span>' +
-        '<span class="vc-trip-name">' + _esc(trip.name) + '</span>' +
-        (trip.hidden ? '<span class="vc-surprise-badge">🤫 Surprise</span>' : '') +
+    return '<button type="button" class="vc-trip ' + cls + (trip.hidden ? ' surprise' : '') + '" onclick="Vacation.openTrip(\'' + trip.id + '\')">' +
+      '<div class="vc-trip-art">' + _heroArt(trip) +
+        (cd ? '<span class="vc-countdown ' + cd.kind + '">' + _esc(cd.text) + '</span>' : '') +
       '</div>' +
-      '<div class="vc-trip-dest">' + _esc(trip.destination || '') +
-        (trip.country ? ' · ' + _esc(trip.country) : '') + '</div>' +
-      (cd ? '<div class="vc-countdown ' + cd.kind + '">' + _esc(cd.text) + '</div>' : '') +
-    '</div>';
+      '<div class="vc-trip-body">' +
+        '<div class="vc-trip-head">' +
+          '<span class="vc-trip-icon">' + _esc(trip.icon || '✈️') + '</span>' +
+          '<span class="vc-trip-name">' + _esc(trip.name) + '</span>' +
+          (trip.hidden ? '<span class="vc-surprise-badge">🤫 Surprise</span>' : '') +
+        '</div>' +
+        '<div class="vc-trip-dest">' + _esc(trip.destination || '') +
+          (trip.country ? ' · ' + _esc(trip.country) : '') + '</div>' +
+        (trip.startDate ? '<div class="vc-trip-dates">📅 ' + _esc(_fmtRange(trip)) + '</div>' : '') +
+      '</div>' +
+    '</button>';
   }
 
   function _renderNewForm(wrap) {
@@ -495,30 +553,36 @@ var Vacation = (function() {
     // belt-and-suspenders so it can never be reached from a kid session.
     if (trip.hidden && !_parentUnlocked) { backToList(); return; }
 
-    var cd = _countdown(trip);
-    var overviewHtml = _renderOverview(trip);
-    var flightsHtml = _renderFlights(trip);
-    var staysHtml = _renderStays(trip);
-    var countriesHtml = _renderCountries(trip);
-    var governHtml = _renderGovern(trip);
-    var coolHtml = _renderCool(trip);
-    var moneyHtml = _renderMoney(trip);
-    var foodsHtml = _renderFoods(trip);
-    var phrasesHtml = _renderPhrases(trip);
-    var placesHtml = _renderPlaces(trip);
-    var quizHtml = _renderQuiz(trip);
-    var galleryHtml = _renderGallery(trip);
-    var suggestionsHtml = _renderSuggestions(trip);
-    var packingHtml = _renderPacking(trip);
-    var itinHtml = _renderItinerary(trip);
     var linksHtml = _learningLinks(trip).map(function(l) {
-      return '<a class="vc-trip" href="' + _esc(l.href) + '" style="text-decoration:none;color:inherit;display:block;">' +
-        '<div class="vc-trip-head">' +
-          '<span class="vc-trip-icon">' + l.label.split(' ')[0] + '</span>' +
-          '<span class="vc-trip-name">' + _esc(l.label.replace(/^[^ ]+ /, '')) + '</span>' +
-        '</div>' +
-        '<div class="vc-trip-dest">' + _esc(l.sub) + '</div>' +
+      return '<a class="vc-link" href="' + _esc(l.href) + '">' +
+        '<span class="vc-link-icon">' + l.label.split(' ')[0] + '</span>' +
+        '<span><b>' + _esc(l.label.replace(/^[^ ]+ /, '')) + '</b><small>' + _esc(l.sub) + '</small></span>' +
       '</a>';
+    }).join('');
+
+    // [id, chip label, html] — empty sections drop out of both the page and the chip bar.
+    var sections = [
+      ['about', '📝 About', _renderOverview(trip)],
+      ['flights', '✈️ Flights', _renderFlights(trip)],
+      ['stay', '🏨 Hotel', _renderStays(trip)],
+      ['days', '🗓 Days', '<div class="vc-section"><div class="vc-section-head">🗓 Day by day</div>' + _renderItinerary(trip) + '</div>'],
+      ['places', '📍 Places', _renderPlaces(trip)],
+      ['spot', '👀 I spy', _renderSpot(trip)],
+      ['photos', '📸 Photos', _renderGallery(trip)],
+      ['culture', '🌏 Culture', _renderCountries(trip)],
+      ['cool', '🌟 Cool facts', _renderCool(trip)],
+      ['food', '🍜 Food', _renderFoods(trip)],
+      ['phrases', '🗣️ Words', _renderPhrases(trip)],
+      ['money', '💱 Money', _renderMoney(trip)],
+      ['govern', '🏛️ Government', _renderGovern(trip)],
+      ['quiz', '🧠 Quiz', _renderQuiz(trip)],
+      ['tips', '💡 Tips', _renderSuggestions(trip)],
+      ['packing', '🧳 Packing', '<div class="vc-section"><div class="vc-section-head">🧳 Packing</div>' + _renderPacking(trip) + '</div>'],
+      ['learn', '📖 Learn', linksHtml ? '<div class="vc-section"><div class="vc-section-head">📖 Learn before you go</div><div class="vc-links">' + linksHtml + '</div></div>' : '']
+    ].filter(function(x) { return x[2]; });
+
+    var chips = sections.map(function(x) {
+      return '<button type="button" class="vc-chip" onclick="Vacation.jumpTo(\'' + x[0] + '\')">' + x[1] + '</button>';
     }).join('');
 
     wrap.innerHTML =
@@ -526,55 +590,31 @@ var Vacation = (function() {
         '<button onclick="Vacation.backToList()">← All trips</button>' +
         (_parentUnlocked
           ? '<button class="vc-tb-primary" onclick="Vacation.editTrip(\'' + trip.id + '\')">✏️ Edit trip</button>' +
-            '<button class="vc-btn-danger" style="border-color:rgba(248,113,113,0.25);" onclick="Vacation.deleteTrip(\'' + trip.id + '\')">🗑 Delete</button>'
+            '<button class="vc-btn-danger" onclick="Vacation.deleteTrip(\'' + trip.id + '\')">🗑 Delete</button>'
           : '<button onclick="Vacation.unlockParent()">🔒 Unlock to edit</button>') +
       '</div>' +
-      '<div class="vc-detail">' +
-        '<div class="vc-detail-head">' +
-          '<span class="vc-detail-icon">' + _esc(trip.icon || '✈️') + '</span>' +
-          '<div class="vc-detail-title">' + _esc(trip.name) + '</div>' +
-        '</div>' +
-        '<div class="vc-detail-meta">' +
+      '<div class="vc-hero">' +
+        '<div class="vc-hero-art">' + _heroArt(trip) + '<div class="vc-hero-shade"></div>' + _bigCountdown(trip) + '</div>' +
+        '<div class="vc-hero-text">' +
           (trip.hidden ? '<span class="vc-surprise-badge">🤫 Surprise</span>' : '') +
-          (trip.destination ? '<span>📍 ' + _esc(trip.destination) + '</span>' : '') +
-          (trip.country ? '<span>' + _esc(trip.country) + '</span>' : '') +
-          (trip.startDate ? '<span>📅 ' + _esc(trip.startDate) +
-            (trip.endDate && trip.endDate !== trip.startDate ? ' → ' + _esc(trip.endDate) : '') + '</span>' : '') +
-          (cd ? '<span class="vc-countdown ' + cd.kind + '">' + _esc(cd.text) + '</span>' : '') +
+          '<h1><span class="vc-hero-icon">' + _esc(trip.icon || '✈️') + '</span> ' + _esc(trip.name) + '</h1>' +
+          '<div class="vc-hero-meta">' +
+            (trip.destination ? '<span>📍 ' + _esc(trip.destination) + '</span>' : '') +
+            (trip.country && String(trip.destination || '').indexOf(trip.country) === -1 ? '<span>' + _esc(trip.country) + '</span>' : '') +
+            (trip.startDate ? '<span>📅 ' + _esc(_fmtRange(trip)) + '</span>' : '') +
+            (trip.startDate ? '<span>🌙 ' + Math.max(0, _tripDays(trip) - 1) + ' nights</span>' : '') +
+          '</div>' +
         '</div>' +
-        (trip.slidesUrl
-          ? '<a class="vc-reveal-btn" href="' + _esc(trip.slidesUrl) + '" target="_blank" rel="noopener">🎉 Reveal slideshow</a>'
-          : '') +
-        overviewHtml +
-        flightsHtml +
-        staysHtml +
-        galleryHtml +
-        countriesHtml +
-        governHtml +
-        coolHtml +
-        moneyHtml +
-        foodsHtml +
-        phrasesHtml +
-        placesHtml +
-        quizHtml +
-        suggestionsHtml +
-        '<div class="vc-section">' +
-          '<div class="vc-section-head">🧳 Packing</div>' +
-          packingHtml +
-        '</div>' +
-        '<div class="vc-section">' +
-          '<div class="vc-section-head">🗓 Itinerary</div>' +
-          itinHtml +
-        '</div>' +
-        (linksHtml ? '<div class="vc-section">' +
-          '<div class="vc-section-head">📖 Learn before you go</div>' +
-          '<div class="vc-trips">' + linksHtml + '</div>' +
-        '</div>' : '') +
+      '</div>' +
+      (trip.slidesUrl
+        ? '<a class="vc-reveal-btn" href="' + _esc(trip.slidesUrl) + '" target="_blank" rel="noopener">🎉 Reveal slideshow</a>'
+        : '') +
+      (sections.length > 3 ? '<nav class="vc-chips" aria-label="Trip sections">' + chips + '</nav>' : '') +
+      '<div class="vc-detail">' +
+        sections.map(function(x) { return _withId(x[2], x[0]); }).join('') +
       '</div>';
   }
 
-  // Free-text intro. Blank lines split paragraphs; single newlines become
-  // line breaks. Everything is escaped first, so trip data can't inject HTML.
   function _renderOverview(trip) {
     var txt = String(trip.overview || '').trim();
     if (!txt) return '';
@@ -633,32 +673,39 @@ var Vacation = (function() {
   function _renderFlights(trip) {
     var f = Array.isArray(trip.flights) ? trip.flights : [];
     if (f.length === 0) return '';
-    var rows = f.map(function(fl) {
+    var rows = f.map(function(fl, i) {
       if (!fl) return '';
-      return '<div class="vc-flight">' +
-        '<div class="vc-flight-top">' +
-          '<span class="vc-flight-air">' + _esc(fl.airline || '') +
-            (fl.number ? ' <b>' + _esc(fl.number) + '</b>' : '') + '</span>' +
-          (fl.date ? '<span class="vc-flight-date">' + _esc(fl.date) + '</span>' : '') +
-        '</div>' +
-        '<div class="vc-flight-route">' +
-          '<div class="vc-fl-end">' +
-            '<span class="vc-fl-code">' + _esc(fl.fromCode || '') + '</span>' +
-            '<span class="vc-fl-city">' + _esc(fl.fromCity || '') + '</span>' +
-            (fl.depLocal ? '<span class="vc-fl-time">' + _esc(fl.depLocal) + '</span>' : '') +
+      return '<div class="vc-pass">' +
+        '<div class="vc-pass-main">' +
+          '<div class="vc-pass-top">' +
+            '<span class="vc-pass-air">' + _esc(fl.airline || 'Flight') + '</span>' +
+            '<span class="vc-pass-tag">' + (i === 0 ? 'GOING' : (i === f.length - 1 ? 'HOME' : 'FLIGHT ' + (i + 1))) + '</span>' +
           '</div>' +
-          '<div class="vc-fl-mid">✈️' + (fl.duration ? '<span>' + _esc(fl.duration) + '</span>' : '') + '</div>' +
-          '<div class="vc-fl-end">' +
-            '<span class="vc-fl-code">' + _esc(fl.toCode || '') + '</span>' +
-            '<span class="vc-fl-city">' + _esc(fl.toCity || '') + '</span>' +
-            (fl.arrLocal ? '<span class="vc-fl-time">' + _esc(fl.arrLocal) + '</span>' : '') +
+          '<div class="vc-pass-route">' +
+            '<div class="vc-pass-end">' +
+              '<span class="vc-pass-code">' + _esc(fl.fromCode || '') + '</span>' +
+              '<span class="vc-pass-city">' + _esc(fl.fromCity || '') + '</span>' +
+            '</div>' +
+            '<div class="vc-pass-mid"><svg viewBox="0 0 100 24" aria-hidden="true"><path d="M4 18 Q50 -6 96 18" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="4 4"/></svg>' +
+              '<span class="vc-pass-plane">✈️</span>' +
+              (fl.duration ? '<span class="vc-pass-dur">' + _esc(fl.duration) + '</span>' : '') + '</div>' +
+            '<div class="vc-pass-end right">' +
+              '<span class="vc-pass-code">' + _esc(fl.toCode || '') + '</span>' +
+              '<span class="vc-pass-city">' + _esc(fl.toCity || '') + '</span>' +
+            '</div>' +
           '</div>' +
+          (fl.note ? '<div class="vc-pass-note">' + _esc(fl.note) + '</div>' : '') +
         '</div>' +
-        (fl.note ? '<div class="vc-flight-note">' + _esc(fl.note) + '</div>' : '') +
+        '<div class="vc-pass-stub">' +
+          (fl.date ? '<div><small>Date</small><b>' + _esc(fl.date) + '</b></div>' : '') +
+          (fl.depLocal ? '<div><small>Takes off</small><b>' + _esc(fl.depLocal) + '</b></div>' : '') +
+          (fl.arrLocal ? '<div><small>Lands</small><b>' + _esc(fl.arrLocal) + '</b></div>' : '') +
+          (fl.number ? '<div><small>Flight</small><b>' + _esc(fl.number) + '</b></div>' : '') +
+        '</div>' +
       '</div>';
     }).join('');
     return '<div class="vc-section"><div class="vc-section-head">✈️ Flights</div>' +
-      '<div class="vc-flights">' + rows + '</div></div>';
+      '<div class="vc-passes">' + rows + '</div></div>';
   }
 
   // ── Countries & culture ──
@@ -691,14 +738,17 @@ var Vacation = (function() {
   function _renderPlaces(trip) {
     var p = Array.isArray(trip.places) ? trip.places : [];
     if (p.length === 0) return '';
+    var n = 0;
     var cards = p.map(function(pl) {
       if (!pl) return '';
+      var onMap = typeof pl.lat === 'number' && typeof pl.lon === 'number';
+      var pic = pl.image
+        ? '<img src="' + _esc(pl.image) + '" alt="' + _esc(pl.name || '') + '" loading="lazy" referrerpolicy="no-referrer" ' +
+          'onerror="this.remove()">'
+        : '';
       return '<div class="vc-place">' +
-        (pl.image
-          ? '<div class="vc-place-img"><img src="' + _esc(pl.image) + '" alt="' + _esc(pl.name || '') + '" ' +
-            'loading="lazy" referrerpolicy="no-referrer" ' +
-            'onerror="this.closest(\'.vc-place-img\').style.display=\'none\'"></div>'
-          : '') +
+        '<div class="vc-place-img">' + _art(pl.art, pl.name) + pic +
+          (onMap ? '<span class="vc-place-num">' + (++n) + '</span>' : '') + '</div>' +
         '<div class="vc-place-body">' +
           '<div class="vc-place-name">' + _esc(pl.emoji || '📍') + ' ' + _esc(pl.name || '') + '</div>' +
           (pl.blurb ? '<div class="vc-place-blurb">' + _esc(pl.blurb) + '</div>' : '') +
@@ -710,9 +760,6 @@ var Vacation = (function() {
       '<div class="vc-places">' + cards + '</div></div>';
   }
 
-  // Self-contained SVG route map: fits all places with lat/lon into a
-  // padded bounding box, draws the route line, numbered pins and labels.
-  // No external tiles, so it always renders.
   function _placesMap(places) {
     var pts = (places || []).filter(function(p) {
       return p && typeof p.lat === 'number' && typeof p.lon === 'number';
@@ -722,27 +769,29 @@ var Vacation = (function() {
     var lons = pts.map(function(p) { return p.lon; });
     var minLat = Math.min.apply(null, lats), maxLat = Math.max.apply(null, lats);
     var minLon = Math.min.apply(null, lons), maxLon = Math.max.apply(null, lons);
-    var padLat = (maxLat - minLat) * 0.25 || 2, padLon = (maxLon - minLon) * 0.25 || 2;
+    var padLat = (maxLat - minLat) * 0.18 || 2, padLon = (maxLon - minLon) * 0.18 || 2;
     minLat -= padLat; maxLat += padLat; minLon -= padLon; maxLon += padLon;
-    var W = 100, H = 60;
-    function fx(lon) { return ((lon - minLon) / (maxLon - minLon) * W).toFixed(2); }
-    function fy(lat) { return ((maxLat - lat) / (maxLat - minLat) * H).toFixed(2); }
+    // Positions in percent of the box, so pins and labels stay put at any size.
+    function fx(lon) { return (lon - minLon) / (maxLon - minLon) * 100; }
+    function fy(lat) { return (maxLat - lat) / (maxLat - minLat) * 100; }
 
-    var poly = pts.map(function(p) { return fx(p.lon) + ',' + fy(p.lat); }).join(' ');
-    var dots = '', labels = '';
+    var poly = pts.map(function(p) { return fx(p.lon).toFixed(2) + ',' + (fy(p.lat) * 0.6).toFixed(2); }).join(' ');
+    var pins = '';
     pts.forEach(function(p, i) {
       var x = fx(p.lon), y = fy(p.lat);
-      dots += '<circle cx="' + x + '" cy="' + y + '" r="1.6" fill="#DB2777" stroke="#fff" stroke-width="0.5"/>' +
-        '<text x="' + x + '" y="' + (parseFloat(y) + 0.55).toFixed(2) + '" text-anchor="middle" ' +
-        'font-size="1.7" font-weight="800" fill="#fff">' + (i + 1) + '</text>';
-      labels += '<div class="vc-map-label" style="left:' + x + '%; top:' + y + '%;">' +
-        (i + 1) + '. ' + _esc(p.name || '') + '</div>';
+      pins += '<div class="vc-map-pin" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;">' +
+        '<span class="vc-map-dot">' + (i + 1) + '</span>' +
+        '<span class="vc-map-label' + (x > 62 ? ' left' : '') + '">' + _esc(p.name || '') + '</span>' +
+      '</div>';
     });
     return '<div class="vc-map">' +
-      '<svg viewBox="0 0 100 60" preserveAspectRatio="none" class="vc-map-svg">' +
-        '<polyline points="' + poly + '" fill="none" stroke="#6366F1" stroke-width="0.7" ' +
-          'stroke-dasharray="1.8 1.4" stroke-linecap="round"/>' + dots +
-      '</svg>' + labels +
+      '<svg viewBox="0 0 100 60" preserveAspectRatio="none" class="vc-map-svg" aria-hidden="true">' +
+        '<defs><pattern id="vc-map-grid" width="10" height="10" patternUnits="userSpaceOnUse">' +
+          '<path d="M10 0 H0 V10" fill="none" stroke="#c7e3d4" stroke-width="0.3"/></pattern></defs>' +
+        '<rect width="100" height="60" fill="url(#vc-map-grid)"/>' +
+        '<polyline points="' + poly + '" fill="none" stroke="#6366F1" stroke-width="2.5" ' +
+          'stroke-dasharray="7 6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+      '</svg>' + pins +
     '</div>';
   }
 
@@ -873,17 +922,72 @@ var Vacation = (function() {
     _quizRerender(trip);
   }
 
+  // ── "I spy" checklist: each kid ticks what they've spotted on the trip.
+  // Stored in the kid's quiz blob (zs_vacquiz_<kid>, already synced) under
+  // _spot: { tripId: [itemId, …] }. Trip ids never start with "_".
+  function _spotFound(tripId) {
+    var all = _quizLoad()._spot || {};
+    return Array.isArray(all[tripId]) ? all[tripId] : [];
+  }
+  function _renderSpot(trip) {
+    var items = Array.isArray(trip.spotIt) ? trip.spotIt.filter(function(x) { return x && x.id && x.label; }) : [];
+    if (items.length === 0) return '';
+    return '<div class="vc-section"><div class="vc-section-head">👀 I spy on our trip</div>' +
+      '<div id="vc-spot">' + _spotBody(trip, items) + '</div></div>';
+  }
+  function _spotBody(trip, items) {
+    var found = _spotFound(trip.id);
+    var have = items.filter(function(x) { return found.indexOf(x.id) !== -1; }).length;
+    var user = typeof getActiveUser === 'function' ? getActiveUser() : null;
+    var tiles = items.map(function(x) {
+      var on = found.indexOf(x.id) !== -1;
+      var art = _art(x.art, x.label);
+      return '<button type="button" class="vc-spot-tile' + (on ? ' found' : '') + '" aria-pressed="' + on + '" ' +
+        'onclick="Vacation.spotToggle(\'' + trip.id + '\', \'' + _esc(String(x.id).replace(/[^\w-]/g, '')) + '\')">' +
+        '<span class="vc-spot-pic">' + (art || '<span class="vc-spot-emoji">' + _esc(x.emoji || '👀') + '</span>') + '</span>' +
+        '<span class="vc-spot-label">' + (art ? _esc(x.emoji || '') + ' ' : '') + _esc(x.label) + '</span>' +
+        '<span class="vc-spot-check">' + (on ? '✓' : '') + '</span>' +
+      '</button>';
+    }).join('');
+    var pct = Math.round(have / items.length * 100);
+    return '<div class="vc-spot-bar"><div class="vc-spot-fill" style="width:' + pct + '%"></div>' +
+        '<span>' + (have === items.length ? '🏆 You spotted them all!' : have + ' of ' + items.length + ' spotted') + '</span></div>' +
+      (user ? '' : '<p class="vc-quiz-hint">Log in as yourself to keep your list.</p>') +
+      '<div class="vc-spot-grid">' + tiles + '</div>';
+  }
+  function spotToggle(tripId, itemId) {
+    var k = _quizKey();
+    var trip = _load().trips.find(function(t) { return t.id === tripId; });
+    if (!trip) return;
+    var items = (trip.spotIt || []).filter(function(x) { return x && x.id && x.label; });
+    if (k) {
+      var data = _quizLoad();
+      var all = data._spot && typeof data._spot === 'object' ? data._spot : {};
+      var list = Array.isArray(all[tripId]) ? all[tripId].slice() : [];
+      var at = list.indexOf(itemId);
+      if (at === -1) list.push(itemId); else list.splice(at, 1);
+      all[tripId] = list;
+      data._spot = all;
+      try {
+        localStorage.setItem(k, JSON.stringify(data));
+        if (typeof CloudSync !== 'undefined' && CloudSync.push) CloudSync.push(k);
+      } catch (e) {}
+    }
+    var box = document.getElementById('vc-spot');
+    if (box) box.innerHTML = _spotBody(trip, items);
+  }
+
   // ── Where we'll stay (hotels / villas) ──
   function _renderStays(trip) {
     var s = Array.isArray(trip.stays) ? trip.stays : [];
     if (s.length === 0) return '';
     var cards = s.map(function(st) {
       if (!st) return '';
+      var pic = st.image
+        ? '<img src="' + _esc(st.image) + '" alt="' + _esc(st.name || '') + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">'
+        : '';
       return '<div class="vc-stay">' +
-        (st.image
-          ? '<div class="vc-stay-img"><img src="' + _esc(st.image) + '" alt="' + _esc(st.name || '') + '" ' +
-            'loading="lazy" referrerpolicy="no-referrer" onerror="this.closest(\'.vc-stay-img\').style.display=\'none\'"></div>'
-          : '') +
+        '<div class="vc-stay-img">' + _art(st.art || 'hotel', '') + pic + '</div>' +
         '<div class="vc-stay-body">' +
           '<div class="vc-stay-name">🏨 ' + _esc(st.name || '') + '</div>' +
           '<div class="vc-stay-meta">' +
@@ -987,19 +1091,21 @@ var Vacation = (function() {
       var items = Array.isArray(co.items) ? co.items : [];
       var rows = items.map(function(it) {
         var dare = Math.max(0, Math.min(3, Number(it.dare) || 0));
-        var meter = dare ? '<span class="vc-food-dare" title="Adventure level">' +
-          new Array(dare + 1).join('🌶️') + '</span>' : '';
+        var meter = '<span class="vc-food-dare" title="Adventure level">' +
+          (dare ? new Array(dare + 1).join('🌶️') : '😋 easy') + '</span>';
+        var art = _art(it.art, it.name, 'vc-art');
         return '<div class="vc-food">' +
-          '<span class="vc-food-emoji">' + _esc(it.emoji || '🍽️') + '</span>' +
+          '<div class="vc-food-pic">' + (art || '<span class="vc-food-emoji">' + _esc(it.emoji || '🍽️') + '</span>') + '</div>' +
           '<div class="vc-food-body">' +
-            '<div class="vc-food-name">' + _esc(it.name || '') + ' ' + meter + '</div>' +
+            '<div class="vc-food-name">' + (art ? _esc(it.emoji || '') + ' ' : '') + _esc(it.name || '') + '</div>' +
+            meter +
             (it.desc ? '<div class="vc-food-desc">' + _esc(it.desc) + '</div>' : '') +
           '</div>' +
         '</div>';
       }).join('');
       return '<div class="vc-food-card">' +
-        '<div class="vc-food-country">' + _esc(co.flag || '🍴') + ' ' + _esc(co.country || '') + '</div>' +
-        rows +
+        (f.length > 1 ? '<div class="vc-food-country">' + _esc(co.flag || '🍴') + ' ' + _esc(co.country || '') + '</div>' : '') +
+        '<div class="vc-food-grid">' + rows + '</div>' +
       '</div>';
     }).join('');
     return '<div class="vc-section"><div class="vc-section-head">🍜 Foods to try</div>' +
@@ -1015,18 +1121,20 @@ var Vacation = (function() {
       var items = Array.isArray(co.items) ? co.items : [];
       var rows = items.map(function(it) {
         return '<div class="vc-phrase">' +
-          '<span class="vc-phrase-word">' + _esc(it.word || '') + '</span>' +
-          (it.say ? '<span class="vc-phrase-say">' + _esc(it.say) + '</span>' : '') +
+          '<div class="vc-phrase-bubble">' +
+            '<span class="vc-phrase-word">' + _esc(it.word || '') + '</span>' +
+            (it.say ? '<span class="vc-phrase-say">🔊 ' + _esc(it.say) + '</span>' : '') +
+          '</div>' +
           '<span class="vc-phrase-mean">' + _esc(it.mean || '') + '</span>' +
         '</div>';
       }).join('');
       return '<div class="vc-phrase-card">' +
         '<div class="vc-phrase-country">' + _esc(co.flag || '🗣️') + ' ' + _esc(co.country || '') +
           (co.language ? ' <span>· ' + _esc(co.language) + '</span>' : '') + '</div>' +
-        rows +
+        '<div class="vc-phrase-grid">' + rows + '</div>' +
       '</div>';
     }).join('');
-    return '<div class="vc-section"><div class="vc-section-head">🗣️ Local phrases</div>' +
+    return '<div class="vc-section"><div class="vc-section-head">🗣️ Words people say here</div>' +
       '<div class="vc-phrases">' + cards + '</div></div>';
   }
 
@@ -1075,30 +1183,30 @@ var Vacation = (function() {
     var end = new Date((trip.endDate || trip.startDate) + 'T00:00:00');
     var dayCount = Math.max(1, Math.round((end - start) / 86400000) + 1);
     if (dayCount > 30) dayCount = 30; // sanity cap
+    var today = _today();
 
     var html = '';
     for (var i = 0; i < dayCount; i++) {
       var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
       var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var label = months[d.getMonth()] + ' ' + d.getDate();
       var val = (trip.itinerary && trip.itinerary[key]) || '';
+      var art = (trip.dayArt && trip.dayArt[key]) || '';
+      var body = _parentUnlocked
+        ? '<textarea aria-label="Plan for ' + _esc(_fmtDate(key, true)) + '" placeholder="Activities, meals, places to visit…"' +
+            ' oninput="Vacation._setItin(\'' + trip.id + '\', \'' + key + '\', this.value)">' + _esc(val) + '</textarea>'
+        : (val
+            ? '<div class="vc-day-text">' + _esc(val).replace(/([a-záéíóúñ]{2}|[0-9)"])([.!?])\s+(?=[0-9A-ZÁÉÍÓÚÑ¡¿])/g, '$1$2\n').split('\n').map(function(x) { return '<p>' + x + '</p>'; }).join('') + '</div>'
+            : '<div class="vc-day-text empty">Free day — plans coming soon!</div>');
       html +=
-        '<div class="vc-day">' +
-          '<div class="vc-day-head">' +
-            '<span class="vc-day-num">Day ' + (i + 1) + '</span>' +
-            '<span class="vc-day-date">' + label + '</span>' +
+        '<div class="vc-day' + (key === today ? ' today' : '') + '">' +
+          '<div class="vc-day-art">' + (_art(art, val) || _art('plane', '')) +
+            '<div class="vc-day-badge"><b>Day ' + (i + 1) + '</b><span>' + _esc(_fmtDate(key, true)) + '</span></div>' +
           '</div>' +
-          '<textarea ' + (_parentUnlocked ? '' : 'disabled') +
-            ' placeholder="Activities, meals, places to visit…"' +
-            ' oninput="Vacation._setItin(\'' + trip.id + '\', \'' + key + '\', this.value)">' +
-            _esc(val) +
-          '</textarea>' +
+          body +
         '</div>';
     }
-    return html;
+    return '<div class="vc-days">' + html + '</div>';
   }
-
 
   // ── Import a trip from a JSON file ──
   // Trip content (flights, hotels, plans) is family data: it lives in the
@@ -1271,6 +1379,8 @@ var Vacation = (function() {
     quizAnswer: quizAnswer,
     quizNext: quizNext,
     moneyConvert: moneyConvert,
+    spotToggle: spotToggle,
+    jumpTo: jumpTo,
     _togglePack: togglePackItem,
     _addPack: addPackItem,
     _delPack: removePackItem,

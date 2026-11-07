@@ -434,6 +434,50 @@ var VacArt = (function () {
         '<path d="M-40 10 l-6 16 h12 M20 12 l-4 14 h12" stroke="#4a6b2f" stroke-width="7" stroke-linecap="round" fill="none"/></g>';
   };
 
+  // Suitcase with travel stickers and a globe — the planner's own banner.
+  S.travel = function (u) {
+    return '<defs>' + sky(u + 's', '#6d5dfc', '#c4b5fd') +
+      '<radialGradient id="' + u + 'g" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#2563eb"/></radialGradient></defs>' +
+      '<rect width="320" height="200" fill="url(#' + u + 's)"/>' +
+      '<g fill="#fff" opacity=".5">' + [[30, 30], [290, 24], [250, 70], [60, 90], [180, 20]].map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2"/>'; }).join('') + '</g>' +
+      '<path d="M20 60 q90 -50 180 -20" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 6" fill="none" opacity=".8"/>' +
+      '<g transform="translate(206 38) rotate(14) scale(.55)" fill="#fff"><path d="M-40 0 q0 -8 12 -8 h60 q18 0 24 8 q-6 8 -24 8 h-60 q-12 0 -12 -8 Z"/>' +
+        '<path d="M-6 0 l-20 -26 h12 l26 24 Z M-6 0 l-20 26 h12 l26 -24 Z M-34 -2 l-8 -12 h6 l10 10 Z"/></g>' +
+      // globe
+      '<g transform="translate(250 128)"><circle r="44" fill="url(#' + u + 'g)"/>' +
+        '<path d="M-30 -20 q14 -8 22 2 q6 10 -6 16 q-10 4 -8 16 q-14 -6 -14 -18 Z M8 -34 q18 2 26 18 q-10 2 -16 -6 q-8 -4 -10 -12 Z M10 10 q14 -4 22 6 q-2 16 -16 20 q-10 -8 -6 -26 Z" fill="#4ade80"/>' +
+        '<ellipse rx="44" ry="14" fill="none" stroke="#fff" stroke-width="1" opacity=".35"/><path d="M0 -44 V44" stroke="#fff" stroke-width="1" opacity=".35"/>' +
+        '<path d="M-10 48 h20 l-4 14 h-12 Z" fill="#a16207"/><path d="M-50 0 a50 50 0 0 1 100 0" fill="none" stroke="#ca8a04" stroke-width="4"/></g>' +
+      // suitcase
+      '<g transform="translate(110 112)">' +
+        '<rect x="-22" y="-62" width="44" height="22" rx="8" fill="none" stroke="#7c2d12" stroke-width="7"/>' +
+        '<rect x="-76" y="-46" width="152" height="104" rx="16" fill="#f97316"/>' +
+        '<rect x="-76" y="-46" width="152" height="18" rx="9" fill="#fb923c"/>' +
+        '<path d="M-40 -46 v104 M40 -46 v104" stroke="#c2410c" stroke-width="7"/>' +
+        '<circle cx="-50" cy="64" r="8" fill="#292524"/><circle cx="50" cy="64" r="8" fill="#292524"/>' +
+        '<g transform="translate(-58 -6) rotate(-12)"><rect x="-16" y="-11" width="32" height="22" rx="4" fill="#fde047"/><text x="0" y="4" font-size="9" font-weight="900" text-anchor="middle" fill="#7c2d12" font-family="sans-serif">TRIP</text></g>' +
+        '<g transform="translate(2 18) rotate(8)"><circle r="16" fill="#38bdf8"/><path d="M-10 4 l6 -10 l4 6 l4 -4 l6 8 Z" fill="#fff"/></g>' +
+        '<g transform="translate(56 -14) rotate(-6)"><rect x="-14" y="-14" width="28" height="28" rx="6" fill="#f472b6"/><path d="M0 -7 l2 5 h5 l-4 3 l2 5 l-5 -3 l-5 3 l2 -5 l-4 -3 h5 Z" fill="#fff"/></g>' +
+        '<g transform="translate(-6 -16)"><rect x="-16" y="-8" width="32" height="16" rx="8" fill="#a3e635"/><text x="0" y="4" font-size="8" font-weight="900" text-anchor="middle" fill="#365314" font-family="sans-serif">FUN!</text></g></g>';
+  };
+
+  // Volcano over a lake with forest — for mountain and lake trips (Pucón, Patagonia…).
+  S.volcano = function (u) {
+    return '<defs>' + sky(u + 's', '#7cc7ff', '#e7f6ff') + sky(u + 'w', '#3f8fc2', '#1f5f8b') +
+      '<linearGradient id="' + u + 'v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8b8fa3"/><stop offset="1" stop-color="#4b5563"/></linearGradient></defs>' +
+      '<rect width="320" height="200" fill="url(#' + u + 's)"/>' + cloud(60, 40, 1) + cloud(270, 30, .8) +
+      '<path d="M182 22 q6 -10 14 -4 q8 -8 14 2" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".8"/>' +
+      '<path d="M60 130 L178 38 h28 L300 130 Z" fill="url(#' + u + 'v)"/>' +
+      '<path d="M156 56 L178 38 h28 L228 56 q-10 8 -18 0 q-8 10 -18 2 q-10 8 -18 -2 q-8 6 -18 0 Z" fill="#fff"/>' +
+      '<path d="M0 130 q60 -30 120 -6 q50 -26 100 0 q50 -20 100 4 V140 H0 Z" fill="#3f6b3a"/>' +
+      '<g fill="#2f5a2c">' + [10, 34, 58, 82, 236, 262, 288, 312].map(function (x, i) {
+        var h = 26 + (i % 3) * 8; return '<path d="M' + x + ' ' + (138 - h) + ' l-10 ' + h + ' h20 Z"/>';
+      }).join('') + '</g>' +
+      water(u + 'w', 136) +
+      '<path d="M100 150 L178 190 h28 L260 150 Z" fill="#fff" opacity=".1"/>' +
+      '<g transform="translate(110 170)"><path d="M-20 0 h40 l-6 8 h-28 Z" fill="#f59e0b"/><path d="M0 0 v-26 l14 22 Z" fill="#fff"/></g>';
+  };
+
   var SCENES = S;
 
   function has(name) { return Object.prototype.hasOwnProperty.call(SCENES, String(name || '')); }
@@ -448,5 +492,41 @@ var VacArt = (function () {
       SCENES[name](u) + '</svg>';
   }
 
-  return { svg: svg, has: has, names: function () { return Object.keys(SCENES); } };
+  // Picks a scene from free text (a place name, a day's plan) by the
+  // keyword that appears EARLIEST, so "Beignets… then the ferry" draws
+  // beignets. Spanish and English keywords both count.
+  var KEYWORDS = [
+    [/new orleans|nola\b/, 'nola'],
+    [/puc[oó]n|volc[aá]n|volcano|patagonia|mountain|monta[ñn]a|cordillera|\blago\b|\blake\b|ski\b|esqu[ií]/, 'volcano'],
+    [/vuelo|flight|airport|aeropuerto|\bfly\b|plane|avi[oó]n/, 'plane'],
+    [/thanksgiving|turkey|acci[oó]n de gracias/, 'turkey'],
+    [/streetcar|tranv[ií]a/, 'streetcar'],
+    [/beignet|caf[eé] du monde/, 'beignets'],
+    [/ferry|algiers/, 'ferry'],
+    [/swamp|pantano|bayou|alligator|caim[aá]n/, 'swamp'],
+    [/oak alley|plantation/, 'oakalley'],
+    [/wwii|museum|museo/, 'museum'],
+    [/garden district|mansion|mansi[oó]n/, 'mansion'],
+    [/fair ?grounds|horse|caballo|hip[oó]dromo|race course/, 'races'],
+    [/city park|\bpark\b|parque/, 'park'],
+    [/jazz|preservation hall|music|m[uú]sica/, 'jazz'],
+    [/cathedral|catedral|jackson square|french quarter/, 'cathedral'],
+    [/hotel|our stay/, 'hotel'],
+    [/pelican|pel[ií]cano/, 'pelican'],
+    [/gumbo|jambalaya|stew/, 'gumbo'],
+    [/po'?-?boy|sandwich|muffuletta/, 'poboy']
+  ];
+  function guess(text) {
+    var t = String(text || '').toLowerCase(), best = null, at = Infinity;
+    KEYWORDS.forEach(function (k) {
+      var m = k[1] && t.search(k[0]);
+      if (m >= 0 && m < at) { at = m; best = k[1]; }
+    });
+    return best;
+  }
+  // The scene for an item: its own `art` if valid, else a guess from text.
+  // art: 'none' opts out of guessing.
+  function pick(art, text) { return art === 'none' ? null : (has(art) ? art : guess(text)); }
+
+  return { svg: svg, has: has, guess: guess, pick: pick, names: function () { return Object.keys(SCENES); } };
 })();
