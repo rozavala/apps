@@ -9,6 +9,7 @@ const diag = require('./diag');
 const ical = require('./ical');
 const wcScores = require('./wc-scores');
 const wcMatch = require('./wc-match');
+const market = require('./market');
 
 const mergeRoutines = require('./routines-merge');
 const omr = require('./omr');
@@ -50,6 +51,9 @@ wcScores.init(app);
 
 // Register per-match detail proxy (ESPN summary JSON — full scorers + cards)
 wcMatch.init(app);
+
+// S&P 500 daily closes for Banco Familia (Stooq / Yahoo, cached on disk)
+market.init(app, DATA_DIR);
 
 app.get('/api/kids', (req, res) => {
   try {

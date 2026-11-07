@@ -100,7 +100,8 @@ var CloudSync = (function() {
     'zs_summer_todos':          'summer',
     'wc2026.v2':                'worldcup',
     'zs_vacation':              'vacation',
-    'zs_off_hours':             'off_hours'
+    'zs_off_hours':             'off_hours',
+    'zs_bank':                  'bank'
   };
   var HOUSEHOLD_KID = '_household';
 
@@ -557,6 +558,28 @@ var CloudSync = (function() {
     if (!out._syncedAt) delete out._syncedAt;
     return out;
   }
+  // ── Banco Familia merge ───────────────────────────────────────
+  // The family bank is an append-only event log (bank-engine.js):
+  // deposits, the parent's "spent" entries, mix changes, votes. Every
+  // event has a unique id and is never edited (mistakes are cancelled
+  // with a "void" event), so the merge is simply the union by id. A
+  // deposit made on a phone and a vote cast on the iPad both survive,
+  // whichever device syncs first.
+  function _mergeBank(server, local) {
+    var s = server || {}, l = local || {};
+    var seen = {}, events = [];
+    [].concat(Array.isArray(s.events) ? s.events : [], Array.isArray(l.events) ? l.events : []).forEach(function(e) {
+      if (!e || !e.id || seen[e.id]) return;
+      seen[e.id] = true;
+      events.push(e);
+    });
+    events.sort(function(a, b) { return ((a.ts || 0) - (b.ts || 0)) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+    var out = { v: 1, events: events };
+    var st = s._syncedAt || l._syncedAt;
+    if (st) out._syncedAt = st;
+    return out;
+  }
+
   // Content only, key order and bookkeeping aside
   function _canon(v) {
     if (Array.isArray(v)) return '[' + v.map(_canon).join(',') + ']';
@@ -626,6 +649,21 @@ var CloudSync = (function() {
         });
       // No .catch: without the server's copy to merge into, don't write
       // over it (a new device's empty blob would wipe the real one).
+    } else if (info.appName === 'bank') {
+      mergeStep = _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + info.kidKey + '/' + info.appName)
+        .then(function(res) {
+          if (!res.ok) throw new Error('read before write: http ' + res.status);
+          return res.json().then(function(serverData) {
+            if (!serverData) return data;
+            var mergedB = _mergeBank(serverData, data);
+            if (_canon(mergedB) !== _canon(data)) {
+              try { localStorage.setItem(key, JSON.stringify(mergedB)); } catch (e) {}
+            }
+            return mergedB;
+          });
+        });
+      // No .catch, as for Little Maestro: never write the bank without
+      // the server's copy to merge into.
     } else if (info.appName === 'worldcup') {
       // Before pushing the World Cup snapshot, fetch the server's
       // current copy and union-merge it with ours, then push the
@@ -730,6 +768,17 @@ var CloudSync = (function() {
             throw e;
           }
           return true;
+        }
+
+        if (info.appName === 'bank') {
+          var mergedBk = _mergeBank(serverData, localMissing ? null : localData);
+          var changedBk = localMissing || _canon(mergedBk) !== _canon(localData);
+          if (changedBk) {
+            try { localStorage.setItem(key, JSON.stringify(mergedBk)); }
+            catch (e) { if (typeof Debug !== 'undefined') Debug.error('[Sync] Quota Exceeded', key); throw e; }
+          }
+          if (_canon(mergedBk) !== _canon(serverData)) state.push(key);
+          return changedBk;
         }
 
         if (info.appName === 'littlemaestro') {
@@ -1196,5 +1245,6 @@ var CloudSync = (function() {
   });
 
   state._mergeLM = _mergeLM;
+  state._mergeBank = _mergeBank;
   return state;
 })();
