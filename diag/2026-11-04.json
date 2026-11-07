@@ -81,9 +81,9 @@
     },
     {
       "entry": {
-        "id": "e_mw28db0z_9jwbjq",
-        "ts": 1793803634963,
-        "clientTs": 1793803634963,
+        "id": "e_mw2adb53_85j879",
+        "ts": 1793806994343,
+        "clientTs": 1793806994343,
         "kind": "error",
         "app": "que-hora-es",
         "page": "que-hora-es.html",
@@ -91,18 +91,17 @@
         "filename": "https://rozavala.github.io/apps/js/que-hora-es-art.js?v=1",
         "lineno": 57,
         "colno": 6,
-        "stack": "drawFace@https://rozavala.github.io/apps/js/que-hora-es-art.js:57:6\nbuild@https://rozavala.github.io/apps/js/que-hora-es-art.js:513:22\ncreateClock@https://rozavala.github.io/apps/js/que-hora-es-art.js:697:10\nexplore@https://rozavala.github.io/apps/js/que-hora-es.js:344:30\nonClick@https://rozavala.github.io/apps/js/que-hora-es.js:1365:44",
-        "user": "u-3bda7c",
-        "age": 11,
+        "stack": "drawFace@https://rozavala.github.io/apps/js/que-hora-es-art.js:57:6\nbuild@https://rozavala.github.io/apps/js/que-hora-es-art.js:513:22\ncreateClock@https://rozavala.github.io/apps/js/que-hora-es-art.js:697:10\nstart@https://rozavala.github.io/apps/js/que-hora-es.js:1004:30\nonClick@https://rozavala.github.io/apps/js/que-hora-es.js:1367:26",
+        "user": "u-9b4aef",
+        "age": 9,
         "guest": false,
         "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
         "trail": []
       },
-      "count": 7,
-      "firstTs": 1793803634963,
+      "count": 4,
+      "firstTs": 1793806994343,
       "lastTs": 1793807106456,
       "users": [
-        "u-3bda7c",
         "u-9b4aef"
       ]
     },
@@ -469,32 +468,6 @@
       "lastTs": 1793804286291,
       "users": [
         "u-46a6e4"
-      ]
-    },
-    {
-      "entry": {
-        "id": "e_mw28d5du_jmu81o",
-        "ts": 1793803627650,
-        "clientTs": 1793803627650,
-        "kind": "error",
-        "app": "que-hora-es",
-        "page": "que-hora-es.html",
-        "message": "TypeError: null is not an object (evaluating 'x.translate')",
-        "filename": "https://rozavala.github.io/apps/js/que-hora-es-art.js?v=1",
-        "lineno": 313,
-        "colno": 6,
-        "stack": "drawGlass@https://rozavala.github.io/apps/js/que-hora-es-art.js:313:6\nbuild@https://rozavala.github.io/apps/js/que-hora-es-art.js:514:24\nsetOptions@https://rozavala.github.io/apps/js/que-hora-es-art.js:610:27\n@https://rozavala.github.io/apps/js/que-hora-es.js:139:51\nforEach@[native code]\nsetLang@https://rozavala.github.io/apps/js/que-hora-es.js:139:24\nonClick@https://rozavala.github.io/apps/js/que-hora-es.js:1362:27",
-        "user": "u-3bda7c",
-        "age": 11,
-        "guest": false,
-        "ua": "Mozilla/5.0 (iPad; CPU OS 16_7_16 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebMIDIBrowser/1.0.6",
-        "trail": []
-      },
-      "count": 1,
-      "firstTs": 1793803627650,
-      "lastTs": 1793803627650,
-      "users": [
-        "u-3bda7c"
       ]
     }
   ]
