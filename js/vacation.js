@@ -33,7 +33,7 @@ var Vacation = (function() {
   var STORAGE_KEY = 'zs_vacation';
   var _parentUnlocked = false;
   var _viewing = null;  // currently-open trip id, or null
-  var _mode = 'list';   // 'list' | 'detail' | 'edit' | 'new'
+  var _mode = 'list';   // 'list' | 'detail' | 'edit' | 'new' | 'import'
   var _quiz = null;     // in-progress quiz: { tripId, idx, score, answered, chosen }
 
   // Default packing categories per kid + shared family items.
@@ -352,6 +352,7 @@ var Vacation = (function() {
     if (!wrap) return;
 
     if (_mode === 'new') return _renderNewForm(wrap);
+    if (_mode === 'import') return _renderImportForm(wrap);
     if (_mode === 'edit' && _viewing) return _renderEditForm(wrap);
     if (_mode === 'detail' && _viewing) return _renderDetail(wrap);
     return _renderList(wrap);
@@ -384,7 +385,8 @@ var Vacation = (function() {
       '</div>' +
       '<div class="vc-toolbar">' +
         (_parentUnlocked
-          ? '<button class="vc-tb-primary" onclick="Vacation.newTrip()">＋ New trip</button>'
+          ? '<button class="vc-tb-primary" onclick="Vacation.newTrip()">＋ New trip</button>' +
+            '<button onclick="Vacation.importStart()">📥 Import trip</button>'
           : '<button onclick="Vacation.unlockParent()">' + lockTxt + '</button>') +
       '</div>' +
       (_parentUnlocked && hiddenCount > 0
@@ -1097,6 +1099,148 @@ var Vacation = (function() {
     return html;
   }
 
+
+  // ── Import a trip from a JSON file ──
+  // Trip content (flights, hotels, plans) is family data: it lives in the
+  // synced zs_vacation blob, never in this public repo. A parent builds the
+  // trip as a JSON file and imports it here; _save() then pushes it to the
+  // household server so every device sees it.
+  //
+  // Accepts one trip object, an array of trips, or { trips: [...] }. Uses
+  // the same fields as the stored trip (see the header comment), plus an
+  // optional packingExtra: { shared: [labels], perKid: [labels] } that is
+  // appended to the default packing lists. A trip whose id matches an
+  // existing one replaces it, keeping that trip's packing ticks.
+  function importStart() {
+    if (!_parentUnlocked) { unlockParent(); return; }
+    _mode = 'import';
+    _viewing = null;
+    _render();
+  }
+
+  function _renderImportForm(wrap) {
+    if (!_parentUnlocked) { backToList(); return; }
+    wrap.innerHTML =
+      '<div class="vc-toolbar">' +
+        '<button onclick="Vacation.backToList()">← All trips</button>' +
+      '</div>' +
+      '<div class="vc-header">' +
+        '<span class="vc-icon">📥</span>' +
+        '<h1>Import trip</h1>' +
+      '</div>' +
+      '<div class="vc-detail">' +
+        '<div class="vc-form">' +
+          '<div class="vc-field"><label for="vc-import-file">Trip file (.json)</label>' +
+            '<input type="file" id="vc-import-file" accept=".json,application/json,text/plain" ' +
+              'onchange="Vacation.importFile(this)"></div>' +
+          '<div class="vc-field"><label for="vc-import-text">…or paste the trip JSON</label>' +
+            '<textarea id="vc-import-text" rows="8" placeholder="{ &quot;name&quot;: &quot;…&quot;, &quot;startDate&quot;: &quot;2026-01-31&quot;, … }"></textarea></div>' +
+          '<p class="vc-form-hint">The trip is saved to this family\'s planner and synced to every device.</p>' +
+          '<div class="vc-form-actions">' +
+            '<button class="vc-btn-secondary" onclick="Vacation.backToList()">Cancel</button>' +
+            '<button class="vc-btn-primary" onclick="Vacation.importText()">Import</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function importFile(input) {
+    var f = input && input.files && input.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function() {
+      var ta = document.getElementById('vc-import-text');
+      if (ta) ta.value = String(r.result || '');
+      importText();
+    };
+    r.onerror = function() { ZsDialog.toast('Could not read that file.'); };
+    r.readAsText(f);
+  }
+
+  var SAFE_ID = /^[A-Za-z0-9_-]{1,64}$/;
+
+  function _labelsToItems(labels, prefix) {
+    return (Array.isArray(labels) ? labels : []).map(function(l, i) {
+      var label = typeof l === 'string' ? l : (l && l.label);
+      label = String(label || '').trim().slice(0, 80);
+      return label ? { id: prefix + i, label: label, packed: !!(l && l.packed) } : null;
+    }).filter(Boolean);
+  }
+
+  // Normalises one imported trip. Returns null when it lacks a name or a
+  // valid start date. Everything it keeps is rendered through _esc(), but
+  // ids and packing keys also end up inside onclick handlers, so those are
+  // restricted to safe characters.
+  function _normaliseImport(t, existing) {
+    if (!t || typeof t !== 'object' || Array.isArray(t)) return null;
+    var isDate = function(d) { return typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d); };
+    var name = String(t.name || '').trim().slice(0, 60);
+    if (!name || !isDate(t.startDate)) return null;
+    var trip = JSON.parse(JSON.stringify(t));
+    trip.id = SAFE_ID.test(String(t.id || '')) ? t.id : _uid();
+    trip.name = name;
+    trip.endDate = isDate(t.endDate) ? t.endDate : t.startDate;
+    trip.hidden = !!t.hidden;
+    if (trip.slidesUrl && /^\s*(javascript|data|vbscript):/i.test(String(trip.slidesUrl))) trip.slidesUrl = '';
+    if (!trip.itinerary || typeof trip.itinerary !== 'object' || Array.isArray(trip.itinerary)) trip.itinerary = {};
+    Object.keys(trip.itinerary).forEach(function(k) {
+      if (!isDate(k)) delete trip.itinerary[k];
+      else trip.itinerary[k] = String(trip.itinerary[k] || '').slice(0, 500);
+    });
+
+    var extra = trip.packingExtra || {};
+    delete trip.packingExtra;
+    if (existing && existing.packing) {
+      trip.packing = existing.packing;          // keep what's already ticked
+    } else {
+      var shared = DEFAULT_PACKING.shared.concat(Array.isArray(extra.shared) ? extra.shared : []);
+      var perKid = DEFAULT_PACKING.perKid.concat(Array.isArray(extra.perKid) ? extra.perKid : []);
+      trip.packing = { shared: _labelsToItems(shared, 'p_s_') };
+      var profiles = typeof getProfiles === 'function' ? getProfiles() : [];
+      profiles.forEach(function(p) {
+        if (!p || !p.name || /['"\\<>]/.test(p.name)) return;
+        trip.packing[p.name] = _labelsToItems(perKid, 'p_' + p.name.replace(/\s/g, '_') + '_');
+      });
+    }
+    return trip;
+  }
+
+  function importText() {
+    if (!_parentUnlocked) return;
+    var ta = document.getElementById('vc-import-text');
+    var raw = ta ? ta.value.trim() : '';
+    if (!raw) { ZsDialog.toast('Choose a trip file or paste the JSON first.'); return; }
+    var parsed;
+    try { parsed = JSON.parse(raw); }
+    catch (e) { ZsDialog.toast('That isn\'t valid trip JSON.'); return; }
+    var list = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.trips) ? parsed.trips : [parsed]);
+
+    var data = _load();
+    var added = 0, replaced = 0, skipped = 0, lastId = null;
+    list.forEach(function(t) {
+      var idx = -1;
+      if (t && SAFE_ID.test(String(t.id || ''))) {
+        idx = data.trips.findIndex(function(x) { return x.id === t.id; });
+      }
+      var trip = _normaliseImport(t, idx >= 0 ? data.trips[idx] : null);
+      if (!trip) { skipped++; return; }
+      if (idx >= 0) { data.trips[idx] = trip; replaced++; }
+      else { data.trips.push(trip); added++; }
+      lastId = trip.id;
+    });
+    if (!lastId) {
+      ZsDialog.toast('Nothing imported: each trip needs a name and a startDate (YYYY-MM-DD).');
+      return;
+    }
+    _save(data);
+    ZsDialog.toast((added ? added + ' trip' + (added === 1 ? '' : 's') + ' added' : '') +
+      (added && replaced ? ', ' : '') +
+      (replaced ? replaced + ' updated' : '') +
+      (skipped ? ' (' + skipped + ' skipped)' : ''));
+    if (added + replaced === 1) openTrip(lastId);
+    else backToList();
+  }
+
   // ── Init ──
   function init() {
     _parentUnlocked = false;
@@ -1120,6 +1264,9 @@ var Vacation = (function() {
     deleteTrip: deleteTrip,
     saveNewTrip: saveNewTrip,
     saveEditTrip: saveEditTrip,
+    importStart: importStart,
+    importFile: importFile,
+    importText: importText,
     quizStart: quizStart,
     quizAnswer: quizAnswer,
     quizNext: quizNext,
