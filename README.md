@@ -236,10 +236,11 @@ Para los iPads de la casa, usa GitHub Pages (Opción 2). No inicies servidores e
 
 ### Opción 2: Teléfonos y Tablets (Phones & Tablets)
 
-Para la mejor experiencia en dispositivos móviles:
-1. Sube los archivos a **GitHub Pages** u otro servidor web estático. (Upload the files to GitHub Pages or another static web server). **Tip: In GitHub, go to Settings > Pages > Source: Deploy from a branch > select `main`.**
-2. Abre la URL en el navegador de tu dispositivo móvil. (Open the URL in your mobile browser).
-3. Selecciona **"Agregar a la pantalla de inicio"** (Add to Home Screen). Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
+Para la mejor experiencia en dispositivos móviles, recomendamos alojar la suite en **GitHub Pages** u otro servidor web estático:
+1. **Haz un Fork (Fork the repo):** Haz un fork de este repositorio a tu propia cuenta de GitHub. (Fork this repository to your own GitHub account).
+2. **Activa GitHub Pages (Enable GitHub Pages):** Ve a la pestaña de "Settings" de tu repositorio, luego a "Pages". En "Source" selecciona "Deploy from a branch" y escoge la rama `main`. (In GitHub, go to Settings > Pages > Source: Deploy from a branch > select `main`).
+3. **Abre y Guarda (Open the URL):** Una vez publicado, abre la URL que te da GitHub Pages en el navegador de tu dispositivo móvil. (Open the URL in your mobile browser).
+4. **Agrega a Pantalla de Inicio (Add to Home Screen):** Esto instalará la suite como una aplicación de pantalla completa sin conexión. (This will install the suite as a full-screen offline app).
    - **iOS (Safari):** Toca el ícono de compartir (Share) y elige "Agregar a inicio" (Add to Home Screen).
    - **Android (Chrome):** Toca el menú de tres puntos y elige "Agregar a la pantalla principal" (Add to Home Screen).
 
