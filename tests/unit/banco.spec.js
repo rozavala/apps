@@ -128,6 +128,66 @@ test.describe('Banco Familia', () => {
     expect(s.bonds / s.value).toBeCloseTo(0.2, 3);
   });
 
+  test('giving: 10% of each deposit (match included) goes to the Giving jar, never below the minimum', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate(() => {
+      const E = /** @type {any} */ (window).BankEngine;
+      const base = JSON.parse(localStorage.getItem('zs_bank')).events;
+      const pablo = E.accounts(base).find(a => a.id === 'pablo');
+      const boys = E.accounts(base).find(a => a.id === 'boys');
+      const dep = { id: 'g1', ts: 60, type: 'deposit', account: 'pablo', amount: 50, match: 5, give: 5.5, source: 'lemonade', date: '2026-11-02' };
+      const gift = { id: 'g2', ts: 61, type: 'give', account: 'pablo', amount: 4, cause: 'parish', date: '2026-11-08' };
+      const before = E.compute(base, 'pablo', {}, '2026-11-08');
+      const after = E.compute(base.concat([dep, gift]), 'pablo', {}, '2026-11-08');
+      const lower = base.concat([{ id: 'p5', ts: 62, type: 'givePct', account: 'pablo', pct: 5, by: 'Pablo', date: '2026-11-02' }]);
+      const higher = base.concat([{ id: 'p20', ts: 62, type: 'givePct', account: 'pablo', pct: 20, by: 'Pablo', date: '2026-11-02' }]);
+      const vote = base.concat([
+        { id: 'pc', ts: 63, type: 'proposal', account: 'boys', cause: 'animals', by: 'Pablo', date: '2026-11-03' },
+        { id: 'v1', ts: 64, type: 'vote', proposal: 'pc', by: 'Ignacio', yes: true, date: '2026-11-03' }]);
+      return {
+        investedAdded: after.value - before.value, jar: after.giving, given: after.given, byCause: after.givenByCause,
+        lower: E.givePctOf(lower, pablo), higher: E.givePctOf(higher, pablo), default: E.givePctOf(base, pablo),
+        firstPlace: E.giveToOf(base, pablo).name,
+        twoOfThree: E.giveToOf(vote, boys).id,
+        allThree: E.giveToOf(vote.concat([{ id: 'v2', ts: 65, type: 'vote', proposal: 'pc', by: 'Rodrigo', yes: true, date: '2026-11-04' }]), boys).id,
+        mixUntouched: E.mixChanges(vote, boys).length
+      };
+    });
+    expect(r.investedAdded).toBeCloseTo(49.5, 1);   // 55 in, 5.50 to giving
+    expect(r.jar).toBeCloseTo(1.5, 2);
+    expect(r.given).toBe(4);
+    expect(r.byCause).toEqual({ parish: 4 });
+    expect(r.default).toBe(10);
+    expect(r.lower).toBe(10);
+    expect(r.higher).toBe(20);
+    expect(r.firstPlace).toBe("St. Claire's parish");
+    expect(r.twoOfThree).toBe('parish');
+    expect(r.allThree).toBe('animals');
+    expect(r.mixUntouched).toBe(0);
+  });
+
+  test('a parent deposit sets aside the giving share, and a gift comes out of the jar', async ({ page }) => {
+    await open(page, 'Pablo');
+    await pin(page, '1234');
+    await page.locator('.bk-actions').getByRole('button', { name: /Deposit/ }).click();
+    await page.selectOption('#bk-f-acc', 'pablo');
+    await page.fill('#bk-f-amt', '20');
+    await page.locator('#bk-f-amt').dispatchEvent('input');
+    await expect(page.locator('#bk-f-give')).toContainText('$2.20 (10%)');
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    const dep = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0]);
+    expect(dep).toMatchObject({ type: 'deposit', amount: 20, match: 2, give: 2.2 });
+
+    await page.getByRole('button', { name: /Gift/ }).click();
+    await expect(page.locator('#bk-g-amt')).toHaveValue('2.20');
+    await page.fill('#bk-g-amt', '5');
+    await page.getByRole('button', { name: 'Record gift' }).click();
+    await expect(page.locator('#zsd-toast')).toContainText('Giving jar has $2.20');
+    await page.fill('#bk-g-amt', '2.20');
+    await page.getByRole('button', { name: 'Record gift' }).click();
+    await expect(page.locator('.bk-given')).toContainText("St. Claire's parish: $2.20");
+  });
+
   test('sync merges two devices\' entries instead of keeping one side', async ({ page }) => {
     await open(page, 'Pablo');
     const out = await page.evaluate(() => {

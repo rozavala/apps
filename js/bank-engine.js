@@ -13,16 +13,25 @@
    'YYYY-MM-DD' it takes effect, by = who entered it):
      account   { account, name, emoji, members: [kid names], kind: 'own'|'shared' }
      accountEdit { account, name?, emoji?, members?, archived? }
-     deposit   { account, amount, source, note, match }   match = $ added by the parent
+     deposit   { account, amount, source, note, match, give }
+                                                           match = $ added by the parent;
+                                                           give = $ of (amount + match) set
+                                                           aside in the Giving jar
      withdraw  { account, amount, note, category }        parent only ("spent")
      mix       { account, bonds }                          % in bonds; the rest is S&P 500
-     proposal  { account, bonds }                          a shared account's proposed mix
+     proposal  { account, bonds | givePct | cause }        a shared account's proposed change
      vote      { proposal, yes }                           one member's answer
      goal      { account, name, amount }                   latest one wins; amount 0 clears it
      rate      { rate }                                    bond rate per year from `date` on
      matchPct  { pct }                                     match % for new deposits
      price     { close }                                   a parent-typed S&P 500 close for `date`
-     void      { target }                                  cancels a deposit/withdraw entered by mistake
+     void      { target }                                  cancels a deposit/withdraw/give entered by mistake
+     givePct   { account, pct }                            % of each deposit for giving (≥ the minimum)
+     giveMin   { pct }                                     the household minimum, 10 to start
+     giveTo    { account, cause }                          where the next gift goes
+     give      { account, amount, cause, note }            a gift made from the Giving jar (parent)
+     cause     { cause, name, emoji }                      a place to give, added by a parent
+     causeEdit { cause, name?, emoji?, removed? }
    ================================================================ */
 (function (root) {
   'use strict';
@@ -30,6 +39,15 @@
   var DEFAULT_RATE = 0.04;      // close to what short U.S. government bonds pay in 2026
   var DEFAULT_MATCH = 10;       // %
   var DEFAULT_BONDS = 50;       // % in bonds until the account picks a mix
+  var DEFAULT_GIVE_MIN = 10;    // % of every deposit that goes to the Giving jar, at least
+
+  // Places to give before a parent edits the list.
+  var DEFAULT_CAUSES = [
+    { id: 'parish',   emoji: '🙏', name: 'St. Claire\'s parish' },
+    { id: 'missions', emoji: '🌍', name: 'Missions collection' },
+    { id: 'foodbank', emoji: '🍞', name: 'Food bank' },
+    { id: 'animals',  emoji: '🐾', name: 'Animal shelter' }
+  ];
 
   // Changes of an account's mix allowed per calendar month (kids).
   var MIX_CHANGES_PER_MONTH = 1;
@@ -161,8 +179,13 @@
     var list = [];
     sorted.forEach(function (e) {
       if (e.type === 'proposal' && e.account === acc.id) {
-        list.forEach(function (p) { if (p.status === 'open') p.status = 'replaced'; });
-        list.push({ id: e.id, bonds: clampPct(e.bonds), by: e.by, date: e.date, ts: e.ts, votes: {}, status: 'open', passedOn: null });
+        // A new proposal replaces an open one about the same thing.
+        var k0 = e.givePct != null ? 'givePct' : e.cause != null ? 'cause' : 'bonds';
+        list.forEach(function (p) { if (p.status === 'open' && p.kind === k0) p.status = 'replaced'; });
+        var kind = e.givePct != null ? 'givePct' : e.cause != null ? 'cause' : 'bonds';
+        list.push({ id: e.id, kind: kind, bonds: kind === 'bonds' ? clampPct(e.bonds) : null,
+          givePct: kind === 'givePct' ? clampPct(e.givePct) : null, cause: kind === 'cause' ? String(e.cause) : null,
+          by: e.by, date: e.date, ts: e.ts, votes: {}, status: 'open', passedOn: null });
         list[list.length - 1].votes[norm(e.by)] = true;
       } else if (e.type === 'vote') {
         var p = list.filter(function (x) { return x.id === e.proposal; })[0];
@@ -194,7 +217,7 @@
     });
     if (acc.kind === 'shared') {
       proposals(events, acc).forEach(function (p) {
-        if (p.status === 'passed') out.push({ date: p.passedOn, ts: p.ts, bonds: p.bonds, by: 'vote', id: p.id });
+        if (p.status === 'passed' && p.kind === 'bonds') out.push({ date: p.passedOn, ts: p.ts, bonds: p.bonds, by: 'vote', id: p.id });
       });
     }
     return out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.ts || 0) - (b.ts || 0); });
@@ -214,6 +237,59 @@
     return { ok: true, first: false };
   }
 
+  // ── giving ──
+  function giveMinOn(sorted, date) {
+    var p = DEFAULT_GIVE_MIN;
+    sorted.forEach(function (e) {
+      if (e.type === 'giveMin' && e.date <= date && Number(e.pct) >= 0 && Number(e.pct) <= 100) p = Number(e.pct);
+    });
+    return p;
+  }
+  // The account's giving % on a date: its own choice (direct, or a passed
+  // vote on a shared account), never below the household minimum.
+  function givePctOf(events, acc, date) {
+    date = date || today();
+    var sorted = sortEvents(events), chosen = null, at = '';
+    sorted.forEach(function (e) {
+      if (e.type === 'givePct' && e.account === acc.id && e.date <= date) { chosen = clampPct(e.pct); at = e.date; }
+    });
+    if (acc.kind === 'shared') {
+      proposals(sorted, acc).forEach(function (p) {
+        if (p.status === 'passed' && p.kind === 'givePct' && p.passedOn <= date && p.passedOn >= at) { chosen = p.givePct; at = p.passedOn; }
+      });
+    }
+    var min = giveMinOn(sorted, date);
+    return Math.max(min, chosen == null ? min : chosen);
+  }
+  function causes(events) {
+    var list = DEFAULT_CAUSES.map(function (c) { return { id: c.id, emoji: c.emoji, name: c.name, removed: false }; });
+    sortEvents(events).forEach(function (e) {
+      if (e.type === 'cause' && e.cause && !list.some(function (c) { return c.id === e.cause; })) {
+        list.push({ id: e.cause, emoji: e.emoji || '💛', name: String(e.name || 'A good cause'), removed: false });
+      } else if (e.type === 'causeEdit') {
+        var c = list.filter(function (x) { return x.id === e.cause; })[0];
+        if (!c) return;
+        if (e.name) c.name = String(e.name);
+        if (e.emoji) c.emoji = e.emoji;
+        if (typeof e.removed === 'boolean') c.removed = e.removed;
+      }
+    });
+    return list;
+  }
+  // Where the account's next gift goes (its own pick or a passed vote),
+  // falling back to the first place still on the list.
+  function giveToOf(events, acc) {
+    var sorted = sortEvents(events), pick = null, at = '';
+    sorted.forEach(function (e) { if (e.type === 'giveTo' && e.account === acc.id) { pick = e.cause; at = e.date; } });
+    if (acc.kind === 'shared') {
+      proposals(sorted, acc).forEach(function (p) {
+        if (p.status === 'passed' && p.kind === 'cause' && p.passedOn >= at) { pick = p.cause; at = p.passedOn; }
+      });
+    }
+    var live = causes(sorted).filter(function (c) { return !c.removed; });
+    return live.filter(function (c) { return c.id === pick; })[0] || live[0] || null;
+  }
+
   // ── the core: an account's state on a date ──
   // Returns balances plus the running totals the page shows.
   function compute(events, accountId, prices, asOf) {
@@ -229,6 +305,7 @@
       account: acc || null, asOf: asOf,
       bonds: 0, units: 0, bondsPct: DEFAULT_BONDS,
       deposited: 0, matched: 0, withdrawn: 0,
+      giving: 0, setAside: 0, given: 0, givenByCause: {}, gifts: 0,
       bySource: {}, deposits: 0, firstDate: null,
       history: [], spPending: false
     };
@@ -240,9 +317,18 @@
       if (e.account !== accountId || gone[e.id] || e.date > asOf) return;
       if (e.type === 'deposit' && Number(e.amount) > 0) tl.push({ date: e.date, ts: e.ts, kind: 'dep', e: e });
       else if (e.type === 'withdraw' && Number(e.amount) > 0) tl.push({ date: e.date, ts: e.ts, kind: 'wd', e: e });
+      else if (e.type === 'give' && Number(e.amount) > 0) tl.push({ date: e.date, ts: e.ts, kind: 'give', e: e });
     });
     mixes.forEach(function (m) { if (m.date <= asOf) tl.push({ date: m.date, ts: m.ts, kind: 'mix', m: m }); });
-    tl.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.ts || 0) - (b.ts || 0); });
+    // Same day and same entry time (two devices, or a frozen test
+    // clock): money in before mix changes, gifts and spending, so a gift
+    // never meets an empty jar that the same day's deposit fills.
+    var ORDER = { dep: 0, mix: 1, give: 2, wd: 3 };
+    tl.sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+      if ((a.ts || 0) !== (b.ts || 0)) return (a.ts || 0) - (b.ts || 0);
+      return ORDER[a.kind] - ORDER[b.kind];
+    });
 
     var cur = null; // date the bond balance is valued at
     function advance(to) {
@@ -267,7 +353,10 @@
         st.units = p ? spPart / p : 0; st.spCost = spPart;
       } else if (x.kind === 'dep') {
         var amt = Number(x.e.amount), m = Math.max(0, Number(x.e.match) || 0);
-        var put = amt + m;
+        // The Giving jar's share comes off the top and isn't invested.
+        var g = Math.min(amt + m, Math.max(0, Number(x.e.give) || 0));
+        var put = amt + m - g;
+        st.giving += g; st.setAside += g;
         st.deposited += amt; st.matched += m; st.deposits++;
         if (!st.firstDate) st.firstDate = x.date;
         var src = x.e.source || 'other';
@@ -276,6 +365,11 @@
         st.bonds += toB;
         if (p) st.units += toS / p;
         st.spCost += toS;
+      } else if (x.kind === 'give') {
+        var gv = Math.min(Number(x.e.amount), st.giving);
+        st.giving -= gv; st.given += gv; st.gifts++;
+        var c = x.e.cause || 'other';
+        st.givenByCause[c] = (st.givenByCause[c] || 0) + gv;
       } else if (x.kind === 'wd') {
         var total2 = st.bonds + spValue(x.date);
         var take = Math.min(Number(x.e.amount), total2);
@@ -300,12 +394,14 @@
     st.spPending = p == null && st.spCost > 0;
     st.spValue = p == null ? (st.spCost || 0) : st.units * p;
     st.value = st.bonds + st.spValue;
-    st.putIn = st.deposited + st.matched;
+    // value = the invested money; the Giving jar is counted apart.
+    st.putIn = st.deposited + st.matched - st.setAside;
+    st.total = st.value + st.giving;
     st.growth = st.value - st.putIn + st.withdrawn;
     st.round = {
       value: round2(st.value), bonds: round2(st.bonds), sp: round2(st.spValue),
       deposited: round2(st.deposited), matched: round2(st.matched), withdrawn: round2(st.withdrawn),
-      growth: round2(st.growth)
+      growth: round2(st.growth), giving: round2(st.giving), given: round2(st.given), total: round2(st.total)
     };
     return st;
   }
@@ -375,6 +471,8 @@
     sortEvents: sortEvents, priceTable: priceTable, priceOn: priceOn,
     accounts: accounts, isMember: isMember, sameName: sameName,
     proposals: proposals, mixChanges: mixChanges, canChangeMix: canChangeMix,
+    DEFAULT_GIVE_MIN: DEFAULT_GIVE_MIN, causes: causes, givePctOf: givePctOf, giveToOf: giveToOf,
+    giveMinOn: function (events, date) { return giveMinOn(sortEvents(events), date || today()); },
     rateOn: function (events, date) { return rateOn(rateSchedule(sortEvents(events)), date || today()); },
     matchPctOn: function (events, date) { return matchPctOn(sortEvents(events), date || today()); },
     compute: compute, series: series, project: project, yearFor: yearFor, dropFromHigh: dropFromHigh,

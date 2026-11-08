@@ -6,6 +6,11 @@
    kid picks: 🛡️ Bonds (steady, fixed rate) and 📈 S&P 500 (follows the
    real market). Only a parent adds or takes out money.
 
+   Giving: a share of every deposit (10% at least; a kid can choose
+   more) goes to a 💛 Giving jar that isn't invested. Each kid picks
+   where it goes (their parish first on the list), and on Sundays a
+   parent records the gift when it's given at Mass.
+
    Storage: household key zs_bank (synced; an event log — see
    js/bank-engine.js for the event shapes and all the maths). The S&P
    500 closes come from the sync server (/api/market/spx) and are
@@ -178,6 +183,7 @@ var Banco = (function () {
     var v = _view.name;
     if (v === 'account') root.innerHTML = renderAccount(_view.id);
     else if (v === 'deposit' || v === 'spend') root.innerHTML = renderMoneyForm(v);
+    else if (v === 'give') root.innerHTML = renderGiveForm();
     else if (v === 'newShared') root.innerHTML = renderSharedForm();
     else if (v === 'settings') root.innerHTML = renderSettings();
     else root.innerHTML = renderHome();
@@ -185,6 +191,7 @@ var Banco = (function () {
     if (r) r.addEventListener('input', function () { pickMix(r.value, true); });
     var tm = document.getElementById('bk-tm-month');
     if (tm) tm.addEventListener('input', function () { timeMachine(); });
+    if (document.getElementById('bk-f-give')) matchPreview();
   }
 
   function renderHome() {
@@ -205,7 +212,8 @@ var Banco = (function () {
         '<span class="bk-acc-main"><span class="bk-acc-name">' + esc(a.name) + '</span>' +
           '<span class="bk-acc-kind">' + (a.kind === 'shared' ? '👥 Shared · ' + a.members.map(esc).join(', ') : '👤 Own account') + '</span></span>' +
         '<span class="bk-acc-bal"><b>' + money(s.value) + '</b>' +
-          (s.deposits ? '<small class="' + (s.growth >= 0 ? 'up' : 'down') + '">' + signed(s.growth) + ' grown</small>' : '<small>No money yet</small>') + '</span>' +
+          (s.deposits ? '<small class="' + (s.growth >= 0 ? 'up' : 'down') + '">' + signed(s.growth) + ' grown</small>' : '<small>No money yet</small>') +
+          (s.giving > 0.004 ? '<small class="bk-give-mini">💛 ' + money(s.giving) + ' to give</small>' : '') + '</span>' +
       '</button>';
     }).join('');
 
@@ -221,7 +229,7 @@ var Banco = (function () {
       ? '<button type="button" class="bk-ghost" onclick="Banco.lock()">🔒 Lock bank manager</button>'
       : '<button type="button" class="bk-ghost" onclick="Banco.unlock()">🔑 Bank manager (parents)</button>';
 
-    return head + parentBar +
+    return head + givingDay(accs) + parentBar +
       (accs.length ? '<h2 class="bk-h2">' + (_parent ? 'All accounts' : 'My accounts') + '</h2><div class="bk-accs">' + cards + '</div>' : empty) +
       (_parent ? renderFamilyTotal(accs) : '') +
       '<div class="bk-foot">' + lock + '</div>';
@@ -230,8 +238,11 @@ var Banco = (function () {
   function renderFamilyTotal(accs) {
     if (!accs.length) return '';
     var pr = prices(), t = 0, put = 0, m = 0;
-    accs.forEach(function (a) { var s = E.compute(load().events, a.id, pr); t += s.value; put += s.deposited - s.withdrawn; m += s.matched; });
+    var g = 0, given = 0;
+    accs.forEach(function (a) { var s = E.compute(load().events, a.id, pr); t += s.total; put += s.deposited - s.withdrawn; m += s.matched; g += s.giving; given += s.given; });
     return '<div class="bk-card bk-total"><div><small>Held for the kids</small><b>' + money(t) + '</b></div>' +
+      '<div><small>💛 Waiting to be given</small><b>' + money(g) + '</b></div>' +
+      '<div><small>💛 Given so far</small><b>' + money(given) + '</b></div>' +
       '<div><small>Cash they gave you</small><b>' + money(put) + '</b></div>' +
       '<div><small>Your match so far</small><b>' + money(m) + '</b></div></div>';
   }
@@ -244,6 +255,7 @@ var Banco = (function () {
     return '<div class="bk-actions">' +
       '<button type="button" class="bk-btn green" onclick="Banco.go(\'deposit\')">＋ Deposit</button>' +
       '<button type="button" class="bk-btn" onclick="Banco.go(\'spend\')">− Money spent</button>' +
+      '<button type="button" class="bk-btn" onclick="Banco.go(\'give\')">💛 Record a gift</button>' +
       '<button type="button" class="bk-btn" onclick="Banco.go(\'newShared\')">👥 New shared account</button>' +
       '<button type="button" class="bk-btn" onclick="Banco.go(\'settings\')">⚙️ Settings</button>' +
       '</div>' +
@@ -264,6 +276,7 @@ var Banco = (function () {
       '<div class="bk-hero-name">' + esc(acc.emoji) + ' ' + esc(acc.name) +
         (acc.kind === 'shared' ? ' <span class="bk-pill">👥 ' + acc.members.map(esc).join(' · ') + '</span>' : '') + '</div>' +
       '<div class="bk-hero-bal">' + money(s.value) + '</div>' +
+      (s.giving > 0.004 || s.given > 0 ? '<div class="bk-hero-give">+ 💛 ' + money(s.giving) + ' in the Giving jar</div>' : '') +
       (s.spPending ? '<div class="bk-note">Waiting for today\'s market price — S&P 500 money is shown at what went in.</div>' : '') +
       '<div class="bk-tiles">' +
         tile('💵', acc.kind === 'shared' ? 'Saved together' : (kid ? 'You saved' : 'Money saved'), money(s.deposited), '') +
@@ -308,6 +321,7 @@ var Banco = (function () {
     var chartCard = '<div class="bk-card"><h3>Your money over time</h3>' + chart(hist) + '</div>';
 
     var goal = renderGoal(acc, s, events);
+    var giving = renderGiving(acc, s, events);
     var tm = renderTimeMachine(acc, s, rate, events);
     var log = renderHistory(acc, events, pr);
 
@@ -316,8 +330,9 @@ var Banco = (function () {
 
     return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← All accounts</button>' +
       (_parent ? '<button type="button" class="bk-btn green small" onclick="Banco.go(\'deposit\', \'' + id + '\')">＋ Deposit</button>' +
-                 '<button type="button" class="bk-btn small" onclick="Banco.go(\'spend\', \'' + id + '\')">− Spent</button>' : '') +
-      '</div>' + top + dropCard + goal + mixCard + chartCard + sources + tm + log + priceNote;
+                 '<button type="button" class="bk-btn small" onclick="Banco.go(\'spend\', \'' + id + '\')">− Spent</button>' +
+                 '<button type="button" class="bk-btn small" onclick="Banco.go(\'give\', \'' + id + '\')">💛 Gift</button>' : '') +
+      '</div>' + top + dropCard + giving + goal + mixCard + chartCard + sources + tm + log + priceNote;
   }
 
   function tile(icon, label, val, cls) {
@@ -328,24 +343,8 @@ var Banco = (function () {
   // → propose, and every member votes. A parent can always set it.
   function renderMixControls(acc, s) {
     var events = load().events, today = E.today();
-    var props = acc.kind === 'shared' ? E.proposals(events, acc) : [];
-    var open = props.filter(function (p) { return p.status === 'open'; })[0];
-    var html = '';
-
-    if (open) {
-      var n = me();
-      var voted = open.votes[n.toLowerCase()];
-      html += '<div class="bk-vote"><b>🗳️ ' + esc(open.by) + ' wants to change the mix to ' + open.bonds + '% bonds · ' + (100 - open.bonds) + '% S&amp;P 500.</b>' +
-        '<div class="bk-votes">' + acc.members.map(function (m) {
-          var v = open.votes[m.toLowerCase()];
-          return '<span class="bk-voter ' + (v === true ? 'yes' : v === false ? 'no' : '') + '">' + (v === true ? '✅' : '⏳') + ' ' + esc(m) + '</span>';
-        }).join('') + '</div>' +
-        (!_parent && E.isMember(acc, n) && voted !== true
-          ? '<div class="bk-row"><button type="button" class="bk-btn green small" onclick="Banco.vote(\'' + open.id + '\', true)">👍 I agree</button>' +
-            '<button type="button" class="bk-btn small" onclick="Banco.vote(\'' + open.id + '\', false)">👎 No</button></div>'
-          : '<small>It changes when everyone agrees. One "no" cancels it.</small>') +
-        '</div>';
-    }
+    var open = openProposal(acc, 'bonds');
+    var html = open ? voteBox(acc, open, 'the mix to ' + open.bonds + '% bonds · ' + (100 - open.bonds) + '% S&amp;P 500') : '';
 
     var gate = E.canChangeMix(events, acc, today);
     if (_chooser && _chooser.account === acc.id) return html + renderChooser(acc, s);
@@ -358,6 +357,170 @@ var Banco = (function () {
         (acc.kind === 'shared' ? '🗳️ Suggest a new mix' : (gate.first ? '✨ Choose your mix' : 'Change my mix')) + '</button>';
     }
     return html;
+  }
+
+  function openProposal(acc, kind) {
+    if (acc.kind !== 'shared') return null;
+    return E.proposals(load().events, acc).filter(function (p) { return p.status === 'open' && p.kind === kind; })[0] || null;
+  }
+  // A shared account's open proposal, with each member's answer and, for
+  // a member who hasn't said yes yet, the buttons to answer.
+  function voteBox(acc, p, what) {
+    var n = me();
+    var voted = p.votes[n.toLowerCase()];
+    return '<div class="bk-vote"><b>🗳️ ' + esc(p.by) + ' wants to change ' + what + '.</b>' +
+      '<div class="bk-votes">' + acc.members.map(function (m) {
+        var v = p.votes[m.toLowerCase()];
+        return '<span class="bk-voter ' + (v === true ? 'yes' : v === false ? 'no' : '') + '">' + (v === true ? '✅' : '⏳') + ' ' + esc(m) + '</span>';
+      }).join('') + '</div>' +
+      (!_parent && E.isMember(acc, n) && voted !== true
+        ? '<div class="bk-row"><button type="button" class="bk-btn green small" onclick="Banco.vote(\'' + p.id + '\', true)">👍 I agree</button>' +
+          '<button type="button" class="bk-btn small" onclick="Banco.vote(\'' + p.id + '\', false)">👎 No</button></div>'
+        : '<small>It changes when everyone agrees. One "no" cancels it.</small>') +
+      '</div>';
+  }
+
+  // ── giving ──
+  function cause(id) {
+    return E.causes(load().events).filter(function (c) { return c.id === id; })[0] || { id: id, emoji: '💛', name: 'A good cause' };
+  }
+  function isSunday(d) { var p = String(d).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getDay() === 0; }
+
+  // The Sunday reminder on the home page: what's ready to give, per account.
+  function givingDay(accs) {
+    var events = load().events, pr = prices(), today = E.today();
+    var ready = accs.map(function (a) { return { a: a, s: E.compute(events, a.id, pr, today) }; })
+      .filter(function (x) { return x.s.giving > 0.004; });
+    if (!ready.length || (!_parent && !isSunday(today))) return '';
+    return '<div class="bk-card bk-giveday">' +
+      '<h3>' + (isSunday(today) ? '💛 It\'s giving day!' : '💛 Ready to give') + '</h3>' +
+      (_parent ? '' : '<p>Bring your giving envelope to Mass today.</p>') +
+      ready.map(function (x) {
+        var to = E.giveToOf(events, x.a);
+        return '<div class="bk-give-row"><span>' + esc(x.a.emoji + ' ' + x.a.name) + '</span>' +
+          '<span><b>' + money(x.s.giving) + '</b> → ' + (to ? esc(to.emoji + ' ' + to.name) : '') + '</span>' +
+          (_parent ? '<button type="button" class="bk-btn green small" onclick="Banco.go(\'give\', \'' + x.a.id + '\')">Given ✓</button>' : '') +
+        '</div>';
+      }).join('') + '</div>';
+  }
+
+  function renderGiving(acc, s, events) {
+    var pct = E.givePctOf(events, acc), min = E.giveMinOn(events);
+    var to = E.giveToOf(events, acc);
+    var member = !_parent && E.isMember(acc, me());
+    var openPct = openProposal(acc, 'givePct'), openCause = openProposal(acc, 'cause');
+    var byCause = Object.keys(s.givenByCause).sort(function (a, b) { return s.givenByCause[b] - s.givenByCause[a]; });
+    var live = E.causes(events).filter(function (c) { return !c.removed; });
+    var shared = acc.kind === 'shared';
+
+    var pctCtl = '';
+    if (_giveEdit === acc.id + ':pct') {
+      var opts = [];
+      for (var v = min; v <= Math.max(min, 50); v += 5) opts.push(v);
+      if (opts.indexOf(pct) === -1) opts.push(pct);
+      pctCtl = '<div class="bk-give-pick">' + opts.sort(function (a, b) { return a - b; }).map(function (v) {
+        return '<button type="button" class="bk-preset' + (v === pct ? ' on' : '') + '" aria-pressed="' + (v === pct) + '" onclick="Banco.setGivePct(\'' + acc.id + '\', ' + v + ')"><b>' + v + '%</b></button>';
+      }).join('') + '</div>';
+    } else if ((member || _parent) && !openPct) {
+      pctCtl = '<button type="button" class="bk-link" onclick="Banco.editGive(\'' + acc.id + ':pct\')">' +
+        (shared && !_parent ? '🗳️ Suggest giving more' : 'Give more') + '</button>';
+    }
+    var causeCtl = '';
+    if (_giveEdit === acc.id + ':cause') {
+      causeCtl = '<div class="bk-give-pick">' + live.map(function (c) {
+        var on = to && c.id === to.id;
+        return '<button type="button" class="bk-preset' + (on ? ' on' : '') + '" aria-pressed="' + !!on + '" onclick="Banco.setGiveTo(\'' + acc.id + '\', \'' + c.id + '\')"><span>' + esc(c.emoji) + '</span><b>' + esc(c.name) + '</b></button>';
+      }).join('') + '</div>';
+    } else if ((member || _parent) && !openCause) {
+      causeCtl = '<button type="button" class="bk-link" onclick="Banco.editGive(\'' + acc.id + ':cause\')">' +
+        (shared && !_parent ? '🗳️ Suggest another place' : 'Choose where') + '</button>';
+    }
+
+    return '<div class="bk-card bk-giving">' +
+      '<div class="bk-giving-top">' + jar(s.giving > 0.004 ? 0.25 + 0.6 * Math.min(1, s.giving / 50) : 0, '#f472b6', '💛') +
+        '<div><h3>Giving jar</h3><div class="bk-giving-amt">' + money(s.giving) + '</div>' +
+        '<small>' + pct + '% of every deposit goes here' + (pct > min ? ' — more than the ' + min + '% minimum. How kind! 🌟' : '.') + '</small></div></div>' +
+      (openPct ? voteBox(acc, openPct, 'giving to ' + openPct.givePct + '% of every deposit') : '') + pctCtl +
+      '<div class="bk-give-to"><span>Next gift goes to</span><b>' + (to ? esc(to.emoji + ' ' + to.name) : '—') + '</b></div>' +
+      (openCause ? voteBox(acc, openCause, 'where gifts go, to ' + esc(cause(openCause.cause).emoji + ' ' + cause(openCause.cause).name)) : '') + causeCtl +
+      (s.given > 0 ? '<div class="bk-given"><b>💛 Given so far: ' + money(s.given) + '</b>' +
+        byCause.map(function (k) { var c = cause(k); return '<span>' + esc(c.emoji + ' ' + c.name) + ': ' + money(s.givenByCause[k]) + '</span>'; }).join('') + '</div>' : '') +
+      (!_parent && isSunday(E.today()) && s.giving > 0.004 ? '<p class="bk-small">It\'s Sunday — bring ' + money(s.giving) + ' to Mass today! 🙏</p>' : '') +
+      '</div>';
+  }
+
+  var _giveEdit = null;
+  function editGive(key) { _giveEdit = _giveEdit === key ? null : key; render(); }
+  function setGivePct(id, v) {
+    var acc = findAccount(id);
+    if (!acc || !(_parent || E.isMember(acc, me()))) return;
+    var events = load().events;
+    v = Math.max(E.giveMinOn(events), Math.min(100, Math.round(v)));
+    _giveEdit = null;
+    if (v === E.givePctOf(events, acc)) { render(); return; }
+    if (acc.kind === 'shared' && !_parent) {
+      add(ev('proposal', { account: id, givePct: v }));
+      ZsDialog.toast('Asked the others. It changes when everyone agrees.');
+    } else {
+      add(ev('givePct', { account: id, pct: v }));
+      ZsDialog.toast(v + '% of every deposit will go to giving. 💛');
+    }
+    render();
+  }
+  function setGiveTo(id, causeId) {
+    var acc = findAccount(id);
+    if (!acc || !(_parent || E.isMember(acc, me()))) return;
+    _giveEdit = null;
+    var cur = E.giveToOf(load().events, acc);
+    if (cur && cur.id === causeId) { render(); return; }
+    if (acc.kind === 'shared' && !_parent) {
+      add(ev('proposal', { account: id, cause: causeId }));
+      ZsDialog.toast('Asked the others. It changes when everyone agrees.');
+    } else {
+      add(ev('giveTo', { account: id, cause: causeId }));
+      ZsDialog.toast('Your next gift goes to ' + cause(causeId).name + '. 💛');
+    }
+    render();
+  }
+
+  function renderGiveForm() {
+    if (!_parent) { _view = { name: 'home' }; return renderHome(); }
+    var events = load().events, pr = prices();
+    var accs = E.accounts(events).filter(function (a) { return !a.archived; });
+    var acc = accs.filter(function (a) { return a.id === _view.id; })[0] ||
+      accs.filter(function (a) { return E.compute(events, a.id, pr).giving > 0.004; })[0] || accs[0];
+    if (!acc) return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← Back</button></div><div class="bk-empty">Open an account first.</div>';
+    var s = E.compute(events, acc.id, pr);
+    var to = E.giveToOf(events, acc);
+    return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← Back</button></div>' +
+      '<div class="bk-card bk-form"><h2>💛 Record a gift</h2>' +
+      '<label for="bk-g-acc">From</label><select id="bk-g-acc" onchange="Banco.go(\'give\', this.value)">' + accountOptions(acc.id) + '</select>' +
+      '<p class="bk-small">In the Giving jar: <b>' + money(s.giving) + '</b></p>' +
+      '<label for="bk-g-amt">Amount given (USD)</label><input id="bk-g-amt" type="number" inputmode="decimal" min="0.01" step="0.01" value="' + (s.giving > 0 ? s.giving.toFixed(2) : '') + '">' +
+      '<fieldset class="bk-sources"><legend>Given to</legend>' + E.causes(events).filter(function (c) { return !c.removed; }).map(function (c) {
+        return '<label class="bk-chip"><input type="radio" name="bk-g-cause" value="' + c.id + '"' + (to && c.id === to.id ? ' checked' : '') + '><span>' + esc(c.emoji + ' ' + c.name) + '</span></label>';
+      }).join('') + '</fieldset>' +
+      '<label for="bk-g-note">Note (optional)</label><input id="bk-g-note" type="text" maxlength="80" placeholder="e.g. Sunday Mass collection">' +
+      '<label for="bk-g-date">Date</label><input id="bk-g-date" type="date" value="' + E.today() + '" max="' + E.today() + '">' +
+      '<div class="bk-row"><button type="button" class="bk-btn" onclick="Banco.go(\'home\')">Cancel</button>' +
+      '<button type="button" class="bk-btn green" onclick="Banco.saveGive()">Record gift</button></div></div>';
+  }
+  function saveGive() {
+    if (!_parent) return;
+    var id = document.getElementById('bk-g-acc').value;
+    var amt = Math.round(parseFloat(document.getElementById('bk-g-amt').value) * 100) / 100;
+    var c = document.querySelector('input[name="bk-g-cause"]:checked');
+    var date = document.getElementById('bk-g-date').value;
+    if (!findAccount(id)) return;
+    if (!E.isDate(date) || date > E.today()) date = E.today();
+    var s = E.compute(load().events, id, prices(), date);
+    if (!(amt > 0)) { ZsDialog.toast('Type an amount.'); return; }
+    if (amt > s.giving + 0.005) { ZsDialog.toast('The Giving jar has ' + money(s.giving) + '.'); return; }
+    if (!c) { ZsDialog.toast('Pick where it was given.'); return; }
+    add(ev('give', { account: id, amount: amt, cause: c.value, note: document.getElementById('bk-g-note').value.trim().slice(0, 80), date: date }));
+    ZsDialog.toast('💛 ' + money(amt) + ' given to ' + cause(c.value).name + '. Thank you!');
+    _view = { name: 'account', id: id };
+    render();
   }
 
   var PRESETS = [
@@ -443,25 +606,34 @@ var Banco = (function () {
     var gone = {};
     events.forEach(function (e) { if (e.type === 'void') gone[e.target] = true; });
     var rows = E.sortEvents(events).filter(function (e) {
-      return (e.account === acc.id && /^(deposit|withdraw|mix|proposal)$/.test(e.type)) ||
+      return (e.account === acc.id && /^(deposit|withdraw|mix|proposal|give|givePct|giveTo)$/.test(e.type)) ||
         (e.type === 'vote' && acc.kind === 'shared' && E.proposals(events, acc).some(function (p) { return p.id === e.proposal; }));
     }).reverse().slice(0, 60).map(function (e) {
       var g = gone[e.id], line = '', amt = '';
       if (e.type === 'deposit') {
         var so = source(e.source);
         line = so.emoji + ' ' + esc(so.label) + (e.note ? ' — ' + esc(e.note) : '');
-        amt = '<b class="up">+' + money(e.amount) + '</b>' + (Number(e.match) > 0 ? '<small>🎁 +' + money(e.match) + ' match</small>' : '');
+        amt = '<b class="up">+' + money(e.amount) + '</b>' + (Number(e.match) > 0 ? '<small>🎁 +' + money(e.match) + ' match</small>' : '') +
+          (Number(e.give) > 0 ? '<small class="bk-give-mini">💛 ' + money(e.give) + ' to giving</small>' : '');
+      } else if (e.type === 'give') {
+        var gc = cause(e.cause);
+        line = '💛 Gave to ' + esc(gc.emoji + ' ' + gc.name) + (e.note ? ' — ' + esc(e.note) : '');
+        amt = '<b class="bk-give-amt">' + money(e.amount) + '</b>';
+      } else if (e.type === 'givePct') {
+        line = '💛 Giving set to ' + e.pct + '% of every deposit' + (e.by && e.by !== 'parent' ? ' by ' + esc(e.by) : '');
+      } else if (e.type === 'giveTo') {
+        line = '💛 Gifts now go to ' + esc(cause(e.cause).name) + (e.by && e.by !== 'parent' ? ' (' + esc(e.by) + '\'s pick)' : '');
       } else if (e.type === 'withdraw') {
         line = '🧾 Spent' + (e.note ? ': ' + esc(e.note) : '');
         amt = '<b class="down">−' + money(e.amount) + '</b>';
       } else if (e.type === 'mix') {
         line = '🎛️ Mix set to ' + e.bonds + '% bonds · ' + (100 - e.bonds) + '% S&amp;P 500' + (e.by && e.by !== 'parent' ? ' by ' + esc(e.by) : '');
       } else if (e.type === 'proposal') {
-        line = '🗳️ ' + esc(e.by) + ' suggested ' + e.bonds + '% bonds';
+        line = '🗳️ ' + esc(e.by) + ' suggested ' + (e.givePct != null ? 'giving ' + e.givePct + '%' : e.cause != null ? 'giving to ' + esc(cause(e.cause).name) : e.bonds + '% bonds');
       } else if (e.type === 'vote') {
         line = (e.yes ? '👍 ' : '👎 ') + esc(e.by) + (e.yes ? ' agreed' : ' said no');
       }
-      var undo = _parent && !g && (e.type === 'deposit' || e.type === 'withdraw')
+      var undo = _parent && !g && (e.type === 'deposit' || e.type === 'withdraw' || e.type === 'give')
         ? '<button type="button" class="bk-link" onclick="Banco.undo(\'' + e.id + '\')" aria-label="Cancel this entry">Undo</button>' : '';
       return '<div class="bk-hrow' + (g ? ' void' : '') + '"><span class="bk-hdate">' + fmtDate(e.date) + '</span>' +
         '<span class="bk-hline">' + line + (g ? ' <em>(cancelled)</em>' : '') + '</span><span class="bk-hamt">' + amt + undo + '</span></div>';
@@ -484,13 +656,14 @@ var Banco = (function () {
     var pct = E.matchPctOn(load().events);
     return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← Back</button></div>' +
       '<div class="bk-card bk-form"><h2>' + (dep ? '＋ Money in' : '− Money spent') + '</h2>' +
-      '<label for="bk-f-acc">Account</label><select id="bk-f-acc">' + accs + '</select>' +
+      '<label for="bk-f-acc">Account</label><select id="bk-f-acc"' + (dep ? ' onchange="Banco.matchPreview()"' : '') + '>' + accs + '</select>' +
       '<label for="bk-f-amt">Amount (USD)</label><input id="bk-f-amt" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"' +
         (dep ? ' oninput="Banco.matchPreview()"' : '') + '>' +
       (dep ? '<fieldset class="bk-sources"><legend>Where did it come from?</legend>' + E.SOURCES.map(function (so, i) {
           return '<label class="bk-chip"><input type="radio" name="bk-src" value="' + so.id + '"' + (i === 0 ? ' checked' : '') + '><span>' + so.emoji + ' ' + so.label + '</span></label>';
         }).join('') + '</fieldset>' +
-        '<label class="bk-check"><input type="checkbox" id="bk-f-match" checked onchange="Banco.matchPreview()"> Add the ' + pct + '% match <b id="bk-f-matchamt"></b></label>' : '') +
+        '<label class="bk-check"><input type="checkbox" id="bk-f-match" checked onchange="Banco.matchPreview()"> Add the ' + pct + '% match <b id="bk-f-matchamt"></b></label>' +
+        '<p class="bk-small" id="bk-f-give"></p>' : '') +
       '<label for="bk-f-note">' + (dep ? 'Note (optional)' : 'What was it for?') + '</label><input id="bk-f-note" type="text" maxlength="80" placeholder="' + (dep ? 'e.g. Saturday lemonade stand' : 'e.g. Lego set') + '">' +
       '<label for="bk-f-date">Date</label><input id="bk-f-date" type="date" value="' + E.today() + '" max="' + E.today() + '">' +
       '<div class="bk-row"><button type="button" class="bk-btn" onclick="Banco.go(\'home\')">Cancel</button>' +
@@ -500,6 +673,13 @@ var Banco = (function () {
     var a = parseFloat((document.getElementById('bk-f-amt') || {}).value), on = (document.getElementById('bk-f-match') || {}).checked;
     var out = document.getElementById('bk-f-matchamt');
     if (out) out.textContent = on && a > 0 ? '(+' + money(a * E.matchPctOn(load().events) / 100) + ')' : '';
+    var gOut = document.getElementById('bk-f-give'), accEl = document.getElementById('bk-f-acc');
+    if (gOut && accEl) {
+      var acc = findAccount(accEl.value);
+      var gp = acc ? E.givePctOf(load().events, acc) : E.DEFAULT_GIVE_MIN;
+      var tot = a > 0 ? a * (1 + (on ? E.matchPctOn(load().events) / 100 : 0)) : 0;
+      gOut.textContent = tot > 0 ? '💛 ' + money(tot * gp / 100) + ' (' + gp + '%) goes to the Giving jar.' : '💛 ' + gp + '% goes to the Giving jar.';
+    }
   }
   function saveMoney(kind) {
     if (!_parent) return;
@@ -514,8 +694,10 @@ var Banco = (function () {
       var srcEl = document.querySelector('input[name="bk-src"]:checked');
       var withMatch = document.getElementById('bk-f-match').checked;
       var m = withMatch ? Math.round(amt * E.matchPctOn(load().events, date)) / 100 : 0;
-      add(ev('deposit', { account: acc, amount: amt, match: m, source: srcEl ? srcEl.value : 'other', note: note, date: date }));
-      ZsDialog.toast('Added ' + money(amt) + (m ? ' + ' + money(m) + ' match' : '') + '.');
+      var gp = E.givePctOf(load().events, findAccount(acc), date);
+      var g = Math.round((amt + m) * gp) / 100;
+      add(ev('deposit', { account: acc, amount: amt, match: m, give: g, source: srcEl ? srcEl.value : 'other', note: note, date: date }));
+      ZsDialog.toast('Added ' + money(amt) + (m ? ' + ' + money(m) + ' match' : '') + ' · 💛 ' + money(g) + ' to giving.');
     } else {
       var s = E.compute(load().events, acc, prices(), date);
       if (amt > s.value + 0.005) { ZsDialog.toast('That account only has ' + money(s.value) + '.'); return; }
@@ -573,6 +755,7 @@ var Banco = (function () {
       '<div class="bk-card bk-form"><h2>⚙️ Bank settings</h2>' +
       '<label for="bk-set-match">Match on new deposits (%)</label><input id="bk-set-match" type="number" min="0" max="100" step="1" value="' + E.matchPctOn(events) + '">' +
       '<label for="bk-set-rate">Bonds interest per year (%)</label><input id="bk-set-rate" type="number" min="0" max="20" step="0.1" value="' + (E.rateOn(events) * 100).toFixed(1) + '">' +
+      '<label for="bk-set-give">Minimum for giving (% of each deposit)</label><input id="bk-set-give" type="number" min="0" max="50" step="1" value="' + E.giveMinOn(events) + '">' +
       '<p class="bk-small">New rates count from today; money already earned stays earned.</p>' +
       '<div class="bk-row"><button type="button" class="bk-btn green" onclick="Banco.saveSettings()">Save</button></div></div>' +
       '<div class="bk-card bk-form"><h2>📈 S&amp;P 500 price</h2>' +
@@ -582,6 +765,12 @@ var Banco = (function () {
       '<label for="bk-p-close">S&amp;P 500 close</label><input id="bk-p-close" type="number" step="0.01" min="100" placeholder="e.g. 6712.50">' +
       '<div class="bk-row"><button type="button" class="bk-btn" onclick="Banco.refreshPrices()">Fetch now</button>' +
       '<button type="button" class="bk-btn green" onclick="Banco.savePrice()">Save price</button></div></div>' +
+      '<div class="bk-card bk-form"><h2>💛 Places to give</h2>' + E.causes(events).map(function (c) {
+        return '<div class="bk-hrow"><span class="bk-hline">' + esc(c.emoji + ' ' + c.name) + (c.removed ? ' <small>· hidden</small>' : '') + '</span>' +
+          '<span class="bk-hamt"><button type="button" class="bk-link" onclick="Banco.renameCause(\'' + c.id + '\')">Rename</button>' +
+          '<button type="button" class="bk-link" onclick="Banco.hideCause(\'' + c.id + '\', ' + !c.removed + ')">' + (c.removed ? 'Show' : 'Hide') + '</button></span></div>';
+      }).join('') +
+      '<div class="bk-row"><button type="button" class="bk-btn" onclick="Banco.addCause()">＋ Add a place</button></div></div>' +
       '<div class="bk-card bk-form"><h2>👥 Accounts</h2>' + accs.map(function (a) {
         return '<div class="bk-hrow"><span class="bk-hline">' + esc(a.emoji + ' ' + a.name) + ' <small>' + (a.kind === 'shared' ? 'shared · ' + a.members.map(esc).join(', ') : 'own') + (a.archived ? ' · closed' : '') + '</small></span>' +
           '<span class="bk-hamt"><button type="button" class="bk-link" onclick="Banco.renameAccount(\'' + a.id + '\')">Rename</button>' +
@@ -596,6 +785,8 @@ var Banco = (function () {
     var rate = Math.round(parseFloat(document.getElementById('bk-set-rate').value) * 10) / 1000;
     if (pct >= 0 && pct <= 100 && pct !== E.matchPctOn(events)) evts.push(ev('matchPct', { pct: pct }));
     if (rate >= 0 && rate <= 0.2 && Math.abs(rate - E.rateOn(events)) > 1e-9) evts.push(ev('rate', { rate: rate }));
+    var gmin = Math.round(parseFloat(document.getElementById('bk-set-give').value));
+    if (gmin >= 0 && gmin <= 50 && gmin !== E.giveMinOn(events)) evts.push(ev('giveMin', { pct: gmin }));
     if (evts.length) add(evts);
     ZsDialog.toast(evts.length ? 'Saved.' : 'Nothing changed.');
     render();
@@ -614,6 +805,31 @@ var Banco = (function () {
       render();
     });
   }
+  function renameCause(id) {
+    if (!_parent) return;
+    var c = cause(id);
+    ZsDialog.prompt({ title: 'Rename "' + c.name + '"', defaultValue: c.name, confirmLabel: 'Save' }).then(function (v) {
+      v = (v || '').trim().slice(0, 40);
+      if (v && v !== c.name) { add(ev('causeEdit', { cause: id, name: v })); render(); }
+    });
+  }
+  function hideCause(id, hide) {
+    if (!_parent) return;
+    add(ev('causeEdit', { cause: id, removed: !!hide }));
+    render();
+  }
+  function addCause() {
+    if (!_parent) return;
+    ZsDialog.prompt({ title: '💛 A new place to give', placeholder: 'e.g. Christmas toy drive', confirmLabel: 'Next' }).then(function (name) {
+      name = (name || '').trim().slice(0, 40);
+      if (!name) return;
+      return ZsDialog.prompt({ title: 'An emoji for it', defaultValue: '💛', confirmLabel: 'Add' }).then(function (em) {
+        add(ev('cause', { cause: E.uid('c'), name: name, emoji: (em || '💛').trim().slice(0, 4) || '💛' }));
+        render();
+      });
+    });
+  }
+
   function renameAccount(id) {
     var a = findAccount(id); if (!_parent || !a) return;
     ZsDialog.prompt({ title: 'Rename account', defaultValue: a.name, confirmLabel: 'Save' }).then(function (v) {
@@ -697,7 +913,7 @@ var Banco = (function () {
     if (_parent || !acc || !E.isMember(acc, me())) return;
     add(ev('vote', { proposal: proposalId, yes: !!yes }));
     var p = E.proposals(load().events, acc).filter(function (x) { return x.id === proposalId; })[0];
-    ZsDialog.toast(p && p.status === 'passed' ? '🎉 Everyone agreed — the new mix is on!' : (yes ? 'Thanks! Waiting for the others.' : 'You said no — the mix stays the same.'));
+    ZsDialog.toast(p && p.status === 'passed' ? '🎉 Everyone agreed — it\'s changed!' : (yes ? 'Thanks! Waiting for the others.' : 'You said no — the mix stays the same.'));
     render();
   }
   function setGoal(id) {
@@ -716,7 +932,7 @@ var Banco = (function () {
   }
 
   // ── navigation & lock ──
-  function go(name, id) { _chooser = null; _view = { name: name, id: id }; render(); window.scrollTo(0, 0); }
+  function go(name, id) { _chooser = null; _giveEdit = null; _view = { name: name, id: id }; render(); window.scrollTo(0, 0); }
   function open(id) { go('account', id); }
   function unlock() {
     var pin = typeof getParentPin === 'function' ? getParentPin() : null;
@@ -732,7 +948,7 @@ var Banco = (function () {
   // Re-draw after a background change, but never under a form the parent
   // is filling in (that would wipe what they typed).
   function softRender() {
-    if (/^(deposit|spend|newShared|settings)$/.test(_view.name)) return;
+    if (/^(deposit|spend|give|newShared|settings)$/.test(_view.name)) return;
     if (document.activeElement && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
     render();
   }
@@ -762,6 +978,8 @@ var Banco = (function () {
     saveSettings: saveSettings, savePrice: savePrice, refreshPrices: refreshPrices,
     renameAccount: renameAccount, editMembers: editMembers, archive: archive, undo: undo,
     chooseMix: chooseMix, pickMix: pickMix, saveMix: saveMix, vote: vote, setGoal: setGoal,
+    editGive: editGive, setGivePct: setGivePct, setGiveTo: setGiveTo, saveGive: saveGive,
+    renameCause: renameCause, hideCause: hideCause, addCause: addCause,
     _render: render
   };
 })();
