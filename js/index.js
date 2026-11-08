@@ -48,6 +48,30 @@
     }
   }
 
+  // Share the link to the apps (the hub's folder, no page name or hash).
+  // The share sheet where there is one; otherwise copy it, and if even that
+  // is refused, show it in a dialog to copy by hand.
+  function shareApps() {
+    var url = location.origin + location.pathname.replace(/[^\/]*$/, '');
+    var say = function(msg) { if (typeof ZsDialog !== 'undefined') ZsDialog.toast(msg); };
+    var show = function() {
+      if (typeof ZsDialog !== 'undefined') ZsDialog.alert({ title: '📤 Share the apps', message: url });
+    };
+    var copy = function() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() { say('Link copied'); }, show);
+      } else {
+        show();
+      }
+    };
+    if (navigator.share) {
+      navigator.share({ title: 'Zavala Serra Apps', text: 'Zavala Serra Apps', url: url })
+        .catch(function(e) { if (!e || e.name !== 'AbortError') copy(); });
+    } else {
+      copy();
+    }
+  }
+
   // ── Public Exports (Direct Assignment at Top) ──
   window.switchUser = function() {
     if (isGuestUser()) {
@@ -73,6 +97,7 @@
   };
 
   window.openParentsCorner = openParentsCornerWrapper;
+  window.shareApps = shareApps;
   window.closeParentsCorner = function() {
     var p = document.getElementById('parents-overlay');
     if (p) p.classList.remove('active');
@@ -1814,6 +1839,9 @@
         '</label>' +
         '<button class="hub-action-btn secondary" style="margin:0;" onclick="openProgressManager()">' +
           '📈 Set / Reset Progress' +
+        '</button>' +
+        '<button class="hub-action-btn secondary" style="margin:0;" onclick="shareApps()">' +
+          '📤 Share the apps' +
         '</button>' +
         '<div style="display:flex; gap:12px; align-items:center; justify-content:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">' +
           '<span style="font-size:0.9rem; font-weight:700;">Parent PIN:</span>' +
