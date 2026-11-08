@@ -181,6 +181,32 @@
 .bk-check { display: flex !important; align-items: center; gap: 8px; }
 .bk-check input { width: 20px; height: 20px; accent-color: #059669; }
 
+/* Giving */
+.bk-give-mini { color: #be185d !important; }
+.bk-hero-give { display: inline-block; margin-top: 2px; font-weight: 800; color: #be185d; background: #fdf2f8; border-radius: 99px; padding: 3px 12px; font-size: .86rem; }
+.bk-giving { background: linear-gradient(160deg, #fdf2f8, #fff 65%); border-color: #fbcfe8; }
+.bk-giving-top { display: flex; align-items: center; gap: 14px; }
+.bk-giving-top .bk-jar { width: 84px; height: 98px; flex: 0 0 auto; }
+.bk-giving-top h3 { margin: 0; }
+.bk-giving-top small { display: block; font-weight: 700; color: var(--text-muted); font-size: .8rem; }
+.bk-giving-amt { font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; color: #9d174d; line-height: 1.1; }
+.bk-give-to { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding: 10px 12px; border-radius: 14px; background: #fff; border: 1px solid #fbcfe8; }
+.bk-give-to span { font-size: .8rem; font-weight: 800; color: var(--text-muted); }
+.bk-give-to b { font-family: var(--font-display); color: #9d174d; }
+.bk-given { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; font-size: .82rem; font-weight: 700; color: var(--text-muted); }
+.bk-given b { width: 100%; color: #9d174d; font-size: .9rem; }
+.bk-give-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin: 10px 0 4px; }
+.bk-give-pick .bk-preset span { font-size: 1.6rem; }
+.bk-giving .bk-preset.on { border-color: #db2777; background: #fdf2f8; }
+.bk-giving .bk-link { color: #be185d; }
+.bk-giveday { background: linear-gradient(135deg, #fdf2f8, #fef3c7); border-color: #fbcfe8; }
+.bk-giveday p { margin: -6px 0 8px; font-weight: 700; }
+.bk-give-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-top: 1px solid #fbcfe8; font-weight: 700; }
+.bk-give-row:first-of-type { border-top: none; }
+.bk-give-row > span:first-child { flex: 1; min-width: 120px; }
+.bk-give-row b { font-family: var(--font-display); color: #9d174d; }
+.bk-give-amt { color: #be185d; }
+
 @media (max-width: 480px) {
   .bk-src { grid-template-columns: 1fr auto; }
   .bk-src-bar { grid-column: 1 / -1; grid-row: 2; }
