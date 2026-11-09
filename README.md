@@ -52,6 +52,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **🦅 Explorador de Naturaleza** | Guía de campo de aves, árboles y animales de Chile, y bingo de la naturaleza para salir a buscarlos. (Field guide to Chilean birds, trees and animals, plus nature bingo to go outside and spot them.) | [naturaleza.html](naturaleza.html) |
 | **🔐 Mensajes Secretos** | Descifra códigos con la rueda de César, el telégrafo Morse, el código masón y más. (Crack codes with a Caesar wheel, a Morse telegraph, pigpen and more.) | [mensajes-secretos.html](mensajes-secretos.html) |
 | **🕰️ ¿Qué Hora Es?** | Aprende a leer la hora moviendo las manecillas de un reloj de madera, en español e inglés. (Learn to tell time by moving the hands of a wooden clock, in Spanish and English.) | [que-hora-es.html](que-hora-es.html) |
+| **🏦 Banco Familia** | El banco de la familia para la plata real de los niños: ahorros, inversiones reales o bonos, y una jarra para dar a buenas causas. (A family bank for the kids' real savings: deposits, real stocks or bonds, and a giving jar.) | [banco.html](banco.html) |
 
 ## 🛡️ Seguridad Familiar y Balance (Family Safety & Balance)
 
