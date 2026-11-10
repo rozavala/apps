@@ -678,12 +678,12 @@ test.describe('Banco Familia', () => {
       expect(years).toEqual([...years].sort((a, b) => a - b));
       expect(pt.rows.every(x => Number.isInteger(x.cents) && x.cents > 0)).toBe(true);
     }
-    expect(r.counts).toEqual([66, 40, 30, 22, 12]);
+    expect(r.counts).toEqual([66, 40, 30, 22, 12]);   // 82 cents in 2026: $10 still buys 12
     await page.locator('.bk-acc', { hasText: 'Own account' }).click();
     const card = page.locator('.bk-prices');
     await expect(card).toContainText('What did $10 buy?');
     await expect(card).toContainText('66 stamps · 15¢ each');
-    await expect(card).toContainText('12 stamps · 78¢ each');
+    await expect(card).toContainText('12 stamps · 82¢ each');
     await expect(card).toContainText('Source: U.S. Postal Service');
     await expect(card).toContainText('instead of only keeping it in a jar');
     await expect(card.locator('.bk-p10')).toHaveCount(5);
