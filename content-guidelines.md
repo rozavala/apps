@@ -60,6 +60,7 @@ The following topics must **never** appear in any app, quiz, story, image captio
 - **No dynamic external content**: All text, questions, and facts live directly in .html/.js files. No API calls that could inject unpredictable text.
 - **No AI-generated stories at runtime**: All content is hand-written and reviewed.
 - **No user-generated content features**: No comments, public sharing, or multiplayer that could introduce external content.
+  - One exception, asked for in issue #607: Sibling challenges. A kid writes a short question, word or hint (120 characters at most) for a sibling in the same household. It never leaves the family's own devices and server, it is always shown as plain text, kids never see anything the app wrote about it, and a parent can see and delete every challenge in Parents Corner.
 - **LocalStorage stores only progress data**: Stars, levels completed, scores. No profiles with pronouns, flags, or identity markers.
 
 ## Pre-Commit Audit (Optional Git Hook)

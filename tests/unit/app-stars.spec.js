@@ -82,7 +82,13 @@ const CASES = [
     stars: 16 },
   { id: 'marinero', prefix: 'zs_marinero_',
     data: { knots: { fig8: { w: 1, c: 1, r: 1 }, bowline: { w: 1 } }, best: { steer: 3, names: 2, buoys: 1 }, hunts: 4 },
-    stars: 13, note: 'treasure hunts cap at 3' }
+    stars: 13, note: 'treasure hunts cap at 3' },
+  { id: 'challenge', prefix: 'zs_challenge_',
+    data: { v: 1, stars: { c_a: '2026-11-09', c_b: '2026-11-10', c_c: '2026-11-10' } },
+    stars: 3, note: 'one per solved challenge' },
+  { id: 'challenge', prefix: 'zs_challenge_',
+    data: { v: 1, stars: { a: '2026-11-10', b: '2026-11-10', c: '2026-11-10', d: '2026-11-10', e: '2026-11-11' } },
+    stars: 4, note: 'at most 3 a day' }
 ];
 
 test.describe('per-app star rules', () => {
