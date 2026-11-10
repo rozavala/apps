@@ -52,6 +52,7 @@ var HubPlan = (function() {
     { id: 'code',       href: 'code-cadet.html',         group: 'science', minAge: 7,  names: ['code cadet'] },
     { id: 'story',      href: 'story-explorer.html',     group: 'reading', minAge: 4,  beginner: true, names: ['story explorer'] },
     { id: 'vocab',      href: 'vocabulario-vivo.html',   group: 'reading', minAge: 7,  names: ['vocabulario vivo'] },
+    { id: 'dictado',    href: 'dictado.html',            group: 'reading', minAge: 6,  names: ['dictado'] },
     { id: 'world',      href: 'world-explorer.html',     group: 'world',   minAge: 5,  names: ['world explorer'] },
     { id: 'quest',      href: 'quest-adventure.html',    group: 'world',   minAge: 5,  names: ['quest adventure', 'summer quest'] },
     { id: 'chile',      href: 'descubre-chile.html',     group: 'world',   minAge: 6,  names: ['descubre chile'] },

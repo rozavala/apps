@@ -45,6 +45,7 @@ var TrophyRoom = (function() {
     { id: 'calculo', name: 'Cálculo Rápido', emoji: '🧮', color: '#0F766E', threshold: 1, href: 'calculo-rapido.html' },
     { id: 'marinero', name: 'Marinero', emoji: '🪢', color: '#C9A227', threshold: 1, href: 'marinero.html' },
     { id: 'review', name: 'Repaso', emoji: '🔁', color: '#0D9488', threshold: 1, href: 'repaso.html' },
+    { id: 'dictado', name: 'Dictado', emoji: '✍️', color: '#4F46E5', threshold: 1, href: 'dictado.html' },
     { id: 'challenge', name: 'Sibling Challenges', emoji: '🤝', color: '#0EA5E9', threshold: 1, href: 'index.html' }
   ];
 
