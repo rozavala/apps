@@ -101,7 +101,8 @@ var CloudSync = (function() {
     'wc2026.v2':                'worldcup',
     'zs_vacation':              'vacation',
     'zs_off_hours':             'off_hours',
-    'zs_bank':                  'bank'
+    'zs_bank':                  'bank',
+    'zs_hub_minage':            'hub_minage'
   };
   var HOUSEHOLD_KID = '_household';
 

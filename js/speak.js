@@ -83,6 +83,11 @@ var ZsSpeak = (function() {
     return t.replace(/\s+/g, ' ').trim();
   }
 
+  // What a choice says: its own words, unless it says what to say.
+  function _choiceText(c) {
+    return c.getAttribute('data-say-text') || _textOf(c);
+  }
+
   function _textOf(el) {
     if (!el) return '';
     var copy = el.cloneNode(true);
@@ -249,7 +254,7 @@ var ZsSpeak = (function() {
     c.setAttribute('data-zs-armed', '1');
     clearTimeout(c.__zsArmTimer);
     c.__zsArmTimer = setTimeout(function() { c.removeAttribute('data-zs-armed'); }, ARM_MS);
-    say(_textOf(c), c.getAttribute('data-zs-lang'));
+    say(_choiceText(c), c.getAttribute('data-zs-lang'));
   }
 
   function _onDown(e) {
@@ -264,7 +269,7 @@ var ZsSpeak = (function() {
     _pressAt = { x: e.clientX, y: e.clientY };
     clearTimeout(_pressTimer);
     _pressTimer = setTimeout(function() {
-      say(_textOf(c), c.getAttribute('data-zs-lang'));
+      say(_choiceText(c), c.getAttribute('data-zs-lang'));
       _suppressClick = true;
       setTimeout(function() { _suppressClick = false; }, 1200);
     }, LONG_PRESS_MS);
