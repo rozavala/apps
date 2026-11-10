@@ -44,6 +44,7 @@ var TrophyRoom = (function() {
     { id: 'cocina', name: 'Cocina Lab', emoji: '👩‍🍳', color: '#B45309', threshold: 1, href: 'cocina-lab.html' },
     { id: 'calculo', name: 'Cálculo Rápido', emoji: '🧮', color: '#0F766E', threshold: 1, href: 'calculo-rapido.html' },
     { id: 'marinero', name: 'Marinero', emoji: '🪢', color: '#C9A227', threshold: 1, href: 'marinero.html' },
+    { id: 'linea', name: 'Línea del Tiempo', emoji: '🏛️', color: '#64748B', threshold: 1, href: 'linea-del-tiempo.html' },
     { id: 'arbol', name: 'Árbol familiar', emoji: '🌳', color: '#2C6B41', threshold: 1, href: 'arbol-familiar.html' },
     { id: 'codelab', name: 'Code Lab', emoji: '🐢', color: '#177A40', threshold: 1, href: 'code-lab.html' },
     { id: 'lector', name: 'Lector', emoji: '📖', color: '#0E8F86', threshold: 1, href: 'lector.html' },

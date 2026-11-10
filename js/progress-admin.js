@@ -375,6 +375,7 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+  APPS.push({ id: 'linea', label: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', prefix: 'zs_linea_', mode: 'reset' });
   // Árbol familiar has no ladder to set: its quiz stars, pages seen and map can only be cleared.
   APPS.push({ id: 'arbol', label: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', prefix: 'zs_arbol_', mode: 'reset' });
 

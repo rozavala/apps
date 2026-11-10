@@ -321,6 +321,7 @@
       'zs_marinero_', 'zs_naturaleza_', 'zs_secretos_', 'zs_clock_', 'zs_dictado_', 'zs_calculo_'
     ];
     prefixes.push('zs_lector_');
+    prefixes.push('zs_linea_');
     prefixes.push('zs_arbol_');
     prefixes.push('zs_codelab_');
     prefixes.forEach(function(p) {
@@ -564,6 +565,7 @@
       { name: 'Dictado', icon: '✍️', href: 'dictado.html', key: 'zs_dictado_' + key, schedId: 'dictado' },
       { name: 'Cálculo Rápido', icon: '🧮', href: 'calculo-rapido.html', key: 'zs_calculo_' + key, schedId: 'calculo' }
     ];
+    apps.push({ name: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', key: 'zs_linea_' + key, schedId: 'linea' });
     apps.push({ name: 'Lector', icon: '📖', href: 'lector.html', key: 'zs_lector_' + key, schedId: 'lector' });
     apps.push({ name: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', key: 'zs_arbol_' + key, schedId: 'arbol' });
     apps.push({ name: 'Code Lab', icon: '🐢', href: 'code-lab.html', key: 'zs_codelab_' + key, schedId: 'codelab' });
@@ -878,7 +880,7 @@
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab'].forEach(function(id) {
+       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea'].forEach(function(id) {
         try {
           var el = document.getElementById('stats-' + id);
           if (!el || typeof getAppStars !== 'function') return;

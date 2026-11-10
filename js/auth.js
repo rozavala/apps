@@ -510,6 +510,17 @@ var APP_STAR_CONFIGS = [
       for (k in (d.books || {})) { q = d.books[k] || {}; n += (q.l ? 1 : 0) + (q.r ? 1 : 0) + (q.p ? 1 : 0); }
       return n;
     } },
+  // Línea del Tiempo: one star for every 10 events opened (up to 15) and
+  // the best round (0 to 3 stars) of each game: put in order (one per
+  // number of cards), who lived at the same time, before or after, and
+  // time-travel trivia for each era.
+  { id: 'linea', prefix: 'zs_linea_', stars: function(d) {
+      var n = 0, k, seen = 0, g = d.g || {};
+      for (k in (d.seen || {})) seen++;
+      n += Math.min(15, Math.floor(seen / 10));
+      for (k in g) n += Math.min(3, Math.max(0, g[k] | 0));
+      return n;
+    } },
   // Árbol familiar: each family game is starred by its best score out of 5
   // (3 right = 1 star, 4 = 2, 5 = 3), one star for every 3 relatives whose page
   // was opened (up to 3), one for 1, 5 and 10 "How are we related?" answers, and

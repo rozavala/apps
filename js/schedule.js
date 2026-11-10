@@ -42,6 +42,7 @@ var AppSchedule = (function() {
     { id: 'calculo',    card: '.card-calculo' }
   ];
   ALL_APPS.push({ id: 'lector', card: '.card-lector' });
+  ALL_APPS.push({ id: 'linea', card: '.card-linea' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
 
@@ -69,6 +70,9 @@ var AppSchedule = (function() {
 
   // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
   [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });
+
+  // Línea del Tiempo (history) rides along with the history and world days.
+  [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
