@@ -16,6 +16,20 @@ module.exports = defineConfig({
     // failed a different handful of tests on every run. Suites that test
     // the reload path itself opt back in with serviceWorkers: 'allow'.
     serviceWorkers: 'block',
+    // The family is in Santa Clara, CA: pin the zone so date-sensitive tests
+    // give the same answer on a UTC dev box, CI and a laptop. Specs that
+    // care about another zone set their own timezoneId.
+    timezoneId: 'America/Los_Angeles',
+    locale: 'en-US',
+    // Tests are hermetic: every host except loopback fails to resolve at
+    // once. Pages link Google Fonts (a stylesheet, so it holds up the load
+    // event) and some apps fetch GitHub/OpenFootball data; on a slow or
+    // stalled network `page.goto` waited out the 30 s test timeout, and a
+    // different test failed each run. This also keeps headless runs away
+    // from the live sync server (*.tail57521e.ts.net, see CLAUDE.md).
+    launchOptions: {
+      args: ['--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1, EXCLUDE localhost'],
+    },
   },
   projects: [
     {
