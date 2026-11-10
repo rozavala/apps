@@ -341,6 +341,7 @@ var ProgressAdmin = (function() {
     { id: 'dictado',    label: 'Dictado',           icon: '✍️',  href: 'dictado.html',           prefix: 'zs_dictado_',    mode: 'reset' },
     { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
+  APPS.push({ id: 'codelab', label: 'Code Lab', icon: '🐢', href: 'code-lab.html', prefix: 'zs_codelab_', mode: 'reset' });
 
   // Lector keeps a ladder of levels for each language in one saved blob
   // (zs_lector_<kid>: lv:{ es2:{sounds,syll,build,read}, … }, books:{…}).

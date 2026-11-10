@@ -83,6 +83,7 @@ var CloudSync = (function() {
     'zs_secretos_': 'secretos',
     'zs_clock_': 'clock',
     'zs_lector_': 'lector',
+    'zs_codelab_': 'codelab',
     'zs_calculo_': 'calculo',
     'zs_arbol_': 'arbol',
     'zs_challenge_': 'challenge',
