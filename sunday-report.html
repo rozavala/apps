@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/sunday-report.css">
+  <link rel="stylesheet" href="css/sunday-report.css?v=2">
   <link rel="stylesheet" href="css/zs-theme.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
@@ -21,8 +21,10 @@
   <div class="sr-toolbar no-print">
     <a href="index.html" class="sr-tb-btn">🏠 Home</a>
     <button class="sr-tb-btn" onclick="SundayReport.refresh()">🔄 Refresh</button>
+    <button class="sr-tb-btn" id="sr-share" onclick="SundayReport.shareImage()">🖼 Share as image</button>
     <button class="sr-tb-btn primary" onclick="SundayReport.print()">🖨 Print</button>
   </div>
+  <div class="sr-status no-print" id="sr-status" role="status" aria-live="polite"></div>
   <div id="sr-content"></div>
 
   <script src="js/dialog.js?v=3"></script>
@@ -34,6 +36,10 @@
   <script src="js/bank-engine.js?v=5"></script>
   <script src="js/activity-log.js"></script>
   <script src="js/routines.js"></script>
-  <script src="js/sunday-report.js?v=2"></script>
+  <script src="js/zs-canvas.js?v=1"></script>
+  <script src="js/hub-plan.js?v=2"></script>
+  <script src="js/progress-catalog.js?v=2"></script>
+  <script src="js/progress-admin.js?v=3"></script>
+  <script src="js/sunday-report.js?v=4"></script>
 </body>
 </html>
