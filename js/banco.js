@@ -11,6 +11,10 @@
    where it goes (their parish first on the list), and on Sundays a
    parent records the gift when it's given at Mass.
 
+   Statements: on the first visit after the 1st, each kid gets last
+   month's statement (what came in, the match, giving, gifts, spent and
+   growth), kept in an archive; a past month is recomputed from the log.
+
    Storage: household key zs_bank (synced; an event log — see
    js/bank-engine.js for the event shapes and all the maths). The S&P
    500 closes come from the sync server (/api/market/spx) and are
@@ -101,6 +105,8 @@ var Banco = (function () {
   function signed(x) { return (x >= 0 ? '+' : '−') + money(Math.abs(x)); }
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function fmtDate(d) { if (!E.isDate(d)) return ''; var p = d.split('-'); return MONTHS[+p[1] - 1] + ' ' + (+p[2]) + ', ' + p[0]; }
+  var MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function monthLabel(m) { var p = String(m).split('-'); return MONTH_NAMES[+p[1] - 1] + ' ' + p[0]; }
   function source(id) { return E.SOURCES.filter(function (s) { return s.id === id; })[0] || E.SOURCES[E.SOURCES.length - 1]; }
 
   // ── art ──
@@ -184,6 +190,7 @@ var Banco = (function () {
     if (v === 'account') root.innerHTML = renderAccount(_view.id);
     else if (v === 'deposit' || v === 'spend') root.innerHTML = renderMoneyForm(v);
     else if (v === 'give') root.innerHTML = renderGiveForm();
+    else if (v === 'statement') root.innerHTML = renderStatement(_view.id, _view.month);
     else if (v === 'newShared') root.innerHTML = renderSharedForm();
     else if (v === 'settings') root.innerHTML = renderSettings();
     else root.innerHTML = renderHome();
@@ -229,7 +236,7 @@ var Banco = (function () {
       ? '<button type="button" class="bk-ghost" onclick="Banco.lock()">🔒 Lock bank manager</button>'
       : '<button type="button" class="bk-ghost" onclick="Banco.unlock()">🔑 Bank manager (parents)</button>';
 
-    return head + givingDay(accs) + parentBar +
+    return head + statementCards(accs) + givingDay(accs) + parentBar +
       (accs.length ? '<h2 class="bk-h2">' + (_parent ? 'All accounts' : 'My accounts') + '</h2><div class="bk-accs">' + cards + '</div>' : empty) +
       (_parent ? renderFamilyTotal(accs) : '') +
       '<div class="bk-foot">' + lock + '</div>';
@@ -323,6 +330,7 @@ var Banco = (function () {
     var goal = renderGoal(acc, s, events);
     var giving = renderGiving(acc, s, events);
     var tm = renderTimeMachine(acc, s, rate, events);
+    var stmts = renderStatementList(acc, events, pr);
     var log = renderHistory(acc, events, pr);
 
     var priceNote = s.price ? '<p class="bk-small">S&amp;P 500 last close: ' + Math.round(s.price).toLocaleString('en-US') +
@@ -332,7 +340,7 @@ var Banco = (function () {
       (_parent ? '<button type="button" class="bk-btn green small" onclick="Banco.go(\'deposit\', \'' + id + '\')">＋ Deposit</button>' +
                  '<button type="button" class="bk-btn small" onclick="Banco.go(\'spend\', \'' + id + '\')">− Spent</button>' +
                  '<button type="button" class="bk-btn small" onclick="Banco.go(\'give\', \'' + id + '\')">💛 Gift</button>' : '') +
-      '</div>' + top + dropCard + giving + goal + mixCard + chartCard + sources + tm + log + priceNote;
+      '</div>' + top + dropCard + giving + goal + mixCard + chartCard + sources + tm + stmts + log + priceNote;
   }
 
   function tile(icon, label, val, cls) {
@@ -378,6 +386,125 @@ var Banco = (function () {
           '<button type="button" class="bk-btn small" onclick="Banco.vote(\'' + p.id + '\', false)">👎 No</button></div>'
         : '<small>It changes when everyone agrees. One "no" cancels it.</small>') +
       '</div>';
+  }
+
+  // ── monthly statements ──
+  var SEEN_KEY = 'zs_bank_stmt_seen';   // this device only: { "kid|account": "YYYY-MM" } = newest one dismissed
+  function seenMap() {
+    try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function markSeen(acc, month) {
+    var m = seenMap(), k = me() + '|' + acc.id;
+    if ((m[k] || '') >= month) return;
+    m[k] = month;
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(m)); } catch (e) {}
+  }
+  function stmtSeen(acc, month) { return (seenMap()[me() + '|' + acc.id] || '') >= month; }
+
+  // The kid-friendly lines of a statement, most important first.
+  function stmtStory(st, acc) {
+    var shared = acc && acc.kind === 'shared';
+    var out = [];
+    if (st.growth >= 0.005) out.push(['🌱', 'Your money grew ' + money(st.growth) + ' by itself this month!']);
+    else if (st.growth <= -0.005) out.push(['🌧️', 'The market dipped, so your money is down ' + money(-st.growth) + ' this month. That happens — it goes up and down.']);
+    if (st.saved > 0) {
+      var top = Object.keys(st.bySource).sort(function (a, b) { return st.bySource[b] - st.bySource[a]; })[0];
+      out.push(['💵', 'You saved ' + money(st.saved) + (shared ? ' together' : '') + (top ? ', mostly from ' + source(top).label.toLowerCase() : '') + '.']);
+    }
+    if (st.matched > 0) out.push(['🎁', 'Papá & Mamá added ' + money(st.matched) + '.']);
+    if (st.given > 0) out.push(['💛', 'You gave ' + money(st.given) + ' to ' + (Object.keys(st.givenByCause).length > 1 ? 'good causes' : cause(Object.keys(st.givenByCause)[0]).name) + '. Thank you!']);
+    else if (st.setAside > 0) out.push(['💛', money(st.setAside) + ' went into the Giving jar.']);
+    if (st.spent > 0) out.push(['🧾', 'You spent ' + money(st.spent) + '.']);
+    if (!out.length) out.push(['⏳', 'A quiet month. Your money is still here, waiting.']);
+    return out;
+  }
+
+  function stmtCardLine(st) {
+    if (st.growth >= 0.005) return 'Your money grew ' + money(st.growth) + ' by itself!';
+    if (st.saved > 0) return 'You saved ' + money(st.saved) + ' this month!';
+    return 'See how your money did.';
+  }
+
+  // Home page, for a kid: last month's statement until it's been opened
+  // or dismissed. Older months stay in each account's archive.
+  function statementCards(accs) {
+    if (_parent) return '';
+    var events = load().events, pr = prices(), today = E.today();
+    return accs.map(function (a) {
+      var m = E.statementMonths(events, a.id, pr, today)[0];
+      if (!m || stmtSeen(a, m)) return '';
+      var st = E.statement(events, a.id, pr, m);
+      return '<div class="bk-card bk-stmt-card"><span class="bk-stmt-ico" aria-hidden="true">📬</span>' +
+        '<div class="bk-stmt-txt"><b>' + esc(a.name) + ': your ' + monthLabel(m).split(' ')[0] + ' statement is here</b><small>' + esc(stmtCardLine(st)) + '</small></div>' +
+        '<button type="button" class="bk-btn green small" onclick="Banco.statement(\'' + a.id + '\', \'' + m + '\')">See it</button>' +
+        '<button type="button" class="bk-x" aria-label="Dismiss the ' + esc(monthLabel(m)) + ' statement for ' + esc(a.name) + '" onclick="Banco.dismissStatement(\'' + a.id + '\', \'' + m + '\')">✕</button></div>';
+    }).join('');
+  }
+
+  function renderStatementList(acc, events, pr) {
+    var months = E.statementMonths(events, acc.id, pr, E.today());
+    if (!months.length) return '';
+    return '<div class="bk-card"><h3>📬 Monthly statements</h3><div class="bk-stmt-list">' + months.slice(0, 24).map(function (m, i) {
+      var st = E.statement(events, acc.id, pr, m);
+      var fresh = !_parent && i === 0 && !stmtSeen(acc, m);
+      return '<button type="button" class="bk-stmt-row" onclick="Banco.statement(\'' + acc.id + '\', \'' + m + '\')">' +
+        '<span>' + esc(monthLabel(m)) + (fresh ? ' <i class="bk-new">New</i>' : '') + '</span><b>' + money(st.end) + '</b></button>';
+    }).join('') + '</div></div>';
+  }
+
+  function stmtArt() {
+    return '<svg class="bk-stmt-art" viewBox="0 0 96 96" aria-hidden="true">' +
+      '<rect x="14" y="8" width="58" height="76" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>' +
+      '<g stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"><path d="M24 24h28M24 34h38M24 44h34M24 54h38M24 64h22"/></g>' +
+      '<rect x="24" y="16" width="20" height="4" rx="2" fill="#10b981"/>' +
+      '<g transform="translate(66 66)"><circle r="20" fill="#10b981" opacity=".15"/><circle r="16" fill="#059669"/><circle r="12.5" fill="none" stroke="#a7f3d0" stroke-width="1.5" stroke-dasharray="2 2.5"/>' +
+      '<path d="M-6 0l4.5 5 8.5-10" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g></svg>';
+  }
+
+  function renderStatement(id, month) {
+    var acc = findAccount(id);
+    var events = load().events, pr = prices();
+    if (!canSee(acc) || E.statementMonths(events, id, pr, E.today()).indexOf(month) < 0) { _view = { name: 'home' }; return renderHome(); }
+    if (!_parent) markSeen(acc, month);
+    var st = E.statement(events, id, pr, month);
+    var shared = acc.kind === 'shared', k = !_parent;
+    function row(cls, label, val) { return '<div class="bk-lrow ' + cls + '"><span>' + label + '</span><b>' + val + '</b></div>'; }
+    var srcRows = Object.keys(st.bySource).sort(function (a, b) { return st.bySource[b] - st.bySource[a]; }).map(function (kx) {
+      var so = source(kx);
+      return '<div class="bk-lsub"><span>' + so.emoji + ' ' + esc(so.label) + '</span><span>' + money(st.bySource[kx]) + '</span></div>';
+    }).join('');
+    var ledger = row('', 'Start of ' + MONTH_NAMES[+month.slice(5) - 1], money(st.start)) +
+      (st.saved > 0 ? row('plus', '💵 ' + (k ? (shared ? 'You saved together' : 'You saved') : 'Saved'), '+' + money(st.saved)) + srcRows : '') +
+      (st.matched > 0 ? row('plus', '🎁 Papá & Mamá added', '+' + money(st.matched)) : '') +
+      (st.growth >= 0.005 ? row('plus', '🌱 Grew by itself', '+' + money(st.growth)) : '') +
+      (st.growth <= -0.005 ? row('minus', '🌧️ The market dipped', '−' + money(-st.growth)) : '') +
+      (st.given > 0 ? row('minus', '💛 Gave away', '−' + money(st.given)) : '') +
+      (st.spent > 0 ? row('minus', '🧾 Spent', '−' + money(st.spent)) : '') +
+      row('total', 'End of ' + MONTH_NAMES[+month.slice(5) - 1], money(st.end));
+
+    var months = E.statementMonths(events, id, pr, E.today());
+    var i = months.indexOf(month);
+    return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.open(\'' + id + '\')">← ' + esc(acc.name) + '</button></div>' +
+      '<div class="bk-card bk-stmt"><div class="bk-stmt-head">' + stmtArt() +
+        '<div><small>Statement</small><h2>' + esc(monthLabel(month)) + '</h2><span>' + esc(acc.emoji + ' ' + acc.name) + '</span></div></div>' +
+      (k ? '<ul class="bk-story">' + stmtStory(st, acc).map(function (l) { return '<li><span aria-hidden="true">' + l[0] + '</span><span>' + esc(l[1]) + '</span></li>'; }).join('') + '</ul>' : '') +
+      '<div class="bk-ledger">' + ledger + '</div>' +
+      '<p class="bk-small">The totals include the Giving jar' + (st.jar > 0.004 ? ' (' + money(st.jar) + ' at the end of the month)' : '') +
+        (st.setAside > 0 ? '. ' + money(st.setAside) + ' was set aside for giving this month' : '') + '.</p>' +
+      '<div class="bk-row bk-stmt-nav">' +
+        (i < months.length - 1 ? '<button type="button" class="bk-btn small" onclick="Banco.statement(\'' + id + '\', \'' + months[i + 1] + '\')">← ' + esc(monthLabel(months[i + 1]).split(' ')[0]) + '</button>' : '') +
+        (i > 0 ? '<button type="button" class="bk-btn small" onclick="Banco.statement(\'' + id + '\', \'' + months[i - 1] + '\')">' + esc(monthLabel(months[i - 1]).split(' ')[0]) + ' →</button>' : '') +
+      '</div></div>';
+  }
+  function statement(id, month) {
+    _chooser = null; _giveEdit = null; _view = { name: 'statement', id: id, month: month };
+    render(); window.scrollTo(0, 0);
+  }
+  function dismissStatement(id, month) {
+    var acc = findAccount(id);
+    if (!acc) return;
+    markSeen(acc, month);
+    render();
   }
 
   // ── giving ──
@@ -973,6 +1100,7 @@ var Banco = (function () {
   else init();
 
   return {
+    statement: statement, dismissStatement: dismissStatement,
     go: go, open: open, unlock: unlock, lock: lock,
     saveMoney: saveMoney, matchPreview: matchPreview, saveShared: saveShared, openOwnAccounts: openOwnAccounts,
     saveSettings: saveSettings, savePrice: savePrice, refreshPrices: refreshPrices,

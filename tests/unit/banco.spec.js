@@ -20,7 +20,7 @@ const BANK = { v: 1, events: [
 ] };
 const PRICES = { '2026-10-01': 6000, '2026-11-06': 6600 };   // +10%
 
-async function open(page, who) {
+async function open(page, who, url) {
   await page.clock.setFixedTime(new Date(2026, 10, 7, 10, 0, 0));
   await page.addInitScript(([kids, who, bank, prices]) => {
     localStorage.setItem('zs_profiles', JSON.stringify(kids));
@@ -28,7 +28,7 @@ async function open(page, who) {
     if (!localStorage.getItem('zs_bank')) localStorage.setItem('zs_bank', JSON.stringify(bank));
     localStorage.setItem('zs_bank_spx', JSON.stringify({ prices }));
   }, [KIDS, who, BANK, PRICES]);
-  await page.goto('/banco.html');
+  await page.goto(url || '/banco.html');
 }
 const pin = async (page, value) => {
   await page.getByRole('button', { name: /Bank manager/ }).click();
@@ -197,6 +197,220 @@ test.describe('Banco Familia', () => {
       return m(phone, ipad).events.map(e => e.id);
     });
     expect(out).toEqual(['a', 'dep', 'vote']);
+  });
+
+  // ── monthly statements ──
+  // One own account, all in the S&P 500, with closes chosen so the
+  // numbers come out round: +5% by Oct 31, then -5% by Nov 30.
+  const STMT_EVENTS = [
+    { id: 'a', ts: 1, type: 'account', account: 'x', name: 'Kid', kind: 'own', members: ['Kid'], date: '2026-09-30' },
+    { id: 'm', ts: 2, type: 'mix', account: 'x', bonds: 0, date: '2026-10-01' },
+    { id: 'd1', ts: 3, type: 'deposit', account: 'x', amount: 40, match: 4, give: 4.4, source: 'lemonade', date: '2026-10-05' },
+    { id: 'd2', ts: 4, type: 'deposit', account: 'x', amount: 10, match: 1, give: 1.1, source: 'chores', date: '2026-10-20' },
+    { id: 'g1', ts: 5, type: 'give', account: 'x', amount: 2, cause: 'parish', date: '2026-11-10' },
+    { id: 'w1', ts: 6, type: 'withdraw', account: 'x', amount: 5, note: 'Lego', date: '2026-11-12' }
+  ];
+  const STMT_PRICES = { '2026-10-01': 6000, '2026-10-31': 6300, '2026-11-30': 5985 };
+
+  test('statement: what came in, the match, giving, growth and the balances add up', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate(([evs, pr]) => {
+      const E = /** @type {any} */ (window).BankEngine;
+      const oct = E.statement(evs, 'x', pr, '2026-10');
+      const nov = E.statement(evs, 'x', pr, '2026-11');
+      const voided = evs.concat([{ id: 'v', ts: 9, type: 'void', target: 'd2', date: '2026-10-21' }]);
+      return {
+        oct, nov,
+        octVoid: E.statement(voided, 'x', pr, '2026-10'),
+        early: E.statementMonths(evs, 'x', pr, '2026-11-07'),
+        later: E.statementMonths(evs, 'x', pr, '2026-12-02'),
+        sameMonth: E.statementMonths(evs, 'x', pr, '2026-10-31'),
+        noDeposits: E.statementMonths(evs.slice(0, 2), 'x', pr, '2026-12-02')
+      };
+    }, [STMT_EVENTS, STMT_PRICES]);
+    // October: $50 saved + $5 match, set aside 5.50; 49.50 invested grows 5%.
+    expect(r.oct.start).toBe(0);
+    expect(r.oct.saved).toBe(50);
+    expect(r.oct.matched).toBe(5);
+    expect(r.oct.bySource).toEqual({ lemonade: 40, chores: 10 });
+    expect(r.oct.setAside).toBe(5.5);
+    expect(r.oct.growth).toBeCloseTo(2.475, 2);
+    expect(r.oct.end).toBeCloseTo(57.475, 2);
+    expect(r.oct.given).toBe(0);
+    // Every month: start + saved + match + growth - gave - spent = end.
+    for (const st of [r.oct, r.nov]) {
+      expect(st.start + st.saved + st.matched + st.growth - st.given - st.spent).toBeCloseTo(st.end, 1);
+    }
+    // November: a $2 gift and $5 spent, then the market falls 5%.
+    expect(r.nov.start).toBeCloseTo(57.475, 2);
+    expect(r.nov.given).toBe(2);
+    expect(r.nov.givenByCause).toEqual({ parish: 2 });
+    expect(r.nov.spent).toBe(5);
+    expect(r.nov.saved).toBe(0);
+    expect(r.nov.growth).toBeLessThan(0);
+    expect(r.nov.end).toBeCloseTo(48.126, 2);
+    // A cancelled deposit drops out of its month.
+    expect(r.octVoid.saved).toBe(40);
+    // Only finished months, from the first deposit.
+    expect(r.early).toEqual(['2026-10']);
+    expect(r.later).toEqual(['2026-11', '2026-10']);
+    expect(r.sameMonth).toEqual([]);
+    expect(r.noDeposits).toEqual([]);
+  });
+
+  test('statement card: shown once after the 1st, opens to the ledger, then lives in the archive', async ({ page }) => {
+    await open(page, 'Pablo');
+    const card = page.locator('.bk-stmt-card');
+    await expect(card).toHaveCount(2);      // Pablo's own account and the shared one
+    await expect(card.first()).toContainText('your October statement is here');
+    await card.first().getByRole('button', { name: 'See it' }).click();
+    await expect(page.locator('.bk-stmt h2')).toHaveText('October 2026');
+    await expect(page.locator('.bk-lrow.total')).toContainText('End of October');
+    await expect(page.locator('.bk-lrow').first()).toContainText('Start of October');
+    await expect(page.locator('.bk-story')).toContainText('You saved $100.00');
+    await expect(page.locator('.bk-story')).toContainText('by itself this month');
+
+    // Opened = seen. The other account's card is still waiting; dismiss it.
+    await page.getByRole('button', { name: /← Pablo/ }).click();
+    await expect(page.locator('.bk-stmt-row')).toContainText('October 2026');
+    await expect(page.locator('.bk-stmt-row .bk-new')).toHaveCount(0);
+    await page.getByRole('button', { name: /All accounts/ }).click();
+    await expect(card).toHaveCount(1);
+    await page.getByRole('button', { name: /Dismiss the October 2026 statement/ }).click();
+    await expect(card).toHaveCount(0);
+    const seen = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank_stmt_seen')));
+    expect(seen).toEqual({ 'Pablo|pablo': '2026-10', 'Pablo|boys': '2026-10' });
+  });
+
+  test('a parent sees the statement archive without the kid card, and nothing else changes', async ({ page }) => {
+    await open(page, 'Pablo');
+    await pin(page, '1234');
+    await expect(page.locator('.bk-stmt-card')).toHaveCount(0);
+    await page.locator('.bk-acc', { hasText: 'Emilia' }).click();
+    await page.locator('.bk-stmt-row').click();
+    await expect(page.locator('.bk-stmt h2')).toHaveText('October 2026');
+    await expect(page.locator('.bk-story')).toHaveCount(0);
+    await expect(page.locator('.bk-lrow.total')).toContainText('End of October');
+    const before = await page.evaluate(() => localStorage.getItem('zs_bank'));
+    expect(JSON.parse(before).events.length).toBe(6);   // viewing wrote nothing
+  });
+
+  // ── badges ──
+  test('badges: savings, months, gifts and holding steady, credited to every member of a shared account', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate(() => {
+      const E = /** @type {any} */ (window).BankEngine;
+      let t = 0;
+      const e = (o) => Object.assign({ id: 'e' + (++t), ts: t, by: 'parent' }, o);
+      const base = [
+        e({ type: 'account', account: 'pablo', name: 'Pablo', kind: 'own', members: ['Pablo'], date: '2026-08-01' }),
+        e({ type: 'account', account: 'emilia', name: 'Emilia', kind: 'own', members: ['Emilia'], date: '2026-08-01' }),
+        e({ type: 'account', account: 'boys', name: 'Boys', kind: 'shared', members: ['Pablo', 'Ignacio'], date: '2026-08-01' }),
+        e({ type: 'deposit', account: 'pablo', amount: 20, match: 2, give: 2.2, source: 'lemonade', date: '2026-08-05' }),
+        e({ type: 'deposit', account: 'pablo', amount: 20, match: 2, give: 2.2, source: 'chores', date: '2026-08-20' }),
+        e({ type: 'deposit', account: 'boys', amount: 40, match: 4, give: 4.4, source: 'sales', date: '2026-09-05' }),
+        e({ type: 'deposit', account: 'emilia', amount: 300, match: 30, give: 33, source: 'chores', date: '2026-09-05' }),
+        e({ type: 'deposit', account: 'pablo', amount: 5, match: 0.5, give: 0.55, source: 'gifts', date: '2026-10-03' }),
+        e({ type: 'give', account: 'pablo', amount: 1, cause: 'parish', date: '2026-10-04' }),
+        e({ type: 'give', account: 'pablo', amount: 1, cause: 'parish', date: '2026-10-11' }),
+        e({ type: 'give', account: 'boys', amount: 1, cause: 'foodbank', date: '2026-10-12' }),
+        e({ type: 'give', account: 'pablo', amount: 1, cause: 'animals', date: '2026-10-18' }),
+        e({ type: 'givePct', account: 'pablo', pct: 20, by: 'Pablo', date: '2026-10-19' }),
+        e({ type: 'givePct', account: 'emilia', pct: 30, by: 'parent', date: '2026-10-19' })
+      ];
+      const pr = { '2026-08-01': 6000, '2026-09-30': 6000, '2026-10-31': 5600, '2026-11-30': 5600 };
+      const got = (evs, who, prices, asOf) => {
+        const o = {};
+        E.badges(evs, who, prices || pr, asOf || '2026-11-05').forEach(b => { o[b.id] = b; });
+        return o;
+      };
+      const pablo = got(base, 'Pablo');
+      const ignacio = got(base, 'Ignacio');
+      const emilia = got(base, 'Emilia');
+      const early = got(base, 'Pablo', pr, '2026-08-25');
+      const cancelled = got(base.concat([e({ type: 'void', target: base[6].id, date: '2026-09-06' })]), 'Emilia');
+      // Held steady: October fell 6.7% while the account held S&P 500 money.
+      const changed = base.concat([e({ type: 'mix', account: 'pablo', bonds: 100, by: 'Pablo', date: '2026-10-15' }),
+        e({ type: 'mix', account: 'boys', bonds: 100, by: 'parent', date: '2026-10-16' })]);
+      const bondsOnly = [base[0], base[2]].concat([e({ type: 'mix', account: 'pablo', bonds: 100, date: '2026-08-02' }),
+        e({ type: 'mix', account: 'boys', bonds: 100, date: '2026-08-02' })], base.slice(3, 6));
+      const smallDip = got(base, 'Pablo', { '2026-08-01': 6000, '2026-09-30': 6000, '2026-10-31': 5800 });
+      const noPrices = got(base, 'Pablo', {});
+      return {
+        pablo, ignacio, emilia, early,
+        cancelledSaved: cancelled.saved250.earned,
+        steadyChanged: got(changed, 'Pablo').steady.earned,
+        steadyBondsOnly: got(bondsOnly, 'Pablo').steady.earned,
+        smallDip: smallDip.steady.earned, noPrices: noPrices.steady.earned,
+        count: E.BADGES.length
+      };
+    });
+    expect(r.count).toBe(11);
+    // Pablo: $20 + $20 + $5 of his own + the shared $40 (every member is credited).
+    expect(r.pablo.first).toMatchObject({ earned: true, date: '2026-08-05' });
+    expect(r.pablo.saved50).toMatchObject({ earned: true, date: '2026-09-05' });
+    expect(r.pablo.saved100.earned).toBe(false);
+    expect(r.pablo.saved100.have).toBe(85);
+    expect(r.pablo.months3).toMatchObject({ earned: true, date: '2026-10-03' });
+    expect(r.pablo.months6).toMatchObject({ earned: false, have: 3 });
+    expect(r.pablo.gift1).toMatchObject({ earned: true, date: '2026-10-04' });
+    expect(r.pablo.places3).toMatchObject({ earned: true, date: '2026-10-18' });   // parish, food bank (shared), animals
+    expect(r.pablo.giveMore).toMatchObject({ earned: true, date: '2026-10-19' });
+    expect(r.pablo.steady).toMatchObject({ earned: true, date: '2026-10-31' });
+    // The shared account's partner is credited for the shared deposit and gift only.
+    expect(r.ignacio.first.earned).toBe(true);
+    expect(r.ignacio.saved50.earned).toBe(false);
+    expect(r.ignacio.saved50.have).toBe(40);
+    expect(r.ignacio.gift1.earned).toBe(true);
+    expect(r.ignacio.places3.have).toBe(1);
+    // A parent's change to the giving % isn't a kid's choice.
+    expect(r.emilia.giveMore.earned).toBe(false);
+    expect(r.emilia.saved250.earned).toBe(true);
+    expect(r.emilia.steady.earned).toBe(true);
+    // Not earned yet on an earlier date; cancelling the deposit takes the badge back.
+    expect(r.early.saved50.earned).toBe(false);
+    expect(r.early.first.earned).toBe(true);
+    expect(r.cancelledSaved).toBe(false);
+    // Holding steady needs S&P 500 money, no change of mix that month, a 5% fall and real closes.
+    expect(r.steadyChanged).toBe(false);
+    expect(r.steadyBondsOnly).toBe(false);
+    expect(r.smallDip).toBe(false);
+    expect(r.noPrices).toBe(false);
+  });
+
+  test('Trophy Room: a Saving & Giving cabinet for kids with an account, and only for them', async ({ page }) => {
+    await open(page, 'Pablo', '/trophy-room.html');
+    await expect(page.locator('#tr-money-label')).toHaveText('Saving & Giving · 3 of 11');
+    await expect(page.locator('#tr-money-grid .tr-badge')).toHaveCount(11);
+    await expect(page.locator('#tr-money-grid .tr-badge.earned')).toHaveCount(3);
+    await page.getByRole('button', { name: /^\$100 saved/ }).click();
+    await expect(page.locator('.tr-pop h2')).toHaveText('$100 saved');
+    await expect(page.locator('.tr-pop')).toContainText('Silver');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.tr-pop')).toHaveCount(0);
+  });
+
+  // Rodrigo with no account: the shared one is just Ignacio and Pablo here.
+  const NO_RODRIGO = (page) => page.addInitScript((bank) => {
+    bank.events[2].members = ['Ignacio', 'Pablo'];
+    localStorage.setItem('zs_bank', JSON.stringify(bank));
+  }, BANK);
+
+  test('Trophy Room: no Saving & Giving cabinet for a kid without an account', async ({ page }) => {
+    await NO_RODRIGO(page);
+    await open(page, 'Rodrigo', '/trophy-room.html');
+    await expect(page.locator('#tr-grid .tr-badge').first()).toBeVisible();
+    await expect(page.locator('#tr-money-label')).toBeHidden();
+    await expect(page.locator('#tr-money-cab')).toBeHidden();
+  });
+
+  test('Sunday Report: a kid with an account gets last month\'s Banco Familia line', async ({ page }) => {
+    await NO_RODRIGO(page);
+    await open(page, 'Pablo', '/sunday-report.html');
+    const pablo = page.locator('.sr-kid', { hasText: 'Pablo' });
+    await expect(pablo).toContainText('Banco Familia · October');
+    await expect(pablo).toContainText('Saved $130.00');
+    await expect(page.locator('.sr-kid', { hasText: 'Rodrigo' })).not.toContainText('Banco Familia');
   });
 
   test('the hub card shows the kid\'s balance', async ({ page }) => {

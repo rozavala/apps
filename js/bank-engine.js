@@ -460,6 +460,163 @@
     return round2((1 - last / hi) * 100);
   }
 
+  // ── monthly statements ──
+  // A month is 'YYYY-MM'. A statement is the difference between the
+  // account on the last day of the month and on the day before it, so
+  // it is always recomputed from the log (nothing is stored), and an
+  // entry cancelled later simply drops out of it.
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function monthStart(m) { return m + '-01'; }
+  function monthEnd(m) { var p = m.split('-'); return iso(new Date(+p[0], +p[1], 0)); }
+  function addMonths(m, n) { var p = m.split('-'); var d = new Date(+p[0], +p[1] - 1 + n, 1); return d.getFullYear() + '-' + pad2(d.getMonth() + 1); }
+
+  // Completed months (newest first) from the account's first deposit up
+  // to the month before asOf's. A month still running has no statement.
+  function statementMonths(events, accountId, prices, asOf) {
+    asOf = asOf || today();
+    var first = compute(events, accountId, prices, asOf).firstDate;
+    if (!first) return [];
+    var last = addMonths(asOf.slice(0, 7), -1), out = [];
+    for (var m = first.slice(0, 7); m <= last; m = addMonths(m, 1)) out.push(m);
+    return out.reverse();
+  }
+
+  function diffMap(a, b) {
+    var out = {};
+    Object.keys(b || {}).forEach(function (k) {
+      var v = round2((b[k] || 0) - ((a || {})[k] || 0));
+      if (v > 0.004) out[k] = v;
+    });
+    return out;
+  }
+
+  // What happened in one month. total = the invested money plus the
+  // Giving jar, so: start + saved + match + growth - gave - spent = end.
+  function statement(events, accountId, prices, month) {
+    var sorted = sortEvents(events);
+    var pt = prices && prices.map ? prices : priceTable(prices, sorted);
+    var a = compute(sorted, accountId, pt, addDays(monthStart(month), -1));
+    var b = compute(sorted, accountId, pt, monthEnd(month));
+    var st = {
+      month: month, account: b.account,
+      start: round2(a.total), end: round2(b.total),
+      saved: round2(b.deposited - a.deposited), matched: round2(b.matched - a.matched),
+      bySource: diffMap(a.bySource, b.bySource),
+      setAside: round2(b.setAside - a.setAside),
+      given: round2(b.given - a.given), gifts: b.gifts - a.gifts, givenByCause: diffMap(a.givenByCause, b.givenByCause),
+      spent: round2(b.withdrawn - a.withdrawn),
+      growth: round2(b.growth - a.growth),
+      deposits: b.deposits - a.deposits,
+      jar: round2(b.giving)
+    };
+    st.active = st.saved > 0 || st.matched > 0 || st.given > 0 || st.spent > 0;
+    return st;
+  }
+
+  // ── badges ──
+  // Computed from the log for one kid, from the entries still standing
+  // (an entry cancelled as a mistake no longer counts). A shared account
+  // counts for every member. Nothing is stored.
+  var BADGES = [
+    { id: 'first',   emoji: '🌱', name: 'First deposit',     desc: 'Put your first money in the bank',          goal: 1,   metal: 'bronze' },
+    { id: 'saved50', emoji: '🪙', name: '$50 saved',         desc: 'Save $50 in all',                           goal: 50,  metal: 'bronze' },
+    { id: 'saved100', emoji: '💵', name: '$100 saved',       desc: 'Save $100 in all',                          goal: 100, metal: 'silver' },
+    { id: 'saved250', emoji: '💰', name: '$250 saved',       desc: 'Save $250 in all',                          goal: 250, metal: 'gold' },
+    { id: 'months3', emoji: '📅', name: '3 months saving',   desc: 'Add to your savings in 3 different months', goal: 3,   metal: 'bronze' },
+    { id: 'months6', emoji: '🗓️', name: '6 months saving',   desc: 'Add to your savings in 6 different months', goal: 6,   metal: 'silver' },
+    { id: 'months12', emoji: '🏔️', name: '12 months saving', desc: 'Add to your savings in 12 different months', goal: 12, metal: 'gold' },
+    { id: 'gift1',   emoji: '💛', name: 'First gift',        desc: 'Make your first gift from the Giving jar',  goal: 1,   metal: 'bronze' },
+    { id: 'places3', emoji: '🎁', name: 'Gave in 3 places',  desc: 'Give to 3 different places',                goal: 3,   metal: 'silver' },
+    { id: 'giveMore', emoji: '🌟', name: 'Gave more',        desc: 'Choose to give more than the minimum',      goal: 1,   metal: 'silver' },
+    { id: 'steady',  emoji: '🧘', name: 'Held steady',       desc: 'Keep your mix through a month the S&P 500 fell 5% or more', goal: 1, metal: 'gold' }
+  ];
+
+  // The date the running count reaches `goal`, from [{date, n}] steps.
+  function reached(steps, goal) {
+    var tot = 0;
+    for (var i = 0; i < steps.length; i++) { tot += steps[i].n; if (tot >= goal) return steps[i].date; }
+    return null;
+  }
+
+  function badges(events, name, prices, asOf) {
+    asOf = asOf || today();
+    var sorted = sortEvents(events), gone = voided(sorted);
+    var pt = prices && prices.map ? prices : priceTable(prices, sorted);
+    var mine = accounts(sorted).filter(function (a) { return isMember(a, name); });
+    var byId = {};
+    mine.forEach(function (a) { byId[a.id] = a; });
+    var deps = [], gifts = [];
+    sorted.forEach(function (e) {
+      if (gone[e.id] || !byId[e.account] || !e.date || e.date > asOf) return;
+      if (e.type === 'deposit' && Number(e.amount) > 0) deps.push(e);
+      else if (e.type === 'give' && Number(e.amount) > 0) gifts.push(e);
+    });
+
+    var res = {};
+    function set(id, have, date) {
+      var b = BADGES.filter(function (x) { return x.id === id; })[0];
+      res[id] = { id: id, emoji: b.emoji, name: b.name, desc: b.desc, metal: b.metal, goal: b.goal,
+        have: Math.min(b.goal, have), earned: have >= b.goal, date: have >= b.goal ? date : null };
+    }
+
+    // Money saved: what the kid put in (the parent's match isn't theirs
+    // to count), summed over their accounts.
+    var cash = deps.map(function (e) { return { date: e.date, n: Number(e.amount) }; });
+    var total = cash.reduce(function (t, x) { return t + x.n; }, 0);
+    set('first', deps.length, deps.length ? deps[0].date : null);
+    [50, 100, 250].forEach(function (g) { set('saved' + g, round2(total), reached(cash, g)); });
+
+    // Months in which they added to their savings.
+    var seenM = {}, mSteps = [];
+    deps.forEach(function (e) { var m = e.date.slice(0, 7); if (!seenM[m]) { seenM[m] = 1; mSteps.push({ date: e.date, n: 1 }); } });
+    [3, 6, 12].forEach(function (g) { set('months' + g, mSteps.length, reached(mSteps, g)); });
+
+    // Gifts, and how many different places.
+    set('gift1', gifts.length, gifts.length ? gifts[0].date : null);
+    var seenC = {}, cSteps = [];
+    gifts.forEach(function (e) { var c = e.cause || 'other'; if (!seenC[c]) { seenC[c] = 1; cSteps.push({ date: e.date, n: 1 }); } });
+    set('places3', cSteps.length, reached(cSteps, 3));
+
+    // Chose to give above the household minimum (a parent's setting is
+    // the family's, not the kid's choice, so it doesn't count).
+    var more = null;
+    sorted.forEach(function (e) {
+      if (more || gone[e.id] || e.type !== 'givePct' || !byId[e.account] || e.by === 'parent' || e.date > asOf) return;
+      if (clampPct(e.pct) > giveMinOn(sorted, e.date)) more = e.date;
+    });
+    mine.forEach(function (a) {
+      if (a.kind !== 'shared') return;
+      proposals(sorted, a).forEach(function (p) {
+        if (p.status === 'passed' && p.kind === 'givePct' && p.passedOn <= asOf && p.givePct > giveMinOn(sorted, p.passedOn) && (!more || p.passedOn < more)) more = p.passedOn;
+      });
+    });
+    set('giveMore', more ? 1 : 0, more);
+
+    // Held through a month the S&P 500 fell 5% or more, with money in it
+    // and no change of mix in that month. Needs real closes on both ends.
+    var steady = null;
+    if (pt.dates.length) {
+      mine.forEach(function (a) {
+        var first = compute(sorted, a.id, pt, asOf).firstDate;
+        if (!first) return;
+        var changes = mixChanges(sorted, a);
+        for (var m = first.slice(0, 7); monthEnd(m) <= asOf; m = addMonths(m, 1)) {
+          var prev = addDays(monthStart(m), -1), end = monthEnd(m);
+          if (steady && end >= steady) break;
+          if (pt.dates[0] > prev) continue;
+          var p0 = priceOn(pt, prev), p1 = priceOn(pt, end);
+          if (!(p0 > 0) || !(p1 <= p0 * 0.95 + 1e-9)) continue;
+          if (changes.some(function (c) { return c.date.slice(0, 7) === m; })) continue;
+          var s0 = compute(sorted, a.id, pt, prev);
+          if (s0.firstDate && s0.spValue > 0.005) { steady = end; break; }
+        }
+      });
+    }
+    set('steady', steady ? 1 : 0, steady);
+
+    return BADGES.map(function (b) { return res[b.id]; });
+  }
+
   function uid(prefix) {
     return (prefix || 'e') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
   }
@@ -475,6 +632,8 @@
     giveMinOn: function (events, date) { return giveMinOn(sortEvents(events), date || today()); },
     rateOn: function (events, date) { return rateOn(rateSchedule(sortEvents(events)), date || today()); },
     matchPctOn: function (events, date) { return matchPctOn(sortEvents(events), date || today()); },
+    statementMonths: statementMonths, statement: statement, monthEnd: monthEnd, addMonths: addMonths,
+    BADGES: BADGES, badges: badges,
     compute: compute, series: series, project: project, yearFor: yearFor, dropFromHigh: dropFromHigh,
     uid: uid
   };
