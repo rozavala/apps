@@ -35,8 +35,10 @@
      wish      { account, name, price, emoji?, photo? }    a kid's wishlist item; the event id is the item's id
      wishDecision { wish, decision: 'keep'|'drop' }        only counts from 7 days after the wish; the first one stands
      wishEdit  { wish, removed }                           a kid takes an item off the list
-   A withdraw may also carry `wish` (the item it paid for) and a deposit
-   `group` (the payday it was split from).
+   A withdraw may also carry `wish` (the item it paid for). A deposit may
+   also carry `group` (the payday it was split from) and `stand`
+   { sales, costs, hours? }: for a stand, `amount` is the profit (sales
+   minus costs). Costs are only reported; they never leave the account.
    ================================================================ */
 (function (root) {
   'use strict';
@@ -465,6 +467,63 @@
     return round2((1 - last / hi) * 100);
   }
 
+  // ── payday for several kids, and lemonade-stand profit ──
+  // Splits a total into n parts to the cent; the odd cents go to the
+  // first parts, so the parts always add up to the total.
+  function splitEqual(total, n) {
+    var cents = Math.round(total * 100), base = Math.floor(cents / n), extra = cents - base * n, out = [];
+    for (var i = 0; i < n; i++) out.push((base + (i < extra ? 1 : 0)) / 100);
+    return out;
+  }
+
+  // One deposit per account, each with its own match and giving share, as
+  // a parent's single deposit would have. spec: { items: [{ account,
+  // amount }], date, source, note, match: bool, stand?: { sales, costs,
+  // hours? } }. For a stand shared by several kids each deposit gets its
+  // share of the sales and costs (so every kid's sales - costs = their
+  // profit) and the full hours. Returns the deposit fields (no id/ts/by).
+  function payday(events, spec) {
+    var accs = accounts(events), date = spec.date || today(), group = uid('pay');
+    var items = (spec.items || []).filter(function (it) {
+      return Number(it.amount) > 0 && accs.some(function (a) { return a.id === it.account; });
+    }).map(function (it) { return { account: it.account, amount: round2(Number(it.amount)) }; });
+    var total = items.reduce(function (t, it) { return t + it.amount; }, 0);
+    var pct = matchPctOn(sortEvents(events), date);
+    return items.map(function (it) {
+      var acc = accs.filter(function (a) { return a.id === it.account; })[0];
+      var m = spec.match ? Math.round(it.amount * pct) / 100 : 0;
+      var g = Math.round((it.amount + m) * givePctOf(events, acc, date)) / 100;
+      var d = { account: it.account, amount: it.amount, match: m, give: g, source: spec.source || 'other', note: spec.note || '', date: date };
+      if (items.length > 1) d.group = group;
+      var st = spec.stand;
+      if (st && Number(st.sales) > 0) {
+        var sales = round2(Number(st.sales) * it.amount / total);
+        d.stand = { sales: sales, costs: round2(sales - it.amount) };
+        if (Number(st.hours) > 0) d.stand.hours = Number(st.hours);
+      }
+      return d;
+    });
+  }
+
+  // A kid's stands: sales, costs and profit, and profit per hour over the
+  // stands where they logged the time.
+  function standStats(events, accountId, asOf) {
+    asOf = asOf || today();
+    var sorted = sortEvents(events), gone = voided(sorted);
+    var out = { count: 0, sales: 0, costs: 0, profit: 0, hours: 0, hoursProfit: 0, perHour: null, items: [] };
+    sorted.forEach(function (e) {
+      if (e.type !== 'deposit' || e.account !== accountId || gone[e.id] || !(e.date <= asOf) || !e.stand || !(Number(e.stand.sales) > 0)) return;
+      var profit = Number(e.amount), sales = Number(e.stand.sales), costs = Math.max(0, Number(e.stand.costs) || 0), hrs = Number(e.stand.hours) > 0 ? Number(e.stand.hours) : 0;
+      out.count++; out.sales += sales; out.costs += costs; out.profit += profit;
+      if (hrs) { out.hours += hrs; out.hoursProfit += profit; }
+      out.items.push({ id: e.id, date: e.date, sales: round2(sales), costs: round2(costs), profit: round2(profit), hours: hrs || null, note: e.note || '' });
+    });
+    out.sales = round2(out.sales); out.costs = round2(out.costs); out.profit = round2(out.profit);
+    if (out.hours > 0) out.perHour = round2(out.hoursProfit / out.hours);
+    out.items.reverse();
+    return out;
+  }
+
   // ── monthly statements ──
   // A month is 'YYYY-MM'. A statement is the difference between the
   // account on the last day of the month and on the day before it, so
@@ -712,6 +771,7 @@
     rateOn: function (events, date) { return rateOn(rateSchedule(sortEvents(events)), date || today()); },
     matchPctOn: function (events, date) { return matchPctOn(sortEvents(events), date || today()); },
     statementMonths: statementMonths, statement: statement, monthEnd: monthEnd, addMonths: addMonths,
+    splitEqual: splitEqual, payday: payday, standStats: standStats,
     BADGES: BADGES, badges: badges, WISH_DAYS: WISH_DAYS, wishes: wishes, wishCost: wishCost,
     compute: compute, series: series, project: project, yearFor: yearFor, dropFromHigh: dropFromHigh,
     uid: uid

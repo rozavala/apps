@@ -336,6 +336,8 @@ var Banco = (function () {
     var wishlist = renderWishlist(acc, events, pr);
     var giving = renderGiving(acc, s, events);
     var tm = renderTimeMachine(acc, s, rate, events);
+    var stands = renderStands(acc, events);
+    var prices10 = renderTenDollars();
     var stmts = renderStatementList(acc, events, pr);
     var log = renderHistory(acc, events, pr);
 
@@ -346,7 +348,7 @@ var Banco = (function () {
       (_parent ? '<button type="button" class="bk-btn green small" onclick="Banco.go(\'deposit\', \'' + id + '\')">＋ Deposit</button>' +
                  '<button type="button" class="bk-btn small" onclick="Banco.go(\'spend\', \'' + id + '\')">− Spent</button>' +
                  '<button type="button" class="bk-btn small" onclick="Banco.go(\'give\', \'' + id + '\')">💛 Gift</button>' : '') +
-      '</div>' + top + dropCard + giving + goal + wishlist + mixCard + chartCard + sources + tm + stmts + log + priceNote;
+      '</div>' + top + dropCard + giving + goal + wishlist + mixCard + chartCard + sources + stands + tm + prices10 + stmts + log + priceNote;
   }
 
   function tile(icon, label, val, cls) {
@@ -696,6 +698,52 @@ var Banco = (function () {
     render(); window.scrollTo(0, 0);
   }
 
+  // ── lemonade-stand profit (ages 9+) ──
+  function renderStands(acc, events) {
+    var u = user();
+    if (!_parent && !(u && u.age >= 9)) return '';
+    var st = E.standStats(events, acc.id, E.today());
+    if (!st.count) return '';
+    var k = !_parent;
+    return '<div class="bk-card bk-stands"><h3>🍋 ' + (k ? 'Your stands' : 'Stands') + '</h3>' +
+      '<div class="bk-tiles">' +
+        tile('🛍️', 'Sales', money(st.sales), '') + tile('🧾', 'Costs', '−' + money(st.costs), 'spent') +
+        tile('💵', 'Profit', money(st.profit), st.profit >= 0 ? 'up' : 'down') +
+        (st.perHour != null ? tile('⏱️', 'Profit per hour', money(st.perHour), '') : '') +
+      '</div>' +
+      '<div class="bk-hist">' + st.items.slice(0, 5).map(function (x) {
+        return '<div class="bk-hrow"><span class="bk-hdate">' + fmtDate(x.date) + '</span>' +
+          '<span class="bk-hline">' + money(x.sales) + ' sales − ' + money(x.costs) + ' costs' + (x.hours ? ' · ' + x.hours + ' h' : '') + (x.note ? ' <small>' + esc(x.note) + '</small>' : '') + '</span>' +
+          '<span class="bk-hamt"><b class="up">' + money(x.profit) + '</b></span></div>';
+      }).join('') + '</div>' +
+      '<p class="bk-small">Only the profit goes into your savings. The costs are just for keeping track.</p>' +
+      '<a class="bk-link" href="mi-negocio.html">📘 Learn how profit works in Mi Negocio →</a></div>';
+  }
+
+  // ── "What did $10 buy?" ──
+  function stampTiles(n) {
+    var cols = 22, w = 11, h = 13, rows = Math.ceil(n / cols), out = '';
+    for (var i = 0; i < n; i++) {
+      var x = (i % cols) * w, y = Math.floor(i / cols) * h;
+      out += '<rect x="' + (x + 1) + '" y="' + (y + 1) + '" width="9" height="11" rx="1.5" fill="#fef3c7" stroke="#d97706" stroke-width=".8" stroke-dasharray="1.4 1"/>' +
+        '<rect x="' + (x + 3) + '" y="' + (y + 3) + '" width="5" height="7" rx=".8" fill="#34d399"/>';
+    }
+    return '<svg class="bk-tiles10" viewBox="0 0 ' + (cols * w) + ' ' + (rows * h) + '" role="img" aria-label="' + n + ' stamps">' + out + '</svg>';
+  }
+  function renderTenDollars() {
+    if (typeof BancoPrices === 'undefined') return '';
+    return BancoPrices.POINTS.map(function (pt) {
+      var rows = pt.rows.map(function (r) {
+        var n = BancoPrices.countFor(r.cents);
+        return '<div class="bk-p10"><div class="bk-p10-head"><b>' + r.year + '</b><span>' + n + ' ' + (n === 1 ? 'stamp' : 'stamps') + ' · ' + r.cents + '¢ each</span></div>' + stampTiles(n) + '</div>';
+      }).join('');
+      return '<div class="bk-card bk-prices"><h3>💵 What did $10 buy?</h3>' +
+        '<p class="bk-small" style="margin:0 0 10px">How many ' + esc(pt.plural) + ' $10 could buy in different years.</p>' + rows +
+        '<p class="bk-small">Prices change slowly over many years, so the same $10 buys a little less later. That\'s one reason savers let their money grow instead of only keeping it in a jar. Growth isn\'t guaranteed, but it gives your money a chance to buy more later.</p>' +
+        '<p class="bk-small bk-source">Source: ' + esc(pt.source) + '</p></div>';
+    }).join('');
+  }
+
   // ── giving ──
   function cause(id) {
     return E.causes(load().events).filter(function (c) { return c.id === id; })[0] || { id: id, emoji: '💛', name: 'A good cause' };
@@ -928,7 +976,8 @@ var Banco = (function () {
       var g = gone[e.id], line = '', amt = '';
       if (e.type === 'deposit') {
         var so = source(e.source);
-        line = so.emoji + ' ' + esc(so.label) + (e.note ? ' — ' + esc(e.note) : '');
+        line = so.emoji + ' ' + esc(so.label) + (e.note ? ' — ' + esc(e.note) : '') +
+          (e.stand ? ' <small>· sales ' + money(e.stand.sales) + ' − costs ' + money(e.stand.costs) + '</small>' : '') + (e.group ? ' <small>· payday split</small>' : '');
         amt = '<b class="up">+' + money(e.amount) + '</b>' + (Number(e.match) > 0 ? '<small>🎁 +' + money(e.match) + ' match</small>' : '') +
           (Number(e.give) > 0 ? '<small class="bk-give-mini">💛 ' + money(e.give) + ' to giving</small>' : '');
       } else if (e.type === 'give') {
@@ -974,33 +1023,151 @@ var Banco = (function () {
     return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← Back</button></div>' +
       '<div class="bk-card bk-form"><h2>' + (dep ? '＋ Money in' : '− Money spent') + '</h2>' +
       (wish ? '<div class="bk-wish-for">' + wishThumb(wish) + '<span>For the wish: <b>' + esc(wish.name) + '</b></span></div>' : '') +
-      '<label for="bk-f-acc">Account</label><select id="bk-f-acc"' + (dep ? ' onchange="Banco.matchPreview()"' : '') + '>' + accs + '</select>' +
-      '<label for="bk-f-amt">Amount (USD)</label><input id="bk-f-amt" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"' + (wish ? ' value="' + wish.price.toFixed(2) + '"' : '') +
-        (dep ? ' oninput="Banco.matchPreview()"' : '') + '>' +
+      '<div id="bk-f-accbox"><label for="bk-f-acc">Account</label><select id="bk-f-acc"' + (dep ? ' onchange="Banco.matchPreview()"' : '') + '>' + accs + '</select></div>' +
+      (dep ? multiBox() : '') +
+      '<div id="bk-f-amtbox"><label for="bk-f-amt" id="bk-f-amtlbl">Amount (USD)</label><input id="bk-f-amt" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"' + (wish ? ' value="' + wish.price.toFixed(2) + '"' : '') +
+        (dep ? ' oninput="Banco.matchPreview()"' : '') + '></div>' +
       (dep ? '<fieldset class="bk-sources"><legend>Where did it come from?</legend>' + E.SOURCES.map(function (so, i) {
           return '<label class="bk-chip"><input type="radio" name="bk-src" value="' + so.id + '"' + (i === 0 ? ' checked' : '') + '><span>' + so.emoji + ' ' + so.label + '</span></label>';
         }).join('') + '</fieldset>' +
+        standBox() +
         '<label class="bk-check"><input type="checkbox" id="bk-f-match" checked onchange="Banco.matchPreview()"> Add the ' + pct + '% match <b id="bk-f-matchamt"></b></label>' +
-        '<p class="bk-small" id="bk-f-give"></p>' : '') +
+        '<p class="bk-small" id="bk-f-give"></p><div class="bk-m-prev" id="bk-m-prev" aria-live="polite"></div>' : '') +
       '<label for="bk-f-note">' + (dep ? 'Note (optional)' : 'What was it for?') + '</label><input id="bk-f-note" type="text" maxlength="80" placeholder="' + (dep ? 'e.g. Saturday lemonade stand' : 'e.g. Lego set') + '"' + (wish ? ' value="' + esc(wish.name) + '"' : '') + '>' +
       '<label for="bk-f-date">Date</label><input id="bk-f-date" type="date" value="' + E.today() + '" max="' + E.today() + '">' +
       '<div class="bk-row"><button type="button" class="bk-btn" onclick="Banco.go(\'home\')">Cancel</button>' +
       '<button type="button" class="bk-btn green" onclick="Banco.saveMoney(\'' + kind + '\')">' + (dep ? 'Add to account' : 'Take it out') + '</button></div></div>';
   }
+  // Payday: split a deposit between several accounts.
+  function multiBox() {
+    var accs = E.accounts(load().events).filter(function (a) { return !a.archived; });
+    return '<label class="bk-check"><input type="checkbox" id="bk-f-multi" onchange="Banco.multiToggle()"> Split between several accounts (payday)</label>' +
+      '<div id="bk-multi" hidden>' +
+      '<fieldset class="bk-sources"><legend>Which accounts?</legend>' + accs.map(function (a) {
+        return '<label class="bk-chip"><input type="checkbox" name="bk-m-acc" value="' + a.id + '" onchange="Banco.multiToggle()"><span>' + esc(a.emoji + ' ' + a.name) + '</span></label>';
+      }).join('') + '</fieldset>' +
+      '<fieldset class="bk-sources"><legend>How to split</legend>' +
+        '<label class="bk-chip"><input type="radio" name="bk-m-mode" value="equal" checked onchange="Banco.multiToggle()"><span>Equally</span></label>' +
+        '<label class="bk-chip"><input type="radio" name="bk-m-mode" value="custom" onchange="Banco.multiToggle()"><span>Different amounts</span></label></fieldset>' +
+      '<div id="bk-m-custom" hidden>' + accs.map(function (a) {
+        return '<div class="bk-m-row" data-acc="' + a.id + '" hidden><label for="bk-m-amt-' + a.id + '">' + esc(a.emoji + ' ' + a.name) + '</label>' +
+          '<input id="bk-m-amt-' + a.id + '" class="bk-m-amt" data-acc="' + a.id + '" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="Banco.matchPreview()"></div>';
+      }).join('') + '</div></div>';
+  }
+  // A stand: the sales and costs behind a deposit. Only the profit goes in.
+  function standBox() {
+    return '<label class="bk-check"><input type="checkbox" id="bk-f-stand" onchange="Banco.standToggle()"> 🍋 Record the stand\'s sales and costs</label>' +
+      '<div id="bk-stand" hidden>' +
+      '<label for="bk-st-sales">Sales (USD)</label><input id="bk-st-sales" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="Banco.matchPreview()">' +
+      '<label for="bk-st-costs">Costs: lemons, cups, sugar… (USD)</label><input id="bk-st-costs" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="Banco.matchPreview()">' +
+      '<label for="bk-st-hours">Hours at the stand (optional)</label><input id="bk-st-hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="e.g. 2">' +
+      '<p class="bk-small" id="bk-st-profit"></p></div>';
+  }
+  function val(id) { var el = document.getElementById(id); return el ? parseFloat(el.value) : NaN; }
+  function checked(id) { var el = document.getElementById(id); return !!(el && el.checked); }
+  function multiState() {
+    var on = checked('bk-f-multi');
+    var ids = Array.prototype.map.call(document.querySelectorAll('input[name="bk-m-acc"]:checked'), function (x) { return x.value; });
+    var mode = (document.querySelector('input[name="bk-m-mode"]:checked') || {}).value || 'equal';
+    return { on: on, ids: ids, mode: mode };
+  }
+  function standState() {
+    if (!checked('bk-f-stand')) return null;
+    var sales = Math.round(val('bk-st-sales') * 100) / 100 || 0, costs = Math.round(val('bk-st-costs') * 100) / 100 || 0;
+    return { sales: sales, costs: costs, profit: Math.round((sales - costs) * 100) / 100, hours: val('bk-st-hours') > 0 ? val('bk-st-hours') : 0 };
+  }
+  // The amounts the form describes, per account: { items, total, error }.
+  function depositItems() {
+    var m = multiState(), st = standState();
+    var total = st ? Math.max(0, st.profit) : (Math.round(val('bk-f-amt') * 100) / 100 || 0);
+    if (!m.on) return { items: [{ account: (document.getElementById('bk-f-acc') || {}).value, amount: total }], total: total, multi: false };
+    var items;
+    if (m.mode === 'equal') {
+      var parts = E.splitEqual(total, Math.max(1, m.ids.length));
+      items = m.ids.map(function (id, i) { return { account: id, amount: total > 0 ? parts[i] : 0 }; });
+    } else {
+      items = m.ids.map(function (id) { return { account: id, amount: Math.round(val('bk-m-amt-' + id) * 100) / 100 || 0 }; });
+      var sum = Math.round(items.reduce(function (t, it) { return t + it.amount; }, 0) * 100) / 100;
+      if (!st) total = sum;
+      else if (Math.abs(sum - total) > 0.004) return { items: items, total: total, multi: true, error: 'The amounts add up to ' + money(sum) + ', but the profit is ' + money(total) + '.' };
+    }
+    return { items: items, total: total, multi: true };
+  }
   function matchPreview() {
-    var a = parseFloat((document.getElementById('bk-f-amt') || {}).value), on = (document.getElementById('bk-f-match') || {}).checked;
+    var m = multiState(), st = standState();
+    // Show only the parts of the form that apply.
+    var multi = document.getElementById('bk-multi'), accBox = document.getElementById('bk-f-accbox'), amtBox = document.getElementById('bk-f-amtbox');
+    if (multi) {
+      multi.hidden = !m.on;
+      accBox.hidden = m.on;
+      var custom = document.getElementById('bk-m-custom');
+      custom.hidden = !(m.on && m.mode === 'custom');
+      Array.prototype.forEach.call(document.querySelectorAll('.bk-m-row'), function (r) { r.hidden = m.ids.indexOf(r.getAttribute('data-acc')) < 0; });
+      amtBox.hidden = m.on && m.mode === 'custom' && !st;
+      var lbl = document.getElementById('bk-f-amtlbl');
+      if (lbl) lbl.textContent = st ? 'Profit to deposit (USD)' : (m.on ? 'Total amount (USD)' : 'Amount (USD)');
+    }
+    var amtEl = document.getElementById('bk-f-amt'), sp = document.getElementById('bk-st-profit'), stBox = document.getElementById('bk-stand');
+    if (stBox) stBox.hidden = !st;
+    if (amtEl) amtEl.readOnly = !!st;
+    if (st && amtEl) {
+      amtEl.value = st.profit > 0 ? st.profit.toFixed(2) : '';
+      sp.textContent = st.sales > 0 && st.profit > 0 ? 'Profit: ' + money(st.profit) + ' (sales ' + money(st.sales) + ' minus costs ' + money(st.costs) + '). Only the profit is deposited; the costs stay out of the account.'
+        : st.sales > 0 ? 'No profit this time, so there\'s nothing to deposit.' : '';
+    }
+
+    var a = depositItems().total, on = checked('bk-f-match');
     var out = document.getElementById('bk-f-matchamt');
-    if (out) out.textContent = on && a > 0 ? '(+' + money(a * E.matchPctOn(load().events) / 100) + ')' : '';
-    var gOut = document.getElementById('bk-f-give'), accEl = document.getElementById('bk-f-acc');
+    if (out) out.textContent = on && a > 0 ? '(+' + money(a * E.matchPctOn(load().events) / 100) + ' in all)' : '';
+    var gOut = document.getElementById('bk-f-give'), accEl = document.getElementById('bk-f-acc'), prev = document.getElementById('bk-m-prev');
     if (gOut && accEl) {
+      gOut.hidden = m.on;
       var acc = findAccount(accEl.value);
       var gp = acc ? E.givePctOf(load().events, acc) : E.DEFAULT_GIVE_MIN;
       var tot = a > 0 ? a * (1 + (on ? E.matchPctOn(load().events) / 100 : 0)) : 0;
       gOut.textContent = tot > 0 ? '💛 ' + money(tot * gp / 100) + ' (' + gp + '%) goes to the Giving jar.' : '💛 ' + gp + '% goes to the Giving jar.';
     }
+    if (prev) {
+      prev.hidden = !m.on;
+      var di = depositItems();
+      var bodies = m.on && !di.error ? E.payday(load().events, { items: di.items, match: on, date: E.today() }) : [];
+      prev.innerHTML = di.error ? esc(di.error) : bodies.map(function (b) {
+        var acc2 = findAccount(b.account);
+        return '<div><b>' + esc(acc2 ? acc2.name : '') + '</b>: ' + money(b.amount) + (b.match ? ' + ' + money(b.match) + ' match' : '') + ' · 💛 ' + money(b.give) + '</div>';
+      }).join('');
+    }
   }
+  function multiToggle() { matchPreview(); }
+  function standToggle() { matchPreview(); }
+
+  function saveDeposit() {
+    var date = document.getElementById('bk-f-date').value;
+    if (!E.isDate(date) || date > E.today()) date = E.today();
+    var note = document.getElementById('bk-f-note').value.trim().slice(0, 80);
+    var srcEl = document.querySelector('input[name="bk-src"]:checked');
+    var m = multiState(), st = standState(), di = depositItems();
+    if (m.on && m.ids.length < 2) { ZsDialog.toast('Pick at least two accounts.'); return; }
+    if (st && st.sales > 0 && !(st.profit > 0)) { ZsDialog.toast('No profit this time, so there\'s nothing to deposit.'); return; }
+    if (st && !(st.sales > 0)) { ZsDialog.toast('Type the stand\'s sales.'); return; }
+    if (di.error) { ZsDialog.toast(di.error); return; }
+    var items = di.items.filter(function (it) { return it.amount > 0; });
+    if (!items.length || di.total <= 0 || di.total > 100000) { ZsDialog.toast('Type an amount.'); return; }
+    if (m.on && m.mode === 'equal' && items.length < m.ids.length) { ZsDialog.toast('That\'s too small to split between ' + m.ids.length + ' accounts.'); return; }
+    if (!items.every(function (it) { return findAccount(it.account); })) return;
+    var bodies = E.payday(load().events, {
+      items: items, date: date, source: srcEl ? srcEl.value : 'other', note: note, match: checked('bk-f-match'),
+      stand: st ? { sales: st.sales, costs: st.costs, hours: st.hours } : null
+    });
+    add(bodies.map(function (b) { return ev('deposit', b); }));
+    var matched = bodies.reduce(function (t, b) { return t + b.match; }, 0), given = bodies.reduce(function (t, b) { return t + b.give; }, 0);
+    ZsDialog.toast('Added ' + money(di.total) + (bodies.length > 1 ? ' across ' + bodies.length + ' accounts' : '') + (matched ? ' + ' + money(matched) + ' match' : '') + ' · 💛 ' + money(given) + ' to giving.');
+    _view = bodies.length > 1 ? { name: 'home' } : { name: 'account', id: bodies[0].account };
+    render();
+  }
+
   function saveMoney(kind) {
     if (!_parent) return;
+    if (kind === 'deposit') { saveDeposit(); return; }
     var acc = document.getElementById('bk-f-acc').value;
     var amt = Math.round(parseFloat(document.getElementById('bk-f-amt').value) * 100) / 100;
     var note = document.getElementById('bk-f-note').value.trim().slice(0, 80);
@@ -1008,22 +1175,12 @@ var Banco = (function () {
     if (!findAccount(acc)) return;
     if (!(amt > 0) || amt > 100000) { ZsDialog.toast('Type an amount.'); return; }
     if (!E.isDate(date) || date > E.today()) date = E.today();
-    if (kind === 'deposit') {
-      var srcEl = document.querySelector('input[name="bk-src"]:checked');
-      var withMatch = document.getElementById('bk-f-match').checked;
-      var m = withMatch ? Math.round(amt * E.matchPctOn(load().events, date)) / 100 : 0;
-      var gp = E.givePctOf(load().events, findAccount(acc), date);
-      var g = Math.round((amt + m) * gp) / 100;
-      add(ev('deposit', { account: acc, amount: amt, match: m, give: g, source: srcEl ? srcEl.value : 'other', note: note, date: date }));
-      ZsDialog.toast('Added ' + money(amt) + (m ? ' + ' + money(m) + ' match' : '') + ' · 💛 ' + money(g) + ' to giving.');
-    } else {
-      var s = E.compute(load().events, acc, prices(), date);
-      if (amt > s.value + 0.005) { ZsDialog.toast('That account only has ' + money(s.value) + '.'); return; }
-      var wf = { account: acc, amount: amt, note: note, date: date };
-      if (_view.wish && _view.id === acc) wf.wish = _view.wish;
-      add(ev('withdraw', wf));
-      ZsDialog.toast('Took out ' + money(amt) + '.');
-    }
+    var s = E.compute(load().events, acc, prices(), date);
+    if (amt > s.value + 0.005) { ZsDialog.toast('That account only has ' + money(s.value) + '.'); return; }
+    var wf = { account: acc, amount: amt, note: note, date: date };
+    if (_view.wish && _view.id === acc) wf.wish = _view.wish;
+    add(ev('withdraw', wf));
+    ZsDialog.toast('Took out ' + money(amt) + '.');
     _view = { name: 'account', id: acc };
     render();
   }
@@ -1297,7 +1454,7 @@ var Banco = (function () {
     wishAdd: wishAdd, wishCancel: wishCancel, wishEmoji: wishEmoji, wishPhoto: wishPhoto, wishSave: wishSave,
     wishRemove: wishRemove, wishDecide: wishDecide, buyWish: buyWish,
     go: go, open: open, unlock: unlock, lock: lock,
-    saveMoney: saveMoney, matchPreview: matchPreview, saveShared: saveShared, openOwnAccounts: openOwnAccounts,
+    saveMoney: saveMoney, matchPreview: matchPreview, multiToggle: multiToggle, standToggle: standToggle, saveShared: saveShared, openOwnAccounts: openOwnAccounts,
     saveSettings: saveSettings, savePrice: savePrice, refreshPrices: refreshPrices,
     renameAccount: renameAccount, editMembers: editMembers, archive: archive, undo: undo,
     chooseMix: chooseMix, pickMix: pickMix, saveMix: saveMix, vote: vote, setGoal: setGoal,
