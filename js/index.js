@@ -131,6 +131,9 @@
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
   window.updateKidLang = function(idx, val) { updateKidLang(idx, val); };
+  window.updateKidHubApp = function(idx, id, val) { updateKidHubApp(idx, id, val); };
+  window.updateKidMoreLock = function(idx, val) { updateKidMoreLock(idx, val); };
+  window.updateHubMinAge = function(id, val) { updateHubMinAge(id, val); };
   window.updateKidRoutinesEnabled = function(idx, val) { updateKidRoutinesEnabled(idx, val); };
   window.addRoutineItem = function(idx, which) { addRoutineItem(idx, which); };
   window.updateRoutineItem = function(idx, which, j, val) { updateRoutineItem(idx, which, j, val); };
@@ -556,6 +559,13 @@
       { name: 'Mensajes Secretos', icon: '🔐', href: 'mensajes-secretos.html', key: 'zs_secretos_' + key, schedId: 'secretos' },
       { name: '¿Qué Hora Es?', icon: '🕰️', href: 'que-hora-es.html', key: 'zs_clock_' + key, schedId: 'clock' }
     ];
+
+    // Only apps this kid can see: by age, and what a parent has hidden.
+    apps = apps.filter(function(app) {
+      if (typeof HubPlan === 'undefined') return true;
+      var planned = HubPlan.appForHref(app.href);
+      return !planned || HubPlan.allowed(user, planned);
+    });
 
     var visibleApps = apps.filter(function(app) {
       return todayAppIds.indexOf(app.schedId) !== -1 ||
@@ -1858,6 +1868,7 @@
       '</div>' +
       (typeof AppSchedule !== 'undefined' ? AppSchedule.renderScheduleConfig() : '') +
       (typeof OffHours !== 'undefined' ? OffHours.renderConfig() : '') +
+      (typeof HubPlan !== 'undefined' ? _renderHubAppsEditor() : '') +
       '<div class="parents-grid">' +
         profiles.map(function(p, i) {
           var timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
@@ -1892,6 +1903,7 @@
                   '</select>' +
                 '</label>' +
               '</div>' +
+              (typeof HubPlan !== 'undefined' ? _renderKidHubApps(p, i) : '') +
               (typeof ZsTTS !== 'undefined' ? (
                 '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
                   '<label style="font-size:0.9rem; font-weight:700;">🗣 Read-aloud ' +
@@ -2005,6 +2017,82 @@
     }
     var label = document.getElementById('chess-val-' + idx);
     if (label) label.textContent = _chessLabel(val);
+  }
+
+  // Parents Corner: which apps this kid sees, and the lock on "More apps".
+  function _renderKidHubApps(p, i) {
+    var hidden = HubPlan.hiddenIds(p);
+    return '<details class="pk-hub" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+      '<summary style="font-size:0.9rem; font-weight:700; cursor:pointer;">📱 Apps on ' + escHtml(p.name) + '\'s hub</summary>' +
+      '<label class="pk-toggle" style="font-size:0.85rem; margin-top:10px; display:flex; gap:6px;">' +
+        '<input type="checkbox" class="pk-more-lock" ' + (HubPlan.moreLocked(p) ? 'checked' : '') + ' onchange="updateKidMoreLock(' + i + ', this.checked)">' +
+        ' 🔒 Ask for the PIN to open "More apps" (ages 5 and under)</label>' +
+      '<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:4px 12px; margin-top:10px;">' +
+      HubPlan.APPS.map(function(a) {
+        var tooYoung = p.age && Number(p.age) < HubPlan.minAge(a.id);
+        return '<label class="pk-toggle" style="font-size:0.8rem; display:flex; gap:6px; align-items:center;' + (tooYoung ? ' opacity:0.6;' : '') + '">' +
+          '<input type="checkbox" class="pk-hub-app" data-app="' + a.id + '" ' + (hidden.indexOf(a.id) < 0 ? 'checked' : '') +
+          ' onchange="updateKidHubApp(' + i + ', \'' + a.id + '\', this.checked)"> ' + escHtml(HubPlan.nameOf(a)) +
+          (tooYoung ? ' <small>(from ' + HubPlan.minAge(a.id) + ')</small>' : '') + '</label>';
+      }).join('') +
+      '</div></details>';
+  }
+
+  // Parents Corner: the minimum age of each app, and a way into any of them.
+  function _renderHubAppsEditor() {
+    return '<details class="pk-hub-ages" style="margin:20px 0; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:16px;">' +
+      '<summary style="font-size:1rem; font-weight:700; cursor:pointer;">📱 Apps: minimum age, and open any app</summary>' +
+      '<p style="font-size:0.75rem; color:var(--text-muted); margin:8px 0;">A kid younger than an app\'s minimum age does not see it on their hub. Tap a name to open the app yourself.</p>' +
+      '<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:6px 14px;">' +
+      HubPlan.APPS.map(function(a) {
+        return '<label style="display:flex; gap:8px; align-items:center; font-size:0.8rem;">' +
+          '<input type="number" class="pk-minage" data-app="' + a.id + '" min="0" max="18" value="' + HubPlan.minAge(a.id) + '" ' +
+            'onchange="updateHubMinAge(\'' + a.id + '\', this.value)" style="width:52px; padding:2px 6px; border-radius:6px;" aria-label="Minimum age for ' + escHtml(HubPlan.nameOf(a)) + '"> ' +
+          '<a href="' + a.href + '" style="color:inherit; font-weight:700;">' + escHtml(HubPlan.nameOf(a)) + '</a></label>';
+      }).join('') +
+      '</div></details>';
+  }
+
+  function _refreshHub() {
+    var hub = document.getElementById('hub-screen');
+    if (hub && hub.classList.contains('active')) renderAppCards();
+  }
+
+  function _pushProfiles(profiles) {
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
+  }
+
+  function updateKidHubApp(idx, id, visible) {
+    var profiles = getProfiles();
+    var p = profiles[idx];
+    if (!p) return;
+    var hidden = Array.isArray(p.hubHidden) ? p.hubHidden.slice() : [];
+    var at = hidden.indexOf(id);
+    if (visible && at >= 0) hidden.splice(at, 1);
+    if (!visible && at < 0) hidden.push(id);
+    p.hubHidden = hidden;
+    saveProfiles(profiles);
+    _pushProfiles(profiles);
+    var active = getActiveUser();
+    if (active && active.name === p.name) _refreshHub();
+  }
+
+  function updateKidMoreLock(idx, locked) {
+    var profiles = getProfiles();
+    var p = profiles[idx];
+    if (!p) return;
+    p.hubMoreLocked = !!locked;
+    saveProfiles(profiles);
+    _pushProfiles(profiles);
+    var active = getActiveUser();
+    if (active && active.name === p.name) _refreshHub();
+  }
+
+  function updateHubMinAge(id, value) {
+    HubPlan.setMinAge(id, value);
+    _refreshHub();
   }
 
   function updateKidLang(idx, lang) {
@@ -2213,6 +2301,11 @@
       var themeEl = document.getElementById('schedule-theme');
       if (dayEl) dayEl.textContent = '📅 ' + msg.day + ' — ' + zsShort(msg.count + ' apps hoy', msg.count + ' apps today');
       if (themeEl) themeEl.textContent = msg.theme;
+    }
+    // After the schedule: Today's 3, and what this kid sees by age and by parent.
+    if (typeof HubPlan !== 'undefined') {
+      try { HubPlan.render(user); }
+      catch (e) { if (typeof Debug !== 'undefined') Debug.error('HubPlan.render failed', e.message); }
     }
   }
 
