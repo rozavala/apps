@@ -447,6 +447,19 @@ var APP_STAR_CONFIGS = [
       for (var k in L) n += Math.min(3, (L[k] && L[k].stars) || 0);
       return n;
     } },
+  // Cálculo Rápido: one star for every two sprint levels mastered (up to 6),
+  // one for each Estimate-it question landed within double or half (2+ of 3,
+  // up to 12), each unit topic's quiz out of 3, and each engineer topic by
+  // problems solved (1, 3 and 6 solved give 1, 2 and 3 stars).
+  { id: 'calculo', prefix: 'zs_calculo_', stars: function(d) {
+      var n = 0, k, sp = d.sprint || {}, e = d.est || {}, u = d.units || {}, g = d.eng || {}, hit = 0, s;
+      n += Math.min(6, Math.floor(Math.max(0, Math.min(12, sp.mastered | 0)) / 2));
+      for (k in e) if ((e[k] | 0) >= 2) hit++;
+      n += Math.min(12, hit);
+      for (k in u) n += Math.max(0, Math.min(3, u[k] | 0));
+      for (k in g) { s = g[k] | 0; n += s >= 6 ? 3 : s >= 3 ? 2 : s >= 1 ? 1 : 0; }
+      return n;
+    } },
   // Explorador de Naturaleza: each seasonal Spot it! card scores by how
   // much of it was found outdoors (3/6/9 of 9 squares → 1/2/3 stars), and
   // each quiz mode is starred out of 3. Opening a plate does not score.
@@ -479,6 +492,13 @@ var APP_STAR_CONFIGS = [
       for (k in (d.knots || {})) { q = d.knots[k] || {}; n += (q.w ? 1 : 0) + (q.c ? 1 : 0) + (q.r ? 1 : 0); }
       for (k in (d.best || {})) n += Math.min(3, d.best[k] || 0);
       return n + Math.min(3, d.hunts || 0);
+    } },
+  // Dictado: the best round of each list and level, up to 3 stars each
+  // (typed from dictation; a round written on paper stops at 2).
+  { id: 'dictado', prefix: 'zs_dictado_', stars: function(d) {
+      var n = 0, b = (d && d.best) || {};
+      for (var k in b) n += Math.min(3, Math.max(0, Number(b[k]) || 0));
+      return n;
     } },
   // Lector: each level activity (sounds, syllables or blending, build, read)
   // is starred out of 3 by first-try answers, and each book earns up to 3:

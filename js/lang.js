@@ -35,6 +35,7 @@ var ZsLang = (function() {
     'quest-adventure.html':    { d: ['Explora un mapa del mundo: ¡tu progreso en cada app desbloquea nuevas regiones!', 'Explore a world map — your progress in every app unlocks new regions!'], g: ['🗺️ Aventura', '🗺️ Adventure'] },
     'guess-quest.html':        { d: ['20 Preguntas: ¡adivina animales, comidas y más!', '20 Questions — guess animals, foods, and more!'], g: ['🧠 Lógica', '🧠 Logic'] },
     'book-movie-check.html':   { d: ['Descubre si un libro o una película es adecuado para nuestra familia.', 'Find out if a book or movie is right for our family.'], g: ['📚 Guía de medios', '📚 Media Guide'] },
+    'dictado.html':            { d: ['Escucha y escribe lo que oyes: reglas de ortografía en español e inglés.', 'Listen, then write what you hear: spelling rules in Spanish and English.'], g: ['✍️ Ortografía', '✍️ Spelling'] },
     'repaso.html':             { d: ['Repasa lo que se te escapó en otras apps: unos 5 minutos al día.', 'Go over what slipped by in other apps: about 5 minutes a day.'], g: ['🔁 Repaso', '🔁 Review'] },
     'trophy-room.html':        { d: ['Todas las insignias, rangos y logros que has ganado, en un solo lugar.', 'Every badge, rank and milestone you\'ve earned — all in one place.'], g: ['🏅 Logros', '🏅 Achievements'] },
     'money-master.html':       { d: ['Monedas, billetes y vuelto: practica con CLP y USD.', 'Coins, bills, and change-making — practice with CLP & USD.'], g: ['🪙 Dinero', '🪙 Money'] },
@@ -53,7 +54,8 @@ var ZsLang = (function() {
     'naturaleza.html':         { d: ['Guía de campo de aves, árboles y animales de Chile — ¡y luego sal a encontrarlos!', 'Field guide to Chilean birds, trees and animals — then go outside and spot them!'], g: ['🌿 Naturaleza', '🌿 Nature'] },
     'mensajes-secretos.html':  { d: ['Descifra códigos con una rueda César, telégrafo Morse, pigpen y más — 19 misiones de espías.', 'Crack codes with a Caesar wheel, Morse telegraph, pigpen and more — 19 spy missions.'], g: ['🕵️ Códigos', '🕵️ Codes'] },
     'lector.html':             { d: ['Aprende a leer: letras y sonidos, sílabas, armar palabras y libros cortos que te leen — en español e inglés.', 'Learn to read: letter sounds, syllables, building words and short read-along books, in Spanish and English.'], g: ['📖 Lectura', '📖 Reading'] },
-    'que-hora-es.html':        { d: ['Aprende a leer la hora en un reloj de madera de verdad: ajusta, lee, planifica tu día y el calendario.', 'Learn to tell time on a real wooden clock — set, read, plan your day and the calendar.'], g: ['⏰ Tiempo', '⏰ Time'] }
+    'que-hora-es.html':        { d: ['Aprende a leer la hora en un reloj de madera de verdad: ajusta, lee, planifica tu día y el calendario.', 'Learn to tell time on a real wooden clock — set, read, plan your day and the calendar.'], g: ['⏰ Tiempo', '⏰ Time'] },
+    'calculo-rapido.html':     { d: ['Gana al reloj con cálculo mental, estima como un ingeniero y convierte unidades.', 'Beat the clock with mental maths, estimate like an engineer and convert units.'], g: ['🧮 Cálculo', '🧮 Calculation'] }
   };
 
   function _lang() {

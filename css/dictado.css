@@ -1,0 +1,207 @@
+/* ================================================================
+   DICTADO — css/dictado.css  (light theme tokens from zs-theme.css)
+   Ink blue on notebook paper, pencil yellow for the highlights.
+   Mobile first: 390px up to iPad.
+   ================================================================ */
+:root {
+  --dk-ink: #312e81;
+  --dk-ink2: #4338ca;
+  --dk-ink-l: #eef2ff;
+  --dk-paper: #fffdf5;
+  --dk-line: #cfe0f3;
+  --dk-margin: #f3a7a7;
+  --dk-pencil: #f5b82e;
+  --dk-warn: #fef3c7;
+  --dk-warn-b: #f59e0b;
+  --dk-ok: #059669;
+  --dk-ok-l: #d1fae5;
+  /* the webfont may be missing offline: fall back to a rounded system face, never a serif */
+  --dk-display: 'Baloo 2', 'Nunito', ui-rounded, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* clears the home button and the kid badge from nav.js */
+.app.dk-app { max-width: 760px; margin: 0 auto; padding-top: 88px; padding-bottom: 96px; font-family: var(--font-body); color: var(--text-primary); }
+#dk-wrap { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.dk-ic { display: inline-flex; width: 24px; height: 24px; flex: 0 0 auto; }
+.dk-ic svg { display: block; }
+.dk-h2 { margin: 0 0 8px; font-family: var(--dk-display); font-size: 1.1rem; color: var(--dk-ink); }
+.dk-h2-pad { margin-left: 4px; }
+.dk-note { margin: 8px 0 0; color: var(--text-muted); font-size: .92rem; }
+button { font-family: var(--font-body); }
+.dk-app button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+.dk-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--mod-shadow-sm); padding: 16px; }
+
+/* ---------- hero ---------- */
+.dk-hero { display: grid; grid-template-columns: 96px 1fr auto; gap: 4px 14px; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius); box-shadow: var(--mod-shadow); padding: 12px 16px; }
+.dk-hero-art { width: 96px; height: 72px; }
+.dk-hero h1 { margin: 0; font-family: var(--dk-display); font-size: 1.8rem; line-height: 1.05; color: var(--dk-ink); }
+.dk-hero p { margin: 2px 0 0; color: var(--text-muted); font-size: .92rem; line-height: 1.3; }
+.dk-total { align-self: start; font-family: var(--dk-display); font-weight: 800; font-size: 1rem; color: #92400e; background: linear-gradient(180deg, #fff7d6, #fde8a0); border: 1px solid #f2cf6b; border-radius: 99px; padding: 5px 12px; white-space: nowrap; }
+
+/* ---------- options ---------- */
+.dk-opts { display: flex; flex-direction: column; gap: 12px; }
+.dk-opt { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.dk-opt-l { font-weight: 800; color: var(--dk-ink); }
+.dk-seg { display: inline-flex; background: var(--bg-sunken); border-radius: 14px; padding: 4px; gap: 4px; }
+.dk-segb { appearance: none; border: 0; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 11px; font-weight: 800; font-size: .98rem; color: var(--text-muted); }
+.dk-segb .dk-ic { width: 22px; height: 20px; }
+.dk-segb.on { background: #fff; color: var(--dk-ink2); box-shadow: 0 1px 4px rgba(15, 15, 25, .15); }
+
+/* ---------- levels ---------- */
+.dk-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.dk-lvl { appearance: none; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 66px; padding: 14px 4px 8px; background: #fff; border: 2px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text-primary); }
+.dk-lvl b { font-family: var(--dk-display); font-size: 1.05rem; }
+.dk-lvl span { font-size: .78rem; color: var(--text-muted); font-weight: 700; }
+.dk-lvl.on { border-color: var(--dk-ink2); background: var(--dk-ink-l); }
+.dk-rec { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: .68rem; font-weight: 800; color: #fff; background: var(--dk-ink2); border-radius: 99px; padding: 2px 8px; white-space: nowrap; }
+
+/* ---------- lists ---------- */
+.dk-lists { display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 10px; }
+.dk-list { appearance: none; cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px; padding: 12px; background: #fff; border: 2px solid var(--border-subtle); border-radius: var(--radius-sm); box-shadow: var(--mod-shadow-sm); color: var(--text-primary); min-height: 120px; }
+.dk-list:active:not(:disabled) { border-color: var(--dk-ink2); background: var(--dk-ink-l); }
+.dk-list:disabled { opacity: .5; }
+.dk-list.mix { background: linear-gradient(180deg, #fff, #f5f3ff); }
+.dk-badge { align-self: flex-start; font-family: var(--dk-display); font-weight: 800; font-size: 1.05rem; line-height: 1; color: var(--dk-ink); background: var(--dk-paper); border: 1.5px solid var(--dk-line); border-bottom-width: 3px; border-radius: 10px; padding: 9px 10px; white-space: nowrap; background-image: linear-gradient(90deg, transparent 10px, var(--dk-margin) 10px, var(--dk-margin) 11px, transparent 11px); }
+.dk-list-t { display: flex; flex-direction: column; min-width: 0; }
+.dk-list-t b { font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
+.dk-list-t small { color: var(--text-muted); font-size: .8rem; font-weight: 700; }
+.dk-stars { letter-spacing: 2px; font-size: 1.15rem; margin-top: auto; }
+.dk-star { color: #d4d4d8; }
+.dk-star.on { color: #f59e0b; }
+
+/* ---------- a round ---------- */
+.dk-qhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.dk-dots { display: flex; gap: 6px; flex-wrap: wrap; }
+.dk-dots i { width: 13px; height: 13px; border-radius: 50%; background: var(--bg-sunken); border: 2px solid var(--border-strong); }
+.dk-dots i.now { border-color: var(--dk-ink2); background: #fff; transform: scale(1.2); }
+.dk-dots i.ok { background: var(--dk-ok); border-color: var(--dk-ok); }
+.dk-dots i.miss { background: var(--dk-warn-b); border-color: var(--dk-warn-b); }
+.dk-from { font-size: .8rem; font-weight: 800; color: var(--dk-ink2); background: var(--dk-ink-l); border-radius: 99px; padding: 4px 10px; }
+.dk-exit { margin-left: auto; appearance: none; border: 0; background: none; cursor: pointer; min-height: 44px; padding: 0 8px; font-weight: 800; color: var(--text-muted); text-decoration: underline; }
+
+.dk-play { display: flex; flex-direction: column; gap: 14px; align-items: stretch; padding: 18px 16px; }
+.dk-hint { margin: 0; font-family: var(--dk-display); font-size: 1.2rem; line-height: 1.25; color: var(--dk-ink); text-align: center; }
+.dk-listen { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+.dk-big { appearance: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 64px; padding: 8px 12px; border: 0; border-radius: var(--radius-sm); font-weight: 800; font-size: 1.1rem; line-height: 1.15; color: #fff; background: var(--dk-ink2); box-shadow: 0 4px 0 #2e2a9a; }
+.dk-big .dk-ic { width: 34px; height: 34px; }
+.dk-big:active { transform: translateY(3px); box-shadow: 0 1px 0 #2e2a9a; }
+.dk-big.slow { background: #fff; color: #166534; border: 2px solid #86c99a; box-shadow: 0 4px 0 #b6dcc2; }
+.dk-big.slow:active { box-shadow: 0 1px 0 #b6dcc2; }
+.dk-nospeech { margin: 0; padding: 10px 12px; background: var(--dk-warn); border-radius: var(--radius-xs); color: #78350f; font-size: .92rem; }
+.dk-link { appearance: none; border: 0; background: none; cursor: pointer; font-weight: 800; color: var(--dk-ink2); text-decoration: underline; min-height: 36px; }
+.dk-peeked { font-family: var(--dk-display); font-weight: 800; font-size: 1.2rem; color: var(--dk-ink); }
+
+.dk-len { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.dk-len i { width: 12px; height: 12px; border-radius: 50%; background: var(--dk-line); }
+
+/* the line you write on */
+.dk-line { min-height: 42px; padding: 4px 14px 2px 18px; font-family: var(--dk-display); font-weight: 700; font-size: 1.55rem; line-height: 36px; color: var(--dk-ink); white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+  background: var(--dk-paper) repeating-linear-gradient(transparent 0 35px, var(--dk-line) 35px 36px); border: 2px solid var(--dk-line); border-left: 3px solid var(--dk-margin); border-radius: var(--radius-xs); }
+.dk-play.l3 .dk-line { min-height: 80px; }
+.dk-ph { color: #a5b4c8; font-weight: 600; font-size: 1.1rem; }
+.dk-caret { display: inline-block; width: 2px; height: 1.2em; margin-left: 1px; vertical-align: -0.2em; background: var(--dk-ink2); animation: dk-blink 1s steps(1) infinite; }
+@keyframes dk-blink { 50% { opacity: 0; } }
+
+/* keyboard */
+.dk-kb { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 620px; margin: 0 auto; user-select: none; -webkit-user-select: none; }
+.dk-krow { display: flex; justify-content: center; gap: 5px; }
+.dk-key { appearance: none; flex: 1 1 0; min-width: 0; max-width: 58px; height: 48px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-weight: 800; font-size: 1.2rem; color: var(--text-primary); background: #fff; border: 1px solid var(--border-strong); border-bottom-width: 3px; border-radius: 9px; }
+.dk-key:active { background: var(--dk-ink-l); transform: translateY(1px); }
+.dk-key.acc { flex: 1.6 1 0; background: #f5f3ff; color: var(--dk-ink2); }
+.dk-key.wide { flex: 1.6 1 0; max-width: 88px; background: #e9e7f4; }
+.dk-key.wide.on { background: var(--dk-ink2); color: #fff; }
+.dk-key.wide .dk-ic { width: 24px; height: 22px; }
+.dk-key.space { flex: 3 1 0; max-width: none; font-size: .95rem; color: var(--text-muted); }
+
+.dk-go { appearance: none; border: 0; cursor: pointer; min-height: 54px; padding: 12px 22px; border-radius: var(--radius-sm); font-weight: 800; font-size: 1.1rem; color: #fff; background: var(--dk-ink2); box-shadow: 0 3px 0 #2e2a9a; }
+.dk-go:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #2e2a9a; }
+.dk-go:disabled { background: #c7c9dd; box-shadow: none; cursor: default; }
+.dk-go.good { background: var(--dk-ok); box-shadow: 0 3px 0 #046c4e; }
+.dk-go.alt { background: #fff; color: var(--dk-ink2); border: 2px solid var(--dk-ink2); box-shadow: none; }
+.dk-sm { appearance: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border-radius: var(--radius-xs); border: 2px solid var(--border-strong); background: #fff; font-weight: 800; color: var(--dk-ink2); }
+.dk-sm .dk-ic { width: 24px; height: 24px; }
+
+/* what you see after checking: the keyboard goes away */
+.dk-play.checked .dk-kb, .dk-play.checked .dk-line, .dk-play.checked #dk-check, .dk-play.checked #dk-written, .dk-play.checked .dk-len { display: none; }
+
+/* ---------- feedback ---------- */
+.dk-fb { display: flex; flex-direction: column; gap: 12px; }
+.dk-fb:empty { display: none; }
+.dk-fb-msg { margin: 0; display: flex; align-items: center; gap: 8px; font-family: var(--dk-display); font-size: 1.3rem; line-height: 1.25; color: #92400e; }
+.dk-fb-msg.good { color: var(--dk-ok); }
+.dk-fb-msg.info { color: var(--dk-ink); }
+.dk-fb-msg .dk-ic { width: 30px; height: 30px; }
+.dk-tiles { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; padding: 6px 0; }
+.dk-w { display: inline-flex; flex-wrap: nowrap; gap: 3px; }
+.dk-t { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 1.9rem; height: 3rem; padding: 0 3px; background: #fff; border: 2px solid var(--border-strong); border-radius: 9px; }
+.dk-t b { font-family: var(--dk-display); font-size: 1.5rem; line-height: 1; color: var(--text-primary); }
+.dk-t small { position: absolute; top: -9px; right: -5px; min-width: 18px; text-align: center; font-size: .74rem; font-weight: 800; color: #78350f; background: #fde68a; border: 1px solid var(--dk-warn-b); border-radius: 99px; padding: 0 4px; line-height: 1.25; }
+.dk-t.sub { background: var(--dk-warn); border-color: var(--dk-warn-b); margin-top: 8px; }
+.dk-t.miss { background: #fffbeb; border: 2px dashed var(--dk-warn-b); }
+.dk-t.miss b { color: #b45309; }
+.dk-t.extra { min-width: 1.4rem; background: #f4f4f5; border: 2px dotted #a1a1aa; margin-top: 8px; }
+.dk-t.extra s { font-family: var(--dk-display); font-weight: 800; color: #71717a; }
+.dk-tiles.ok .dk-t { background: var(--dk-ok-l); border-color: #6ee7b7; }
+.dk-t.sp { min-width: 0; width: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+.dk-t.sp.sub, .dk-t.sp.miss, .dk-t.sp.extra { min-width: 1.1rem; width: 1.1rem; border: 2px dashed var(--dk-warn-b); background: var(--dk-warn); }
+.dk-you { margin: 0; font-size: .95rem; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
+.dk-you span { font-weight: 800; color: var(--text-primary); }
+
+.dk-rule { background: #fffbeb; border: 1px solid #fcd34d; border-left: 5px solid var(--dk-pencil); border-radius: var(--radius-xs); padding: 12px 14px; }
+.dk-rule-h { display: flex; align-items: center; gap: 8px; color: #78350f; font-size: 1.02rem; }
+.dk-rule-h .dk-ic { width: 26px; height: 26px; }
+.dk-rule p { margin: 6px 0 0; line-height: 1.4; color: var(--text-primary); }
+.dk-rv { margin: 0; font-size: .9rem; font-weight: 700; color: var(--dk-ink2); text-align: center; }
+
+.dk-fb-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+.dk-fb-actions .dk-go { flex: 1 1 200px; }
+.dk-fb-actions.col { flex-direction: column; align-items: stretch; }
+.dk-fb-actions.col .dk-go { flex: none; }
+.dk-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.dk-chip { appearance: none; cursor: pointer; min-height: 48px; padding: 0 16px; border-radius: 99px; border: 2px solid var(--border-strong); background: #fff; font-family: var(--dk-display); font-weight: 800; font-size: 1.15rem; color: var(--text-primary); }
+.dk-chip.on { border-color: var(--dk-warn-b); background: var(--dk-warn); }
+
+/* ---------- done ---------- */
+.dk-done { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 20px 16px; }
+.dk-medal { width: 170px; height: 136px; }
+.dk-done-t { margin: 0; font-family: var(--dk-display); font-size: 1.7rem; color: var(--dk-ink); }
+.dk-done-s { margin: 0; font-weight: 800; font-size: 1.1rem; }
+.dk-newbest { margin: 0; font-weight: 800; color: #92400e; background: var(--dk-warn); border-radius: 99px; padding: 5px 14px; }
+.dk-missed { width: 100%; text-align: left; background: var(--dk-ink-l); border-radius: var(--radius-xs); padding: 10px 14px; }
+.dk-missed h3 { margin: 0 0 4px; font-size: 1rem; color: var(--dk-ink); }
+.dk-missed ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.dk-missed li { background: #fff; border: 1.5px solid var(--dk-line); border-radius: 99px; padding: 4px 12px; font-weight: 800; overflow-wrap: anywhere; }
+.dk-missed .dk-rv { margin-top: 8px; text-align: left; }
+.dk-back { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; font-weight: 800; color: var(--dk-ink2); text-decoration: underline; }
+.dk-done .dk-fb-actions { width: 100%; }
+
+/* ---------- small screens and tablets ---------- */
+@media (max-width: 420px) {
+  .app.dk-app { padding-left: 12px; padding-right: 12px; }
+  .dk-play { padding: 16px 12px; }
+  .dk-hero { grid-template-columns: 74px 1fr auto; padding: 10px 12px; gap: 4px 10px; }
+  .dk-hero-art { width: 74px; height: 56px; }
+  .dk-hero h1 { font-size: 1.5rem; }
+  .dk-hero p { font-size: .84rem; }
+  .dk-krow { gap: 4px; }
+  .dk-key { height: 46px; font-size: 1.12rem; border-radius: 8px; }
+  .dk-line { font-size: 1.4rem; }
+  .dk-big { font-size: 1rem; gap: 6px; }
+  .dk-big .dk-ic { width: 28px; height: 28px; }
+  .dk-t { min-width: 1.65rem; height: 2.7rem; }
+  .dk-t b { font-size: 1.3rem; }
+  .dk-tiles { gap: 4px 9px; }
+}
+@media (min-width: 700px) {
+  .dk-key { height: 56px; font-size: 1.3rem; }
+  .dk-krow { gap: 6px; }
+  .dk-kb { gap: 8px; }
+  .dk-line { font-size: 1.8rem; line-height: 40px; min-height: 48px; background-image: repeating-linear-gradient(transparent 0 39px, var(--dk-line) 39px 40px); }
+  .dk-play.l3 .dk-line { min-height: 90px; }
+  .dk-play { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dk-caret { animation: none; }
+  .dk-big:active, .dk-go:active { transform: none; }
+}

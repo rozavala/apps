@@ -246,6 +246,25 @@ test.describe('Sunday Report', () => {
     await expect(kid(page, 'Diego').locator('.sr-working')).toContainText('keeps coming back');
   });
 
+  test('the daily review feeds the report: mastered and streak under going well, repeat misses under still working on', async ({ page }) => {
+    await open(page);
+    await page.evaluate(() => {
+      const w = /** @type {any} */ (window), R = w.Review, td = R.dayNum();
+      const day = n => { const d = new Date(); d.setDate(d.getDate() - n); return R.dateKey(d); };
+      const it = (id, app, misses) => ({ id, app, prompt: 'q ' + id, answer: 'a', box: 1, due: td, added: td - 9, misses, hits: 0 });
+      localStorage.setItem('zs_review_elena', JSON.stringify({ v: 1, retired: 2,
+        done: { [day(0)]: 5, [day(1)]: 5, [day(2)]: 5 },
+        items: { 'atlas:1': it('atlas:1', 'atlas', 3), 'atlas:2': it('atlas:2', 'atlas', 4), 'math:1': it('math:1', 'math', 1) } }));
+      w.SundayReport.refresh();
+    });
+    const elena = kid(page, 'Elena');
+    await expect(elena.locator('.sr-strong')).toContainText('2 questions mastered');
+    await expect(elena.locator('.sr-strong')).toContainText('done 3 days in a row');
+    await expect(elena.locator('.sr-working')).toContainText('2 questions keep coming back, all from World Atlas');
+    // A kid with no review data gets nothing from it.
+    await expect(kid(page, 'Ana')).not.toContainText('Daily review');
+  });
+
   test('share as an image: a PNG goes to the share sheet', async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });

@@ -6,7 +6,7 @@ const { injectMockProfile } = require('../helpers/utils');
 // matches nothing silently never hides its app (Descubre Chile shipped
 // that way once), and an app missing from every day is never offered.
 const LEARN_BY_DOING = ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-  'marinero', 'naturaleza', 'secretos', 'clock'];
+  'marinero', 'naturaleza', 'secretos', 'clock', 'calculo'];
 
 test.describe('Smart Schedule', () => {
 

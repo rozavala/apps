@@ -337,7 +337,9 @@ var ProgressAdmin = (function() {
     { id: 'marinero',   label: 'Marinero',          icon: '🪢',  href: 'marinero.html',          prefix: 'zs_marinero_',   mode: 'reset' },
     { id: 'naturaleza', label: 'Explorador de Naturaleza', icon: '🦅', href: 'naturaleza.html', prefix: 'zs_naturaleza_', mode: 'reset' },
     { id: 'secretos',   label: 'Mensajes Secretos', icon: '🔐',  href: 'mensajes-secretos.html', prefix: 'zs_secretos_',   mode: 'reset' },
-    { id: 'clock',      label: '¿Qué Hora Es?',     icon: '🕰️',  href: 'que-hora-es.html',       prefix: 'zs_clock_',      mode: 'reset' }
+    { id: 'clock',      label: '¿Qué Hora Es?',     icon: '🕰️',  href: 'que-hora-es.html',       prefix: 'zs_clock_',      mode: 'reset' },
+    { id: 'dictado',    label: 'Dictado',           icon: '✍️',  href: 'dictado.html',           prefix: 'zs_dictado_',    mode: 'reset' },
+    { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
 
   // Lector keeps a ladder of levels for each language in one saved blob

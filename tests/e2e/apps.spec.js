@@ -28,6 +28,8 @@ const MAJOR_APPS = [
   'naturaleza.html',
   'mensajes-secretos.html',
   'que-hora-es.html',
+  'dictado.html',
+  'calculo-rapido.html',
   'lector.html'
 ];
 

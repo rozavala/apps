@@ -170,11 +170,11 @@ var SundayReport = (function() {
   var APP_NAMES = {
     math: 'Math Galaxy', guess: 'Guess Quest', chess: 'Chess Quest', clock: '¿Qué Hora Es?', euclid: "Euclid's Workshop",
     lab: 'Lab Explorer', naturaleza: 'Explorador de Naturaleza', cocina: 'Cocina Lab', circuit: 'Circuit Lab',
-    engineer: 'Little Engineer', marinero: 'Marinero', secretos: 'Mensajes Secretos', code: 'Code Cadet',
+    engineer: 'Little Engineer', marinero: 'Marinero', calculo: 'Cálculo Rápido', secretos: 'Mensajes Secretos', code: 'Code Cadet',
     story: 'Story Explorer', vocab: 'Vocabulario Vivo', world: 'World Explorer', quest: 'Quest Adventure',
     chile: 'Descubre Chile', atlas: 'World Atlas', civics: 'Civics Lab', faith: 'Fe Explorador', bible: 'Bible Explorer',
     piano: 'Little Maestro', art: 'Art Studio', guitar: 'Guitar Jam', bank: 'Banco Familia', money: 'Money Master',
-    negocio: 'Mi Negocio', invest: 'Invest Quest', move: 'Move Quest', sports: 'Sports Arena', worldcup: 'World Cup 2026', review: 'Repaso', lector: 'Lector'
+    negocio: 'Mi Negocio', invest: 'Invest Quest', move: 'Move Quest', sports: 'Sports Arena', worldcup: 'World Cup 2026', review: 'Repaso', dictado: 'Dictado', lector: 'Lector'
   };
   function _appName(app) { return app ? (APP_NAMES[app.id] || app.id) : ''; }
 
@@ -184,15 +184,34 @@ var SundayReport = (function() {
   }
 
   // ── Extra insight sources ────────────────────────────────────────
-  // REPASO HOOK. The review items that keep coming back ("Repaso") have
-  // not landed yet. When they do, register a function from the Repaso
-  // module and its lines join "Going well" / "Still working on":
+  // Other modules add lines to "Going well" / "Still working on" with:
   //   SundayReport.addInsightSource(function(kidName) {
   //     return { strong: [{ text: '…' }], working: [{ text: '…' }] };
   //   });
-  // Until then nothing is registered and the report leaves that source out.
+  // The daily review (Repaso, js/review.js) registers one just below.
   var _insightSources = [];
   function addInsightSource(fn) { if (typeof fn === 'function') _insightSources.push(fn); }
+
+  // Repaso: what a kid has mastered in the review, and what keeps coming
+  // back (missed three times or more and still not retired).
+  var REVIEW_APP_NAMES = { patron: 'Patrón de Lancha' };
+  function _reviewInsights(kidName) {
+    if (typeof Review === 'undefined') return null;
+    var c = Review.counts(kidName), strong = [], working = [];
+    if (c.retired > 0) strong.push({ text: 'Daily review — ' + c.retired + ' ' + (c.retired === 1 ? 'question' : 'questions') + ' mastered' });
+    if (c.streak >= 3) strong.push({ text: 'Daily review — done ' + c.streak + ' days in a row' });
+    var stuck = Review.all(kidName).filter(function(it) { return (it.misses | 0) >= 3; });
+    if (stuck.length) {
+      var by = {};
+      stuck.forEach(function(it) { by[it.app] = (by[it.app] || 0) + 1; });
+      var top = Object.keys(by).sort(function(a, b) { return by[b] - by[a] || (a < b ? -1 : 1); })[0];
+      var topName = REVIEW_APP_NAMES[top] || APP_NAMES[top] || top;
+      working.push({ text: 'Daily review — ' + stuck.length + ' ' + (stuck.length === 1 ? 'question keeps' : 'questions keep') + ' coming back' +
+        (stuck.length > 1 && by[top] === stuck.length ? ', all from ' + topName : ', most from ' + topName) });
+    }
+    return { strong: strong, working: working };
+  }
+  addInsightSource(_reviewInsights);
 
   // Progress-catalog view of one kid: apps they have started, how far,
   // and what comes next. Reads through ProgressAdmin (the same reader
