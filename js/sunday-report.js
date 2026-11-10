@@ -69,6 +69,32 @@ var SundayReport = (function() {
     return (d.getDate()) + '/' + m;
   }
 
+  // Banco Familia: the kid's latest monthly statement as of the end of the
+  // week, summed over their accounts (a shared account counts for each
+  // member). null if they have no account or no finished month yet.
+  function _bankLine(name, weekTo) {
+    if (typeof BankEngine === 'undefined') return null;
+    try {
+      var bank = JSON.parse(localStorage.getItem('zs_bank') || 'null') || {};
+      var events = Array.isArray(bank.events) ? bank.events : [];
+      var spx = (JSON.parse(localStorage.getItem('zs_bank_spx') || 'null') || {}).prices || {};
+      var asOf = BankEngine.iso(weekTo);
+      var out = null;
+      BankEngine.accounts(events).forEach(function(a) {
+        if (a.archived || !BankEngine.isMember(a, name)) return;
+        var m = BankEngine.statementMonths(events, a.id, spx, asOf)[0];
+        if (!m) return;
+        var st = BankEngine.statement(events, a.id, spx, m);
+        if (!out) out = { month: m, saved: 0, matched: 0, growth: 0, given: 0, end: 0 };
+        if (out.month !== m) return;
+        out.saved += st.saved; out.matched += st.matched; out.growth += st.growth; out.given += st.given; out.end += st.end;
+      });
+      return out;
+    } catch (e) { return null; }
+  }
+  function _money(x) { return '$' + (Math.round(x * 100) / 100).toFixed(2); }
+  var MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
   function _kidStats(name, weekFromMs, weekToMs) {
     var nameKey = name.toLowerCase().replace(/\s+/g, '_');
     var playerStats = typeof getPlayerStats === 'function' ? getPlayerStats(name) : { totalStars: 0, appStats: {} };
@@ -127,7 +153,8 @@ var SundayReport = (function() {
       totalEvents: totalEvents,
       topApps: topApps,
       routineStreak: routineStreak,
-      highlights: highlights
+      highlights: highlights,
+      bank: _bankLine(name, new Date(weekToMs))
     };
   }
 
@@ -171,9 +198,16 @@ var SundayReport = (function() {
         '</div>';
       }).join('');
 
+      var bk = stats.bank;
+      var bankBlock = bk ? '<div class="sr-moments"><h3>🏦 Banco Familia · ' + MONTH_NAMES[+bk.month.slice(5) - 1] + '</h3>' +
+        '<div class="sr-moment"><span class="ic">💵</span><span class="ds">Saved ' + _money(bk.saved) + (bk.matched > 0 ? ' (+' + _money(bk.matched) + ' from Papá &amp; Mamá)' : '') + '</span></div>' +
+        (Math.abs(bk.growth) >= 0.005 ? '<div class="sr-moment"><span class="ic">' + (bk.growth > 0 ? '🌱' : '🌧️') + '</span><span class="ds">' + (bk.growth > 0 ? 'Grew by itself ' + _money(bk.growth) : 'Market dip ' + _money(-bk.growth)) + '</span></div>' : '') +
+        (bk.given > 0 ? '<div class="sr-moment"><span class="ic">💛</span><span class="ds">Gave ' + _money(bk.given) + '</span></div>' : '') +
+        '<div class="sr-moment"><span class="ic">🏦</span><span class="ds">Balance at month end ' + _money(bk.end) + '</span></div></div>' : '';
+
       var body;
       if (stats.totalEvents === 0 && stats.totalStars === 0) {
-        body = '<div class="sr-kid-empty">No recorded activity this week — a gentle nudge for next week!</div>';
+        body = '<div class="sr-kid-empty">No recorded activity this week — a gentle nudge for next week!</div>' + bankBlock;
       } else {
         body =
           '<div class="sr-kid-grid">' +
@@ -183,7 +217,7 @@ var SundayReport = (function() {
             '<div class="sr-stat-pill"><div class="num">' + stats.rank.icon + '</div><div class="lbl">' + _esc(stats.rank.name) + '</div></div>' +
           '</div>' +
           (appLines ? '<div class="sr-moments"><h3>Most active apps</h3>' + appLines + '</div>' : '') +
-          (highlightLines ? '<div class="sr-moments"><h3>Highlights</h3>' + highlightLines + '</div>' : '');
+          (highlightLines ? '<div class="sr-moments"><h3>Highlights</h3>' + highlightLines + '</div>' : '') + bankBlock;
       }
 
       kidBlocks +=

@@ -76,7 +76,6 @@ var TrophyRoom = (function() {
   ];
 
   var _last = null;   // last computed view, for the detail popover
-  var _animated = false;
 
   // Star rules live in auth.js next to getPlayerStats. This used to
   // keep its own copy, which meant a new app could be added there and
@@ -200,6 +199,7 @@ var TrophyRoom = (function() {
     }
 
     _renderCabinet(view);
+    _renderMoney(user);
 
     // Milestone plaques
     var ms = document.getElementById('tr-milestones');
@@ -244,9 +244,10 @@ var TrophyRoom = (function() {
     }
   }
 
-  function _renderCabinet(view) {
-    var grid = document.getElementById('tr-grid');
+  function _renderCabinet(view, gridId, onOpen) {
+    var grid = document.getElementById(gridId || 'tr-grid');
     if (!grid) return;
+    onOpen = onOpen || _openDetail;
     var cols = _columns(grid.clientWidth || window.innerWidth);
     grid.setAttribute('data-cols', cols);
     var html = '';
@@ -254,22 +255,87 @@ var TrophyRoom = (function() {
       html += '<div class="tr-shelf"><div class="tr-shelf-items" style="--cols:' + cols + '">';
       view.slice(r, r + cols).forEach(function(v, k) {
         var b = v.b;
-        var label = b.name + ': ' + (v.metal ? (v.metal + ', ' + v.stars + ' star' + (v.stars === 1 ? '' : 's')) : 'locked');
+        var label = b.name + ': ' + (v.metal ? (v.metal + (v.sub ? ', ' + v.sub : ', ' + v.stars + ' star' + (v.stars === 1 ? '' : 's'))) : 'locked');
         html += '<button type="button" class="tr-badge ' + (v.metal ? 'earned tr-' + v.metal : 'locked') + '" data-id="' + _esc(b.id) + '"' +
           ' aria-label="' + _esc(label) + '" style="animation-delay:' + ((r + k) * 0.025).toFixed(3) + 's">' +
           '<span class="tr-badge-art">' + _art(function(A) { return A.badge(v.metal, b.emoji, b.color); }) + '</span>' +
           '<span class="tr-nameplate"><span class="tr-badge-name">' + _esc(b.name) + '</span>' +
-          (v.metal ? '<span class="tr-badge-stars">⭐ ' + v.stars + '</span>' : '') + '</span>' +
+          (v.metal ? '<span class="tr-badge-stars">' + (v.sub ? _esc(v.sub) : '⭐ ' + v.stars) + '</span>' : '') + '</span>' +
         '</button>';
       });
       html += '</div><div class="tr-glass" aria-hidden="true"></div></div>';
     }
     grid.innerHTML = html;
     // Pop the badges in once; a re-layout on resize should not replay it.
-    if (!_animated) { grid.classList.add('tr-anim'); _animated = true; setTimeout(function() { grid.classList.remove('tr-anim'); }, 1600); }
+    if (!grid.__animated) { grid.classList.add('tr-anim'); grid.__animated = true; setTimeout(function() { grid.classList.remove('tr-anim'); }, 1600); }
     Array.prototype.forEach.call(grid.querySelectorAll('.tr-badge'), function(btn) {
-      btn.addEventListener('click', function() { _openDetail(btn.getAttribute('data-id'), btn); });
+      btn.addEventListener('click', function() { onOpen(btn.getAttribute('data-id'), btn); });
     });
+  }
+
+  // ── Saving & giving badges (Banco Familia) ──
+  // Worked out from the bank's own log by BankEngine.badges(); nothing is
+  // stored here and they don't count toward stars or the app-badge
+  // milestones. Shown only for a kid who has a bank account.
+  var _lastMoney = null;
+  var MONEY_COLOR = { first: '#10B981', saved50: '#10B981', saved100: '#10B981', saved250: '#10B981',
+    months3: '#38BDF8', months6: '#38BDF8', months12: '#38BDF8',
+    gift1: '#F472B6', places3: '#F472B6', giveMore: '#F472B6', steady: '#A78BFA' };
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function _fmtDay(d) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d || '')) return '';
+    var p = d.split('-');
+    return MONTHS[+p[1] - 1] + ' ' + (+p[2]) + ', ' + p[0];
+  }
+  function _moneyBadges(user) {
+    if (typeof BankEngine === 'undefined' || !user) return null;
+    try {
+      var bank = JSON.parse(localStorage.getItem('zs_bank') || 'null') || {};
+      var events = Array.isArray(bank.events) ? bank.events : [];
+      if (!BankEngine.accounts(events).some(function(a) { return BankEngine.isMember(a, user.name); })) return null;
+      var spx = (JSON.parse(localStorage.getItem('zs_bank_spx') || 'null') || {}).prices || {};
+      return BankEngine.badges(events, user.name, spx);
+    } catch (e) { return null; }
+  }
+  function _renderMoney(user) {
+    var list = _moneyBadges(user);
+    var label = document.getElementById('tr-money-label'), cab = document.getElementById('tr-money-cab');
+    if (!label || !cab) return;
+    if (!list) { label.style.display = 'none'; cab.style.display = 'none'; _lastMoney = null; return; }
+    var got = list.filter(function(b) { return b.earned; }).length;
+    label.style.display = ''; cab.style.display = '';
+    label.textContent = 'Saving & Giving · ' + got + ' of ' + list.length;
+    _lastMoney = list.map(function(b) {
+      return { b: { id: b.id, name: b.name, emoji: b.emoji, color: MONEY_COLOR[b.id] || '#10B981', href: 'banco.html' },
+        stars: 0, metal: b.earned ? b.metal : null, sub: b.earned ? _fmtDay(b.date) : '', money: b };
+    });
+    _renderCabinet(_lastMoney, 'tr-money-grid', _openMoneyDetail);
+  }
+  function _openMoneyDetail(id, from) {
+    var v = null;
+    (_lastMoney || []).forEach(function(x) { if (x.b.id === id) v = x; });
+    if (!v) return;
+    _closeDetail();
+    _popReturn = from || null;
+    var b = v.money;
+    var status = b.earned ? (b.metal.charAt(0).toUpperCase() + b.metal.slice(1) + ' · ' + _fmtDay(b.date)) : 'Locked';
+    var ov = document.createElement('div');
+    ov.className = 'tr-pop-overlay';
+    ov.innerHTML =
+      '<div class="tr-pop" role="dialog" aria-modal="true" aria-labelledby="tr-pop-title">' +
+        '<button type="button" class="tr-pop-close" aria-label="Close">✕</button>' +
+        '<div class="tr-pop-art">' + _art(function(A) { return A.badge(v.metal, b.emoji, v.b.color); }) + '</div>' +
+        '<h2 id="tr-pop-title">' + _esc(b.name) + '</h2>' +
+        '<div class="tr-pop-metal tr-pm-' + (v.metal || 'locked') + '">' + _esc(status) + '</div>' +
+        '<p class="tr-pop-next">' + _esc(b.desc) + '.' + (!b.earned && b.goal > 1 ? ' You have ' + (b.id.indexOf('saved') === 0 ? '$' + Math.floor(b.have) : b.have) + ' of ' + (b.id.indexOf('saved') === 0 ? '$' + b.goal : b.goal) + '.' : '') + '</p>' +
+        '<a class="tr-next-link tr-pop-open" href="banco.html">Open Banco Familia →</a>' +
+      '</div>';
+    document.body.appendChild(ov);
+    _pop = ov;
+    ov.addEventListener('click', function(e) { if (e.target === ov) _closeDetail(); });
+    ov.querySelector('.tr-pop-close').addEventListener('click', _closeDetail);
+    document.addEventListener('keydown', _onKey, true);
+    try { ov.querySelector('.tr-pop-close').focus(); } catch (e) {}
   }
 
   // ── Badge detail popover ──
@@ -351,7 +417,7 @@ var TrophyRoom = (function() {
       var grid = document.getElementById('tr-grid');
       if (!grid || !_last) return;
       var c = _columns(grid.clientWidth || window.innerWidth);
-      if (c !== _lastCols) { _lastCols = c; _renderCabinet(_last); }
+      if (c !== _lastCols) { _lastCols = c; _renderCabinet(_last); if (_lastMoney) _renderCabinet(_lastMoney, 'tr-money-grid', _openMoneyDetail); }
       var m = document.getElementById('tr-mountain');
       if (m && Math.abs(m.clientWidth - _mountainW) > 40) _renderMountain();
     }, 120);
