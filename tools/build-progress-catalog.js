@@ -151,6 +151,12 @@ const BUILDERS = {
       .map((p, idx) => unit(idx + 1, p.name, _title(p.tier)));
   },
 
+  // Lector keeps one level ladder for each language. A level is done when
+  // every practice in it has 2+ stars; the unit carries its practices in
+  // `k` so Progress Manager can tell (see lectorLevels in progress-admin.js).
+  lector_es() { return lectorLevels('es', 'Español'); },
+  lector_en() { return lectorLevels('en', 'English'); },
+
   world() {
     const out = [];
     arr('js/world-explorer.js', 'CONTINENTS').forEach(c => {
@@ -161,6 +167,11 @@ const BUILDERS = {
     return out;
   },
 };
+
+function lectorLevels(lang, group) {
+  const D = require(path.join(ROOT, 'js', 'lector-data.js'));
+  return D.levels(lang).map(l => unit(l.id, 'Level ' + l.n + ' · ' + l.title[lang === 'es' ? 0 : 1], group, l.acts.join(',')));
+}
 
 function _title(s) {
   if (!s) return '';

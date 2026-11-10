@@ -320,6 +320,7 @@
       'zs_circuit_', 'zs_engineer_', 'zs_negocio_', 'zs_euclid_', 'zs_cocina_',
       'zs_marinero_', 'zs_naturaleza_', 'zs_secretos_', 'zs_clock_', 'zs_dictado_', 'zs_calculo_'
     ];
+    prefixes.push('zs_lector_');
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
     });
@@ -561,6 +562,7 @@
       { name: 'Dictado', icon: '✍️', href: 'dictado.html', key: 'zs_dictado_' + key, schedId: 'dictado' },
       { name: 'Cálculo Rápido', icon: '🧮', href: 'calculo-rapido.html', key: 'zs_calculo_' + key, schedId: 'calculo' }
     ];
+    apps.push({ name: 'Lector', icon: '📖', href: 'lector.html', key: 'zs_lector_' + key, schedId: 'lector' });
 
     // Only apps this kid can see: by age, and what a parent has hidden.
     apps = apps.filter(function(app) {
@@ -872,7 +874,7 @@
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo'].forEach(function(id) {
+       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector'].forEach(function(id) {
         try {
           var el = document.getElementById('stats-' + id);
           if (!el || typeof getAppStars !== 'function') return;

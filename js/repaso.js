@@ -14,7 +14,7 @@
 
   var APP_NAMES = {
     math: 'Math Galaxy', vocab: 'Vocabulario Vivo', bible: 'Bible Explorer',
-    atlas: 'World Atlas', chess: 'Chess Quest', patron: 'Patrón de Lancha', dictado: 'Dictado', calculo: 'Cálculo Rápido'
+    atlas: 'World Atlas', chess: 'Chess Quest', patron: 'Patrón de Lancha', dictado: 'Dictado', calculo: 'Cálculo Rápido', lector: 'Lector'
   };
 
   var S = { queue: [], i: 0, right: 0, answered: 0, item: null, locked: false };

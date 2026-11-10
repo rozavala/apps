@@ -342,6 +342,39 @@ var ProgressAdmin = (function() {
     { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
 
+  // Lector keeps a ladder of levels for each language in one saved blob
+  // (zs_lector_<kid>: lv:{ es2:{sounds,syll,build,read}, … }, books:{…}).
+  // A level counts as done when every practice in it has 2+ stars.
+  function _lectorApp(lang, label) {
+    function acts(u) { return String(u.k || '').split(',').filter(Boolean); }
+    return {
+      id: 'lector-' + lang, label: 'Lector — ' + label, icon: '📖', href: 'lector.html',
+      prefix: 'zs_lector_', catalog: 'lector_' + lang, mode: 'sequence', noun: 'level',
+      done: function(data, u) {
+        var L = (data.lv || {})[u.i] || {};
+        return acts(u).every(function(a) { return (L[a] | 0) >= 2; });
+      },
+      apply: function(data, units, count) {
+        data.lv = data.lv || {};
+        units.forEach(function(u, idx) {
+          if (idx < count) {
+            var L = data.lv[u.i] = data.lv[u.i] || {};
+            acts(u).forEach(function(a) { if ((L[a] | 0) < 2) L[a] = 3; });
+          } else delete data.lv[u.i];
+        });
+        return data;                 // books and their stars are left alone
+      },
+      clear: function(data) {
+        var out = { v: 1, lv: {}, books: {} }, k;
+        if (data.lang) out.lang = data.lang;
+        for (k in (data.lv || {})) if (k.indexOf(lang) !== 0) out.lv[k] = data.lv[k];
+        for (k in (data.books || {})) if (k.indexOf(lang + '-') !== 0) out.books[k] = data.books[k];
+        return out;
+      }
+    };
+  }
+  APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+
   var _byId = {};
   APPS.forEach(function(a) { _byId[a.id] = a; });
 
