@@ -16,7 +16,7 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **🧮 Math Galaxy** | Supera desafíos matemáticos—suma, multiplicación, fracciones y más en una aventura espacial. (Blast through math challenges—addition, multiplication, fractions, and more in a space adventure.) | [math-galaxy.html](math-galaxy.html) |
 | **🤖 Code Cadet** | Resuelve rompecabezas de lógica con programación visual en bloques. (Solve logic puzzles with visual block-based programming.) | [code-cadet.html](code-cadet.html) |
 | **💰 Money Master** | Aprende sobre monedas, billetes y a dar vuelto — practica con CLP y USD. (Coins, bills, and change-making — practice with CLP & USD.) | [money-master.html](money-master.html) |
-| **📈 Invest Quest** | Aprende sobre riesgo, retorno y cómo funciona el mercado. (Learn about risk, return and how the market works). | [invest-quest.html](invest-quest.html) |
+| **📈 Invest Quest** | Aprende sobre riesgo, retorno y cómo funciona el mercado. (Learn about risk, return and how the market works.) | [invest-quest.html](invest-quest.html) |
 | **🇨🇱 Descubre Chile** | Explora la increíble historia de Chile—desde el pueblo Mapuche hasta los Andes, a través de historias y cuestionarios. (Explore Chile's amazing history—from the Mapuche people to the Andes, through stories and quizzes.) | [descubre-chile.html](descubre-chile.html) |
 | **♟️ Chess Quest** | Domina el ajedrez desde lo básico—aprende cómo se mueve cada pieza, tácticas y juega contra una IA amigable. (Master chess from the basics—learn how each piece moves, tactics, and play against a friendly AI.) | [chess-quest.html](chess-quest.html) |
 | **⛪ Fe Explorador** | Descubre oraciones clásicas, biografías históricas de santos y el rico patrimonio católico de Chile. (Discover classic prayers, factual biographies of historical saints, and the rich Chilean Catholic heritage through interactive stories.) | [fe-explorador.html](fe-explorador.html) |
@@ -32,10 +32,10 @@ Aventuras de aprendizaje divertidas, basadas en hechos y habilidades para niños
 | **🎯 Guess Quest** | Desarrolla habilidades de deducción y vocabulario adivinando palabras ocultas en inglés y español. (Build deduction skills and vocabulary by guessing hidden words in English and Spanish.) | [guess-quest.html](guess-quest.html) |
 | **📖 Bible Explorer** | Historias, versículos y los libros de la Sagrada Escritura. (Stories, verses, and the books of the Holy Scripture.) | [bible-explorer.html](bible-explorer.html) |
 | **📚 Vocabulario Vivo** | Aprende inglés y español por raíces latinas y griegas. (Learn English and Spanish through Latin and Greek roots.) | [vocabulario-vivo.html](vocabulario-vivo.html) |
-| **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values). | [book-movie-check.html](book-movie-check.html) |
-| **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list). | [shopping-list.html](shopping-list.html) |
-| **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge). | [family.html](family.html) |
-| **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone). | [trophy-room.html](trophy-room.html) |
+| **🔍 Book & Movie Check** | Averigua si un libro o película es adecuado para nuestra familia evaluándolo a través de los valores familiares. (Find out if a book or movie is right for our family by evaluating through family values.) | [book-movie-check.html](book-movie-check.html) |
+| **🛒 Lista de Compras** | Lista de compras compartida para la familia. (Shared family shopping list.) | [shopping-list.html](shopping-list.html) |
+| **🏠 Family Wall** | Dashboard compartido para la familia. (Shared family dashboard for the fridge.) | [family.html](family.html) |
+| **🏆 Trophy Room** | Cada insignia, cada rango, cada hito. (Every badge, every rank, every milestone.) | [trophy-room.html](trophy-room.html) |
 | **🍽️ Menú Semanal** | Planifica las comidas de la semana con la familia. (Plan the weekly meals with the family.) | [menu.html](menu.html) |
 | **⏱️ Home Timer** | Temporizador familiar para tareas y actividades. (Family timer for tasks and activities.) | [home-timer.html](home-timer.html) |
 | **👨‍👩‍👧‍👦 Sunday Report** | Resumen semanal de actividades familiares. (Weekly summary of family activities.) | [sunday-report.html](sunday-report.html) |
