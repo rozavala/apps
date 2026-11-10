@@ -374,6 +374,7 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+  APPS.push({ id: 'linea', label: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', prefix: 'zs_linea_', mode: 'reset' });
 
   var _byId = {};
   APPS.forEach(function(a) { _byId[a.id] = a; });

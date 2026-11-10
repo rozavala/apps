@@ -56,6 +56,7 @@ var HubPlan = (function() {
     { id: 'dictado',    href: 'dictado.html',            group: 'reading', minAge: 6,  names: ['dictado'] },
     { id: 'world',      href: 'world-explorer.html',     group: 'world',   minAge: 5,  names: ['world explorer'] },
     { id: 'quest',      href: 'quest-adventure.html',    group: 'world',   minAge: 5,  names: ['quest adventure', 'summer quest'] },
+    { id: 'linea',      href: 'linea-del-tiempo.html',   group: 'world',   minAge: 5,  names: ['linea del tiempo'] },
     { id: 'chile',      href: 'descubre-chile.html',     group: 'world',   minAge: 6,  names: ['descubre chile'] },
     { id: 'atlas',      href: 'world-atlas.html',        group: 'world',   minAge: 6,  names: ['world atlas'] },
     { id: 'civics',     href: 'civics-lab.html',         group: 'world',   minAge: 8,  names: ['civics lab'] },

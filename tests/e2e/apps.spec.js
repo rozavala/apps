@@ -30,7 +30,8 @@ const MAJOR_APPS = [
   'que-hora-es.html',
   'dictado.html',
   'calculo-rapido.html',
-  'lector.html'
+  'lector.html',
+  'linea-del-tiempo.html'
 ];
 
 test.describe('Major Apps Critical Path', () => {

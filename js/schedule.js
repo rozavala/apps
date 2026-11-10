@@ -42,6 +42,7 @@ var AppSchedule = (function() {
     { id: 'calculo',    card: '.card-calculo' }
   ];
   ALL_APPS.push({ id: 'lector', card: '.card-lector' });
+  ALL_APPS.push({ id: 'linea', card: '.card-linea' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -62,6 +63,9 @@ var AppSchedule = (function() {
 
   // Lector (reading practice for the youngest) is offered every day.
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
+
+  // Línea del Tiempo (history) rides along with the history and world days.
+  [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
