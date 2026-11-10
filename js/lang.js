@@ -52,7 +52,8 @@ var ZsLang = (function() {
     'marinero.html':           { d: ['Anuda nudos de navegación reales, orienta con la brújula y lee boyas y banderas de señales.', 'Tie real sailing knots, steer by compass, and read buoys and signal flags.'], g: ['⚓ Marinería', '⚓ Seamanship'] },
     'naturaleza.html':         { d: ['Guía de campo de aves, árboles y animales de Chile — ¡y luego sal a encontrarlos!', 'Field guide to Chilean birds, trees and animals — then go outside and spot them!'], g: ['🌿 Naturaleza', '🌿 Nature'] },
     'mensajes-secretos.html':  { d: ['Descifra códigos con una rueda César, telégrafo Morse, pigpen y más — 19 misiones de espías.', 'Crack codes with a Caesar wheel, Morse telegraph, pigpen and more — 19 spy missions.'], g: ['🕵️ Códigos', '🕵️ Codes'] },
-    'que-hora-es.html':        { d: ['Aprende a leer la hora en un reloj de madera de verdad: ajusta, lee, planifica tu día y el calendario.', 'Learn to tell time on a real wooden clock — set, read, plan your day and the calendar.'], g: ['⏰ Tiempo', '⏰ Time'] }
+    'que-hora-es.html':        { d: ['Aprende a leer la hora en un reloj de madera de verdad: ajusta, lee, planifica tu día y el calendario.', 'Learn to tell time on a real wooden clock — set, read, plan your day and the calendar.'], g: ['⏰ Tiempo', '⏰ Time'] },
+    'calculo-rapido.html':     { d: ['Gana al reloj con cálculo mental, estima como un ingeniero y convierte unidades.', 'Beat the clock with mental maths, estimate like an engineer and convert units.'], g: ['🧮 Cálculo', '🧮 Calculation'] }
   };
 
   function _lang() {

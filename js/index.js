@@ -318,7 +318,7 @@
       'zs_sports_', 'zs_move_', 'zs_lab_', 'zs_world_', 'zs_story_', 'zs_quest_',
       'zs_lcheck_', 'zs_lastrank_', 'littlemaestro_',
       'zs_circuit_', 'zs_engineer_', 'zs_negocio_', 'zs_euclid_', 'zs_cocina_',
-      'zs_marinero_', 'zs_naturaleza_', 'zs_secretos_', 'zs_clock_'
+      'zs_marinero_', 'zs_naturaleza_', 'zs_secretos_', 'zs_clock_', 'zs_calculo_'
     ];
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
@@ -557,7 +557,8 @@
       { name: 'Marinero', icon: '🪢', href: 'marinero.html', key: 'zs_marinero_' + key, schedId: 'marinero' },
       { name: 'Explorador de Naturaleza', icon: '🦅', href: 'naturaleza.html', key: 'zs_naturaleza_' + key, schedId: 'naturaleza' },
       { name: 'Mensajes Secretos', icon: '🔐', href: 'mensajes-secretos.html', key: 'zs_secretos_' + key, schedId: 'secretos' },
-      { name: '¿Qué Hora Es?', icon: '🕰️', href: 'que-hora-es.html', key: 'zs_clock_' + key, schedId: 'clock' }
+      { name: '¿Qué Hora Es?', icon: '🕰️', href: 'que-hora-es.html', key: 'zs_clock_' + key, schedId: 'clock' },
+      { name: 'Cálculo Rápido', icon: '🧮', href: 'calculo-rapido.html', key: 'zs_calculo_' + key, schedId: 'calculo' }
     ];
 
     // Only apps this kid can see: by age, and what a parent has hidden.
@@ -870,7 +871,7 @@
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-       'marinero', 'naturaleza', 'secretos', 'clock'].forEach(function(id) {
+       'marinero', 'naturaleza', 'secretos', 'clock', 'calculo'].forEach(function(id) {
         try {
           var el = document.getElementById('stats-' + id);
           if (!el || typeof getAppStars !== 'function') return;
