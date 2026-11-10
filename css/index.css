@@ -586,9 +586,11 @@
     .card-cocina { --card-accent: #FDBA74; --card-glow: rgba(253, 186, 116, 0.30); --card-icon-bg: linear-gradient(135deg, #C2410C, #FDBA74); --card-tag-bg: rgba(253, 186, 116, 0.15); }
     .card-linea { --card-accent: #94A3B8; --card-glow: rgba(148, 163, 184, 0.30); --card-icon-bg: linear-gradient(135deg, #334155, #94A3B8); --card-tag-bg: rgba(148, 163, 184, 0.15); }
     .card-lector { --card-accent: #14B8A6; --card-glow: rgba(20, 184, 166, 0.30); --card-icon-bg: linear-gradient(135deg, #0E7490, #5EEAD4); --card-tag-bg: rgba(20, 184, 166, 0.15); }
+    .card-codelab { --card-accent: #22C55E; --card-glow: rgba(34, 197, 94, 0.30); --card-icon-bg: linear-gradient(135deg, #15803D, #86EFAC); --card-tag-bg: rgba(34, 197, 94, 0.15); }
     .card-marinero { --card-accent: #38BDF8; --card-glow: rgba(56, 189, 248, 0.30); --card-icon-bg: linear-gradient(135deg, #1E3A8A, #38BDF8); --card-tag-bg: rgba(56, 189, 248, 0.15); }
     .card-naturaleza { --card-accent: #84CC16; --card-glow: rgba(132, 204, 22, 0.30); --card-icon-bg: linear-gradient(135deg, #166534, #84CC16); --card-tag-bg: rgba(132, 204, 22, 0.15); }
     .card-secretos { --card-accent: #A1A1AA; --card-glow: rgba(161, 161, 170, 0.30); --card-icon-bg: linear-gradient(135deg, #3F3F46, #A1A1AA); --card-tag-bg: rgba(161, 161, 170, 0.15); }
+    .card-arbol { --card-accent: #4ADE80; --card-glow: rgba(74, 222, 128, 0.30); --card-icon-bg: linear-gradient(135deg, #14532D, #4ADE80); --card-tag-bg: rgba(74, 222, 128, 0.15); }
     .card-calculo { --card-accent: #2DD4BF; --card-glow: rgba(45, 212, 191, 0.30); --card-icon-bg: linear-gradient(135deg, #115E59, #2DD4BF); --card-tag-bg: rgba(45, 212, 191, 0.15); }
     .card-clock { --card-accent: #E7B36A; --card-glow: rgba(231, 179, 106, 0.30); --card-icon-bg: linear-gradient(135deg, #7C2D12, #E7B36A); --card-tag-bg: rgba(231, 179, 106, 0.15); }
 

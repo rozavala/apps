@@ -521,6 +521,26 @@ var APP_STAR_CONFIGS = [
       for (k in g) n += Math.min(3, Math.max(0, g[k] | 0));
       return n;
     } },
+  // Árbol familiar: each family game is starred by its best score out of 5
+  // (3 right = 1 star, 4 = 2, 5 = 3), one star for every 3 relatives whose page
+  // was opened (up to 3), one for 1, 5 and 10 "How are we related?" answers, and
+  // one for opening the family map. The tree itself is household data and never scores.
+  { id: 'arbol', prefix: 'zs_arbol_', stars: function(d) {
+      var n = 0, k, q = d.q || {}, seen = 0, rel = d.rel | 0;
+      for (k in q) n += Math.max(0, Math.min(3, (q[k] | 0) - 2));
+      for (k in (d.seen || {})) seen++;
+      n += Math.min(3, Math.floor(seen / 3));
+      n += rel >= 10 ? 3 : rel >= 5 ? 2 : rel >= 1 ? 1 : 0;
+      n += d.map ? 1 : 0;
+      return n;
+    } },
+  // Code Lab: each mission is worth up to 3 stars (solved, no hints, a
+  // short program), kept in { m: { '<missionId>': { s: 0..3, ... } } }.
+  { id: 'codelab', prefix: 'zs_codelab_', stars: function(d) {
+      var n = 0, m = d.m && typeof d.m === 'object' ? d.m : {};
+      for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a
