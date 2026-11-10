@@ -92,6 +92,10 @@ var ZsDialog = (function() {
     return (typeof opts === 'string') ? { message: opts } : (opts || {});
   }
 
+  // The built-in words follow the kid's language (auth.js); callers'
+  // own titles, messages and labels are used as given.
+  function _L(es, en) { return typeof zsT === 'function' ? zsT(es, en) : en; }
+
   // kind: 'confirm' | 'alert' | 'prompt'
   function _show(kind, o) {
     _injectStyles();
@@ -104,7 +108,7 @@ var ZsDialog = (function() {
       overlay.className = 'zsd-overlay';
       overlay.setAttribute('role', kind === 'alert' ? 'alertdialog' : 'dialog');
       overlay.setAttribute('aria-modal', 'true');
-      var title = o.title || (kind === 'confirm' ? 'Are you sure?' : '');
+      var title = o.title || (kind === 'confirm' ? _L('¿Seguro?', 'Are you sure?') : '');
       overlay.innerHTML =
         '<div class="zsd-panel">' +
           (title ? '<h2 class="zsd-title">' + _esc(title) + '</h2>' : '') +
@@ -117,9 +121,9 @@ var ZsDialog = (function() {
             : '') +
           '<div class="zsd-actions">' +
             (kind === 'alert' ? '' :
-              '<button type="button" class="zsd-btn zsd-cancel">' + _esc(o.cancelLabel || 'Cancel') + '</button>') +
+              '<button type="button" class="zsd-btn zsd-cancel">' + _esc(o.cancelLabel || _L('Cancelar', 'Cancel')) + '</button>') +
             '<button type="button" class="zsd-btn zsd-ok' + (o.danger ? ' zsd-danger' : '') + '">' +
-              _esc(o.confirmLabel || 'OK') +
+              _esc(o.confirmLabel || _L('Aceptar', 'OK')) +
             '</button>' +
           '</div>' +
         '</div>';

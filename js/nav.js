@@ -45,13 +45,13 @@
     var wallBtn = document.createElement('a');
     wallBtn.className = 'home-btn';
     wallBtn.href = 'family.html';
-    wallBtn.title = 'Back to the family wall';
+    wallBtn.title = typeof zsT === 'function' ? zsT('Volver al muro familiar', 'Back to the family wall') : 'Back to the family wall';
     wallBtn.textContent = '\u2190';
 
     var homeBtn = document.createElement('a');
     homeBtn.className = 'home-btn';
     homeBtn.href = 'index.html';
-    homeBtn.title = 'Back to apps';
+    homeBtn.title = typeof zsT === 'function' ? zsT('Volver a las apps', 'Back to apps') : 'Back to apps';
     homeBtn.textContent = '\ud83c\udfe0';
 
     nav.appendChild(wallBtn);
@@ -87,7 +87,7 @@
     var homeBtn = document.createElement('a');
     homeBtn.className = 'home-btn';
     homeBtn.href = 'index.html';
-    homeBtn.title = 'Back to apps';
+    homeBtn.title = typeof zsT === 'function' ? zsT('Volver a las apps', 'Back to apps') : 'Back to apps';
     homeBtn.textContent = '🏠';
 
     // User badge

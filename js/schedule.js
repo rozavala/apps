@@ -123,9 +123,21 @@ var AppSchedule = (function() {
       6: 'Weekend Adventure 🚀'
     };
 
+    var DAYS_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    var THEMES_ES = {
+      0: 'Relajo y exploración 🌈',
+      1: 'Día de descubrimiento 🔬',
+      2: 'Estrategia y cuentos 📚',
+      3: 'Artes creativas 🎨',
+      4: 'Ciencia y mundo 🌍',
+      5: 'Música y lógica 🎵',
+      6: 'Aventura de fin de semana 🚀'
+    };
+    var tr = typeof zsT === 'function' ? zsT : function(es, en) { return en; };
+
     return {
-      day: DAYS[day],
-      theme: THEMES[day],
+      day: tr(DAYS_ES[day], DAYS[day]),
+      theme: tr(THEMES_ES[day], THEMES[day]),
       count: apps.length
     };
   }

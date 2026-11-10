@@ -1406,6 +1406,7 @@ var QueHoraEs = (function() {
     tier = typeof getAgeTier === 'function' ? getAgeTier(age) : 'intermediate';
     data = _load();
     if (data.lang !== 'en' && data.lang !== 'es') data.lang = 'en';
+    data.lang = zsAppLang(data.lang);
     if (typeof data.helper !== 'boolean') data.helper = tier === 'beginner';
     if (typeof data.digital !== 'boolean') data.digital = true;
     if (!data.levels || typeof data.levels !== 'object') data.levels = {};

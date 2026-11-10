@@ -382,6 +382,11 @@ const GuessQuest = (() => {
       CloudSync.pull(_storageKey());
     }
 
+    lang = zsAppLang(lang);
+    document.documentElement.lang = lang;
+    const langLabel = document.getElementById('lang-label');
+    if (langLabel) langLabel.textContent = lang === 'en' ? 'ES / EN' : 'EN / ES';
+
     _renderCategorySelect();
     _updateHubStats();
   }

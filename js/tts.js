@@ -93,7 +93,8 @@ var ZsTTS = (function() {
     opts = opts || {};
 
     var utterance = new window.SpeechSynthesisUtterance(text);
-    utterance.lang = opts.lang || 'en-US';
+    // Callers that know the language pass it; otherwise the kid's own.
+    utterance.lang = opts.lang || (typeof getKidLang === 'function' && getKidLang() === 'es' ? 'es-CL' : 'en-US');
     utterance.rate = typeof opts.rate === 'number' ? opts.rate : s.rate;
     utterance.pitch = typeof opts.pitch === 'number' ? opts.pitch : 1.0;
 
