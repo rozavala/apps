@@ -1126,6 +1126,7 @@ const WorldExplorer = (() => {
     }
     const data = _load();
     if (data.lang === 'es') lang = 'es';
+    lang = zsAppLang(lang);
     _applyStaticText();
     _renderExplore();
     _updateGlobalStars();

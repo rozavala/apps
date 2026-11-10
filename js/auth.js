@@ -107,9 +107,83 @@ function getActiveUser() {
 
 function getGreeting() {
   var h = new Date().getHours();
-  if (h < 12) return 'Good morning!';
-  if (h < 17) return 'Good afternoon!';
-  return 'Good evening!';
+  if (h < 12) return zsT('¡Buenos días!', 'Good morning!');
+  if (h < 17) return zsT('¡Buenas tardes!', 'Good afternoon!');
+  return zsT('¡Buenas noches!', 'Good evening!');
+}
+
+// ── Language ──────────────────────────────────────────────────────
+// Each kid has a language for the shared screens: 'es', 'en' or 'both'
+// (Spanish first, English beside or under it). It lives on the profile,
+// so it syncs with the profile. A profile with no setting reads as
+// English, which is what the shared screens always were; nothing changes
+// until a parent picks one.
+
+var KID_LANGS = ['es', 'en', 'both'];
+
+function _kidLangFrom(p) {
+  return p && KID_LANGS.indexOf(p.lang) >= 0 ? p.lang : null;
+}
+
+// 'es' | 'en' | 'both' as set on the profile, or null when nobody chose.
+function getKidLangChoice(userName) {
+  var name = userName;
+  var active = getActiveUser();
+  if (!name && active) name = active.name;
+  var lang = null;
+  if (name) {
+    var profiles = getProfiles();
+    for (var i = 0; i < profiles.length; i++) {
+      if (profiles[i] && profiles[i].name === name) { lang = _kidLangFrom(profiles[i]); break; }
+    }
+    // A guest is not in the profile list; use the signed-in copy.
+    if (!lang && active && active.name === name) lang = _kidLangFrom(active);
+  }
+  return lang;
+}
+
+function getKidLang(userName) {
+  return getKidLangChoice(userName) || 'en';
+}
+
+// For an app that keeps its own English/Spanish switch: when a parent has
+// set Spanish or English for this kid, the app opens in it; otherwise (not
+// set, or 'both') the app keeps the language it saved. The app's switch
+// still works while it is open.
+function zsAppLang(saved) {
+  var choice = getKidLangChoice();
+  return choice === 'es' || choice === 'en' ? choice : saved;
+}
+
+function setKidLang(userName, lang) {
+  if (KID_LANGS.indexOf(lang) < 0) return false;
+  var profiles = getProfiles();
+  var hit = false;
+  for (var i = 0; i < profiles.length; i++) {
+    if (profiles[i] && profiles[i].name === userName) { profiles[i].lang = lang; hit = true; }
+  }
+  if (!hit) return false;
+  saveProfiles(profiles);
+  var active = getActiveUser();
+  if (active && active.name === userName) { active.lang = lang; setActiveUser(active); }
+  if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+    try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+  }
+  return true;
+}
+
+// For short things where saying it twice is clutter (a count, a timer):
+// Spanish when the kid has Spanish or both, English otherwise.
+function zsShort(es, en) {
+  return getKidLang() === 'en' ? en : es;
+}
+
+// The text in this kid's language. 'both' gives "Spanish · English".
+// (Some apps have their own local t(en, es) with the arguments the other
+// way round; this one is zsT(es, en).)
+function zsT(es, en) {
+  var lang = getKidLang();
+  return lang === 'es' ? es : lang === 'both' ? es + ' · ' + en : en;
 }
 
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }

@@ -130,6 +130,7 @@
   window.redeemForTime = function() { redeemForTime(); };
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
+  window.updateKidLang = function(idx, val) { updateKidLang(idx, val); };
   window.updateKidRoutinesEnabled = function(idx, val) { updateKidRoutinesEnabled(idx, val); };
   window.addRoutineItem = function(idx, which) { addRoutineItem(idx, which); };
   window.updateRoutineItem = function(idx, which, j, val) { updateRoutineItem(idx, which, j, val); };
@@ -187,6 +188,7 @@
   var editEmoji = null;
   var editColor = null;
   var editAge = null;
+  var editLang = 'en';
   // Tap-to-confirm state for the Delete button. The native confirm()
   // dialog used to live here, but it is unreliable in iPad PWAs (the
   // standalone shell silently auto-dismisses with `false`) — which
@@ -204,6 +206,7 @@
     var grid = document.getElementById('profiles-grid');
     var profiles = getProfiles();
     if (!grid) return;
+    if (typeof ZsLang !== 'undefined') ZsLang.apply();
     grid.innerHTML = '';
 
     profiles.forEach(function(p, i) {
@@ -405,7 +408,7 @@
 
     if (typeof TimerManager !== 'undefined' && els.timer) {
       var rem = TimerManager.getRemaining();
-      els.timer.textContent = '⏰ ' + rem + ' min left';
+      els.timer.textContent = zsShort('⏰ quedan ' + rem + ' min', '⏰ ' + rem + ' min left');
     }
     
     if (typeof ChoresManager !== 'undefined' && els.tokens) {
@@ -413,7 +416,7 @@
         els.tokens.style.display = 'none';
       } else {
         var tokens = ChoresManager.getStatus().totalTokens;
-        els.tokens.textContent = '⭐ ' + tokens + ' tokens';
+        els.tokens.textContent = zsShort('⭐ ' + tokens + ' fichas', '⭐ ' + tokens + ' tokens');
         els.tokens.style.display = '';
       }
     }
@@ -435,6 +438,9 @@
     try {
       renderAppCards(user);
     } catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderAppCards failed', e.message); }
+    // After the cards are in place: the hub's own words in the kid's language.
+    try { if (typeof ZsLang !== 'undefined') ZsLang.apply(); }
+    catch(e) { if (typeof Debug !== 'undefined') Debug.error('ZsLang.apply failed', e.message); }
     
     try {
       updateStatsCards(user, precalcStats);
@@ -586,10 +592,10 @@
     });
     if (noProgress.length > 0) {
       var pick = noProgress[Math.floor(Math.random() * noProgress.length)];
-      return { text: 'Try something new!', sub: pick.name, icon: pick.icon, href: pick.href };
+      return { text: zsShort('¡Prueba algo nuevo!', 'Try something new!'), sub: pick.name, icon: pick.icon, href: pick.href };
     }
 
-    return { text: 'Keep practicing!', sub: 'Play any app to earn more stars', icon: '⭐', href: null };
+    return { text: zsShort('¡Sigue practicando!', 'Keep practicing!'), sub: zsShort('Juega cualquier app para ganar más estrellas', 'Play any app to earn more stars'), icon: '⭐', href: null };
   }
 
   function updateStatsCards(user, precalculatedStats) {
@@ -1876,6 +1882,16 @@
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" onclick="addKidBonus(getProfiles()[' + i + '].name, 30)">+30 min</button>' +
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1; border-color:rgba(239,68,68,0.3); color:#F87171;" onclick="resetKidTimer(getProfiles()[' + i + '].name)">Reset Today</button>' +
               '</div>' +
+              '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+                '<label style="font-size:0.9rem; font-weight:700;">🌐 Language ' +
+                  '<select class="pk-lang" aria-label="Language for ' + escHtml(p.name) + '" onchange="updateKidLang(' + i + ', this.value)" ' +
+                          'style="margin-left:8px; padding:4px 8px; border-radius:8px; font:inherit;">' +
+                    LANG_OPTIONS.map(function(o) {
+                      return '<option value="' + o.lang + '"' + (getKidLang(p.name) === o.lang ? ' selected' : '') + '>' + o.label + '</option>';
+                    }).join('') +
+                  '</select>' +
+                '</label>' +
+              '</div>' +
               (typeof ZsTTS !== 'undefined' ? (
                 '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
                   '<label class="pk-toggle" style="font-size:0.9rem;">' +
@@ -1982,6 +1998,16 @@
     }
     var label = document.getElementById('chess-val-' + idx);
     if (label) label.textContent = _chessLabel(val);
+  }
+
+  function updateKidLang(idx, lang) {
+    var profiles = getProfiles();
+    if (!profiles[idx]) return;
+    setKidLang(profiles[idx].name, lang);
+    var active = getActiveUser();
+    if (active && active.name === profiles[idx].name && document.getElementById('hub-screen').classList.contains('active')) {
+      showHub();
+    }
   }
 
   function updateKidFaith(idx, checked) {
@@ -2178,7 +2204,7 @@
       var msg = AppSchedule.getTodayMessage();
       var dayEl = document.getElementById('schedule-day');
       var themeEl = document.getElementById('schedule-theme');
-      if (dayEl) dayEl.textContent = '📅 ' + msg.day + ' — ' + msg.count + ' apps today';
+      if (dayEl) dayEl.textContent = '📅 ' + msg.day + ' — ' + zsShort(msg.count + ' apps hoy', msg.count + ' apps today');
       if (themeEl) themeEl.textContent = msg.theme;
     }
   }
@@ -2329,12 +2355,14 @@
     editEmoji = p.avatar;
     editColor = p.color;
     editAge   = p.age || null;
+    editLang  = getKidLang(p.name);
     var inp = document.getElementById('edit-name');
     if (inp) inp.value = p.name;
     _updateEditPreview();
     _renderEditAgePicker();
     _renderEditEmojiPicker();
     _renderEditColorPicker();
+    _renderEditLangPicker();
     var mod = document.getElementById('edit-modal');
     if (mod) mod.classList.add('active');
   }
@@ -2384,6 +2412,29 @@
     });
   }
 
+  var LANG_OPTIONS = [
+    { lang: 'es', label: 'Español' },
+    { lang: 'en', label: 'English' },
+    { lang: 'both', label: 'Español + English' }
+  ];
+
+  function _renderEditLangPicker() {
+    var el = document.getElementById('edit-lang-picker');
+    if (!el) return;
+    el.innerHTML = '';
+    LANG_OPTIONS.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'age-option' + (editLang === opt.lang ? ' selected' : '');
+      btn.style.width = 'auto';
+      btn.style.padding = '0 14px';
+      btn.setAttribute('data-lang', opt.lang);
+      btn.innerHTML = '<span class="age-num" style="font-size:0.85rem;">' + opt.label + '</span>';
+      btn.onclick = function() { editLang = opt.lang; _renderEditLangPicker(); };
+      el.appendChild(btn);
+    });
+  }
+
   function _renderEditEmojiPicker() {
     var el = document.getElementById('edit-emoji-picker');
     if (!el) return;
@@ -2418,11 +2469,19 @@
     var name = document.getElementById('edit-name').value.trim();
     if (!name) return;
     var oldName = profiles[editingIndex].name;
+    // Only write a language when it differs from what the profile reads as.
+    var langChanged = editLang !== getKidLang(oldName);
     profiles[editingIndex].name = name;
     profiles[editingIndex].avatar = editEmoji;
     profiles[editingIndex].color = editColor;
     if (editAge) profiles[editingIndex].age = editAge;
+    if (langChanged) profiles[editingIndex].lang = editLang;
     saveProfiles(profiles);
+    // Without this push the server's copy of the profile wins the next sync
+    // and the edit is undone.
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
     var act = getActiveUser();
     if (act && act.name === oldName) setActiveUser(profiles[editingIndex]);
     closeEditModal();
