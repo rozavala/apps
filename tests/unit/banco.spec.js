@@ -589,6 +589,206 @@ test.describe('Banco Familia', () => {
     await expect(page.locator('#zsd-toast')).toContainText('7 more days to think');
   });
 
+  // ── payday for several kids, stand profit, what $10 bought ──
+  const PAY_EVENTS = [
+    { id: 'a1', ts: 1, type: 'account', account: 'a', name: 'Ana', kind: 'own', members: ['Ana'], date: '2026-10-01' },
+    { id: 'a2', ts: 2, type: 'account', account: 'b', name: 'Beto', kind: 'own', members: ['Beto'], date: '2026-10-01' },
+    { id: 'a3', ts: 3, type: 'account', account: 'c', name: 'Caro', kind: 'own', members: ['Caro'], date: '2026-10-01' },
+    { id: 'gp', ts: 4, type: 'givePct', account: 'b', pct: 20, by: 'Beto', date: '2026-10-02' }
+  ];
+
+  test('payday: one deposit per account, odd cents shared out, match and giving applied to each', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate((evs) => {
+      const E = /** @type {any} */ (window).BankEngine;
+      const sum = (a) => Math.round(a.reduce((t, x) => t + x, 0) * 100) / 100;
+      const equal = E.payday(evs, { items: E.splitEqual(10, 3).map((amount, i) => ({ account: ['a', 'b', 'c'][i], amount })), date: '2026-11-07', source: 'lemonade', note: 'Joint stand', match: true });
+      const custom = E.payday(evs, { items: [{ account: 'a', amount: 7.5 }, { account: 'b', amount: 2.5 }, { account: 'zzz', amount: 4 }, { account: 'c', amount: 0 }], date: '2026-11-07', source: 'chores', match: false });
+      const single = E.payday(evs, { items: [{ account: 'a', amount: 4 }], date: '2026-11-07', match: true });
+      // the bodies, made into real events, give the balances a parent's separate deposits would
+      let t = 100;
+      const made = equal.map(b => Object.assign({ id: 'p' + (++t), ts: t, type: 'deposit', by: 'parent' }, b));
+      const after = E.compute(evs.concat(made), 'b', {}, '2026-11-07');
+      return { split: [E.splitEqual(10, 3), E.splitEqual(10.01, 2), E.splitEqual(0.02, 3), E.splitEqual(9, 3)], equal, custom, single,
+        total: sum(equal.map(b => b.amount)), groups: new Set(equal.map(b => b.group)).size,
+        jarB: after.giving, bMatched: after.matched, bDeposited: after.deposited };
+    }, PAY_EVENTS);
+    expect(r.split).toEqual([[3.34, 3.33, 3.33], [5.01, 5], [0.01, 0.01, 0], [3, 3, 3]]);
+    expect(r.total).toBe(10);
+    expect(r.equal.map(b => b.account)).toEqual(['a', 'b', 'c']);
+    expect(r.equal.map(b => b.match)).toEqual([0.33, 0.33, 0.33]);          // 10% of 3.34 / 3.33 / 3.33, to the cent
+    // Giving: 10% minimum for Ana and Caro, Beto chose 20%, each on amount + match.
+    expect(r.equal.map(b => b.give)).toEqual([0.37, 0.73, 0.37]);
+    expect(r.equal.every(b => b.source === 'lemonade' && b.note === 'Joint stand' && b.date === '2026-11-07')).toBe(true);
+    expect(r.groups).toBe(1);
+    expect(r.jarB).toBeCloseTo(0.73, 2);
+    expect(r.bMatched).toBeCloseTo(0.33, 2);
+    expect(r.bDeposited).toBe(3.33);
+    // Custom amounts; an unknown account and a zero amount are skipped; no match when off.
+    expect(r.custom.map(b => [b.account, b.amount, b.match, b.give])).toEqual([['a', 7.5, 0, 0.75], ['b', 2.5, 0, 0.5]]);
+    expect(r.single).toHaveLength(1);
+    expect(r.single[0].group).toBeUndefined();
+  });
+
+  test('stand profit: only the profit is deposited, costs are reported, and a joint stand splits both', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate((evs) => {
+      const E = /** @type {any} */ (window).BankEngine;
+      let t = 100;
+      const mk = (b) => Object.assign({ id: 'p' + (++t), ts: t, type: 'deposit', by: 'parent' }, b);
+      const solo = E.payday(evs, { items: [{ account: 'a', amount: 14 }], date: '2026-11-01', source: 'lemonade', match: false, stand: { sales: 20, costs: 6, hours: 2 } }).map(mk);
+      const solo2 = E.payday(evs, { items: [{ account: 'a', amount: 9 }], date: '2026-11-05', source: 'lemonade', match: false, stand: { sales: 15, costs: 6 } }).map(mk);
+      const plain = E.payday(evs, { items: [{ account: 'a', amount: 5 }], date: '2026-11-06', source: 'gifts', match: false }).map(mk);
+      const joint = E.payday(evs, { items: [{ account: 'a', amount: 9 }, { account: 'b', amount: 9 }], date: '2026-11-07', source: 'lemonade', match: true, stand: { sales: 30, costs: 12, hours: 2 } }).map(mk);
+      const all = evs.concat(solo, solo2, plain, joint);
+      const stats = E.standStats(all, 'a', '2026-11-07');
+      return {
+        solo: solo[0].stand, joint: joint.map(b => [b.amount, b.stand]),
+        stats: { count: stats.count, sales: stats.sales, costs: stats.costs, profit: stats.profit, hours: stats.hours, perHour: stats.perHour, newest: stats.items[0].date },
+        value: E.compute(all, 'a', {}, '2026-11-07').deposited,
+        none: E.standStats(evs, 'a', '2026-11-07').count,
+        beforeDate: E.standStats(all, 'a', '2026-11-02').count,
+        voided: E.standStats(all.concat([{ id: 'v1', ts: 999, type: 'void', target: solo[0].id, date: '2026-11-08' }]), 'a', '2026-11-08').count,
+        noHours: E.standStats(all, 'a', '2026-11-05').perHour
+      };
+    }, PAY_EVENTS);
+    expect(r.solo).toEqual({ sales: 20, costs: 6, hours: 2 });
+    // A joint stand: $30 sales, $12 costs, $18 profit shared by two kids.
+    expect(r.joint).toEqual([[9, { sales: 15, costs: 6, hours: 2 }], [9, { sales: 15, costs: 6, hours: 2 }]]);
+    expect(r.stats).toMatchObject({ count: 3, sales: 20 + 15 + 15, costs: 18, profit: 14 + 9 + 9, hours: 4, newest: '2026-11-07' });
+    expect(r.stats.perHour).toBe(Math.round(((14 + 9) / 4) * 100) / 100);     // 14 over 2 h and 9 over 2 h
+    expect(r.value).toBe(14 + 9 + 5 + 9);                                      // profit and the gift in; costs never taken out
+    expect(r.none).toBe(0);
+    expect(r.beforeDate).toBe(1);
+    expect(r.voided).toBe(2);
+    expect(r.noHours).toBe(7);                                                 // only the 2-hour stand has hours on that date
+  });
+
+  test('"What did $10 buy?": every price point is sourced, rounded and in order', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate(() => {
+      const P = /** @type {any} */ (window).BancoPrices;
+      return { pts: P.POINTS, counts: P.POINTS[0].rows.map(x => P.countFor(x.cents)) };
+    });
+    expect(r.pts.length).toBeGreaterThan(0);
+    for (const pt of r.pts) {
+      expect(pt.source).toMatch(/\S{5}/);
+      expect(pt.rows.length).toBeGreaterThanOrEqual(3);
+      const years = pt.rows.map(x => x.year);
+      expect(years).toEqual([...years].sort((a, b) => a - b));
+      expect(pt.rows.every(x => Number.isInteger(x.cents) && x.cents > 0)).toBe(true);
+    }
+    expect(r.counts).toEqual([66, 40, 30, 22, 12]);
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    const card = page.locator('.bk-prices');
+    await expect(card).toContainText('What did $10 buy?');
+    await expect(card).toContainText('66 stamps · 15¢ each');
+    await expect(card).toContainText('12 stamps · 78¢ each');
+    await expect(card).toContainText('Source: U.S. Postal Service');
+    await expect(card).toContainText('instead of only keeping it in a jar');
+    await expect(card.locator('.bk-p10')).toHaveCount(5);
+  });
+
+  test('parent deposit form: payday split between accounts, then a stand with sales and costs', async ({ page }) => {
+    await open(page, 'Pablo');
+    await pin(page, '1234');
+    await page.locator('.bk-actions').getByRole('button', { name: /Deposit/ }).click();
+    await page.getByLabel(/Split between several accounts/).check();
+    await expect(page.locator('#bk-f-accbox')).toBeHidden();
+    await page.locator('label.bk-chip', { hasText: 'Pablo' }).first().click();
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    await expect(page.locator('#zsd-toast')).toContainText('Pick at least two accounts');
+    await page.locator('label.bk-chip', { hasText: 'Emilia' }).first().click();
+    await page.fill('#bk-f-amt', '10.01');
+    await page.locator('#bk-f-amt').dispatchEvent('input');
+    await expect(page.locator('#bk-m-prev')).toContainText('Pablo: $5.01 + $0.50 match');
+    await expect(page.locator('#bk-m-prev')).toContainText('Emilia: $5.00 + $0.50 match');
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    const two = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-2));
+    expect(two.map(e => [e.type, e.account, e.amount, e.match, e.give, e.by])).toEqual([
+      ['deposit', 'pablo', 5.01, 0.5, 0.55, 'parent'], ['deposit', 'emilia', 5, 0.5, 0.55, 'parent']]);
+    expect(two[0].group).toBe(two[1].group);
+    expect(two[0].group).toBeTruthy();
+    await expect(page.locator('.bk-acc').first()).toBeVisible();          // back on the home page
+
+    // A stand: only the profit is deposited.
+    await page.locator('.bk-actions').getByRole('button', { name: /Deposit/ }).click();
+    await page.selectOption('#bk-f-acc', 'pablo');
+    await page.getByLabel(/Record the stand/).check();
+    await page.fill('#bk-st-sales', '30');
+    await page.fill('#bk-st-costs', '12');
+    await page.fill('#bk-st-hours', '2');
+    await page.locator('#bk-st-hours').dispatchEvent('input');
+    await expect(page.locator('#bk-f-amt')).toHaveValue('18.00');
+    await expect(page.locator('#bk-st-profit')).toContainText('Only the profit is deposited');
+    await page.fill('#bk-st-costs', '31');
+    await expect(page.locator('#bk-st-profit')).toContainText('No profit this time');
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    await expect(page.locator('#zsd-toast')).toContainText('No profit');
+    await page.fill('#bk-st-costs', '12');
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    const dep = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0]);
+    expect(dep).toMatchObject({ type: 'deposit', account: 'pablo', amount: 18, match: 1.8, source: 'lemonade', stand: { sales: 30, costs: 12, hours: 2 } });
+    // The parent sees the stands card; the costs were not taken out.
+    await expect(page.locator('.bk-stands')).toContainText('Sales');
+    await expect(page.locator('.bk-stands')).toContainText('$9.00');       // profit per hour
+    await expect(page.locator('.bk-stands a')).toHaveAttribute('href', 'mi-negocio.html');
+    const out = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.filter(e => e.type === 'withdraw').length);
+    expect(out).toBe(0);
+  });
+
+  test('a joint stand: custom amounts must add up to the profit', async ({ page }) => {
+    await open(page, 'Pablo');
+    await pin(page, '1234');
+    await page.locator('.bk-actions').getByRole('button', { name: /Deposit/ }).click();
+    await page.getByLabel(/Split between several accounts/).check();
+    await page.locator('label.bk-chip', { hasText: 'Pablo' }).first().click();
+    await page.locator('label.bk-chip', { hasText: 'Emilia' }).first().click();
+    await page.locator('label.bk-chip', { hasText: 'Different amounts' }).click();
+    await page.getByLabel(/Record the stand/).check();
+    await page.fill('#bk-st-sales', '30');
+    await page.fill('#bk-st-costs', '10');
+    await page.fill('#bk-m-amt-pablo', '15');
+    await page.fill('#bk-m-amt-emilia', '3');
+    await page.locator('#bk-m-amt-emilia').dispatchEvent('input');
+    await expect(page.locator('#bk-m-prev')).toContainText('add up to $18.00, but the profit is $20.00');
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    await expect(page.locator('#zsd-toast')).toContainText('add up to $18.00');
+    await page.fill('#bk-m-amt-emilia', '5');
+    await page.getByRole('button', { name: 'Add to account' }).click();
+    const two = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-2));
+    expect(two.map(e => [e.account, e.amount, e.stand])).toEqual([
+      ['pablo', 15, { sales: 22.5, costs: 7.5 }], ['emilia', 5, { sales: 7.5, costs: 2.5 }]]);
+  });
+
+  // Stands are for kids 9 and up (Emilia is 12, Pablo is 8); a parent sees them for everyone.
+  const STAND_BANK = (page) => page.addInitScript((bank) => {
+    bank.events.push({ id: 'st1', ts: 70, type: 'deposit', account: 'emilia', amount: 14, match: 1.4, give: 1.54, source: 'lemonade', date: '2026-11-02', by: 'parent', stand: { sales: 20, costs: 6, hours: 2 } });
+    bank.events.push({ id: 'st2', ts: 71, type: 'deposit', account: 'pablo', amount: 9, match: 0.9, give: 0.99, source: 'lemonade', date: '2026-11-02', by: 'parent', stand: { sales: 15, costs: 6 } });
+    localStorage.setItem('zs_bank', JSON.stringify(bank));
+  }, BANK);
+
+  test('stand profit shows for a 12-year-old with Mi Negocio link, not for an 8-year-old', async ({ page }) => {
+    await STAND_BANK(page);
+    await open(page, 'Emilia');
+    await page.locator('.bk-acc').first().click();
+    const card = page.locator('.bk-stands');
+    await expect(card).toContainText('Your stands');
+    await expect(card.locator('.bk-tile').nth(0)).toContainText('$20.00');
+    await expect(card.locator('.bk-tile').nth(1)).toContainText('−$6.00');
+    await expect(card.locator('.bk-tile').nth(2)).toContainText('$14.00');
+    await expect(card.locator('.bk-tile').nth(3)).toContainText('$7.00');          // $14 over 2 hours
+    await expect(card.locator('a')).toHaveAttribute('href', 'mi-negocio.html');
+  });
+  test('stand profit is hidden from an 8-year-old', async ({ page }) => {
+    await STAND_BANK(page);
+    await open(page, 'Pablo');
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await expect(page.locator('.bk-hero-bal')).toBeVisible();
+    await expect(page.locator('.bk-stands')).toHaveCount(0);
+    await expect(page.locator('.bk-hist')).toContainText('Lemonade stand');
+  });
+
   test('the hub card shows the kid\'s balance', async ({ page }) => {
     await page.addInitScript(([kids, bank, prices]) => {
       localStorage.setItem('zs_profiles', JSON.stringify(kids));
