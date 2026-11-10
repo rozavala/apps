@@ -83,6 +83,7 @@ var CloudSync = (function() {
     'zs_secretos_': 'secretos',
     'zs_clock_': 'clock',
     'zs_challenge_': 'challenge',
+    'zs_review_': 'review',
     'littlemaestro_': 'littlemaestro',
   };
 
