@@ -7,16 +7,16 @@
 
    First-class stamp (one ounce letter), in cents.
    Source: United States Postal Service, Postal History, "Rates for
-   Domestic Letters Since 1863" (published by the USPS Historian)
+   Domestic Letters Since 1863" (USPS Historian, page footer dated
+   August 2026), read directly from the page:
    https://about.usps.com/who/profile/history/domestic-letter-rates-since-1863.htm
-   The rate in force in each year shown (effective date of that rate):
-     1980  15 cents  (May 29, 1978)
-     1990  25 cents  (April 3, 1988)
-     2000  33 cents  (January 10, 1999)
-     2010  44 cents  (May 11, 2009)
-     2025  78 cents  (July 13, 2025)
-   Review note: these were read from a search summary of the USPS table,
-   not from the page itself; spot-check them against the URL above.
+   The rows used (effective date, cents), each the rate in force in the
+   year shown:
+     1980  May 29, 1978    15 cents
+     1990  April 3, 1988   25 cents
+     2000  January 10, 1999  33 cents
+     2010  May 11, 2009    44 cents
+     2026  July 12, 2026   82 cents
    ================================================================ */
 var BancoPrices = (function () {
   'use strict';
@@ -30,7 +30,7 @@ var BancoPrices = (function () {
         { year: 1990, cents: 25 },
         { year: 2000, cents: 33 },
         { year: 2010, cents: 44 },
-        { year: 2025, cents: 78 }
+        { year: 2026, cents: 82 }
       ]
     }
   ];
