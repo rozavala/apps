@@ -44,6 +44,7 @@ var TrophyRoom = (function() {
     { id: 'cocina', name: 'Cocina Lab', emoji: '👩‍🍳', color: '#B45309', threshold: 1, href: 'cocina-lab.html' },
     { id: 'marinero', name: 'Marinero', emoji: '🪢', color: '#C9A227', threshold: 1, href: 'marinero.html' },
     { id: 'review', name: 'Repaso', emoji: '🔁', color: '#0D9488', threshold: 1, href: 'repaso.html' },
+    { id: 'dictado', name: 'Dictado', emoji: '✍️', color: '#4F46E5', threshold: 1, href: 'dictado.html' },
     { id: 'challenge', name: 'Sibling Challenges', emoji: '🤝', color: '#0EA5E9', threshold: 1, href: 'index.html' }
   ];
 

@@ -480,6 +480,13 @@ var APP_STAR_CONFIGS = [
       for (k in (d.best || {})) n += Math.min(3, d.best[k] || 0);
       return n + Math.min(3, d.hunts || 0);
     } },
+  // Dictado: the best round of each list and level, up to 3 stars each
+  // (typed from dictation; a round written on paper stops at 2).
+  { id: 'dictado', prefix: 'zs_dictado_', stars: function(d) {
+      var n = 0, b = (d && d.best) || {};
+      for (var k in b) n += Math.min(3, Math.max(0, Number(b[k]) || 0));
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a
