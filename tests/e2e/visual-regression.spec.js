@@ -9,6 +9,13 @@ const VISUAL_APPS = [
   'art-studio.html'
 ];
 
+// The committed snapshots were taken with the Google Fonts webfonts loaded, so
+// this spec keeps real network access (every other spec runs with external
+// hosts unresolvable, see playwright.config.js).
+test.use({ launchOptions: { args: [] } });
+// ...but never the live sync server (see CLAUDE.md).
+test.beforeEach(async ({ page }) => { await page.route(/tail57521e\.ts\.net/, r => r.abort()); });
+
 test.describe('Visual Regression Tests', () => {
 
   for (const app of VISUAL_APPS) {
