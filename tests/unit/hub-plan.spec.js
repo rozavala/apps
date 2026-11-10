@@ -174,6 +174,8 @@ test.describe('Hub plan', () => {
     // Fold one; it stays folded after a reload.
     await page.locator('.hub-group[data-group="math"] > summary').click();
     await expect(page.locator('.hub-group[data-group="math"]')).not.toHaveAttribute('open', '');
+    // The browser reports the fold a moment later; wait for it to be saved.
+    await page.waitForFunction(() => (localStorage.getItem('zs_hub_fold_test') || '').includes('"math":false'));
     await page.reload();
     await page.waitForFunction(() => !!document.getElementById('hub-today'));
     await expect(page.locator('.hub-group[data-group="math"]')).not.toHaveAttribute('open', '');
