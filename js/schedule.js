@@ -38,7 +38,8 @@ var AppSchedule = (function() {
     { id: 'naturaleza', card: '.card-naturaleza' },
     { id: 'secretos',   card: '.card-secretos' },
     { id: 'clock',      card: '.card-clock' },
-    { id: 'dictado',    card: '.card-dictado' }
+    { id: 'dictado',    card: '.card-dictado' },
+    { id: 'calculo',    card: '.card-calculo' }
   ];
 
   var SMART_SCHEDULE = {
@@ -47,13 +48,13 @@ var AppSchedule = (function() {
     1: ['piano', 'math', 'chile', 'lab', 'guess', 'money',
         'circuit', 'negocio', 'clock'],                                // Monday
     2: ['piano', 'chess', 'guitar', 'story', 'guess',
-        'engineer', 'euclid', 'secretos', 'dictado'],                  // Tuesday
+        'engineer', 'euclid', 'secretos', 'dictado', 'calculo'],                  // Tuesday
     3: ['piano', 'math', 'art', 'world', 'atlas', 'guess', 'money',
         'marinero', 'clock'],                                          // Wednesday
     4: ['piano', 'math', 'chile', 'lab', 'guess',
         'circuit', 'naturaleza', 'dictado'],                           // Thursday
     5: ['piano', 'chess', 'guitar', 'story', 'guess', 'money',
-        'negocio', 'euclid', 'secretos'],                              // Friday
+        'negocio', 'euclid', 'secretos', 'calculo'],                   // Friday
     6: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
         'cocina', 'engineer']                                          // Saturday
   };

@@ -40,6 +40,7 @@ var HubPlan = (function() {
     { id: 'guess',      href: 'guess-quest.html',        group: 'math',    minAge: 4,  beginner: true, names: ['guess quest'] },
     { id: 'chess',      href: 'chess-quest.html',        group: 'math',    minAge: 5,  names: ['chess quest'] },
     { id: 'clock',      href: 'que-hora-es.html',        group: 'math',    minAge: 5,  names: ['que hora es', 'clock'] },
+    { id: 'calculo',    href: 'calculo-rapido.html',     group: 'math',    minAge: 5,  names: ['calculo rapido'] },
     { id: 'euclid',     href: 'euclid-workshop.html',    group: 'math',    minAge: 8,  names: ['euclid'] },
     { id: 'lab',        href: 'lab-explorer.html',       group: 'science', minAge: 4,  beginner: true, names: ['lab explorer'] },
     { id: 'naturaleza', href: 'naturaleza.html',         group: 'science', minAge: 4,  beginner: true, names: ['naturaleza', 'explorador de naturaleza'] },

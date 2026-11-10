@@ -170,7 +170,7 @@ var SundayReport = (function() {
   var APP_NAMES = {
     math: 'Math Galaxy', guess: 'Guess Quest', chess: 'Chess Quest', clock: '¿Qué Hora Es?', euclid: "Euclid's Workshop",
     lab: 'Lab Explorer', naturaleza: 'Explorador de Naturaleza', cocina: 'Cocina Lab', circuit: 'Circuit Lab',
-    engineer: 'Little Engineer', marinero: 'Marinero', secretos: 'Mensajes Secretos', code: 'Code Cadet',
+    engineer: 'Little Engineer', marinero: 'Marinero', calculo: 'Cálculo Rápido', secretos: 'Mensajes Secretos', code: 'Code Cadet',
     story: 'Story Explorer', vocab: 'Vocabulario Vivo', world: 'World Explorer', quest: 'Quest Adventure',
     chile: 'Descubre Chile', atlas: 'World Atlas', civics: 'Civics Lab', faith: 'Fe Explorador', bible: 'Bible Explorer',
     piano: 'Little Maestro', art: 'Art Studio', guitar: 'Guitar Jam', bank: 'Banco Familia', money: 'Money Master',
