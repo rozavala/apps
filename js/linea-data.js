@@ -135,7 +135,7 @@ var LineaData = (function () {
 
     ['santiago-bishopric', 1561, 'cl', 3, 'cathedral',
       ['Se crea el obispado de Santiago', 'The Diocese of Santiago is created'],
-      ['El papa Pío IV crea la diócesis de Santiago de Chile en 1561. Rodrigo González Marmolejo fue nombrado su primer obispo.', 'Pope Pius IV creates the Diocese of Santiago de Chile in 1561. Rodrigo González Marmolejo was named its first bishop.'],
+      ['El papa Pío IV crea la diócesis de Santiago de Chile en 1561. Su primer obispo (electo) fue Rodrigo González Marmolejo.', 'Pope Pius IV creates the Diocese of Santiago de Chile in 1561. Its first bishop-elect was Rodrigo González Marmolejo.'],
       ['Fue el comienzo de la organización de la Iglesia católica en Chile.', 'It was the start of the organization of the Catholic Church in Chile.'],
       'Arzobispado de Santiago: Historia',
       { ln: [['chile', 'RM', 'Región Metropolitana', 'Metropolitan Region']] }],
@@ -191,11 +191,11 @@ var LineaData = (function () {
       {}],
 
     ['flag-chile', 1817, 'cl', 2, 'flag',
-      ['Se decreta la bandera de Chile', 'The flag of Chile is decreed'],
-      ['En octubre de 1817 el gobierno de O’Higgins decreta la bandera de Chile. La de hoy tiene franjas blanca y roja y un cuadrado azul con una estrella blanca, y se usa en la proclamación de la independencia en 1818.', 'In October 1817 the government of O’Higgins decrees the flag of Chile. Today’s flag has white and red stripes and a blue square with a white star, and it is flown at the proclamation of independence in 1818.'],
+      ['Se oficializa la bandera de Chile', 'The flag of Chile is made official'],
+      ['El 18 de octubre de 1817 se oficializa la bandera de Chile. Su diseño actual, con franjas blanca y roja y un cuadrado azul con una estrella blanca, quedó fijado en 1854 y 1912.', 'On 18 October 1817 the flag of Chile is made official. Its current design, with white and red stripes and a blue square with a white star, was fixed in 1854 and 1912.'],
       ['Es la bandera que hoy se iza en todo el país.', 'It is the flag flown across the country today.'],
       'Gobierno de Chile: Símbolos patrios',
-      { dt: ['1817–1818', '1817–1818'] }],
+      {}],
 
     ['andes-crossing', 1817, 'cl', 2, 'andes',
       ['El Ejército de los Andes cruza la cordillera', 'The Army of the Andes crosses the mountains'],
@@ -279,14 +279,14 @@ var LineaData = (function () {
     ['teatro-municipal', 1857, 'cl', 3, 'theatre',
       ['Se inaugura el Teatro Municipal', 'The Teatro Municipal opens'],
       ['El 17 de septiembre de 1857 se inaugura el Teatro Municipal de Santiago, con la ópera “Ernani”, de Verdi. Hoy se presentan allí óperas, conciertos y ballet.', 'On 17 September 1857 the Teatro Municipal of Santiago opens, with the opera “Ernani” by Verdi. Today operas, concerts and ballet are performed there.'],
-      ['Fue construido especialmente para presentar óperas.', 'It was built especially to present operas.'],
+      ['Es el principal teatro de ópera de Chile.', 'It is Chile’s main opera house.'],
       'Teatro Municipal de Santiago: Historia',
       { ln: [['piano', '', '', '']] }],
 
     ['godoy', 1918, 'cl', 3, 'plane',
-      ['El primer cruce de los Andes en avión', 'The first flight across the Andes'],
+      ['El primer cruce de la parte más alta de los Andes en avión', 'The first flight across the highest part of the Andes'],
       ['El 12 de diciembre de 1918, el teniente chileno Dagoberto Godoy sale desde Santiago y cruza la cordillera de los Andes en avión, hacia Argentina.', 'On 12 December 1918, the Chilean lieutenant Dagoberto Godoy takes off near Santiago and flies across the Andes mountains toward Argentina.'],
-      ['Fue el primer piloto en cruzar los Andes en avión.', 'He was the first pilot to fly across the Andes.'],
+      ['Fue el primer piloto en cruzar la parte más alta de los Andes en avión.', 'He was the first pilot to fly across the highest part of the Andes.'],
       'Memoria Chilena: Dagoberto Godoy',
       { ln: [['chile', 'RM', 'Región Metropolitana', 'Metropolitan Region']] }],
 
@@ -497,7 +497,7 @@ var LineaData = (function () {
 
     ['rome-west-end', 476, 'wd', 2, 'arch',
       ['Termina el Imperio romano de Occidente', 'The Western Roman Empire ends'],
-      ['En el año 476 termina el Imperio romano de Occidente, cuando el último emperador, Rómulo Augústulo, deja el trono.', 'In the year 476 the Western Roman Empire ends, when the last emperor, Romulus Augustulus, leaves the throne.'],
+      ['En el año 476 termina el Imperio romano de Occidente, cuando el último emperador, Rómulo Augústulo, es depuesto por Odoacro.', 'In the year 476 the Western Roman Empire ends, when the last emperor, Romulus Augustulus, is deposed by Odoacer.'],
       ['Muchos historiadores usan este año para marcar el comienzo de la Edad Media.', 'Many historians use this year to mark the start of the Middle Ages.'],
       'Britannica: Fall of the Western Roman Empire',
       {}],
@@ -824,7 +824,7 @@ var LineaData = (function () {
 
     ['jesus-birth', -5, 'ch', 1, 'nativity',
       ['Nace Jesús', 'Jesus is born'],
-      ['Jesús nace en Belén, en Judea. Los cristianos celebran su nacimiento cada año en Navidad, el 25 de diciembre.', 'Jesus is born in Bethlehem, in Judea. Christians celebrate his birth every year at Christmas, on 25 December.'],
+      ['Según los Evangelios, Jesús nace en Belén, en Judea. Los cristianos celebran su nacimiento cada año en Navidad, el 25 de diciembre.', 'According to the Gospels, Jesus is born in Bethlehem, in Judea. Christians celebrate his birth every year at Christmas, on 25 December.'],
       ['Nuestro calendario cuenta los años desde su nacimiento, aunque los historiadores creen que fue unos años antes del año 1.', 'Our calendar counts the years from his birth, although historians think it was a few years before the year 1.'],
       'Britannica: Jesus',
       { c: 1, dt: ['c. 6–4 a. C.', 'c. 6–4 BC'], ln: [['bible', '', '', '']] }],
@@ -838,7 +838,7 @@ var LineaData = (function () {
 
     ['pentecost', 30.1, 'ch', 2, 'flame',
       ['Pentecostés', 'Pentecost'],
-      ['Cincuenta días después de la Pascua, los apóstoles reciben el Espíritu Santo en Jerusalén.', 'Fifty days after Easter, the apostles receive the Holy Spirit in Jerusalem.'],
+      ['Según los Hechos de los Apóstoles, cincuenta días después de la Pascua los apóstoles reciben el Espíritu Santo en Jerusalén.', 'According to the Acts of the Apostles, fifty days after Easter the apostles receive the Holy Spirit in Jerusalem.'],
       ['Se recuerda como el cumpleaños de la Iglesia.', 'It is remembered as the birthday of the Church.'],
       'Vatican.va: Catechism of the Catholic Church, Pentecost',
       { c: 1, dt: ['c. 30–33', 'c. 30–33'], ln: [['bible', '', '', '']] }],
@@ -852,7 +852,7 @@ var LineaData = (function () {
 
     ['gospels', 65, 'ch', 2, 'scroll',
       ['Se escriben los Evangelios', 'The Gospels are written'],
-      ['Marcos, Mateo, Lucas y Juan escriben los cuatro Evangelios, que cuentan la vida y las enseñanzas de Jesús.', 'Mark, Matthew, Luke and John write the four Gospels, which tell the life and teachings of Jesus.'],
+      ['Según la tradición, Marcos, Mateo, Lucas y Juan escriben los cuatro Evangelios, que cuentan la vida y las enseñanzas de Jesús.', 'By tradition, Mark, Matthew, Luke and John write the four Gospels, which tell the life and teachings of Jesus.'],
       ['Son los libros más importantes del Nuevo Testamento.', 'They are the most important books of the New Testament.'],
       'Britannica: Gospel',
       { c: 1, dt: ['c. 65–100', 'c. 65–100'], ln: [['bible', '', '', '']] }],
@@ -951,7 +951,7 @@ var LineaData = (function () {
     ['francis-assisi', 1181, 'ch', 1, 'p:friar',
       ['San Francisco de Asís', 'Saint Francis of Assisi'],
       ['San Francisco nació en Asís, Italia. Dejó una vida rica por una vida sencilla y fundó los franciscanos.', 'Saint Francis was born in Assisi, Italy. He left a rich life for a simple one and founded the Franciscans.'],
-      ['Su “Cántico de las criaturas” alaba a Dios por el sol, la luna y los animales.', 'His “Canticle of the Creatures” praises God for the sun, the moon and the animals.'],
+      ['Su “Cántico de las criaturas” alaba a Dios por el sol, la luna, el agua y el fuego.', 'His “Canticle of the Creatures” praises God for the sun, the moon, water and fire.'],
       'Britannica: Saint Francis of Assisi',
       { c: 1, sp: [1181, 1226], ln: [['fe', 'francisco', 'San Francisco de Asís', 'Saint Francis of Assisi'], ['world', 'italy', 'Italia', 'Italy']] }],
 
@@ -963,8 +963,8 @@ var LineaData = (function () {
       { sp: [1194, 1253], ln: [['fe', 'clara', 'Santa Clara de Asís', 'Saint Clare of Assisi']] }],
 
     ['greccio', 1223, 'ch', 1, 'crib',
-      ['El primer pesebre', 'The first nativity scene'],
-      ['En la Navidad de 1223, en Greccio (Italia), san Francisco prepara una escena del nacimiento de Jesús con un pesebre con paja, un buey y un asno, y allí se celebra la Misa de Navidad.', 'At Christmas in 1223, at Greccio (Italy), Saint Francis sets up a scene of the birth of Jesus, with a manger, straw, an ox and a donkey, and Christmas Mass is celebrated there.'],
+      ['El pesebre de Greccio', 'The nativity scene at Greccio'],
+      ['En la Navidad de 1223, en Greccio (Italia), san Francisco prepara un pesebre con heno, un buey y un asno, y se celebra la misa junto a él, con frailes y gente de la zona.', 'At Christmas in 1223, at Greccio (Italy), Saint Francis sets up a manger with hay, an ox and a donkey, and Mass is celebrated beside it, with friars and people from the area.'],
       ['Según el relato de su primer biógrafo, de allí viene la costumbre de armar el pesebre en Navidad.', 'According to his first biographer, that is where the custom of setting up a nativity scene at Christmas comes from.'],
       'Vatican.va: Apostolic Letter Admirabile signum (2019)',
       { ln: [['fe', 'francisco', 'San Francisco de Asís', 'Saint Francis of Assisi']] }],
@@ -1007,7 +1007,7 @@ var LineaData = (function () {
     ['st-peters', 1506, 'ch', 2, 'dome',
       ['Comienza la nueva basílica de San Pedro', 'Work starts on the new St. Peter’s Basilica'],
       ['El 18 de abril de 1506 se coloca la primera piedra de la nueva basílica de San Pedro, en el Vaticano. Se terminó en 1626.', 'On 18 April 1506 the first stone of the new Basilica of Saint Peter, in the Vatican, is laid. It was finished in 1626.'],
-      ['Su cúpula, diseñada por Miguel Ángel, mide unos 42 metros de ancho.', 'Its dome, designed by Michelangelo, is about 42 metres wide.'],
+      ['Su cúpula, diseñada por Miguel Ángel y terminada por otros, mide unos 42 metros de ancho.', 'Its dome, designed by Michelangelo and finished by others, is about 42 metres wide.'],
       'Vatican.va: Papal Basilica of St. Peter',
       { ln: [['world', 'italy', 'Italia', 'Italy']] }],
 
@@ -1034,7 +1034,7 @@ var LineaData = (function () {
 
     ['gregorian-calendar', 1582, 'ch', 2, 'calendar',
       ['El calendario gregoriano', 'The Gregorian calendar'],
-      ['El papa Gregorio XIII reforma el calendario. En países como Italia y España se pasó del 4 al 15 de octubre de 1582.', 'Pope Gregory XIII reforms the calendar. In countries such as Italy and Spain the days jumped from 4 October to 15 October 1582.'],
+      ['El papa Gregorio XIII reforma el calendario. En Italia, España y Portugal, entre otros, se pasó del 4 al 15 de octubre de 1582.', 'Pope Gregory XIII reforms the calendar. In Italy, Spain and Portugal, among others, the days jumped from 4 October to 15 October 1582.'],
       ['Es el calendario que usamos hoy en casi todo el mundo.', 'It is the calendar we use today in almost the whole world.'],
       'Britannica: Gregorian calendar',
       {}],

@@ -205,3 +205,4 @@ body.ln-noscroll { overflow: hidden; }
   .ln-cause { grid-template-columns: 1fr 1fr; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .ln-thumb { transition: none; } }
+@media (max-width: 460px) { .ln-brand-t { font-size: 1.05rem; } }
