@@ -350,6 +350,12 @@
       if (ok){ Q.correct++; state.correct++; }
       state.answered++;
       var box = record(q.id, ok);
+      try {
+        if (typeof Review !== 'undefined') {
+          if (ok) Review.hit(null, 'patron:' + q.id);
+          else Review.add(null, { app: 'patron', id: 'patron:' + q.id, prompt: q.q, answer: q.o[q.a], choices: q.o });
+        }
+      } catch (e) {}
       saveState();
       Q.answers.push({ id: q.id, mod: q.mod, q: q.q, correct: ok, your: q.o[choice], right: q.o[q.a], e: q.e });
       feedback(ok ? '✅' : '📚');

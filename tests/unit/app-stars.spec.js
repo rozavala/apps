@@ -82,7 +82,17 @@ const CASES = [
     stars: 16 },
   { id: 'marinero', prefix: 'zs_marinero_',
     data: { knots: { fig8: { w: 1, c: 1, r: 1 }, bowline: { w: 1 } }, best: { steer: 3, names: 2, buoys: 1 }, hunts: 4 },
-    stars: 13, note: 'treasure hunts cap at 3' }
+    stars: 13, note: 'treasure hunts cap at 3' },
+  { id: 'review', prefix: 'zs_review_',
+    data: { v: 1, items: { 'math:a': { id: 'math:a', box: 1, due: 20000 } }, done: { '2026-11-03': 10, '2026-11-04': 6, '2026-11-05': 3 }, retired: 4 },
+    stars: 3, note: 'one star for each day the review was finished; items and retired ones do not score' },
+  { id: 'review', prefix: 'zs_review_', data: { items: {} }, stars: 0, note: 'nothing finished yet' },
+  { id: 'challenge', prefix: 'zs_challenge_',
+    data: { v: 1, stars: { c_a: '2026-11-09', c_b: '2026-11-10', c_c: '2026-11-10' } },
+    stars: 3, note: 'one per solved challenge' },
+  { id: 'challenge', prefix: 'zs_challenge_',
+    data: { v: 1, stars: { a: '2026-11-10', b: '2026-11-10', c: '2026-11-10', d: '2026-11-10', e: '2026-11-11' } },
+    stars: 4, note: 'at most 3 a day' }
 ];
 
 test.describe('per-app star rules', () => {

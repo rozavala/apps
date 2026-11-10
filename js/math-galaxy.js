@@ -519,6 +519,18 @@ function handleAnswer(btn, selected, q) {
   resolve(correct, q, btn);
 }
 
+// Repaso (the daily review): a missed multiple-choice question comes back
+// tomorrow; one that comes back and is answered right moves up a box.
+function reviewNote(q, correct) {
+  try {
+    if (typeof Review === 'undefined' || !q || !q.options || !q.options.length || !q.text) return;
+    const fmt = v => typeof v === 'number' ? MGVis.fmt(v) : String(v);
+    const ans = fmt(q.answer);
+    if (correct) Review.hit(null, Review.idFor('math', q.text, ans));
+    else Review.add(null, { app: 'math', prompt: q.text, answer: ans, choices: q.options.map(fmt) });
+  } catch (e) {}
+}
+
 function resolve(correct, q, btn) {
   MG.answered = true;
   const card = document.getElementById('questionCard');
@@ -527,6 +539,7 @@ function resolve(correct, q, btn) {
   s.n++;
   if (q.hinted) s.h++;
   MG.results[currentQ] = correct;
+  reviewNote(q, correct);
   if (MG.ctl) MG.ctl.lock();
   document.getElementById('checkBtn').hidden = true;
   document.getElementById('hintBtn').disabled = true;

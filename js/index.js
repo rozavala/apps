@@ -856,6 +856,17 @@
         }
       } catch (e) {}
 
+      // Daily review: how many are waiting, and the flame.
+      try {
+        var rvEl = document.getElementById('stats-review');
+        if (rvEl && typeof Review !== 'undefined') {
+          var rv = Review.counts(user.name), rvItems = [];
+          if (rv.due > 0) rvItems.push('🔁 ' + rv.due + ' ' + zsShort('por repasar', 'to review'));
+          if (rv.streak > 0) rvItems.push('🔥 ' + rv.streak);
+          rvEl.innerHTML = rvItems.map(function(i) { return '<span class="cs-item active">' + i + '</span>'; }).join('');
+        }
+      } catch (e) {}
+
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
@@ -1869,6 +1880,7 @@
       (typeof AppSchedule !== 'undefined' ? AppSchedule.renderScheduleConfig() : '') +
       (typeof OffHours !== 'undefined' ? OffHours.renderConfig() : '') +
       (typeof HubPlan !== 'undefined' ? _renderHubAppsEditor() : '') +
+      (typeof Challenges !== 'undefined' ? '<div id="parents-challenges"></div>' : '') +
       '<div class="parents-grid">' +
         profiles.map(function(p, i) {
           var timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
@@ -1940,6 +1952,9 @@
 
     if (typeof FamilyCalendar !== 'undefined') {
       try { FamilyCalendar.renderEditor('parents-fcal-editor'); } catch (e) {}
+    }
+    if (typeof Challenges !== 'undefined') {
+      try { Challenges.renderParents('parents-challenges'); } catch (e) {}
     }
   }
 
@@ -2307,6 +2322,11 @@
       try { HubPlan.render(user); }
       catch (e) { if (typeof Debug !== 'undefined') Debug.error('HubPlan.render failed', e.message); }
     }
+    // Sibling challenges: the inbox and the button, above Today's 3.
+    if (typeof Challenges !== 'undefined') {
+      try { Challenges.renderHub(user); }
+      catch (e) { if (typeof Debug !== 'undefined') Debug.error('Challenges.renderHub failed', e.message); }
+    }
   }
 
   function openModal() {
@@ -2671,6 +2691,10 @@
       if (hub && hub.classList.contains('active')) {
         updateStatsCards(); renderAppCards();
       }
+    });
+    // A challenge was sent, solved or deleted: the star count and inbox change.
+    window.addEventListener('zs:challenges-changed', function() {
+      if (hub && hub.classList.contains('active')) showHub();
     });
 
     var active = getActiveUser();

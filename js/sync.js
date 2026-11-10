@@ -82,6 +82,8 @@ var CloudSync = (function() {
     'zs_naturaleza_': 'naturaleza',
     'zs_secretos_': 'secretos',
     'zs_clock_': 'clock',
+    'zs_challenge_': 'challenge',
+    'zs_review_': 'review',
     'littlemaestro_': 'littlemaestro',
   };
 
@@ -102,6 +104,7 @@ var CloudSync = (function() {
     'zs_vacation':              'vacation',
     'zs_off_hours':             'off_hours',
     'zs_bank':                  'bank',
+    'zs_challenges':            'challenges',
     'zs_hub_minage':            'hub_minage'
   };
   var HOUSEHOLD_KID = '_household';
@@ -581,6 +584,38 @@ var CloudSync = (function() {
     return out;
   }
 
+  // ── Sibling challenges merge ──────────────────────────────────
+  // Challenges are an append-only event log like the bank's (see
+  // challenge-engine.js): create, try, solve and remove events, each
+  // with a unique id and never edited. A solve event's id is made from
+  // the challenge id, so two devices that both saw it solved agree on
+  // one. The merge is the union by id, with one extra rule: when a
+  // parent removed a challenge, the words of its create event are
+  // dropped, so a copy from a device that had not synced yet cannot
+  // bring them back.
+  function _mergeChallenges(server, local) {
+    var s = server || {}, l = local || {};
+    var seen = {}, events = [], removed = {};
+    [].concat(Array.isArray(s.events) ? s.events : [], Array.isArray(l.events) ? l.events : []).forEach(function(e) {
+      if (!e || !e.id || seen[e.id]) return;
+      seen[e.id] = true;
+      events.push(e);
+      if (e.type === 'remove' && e.ch) removed[e.ch] = true;
+    });
+    events = events.map(function(e) {
+      if (e.type !== 'create' || !removed[e.id]) return e;
+      return { id: e.id, type: 'create', ts: e.ts, from: e.from, to: e.to, kind: e.kind, gone: true };
+    });
+    events.sort(function(a, b) { return ((a.ts || 0) - (b.ts || 0)) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); });
+    var out = { v: 1, events: events };
+    var st = s._syncedAt || l._syncedAt;
+    if (st) out._syncedAt = st;
+    return out;
+  }
+
+  // The household event logs, by sync name: each is merged read-before-write.
+  var EVENT_LOGS = { bank: _mergeBank, challenges: _mergeChallenges };
+
   // Content only, key order and bookkeeping aside
   function _canon(v) {
     if (Array.isArray(v)) return '[' + v.map(_canon).join(',') + ']';
@@ -650,21 +685,22 @@ var CloudSync = (function() {
         });
       // No .catch: without the server's copy to merge into, don't write
       // over it (a new device's empty blob would wipe the real one).
-    } else if (info.appName === 'bank') {
+    } else if (EVENT_LOGS[info.appName]) {
+      var mergeLog = EVENT_LOGS[info.appName];
       mergeStep = _fetchWithTimeout(SYNC_SERVER + '/api/kids/' + info.kidKey + '/' + info.appName)
         .then(function(res) {
           if (!res.ok) throw new Error('read before write: http ' + res.status);
           return res.json().then(function(serverData) {
             if (!serverData) return data;
-            var mergedB = _mergeBank(serverData, data);
+            var mergedB = mergeLog(serverData, data);
             if (_canon(mergedB) !== _canon(data)) {
               try { localStorage.setItem(key, JSON.stringify(mergedB)); } catch (e) {}
             }
             return mergedB;
           });
         });
-      // No .catch, as for Little Maestro: never write the bank without
-      // the server's copy to merge into.
+      // No .catch, as for Little Maestro: never write an event log
+      // without the server's copy to merge into.
     } else if (info.appName === 'worldcup') {
       // Before pushing the World Cup snapshot, fetch the server's
       // current copy and union-merge it with ours, then push the
@@ -771,8 +807,8 @@ var CloudSync = (function() {
           return true;
         }
 
-        if (info.appName === 'bank') {
-          var mergedBk = _mergeBank(serverData, localMissing ? null : localData);
+        if (EVENT_LOGS[info.appName]) {
+          var mergedBk = EVENT_LOGS[info.appName](serverData, localMissing ? null : localData);
           var changedBk = localMissing || _canon(mergedBk) !== _canon(localData);
           if (changedBk) {
             try { localStorage.setItem(key, JSON.stringify(mergedBk)); }
@@ -1247,5 +1283,6 @@ var CloudSync = (function() {
 
   state._mergeLM = _mergeLM;
   state._mergeBank = _mergeBank;
+  state._mergeChallenges = _mergeChallenges;
   return state;
 })();

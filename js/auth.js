@@ -359,6 +359,11 @@ var APP_STAR_CONFIGS = [
   { id: 'bmcheck', prefix: 'zs_bmcheck_' },
   { id: 'worldcup', prefix: 'zs_worldcup_' },
 
+  // Repaso (the daily review) earns one star for each day it was finished.
+  { id: 'review', prefix: 'zs_review_', stars: function(d) {
+      return Object.keys((d && d.done) || {}).length;
+    } },
+
   // Money Master keeps {currency: {mode: {score, stars}}}.
   { id: 'money', prefix: 'zs_money_', stars: function(d) {
       var n = 0;
@@ -474,6 +479,16 @@ var APP_STAR_CONFIGS = [
       for (k in (d.knots || {})) { q = d.knots[k] || {}; n += (q.w ? 1 : 0) + (q.c ? 1 : 0) + (q.r ? 1 : 0); }
       for (k in (d.best || {})) n += Math.min(3, d.best[k] || 0);
       return n + Math.min(3, d.hunts || 0);
+    } },
+  // Sibling challenges: one star for each challenge solved, to the kid who
+  // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
+  // (a cache of the household log, see challenge-engine.js); at most 3 a
+  // day, so a pile of easy challenges cannot farm stars.
+  { id: 'challenge', prefix: 'zs_challenge_', stars: function(d) {
+      var per = {}, n = 0, s = d.stars && typeof d.stars === 'object' ? d.stars : {};
+      for (var id in s) per[String(s[id])] = (per[String(s[id])] || 0) + 1;
+      for (var day in per) n += Math.min(3, per[day]);
+      return n;
     } }
 ];
 
