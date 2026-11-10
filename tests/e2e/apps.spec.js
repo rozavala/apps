@@ -27,7 +27,8 @@ const MAJOR_APPS = [
   'marinero.html',
   'naturaleza.html',
   'mensajes-secretos.html',
-  'que-hora-es.html'
+  'que-hora-es.html',
+  'dictado.html'
 ];
 
 test.describe('Major Apps Critical Path', () => {
