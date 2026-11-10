@@ -50,6 +50,7 @@ var HubPlan = (function() {
     { id: 'marinero',   href: 'marinero.html',           group: 'science', minAge: 7,  names: ['marinero'] },
     { id: 'secretos',   href: 'mensajes-secretos.html',  group: 'science', minAge: 7,  names: ['mensajes secretos'] },
     { id: 'code',       href: 'code-cadet.html',         group: 'science', minAge: 7,  names: ['code cadet'] },
+    { id: 'codelab',    href: 'code-lab.html',           group: 'science', minAge: 9,  names: ['code lab'] },
     { id: 'story',      href: 'story-explorer.html',     group: 'reading', minAge: 4,  beginner: true, names: ['story explorer'] },
     { id: 'lector',     href: 'lector.html',             group: 'reading', minAge: 4,  beginner: true, names: ['lector'] },
     { id: 'vocab',      href: 'vocabulario-vivo.html',   group: 'reading', minAge: 7,  names: ['vocabulario vivo'] },
