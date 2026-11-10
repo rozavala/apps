@@ -260,6 +260,22 @@ window.ZSProgressCatalog = {
     {"i":"static","l":"⚡ Static Electricity","g":"Physics","n":1}
   ],
 
+  lector_en: [
+    {"i":"en1","l":"Level 1 · s a t p i n","g":"English","k":"sounds,blend,build,read"},
+    {"i":"en2","l":"Level 2 · c e h r m d","g":"English","k":"sounds,blend,build,read"},
+    {"i":"en3","l":"Level 3 · g o u l f b x","g":"English","k":"sounds,blend,build,read"},
+    {"i":"en4","l":"Level 4 · sh ch th ck j w v","g":"English","k":"sounds,blend,build,read"}
+  ],
+
+  lector_es: [
+    {"i":"es1","l":"Level 1 · Las vocales","g":"Español","k":"sounds"},
+    {"i":"es2","l":"Level 2 · m · p · s · l","g":"Español","k":"sounds,syll,build,read"},
+    {"i":"es3","l":"Level 3 · t · d","g":"Español","k":"sounds,syll,build,read"},
+    {"i":"es4","l":"Level 4 · n · r","g":"Español","k":"sounds,syll,build,read"},
+    {"i":"es5","l":"Level 5 · c · b · v","g":"Español","k":"sounds,syll,build,read"},
+    {"i":"es6","l":"Level 6 · f · g","g":"Español","k":"sounds,syll,build,read"}
+  ],
+
   piano: [
     {"i":100,"l":"Twinkle, Twinkle (Primer)","g":"Primer · World 1"},
     {"i":101,"l":"Two Little Blackbirds","g":"Primer · World 1"},

@@ -299,7 +299,7 @@ test.describe('Hub plan catalog', () => {
     });
     expect(out.badGroup).toEqual([]);
     expect(out.beginners).toBeGreaterThanOrEqual(6);
-    expect(out.beginners).toBeLessThanOrEqual(8);
+    expect(out.beginners).toBeLessThanOrEqual(9);   // Lector joined the youngest list (reading is the gap for 4 to 6)
     expect(out.groups).toEqual(['math', 'science', 'reading', 'world', 'faith', 'arts', 'money', 'move', 'more']);
   });
 });

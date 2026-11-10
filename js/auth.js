@@ -480,6 +480,16 @@ var APP_STAR_CONFIGS = [
       for (k in (d.best || {})) n += Math.min(3, d.best[k] || 0);
       return n + Math.min(3, d.hunts || 0);
     } },
+  // Lector: each level activity (sounds, syllables or blending, build, read)
+  // is starred out of 3 by first-try answers, and each book earns up to 3:
+  // listened to it, read it by tapping every word, and read it aloud to a
+  // grown-up who confirmed with the PIN.
+  { id: 'lector', prefix: 'zs_lector_', stars: function(d) {
+      var n = 0, k, q, acts = ['sounds', 'syll', 'blend', 'build', 'read'];
+      for (k in (d.lv || {})) { q = d.lv[k] || {}; for (var i = 0; i < acts.length; i++) n += Math.min(3, Math.max(0, q[acts[i]] | 0)); }
+      for (k in (d.books || {})) { q = d.books[k] || {}; n += (q.l ? 1 : 0) + (q.r ? 1 : 0) + (q.p ? 1 : 0); }
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a

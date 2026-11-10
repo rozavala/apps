@@ -39,6 +39,7 @@ var AppSchedule = (function() {
     { id: 'secretos',   card: '.card-secretos' },
     { id: 'clock',      card: '.card-clock' }
   ];
+  ALL_APPS.push({ id: 'lector', card: '.card-lector' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -56,6 +57,9 @@ var AppSchedule = (function() {
     6: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
         'cocina', 'engineer']                                          // Saturday
   };
+
+  // Lector (reading practice for the youngest) is offered every day.
+  Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
