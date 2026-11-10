@@ -34,6 +34,7 @@ var ZsSpeak = (function() {
   'use strict';
 
   var RULES = {
+    'repaso':           [{ group: '.rp-choices', choice: '.rp-choice', prompt: '.rp-prompt' }],
     'bible-explorer':   [{ group: '.bx-quiz-options, .bx-drill-options', choice: '.bx-quiz-opt, .bx-drill-opt', prompt: '.bx-quiz-q' }],
     'civics-lab':       [{ group: '.cv-quiz-options', choice: '.cv-quiz-opt', prompt: '.cv-quiz-q' }],
     'world-atlas':      [{ group: '.wa-options', choice: '.wa-option', prompt: '.wa-q-text' }],

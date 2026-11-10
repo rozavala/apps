@@ -905,6 +905,17 @@ var WorldAtlas = (function() {
     _resolve(correct, index);
   }
 
+  // Repaso (the daily review). Map and flag questions need a picture, so
+  // only the ones whose question is plain text go there.
+  function _reviewNote(q, correct) {
+    try {
+      if (typeof Review === 'undefined' || q.type === 'map' || q.type === 'flag' || !q.text) return;
+      var ans = q.labelOf(q.answer);
+      if (correct) Review.hit(null, Review.idFor('atlas', q.text, ans));
+      else Review.add(null, { app: 'atlas', prompt: q.text, answer: ans, choices: q.options.map(function(o) { return q.labelOf(o); }) });
+    } catch (e) {}
+  }
+
   function _resolve(correct, index) {
     if (quiz.answered) return;
     quiz.answered = true;
@@ -927,6 +938,7 @@ var WorldAtlas = (function() {
       quiz.missed.push(q);
     }
     _record(q.answer.id, correct);
+    _reviewNote(q, correct);
     $('wa-quiz-score').textContent = quiz.score + ' ✅';
 
     $('wa-after').innerHTML =

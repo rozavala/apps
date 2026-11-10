@@ -964,8 +964,23 @@ function tryPuzzleMove(m){
   },650);
 }
 
+// Repaso (the daily review): a puzzle that was missed comes back tomorrow,
+// drawn from its starting position. Puzzles built from a function (no FEN)
+// are not included.
+function _reviewPuzzle(ok){
+  try{
+    if(typeof Review==='undefined'||!PZ||!PZ.pz||!PZ.pz.fen)return;
+    const id='chess:p'+PZ.i;
+    if(ok){Review.hit(null,id);return}
+    const start=CQE.fromFEN(PZ.pz.fen),mv=CQE.parseUci(start,PZ.pz.line[0]);
+    if(!mv)return;
+    Review.add(null,{app:'chess',id:id,prompt:PZ.pz.name+' — '+PZ.pz.hint,answer:CQE.san(start,mv),fen:PZ.pz.fen});
+  }catch(e){}
+}
+
 function puzzleWrong(m){
   PZ.wrong++;
+  _reviewPuzzle(false);
   const why=Coach.whyWrong(PZ.pz,PZ.pos,m);
   const before=CQE.toFEN(PZ.pos),keepLast=PZ.last;
   setCoach('puzzleCoach','Not quite. '+why.text,'bad',null,'Coach');
@@ -992,6 +1007,7 @@ function puzzleWrong(m){
 function puzzleSolvedNow(alt){
   if(!PZ)return;
   PZ.solved=true;PZ.busy=false;
+  _reviewPuzzle(true);
   const prog=getUserProgress();
   const id=PZ.i+1;
   const mark=PZ.wrong===0&&PZ.hint===0?3:(PZ.wrong+PZ.hint<=1?2:1);

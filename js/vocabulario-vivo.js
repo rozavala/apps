@@ -1197,6 +1197,17 @@ const VocabularioVivo = (() => {
     return _shuffle([root].concat(decoys));
   }
 
+  // Repaso (the daily review): a word whose root was missed comes back tomorrow.
+  function _reviewMatch(word, root, options, correct) {
+    try {
+      if (typeof Review === 'undefined') return;
+      const label = r => r.id.replace('_alone', '') + '- = ' + _l(r.meaning);
+      const prompt = _T('Which root is in this word?', '¿Qué raíz tiene esta palabra?') + ' ' + word;
+      if (correct) Review.hit(null, Review.idFor('vocab', prompt, label(root)));
+      else Review.add(null, { app: 'vocab', prompt: prompt, answer: label(root), choices: options.map(label) });
+    } catch (e) {}
+  }
+
   function _renderMatchQuestion() {
     const sess = state.matchSession;
     const item = sess.queue[sess.idx];
@@ -1232,7 +1243,8 @@ const VocabularioVivo = (() => {
         btn.classList.add(correct ? 'vv-correct' : 'vv-wrong');
         sess.results[sess.idx] = correct;
         if (correct) sess.correct++;
-        else {
+        _reviewMatch(word, root, options, correct);
+        if (!correct) {
           const actual = wrap.querySelector('[data-root="' + root.id + '"]');
           if (actual) actual.classList.add('vv-actual');
         }

@@ -359,6 +359,11 @@ var APP_STAR_CONFIGS = [
   { id: 'bmcheck', prefix: 'zs_bmcheck_' },
   { id: 'worldcup', prefix: 'zs_worldcup_' },
 
+  // Repaso (the daily review) earns one star for each day it was finished.
+  { id: 'review', prefix: 'zs_review_', stars: function(d) {
+      return Object.keys((d && d.done) || {}).length;
+    } },
+
   // Money Master keeps {currency: {mode: {score, stars}}}.
   { id: 'money', prefix: 'zs_money_', stars: function(d) {
       var n = 0;
