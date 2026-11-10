@@ -32,6 +32,11 @@
      give      { account, amount, cause, note }            a gift made from the Giving jar (parent)
      cause     { cause, name, emoji }                      a place to give, added by a parent
      causeEdit { cause, name?, emoji?, removed? }
+     wish      { account, name, price, emoji?, photo? }    a kid's wishlist item; the event id is the item's id
+     wishDecision { wish, decision: 'keep'|'drop' }        only counts from 7 days after the wish; the first one stands
+     wishEdit  { wish, removed }                           a kid takes an item off the list
+   A withdraw may also carry `wish` (the item it paid for) and a deposit
+   `group` (the payday it was split from).
    ================================================================ */
 (function (root) {
   'use strict';
@@ -513,6 +518,70 @@
     return st;
   }
 
+  // ── wishlist ──
+  // A kid adds things they want. They can only decide about an item once
+  // WISH_DAYS days have passed ("Do you still want it?"); a decision
+  // dated sooner is ignored, so a clock or a stray device can't skip the
+  // wait. "keep" puts it on the parent's list; "drop" is a saving. A
+  // parent buying it records the usual withdraw with `wish: <item id>`.
+  var WISH_DAYS = 7;
+  function wishes(events, accountId, asOf) {
+    asOf = asOf || today();
+    var sorted = sortEvents(events), gone = voided(sorted);
+    var list = [], byId = {};
+    sorted.forEach(function (e) {
+      if (gone[e.id] || !(e.date <= asOf)) return;
+      if (e.type === 'wish' && e.account === accountId && isDate(e.date) && Number(e.price) > 0 && e.name) {
+        var w = { id: e.id, account: accountId, name: String(e.name), price: round2(Number(e.price)), emoji: e.emoji || '', photo: e.photo || '',
+          date: e.date, readyOn: addDays(e.date, WISH_DAYS), by: e.by, decision: null, decidedOn: null, removed: false, boughtOn: null };
+        list.push(w); byId[w.id] = w;
+      } else if (e.type === 'wishDecision' && byId[e.wish]) {
+        var d = byId[e.wish];
+        if (!d.decision && e.date >= d.readyOn && (e.decision === 'keep' || e.decision === 'drop')) { d.decision = e.decision; d.decidedOn = e.date; }
+      } else if (e.type === 'wishEdit' && byId[e.wish] && e.removed === true) {
+        byId[e.wish].removed = true;
+      } else if (e.type === 'withdraw' && e.wish && byId[e.wish] && e.account === accountId && Number(e.amount) > 0) {
+        byId[e.wish].boughtOn = e.date;
+      }
+    });
+    return list.map(function (w) {
+      w.daysLeft = Math.max(0, WISH_DAYS - days(w.date, asOf));
+      w.status = w.boughtOn ? 'bought' : w.removed ? 'removed' : w.decision === 'keep' ? 'keep' : w.decision === 'drop' ? 'drop'
+        : w.daysLeft > 0 ? 'waiting' : 'ready';
+      return w;
+    });
+  }
+  // What an item costs in the kid's own terms: a share of their savings,
+  // and how many of their usual deposits (and months of saving at their
+  // pace) it would take. null where there's no deposit history yet.
+  function wishCost(events, accountId, price, prices, asOf) {
+    asOf = asOf || today();
+    var sorted = sortEvents(events), gone = voided(sorted);
+    var s = compute(sorted, accountId, prices, asOf);
+    var out = { price: round2(price), value: round2(s.value), share: null, short: 0, avgDeposit: null, stands: null, lemonade: false, perMonth: null, months: null };
+    if (s.value > 0.004) {
+      if (price <= s.value) out.share = Math.round(price / s.value * 100);
+      else out.short = round2(price - s.value);
+    } else out.short = round2(price);
+    var deps = sorted.filter(function (e) {
+      return !gone[e.id] && e.type === 'deposit' && e.account === accountId && Number(e.amount) > 0 && e.date <= asOf;
+    });
+    if (deps.length) {
+      var lem = deps.filter(function (e) { return e.source === 'lemonade'; });
+      var use = lem.length ? lem : deps;
+      out.lemonade = lem.length > 0;
+      out.avgDeposit = round2(use.reduce(function (t, e) { return t + Number(e.amount); }, 0) / use.length);
+      out.stands = Math.max(1, Math.ceil(price / out.avgDeposit));
+      var m0 = deps[0].date.slice(0, 7), m1 = asOf.slice(0, 7), n = 1;
+      while (m0 < m1) { m0 = addMonths(m0, 1); n++; }
+      if (n >= 2) {
+        out.perMonth = round2(s.deposited / n);
+        out.months = out.perMonth > 0 ? Math.max(1, Math.ceil(price / out.perMonth)) : null;
+      }
+    }
+    return out;
+  }
+
   // ── badges ──
   // Computed from the log for one kid, from the entries still standing
   // (an entry cancelled as a mistake no longer counts). A shared account
@@ -528,6 +597,7 @@
     { id: 'gift1',   emoji: '💛', name: 'First gift',        desc: 'Make your first gift from the Giving jar',  goal: 1,   metal: 'bronze' },
     { id: 'places3', emoji: '🎁', name: 'Gave in 3 places',  desc: 'Give to 3 different places',                goal: 3,   metal: 'silver' },
     { id: 'giveMore', emoji: '🌟', name: 'Gave more',        desc: 'Choose to give more than the minimum',      goal: 1,   metal: 'silver' },
+    { id: 'waited',  emoji: '🤔', name: 'Think it over',     desc: 'Wait a week, then change your mind about something on your wishlist', goal: 1, metal: 'silver' },
     { id: 'steady',  emoji: '🧘', name: 'Held steady',       desc: 'Keep your mix through a month the S&P 500 fell 5% or more', goal: 1, metal: 'gold' }
   ];
 
@@ -614,6 +684,15 @@
     }
     set('steady', steady ? 1 : 0, steady);
 
+    // Waited out a wish and chose not to buy it.
+    var waited = null;
+    mine.forEach(function (a) {
+      wishes(sorted, a.id, asOf).forEach(function (w) {
+        if (w.decision === 'drop' && (!waited || w.decidedOn < waited)) waited = w.decidedOn;
+      });
+    });
+    set('waited', waited ? 1 : 0, waited);
+
     return BADGES.map(function (b) { return res[b.id]; });
   }
 
@@ -633,7 +712,7 @@
     rateOn: function (events, date) { return rateOn(rateSchedule(sortEvents(events)), date || today()); },
     matchPctOn: function (events, date) { return matchPctOn(sortEvents(events), date || today()); },
     statementMonths: statementMonths, statement: statement, monthEnd: monthEnd, addMonths: addMonths,
-    BADGES: BADGES, badges: badges,
+    BADGES: BADGES, badges: badges, WISH_DAYS: WISH_DAYS, wishes: wishes, wishCost: wishCost,
     compute: compute, series: series, project: project, yearFor: yearFor, dropFromHigh: dropFromHigh,
     uid: uid
   };

@@ -345,7 +345,7 @@ test.describe('Banco Familia', () => {
         count: E.BADGES.length
       };
     });
-    expect(r.count).toBe(11);
+    expect(r.count).toBe(12);
     // Pablo: $20 + $20 + $5 of his own + the shared $40 (every member is credited).
     expect(r.pablo.first).toMatchObject({ earned: true, date: '2026-08-05' });
     expect(r.pablo.saved50).toMatchObject({ earned: true, date: '2026-09-05' });
@@ -380,8 +380,8 @@ test.describe('Banco Familia', () => {
 
   test('Trophy Room: a Saving & Giving cabinet for kids with an account, and only for them', async ({ page }) => {
     await open(page, 'Pablo', '/trophy-room.html');
-    await expect(page.locator('#tr-money-label')).toHaveText('Saving & Giving · 3 of 11');
-    await expect(page.locator('#tr-money-grid .tr-badge')).toHaveCount(11);
+    await expect(page.locator('#tr-money-label')).toHaveText('Saving & Giving · 3 of 12');
+    await expect(page.locator('#tr-money-grid .tr-badge')).toHaveCount(12);
     await expect(page.locator('#tr-money-grid .tr-badge.earned')).toHaveCount(3);
     await page.getByRole('button', { name: /^\$100 saved/ }).click();
     await expect(page.locator('.tr-pop h2')).toHaveText('$100 saved');
@@ -411,6 +411,182 @@ test.describe('Banco Familia', () => {
     await expect(pablo).toContainText('Banco Familia · October');
     await expect(pablo).toContainText('Saved $130.00');
     await expect(page.locator('.sr-kid', { hasText: 'Rodrigo' })).not.toContainText('Banco Familia');
+  });
+
+  // ── wishlist ──
+  const WISH_BASE = [
+    { id: 'a', ts: 1, type: 'account', account: 'x', name: 'Kid', kind: 'own', members: ['Kid'], date: '2026-09-01' },
+    { id: 'm', ts: 2, type: 'mix', account: 'x', bonds: 100, date: '2026-09-01' },
+    { id: 'd1', ts: 3, type: 'deposit', account: 'x', amount: 20, source: 'lemonade', date: '2026-09-05' },
+    { id: 'd2', ts: 4, type: 'deposit', account: 'x', amount: 30, source: 'lemonade', date: '2026-10-03' },
+    { id: 'd3', ts: 5, type: 'deposit', account: 'x', amount: 10, source: 'chores', date: '2026-10-10' },
+    { id: 'w1', ts: 6, type: 'wish', account: 'x', name: 'Lego set', price: 30, emoji: '🧩', date: '2026-11-01', by: 'Kid' }
+  ];
+
+  test('wishlist: a decision only counts after 7 days, the first one stands, and a purchase closes it', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate((base) => {
+      const E = /** @type {any} */ (window).BankEngine;
+      const st = (evs, asOf) => { const w = E.wishes(evs, 'x', asOf)[0]; return w && { status: w.status, daysLeft: w.daysLeft, readyOn: w.readyOn }; };
+      const decide = (decision, date, id, ts) => ({ id: id || 'wd', ts: ts || 20, type: 'wishDecision', wish: 'w1', decision, date, by: 'Kid' });
+      const early = base.concat([decide('keep', '2026-11-07')]);           // day 6: too soon
+      const onTime = base.concat([decide('keep', '2026-11-08')]);          // day 7
+      const twice = base.concat([decide('drop', '2026-11-08'), decide('keep', '2026-11-09', 'wd2', 21)]);
+      const bought = onTime.concat([{ id: 'wb', ts: 30, type: 'withdraw', account: 'x', amount: 29.5, wish: 'w1', note: 'Lego set', date: '2026-11-10' }]);
+      const wrongAcct = onTime.concat([{ id: 'wb', ts: 30, type: 'withdraw', account: 'other', amount: 5, wish: 'w1', date: '2026-11-10' }]);
+      return {
+        day0: st(base, '2026-11-01'), day1: st(base, '2026-11-02'), day6: st(base, '2026-11-07'), day7: st(base, '2026-11-08'), day9: st(base, '2026-11-10'),
+        beforeAdded: E.wishes(base, 'x', '2026-10-31').length,
+        early: st(early, '2026-11-20'), onTime: st(onTime, '2026-11-20'), onTimeButAsOfEarlier: st(onTime, '2026-11-08'),
+        twice: st(twice, '2026-11-20'),
+        bought: st(bought, '2026-11-20'), boughtThenCancelled: st(bought.concat([{ id: 'vv', ts: 40, type: 'void', target: 'wb', date: '2026-11-11' }]), '2026-11-20'),
+        wrongAcct: st(wrongAcct, '2026-11-20'),
+        removed: st(base.concat([{ id: 'we', ts: 22, type: 'wishEdit', wish: 'w1', removed: true, date: '2026-11-02' }]), '2026-11-20'),
+        badgeNot: E.badges(onTime, 'Kid', {}, '2026-11-20').find(b => b.id === 'waited').earned,
+        badgeYes: E.badges(base.concat([decide('drop', '2026-11-08')]), 'Kid', {}, '2026-11-20').find(b => b.id === 'waited'),
+        badgeEarly: E.badges(base.concat([decide('drop', '2026-11-07')]), 'Kid', {}, '2026-11-20').find(b => b.id === 'waited').earned
+      };
+    }, WISH_BASE);
+    expect(r.day0).toEqual({ status: 'waiting', daysLeft: 7, readyOn: '2026-11-08' });
+    expect(r.day1).toMatchObject({ status: 'waiting', daysLeft: 6 });
+    expect(r.day6).toMatchObject({ status: 'waiting', daysLeft: 1 });
+    expect(r.day7).toMatchObject({ status: 'ready', daysLeft: 0 });
+    expect(r.day9.status).toBe('ready');
+    expect(r.beforeAdded).toBe(0);
+    expect(r.early.status).toBe('ready');                 // the day-6 "keep" is ignored
+    expect(r.onTime.status).toBe('keep');
+    expect(r.onTimeButAsOfEarlier.status).toBe('keep');
+    expect(r.twice.status).toBe('drop');                  // first valid decision stands
+    expect(r.bought.status).toBe('bought');
+    expect(r.boughtThenCancelled.status).toBe('keep');
+    expect(r.wrongAcct.status).toBe('keep');
+    expect(r.removed.status).toBe('removed');
+    expect(r.badgeNot).toBe(false);
+    expect(r.badgeYes).toMatchObject({ earned: true, date: '2026-11-08' });
+    expect(r.badgeEarly).toBe(false);
+  });
+
+  test('wishlist: price as a share of savings, usual deposits and months of saving', async ({ page }) => {
+    await open(page, 'Pablo');
+    const r = await page.evaluate((base) => {
+      const E = /** @type {any} */ (window).BankEngine;
+      const own = E.compute(base, 'x', {}, '2026-11-08').value;
+      return {
+        own, small: E.wishCost(base, 'x', 30, {}, '2026-11-08'), big: E.wishCost(base, 'x', 500, {}, '2026-11-08'),
+        none: E.wishCost(base.slice(0, 2), 'x', 30, {}, '2026-11-08'),
+        noLemonade: E.wishCost(base.filter(e => e.source !== 'lemonade'), 'x', 30, {}, '2026-11-08'),
+        oneMonth: E.wishCost(base.filter(e => e.date < '2026-10-01'), 'x', 10, {}, '2026-09-20')
+      };
+    }, WISH_BASE);
+    // Usual lemonade stand = (20 + 30) / 2 = $25; $60 saved over Sep-Nov = $20 a month.
+    expect(r.small.share).toBe(Math.round(30 / r.own * 100));
+    expect(r.small).toMatchObject({ avgDeposit: 25, lemonade: true, stands: 2, perMonth: 20, months: 2, short: 0 });
+    expect(r.big.share).toBeNull();
+    expect(r.big.short).toBeCloseTo(500 - r.own, 1);
+    expect(r.big.stands).toBe(20);
+    expect(r.none).toMatchObject({ share: null, stands: null, months: null, short: 30 });
+    expect(r.noLemonade).toMatchObject({ lemonade: false, avgDeposit: 10 });
+    expect(r.oneMonth.months).toBeNull();                 // too little history for a monthly pace
+  });
+
+  test('wishlist: a kid adds an item, waits, decides; the parent sees it and records the purchase', async ({ page }) => {
+    await open(page, 'Pablo');
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await page.getByRole('button', { name: /Add something I want/ }).click();
+    await page.getByRole('button', { name: 'Add to my wishlist' }).click();
+    await expect(page.locator('#zsd-toast')).toContainText('What do you want');
+    await page.fill('#bk-w-name', 'Lego set');
+    await page.fill('#bk-w-price', '24.99');
+    await page.getByRole('button', { name: 'Picture 🧩' }).click();
+    await expect(page.locator('#bk-w-name')).toHaveValue('Lego set');     // choosing a picture keeps what was typed
+    await page.getByRole('button', { name: 'Add to my wishlist' }).click();
+    const item = page.locator('.bk-wish').first();
+    await expect(item).toContainText('Lego set');
+    await expect(item).toContainText('$24.99');
+    await expect(item).toContainText('7 more days to think 🤔');
+    await expect(item).toContainText('% of your savings');
+    await expect(item.getByRole('button', { name: 'Still want it' })).toHaveCount(0);
+    const ev1 = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0]);
+    expect(ev1).toMatchObject({ type: 'wish', account: 'pablo', name: 'Lego set', price: 24.99, emoji: '🧩', date: '2026-11-07', by: 'Pablo' });
+
+    // Day 6: still waiting. Day 7: the question appears.
+    await page.clock.setFixedTime(new Date(2026, 10, 13, 10, 0, 0));
+    await page.reload();
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await expect(page.locator('.bk-wish').first()).toContainText('1 more day to think');
+    await page.clock.setFixedTime(new Date(2026, 10, 14, 10, 0, 0));
+    await page.reload();
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await expect(page.locator('.bk-wish').first()).toContainText('Do you still want it?');
+    await page.getByRole('button', { name: 'Still want it' }).click();
+    await expect(page.locator('.bk-wish').first()).toContainText('Talk about it with Mom or Dad');
+    const dec = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0]);
+    expect(dec).toMatchObject({ type: 'wishDecision', decision: 'keep', date: '2026-11-14' });
+
+    // The parent's list, then the "Money spent" form filled in from the item.
+    await page.getByRole('button', { name: /All accounts/ }).click();
+    await expect(page.locator('.bk-wishinbox')).toHaveCount(0);           // not on a kid's screen
+    await pin(page, '1234');
+    await expect(page.locator('.bk-wishinbox')).toContainText('Lego set');
+    await page.locator('.bk-wishinbox').getByRole('button', { name: 'Bought it' }).click();
+    await expect(page.locator('#bk-f-amt')).toHaveValue('24.99');
+    await expect(page.locator('#bk-f-note')).toHaveValue('Lego set');
+    await page.getByRole('button', { name: 'Take it out' }).click();
+    const buy = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0]);
+    expect(buy).toMatchObject({ type: 'withdraw', account: 'pablo', amount: 24.99, wish: dec.wish, by: 'parent' });
+    await page.getByRole('button', { name: /All accounts/ }).click();
+    await expect(page.locator('.bk-wishinbox')).toHaveCount(0);           // bought: off the list
+  });
+
+  test('wishlist: "Changed my mind" celebrates the saving and earns the badge; a photo is stored small', async ({ page }) => {
+    await open(page, 'Pablo');
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await page.getByRole('button', { name: /Add something I want/ }).click();
+    await page.fill('#bk-w-name', 'Scooter');
+    await page.fill('#bk-w-price', '60');
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    await page.setInputFiles('#bk-w-photo', { name: 'p.png', mimeType: 'image/png', buffer: png });
+    await expect(page.locator('.bk-wish-prev img')).toBeVisible();
+    await expect(page.locator('#bk-w-name')).toHaveValue('Scooter');
+    await page.getByRole('button', { name: 'Add to my wishlist' }).click();
+    const w = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0]);
+    expect(w.photo).toMatch(/^data:image\/jpeg;base64,/);
+    expect(w.photo.length).toBeLessThan(5000);
+    await expect(page.locator('.bk-wish img.bk-wish-img')).toBeVisible();
+
+    await page.clock.setFixedTime(new Date(2026, 10, 15, 10, 0, 0));
+    await page.reload();
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await page.getByRole('button', { name: 'Changed my mind' }).click();
+    await expect(page.locator('#zsd-toast')).toContainText('You saved $60.00');
+    await expect(page.locator('#zsd-toast')).toContainText('Think it over');
+    await expect(page.locator('.bk-wish-saved')).toContainText('$60.00');
+    await page.goto('/trophy-room.html');
+    await expect(page.locator('#tr-money-grid .tr-badge.earned', { hasText: 'Think it over' })).toHaveCount(1);
+  });
+
+  test('wishlist: shared accounts have none, and a stray early decision does not skip the wait', async ({ page }) => {
+    await open(page, 'Pablo');
+    await page.locator('.bk-acc', { hasText: 'Shared' }).click();
+    await expect(page.locator('.bk-wishlist')).toHaveCount(0);
+    await page.getByRole('button', { name: /All accounts/ }).click();
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await page.getByRole('button', { name: /Add something I want/ }).click();
+    await page.fill('#bk-w-name', 'Kite');
+    await page.fill('#bk-w-price', '12');
+    await page.getByRole('button', { name: 'Add to my wishlist' }).click();
+    const wishId = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_bank')).events.slice(-1)[0].id);
+    // A decision dated the same day (e.g. from another device) is ignored.
+    await page.evaluate((id) => {
+      const d = JSON.parse(localStorage.getItem('zs_bank'));
+      d.events.push({ id: 'early', ts: Date.now() + 1, type: 'wishDecision', account: 'pablo', wish: id, decision: 'keep', date: '2026-11-07', by: 'Pablo' });
+      localStorage.setItem('zs_bank', JSON.stringify(d));
+    }, wishId);
+    await page.reload();
+    await page.locator('.bk-acc', { hasText: 'Own account' }).click();
+    await expect(page.locator('.bk-wish').first()).toContainText('7 more days to think');
+    await page.evaluate(() => window.Banco.wishDecide('pablo', JSON.parse(localStorage.getItem('zs_bank')).events.find(e => e.type === 'wish').id, true));
+    await expect(page.locator('#zsd-toast')).toContainText('7 more days to think');
   });
 
   test('the hub card shows the kid\'s balance', async ({ page }) => {
