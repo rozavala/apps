@@ -15,6 +15,11 @@
    month's statement (what came in, the match, giving, gifts, spent and
    growth), kept in an archive; a past month is recomputed from the log.
 
+   Wishlist: a kid adds things they want and has to wait 7 days before
+   deciding ("Do you still want it?"). It is a thinking tool, not a
+   spending button: only a parent takes money out, and a "still want
+   it" item shows on the parent's list with a one-tap way to record it.
+
    Storage: household key zs_bank (synced; an event log — see
    js/bank-engine.js for the event shapes and all the maths). The S&P
    500 closes come from the sync server (/api/market/spx) and are
@@ -236,7 +241,7 @@ var Banco = (function () {
       ? '<button type="button" class="bk-ghost" onclick="Banco.lock()">🔒 Lock bank manager</button>'
       : '<button type="button" class="bk-ghost" onclick="Banco.unlock()">🔑 Bank manager (parents)</button>';
 
-    return head + statementCards(accs) + givingDay(accs) + parentBar +
+    return head + statementCards(accs) + givingDay(accs) + parentBar + wishInbox(accs) +
       (accs.length ? '<h2 class="bk-h2">' + (_parent ? 'All accounts' : 'My accounts') + '</h2><div class="bk-accs">' + cards + '</div>' : empty) +
       (_parent ? renderFamilyTotal(accs) : '') +
       '<div class="bk-foot">' + lock + '</div>';
@@ -328,6 +333,7 @@ var Banco = (function () {
     var chartCard = '<div class="bk-card"><h3>Your money over time</h3>' + chart(hist) + '</div>';
 
     var goal = renderGoal(acc, s, events);
+    var wishlist = renderWishlist(acc, events, pr);
     var giving = renderGiving(acc, s, events);
     var tm = renderTimeMachine(acc, s, rate, events);
     var stmts = renderStatementList(acc, events, pr);
@@ -340,7 +346,7 @@ var Banco = (function () {
       (_parent ? '<button type="button" class="bk-btn green small" onclick="Banco.go(\'deposit\', \'' + id + '\')">＋ Deposit</button>' +
                  '<button type="button" class="bk-btn small" onclick="Banco.go(\'spend\', \'' + id + '\')">− Spent</button>' +
                  '<button type="button" class="bk-btn small" onclick="Banco.go(\'give\', \'' + id + '\')">💛 Gift</button>' : '') +
-      '</div>' + top + dropCard + giving + goal + mixCard + chartCard + sources + tm + stmts + log + priceNote;
+      '</div>' + top + dropCard + giving + goal + wishlist + mixCard + chartCard + sources + tm + stmts + log + priceNote;
   }
 
   function tile(icon, label, val, cls) {
@@ -505,6 +511,189 @@ var Banco = (function () {
     if (!acc) return;
     markSeen(acc, month);
     render();
+  }
+
+  // ── wishlist ──
+  var WISH_EMOJI = ['🎁', '🧸', '🎮', '🚲', '📚', '⚽', '🎨', '🎧', '🛹', '👟', '🧩', '⭐'];
+  var _wish = null;     // draft of the item being added: { account, name, price, emoji, photo }
+  function photoOk(p) { return typeof p === 'string' && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]{20,80000}$/.test(p); }
+  function wishThumb(w) {
+    return photoOk(w.photo) ? '<img class="bk-wish-img" src="' + w.photo + '" alt="">'
+      : '<span class="bk-wish-emoji" aria-hidden="true">' + esc(w.emoji || '🎁') + '</span>';
+  }
+  function wishCostLines(c, who) {
+    var out = [];
+    if (c.share != null) out.push('That\'s ' + c.share + '% of ' + who + ' savings.');
+    else out.push('More than ' + who + ' savings right now — ' + money(c.short) + ' to go.');
+    if (c.stands) out.push('About ' + c.stands + (c.lemonade ? ' lemonade stand' : ' deposit') + (c.stands === 1 ? '' : 's') + ' like ' + (who === 'your' ? 'your' : 'the') + ' usual (' + money(c.avgDeposit) + ').');
+    if (c.months) out.push('At that pace, about ' + c.months + ' month' + (c.months === 1 ? '' : 's') + ' of saving.');
+    return out;
+  }
+  function wishPips(w) {
+    var done = E.WISH_DAYS - w.daysLeft, h = '';
+    for (var i = 0; i < E.WISH_DAYS; i++) h += '<i class="' + (i < done ? 'on' : '') + '"></i>';
+    return '<span class="bk-pips" aria-hidden="true">' + h + '</span>';
+  }
+
+  function wishItem(w, acc, events, pr, member) {
+    var who = member ? 'your' : acc.name + '\'s';
+    var body = '';
+    if (w.status === 'waiting') {
+      body = '<div class="bk-wish-wait">' + wishPips(w) + '<b>' + w.daysLeft + ' more day' + (w.daysLeft === 1 ? '' : 's') + ' to think 🤔</b></div>';
+    } else if (w.status === 'ready') {
+      body = member
+        ? '<div class="bk-wish-ask"><b>Do you still want it?</b><div class="bk-row">' +
+          '<button type="button" class="bk-btn green small" onclick="Banco.wishDecide(\'' + acc.id + '\', \'' + w.id + '\', true)">Still want it</button>' +
+          '<button type="button" class="bk-btn small" onclick="Banco.wishDecide(\'' + acc.id + '\', \'' + w.id + '\', false)">Changed my mind</button></div></div>'
+        : '<div class="bk-wish-wait"><b>Waiting for ' + esc(acc.name) + ' to decide</b></div>';
+    } else if (w.status === 'keep') {
+      body = '<div class="bk-wish-keep">⭐ ' + (member ? 'You still want it. Talk about it with Mom or Dad!' : 'Still wants it — ready to talk about.') + '</div>' +
+        (_parent ? '<button type="button" class="bk-btn green small" onclick="Banco.buyWish(\'' + acc.id + '\', \'' + w.id + '\')">Bought it</button>' : '');
+    } else if (w.status === 'drop') {
+      body = '<div class="bk-wish-drop">🎉 ' + (member ? 'You saved ' : 'Saved ') + money(w.price) + ' by thinking it over!</div>';
+    } else if (w.status === 'bought') {
+      body = '<div class="bk-wish-keep">🎁 Got it on ' + esc(fmtDate(w.boughtOn)) + '.</div>';
+    }
+    var cost = (w.status === 'waiting' || w.status === 'ready' || w.status === 'keep')
+      ? '<ul class="bk-wish-cost">' + wishCostLines(E.wishCost(events, acc.id, w.price, pr, E.today()), who).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>' : '';
+    var rm = member && (w.status === 'waiting' || w.status === 'ready')
+      ? '<button type="button" class="bk-link" aria-label="Take ' + esc(w.name) + ' off my wishlist" onclick="Banco.wishRemove(\'' + acc.id + '\', \'' + w.id + '\')">Remove</button>' : '';
+    return '<div class="bk-wish bk-ws-' + w.status + '">' + wishThumb(w) +
+      '<div class="bk-wish-main"><div class="bk-wish-top"><b>' + esc(w.name) + '</b><span>' + money(w.price) + '</span></div>' + body + cost + rm + '</div></div>';
+  }
+
+  function wishForm() {
+    var d = _wish;
+    return '<div class="bk-wish-form">' +
+      '<label for="bk-w-name">What do you want?</label><input id="bk-w-name" type="text" maxlength="40" value="' + esc(d.name) + '" placeholder="e.g. Lego set">' +
+      '<label for="bk-w-price">How much is it? (USD)</label><input id="bk-w-price" type="number" inputmode="decimal" min="0.01" step="0.01" value="' + esc(d.price) + '" placeholder="0.00">' +
+      '<fieldset class="bk-sources"><legend>Pick a picture</legend>' + WISH_EMOJI.map(function (em) {
+        return '<button type="button" class="bk-emo' + (em === d.emoji && !d.photo ? ' on' : '') + '" aria-pressed="' + (em === d.emoji && !d.photo) + '" aria-label="Picture ' + em + '" onclick="Banco.wishEmoji(\'' + em + '\')">' + em + '</button>';
+      }).join('') + '</fieldset>' +
+      '<label for="bk-w-photo">Or a photo (optional)</label><input id="bk-w-photo" type="file" accept="image/*" onchange="Banco.wishPhoto(this)">' +
+      (photoOk(d.photo) ? '<div class="bk-wish-prev"><img class="bk-wish-img" src="' + d.photo + '" alt="Your photo"><button type="button" class="bk-link" onclick="Banco.wishEmoji(null)">Use a picture instead</button></div>' : '') +
+      '<div class="bk-row"><button type="button" class="bk-btn small" onclick="Banco.wishCancel()">Cancel</button>' +
+      '<button type="button" class="bk-btn green small" onclick="Banco.wishSave()">Add to my wishlist</button></div>' +
+      '<p class="bk-small">You\'ll get to decide in ' + E.WISH_DAYS + ' days. Only a parent can buy it.</p></div>';
+  }
+
+  function renderWishlist(acc, events, pr) {
+    if (acc.kind !== 'own') return '';
+    var member = !_parent && E.isMember(acc, me());
+    if (!member && !_parent) return '';
+    var list = E.wishes(events, acc.id, E.today()).filter(function (w) { return w.status !== 'removed'; }).reverse();
+    if (!list.length && !member) return '';
+    var saved = list.filter(function (w) { return w.status === 'drop'; }).reduce(function (t, w) { return t + w.price; }, 0);
+    var adding = member && _wish && _wish.account === acc.id;
+    return '<div class="bk-card bk-wishlist"><h3>⭐ ' + (member ? 'My wishlist' : esc(acc.name) + '\'s wishlist') + '</h3>' +
+      (saved > 0 ? '<div class="bk-wish-saved">🎉 ' + (member ? 'You\'ve saved ' : 'Saved ') + money(saved) + ' by thinking it over!</div>' : '') +
+      (list.length ? list.slice(0, 20).map(function (w) { return wishItem(w, acc, events, pr, member); }).join('')
+        : '<p class="bk-small">Things you want go here. Wait ' + E.WISH_DAYS + ' days, then decide if you still want it.</p>') +
+      (adding ? wishForm() : (member ? '<div class="bk-row"><button type="button" class="bk-btn small" onclick="Banco.wishAdd(\'' + acc.id + '\')">＋ Add something I want</button></div>' : '')) +
+      '</div>';
+  }
+
+  // The bank manager's list: items a kid still wants after the wait.
+  function wishInbox(accs) {
+    if (!_parent) return '';
+    var events = load().events, pr = prices(), rows = '';
+    accs.forEach(function (a) {
+      if (a.kind !== 'own') return;
+      E.wishes(events, a.id, E.today()).filter(function (w) { return w.status === 'keep'; }).forEach(function (w) {
+        var c = E.wishCost(events, a.id, w.price, pr, E.today());
+        rows += '<div class="bk-wish-row">' + wishThumb(w) + '<span class="bk-wish-row-t"><b>' + esc(w.name) + '</b> · ' + esc(a.name) + '<br><small>' +
+          (c.share != null ? c.share + '% of their savings' : 'more than they have saved (' + money(c.short) + ' to go)') + '</small></span>' +
+          '<span><b>' + money(w.price) + '</b></span>' +
+          '<button type="button" class="bk-btn green small" onclick="Banco.buyWish(\'' + a.id + '\', \'' + w.id + '\')">Bought it</button></div>';
+      });
+    });
+    return rows ? '<div class="bk-card bk-wishinbox"><h3>⭐ Still wanted after the wait</h3>' + rows + '</div>' : '';
+  }
+
+  function syncWishDraft() {
+    if (!_wish) return;
+    var n = document.getElementById('bk-w-name'), p = document.getElementById('bk-w-price');
+    if (n) _wish.name = n.value;
+    if (p) _wish.price = p.value;
+  }
+  function wishAdd(id) {
+    var acc = findAccount(id);
+    if (!acc || _parent || !E.isMember(acc, me())) return;
+    _wish = { account: id, name: '', price: '', emoji: '🎁', photo: '' };
+    render();
+    var n = document.getElementById('bk-w-name'); if (n) n.focus();
+  }
+  function wishCancel() { _wish = null; render(); }
+  function wishEmoji(em) {
+    syncWishDraft();
+    if (!_wish) return;
+    if (em) _wish.emoji = em;
+    _wish.photo = '';
+    render();
+  }
+  // Shrink a photo to a small JPEG so the event log stays light.
+  function wishPhoto(input) {
+    var f = input.files && input.files[0];
+    if (!f || !_wish) return;
+    syncWishDraft();
+    var url = URL.createObjectURL(f), img = new Image();
+    img.onload = function () {
+      var k = Math.min(1, 160 / Math.max(img.width, img.height, 1));
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      var ctx = typeof ZsCanvas !== 'undefined' ? ZsCanvas.get2d(c) : c.getContext('2d');
+      if (ctx && _wish) {
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        var data = c.toDataURL('image/jpeg', 0.6);
+        if (photoOk(data)) _wish.photo = data; else ZsDialog.toast('That photo is too big. Pick a picture instead.');
+      }
+      if (typeof ZsCanvas !== 'undefined') ZsCanvas.release(c);
+      URL.revokeObjectURL(url);
+      render();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); ZsDialog.toast('Could not read that photo.'); };
+    img.src = url;
+  }
+  function wishSave() {
+    syncWishDraft();
+    var acc = _wish && findAccount(_wish.account);
+    if (!acc || _parent || !E.isMember(acc, me())) return;
+    var name = _wish.name.trim().slice(0, 40), price = Math.round(parseFloat(_wish.price) * 100) / 100;
+    if (!name) { ZsDialog.toast('What do you want?'); return; }
+    if (!(price > 0) || price > 100000) { ZsDialog.toast('Type how much it costs.'); return; }
+    var f = { account: acc.id, name: name, price: price, emoji: _wish.emoji || '🎁' };
+    if (photoOk(_wish.photo)) f.photo = _wish.photo;
+    add(ev('wish', f));
+    _wish = null;
+    ZsDialog.toast('Added! Come back in ' + E.WISH_DAYS + ' days to decide. 🤔');
+    render();
+  }
+  function wishRemove(accId, id) {
+    var acc = findAccount(accId);
+    if (!acc || _parent || !E.isMember(acc, me())) return;
+    add(ev('wishEdit', { wish: id, removed: true }));
+    render();
+  }
+  function wishDecide(accId, id, keep) {
+    var acc = findAccount(accId);
+    if (!acc || _parent || !E.isMember(acc, me())) return;
+    var events = load().events;
+    var w = E.wishes(events, accId, E.today()).filter(function (x) { return x.id === id; })[0];
+    if (!w || w.status !== 'ready') {
+      ZsDialog.toast(w && w.status === 'waiting' ? w.daysLeft + ' more day' + (w.daysLeft === 1 ? '' : 's') + ' to think. 🤔' : 'That one is already decided.');
+      render(); return;
+    }
+    var had = E.badges(events, me(), prices()).filter(function (b) { return b.id === 'waited'; })[0].earned;
+    add(ev('wishDecision', { account: accId, wish: id, decision: keep ? 'keep' : 'drop' }));
+    ZsDialog.toast(keep ? 'It\'s on the list. Talk about it with Mom or Dad! ⭐'
+      : '🎉 You saved ' + money(w.price) + '!' + (had ? '' : ' New badge: Think it over!'));
+    render();
+  }
+  // A parent records the purchase: the usual "Money spent" form, filled in.
+  function buyWish(accId, id) {
+    if (!_parent) return;
+    _chooser = null; _giveEdit = null; _view = { name: 'spend', id: accId, wish: id };
+    render(); window.scrollTo(0, 0);
   }
 
   // ── giving ──
@@ -781,17 +970,19 @@ var Banco = (function () {
     if (!accs) return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← Back</button></div>' +
       '<div class="bk-empty">Open an account first.</div>';
     var pct = E.matchPctOn(load().events);
+    var wish = !dep && _view.wish ? E.wishes(load().events, _view.id, E.today()).filter(function (w) { return w.id === _view.wish; })[0] : null;
     return '<div class="bk-top"><button type="button" class="bk-ghost" onclick="Banco.go(\'home\')">← Back</button></div>' +
       '<div class="bk-card bk-form"><h2>' + (dep ? '＋ Money in' : '− Money spent') + '</h2>' +
+      (wish ? '<div class="bk-wish-for">' + wishThumb(wish) + '<span>For the wish: <b>' + esc(wish.name) + '</b></span></div>' : '') +
       '<label for="bk-f-acc">Account</label><select id="bk-f-acc"' + (dep ? ' onchange="Banco.matchPreview()"' : '') + '>' + accs + '</select>' +
-      '<label for="bk-f-amt">Amount (USD)</label><input id="bk-f-amt" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"' +
+      '<label for="bk-f-amt">Amount (USD)</label><input id="bk-f-amt" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"' + (wish ? ' value="' + wish.price.toFixed(2) + '"' : '') +
         (dep ? ' oninput="Banco.matchPreview()"' : '') + '>' +
       (dep ? '<fieldset class="bk-sources"><legend>Where did it come from?</legend>' + E.SOURCES.map(function (so, i) {
           return '<label class="bk-chip"><input type="radio" name="bk-src" value="' + so.id + '"' + (i === 0 ? ' checked' : '') + '><span>' + so.emoji + ' ' + so.label + '</span></label>';
         }).join('') + '</fieldset>' +
         '<label class="bk-check"><input type="checkbox" id="bk-f-match" checked onchange="Banco.matchPreview()"> Add the ' + pct + '% match <b id="bk-f-matchamt"></b></label>' +
         '<p class="bk-small" id="bk-f-give"></p>' : '') +
-      '<label for="bk-f-note">' + (dep ? 'Note (optional)' : 'What was it for?') + '</label><input id="bk-f-note" type="text" maxlength="80" placeholder="' + (dep ? 'e.g. Saturday lemonade stand' : 'e.g. Lego set') + '">' +
+      '<label for="bk-f-note">' + (dep ? 'Note (optional)' : 'What was it for?') + '</label><input id="bk-f-note" type="text" maxlength="80" placeholder="' + (dep ? 'e.g. Saturday lemonade stand' : 'e.g. Lego set') + '"' + (wish ? ' value="' + esc(wish.name) + '"' : '') + '>' +
       '<label for="bk-f-date">Date</label><input id="bk-f-date" type="date" value="' + E.today() + '" max="' + E.today() + '">' +
       '<div class="bk-row"><button type="button" class="bk-btn" onclick="Banco.go(\'home\')">Cancel</button>' +
       '<button type="button" class="bk-btn green" onclick="Banco.saveMoney(\'' + kind + '\')">' + (dep ? 'Add to account' : 'Take it out') + '</button></div></div>';
@@ -828,7 +1019,9 @@ var Banco = (function () {
     } else {
       var s = E.compute(load().events, acc, prices(), date);
       if (amt > s.value + 0.005) { ZsDialog.toast('That account only has ' + money(s.value) + '.'); return; }
-      add(ev('withdraw', { account: acc, amount: amt, note: note, date: date }));
+      var wf = { account: acc, amount: amt, note: note, date: date };
+      if (_view.wish && _view.id === acc) wf.wish = _view.wish;
+      add(ev('withdraw', wf));
       ZsDialog.toast('Took out ' + money(amt) + '.');
     }
     _view = { name: 'account', id: acc };
@@ -1059,7 +1252,7 @@ var Banco = (function () {
   }
 
   // ── navigation & lock ──
-  function go(name, id) { _chooser = null; _giveEdit = null; _view = { name: name, id: id }; render(); window.scrollTo(0, 0); }
+  function go(name, id) { _chooser = null; _giveEdit = null; _wish = null; _view = { name: name, id: id }; render(); window.scrollTo(0, 0); }
   function open(id) { go('account', id); }
   function unlock() {
     var pin = typeof getParentPin === 'function' ? getParentPin() : null;
@@ -1070,7 +1263,7 @@ var Banco = (function () {
       else ZsDialog.toast('Wrong PIN.');
     });
   }
-  function lock() { _parent = false; _chooser = null; go('home'); }
+  function lock() { _parent = false; _chooser = null; _wish = null; go('home'); }
 
   // Re-draw after a background change, but never under a form the parent
   // is filling in (that would wipe what they typed).
@@ -1101,6 +1294,8 @@ var Banco = (function () {
 
   return {
     statement: statement, dismissStatement: dismissStatement,
+    wishAdd: wishAdd, wishCancel: wishCancel, wishEmoji: wishEmoji, wishPhoto: wishPhoto, wishSave: wishSave,
+    wishRemove: wishRemove, wishDecide: wishDecide, buyWish: buyWish,
     go: go, open: open, unlock: unlock, lock: lock,
     saveMoney: saveMoney, matchPreview: matchPreview, saveShared: saveShared, openOwnAccounts: openOwnAccounts,
     saveSettings: saveSettings, savePrice: savePrice, refreshPrices: refreshPrices,

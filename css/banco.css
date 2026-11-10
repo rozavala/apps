@@ -238,6 +238,42 @@
 .bk-lsub { display: flex; justify-content: space-between; padding: 3px 14px 3px 34px; font-size: .8rem; font-weight: 700; color: var(--text-muted); }
 .bk-stmt-nav { justify-content: space-between; }
 
+/* Wishlist */
+.bk-wishlist h3 { margin-bottom: 8px; }
+.bk-wish { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid #f1f1f6; }
+.bk-wish:first-of-type { border-top: none; }
+.bk-wish-emoji { width: 52px; height: 52px; border-radius: 16px; background: #fef3c7; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex: 0 0 auto; }
+.bk-wish-img { width: 52px; height: 52px; border-radius: 16px; object-fit: cover; flex: 0 0 auto; background: #f1f5f9; }
+.bk-wish-main { flex: 1; min-width: 0; }
+.bk-wish-top { display: flex; justify-content: space-between; gap: 8px; font-weight: 800; }
+.bk-wish-top span { font-family: var(--font-display); color: #064e3b; }
+.bk-wish-wait { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: .9rem; }
+.bk-pips { display: inline-flex; gap: 4px; }
+.bk-pips i { width: 10px; height: 10px; border-radius: 50%; background: #e5e7eb; }
+.bk-pips i.on { background: #f59e0b; }
+.bk-wish-ask { margin-top: 6px; }
+.bk-wish-ask .bk-row { justify-content: flex-start; margin-top: 6px; }
+.bk-wish-keep { margin-top: 6px; font-weight: 700; font-size: .88rem; color: #92400e; }
+.bk-wish-drop, .bk-wish-saved { margin-top: 6px; font-weight: 800; font-size: .9rem; color: #047857; background: #ecfdf5; border-radius: 12px; padding: 6px 10px; }
+.bk-wish-saved { margin: 0 0 6px; }
+.bk-wish-cost { list-style: none; margin: 6px 0 0; padding: 0; font-size: .78rem; font-weight: 700; color: var(--text-muted); display: grid; gap: 2px; }
+.bk-wish-drop + .bk-wish-cost { display: none; }
+.bk-wish-form { border-top: 1px dashed #d1d5db; margin-top: 10px; padding-top: 4px; }
+.bk-wish-form label, .bk-wish-form legend { display: block; font-weight: 800; font-size: .84rem; margin: 12px 0 4px; }
+.bk-wish-form input[type="text"], .bk-wish-form input[type="number"] { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1.5px solid #e0e0ea; background: #f8fafc; font: inherit; font-size: 1rem; color: var(--text); }
+.bk-wish-form input[type="file"] { width: 100%; font: inherit; font-size: .86rem; }
+.bk-emo { width: 44px; height: 44px; border-radius: 12px; border: 2px solid #e5e7eb; background: #fff; font-size: 1.4rem; cursor: pointer; }
+.bk-emo.on { border-color: #059669; background: #ecfdf5; }
+.bk-wish-prev { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.bk-wish-for { display: flex; align-items: center; gap: 10px; background: #fef3c7; border-radius: 14px; padding: 8px 12px; margin-bottom: 8px; font-weight: 700; }
+.bk-wishinbox { background: linear-gradient(135deg, #fffbeb, #fff 70%); border-color: #fde68a; }
+.bk-wish-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid #fde68a; font-weight: 700; }
+.bk-wish-row:first-of-type { border-top: none; }
+.bk-wish-row-t { flex: 1; min-width: 0; }
+.bk-wish-row small { font-weight: 700; color: var(--text-muted); }
+.bk-wish-row b { font-family: var(--font-display); }
+.bk-wishinbox .bk-wish-img, .bk-wishinbox .bk-wish-emoji { width: 40px; height: 40px; font-size: 1.4rem; border-radius: 12px; }
+
 @media (max-width: 480px) {
   .bk-src { grid-template-columns: 1fr auto; }
   .bk-src-bar { grid-column: 1 / -1; grid-row: 2; }
