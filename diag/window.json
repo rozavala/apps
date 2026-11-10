@@ -1,5 +1,37 @@
 {
-  "generatedAt": "2026-11-07T16:04:18.087Z",
+  "generatedAt": "2026-11-10T03:54:51.186Z",
   "windowHours": 72,
-  "days": []
+  "days": [
+    {
+      "day": "2026-11-10",
+      "groups": [
+        {
+          "entry": {
+            "id": "e_mwa5945t_jh1kif",
+            "ts": 1794282130001,
+            "clientTs": 1794282130001,
+            "kind": "console.warn",
+            "app": "book-movie-check",
+            "page": "book-movie-check.html",
+            "message": "[BMC] Evaluate failed: signal is aborted without reason",
+            "filename": null,
+            "lineno": null,
+            "colno": null,
+            "stack": null,
+            "user": "u-3bda7c",
+            "age": 11,
+            "guest": false,
+            "ua": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Mobile Safari/537.36",
+            "trail": []
+          },
+          "count": 2,
+          "firstTs": 1794282130001,
+          "lastTs": 1794282206814,
+          "users": [
+            "u-3bda7c"
+          ]
+        }
+      ]
+    }
+  ]
 }
