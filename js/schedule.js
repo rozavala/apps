@@ -42,6 +42,7 @@ var AppSchedule = (function() {
     { id: 'calculo',    card: '.card-calculo' }
   ];
   ALL_APPS.push({ id: 'lector', card: '.card-lector' });
+  ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -62,6 +63,9 @@ var AppSchedule = (function() {
 
   // Lector (reading practice for the youngest) is offered every day.
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
+
+  // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
+  [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';

@@ -510,6 +510,13 @@ var APP_STAR_CONFIGS = [
       for (k in (d.books || {})) { q = d.books[k] || {}; n += (q.l ? 1 : 0) + (q.r ? 1 : 0) + (q.p ? 1 : 0); }
       return n;
     } },
+  // Code Lab: each mission is worth up to 3 stars (solved, no hints, a
+  // short program), kept in { m: { '<missionId>': { s: 0..3, ... } } }.
+  { id: 'codelab', prefix: 'zs_codelab_', stars: function(d) {
+      var n = 0, m = d.m && typeof d.m === 'object' ? d.m : {};
+      for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a
