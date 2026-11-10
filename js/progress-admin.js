@@ -374,6 +374,8 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+  // Árbol familiar has no ladder to set: its quiz stars, pages seen and map can only be cleared.
+  APPS.push({ id: 'arbol', label: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', prefix: 'zs_arbol_', mode: 'reset' });
 
   var _byId = {};
   APPS.forEach(function(a) { _byId[a.id] = a; });

@@ -42,6 +42,7 @@ var AppSchedule = (function() {
     { id: 'calculo',    card: '.card-calculo' }
   ];
   ALL_APPS.push({ id: 'lector', card: '.card-lector' });
+  ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -62,6 +63,8 @@ var AppSchedule = (function() {
 
   // Lector (reading practice for the youngest) is offered every day.
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
+  // Árbol familiar (the family tree) is a Sunday and Wednesday visit.
+  [0, 3].forEach(function(d) { SMART_SCHEDULE[d].push('arbol'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
