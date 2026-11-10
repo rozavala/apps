@@ -230,6 +230,43 @@
   padding: 14px 0;
 }
 
+/* Time by subject */
+.sr-bar {
+  display: grid;
+  grid-template-columns: minmax(120px, 190px) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #3c3256;
+  padding: 3px 0;
+}
+.sr-bar-track { height: 10px; border-radius: 99px; background: rgba(201,164,73,0.18); overflow: hidden; }
+.sr-bar-fill { display: block; height: 100%; border-radius: 99px; background: #7a2a2a; }
+.sr-bar-min { color: #6b5a82; font-size: 0.78rem; white-space: nowrap; }
+.sr-note { font-size: 0.74rem; color: #6b5a82; font-weight: 600; font-style: italic; margin-top: 4px; }
+
+/* Going well / still working on */
+.sr-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+
+/* Suggested next */
+.sr-next {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(99,102,241,0.08);
+  border: 1.5px solid rgba(99,102,241,0.3);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.sr-next h3 { font-family: 'Baloo 2', cursive; font-size: 0.95rem; font-weight: 800; color: #1f1934; margin-bottom: 4px; }
+.sr-next-text { font-size: 0.9rem; font-weight: 700; color: #1f1934; line-height: 1.35; }
+.sr-next-link {
+  display: inline-block; margin-top: 8px; padding: 7px 14px; border-radius: 10px;
+  background: #4338CA; color: #fff; font-weight: 800; font-size: 0.85rem; text-decoration: none;
+}
+.sr-status { max-width: 880px; margin: -8px auto 12px; text-align: right; font-size: 0.85rem; font-weight: 700; color: #4338CA; min-height: 1em; }
+
 .sr-footer {
   margin-top: 20px;
   text-align: center;
@@ -246,6 +283,9 @@
   .no-print { display: none !important; }
   .sr-sheet { box-shadow: none; max-width: none; margin: 0; padding: 0; border-radius: 0; background: #fff !important; }
   .sr-kid, .sr-family { background: #fff; }
+  .sr-next { background: #fff; border-color: #999; }
+  .sr-next-link { background: none; color: #000; padding: 0; text-decoration: underline; }
+  .sr-bar-fill { background: #444; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .sr-body { color: #000; }
 }
 
@@ -254,4 +294,7 @@
   .sr-sheet { padding: 20px 18px; border-radius: 12px; }
   .sr-family-stats { grid-template-columns: repeat(2, 1fr); }
   .sr-kid-grid { grid-template-columns: repeat(2, 1fr); }
+  .sr-two { grid-template-columns: 1fr; }
+  .sr-bar { grid-template-columns: 1fr auto; }
+  .sr-bar-track { grid-column: 1 / -1; order: 3; }
 }
