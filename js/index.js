@@ -1894,10 +1894,17 @@
               '</div>' +
               (typeof ZsTTS !== 'undefined' ? (
                 '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
-                  '<label class="pk-toggle" style="font-size:0.9rem;">' +
-                    '<input type="checkbox" ' + (ZsTTS.getSettings(p.name).enabled ? 'checked' : '') + ' onchange="updateKidTts(' + i + ', \'enabled\', this.checked)">' +
-                    ' 🗣 Read-aloud enabled' +
+                  '<label style="font-size:0.9rem; font-weight:700;">🗣 Read-aloud ' +
+                    '<select class="pk-tts-mode" aria-label="Read-aloud for ' + escHtml(p.name) + '" onchange="updateKidTts(' + i + ', \'mode\', this.value)" ' +
+                            'style="margin-left:8px; padding:4px 8px; border-radius:8px; font:inherit;">' +
+                      [['on', 'On (🔊 buttons)'], ['auto', 'Auto (little-kid mode)'], ['off', 'Off']].map(function(o) {
+                        return '<option value="' + o[0] + '"' + (ZsTTS.getSettings(p.name).mode === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+                      }).join('') +
+                    '</select>' +
                   '</label>' +
+                  '<p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">' +
+                    'Auto reads each question out when it appears, says an answer on the first tap and picks it on the second, and makes buttons and text bigger. It starts on for kids aged 5 and under.' +
+                  '</p>' +
                   '<label style="display:block;margin-top:8px;font-size:0.8rem;color:var(--text-muted);font-weight:700;">' +
                     'Rate: <span id="tts-rate-val-' + i + '">' + ZsTTS.getSettings(p.name).rate.toFixed(2) + '×</span>' +
                   '</label>' +
