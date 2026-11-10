@@ -1707,6 +1707,7 @@ const BibleExplorer = (() => {
   function init() {
     const saved = _loadProgress().lang;
     if (saved === 'es' || saved === 'en') state.lang = saved;
+    state.lang = zsAppLang(state.lang);
     _applyLangLabel();
     document.getElementById('bx-tile-stories').onclick = openStories;
     document.getElementById('bx-tile-verses').onclick = openVerses;

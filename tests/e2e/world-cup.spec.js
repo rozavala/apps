@@ -1,4 +1,5 @@
 // @ts-check
+const path = require('path');
 const { test, expect } = require('@playwright/test');
 const { injectMockProfile } = require('../helpers/utils');
 
@@ -11,6 +12,18 @@ test.describe('World Cup 2026 app', () => {
 
   test('all tabs render with no console errors', async ({ page }) => {
     await injectMockProfile(page);
+
+    // The app fetches the nominated squads from GitHub on start. Serve the
+    // repo's own copy instead of depending on the network (the browser
+    // resolves no external hosts under test, see playwright.config.js).
+    await page.route('https://raw.githubusercontent.com/rozavala/apps/main/data/squads-2026.json', route =>
+      route.fulfill({ path: path.join(__dirname, '../../data/squads-2026.json'), contentType: 'application/json',
+                      headers: { 'access-control-allow-origin': '*' } }));
+
+    // Same for the score sync (it fires a few seconds after start, so on a
+    // slow machine it landed inside the tab walk): an empty fixture.
+    await page.route('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json', route =>
+      route.fulfill({ json: { matches: [] }, headers: { 'access-control-allow-origin': '*' } }));
 
     /** @type {string[]} */
     const errors = [];

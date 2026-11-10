@@ -736,15 +736,17 @@ var Routines = (function() {
     var which = getActiveRoutine();
     var block = status[which];
     var info = labelFor(which);
-    var heading = info.icon + ' ' + info.greeting;
+    var tr = typeof zsShort === 'function' ? zsShort : function(es, en) { return en; };
+    var GREETING_ES = { morning: 'Buenos días', afternoon: 'Buenas tardes', evening: 'Buenas noches' };
+    var heading = info.icon + ' ' + tr(GREETING_ES[which] || info.greeting, info.greeting);
 
     if (block.complete) {
       el.innerHTML =
         '<div class="rn-card rn-done" onclick="Routines._open(\'' + which + '\')">' +
           '<div class="rn-emoji">🎉</div>' +
           '<div class="rn-body">' +
-            '<div class="rn-title">' + heading + ' — all done!</div>' +
-            '<div class="rn-sub">Streak: 🔥 ' + status.streak + ' day' + (status.streak === 1 ? '' : 's') + '</div>' +
+            '<div class="rn-title">' + heading + tr(' — ¡todo listo!', ' — all done!') + '</div>' +
+            '<div class="rn-sub">' + tr('Racha: 🔥 ' + status.streak + ' día' + (status.streak === 1 ? '' : 's'), 'Streak: 🔥 ' + status.streak + ' day' + (status.streak === 1 ? '' : 's')) + '</div>' +
           '</div>' +
           '<div class="rn-arrow">→</div>' +
         '</div>';
@@ -758,7 +760,7 @@ var Routines = (function() {
         '<div class="rn-emoji">' + info.icon + '</div>' +
         '<div class="rn-body">' +
           '<div class="rn-title">' + heading + '</div>' +
-          '<div class="rn-sub">' + remaining + ' thing' + (remaining === 1 ? '' : 's') + ' to do' +
+          '<div class="rn-sub">' + tr(remaining + ' cosa' + (remaining === 1 ? '' : 's') + ' por hacer', remaining + ' thing' + (remaining === 1 ? '' : 's') + ' to do') +
           (status.streak > 0 ? ' · 🔥 ' + status.streak : '') + '</div>' +
           '<div class="rn-bar"><div class="rn-bar-fill" style="width:' + pct + '%"></div></div>' +
         '</div>' +

@@ -1545,6 +1545,7 @@ const CivicsLab = (() => {
   function init() {
     const prog = _loadProgress();
     if (prog.lang === 'es' || prog.lang === 'en') state.lang = prog.lang;
+    state.lang = zsAppLang(state.lang);
     const hero = document.getElementById('cv-hero-art');
     if (hero) hero.innerHTML = _art(A => A.building('moneda', { label: 'Palacio de La Moneda', par: 'xMidYMid slice' }));
     document.querySelectorAll('.cv-tile-icon[data-icon]').forEach(el => {

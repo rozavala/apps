@@ -373,6 +373,7 @@ var MathExtras = (function() {
     var lang = 'es';
 
     function open() {
+      lang = zsAppLang(lang);
       _showScreen('screen-words');
       _renderPicker();
     }

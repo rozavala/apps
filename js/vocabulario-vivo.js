@@ -2017,6 +2017,8 @@ const VocabularioVivo = (() => {
 
   // ── Init ──
   function init() {
+    state.lang = zsAppLang(state.lang);
+    document.documentElement.lang = state.lang;
     if (A) A.installWood();
     document.getElementById('vv-tile-roots').onclick = openRoots;
     document.getElementById('vv-tile-match').onclick = openMatch;

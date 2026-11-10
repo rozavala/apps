@@ -1007,7 +1007,7 @@ var WorldAtlas = (function() {
     }
 
     var data = _load();
-    lang = data.lang === 'es' ? 'es' : 'en';
+    lang = zsAppLang(data.lang === 'es' ? 'es' : 'en');
 
     $('wa-lang-toggle').onclick = toggleLanguage;
     $('wa-mode-browse').onclick = openBrowse;

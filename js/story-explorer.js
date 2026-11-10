@@ -1075,6 +1075,7 @@ const StoryExplorer = (() => {
     document.body.dataset.age = ageTier;
     const d = _load();
     if (d.prefs && (d.prefs.lang === 'es' || d.prefs.lang === 'en')) lang = d.prefs.lang;
+    lang = zsAppLang(lang);
     _bind();
     _applyLang();
     _renderLibrary();

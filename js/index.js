@@ -130,6 +130,10 @@
   window.redeemForTime = function() { redeemForTime(); };
   window.updateKidChess = function(idx, val) { updateKidChess(idx, val); };
   window.updateKidFaith = function(idx, val) { updateKidFaith(idx, val); };
+  window.updateKidLang = function(idx, val) { updateKidLang(idx, val); };
+  window.updateKidHubApp = function(idx, id, val) { updateKidHubApp(idx, id, val); };
+  window.updateKidMoreLock = function(idx, val) { updateKidMoreLock(idx, val); };
+  window.updateHubMinAge = function(id, val) { updateHubMinAge(id, val); };
   window.updateKidRoutinesEnabled = function(idx, val) { updateKidRoutinesEnabled(idx, val); };
   window.addRoutineItem = function(idx, which) { addRoutineItem(idx, which); };
   window.updateRoutineItem = function(idx, which, j, val) { updateRoutineItem(idx, which, j, val); };
@@ -187,6 +191,7 @@
   var editEmoji = null;
   var editColor = null;
   var editAge = null;
+  var editLang = 'en';
   // Tap-to-confirm state for the Delete button. The native confirm()
   // dialog used to live here, but it is unreliable in iPad PWAs (the
   // standalone shell silently auto-dismisses with `false`) — which
@@ -204,6 +209,7 @@
     var grid = document.getElementById('profiles-grid');
     var profiles = getProfiles();
     if (!grid) return;
+    if (typeof ZsLang !== 'undefined') ZsLang.apply();
     grid.innerHTML = '';
 
     profiles.forEach(function(p, i) {
@@ -405,7 +411,7 @@
 
     if (typeof TimerManager !== 'undefined' && els.timer) {
       var rem = TimerManager.getRemaining();
-      els.timer.textContent = '⏰ ' + rem + ' min left';
+      els.timer.textContent = zsShort('⏰ quedan ' + rem + ' min', '⏰ ' + rem + ' min left');
     }
     
     if (typeof ChoresManager !== 'undefined' && els.tokens) {
@@ -413,7 +419,7 @@
         els.tokens.style.display = 'none';
       } else {
         var tokens = ChoresManager.getStatus().totalTokens;
-        els.tokens.textContent = '⭐ ' + tokens + ' tokens';
+        els.tokens.textContent = zsShort('⭐ ' + tokens + ' fichas', '⭐ ' + tokens + ' tokens');
         els.tokens.style.display = '';
       }
     }
@@ -435,6 +441,9 @@
     try {
       renderAppCards(user);
     } catch(e) { if (typeof Debug !== 'undefined') Debug.error('renderAppCards failed', e.message); }
+    // After the cards are in place: the hub's own words in the kid's language.
+    try { if (typeof ZsLang !== 'undefined') ZsLang.apply(); }
+    catch(e) { if (typeof Debug !== 'undefined') Debug.error('ZsLang.apply failed', e.message); }
     
     try {
       updateStatsCards(user, precalcStats);
@@ -551,6 +560,13 @@
       { name: '¿Qué Hora Es?', icon: '🕰️', href: 'que-hora-es.html', key: 'zs_clock_' + key, schedId: 'clock' }
     ];
 
+    // Only apps this kid can see: by age, and what a parent has hidden.
+    apps = apps.filter(function(app) {
+      if (typeof HubPlan === 'undefined') return true;
+      var planned = HubPlan.appForHref(app.href);
+      return !planned || HubPlan.allowed(user, planned);
+    });
+
     var visibleApps = apps.filter(function(app) {
       return todayAppIds.indexOf(app.schedId) !== -1 ||
              alwaysVisible.indexOf(app.schedId) !== -1 ||
@@ -586,10 +602,10 @@
     });
     if (noProgress.length > 0) {
       var pick = noProgress[Math.floor(Math.random() * noProgress.length)];
-      return { text: 'Try something new!', sub: pick.name, icon: pick.icon, href: pick.href };
+      return { text: zsShort('¡Prueba algo nuevo!', 'Try something new!'), sub: pick.name, icon: pick.icon, href: pick.href };
     }
 
-    return { text: 'Keep practicing!', sub: 'Play any app to earn more stars', icon: '⭐', href: null };
+    return { text: zsShort('¡Sigue practicando!', 'Keep practicing!'), sub: zsShort('Juega cualquier app para ganar más estrellas', 'Play any app to earn more stars'), icon: '⭐', href: null };
   }
 
   function updateStatsCards(user, precalculatedStats) {
@@ -1852,6 +1868,7 @@
       '</div>' +
       (typeof AppSchedule !== 'undefined' ? AppSchedule.renderScheduleConfig() : '') +
       (typeof OffHours !== 'undefined' ? OffHours.renderConfig() : '') +
+      (typeof HubPlan !== 'undefined' ? _renderHubAppsEditor() : '') +
       '<div class="parents-grid">' +
         profiles.map(function(p, i) {
           var timerData = TimerManager.getDataForKid(p.name) || { minutesUsed: 0, maxMinutes: 45 };
@@ -1876,12 +1893,30 @@
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1;" onclick="addKidBonus(getProfiles()[' + i + '].name, 30)">+30 min</button>' +
                 '<button class="hub-action-btn secondary" style="padding:6px 12px; font-size:0.75rem; flex:1; border-color:rgba(239,68,68,0.3); color:#F87171;" onclick="resetKidTimer(getProfiles()[' + i + '].name)">Reset Today</button>' +
               '</div>' +
+              '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+                '<label style="font-size:0.9rem; font-weight:700;">🌐 Language ' +
+                  '<select class="pk-lang" aria-label="Language for ' + escHtml(p.name) + '" onchange="updateKidLang(' + i + ', this.value)" ' +
+                          'style="margin-left:8px; padding:4px 8px; border-radius:8px; font:inherit;">' +
+                    LANG_OPTIONS.map(function(o) {
+                      return '<option value="' + o.lang + '"' + (getKidLang(p.name) === o.lang ? ' selected' : '') + '>' + o.label + '</option>';
+                    }).join('') +
+                  '</select>' +
+                '</label>' +
+              '</div>' +
+              (typeof HubPlan !== 'undefined' ? _renderKidHubApps(p, i) : '') +
               (typeof ZsTTS !== 'undefined' ? (
                 '<div class="pk-setting" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
-                  '<label class="pk-toggle" style="font-size:0.9rem;">' +
-                    '<input type="checkbox" ' + (ZsTTS.getSettings(p.name).enabled ? 'checked' : '') + ' onchange="updateKidTts(' + i + ', \'enabled\', this.checked)">' +
-                    ' 🗣 Read-aloud enabled' +
+                  '<label style="font-size:0.9rem; font-weight:700;">🗣 Read-aloud ' +
+                    '<select class="pk-tts-mode" aria-label="Read-aloud for ' + escHtml(p.name) + '" onchange="updateKidTts(' + i + ', \'mode\', this.value)" ' +
+                            'style="margin-left:8px; padding:4px 8px; border-radius:8px; font:inherit;">' +
+                      [['on', 'On (🔊 buttons)'], ['auto', 'Auto (little-kid mode)'], ['off', 'Off']].map(function(o) {
+                        return '<option value="' + o[0] + '"' + (ZsTTS.getSettings(p.name).mode === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+                      }).join('') +
+                    '</select>' +
                   '</label>' +
+                  '<p style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">' +
+                    'Auto reads each question out when it appears, says an answer on the first tap and picks it on the second, and makes buttons and text bigger. It starts on for kids aged 5 and under.' +
+                  '</p>' +
                   '<label style="display:block;margin-top:8px;font-size:0.8rem;color:var(--text-muted);font-weight:700;">' +
                     'Rate: <span id="tts-rate-val-' + i + '">' + ZsTTS.getSettings(p.name).rate.toFixed(2) + '×</span>' +
                   '</label>' +
@@ -1982,6 +2017,92 @@
     }
     var label = document.getElementById('chess-val-' + idx);
     if (label) label.textContent = _chessLabel(val);
+  }
+
+  // Parents Corner: which apps this kid sees, and the lock on "More apps".
+  function _renderKidHubApps(p, i) {
+    var hidden = HubPlan.hiddenIds(p);
+    return '<details class="pk-hub" style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06);">' +
+      '<summary style="font-size:0.9rem; font-weight:700; cursor:pointer;">📱 Apps on ' + escHtml(p.name) + '\'s hub</summary>' +
+      '<label class="pk-toggle" style="font-size:0.85rem; margin-top:10px; display:flex; gap:6px;">' +
+        '<input type="checkbox" class="pk-more-lock" ' + (HubPlan.moreLocked(p) ? 'checked' : '') + ' onchange="updateKidMoreLock(' + i + ', this.checked)">' +
+        ' 🔒 Ask for the PIN to open "More apps" (ages 5 and under)</label>' +
+      '<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:4px 12px; margin-top:10px;">' +
+      HubPlan.APPS.map(function(a) {
+        var tooYoung = p.age && Number(p.age) < HubPlan.minAge(a.id);
+        return '<label class="pk-toggle" style="font-size:0.8rem; display:flex; gap:6px; align-items:center;' + (tooYoung ? ' opacity:0.6;' : '') + '">' +
+          '<input type="checkbox" class="pk-hub-app" data-app="' + a.id + '" ' + (hidden.indexOf(a.id) < 0 ? 'checked' : '') +
+          ' onchange="updateKidHubApp(' + i + ', \'' + a.id + '\', this.checked)"> ' + escHtml(HubPlan.nameOf(a)) +
+          (tooYoung ? ' <small>(from ' + HubPlan.minAge(a.id) + ')</small>' : '') + '</label>';
+      }).join('') +
+      '</div></details>';
+  }
+
+  // Parents Corner: the minimum age of each app, and a way into any of them.
+  function _renderHubAppsEditor() {
+    return '<details class="pk-hub-ages" style="margin:20px 0; padding:12px 16px; background:rgba(255,255,255,0.05); border-radius:16px;">' +
+      '<summary style="font-size:1rem; font-weight:700; cursor:pointer;">📱 Apps: minimum age, and open any app</summary>' +
+      '<p style="font-size:0.75rem; color:var(--text-muted); margin:8px 0;">A kid younger than an app\'s minimum age does not see it on their hub. Tap a name to open the app yourself.</p>' +
+      '<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:6px 14px;">' +
+      HubPlan.APPS.map(function(a) {
+        return '<label style="display:flex; gap:8px; align-items:center; font-size:0.8rem;">' +
+          '<input type="number" class="pk-minage" data-app="' + a.id + '" min="0" max="18" value="' + HubPlan.minAge(a.id) + '" ' +
+            'onchange="updateHubMinAge(\'' + a.id + '\', this.value)" style="width:52px; padding:2px 6px; border-radius:6px;" aria-label="Minimum age for ' + escHtml(HubPlan.nameOf(a)) + '"> ' +
+          '<a href="' + a.href + '" style="color:inherit; font-weight:700;">' + escHtml(HubPlan.nameOf(a)) + '</a></label>';
+      }).join('') +
+      '</div></details>';
+  }
+
+  function _refreshHub() {
+    var hub = document.getElementById('hub-screen');
+    if (hub && hub.classList.contains('active')) renderAppCards();
+  }
+
+  function _pushProfiles(profiles) {
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
+  }
+
+  function updateKidHubApp(idx, id, visible) {
+    var profiles = getProfiles();
+    var p = profiles[idx];
+    if (!p) return;
+    var hidden = Array.isArray(p.hubHidden) ? p.hubHidden.slice() : [];
+    var at = hidden.indexOf(id);
+    if (visible && at >= 0) hidden.splice(at, 1);
+    if (!visible && at < 0) hidden.push(id);
+    p.hubHidden = hidden;
+    saveProfiles(profiles);
+    _pushProfiles(profiles);
+    var active = getActiveUser();
+    if (active && active.name === p.name) _refreshHub();
+  }
+
+  function updateKidMoreLock(idx, locked) {
+    var profiles = getProfiles();
+    var p = profiles[idx];
+    if (!p) return;
+    p.hubMoreLocked = !!locked;
+    saveProfiles(profiles);
+    _pushProfiles(profiles);
+    var active = getActiveUser();
+    if (active && active.name === p.name) _refreshHub();
+  }
+
+  function updateHubMinAge(id, value) {
+    HubPlan.setMinAge(id, value);
+    _refreshHub();
+  }
+
+  function updateKidLang(idx, lang) {
+    var profiles = getProfiles();
+    if (!profiles[idx]) return;
+    setKidLang(profiles[idx].name, lang);
+    var active = getActiveUser();
+    if (active && active.name === profiles[idx].name && document.getElementById('hub-screen').classList.contains('active')) {
+      showHub();
+    }
   }
 
   function updateKidFaith(idx, checked) {
@@ -2178,8 +2299,13 @@
       var msg = AppSchedule.getTodayMessage();
       var dayEl = document.getElementById('schedule-day');
       var themeEl = document.getElementById('schedule-theme');
-      if (dayEl) dayEl.textContent = '📅 ' + msg.day + ' — ' + msg.count + ' apps today';
+      if (dayEl) dayEl.textContent = '📅 ' + msg.day + ' — ' + zsShort(msg.count + ' apps hoy', msg.count + ' apps today');
       if (themeEl) themeEl.textContent = msg.theme;
+    }
+    // After the schedule: Today's 3, and what this kid sees by age and by parent.
+    if (typeof HubPlan !== 'undefined') {
+      try { HubPlan.render(user); }
+      catch (e) { if (typeof Debug !== 'undefined') Debug.error('HubPlan.render failed', e.message); }
     }
   }
 
@@ -2329,12 +2455,14 @@
     editEmoji = p.avatar;
     editColor = p.color;
     editAge   = p.age || null;
+    editLang  = getKidLang(p.name);
     var inp = document.getElementById('edit-name');
     if (inp) inp.value = p.name;
     _updateEditPreview();
     _renderEditAgePicker();
     _renderEditEmojiPicker();
     _renderEditColorPicker();
+    _renderEditLangPicker();
     var mod = document.getElementById('edit-modal');
     if (mod) mod.classList.add('active');
   }
@@ -2384,6 +2512,29 @@
     });
   }
 
+  var LANG_OPTIONS = [
+    { lang: 'es', label: 'Español' },
+    { lang: 'en', label: 'English' },
+    { lang: 'both', label: 'Español + English' }
+  ];
+
+  function _renderEditLangPicker() {
+    var el = document.getElementById('edit-lang-picker');
+    if (!el) return;
+    el.innerHTML = '';
+    LANG_OPTIONS.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'age-option' + (editLang === opt.lang ? ' selected' : '');
+      btn.style.width = 'auto';
+      btn.style.padding = '0 14px';
+      btn.setAttribute('data-lang', opt.lang);
+      btn.innerHTML = '<span class="age-num" style="font-size:0.85rem;">' + opt.label + '</span>';
+      btn.onclick = function() { editLang = opt.lang; _renderEditLangPicker(); };
+      el.appendChild(btn);
+    });
+  }
+
   function _renderEditEmojiPicker() {
     var el = document.getElementById('edit-emoji-picker');
     if (!el) return;
@@ -2418,11 +2569,19 @@
     var name = document.getElementById('edit-name').value.trim();
     if (!name) return;
     var oldName = profiles[editingIndex].name;
+    // Only write a language when it differs from what the profile reads as.
+    var langChanged = editLang !== getKidLang(oldName);
     profiles[editingIndex].name = name;
     profiles[editingIndex].avatar = editEmoji;
     profiles[editingIndex].color = editColor;
     if (editAge) profiles[editingIndex].age = editAge;
+    if (langChanged) profiles[editingIndex].lang = editLang;
     saveProfiles(profiles);
+    // Without this push the server's copy of the profile wins the next sync
+    // and the edit is undone.
+    if (typeof CloudSync !== 'undefined' && CloudSync.overwriteProfiles) {
+      try { CloudSync.overwriteProfiles(profiles); } catch (e) {}
+    }
     var act = getActiveUser();
     if (act && act.name === oldName) setActiveUser(profiles[editingIndex]);
     closeEditModal();
