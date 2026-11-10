@@ -1024,6 +1024,15 @@ const BibleExplorer = (() => {
       '<div class="bx-dots">' + _quiz.items.map((_, i) => '<i class="' + (i < _quiz.i ? 'done' : i === _quiz.i ? 'cur' : '') + '"></i>').join('') + '</div></div></div>';
   }
 
+  // Repaso (the daily review): a missed question comes back tomorrow.
+  function _reviewNote(prompt, answer, choices, correct) {
+    try {
+      if (typeof Review === 'undefined') return;
+      if (correct) Review.hit(null, Review.idFor('bible', prompt, answer));
+      else Review.add(null, { app: 'bible', prompt: prompt, answer: answer, choices: choices });
+    } catch (e) {}
+  }
+
   function _renderQuizQuestion() {
     const it = _quiz.items[_quiz.i];
     if (!it) return _finishStoryQuiz();
@@ -1043,6 +1052,7 @@ const BibleExplorer = (() => {
         btn.classList.add(correct ? 'bx-correct' : 'bx-wrong');
         wrap.querySelectorAll('.bx-quiz-opt').forEach(b => { b.disabled = true; if (b.dataset.v === it.answer) b.classList.add('bx-correct'); });
         if (correct) _quiz.correct++;
+        _reviewNote(it.q, it.answer, it.opts, correct);
         sfx(correct ? 'correct' : 'wrong');
         const fb = wrap.querySelector('.bx-quiz-fb');
         fb.className = 'bx-quiz-fb ' + (correct ? 'bx-feedback-good' : 'bx-feedback-bad');
@@ -1380,6 +1390,19 @@ const BibleExplorer = (() => {
       .replace(/[^a-z0-9]/gi, '');
   }
 
+  // A verse that was not filled in right comes back as "complete the verse".
+  function _reviewVerse(idx, parsed, ok) {
+    try {
+      const v = VERSES[idx];
+      if (typeof Review === 'undefined' || !v) return;
+      const raw = v[state.lang === 'es' ? 'es' : 'en'] || v.en;
+      const prompt = v.ref + ' — ' + raw.replace(/\[[^\]]*\]/g, '____');
+      const answer = parsed.blanks.join(', ');
+      if (ok) Review.hit(null, Review.idFor('bible', prompt, answer));
+      else Review.add(null, { app: 'bible', prompt: prompt, answer: answer });
+    } catch (e) {}
+  }
+
   function _checkVerse(idx, parsed, mode, quiet) {
     const fields = mode === 'type'
       ? [...document.querySelectorAll('#bx-verse-detail .bx-blank')]
@@ -1394,6 +1417,7 @@ const BibleExplorer = (() => {
       if (okk) correct++;
     });
     const fb = document.getElementById('bx-verse-feedback');
+    if (!quiet) _reviewVerse(idx, parsed, correct === total);
     if (correct === total) {
       sfx('correct');
       fb.className = 'bx-verse-feedback bx-feedback-good';

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Repaso del día 🔁</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/repaso.css?v=2">
+  <link rel="stylesheet" href="css/zs-theme.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div class="app rp-app">
+    <!-- HOME: how many are waiting, the boxes, the flame -->
+    <div class="screen active" id="rp-home">
+      <header class="rp-hero">
+        <div class="rp-hero-art" id="rp-hero-art" aria-hidden="true"></div>
+        <div class="rp-hero-text">
+          <h1 id="rp-title">Repaso del día</h1>
+          <p id="rp-sub"></p>
+        </div>
+        <div class="rp-flame" id="rp-flame"></div>
+      </header>
+      <section class="rp-card" aria-live="polite">
+        <div class="rp-due" id="rp-due"></div>
+        <button type="button" class="rp-go" id="rp-go"></button>
+        <p class="rp-note" id="rp-note"></p>
+      </section>
+      <section class="rp-card">
+        <h2 class="rp-h2" id="rp-boxes-title"></h2>
+        <div class="rp-boxes" id="rp-boxes"></div>
+      </section>
+    </div>
+
+    <!-- QUIZ: one item at a time -->
+    <div class="screen" id="rp-quiz">
+      <div class="rp-qhead">
+        <div class="rp-dots" id="rp-dots" role="img"></div>
+        <span class="rp-from" id="rp-from"></span>
+      </div>
+      <div class="rp-qcard">
+        <div class="rp-board" id="rp-board" hidden></div>
+        <div class="rp-prompt" id="rp-prompt"></div>
+        <div class="rp-choices" id="rp-choices"></div>
+        <div class="rp-reveal" id="rp-reveal" hidden>
+          <button type="button" class="rp-show" id="rp-show"></button>
+        </div>
+        <div class="rp-feedback" id="rp-feedback" aria-live="polite"></div>
+        <div class="rp-selfcheck" id="rp-selfcheck" hidden>
+          <button type="button" class="rp-knew" id="rp-knew"></button>
+          <button type="button" class="rp-notyet" id="rp-notyet"></button>
+        </div>
+        <button type="button" class="rp-next" id="rp-next" hidden></button>
+      </div>
+    </div>
+
+    <!-- DONE -->
+    <div class="screen" id="rp-done">
+      <div class="rp-donecard">
+        <div class="rp-done-art" id="rp-done-art" aria-hidden="true"></div>
+        <h2 id="rp-done-title"></h2>
+        <p id="rp-done-sum"></p>
+        <p class="rp-star" id="rp-done-star"></p>
+        <div class="rp-flame big" id="rp-done-flame"></div>
+        <div class="rp-actions">
+          <button type="button" class="rp-go" id="rp-more" hidden></button>
+          <a class="rp-back" id="rp-back" href="index.html"></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/dialog.js?v=3"></script>
+  <script src="js/tts.js?v=3"></script>
+  <script src="js/speak.js?v=2"></script>
+  <script src="js/debug.js?v=3"></script>
+  <script src="js/auth.js?v=7"></script>
+  <script src="js/off-hours.js?v=1"></script>
+  <script src="js/a11y.js"></script>
+  <script src="js/sync.js?v=19"></script>
+  <script src="js/zs-diag.js?v=3"></script>
+  <script src="js/nav.js?v=4"></script>
+  <script src="js/sounds.js"></script>
+  <script src="js/activity-log.js"></script>
+  <script src="js/review.js?v=1"></script>
+  <script src="js/repaso.js?v=1"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>

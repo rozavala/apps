@@ -856,6 +856,17 @@
         }
       } catch (e) {}
 
+      // Daily review: how many are waiting, and the flame.
+      try {
+        var rvEl = document.getElementById('stats-review');
+        if (rvEl && typeof Review !== 'undefined') {
+          var rv = Review.counts(user.name), rvItems = [];
+          if (rv.due > 0) rvItems.push('🔁 ' + rv.due + ' ' + zsShort('por repasar', 'to review'));
+          if (rv.streak > 0) rvItems.push('🔥 ' + rv.streak);
+          rvEl.innerHTML = rvItems.map(function(i) { return '<span class="cs-item active">' + i + '</span>'; }).join('');
+        }
+      } catch (e) {}
+
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',

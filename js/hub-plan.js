@@ -68,6 +68,7 @@ var HubPlan = (function() {
     { id: 'move',       href: 'move-quest.html',         group: 'move',    minAge: 4,  beginner: true, names: ['move quest'] },
     { id: 'sports',     href: 'sports-arena.html',       group: 'move',    minAge: 5,  names: ['sports arena'] },
     { id: 'worldcup',   href: 'world-cup.html',          group: 'move',    minAge: 6,  names: ['world cup'] },
+    { id: 'review',     href: 'repaso.html',             group: 'reading', minAge: 5,  names: ['repaso'] },
     { id: 'trophy',     href: 'trophy-room.html',        group: 'more',    minAge: 4,  names: [], list: false },
     { id: 'bmcheck',    href: 'book-movie-check.html',   group: 'more',    minAge: 8,  names: ['book & movie check'], list: false },
     { id: 'patron',     href: 'patron-lancha.html',      group: 'more',    minAge: 11, names: [], list: false }
@@ -206,12 +207,18 @@ var HubPlan = (function() {
     (opts.scheduled || (typeof AppSchedule !== 'undefined' ? AppSchedule.getTodayApps() : [])).forEach(function(id) { scheduled[id] = true; });
     var dateKey = _dateKey(now);
 
-    var cands = eligible.map(_byId).filter(function(a) { return a && a.list !== false && !act.today[a.id]; });
+    // Repaso is only a suggestion when there is something to review.
+    var reviewDue = opts.reviewDue != null ? opts.reviewDue
+      : (typeof Review !== 'undefined' && Review.dueCount ? Review.dueCount(user.name) : 0);
+    var cands = eligible.map(_byId).filter(function(a) {
+      return a && a.list !== false && !act.today[a.id] && (a.id !== 'review' || reviewDue > 0);
+    });
     var score = {};
     cands.forEach(function(a) {
       var days = act.last[a.id] ? Math.min(14, (now.getTime() - act.last[a.id]) / DAY) : 14;
       score[a.id] = (scheduled[a.id] ? 3 : 0) + (days / 14) * 3 + (weak[a.group] || 0) +
         (_hash(dateKey + '|' + user.name + '|' + a.id) % 100) / 100;
+      if (a.id === 'review') score[a.id] += 5;   // what slipped by comes first
     });
     cands.sort(function(a, b) { return score[b.id] - score[a.id]; });
 

@@ -35,6 +35,7 @@ var ZsLang = (function() {
     'quest-adventure.html':    { d: ['Explora un mapa del mundo: ¡tu progreso en cada app desbloquea nuevas regiones!', 'Explore a world map — your progress in every app unlocks new regions!'], g: ['🗺️ Aventura', '🗺️ Adventure'] },
     'guess-quest.html':        { d: ['20 Preguntas: ¡adivina animales, comidas y más!', '20 Questions — guess animals, foods, and more!'], g: ['🧠 Lógica', '🧠 Logic'] },
     'book-movie-check.html':   { d: ['Descubre si un libro o una película es adecuado para nuestra familia.', 'Find out if a book or movie is right for our family.'], g: ['📚 Guía de medios', '📚 Media Guide'] },
+    'repaso.html':             { d: ['Repasa lo que se te escapó en otras apps: unos 5 minutos al día.', 'Go over what slipped by in other apps: about 5 minutes a day.'], g: ['🔁 Repaso', '🔁 Review'] },
     'trophy-room.html':        { d: ['Todas las insignias, rangos y logros que has ganado, en un solo lugar.', 'Every badge, rank and milestone you\'ve earned — all in one place.'], g: ['🏅 Logros', '🏅 Achievements'] },
     'money-master.html':       { d: ['Monedas, billetes y vuelto: practica con CLP y USD.', 'Coins, bills, and change-making — practice with CLP & USD.'], g: ['🪙 Dinero', '🪙 Money'] },
     'invest-quest.html':       { d: ['Invierte en empresas de práctica, sigue el mercado y aprende sobre riesgo, retorno y ROI.', 'Invest in real-style companies, ride the market, and learn risk, return & ROI.'], g: ['💹 Inversión', '💹 Investing'] },
