@@ -31,6 +31,7 @@ const MAJOR_APPS = [
   'dictado.html',
   'calculo-rapido.html',
   'lector.html',
+  'arbol-familiar.html',
   'code-lab.html'
 ];
 
