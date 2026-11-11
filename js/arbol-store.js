@@ -1,13 +1,14 @@
 /* ================================================================
    ÁRBOL FAMILIAR — the stored tree (js/arbol-store.js)
 
-   The family tree is HOUSEHOLD data: one JSON blob at the localStorage key
-   zs_family_tree, synced to the family server as household item
-   "family_tree" (the server keeps one JSON document per item, 5 MB at most).
+   The family tree is HOUSEHOLD data: one JSON object kept in IndexedDB on
+   each device and synced to the family server as household items
+   "family_tree" (a manifest) and "family_tree_1..n" (compressed pieces).
+   See js/arbol-db.js.
    It holds real people, living ones included, so it exists only on the
    family's devices and server. Never in this repository.
 
-   Stored shape (v1), compact on purpose (a 5,000-person tree is about 1 MB):
+   Stored shape (v1), compact on purpose (a 20,000-person tree is about 9 MB):
      { v:1,
        imp: { ts, file, ver, software, people, fams, trim:0..3, notes, media },
        (trim: 0 everything, 1 shorter notes, 2 no notes and fewer events, 3 births, deaths and marriages only)
@@ -36,10 +37,11 @@
   var G = (typeof require === 'function' && typeof module !== 'undefined') ? require('./gedcom.js') : root.Gedcom;
 
   var KEY = 'zs_family_tree';
-  // The binding limit is the device: localStorage holds about 5 million characters per site on an iPad,
-  // and the whole suite shares it. 1.8 million characters (about 2.5 MB on the wire, half the server's
-  // 5 MB limit) holds roughly 5,000 richly annotated people or 10,000 bare ones.
-  var BUDGET = 1800000;
+  // The tree is kept in IndexedDB and synced compressed and in pieces (js/arbol-db.js), so neither
+  // localStorage nor the server's 5 MB request limit binds it. The budget keeps memory sane on an
+  // iPad: 32 million characters holds a 20,000-person tree with its notes (about 9 MB) several
+  // times over; past it, the trim ladder drops notes and minor events first.
+  var BUDGET = 32000000;
   var NOTE_CAP = [1200, 300], NOTES_PER = [8, 3];
   var LIVING_YEARS = 100;          // born within this many years and no death record: treated as living
 

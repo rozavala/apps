@@ -107,7 +107,7 @@ test.describe('Stored tree', () => {
     expect(r.store.P.I5).toMatchObject({ g: 'Ernesto', gone: 1, a: { photo: 'ernesto' } });   // his photo stays on his own (now hidden) record
   });
 
-  test('a 5,000-person tree: stored size is measured and fits the budget, far under the server’s 5 MB', () => {
+  test('a 5,000-person tree: stored size is measured and fits the budget', () => {
     const text = H.big(5000);
     const parsed = G.parse(text);
     const r = S.merge(null, parsed, { file: 'big.ged' });
@@ -150,10 +150,21 @@ test.describe('Stored tree', () => {
     }
   });
 
-  test('a 20,000-person tree is refused with an error rather than overflowing the device', () => {
-    const r = S.merge(null, G.parse(H.big(20000)), {});
+  test('a 10 MB, 20,000-person GEDCOM is kept whole (no trimming), within the budget', () => {
+    const text = H.big(20000);
+    expect(Buffer.byteLength(text)).toBeGreaterThan(10 * 1000 * 1000);
+    const r = S.merge(null, G.parse(text), {});
+    expect(r.error).toBeUndefined();
+    expect(r.report.trim).toBe(0);
+    expect(Object.keys(r.store.P)).toHaveLength(20000);
+    expect(S.size(r.store)).toBeLessThan(S.BUDGET / 2);   // room for a tree twice as big
+    test.info().annotations.push({ type: 'size', description: `20000 people: file ${text.length} chars -> stored ${S.size(r.store)} chars; budget ${S.BUDGET}` });
+  });
+
+  test('a tree past the budget is still refused with an error rather than overflowing the device', () => {
+    const r = S.merge(null, G.parse(H.big(3000)), { budget: 50000 });
     expect(r.error).toBe('too-big');
-    expect(r.size).toBeGreaterThan(S.BUDGET);
+    expect(r.size).toBeGreaterThan(50000);
   });
 });
 

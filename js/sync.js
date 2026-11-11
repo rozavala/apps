@@ -111,14 +111,10 @@ var CloudSync = (function() {
     'zs_off_hours':             'off_hours',
     'zs_bank':                  'bank',
     'zs_challenges':            'challenges',
-    'zs_hub_minage':            'hub_minage',
-    'zs_family_tree':           'family_tree'
+    'zs_hub_minage':            'hub_minage'
+    // The family tree (Árbol familiar) is household data too, but too big for this
+    // path: js/arbol-db.js keeps it in IndexedDB and syncs it in compressed pieces.
   };
-  // The family tree can be about a megabyte, so only the pages that use it pull and
-  // push it on load (the other 40 pages would fetch it for nothing). Parents Corner's
-  // "Push All" skips it too: an import pushes it on its own.
-  var HOUSEHOLD_LAZY = { 'zs_family_tree': 'arbol-familiar' };
-  function _wantsLazy(key) { return window.location.pathname.indexOf(HOUSEHOLD_LAZY[key]) !== -1; }
   var HOUSEHOLD_KID = '_household';
 
   var state = {
@@ -1121,7 +1117,6 @@ var CloudSync = (function() {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var promises = [];
     for (var key in HOUSEHOLD_KEYS) {
-      if (HOUSEHOLD_LAZY[key] && !_wantsLazy(key)) continue;
       promises.push(state.pull(key));
     }
     return Promise.all(promises);
@@ -1133,7 +1128,6 @@ var CloudSync = (function() {
     if (!state.isConfigured() || !state.online) return Promise.resolve();
     var promises = [];
     for (var key in HOUSEHOLD_KEYS) {
-      if (HOUSEHOLD_LAZY[key] && !_wantsLazy(key)) continue;
       if (localStorage.getItem(key)) promises.push(state.push(key));
     }
     return Promise.all(promises);
