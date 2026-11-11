@@ -1075,7 +1075,10 @@ var CloudSync = (function() {
 
           if (nameToIdx.hasOwnProperty(key)) {
             var existing = finalProfiles[nameToIdx[key]];
-            if (p.age > existing.age) {
+            // A copy with a birthday wins (its age follows the date);
+            // otherwise the older age, as before.
+            var pB = !!p.birthday, eB = !!existing.birthday;
+            if ((pB && !eB) || (pB === eB && p.age > existing.age)) {
               finalProfiles[nameToIdx[key]] = p;
             }
           } else {
