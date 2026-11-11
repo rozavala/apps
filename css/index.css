@@ -248,6 +248,12 @@
       width: 90%;
       max-width: 420px;
       animation: popIn 0.3s ease-out;
+      /* a tall form (edit profile) scrolls inside the window, so Save stays reachable */
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
     .modal h2 {
       font-family: var(--font-display);
@@ -328,6 +334,12 @@
     .age-option:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); transform: translateY(-1px); }
     .age-option.selected { border-color: var(--purple); color: var(--purple); background: rgba(167,139,250,0.08); box-shadow: 0 0 16px var(--purple-glow); }
     .age-option:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+
+    /* Birthday (optional): the age then follows it */
+    .bday-opt { font-weight: 400; color: var(--text-muted); }
+    .modal-field input.bday-input { color-scheme: dark; min-height: 44px; }
+    .bday-hint { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.35; }
+    .bday-hint.bday-bad { color: #EF4444; font-weight: 700; }
     .age-option .age-num { font-size: 1.1rem; display: block; }
     .age-option .age-label { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; }
 

@@ -21,6 +21,35 @@ var AGE_OPTIONS = [
   { age: 11, label: '11+' }
 ];
 
+// ── Birthdays ─────────────────────────────────────────────────────
+// A profile may carry a birthday ('YYYY-MM-DD', with the year). Then its age
+// is worked out from it each time profiles are read, so it goes up by itself
+// on the birthday and works for grown-ups too. Without one, the age picked by
+// hand (4 to 11+) is used, as before.
+function ageFromBirthday(bday, now) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(bday || ''));
+  if (!m) return null;
+  var y = +m[1], mo = +m[2], d = +m[3];
+  if (y < 1900 || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  now = now || new Date();
+  var age = now.getFullYear() - y;
+  if (now.getMonth() + 1 < mo || (now.getMonth() + 1 === mo && now.getDate() < d)) age--;
+  return age >= 0 && age < 130 ? age : null;
+}
+function isBirthdayToday(p, now) {
+  var m = p && /^\d{4}-(\d{2})-(\d{2})$/.exec(String(p.birthday || ''));
+  if (!m) return false;
+  now = now || new Date();
+  return now.getMonth() + 1 === +m[1] && now.getDate() === +m[2];
+}
+function _withBirthdayAge(p) {
+  if (p && p.birthday) {
+    var a = ageFromBirthday(p.birthday);
+    if (a != null) p.age = a;
+  }
+  return p;
+}
+
 var STORAGE_KEY = 'zs_profiles';
 var ACTIVE_KEY  = 'zs_active_user';
 
@@ -46,6 +75,7 @@ function getProfiles() {
                    .filter(function(x){ return !!x; });
     }
     
+    (parsed || []).forEach(_withBirthdayAge);
     _cachedProfiles = parsed || [];
     _profilesCached = true;
     return _cachedProfiles;
@@ -97,7 +127,7 @@ function getActiveUser() {
   if (_activeUserCached && _cachedActiveUser) return _cachedActiveUser;
   try {
     var raw = localStorage.getItem(ACTIVE_KEY) || sessionStorage.getItem(ACTIVE_KEY);
-    _cachedActiveUser = raw ? JSON.parse(raw) : null;
+    _cachedActiveUser = raw ? _withBirthdayAge(JSON.parse(raw)) : null;
     _activeUserCached = true;
     return _cachedActiveUser;
   } catch (e) {
