@@ -123,6 +123,28 @@ var ArbolFiles = (function() {
   }
   function isImage(entry) { return /^image\//.test(entry.type); }
 
-  return { newId: newId, url: url, typeOf: typeOf, prepare: prepare, upload: upload, remove: remove, list: list, isImage: isImage, MAX: MAX };
+  // A face: a square crop of a photo already on the server, cut in the browser.
+  // fx, fy: the face's centre (0..1 of the photo); z: zoom (1 = the whole short side).
+  // -> Promise<{ id, src, kids }> for P[id].a.face
+  function makeFace(entry, fx, fy, z) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      img.crossOrigin = 'anonymous';             // the server sends CORS headers, so the canvas stays readable
+      img.onload = function() { resolve(img); };
+      img.onerror = function() { reject(new Error('load')); };
+      img.src = url(entry.id);
+    }).then(function(img) {
+      var w = img.naturalWidth, h = img.naturalHeight, side = Math.min(w, h) / Math.max(1, z || 1);
+      var sx = Math.max(0, Math.min(w - side, fx * w - side / 2)), sy = Math.max(0, Math.min(h - side, fy * h - side / 2));
+      var c = document.createElement('canvas'); c.width = c.height = 320;
+      c.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, 320, 320);
+      return new Promise(function(res) { c.toBlob(function(b) { c.width = c.height = 0; res(b); }, 'image/jpeg', 0.86); });
+    }).then(function(blob) {
+      if (!blob) throw new Error('crop');
+      return put(blob, 'image/jpeg');
+    }).then(function(id) { return { id: id, src: entry.id, kids: entry.kids ? 1 : 0 }; });
+  }
+
+  return { newId: newId, url: url, typeOf: typeOf, prepare: prepare, upload: upload, remove: remove, list: list, isImage: isImage, makeFace: makeFace, MAX: MAX };
 })();
 if (typeof window !== 'undefined') window.ArbolFiles = ArbolFiles;
