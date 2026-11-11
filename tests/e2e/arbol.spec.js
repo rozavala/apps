@@ -28,10 +28,26 @@ async function seed(page, { linked = true, cfg = {}, extra } = {}) {
     // @ts-ignore
     const r = ArbolStore.merge(null, Gedcom.parse(extra ? text.replace('0 TRLR', extra + '\n0 TRLR') : text), { file: 'sample.ged' });
     r.store.cfg = Object.assign({ map: linked ? { lucia: 'I24' } : {}, notes: 0, living: 0 }, cfg);
+    // The way the first version stored it: the page moves it to IndexedDB on reload.
     localStorage.setItem('zs_family_tree', JSON.stringify(r.store));
     // @ts-ignore
-    Arbol.reload();
+    return Arbol.reload();
   }, [H.sample(), linked, cfg, extra]);
+}
+// The tree as saved on this device (IndexedDB, js/arbol-db.js).
+// @ts-ignore
+const stored = (page) => page.evaluate(() => ArbolDB.get().then(r => r && r.tree));
+async function edit(page, kind) {
+  await page.evaluate(async (kind) => {
+    // @ts-ignore
+    const r = await ArbolDB.get(), s = r.tree;
+    if (kind === 'hostile') { s.P.I77.fc = []; s.P.I24.fc = ['F9']; }
+    if (kind === 'kid-added') s.P.I12.a = { photo: 'later' };
+    // @ts-ignore
+    await ArbolDB.put(s, Date.now());
+    // @ts-ignore
+    await Arbol.reload();
+  }, kind);
 }
 const bodyText = (page) => page.locator('#ar-wrap').innerText();
 
@@ -179,8 +195,7 @@ test.describe('Árbol familiar', () => {
         '0 @I77@ INDI', '1 NAME <img src=x onerror="window.__pwn=1"> /<script>window.__pwn=2<\/script>/', '1 SEX M',
         '1 BIRT', '2 DATE 1900', '2 PLAC <b onmouseover="window.__pwn=3">Nowhere</b>, Chile', '1 DEAT', '2 DATE 1950',
         '1 NOTE <svg onload="window.__pwn=4">', '1 FAMC @F9@'].join('\n') + '\n0 @F77@ FAM\n1 CHIL @I77@\n1 HUSB @I77@', cfg: { notes: 1 } });
-      await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('zs_family_tree')); s.P.I77.fc = []; s.P.I24.fc = ['F9']; localStorage.setItem('zs_family_tree', JSON.stringify(s)); });
-      await page.evaluate(() => { /** @type {any} */ (window).Arbol.reload(); });
+      await edit(page, 'hostile');
       // the hostile person as a search result in "How are we related?"
       await page.click('[data-to=related]');
       await page.fill('#ar-q', 'img');
@@ -309,16 +324,16 @@ test.describe('Árbol familiar', () => {
       await page.click('.ar-kpick:has-text("Lucía Ejemplo")');
       await expect(page.locator('.ar-klinked')).toContainText('Lucía Ejemplo');
       await expect(page.locator('#ar-file')).toBeAttached();
-      const tree = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_family_tree')));
-      expect(tree.cfg.map).toEqual({ lucia: 'I24' });
+      await expect.poll(async () => (await stored(page)).cfg.map).toEqual({ lucia: 'I24' });
+      const tree = await stored(page);
       expect(Object.keys(tree.P)).toHaveLength(30);
       // something the kids added, then a newer export (a corrected name) with the same ids
-      await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('zs_family_tree')); s.P.I12.a = { photo: 'later' }; localStorage.setItem('zs_family_tree', JSON.stringify(s)); /** @type {any} */ (window).Arbol.reload(); });
+      await edit(page, 'kid-added');
       const newer = H.sample().replace('1 NAME Marta /Soto/', '1 NAME Marta Elena /Soto/').replace('2 GIVN Marta', '2 GIVN Marta Elena');
       await page.setInputFiles('#ar-file', { name: 'newer.ged', mimeType: 'text/plain', buffer: Buffer.from(newer, 'utf8') });
       await expect(page.locator('.ar-preview')).toContainText('1 updated');
       await page.click('[data-act=doimport]');
-      const after = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_family_tree')));
+      const after = await stored(page);
       expect(after.P.I12.g).toBe('Marta Elena');
       expect(after.P.I12.a).toEqual({ photo: 'later' });
       expect(after.cfg.map).toEqual({ lucia: 'I24' });
@@ -337,8 +352,7 @@ test.describe('Árbol familiar', () => {
       await page.fill('.zsd-input', '1234'); await page.keyboard.press('Enter');
       await page.check('#ar-notes');
       await page.check('#ar-live');
-      const cfg = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_family_tree')).cfg);
-      expect(cfg).toMatchObject({ notes: 1, living: 1 });
+      await expect.poll(async () => (await stored(page)).cfg).toMatchObject({ notes: 1, living: 1 });
       await page.locator('.ar-help summary').click();
       const help = await page.locator('.ar-helpb').innerText();
       expect(help).toContain('https://www.familysearch.org/innovate/export');
@@ -353,6 +367,7 @@ test.describe('Árbol familiar', () => {
       await page.fill('.zsd-input', '1234'); await page.keyboard.press('Enter');
       await page.click('[data-act=removetree]');
       await page.click('.zsd-ok');
+      await expect.poll(() => stored(page)).toBeNull();
       expect(await page.evaluate(() => localStorage.getItem('zs_family_tree'))).toBeNull();
     });
   });

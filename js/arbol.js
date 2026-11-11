@@ -32,7 +32,8 @@ var Arbol = (function() {
   var PREFIX = 'zs_arbol_';
 
   var root = null, user = null, age = 8, tier = 'intermediate', kidKey = '';
-  var tree = null, idx = null, livingSet = null, vcache = {}, ccache = {};
+  var tree = null, treeTs = 0, idx = null, livingSet = null, vcache = {}, ccache = {};
+  var ready = false, staleTree = false, syncing = null;
   var data = null;
   var st = { view: 'home', pid: null, root: null, depth: 0, hist: [], q: null, rel: { a: null, b: null, pick: null, text: '' }, map: { gen: 0, sel: null }, par: null, imp: null, pq: {}, fail: false };
   var pan = null, panMoved = false;
@@ -61,9 +62,16 @@ var Arbol = (function() {
   // ---------------------------------------------------------------
   // Storage: the household tree, and this kid's progress
   // ---------------------------------------------------------------
+  // The tree lives in IndexedDB (js/arbol-db.js): a big one does not fit in localStorage.
   function loadTree() {
-    var raw = null, t = null;
-    try { raw = localStorage.getItem(Store.KEY); t = raw ? JSON.parse(raw) : null; } catch (e) { t = null; }
+    return ArbolDB.get().then(function(rec) {
+      treeTs = rec ? rec.ts : 0;
+      applyTree(rec ? rec.tree : null);
+      ready = true;
+      return tree;
+    }, function() { ready = true; applyTree(null); return null; });
+  }
+  function applyTree(t) {
     if (!t || typeof t !== 'object' || !t.P || typeof t.P !== 'object' || !Object.keys(t.P).length) t = null;
     if (t) {
       if (!t.F || typeof t.F !== 'object') t.F = {};
@@ -78,12 +86,37 @@ var Arbol = (function() {
     livingSet = t ? Store.livingSet(t, nowYear()) : {};
     return t;
   }
+  // Resolves true once saved on this device; the upload to the family server follows on its own.
   function saveTree() {
-    try { localStorage.setItem(Store.KEY, JSON.stringify(tree)); }
-    catch (e) { return false; }
-    if (typeof CloudSync !== 'undefined' && CloudSync.online) CloudSync.push(Store.KEY);
+    var ts = Date.now();
     vcache = {}; ccache = {};
-    return true;
+    return ArbolDB.put(tree, ts).then(function() {
+      treeTs = ts;
+      ArbolSync.push(tree, ts).catch(function(e) { if (typeof Debug !== 'undefined') Debug.error('[Arbol] upload failed', e && e.message); });
+      return true;
+    }, function() { return false; });
+  }
+
+  // Bring this device and the family server in line: the newer tree wins.
+  function syncTree() {
+    if (syncing || !ArbolSync.online()) return syncing || Promise.resolve();
+    syncing = ArbolSync.pull(treeTs).then(function(r) {
+      if (!r) { if (tree) return ArbolSync.push(tree, treeTs || Date.now()); return; }
+      if (r.same) { if (tree && r.ts < treeTs) return ArbolSync.push(tree, treeTs); return; }
+      if (r.empty) {
+        if (!tree || treeTs >= r.ts) return;
+        return ArbolDB.clear().then(function() { treeTs = 0; refreshFromStore(null); });
+      }
+      return ArbolDB.put(r.tree, r.ts).then(function() { treeTs = r.ts; refreshFromStore(r.tree); });
+    }).catch(function(e) {
+      if (typeof Debug !== 'undefined') Debug.error('[Arbol] sync failed', e && e.message);
+    }).then(function() { syncing = null; });
+    return syncing;
+  }
+  function refreshFromStore(t) {
+    // never swap the tree out from under a parent's screen or a quiz in progress
+    if (st.view === 'parents' || st.q) { staleTree = true; return; }
+    applyTree(t); render();
   }
 
   function dataKey() { return typeof getUserAppKey === 'function' ? getUserAppKey(PREFIX) : null; }
@@ -194,9 +227,11 @@ var Arbol = (function() {
 
   function render() {
     if (!root) return;
+    if (staleTree && st.view !== 'parents' && !st.q) { staleTree = false; loadTree().then(render); return; }
     clearPan();
     var html = '';
     if (st.view === 'parents') html = viewParents();
+    else if (!ready) html = '<div class="ar-empty"><p>' + esc(T('Cargando el árbol…', 'Loading the tree…')) + '</p></div>';
     else if (!user) html = viewNoUser();
     else if (!tree) html = viewEmpty();
     else if (!meId() && st.view !== 'person') html = viewUnlinked();
@@ -815,8 +850,8 @@ var Arbol = (function() {
     var info = tree ? tree.imp : null, n = tree ? Object.keys(tree.P).filter(function(i) { return !tree.P[i].gone; }).length : 0;
     html += '<section class="ar-psec"><h3>' + esc(T('1. El árbol', '1. The tree')) + '</h3>';
     if (tree) {
-      var kb = Math.round(JSON.stringify(tree).length / 1024);
-      html += '<p>' + esc(T(n + ' personas guardadas', n + ' people saved')) + (info ? ' · ' + esc(info.file || 'GEDCOM') + ' · ' + esc(new Date(info.ts).toLocaleDateString(dl() === 'es' ? 'es-CL' : 'en-US')) : '') + ' · ' + kb + ' KB</p>';
+      var kb = Math.round(JSON.stringify(tree).length / 1024), sz = kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB';
+      html += '<p>' + esc(T(n + ' personas guardadas', n + ' people saved')) + (info ? ' · ' + esc(info.file || 'GEDCOM') + ' · ' + esc(new Date(info.ts).toLocaleDateString(dl() === 'es' ? 'es-CL' : 'en-US')) : '') + ' · ' + sz + '</p>';
       if (info && info.trim) html += '<p class="ar-warn">' + esc(T('El árbol era muy grande: se guardó una versión reducida (' + ['', 'historias más cortas', 'sin las historias y con menos datos', 'solo nacimientos, fallecimientos y matrimonios'][info.trim] + ').', 'The tree was very large, so a smaller version was saved (' + ['', 'shorter stories', 'no stories and fewer details', 'births, deaths and marriages only'][info.trim] + ').')) + '</p>';
     } else html += '<p>' + esc(T('Todavía no hay un árbol.', 'There is no tree yet.')) + '</p>';
     html += '<label class="ar-file"><span class="ar-btn">' + esc(tree ? T('Actualizar con un archivo nuevo', 'Update with a newer file') : T('Elegir archivo GEDCOM (.ged)', 'Choose a GEDCOM file (.ged)')) + '</span>' +
@@ -838,6 +873,7 @@ var Arbol = (function() {
     var I = st.imp;
     if (!I) return '';
     if (I.error) return '<p class="ar-warn" role="alert">' + esc(I.error) + '</p>';
+    if (I.saving) return '<p class="ar-preview" role="status">' + esc(T('Guardando el árbol…', 'Saving the tree…')) + '</p>';
     var s = I.parsed.stats, live = I.liveCount;
     var li = '<li>' + esc(T(s.individuals + ' personas y ' + s.families + ' familias', s.individuals + ' people and ' + s.families + ' families')) + '</li>' +
       '<li>' + esc(T('Versión GEDCOM ' + (I.parsed.version || '?') + (I.parsed.software ? ' · ' + I.parsed.software : ''), 'GEDCOM version ' + (I.parsed.version || '?') + (I.parsed.software ? ' · ' + I.parsed.software : ''))) + '</li>' +
@@ -932,13 +968,16 @@ var Arbol = (function() {
     var prev = tree;
     tree = res.store;
     if (prev && prev.cfg) tree.cfg = prev.cfg;
-    if (!saveTree()) { tree = prev; toast(T('No hay espacio en este aparato para guardar el árbol.', 'There is not enough space on this device to save the tree.')); return; }
-    loadTree();
-    st.imp = { name: I.name, parsed: I.parsed, report: res.report, liveCount: I.liveCount, done: true };
-    st.imp = null;
-    toast(T('Árbol guardado: ' + res.report.added + ' nuevas, ' + res.report.updated + ' actualizadas.', 'Tree saved: ' + res.report.added + ' new, ' + res.report.updated + ' updated.'));
-    log('Family tree imported');
+    st.imp = { name: I.name, parsed: I.parsed, report: res.report, liveCount: I.liveCount, saving: true };
     render();
+    saveTree().then(function(ok) {
+      if (!ok) { tree = prev; st.imp = null; render(); toast(T('No hay espacio en este aparato para guardar el árbol.', 'There is not enough space on this device to save the tree.')); return; }
+      applyTree(tree);
+      st.imp = null;
+      toast(T('Árbol guardado: ' + res.report.added + ' nuevas, ' + res.report.updated + ' actualizadas.', 'Tree saved: ' + res.report.added + ' new, ' + res.report.updated + ' updated.'));
+      log('Family tree imported');
+      render();
+    });
   }
 
   // ---------------------------------------------------------------
@@ -993,15 +1032,15 @@ var Arbol = (function() {
   }
 
   function removeTree() {
-    try { localStorage.removeItem(Store.KEY); } catch (e) {}
-    // an empty tree replaces the one on the server (the server has no delete for household items)
-    if (typeof CloudSync !== 'undefined' && CloudSync.online) {
-      try { localStorage.setItem(Store.KEY, JSON.stringify({ v: 1, P: {}, F: {}, cfg: { map: {}, notes: 0, living: 0 }, imp: null })); CloudSync.push(Store.KEY); } catch (e) {}
-      try { localStorage.removeItem(Store.KEY); } catch (e) {}
-    }
-    loadTree();
-    render();
-    toast(T('Árbol borrado.', 'Tree deleted.'));
+    // the server has no delete for household items: an "empty" manifest replaces the tree there
+    var ts = Date.now();
+    ArbolDB.clear().then(function() {
+      treeTs = 0;
+      ArbolSync.push(null, ts).catch(function() {});
+      applyTree(null);
+      render();
+      toast(T('Árbol borrado.', 'Tree deleted.'));
+    });
   }
 
   function onKey(ev) {
@@ -1031,17 +1070,17 @@ var Arbol = (function() {
       kidKey = user.name.toLowerCase().replace(/\s+/g, '_');
       data = loadData();
     }
-    loadTree();
     root.addEventListener('click', onClick);
     root.addEventListener('keydown', onKey);
     root.addEventListener('input', onInput);
     window.addEventListener('pagehide', stopSpeech);
-    window.addEventListener('zs:household-synced', function() {
-      if (st.view === 'parents' || st.q) return;
-      loadTree(); render();
-    });
-    if (/[?&]parent=1/.test(location.search)) { askParent(function() { st.view = 'parents'; render(); }); }
+    window.addEventListener('zs:household-synced', function() { if (ready) syncTree(); });
     render();
+    loadTree().then(function() {
+      render();
+      syncTree();
+      if (/[?&]parent=1/.test(location.search)) { askParent(function() { st.view = 'parents'; render(); }); }
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
@@ -1049,7 +1088,9 @@ var Arbol = (function() {
   return {
     state: function() { return { view: st.view, pid: st.pid, tier: tier, me: tree ? meId() : null, depth: st.depth, quiz: st.q ? { kind: st.q.kind, i: st.q.i, score: st.q.score, list: st.q.list } : null }; },
     data: function() { return data; },
-    reload: function() { loadTree(); render(); },
+    reload: function() { return loadTree().then(function() { render(); }); },
+    tree: function() { return tree; },
+    sync: function() { return syncTree(); },
     _V: V
   };
 })();
