@@ -2348,6 +2348,7 @@
     selectedAge   = null;
     var inp = document.getElementById('new-name');
     if (inp) inp.value = '';
+    _setupBirthday('new', '', function(age) { selectedAge = age; renderAgePicker(); });
     renderAgePicker();
     renderEmojiPicker();
     renderColorPicker();
@@ -2360,6 +2361,40 @@
     if (mod) mod.classList.remove('active');
   }
 
+  // ── Birthday field (add and edit modals) ──
+  // The picker's last button is "11+": any age from 11 up lights it.
+  function _ageMatches(age, opt) { return age != null && (opt === 11 ? age >= 11 : age === opt); }
+  function _todayIso() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function _birthdayValue(which) {
+    var el = document.getElementById(which + '-birthday');
+    var v = el ? el.value : '';
+    return v && ageFromBirthday(v) != null && v <= _todayIso() ? v : '';
+  }
+  function _birthdayHint(which) {
+    var hint = document.getElementById(which + '-birthday-hint'), v = _birthdayValue(which);
+    if (!hint) return;
+    var el = document.getElementById(which + '-birthday');
+    if (el && el.value && !v) { hint.textContent = 'That date is not valid.'; hint.classList.add('bday-bad'); return; }
+    hint.classList.remove('bday-bad');
+    hint.textContent = v ? 'Age now: ' + ageFromBirthday(v) + '. It goes up by itself on the birthday.' : 'The age then goes up by itself each year. Works for grown-ups too.';
+  }
+  function _setupBirthday(which, value, onAge) {
+    var el = document.getElementById(which + '-birthday');
+    if (!el) return;
+    el.value = value || '';
+    el.max = _todayIso();
+    el.oninput = el.onchange = function() {
+      var v = _birthdayValue(which);
+      if (v) onAge(ageFromBirthday(v));
+      _birthdayHint(which);
+    };
+    _birthdayHint(which);
+  }
+  function _clearBirthday(which) {
+    var el = document.getElementById(which + '-birthday');
+    if (el && el.value) { el.value = ''; _birthdayHint(which); }
+  }
+
   function renderAgePicker() {
     var el = document.getElementById('age-picker');
     if (!el) return;
@@ -2367,9 +2402,9 @@
     AGE_OPTIONS.forEach(function(opt) {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'age-option' + (selectedAge === opt.age ? ' selected' : '');
+      btn.className = 'age-option' + (_ageMatches(selectedAge, opt.age) ? ' selected' : '');
       btn.innerHTML = '<span class="age-num">' + opt.label + '</span>';
-      btn.onclick = function() { selectedAge = opt.age; renderAgePicker(); };
+      btn.onclick = function() { selectedAge = opt.age; _clearBirthday('new'); renderAgePicker(); };
       el.appendChild(btn);
     });
   }
@@ -2403,7 +2438,9 @@
   function createProfile() {
     var name = document.getElementById('new-name').value.trim();
     if (!name) return;
-    if (!selectedAge) return;
+    var bday = _birthdayValue('new');
+    if (bday) selectedAge = ageFromBirthday(bday);
+    if (!selectedAge && selectedAge !== 0) return;
     var profiles = getProfiles();
     var newUser = { 
       name: name, 
@@ -2413,6 +2450,7 @@
       maxMinutes: 45,
       faithVisible: true 
     };
+    if (bday) newUser.birthday = bday;
     profiles.push(newUser);
     saveProfiles(profiles);
     closeModal();
@@ -2489,6 +2527,7 @@
     editColor = p.color;
     editAge   = p.age || null;
     editLang  = getKidLang(p.name);
+    _setupBirthday('edit', p.birthday || '', function(age) { editAge = age; _renderEditAgePicker(); });
     var inp = document.getElementById('edit-name');
     if (inp) inp.value = p.name;
     _updateEditPreview();
@@ -2538,9 +2577,9 @@
     AGE_OPTIONS.forEach(function(opt) {
       var btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'age-option' + (editAge === opt.age ? ' selected' : '');
+      btn.className = 'age-option' + (_ageMatches(editAge, opt.age) ? ' selected' : '');
       btn.innerHTML = '<span class="age-num">' + opt.label + '</span>';
-      btn.onclick = function() { editAge = opt.age; _renderEditAgePicker(); };
+      btn.onclick = function() { editAge = opt.age; _clearBirthday('edit'); _renderEditAgePicker(); };
       el.appendChild(btn);
     });
   }
@@ -2607,7 +2646,10 @@
     profiles[editingIndex].name = name;
     profiles[editingIndex].avatar = editEmoji;
     profiles[editingIndex].color = editColor;
-    if (editAge) profiles[editingIndex].age = editAge;
+    var bday = _birthdayValue('edit');
+    if (bday) { profiles[editingIndex].birthday = bday; editAge = ageFromBirthday(bday); }
+    else delete profiles[editingIndex].birthday;
+    if (editAge || editAge === 0) profiles[editingIndex].age = editAge;
     if (langChanged) profiles[editingIndex].lang = editLang;
     saveProfiles(profiles);
     // Without this push the server's copy of the profile wins the next sync
