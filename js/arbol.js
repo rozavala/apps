@@ -196,7 +196,7 @@ var Arbol = (function() {
       if (!(o && o.noHist)) { st.hist.push(snap()); if (st.hist.length > 40) st.hist.shift(); }
     }
     st.view = view;
-    st.fview = null; st.fup = null;
+    st.fview = null; st.fup = null; st.crop = null;
     if (o && o.pid !== undefined) st.pid = o.pid;
     if (o && o.depth !== undefined) st.depth = o.depth;
     render();
@@ -253,6 +253,7 @@ var Arbol = (function() {
   function after() {
     if (st.view === 'tree' && tree && meId()) mountTree();
     if (st.view === 'parents') mountParents();
+    if (st.crop) mountCrop();
   }
 
   // ---------------------------------------------------------------
@@ -318,7 +319,7 @@ var Arbol = (function() {
     var label = v.name + (v.years ? ', ' + v.years : '');
     var s = '<g class="ar-pcard" data-act="person" data-id="' + esc(id) + '" tabindex="0" role="button" aria-label="' + esc(label) + '" transform="translate(' + x + ' ' + y + ')">' +
       '<rect width="' + w + '" height="' + h + '" rx="14" fill="' + tone[0] + '" stroke="' + tone[2] + '" stroke-width="2.4"/>' +
-      '<g transform="translate(' + (w / 2 - 26) + ' 8) scale(.52)" clip-path="url(#arClip)"><circle cx="50" cy="50" r="48" fill="#fff" opacity=".75"/>' + Art.person(kindOf(v), tone[1]) + '</g>' +
+      '<g transform="translate(' + (w / 2 - 26) + ' 8) scale(.52)" clip-path="url(#arClip)">' + faceSvg(id, kindOf(v), tone[1]) + '</g>' +
       '<text x="' + w / 2 + '" y="76" text-anchor="middle" class="ar-t1">' + esc(cut(v.first, 13)) + '</text>' +
       '<text x="' + w / 2 + '" y="92" text-anchor="middle" class="ar-t2">' + esc(cut(v.surname, 17)) + '</text>' +
       '<text x="' + w / 2 + '" y="108" text-anchor="middle" class="ar-t3">' + esc(v.years) + '</text>';
@@ -387,7 +388,7 @@ var Arbol = (function() {
       if (!id) return ph ? '<div class="ar-big ghost" aria-hidden="true">' + Art.portrait('unknown', '#9a917c', 84) + '<b>?</b></div>' : '';
       var v = V(id), code = cc(id);
       return '<button class="ar-big" data-act="person" data-id="' + esc(id) + '" aria-label="' + esc(v.name) + '">' +
-        Art.portrait(kindOf(v), '#3f8f5a', 96) + '<b>' + esc(v.first) + '</b>' +
+        pp(id, kindOf(v), '#3f8f5a', 96) + '<b>' + esc(v.first) + '</b>' +
         '<small>' + esc(id === me ? T('Yo', 'Me') : termFor(id, me)) + '</small>' + (code ? '<span class="ar-bigflag">' + flagHtml(code, 34) + '</span>' : '') + '</button>';
     }
     return head() + backBar(T('Inicio', 'Home')) + '<h2 class="ar-h2">' + esc(T('Mi familia', 'My family')) + '</h2>' +
@@ -539,7 +540,7 @@ var Arbol = (function() {
     var notes = (v.notes || []).map(function(n) { return '<p>' + esc(n).replace(/\n/g, '<br>') + '</p>'; }).join('');
     var map = personMap(id);
     return head() + backBar() +
-      '<section class="ar-person"><div class="ar-pp">' + Art.portrait(kind, Art.TONES[relP ? 1 : 0][1], isLittle() ? 130 : 104) + '</div>' +
+      '<section class="ar-person"><div class="ar-pp">' + pp(id, kind, Art.TONES[relP ? 1 : 0][1], isLittle() ? 130 : 104) + '</div>' +
       '<div class="ar-pinfo"><h2>' + esc(v.name) + ' ' + sayBtn(spk) + '</h2>' +
       (v.nick ? '<p class="ar-nick">“' + esc(v.nick) + '”</p>' : '') +
       (v.years ? '<p class="ar-yrs">' + esc(v.years) + (v.born && v.born !== String(v.birthYear) ? ' · ' + esc(v.born) : '') + '</p>' : '') +
@@ -551,7 +552,7 @@ var Arbol = (function() {
       (isLittle() ? '' : (tl ? '<h3 class="ar-h3">' + esc(T('Su vida', 'Their life')) + '</h3><ol class="ar-tl">' + tl + '</ol>' : '')) +
       (!isLittle() && map ? '<h3 class="ar-h3">' + esc(T('Sus lugares', 'Their places')) + '</h3>' + map : '') +
       (notes ? '<h3 class="ar-h3">' + esc(T('Historias', 'Stories')) + '</h3><div class="ar-notes">' + notes + '</div>' : '') +
-      filesSection(id) + familyChips(id) + parentFiles(id) + parentBtn() + lightbox(id);
+      filesSection(id) + familyChips(id) + parentFiles(id) + parentBtn() + lightbox(id) + cropView(id);
   }
 
   // ---------------------------------------------------------------
@@ -563,6 +564,25 @@ var Arbol = (function() {
     var hideLiving = livingSet[id] && !(tree.cfg && tree.cfg.living);
     return Files.list(tree, id).filter(function(f) { return f.kids && !hideLiving; });
   }
+  // A person's face (a crop of one of their photos), if there is one and the viewer may see it.
+  function faceUrl(id) {
+    var p = tree && tree.P[id], f = p && p.a && p.a.face;
+    if (!f || !/^[a-f0-9]{32}$/.test(String(f.id))) return '';
+    if (!parentOk && (!f.kids || (livingSet[id] && !(tree.cfg && tree.cfg.living)))) return '';
+    return Files.url(f.id);
+  }
+  // A portrait: the face when there is one, else the drawn figure.
+  function pp(id, kind, tone, px) {
+    var u = id ? faceUrl(id) : '';
+    if (u) return '<img class="ar-portrait ar-face" src="' + esc(u) + '" width="' + px + '" height="' + px + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">';
+    return Art.portrait(kind, tone, px);
+  }
+  function faceSvg(id, kind, tone) {
+    var u = faceUrl(id);
+    if (u) return '<circle cx="50" cy="50" r="48" fill="#fff"/><image href="' + esc(u) + '" x="2" y="2" width="96" height="96" preserveAspectRatio="xMidYMid slice"/>';
+    return '<circle cx="50" cy="50" r="48" fill="#fff" opacity=".75"/>' + Art.person(kind, tone);
+  }
+
   function filesSection(id) {
     var list = parentOk ? Files.list(tree, id) : kidFiles(id);
     if (!list.length) return '';
@@ -590,8 +610,12 @@ var Arbol = (function() {
     var rows = list.map(function(f) {
       return '<li><span class="ar-fname">' + (Files.isImage(f) ? '🖼️ ' : '📄 ') + esc(f.t || T('(sin título)', '(no title)')) + ' <small>' + Math.max(1, Math.round((f.size || 0) / 1024)) + ' KB</small></span>' +
         '<label class="ar-chk sm"><input type="checkbox" class="ar-fkids" data-fid="' + esc(f.id) + '"' + (f.kids ? ' checked' : '') + '> <span>' + esc(T('Los niños lo ven', 'Kids can see it')) + '</span></label>' +
+        (Files.isImage(f) ? '<button class="ar-link" data-act="facepick" data-fid="' + esc(f.id) + '">😊 ' + esc(isFaceOf(id, f.id) ? T('Cambiar la cara', 'Change the face') : T('Usar para la cara', 'Use for the face')) + '</button>' : '') +
         '<button class="ar-link" data-act="filedel" data-fid="' + esc(f.id) + '">' + esc(T('Borrar', 'Delete')) + '</button></li>';
     }).join('');
+    var face = tree.P[id] && tree.P[id].a && tree.P[id].a.face;
+    if (face) rows += '<li class="ar-faceRow"><img class="ar-portrait ar-face" src="' + esc(Files.url(face.id)) + '" width="44" height="44" alt=""><span class="ar-fname">' + esc(T('Su cara en el árbol', 'Their face in the tree')) + '</span>' +
+      '<button class="ar-link" data-act="facedel">' + esc(T('Quitar la cara', 'Remove the face')) + '</button></li>';
     return '<section class="ar-psec ar-fpanel"><h3>🔒 ' + esc(T('Fotos y documentos (papás)', 'Photos and documents (parents)')) + '</h3>' +
       (rows ? '<ul class="ar-flist">' + rows + '</ul>' : '') +
       '<label class="ar-lbl" for="ar-ftitle">' + esc(T('Título (por ejemplo: Acta de matrimonio, Bautizo 1932)', 'Title (for example: Marriage record, Baptism 1932)')) + '</label>' +
@@ -602,9 +626,69 @@ var Arbol = (function() {
       '<input id="ar-fup" type="file" multiple accept="image/*,.heic,.heif,application/pdf,.pdf"' + (U.busy ? ' disabled' : '') + ' aria-label="' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '"></label>' +
       (U.msg ? '<p class="' + (U.err ? 'ar-warn' : 'ar-ok') + '" role="status">' + esc(U.msg) + '</p>' : '') +
       '<p class="ar-note">' + esc(T('Fotos (JPEG, PNG, HEIC) y documentos PDF, hasta 25 MB cada uno. Se guardan en el servidor de la familia.', 'Photos (JPEG, PNG, HEIC) and PDF documents, up to 25 MB each. They are kept on the family server.')) + '</p>' +
+      '<p class="ar-note">' + esc(T('¿Las fotos están en Google Fotos? En la app de Google Fotos, abre la foto, toca Compartir y luego «Guardar en el dispositivo». Después elígela aquí desde la fototeca.', 'Photos in Google Photos? In the Google Photos app, open the photo, tap Share, then “Save to device”. Then choose it here from the photo library.')) + '</p>' +
+      '<p class="ar-note">' + esc(T('Para mostrar su cara en el árbol: sube una foto y toca «Usar para la cara».', 'To show their face in the tree: upload a photo and tap “Use for the face”.')) + '</p>' +
       '<button class="ar-link" data-act="parentdone">🔓 ' + esc(T('Listo: salir del modo papás', 'Done: leave parent mode')) + '</button>' +
       '</section>';
   }
+  function isFaceOf(id, fid) { var p = tree.P[id]; return !!(p && p.a && p.a.face && p.a.face.src === fid); }
+
+  // The face picker: tap the face on the photo, set the zoom, save.
+  function cropView(id) {
+    var C = st.crop;
+    if (!C || C.pid !== id) return '';
+    return '<div class="ar-lightbox ar-crop" role="dialog" aria-modal="true" aria-label="' + esc(T('Elegir la cara', 'Choose the face')) + '">' +
+      '<button class="ar-lbx" data-act="cropcancel" aria-label="' + esc(T('Cancelar', 'Cancel')) + '">✕</button>' +
+      '<p>' + esc(T('Toca la cara en la foto y ajusta el tamaño.', 'Tap the face in the photo, then set the size.')) + '</p>' +
+      '<div class="ar-cropbox" id="ar-cropbox"><img id="ar-cropimg" crossorigin="anonymous" src="' + esc(Files.url(C.fid)) + '" alt=""><div class="ar-cropring" id="ar-cropring" aria-hidden="true"></div></div>' +
+      '<label class="ar-cropz"><span>🔍</span><input type="range" id="ar-cropz" min="1" max="6" step="0.1" value="' + C.z + '" aria-label="' + esc(T('Tamaño', 'Size')) + '"></label>' +
+      (C.err ? '<p class="ar-warn" role="alert">' + esc(C.err) + '</p>' : '') +
+      '<div class="ar-actions"><button class="ar-btn" data-act="cropsave"' + (C.busy ? ' disabled' : '') + '>' + esc(C.busy ? T('Guardando…', 'Saving…') : T('Guardar la cara', 'Save the face')) + '</button></div></div>';
+  }
+  function placeRing() {
+    var C = st.crop, img = $('#ar-cropimg'), ring = $('#ar-cropring');
+    if (!C || !img || !ring || !img.naturalWidth) return;
+    var w = img.clientWidth, h = img.clientHeight, side = Math.min(w, h) / C.z;
+    var cx = Math.max(side / 2, Math.min(w - side / 2, C.x * w)), cy = Math.max(side / 2, Math.min(h - side / 2, C.y * h));
+    ring.style.width = ring.style.height = side + 'px';
+    ring.style.left = (img.offsetLeft + cx - side / 2) + 'px';
+    ring.style.top = (img.offsetTop + cy - side / 2) + 'px';
+    ring.style.display = 'block';
+  }
+  function mountCrop() {
+    var img = $('#ar-cropimg'), z = $('#ar-cropz');
+    if (!img) return;
+    if (img.complete && img.naturalWidth) placeRing(); else img.addEventListener('load', placeRing);
+    img.addEventListener('click', function(ev) {
+      var r = img.getBoundingClientRect();
+      st.crop.x = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+      st.crop.y = Math.max(0, Math.min(1, (ev.clientY - r.top) / r.height));
+      placeRing();
+    });
+    if (z) z.addEventListener('input', function() { st.crop.z = parseFloat(z.value) || 1; placeRing(); });
+  }
+  function saveFace() {
+    var C = st.crop, p = tree.P[C.pid], entry = Files.list(tree, C.pid).filter(function(x) { return x.id === C.fid; })[0];
+    if (!C || !p || !entry || C.busy) return;
+    if (!ArbolSync.online()) { C.err = T('Hay que estar conectado al servidor de la familia.', 'This device must be connected to the family server.'); render(); return; }
+    C.busy = 1; C.err = null; render();
+    Files.makeFace(entry, C.x, C.y, C.z).then(function(face) {
+      if (!p.a) p.a = {};
+      var old = p.a.face;
+      p.a.face = face;
+      if (old && old.id) Files.remove({ id: old.id });
+      st.crop = null;
+      return saveTree().then(function() { toast(T('Cara guardada', 'Face saved')); render(); });
+    }, function() { C.busy = 0; C.err = T('No se pudo cortar la foto.', 'The photo could not be cropped.'); render(); });
+  }
+  function removeFace(id) {
+    var p = tree.P[id];
+    if (!p || !p.a || !p.a.face) return;
+    Files.remove({ id: p.a.face.id });
+    delete p.a.face;
+    saveTree().then(render);
+  }
+
   function uploadFiles(id, fileList) {
     var files = Array.prototype.slice.call(fileList || []);
     if (!files.length) return;
@@ -644,6 +728,7 @@ var Arbol = (function() {
       if (!yes) return;
       Files.remove(f).then(function() {
         p.a.files = p.a.files.filter(function(x) { return x.id !== fid; });
+        if (p.a.face && p.a.face.src === fid) { Files.remove({ id: p.a.face.id }); delete p.a.face; }
         if (st.fview === fid) st.fview = null;
         saveTree().then(render);
       });
@@ -652,7 +737,7 @@ var Arbol = (function() {
 
   function chip(id, label) {
     var v = V(id); if (!v) return '';
-    return '<button class="ar-pchip" data-act="person" data-id="' + esc(id) + '">' + Art.portrait(kindOf(v), '#3f8f5a', 34) + '<span>' + esc(v.first) + (label ? '<small>' + esc(label) + '</small>' : '') + '</span></button>';
+    return '<button class="ar-pchip" data-act="person" data-id="' + esc(id) + '">' + pp(id, kindOf(v), '#3f8f5a', 34) + '<span>' + esc(v.first) + (label ? '<small>' + esc(label) + '</small>' : '') + '</span></button>';
   }
   function familyChips(id) {
     var out = '', ps = Kin.parentsOf(idx, id).filter(Boolean), sp = (idx.sp[id] || []).concat(idx.ex[id] || []), sib = Kin.siblings(idx, id), kids = idx.kids[id] || [];
@@ -778,7 +863,7 @@ var Arbol = (function() {
     function pickCard(who, id) {
       var v = id ? V(id) : null;
       return '<button class="ar-pick' + (R.pick === who ? ' on' : '') + '" data-act="pick" data-who="' + who + '" aria-label="' + esc(T('Elegir persona', 'Choose a person')) + '">' +
-        (v ? Art.portrait(kindOf(v), '#3f8f5a', 56) + '<b>' + esc(v.id === me ? T('Tú', 'You') : v.first) + '</b>' : Art.portrait('unknown', '#9a917c', 56) + '<b>' + esc(T('Elige…', 'Pick…')) + '</b>') + '</button>';
+        (v ? pp(v.id, kindOf(v), '#3f8f5a', 56) + '<b>' + esc(v.id === me ? T('Tú', 'You') : v.first) + '</b>' : Art.portrait('unknown', '#9a917c', 56) + '<b>' + esc(T('Elige…', 'Pick…')) + '</b>') + '</button>';
     }
     var body = '';
     if (R.pick) {
@@ -816,7 +901,7 @@ var Arbol = (function() {
       diagram = '<div class="ar-path" role="group" aria-label="' + esc(T('El camino entre los dos', 'The path between the two')) + '">' + seq.map(function(id, i) {
         var v = V(id);
         return (i ? '<span class="ar-arrow" aria-hidden="true">' + (i <= upTo ? '↑' : '↓') + '</span>' : '') +
-          '<span class="ar-step' + (i === upTo ? ' top' : '') + '">' + Art.portrait(kindOf(v), '#3f8f5a', 40) + '<b>' + esc(id === me ? T('Tú', 'You') : v.first) + '</b></span>';
+          '<span class="ar-step' + (i === upTo ? ' top' : '') + '">' + pp(id, kindOf(v), '#3f8f5a', 40) + '<b>' + esc(id === me ? T('Tú', 'You') : v.first) + '</b></span>';
       }).join('') + '</div>';
       if (rel2.key !== 'anc' && rel2.key !== 'desc') {
         var names = rel2.common.map(function(c) { return V(c) ? V(c).first : ''; }).filter(Boolean);
@@ -863,14 +948,14 @@ var Arbol = (function() {
     var opts = q.opts.map(function(o, i) {
       var cls = 'ar-opt' + (Q.picked != null ? (o.correct ? ' right' : i === Q.picked ? ' wrong' : '') : '');
       var inner;
-      if (o.id) { var v = V(o.id); inner = Art.portrait(kindOf(v), '#3f8f5a', isLittle() ? 84 : 56) + '<b>' + esc(o.label.es && (isLittle() ? v.first : v.name)) + '</b>' + (!isLittle() && o.sub ? '<small>' + esc(o.sub) + '</small>' : ''); }
+      if (o.id) { var v = V(o.id); inner = pp(o.id, kindOf(v), '#3f8f5a', isLittle() ? 84 : 56) + '<b>' + esc(o.label.es && (isLittle() ? v.first : v.name)) + '</b>' + (!isLittle() && o.sub ? '<small>' + esc(o.sub) + '</small>' : ''); }
       else if (o.code) inner = flagHtml(o.code, 44) + '<b>' + esc(T(o.label.es, o.label.en)) + '</b>';
       else inner = '<b>' + esc(T(o.label.es, o.label.en)) + '</b>';
       return '<button class="' + cls + (o.id ? ' person' : '') + '" data-act="qpick" data-i="' + i + '"' + (Q.picked != null ? ' disabled' : '') + '>' + inner + '</button>';
     }).join('');
     return head() + '<div class="ar-qbar"><button class="ar-back" data-act="qexit" aria-label="' + esc(T('Salir', 'Quit')) + '">✕</button><span>' + (Q.i + 1) + ' / ' + Q.list.length + '</span></div>' +
       '<div class="ar-q"><h2 class="ar-qtext">' + esc(prompt) + ' ' + sayBtn(prompt) + '</h2>' +
-      (q.portrait ? '<div class="ar-qpp">' + Art.portrait(kindOf(V(q.portrait)), '#3f8f5a', 76) + '</div>' : '') +
+      (q.portrait ? '<div class="ar-qpp">' + pp(q.portrait, kindOf(V(q.portrait)), '#3f8f5a', 76) + '</div>' : '') +
       '<div class="ar-opts' + (isLittle() ? ' big' : '') + '">' + opts + '</div>' +
       (Q.picked != null ? '<p class="ar-fb ' + (q.opts[Q.picked].correct ? 'ok' : 'no') + '">' + esc(q.opts[Q.picked].correct ? T('¡Correcto!', 'Correct!') : T('Casi. La respuesta era: ', 'Almost. The answer was: ') + answerText(q)) + '</p>' +
         '<div class="ar-actions"><button class="ar-btn" data-act="qnext">' + esc(Q.i + 1 < Q.list.length ? T('Siguiente', 'Next') : T('Ver resultado', 'See result')) + '</button></div>' : '') + '</div>';
@@ -1120,6 +1205,10 @@ var Arbol = (function() {
       case 'doimport': doImport(); break;
       case 'fileview': st.fview = el.getAttribute('data-fid'); render(); break;
       case 'fileclose': st.fview = null; render(); break;
+      case 'facepick': st.crop = { pid: st.pid, fid: el.getAttribute('data-fid'), x: 0.5, y: 0.35, z: 2 }; render(); break;
+      case 'cropcancel': st.crop = null; render(); break;
+      case 'cropsave': saveFace(); break;
+      case 'facedel': removeFace(st.pid); break;
       case 'parentdone': parentOk = false; st.fup = null; st.fview = null; render(); break;
       case 'fileunlock': askParent(function() { st.fup = null; render(); }); break;
       case 'filedel': deleteFile(st.pid, el.getAttribute('data-fid')); break;
@@ -1181,7 +1270,12 @@ var Arbol = (function() {
       if (t.id === 'ar-fup') uploadFiles(st.pid, t.files);
       else if (t.classList && t.classList.contains('ar-fkids')) {
         var f = Files.list(tree, st.pid).filter(function(x) { return x.id === t.getAttribute('data-fid'); })[0];
-        if (f) { f.kids = t.checked ? 1 : 0; saveTree(); toast(T('Guardado', 'Saved')); }
+        if (f) {
+          f.kids = t.checked ? 1 : 0;
+          var pf = tree.P[st.pid].a && tree.P[st.pid].a.face;
+          if (pf && pf.src === f.id) pf.kids = f.kids;      // the face is as visible as its photo
+          saveTree(); toast(T('Guardado', 'Saved'));
+        }
       }
     });
     window.addEventListener('pagehide', stopSpeech);

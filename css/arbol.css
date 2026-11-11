@@ -234,3 +234,15 @@
 .ar-lightbox img { max-width: 100%; max-height: calc(100% - 70px); object-fit: contain; border-radius: 8px; background: #fff; }
 .ar-lightbox p { margin: 0; color: #fff; font-weight: 700; text-align: center; }
 .ar-lbx { position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); width: 48px; height: 48px; border: 0; border-radius: 50%; background: #fff; color: var(--ar-ink); font-size: 1.4rem; cursor: pointer; }
+
+/* ── Faces: a round crop of a person's photo, in place of the drawn figure ── */
+img.ar-face { border-radius: 50%; object-fit: cover; background: #fff3d6; display: block; flex: none; box-shadow: 0 0 0 2px #fff, 0 1px 4px rgba(0,0,0,.18); }
+.ar-faceRow img.ar-face { width: 44px; height: 44px; }
+.ar-crop { gap: 12px; }
+.ar-crop > p { max-width: 520px; }
+.ar-cropbox { position: relative; max-width: 100%; max-height: calc(100% - 190px); display: flex; justify-content: center; }
+.ar-cropbox img { max-width: 100%; max-height: 60vh; max-height: 60dvh; object-fit: contain; border-radius: 8px; cursor: crosshair; touch-action: manipulation; }
+.ar-cropring { display: none; position: absolute; border-radius: 50%; box-shadow: 0 0 0 3px #fff, 0 0 0 9999px rgba(20, 18, 30, .55); pointer-events: none; }
+.ar-cropbox { overflow: hidden; border-radius: 8px; }
+.ar-cropz { display: flex; align-items: center; gap: 10px; color: #fff; width: min(360px, 100%); }
+.ar-cropz input { flex: 1; min-height: 44px; }

@@ -23,7 +23,8 @@ async function open(page, o = {}) {
       if (req.method() === 'PUT') { server.files[id] = { type: req.headers()['content-type'], body: req.postDataBuffer() }; return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"saved"}' }); }
       if (req.method() === 'DELETE') { delete server.files[id]; return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"deleted"}' }); }
       const f = server.files[id];
-      return f ? route.fulfill({ status: 200, contentType: f.type, body: f.body }) : route.fulfill({ status: 404, body: '' });
+      // like the real server (cors()), so a canvas may read the photo to cut a face from it
+      return f ? route.fulfill({ status: 200, contentType: f.type, body: f.body, headers: { 'Access-Control-Allow-Origin': '*' } }) : route.fulfill({ status: 404, body: '' });
     }
     m = /^\/api\/kids\/([^/]+)\/([^/]+)$/.exec(u.pathname);
     if (m && req.method() === 'PUT') { server.items[m[1] + '/' + m[2]] = JSON.parse(req.postData() || 'null'); return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"saved"}' }); }
@@ -128,6 +129,74 @@ test.describe('Árbol familiar: photos and documents', () => {
     const dims = await page.evaluate((u) => new Promise(r => { const i = new Image(); i.onload = () => r([i.naturalWidth, i.naturalHeight]); i.src = u; }), FAKE + '/api/files/arbol/' + f.id);
     expect(dims).toEqual([2400, 1800]);
     expect(Object.keys(server.files)).toHaveLength(2);     // the photo and its preview
+  });
+
+  test('a face cut from a photo replaces the drawn figure, for the kids too, and goes with its photo', async ({ page }) => {
+    const server = await open(page);
+    // a 600 x 400 photo, beige, with a red "face" centred at (450, 120)
+    const b64 = await page.evaluate(() => {
+      const c = document.createElement('canvas'); c.width = 600; c.height = 400; const g = c.getContext('2d');
+      g.fillStyle = '#e8dcc0'; g.fillRect(0, 0, 600, 400); g.fillStyle = '#d02020'; g.beginPath(); g.arc(450, 120, 60, 0, 7); g.fill();
+      return c.toDataURL('image/png').split(',')[1];
+    });
+    await person(page, DEAD);
+    await unlock(page);
+    await page.setInputFiles('#ar-fup', [{ name: 'familia.png', mimeType: 'image/png', buffer: Buffer.from(b64, 'base64') }]);
+    await expect(page.locator('.ar-fpanel [role=status]')).toContainText('1 saved');
+    await page.click('[data-act=facepick]');
+    const img = page.locator('#ar-cropimg');
+    await expect(img).toHaveJSProperty('complete', true);
+    const box = await img.boundingBox();
+    await img.click({ position: { x: box.width * 0.75, y: box.height * 0.30 } });
+    await page.fill('#ar-cropz', '3');
+    await expect(page.locator('#ar-cropring')).toBeVisible();
+    await page.click('[data-act=cropsave]');
+    await expect(page.locator('.ar-crop')).toHaveCount(0);
+
+    // the face: a 320 x 320 JPEG on the server, mostly the red circle
+    const p = await page.evaluate((id) => /** @type {any} */ (window).ArbolDB.get().then(r => r.tree.P[id].a), DEAD);
+    expect(p.face).toMatchObject({ src: p.files[0].id, kids: 1 });
+    expect(server.files[p.face.id].type).toBe('image/jpeg');
+    const red = await page.evaluate((u) => new Promise(res => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => {
+      const c = document.createElement('canvas'); c.width = i.naturalWidth; c.height = i.naturalHeight; const g = c.getContext('2d'); g.drawImage(i, 0, 0);
+      const d = g.getImageData(160, 160, 1, 1).data; res([i.naturalWidth, i.naturalHeight, d[0] > 150 && d[1] < 90]); }; i.src = u; }), FAKE + '/api/files/arbol/' + p.face.id);
+    expect(red).toEqual([320, 320, true]);
+
+    // a kid sees the face on the person's page, the family chips and the tree
+    await page.click('[data-act=parentdone]');
+    await expect(page.locator('.ar-pp img.ar-face')).toHaveAttribute('src', FAKE + '/api/files/arbol/' + p.face.id);
+    await page.click('[data-act=treefrom]');
+    await expect(page.locator('#ar-tree-g image')).toHaveAttribute('href', FAKE + '/api/files/arbol/' + p.face.id);
+
+    // made parents-only, the photo takes its face with it
+    await person(page, DEAD);
+    await unlock(page);
+    await page.locator('.ar-fkids').first().uncheck();
+    await page.click('[data-act=parentdone]');
+    await expect(page.locator('.ar-pp img.ar-face')).toHaveCount(0);
+    await expect(page.locator('.ar-pp svg.ar-portrait')).toHaveCount(1);
+    // and deleting the photo deletes the face
+    await unlock(page);
+    await page.locator('.ar-flist li', { hasText: 'familia' }).locator('[data-act=filedel]').click();
+    await page.click('.zsd-ok');
+    await expect(page.locator('.ar-faceRow')).toHaveCount(0);
+    expect(Object.keys(server.files)).toHaveLength(0);
+  });
+
+  test('a living relative\'s face stays hidden from the kids unless the parent shows living relatives', async ({ page }) => {
+    await open(page);
+    await page.evaluate(async (id) => {
+      // @ts-ignore
+      const r = await ArbolDB.get(); r.tree.P[id].a = { face: { id: 'a'.repeat(32), src: 'b'.repeat(32), kids: 1 } }; await ArbolDB.put(r.tree, Date.now()); await Arbol.reload();
+    }, LIVING);
+    await person(page, LIVING);
+    await expect(page.locator('.ar-pp img.ar-face')).toHaveCount(0);
+    await page.evaluate(async () => {
+      // @ts-ignore
+      const r = await ArbolDB.get(); r.tree.cfg.living = 1; await ArbolDB.put(r.tree, Date.now()); await Arbol.reload();
+    });
+    await person(page, LIVING);
+    await expect(page.locator('.ar-pp img.ar-face')).toHaveCount(1);
   });
 
   test('parents-only files, and any file of a living relative, stay hidden from the kids', async ({ page }) => {
