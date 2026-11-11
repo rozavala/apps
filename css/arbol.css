@@ -212,3 +212,25 @@
   .ar-svg { height: 62vh; }
 }
 @media (prefers-reduced-motion: reduce) { .ar-card-btn:active { transform: none; } }
+
+/* ── Photos and documents (js/arbol-files.js) ───────────────────── */
+.ar-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; margin: 8px 0 16px; }
+.ar-ftile { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 6px; border: 2px solid var(--ar-line); border-radius: 14px; background: #fff; color: var(--ar-ink); text-decoration: none; cursor: pointer; font: inherit; text-align: left; min-width: 0; }
+.ar-ftile img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: var(--ar-paper); display: block; }
+.ar-ftile img.ar-fbroken { visibility: hidden; }
+.ar-ftile.doc b { display: grid; place-items: center; aspect-ratio: 1; font-size: 3rem; border-radius: 10px; background: var(--ar-paper); }
+.ar-ftile span { font-size: .9rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.ar-flock { position: absolute; top: 10px; right: 10px; font-style: normal; background: #fff; border-radius: 999px; padding: 2px 6px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.ar-fadd { margin: 6px 0 14px; }
+.ar-fpanel input[type="text"] { width: 100%; min-height: 46px; padding: 8px 12px; border: 2px solid var(--ar-line); border-radius: 12px; font-size: 1rem; background: #fff; color: var(--ar-ink); box-sizing: border-box; }
+.ar-fpanel .ar-file { position: relative; }
+.ar-flist { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ar-flist li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 8px 10px; border: 1px solid var(--ar-line); border-radius: 12px; background: var(--ar-paper); }
+.ar-fname { flex: 1 1 180px; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+.ar-fname small { color: var(--ar-muted); font-weight: 400; }
+.ar-chk.sm { padding: 2px 0; font-size: .9rem; }
+.ar-ok { color: var(--ar-green-d); font-weight: 700; }
+.ar-lightbox { position: fixed; inset: 0; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: rgba(20, 18, 30, .92); }
+.ar-lightbox img { max-width: 100%; max-height: calc(100% - 70px); object-fit: contain; border-radius: 8px; background: #fff; }
+.ar-lightbox p { margin: 0; color: #fff; font-weight: 700; text-align: center; }
+.ar-lbx { position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); width: 48px; height: 48px; border: 0; border-radius: 50%; background: #fff; color: var(--ar-ink); font-size: 1.4rem; cursor: pointer; }

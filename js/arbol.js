@@ -28,7 +28,7 @@
 var Arbol = (function() {
   'use strict';
 
-  var Store = ArbolStore, Kin = ArbolKin, Art = ArbolArt, Quiz = ArbolQuiz, Places = ArbolPlaces, G = Gedcom;
+  var Store = ArbolStore, Kin = ArbolKin, Art = ArbolArt, Quiz = ArbolQuiz, Places = ArbolPlaces, G = Gedcom, Files = ArbolFiles;
   var PREFIX = 'zs_arbol_';
 
   var root = null, user = null, age = 8, tier = 'intermediate', kidKey = '';
@@ -196,6 +196,7 @@ var Arbol = (function() {
       if (!(o && o.noHist)) { st.hist.push(snap()); if (st.hist.length > 40) st.hist.shift(); }
     }
     st.view = view;
+    st.fview = null; st.fup = null;
     if (o && o.pid !== undefined) st.pid = o.pid;
     if (o && o.depth !== undefined) st.depth = o.depth;
     render();
@@ -550,7 +551,103 @@ var Arbol = (function() {
       (isLittle() ? '' : (tl ? '<h3 class="ar-h3">' + esc(T('Su vida', 'Their life')) + '</h3><ol class="ar-tl">' + tl + '</ol>' : '')) +
       (!isLittle() && map ? '<h3 class="ar-h3">' + esc(T('Sus lugares', 'Their places')) + '</h3>' + map : '') +
       (notes ? '<h3 class="ar-h3">' + esc(T('Historias', 'Stories')) + '</h3><div class="ar-notes">' + notes + '</div>' : '') +
-      familyChips(id) + parentBtn();
+      filesSection(id) + familyChips(id) + parentFiles(id) + parentBtn() + lightbox(id);
+  }
+
+  // ---------------------------------------------------------------
+  // Photos and documents (js/arbol-files.js; stored on the family server)
+  // ---------------------------------------------------------------
+  // What the kids may see: files a parent marked for them, and none of a living
+  // person's unless the parent opted in to showing living relatives in full.
+  function kidFiles(id) {
+    var hideLiving = livingSet[id] && !(tree.cfg && tree.cfg.living);
+    return Files.list(tree, id).filter(function(f) { return f.kids && !hideLiving; });
+  }
+  function filesSection(id) {
+    var list = parentOk ? Files.list(tree, id) : kidFiles(id);
+    if (!list.length) return '';
+    var tiles = list.map(function(f) {
+      var title = f.t || (Files.isImage(f) ? T('Foto', 'Photo') : T('Documento', 'Document'));
+      var lock = parentOk && !kidFiles(id).some(function(k) { return k.id === f.id; }) ? '<i class="ar-flock" title="' + esc(T('Solo papás', 'Parents only')) + '">🔒</i>' : '';
+      if (Files.isImage(f)) {
+        return '<button class="ar-ftile" data-act="fileview" data-fid="' + esc(f.id) + '"><img src="' + esc(Files.url(f.th || f.id)) + '" alt="' + esc(title) + '" loading="lazy" onerror="this.classList.add(\'ar-fbroken\')">' + lock + '<span>' + esc(title) + '</span></button>';
+      }
+      return '<a class="ar-ftile doc" href="' + esc(Files.url(f.id)) + '" target="_blank" rel="noopener"><b aria-hidden="true">📄</b>' + lock + '<span>' + esc(title) + '</span></a>';
+    }).join('');
+    return '<h3 class="ar-h3">' + esc(T('Fotos y documentos', 'Photos and documents')) + '</h3><div class="ar-files">' + tiles + '</div>';
+  }
+  function lightbox(id) {
+    if (!st.fview) return '';
+    var f = Files.list(tree, id).filter(function(x) { return x.id === st.fview; })[0];
+    if (!f || !(parentOk || kidFiles(id).indexOf(f) >= 0)) return '';
+    return '<div class="ar-lightbox" role="dialog" aria-modal="true" aria-label="' + esc(f.t || T('Foto', 'Photo')) + '">' +
+      '<button class="ar-lbx" data-act="fileclose" aria-label="' + esc(T('Cerrar', 'Close')) + '">✕</button>' +
+      '<img src="' + esc(Files.url(f.id)) + '" alt="' + esc(f.t || '') + '">' + (f.t ? '<p>' + esc(f.t) + '</p>' : '') + '</div>';
+  }
+  function parentFiles(id) {
+    if (!parentOk) return '<div class="ar-fadd"><button class="ar-btn alt" data-act="fileunlock">🔒 ' + esc(T('Agregar fotos o documentos', 'Add photos or documents')) + '</button></div>';
+    var U = st.fup || {}, list = Files.list(tree, id);
+    var rows = list.map(function(f) {
+      return '<li><span class="ar-fname">' + (Files.isImage(f) ? '🖼️ ' : '📄 ') + esc(f.t || T('(sin título)', '(no title)')) + ' <small>' + Math.max(1, Math.round((f.size || 0) / 1024)) + ' KB</small></span>' +
+        '<label class="ar-chk sm"><input type="checkbox" class="ar-fkids" data-fid="' + esc(f.id) + '"' + (f.kids ? ' checked' : '') + '> <span>' + esc(T('Los niños lo ven', 'Kids can see it')) + '</span></label>' +
+        '<button class="ar-link" data-act="filedel" data-fid="' + esc(f.id) + '">' + esc(T('Borrar', 'Delete')) + '</button></li>';
+    }).join('');
+    return '<section class="ar-psec ar-fpanel"><h3>🔒 ' + esc(T('Fotos y documentos (papás)', 'Photos and documents (parents)')) + '</h3>' +
+      (rows ? '<ul class="ar-flist">' + rows + '</ul>' : '') +
+      '<label class="ar-lbl" for="ar-ftitle">' + esc(T('Título (por ejemplo: Acta de matrimonio, Bautizo 1932)', 'Title (for example: Marriage record, Baptism 1932)')) + '</label>' +
+      '<input id="ar-ftitle" type="text" maxlength="80" autocomplete="off">' +
+      '<label class="ar-chk"><input type="checkbox" id="ar-fkidsnew" checked> <span>' + esc(T('Los niños pueden verlo', 'Kids can see it')) + '</span></label>' +
+      (livingSet[id] && !(tree.cfg && tree.cfg.living) ? '<p class="ar-note">' + esc(T('Esta persona parece estar viva: los niños no ven sus archivos mientras los datos de personas vivas estén protegidos.', 'This person looks to be living: the kids do not see their files while living relatives are protected.')) + '</p>' : '') +
+      '<label class="ar-file"><span class="ar-btn"' + (U.busy ? ' aria-disabled="true"' : '') + '>📎 ' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '</span>' +
+      '<input id="ar-fup" type="file" multiple accept="image/*,.heic,.heif,application/pdf,.pdf"' + (U.busy ? ' disabled' : '') + ' aria-label="' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '"></label>' +
+      (U.msg ? '<p class="' + (U.err ? 'ar-warn' : 'ar-ok') + '" role="status">' + esc(U.msg) + '</p>' : '') +
+      '<p class="ar-note">' + esc(T('Fotos (JPEG, PNG, HEIC) y documentos PDF, hasta 25 MB cada uno. Se guardan en el servidor de la familia.', 'Photos (JPEG, PNG, HEIC) and PDF documents, up to 25 MB each. They are kept on the family server.')) + '</p>' +
+      '<button class="ar-link" data-act="parentdone">🔓 ' + esc(T('Listo: salir del modo papás', 'Done: leave parent mode')) + '</button>' +
+      '</section>';
+  }
+  function uploadFiles(id, fileList) {
+    var files = Array.prototype.slice.call(fileList || []);
+    if (!files.length) return;
+    if (!ArbolSync.online()) { st.fup = { err: 1, msg: T('Para subir archivos hay que estar conectado al servidor de la familia.', 'To upload files this device must be connected to the family server.') }; render(); return; }
+    var titleEl = $('#ar-ftitle'), kidsEl = $('#ar-fkidsnew');
+    var title = titleEl ? titleEl.value : '', kids = kidsEl ? kidsEl.checked : true;
+    var done = 0, failed = [];
+    st.fup = { busy: 1, msg: T('Subiendo 1 de ' + files.length + '…', 'Uploading 1 of ' + files.length + '…') }; render();
+    var chain = Promise.resolve();
+    files.forEach(function(file, i) {
+      chain = chain.then(function() {
+        st.fup = { busy: 1, msg: T('Subiendo ' + (i + 1) + ' de ' + files.length + '…', 'Uploading ' + (i + 1) + ' of ' + files.length + '…') }; render();
+        var t = title ? (files.length > 1 ? title + ' (' + (i + 1) + ')' : title) : String(file.name || '').replace(/\.[a-z0-9]{2,5}$/i, '');
+        return Files.upload(file, t, kids).then(function(entry) {
+          var p = tree.P[id];
+          if (!p) return;
+          if (!p.a || typeof p.a !== 'object') p.a = {};
+          if (!Array.isArray(p.a.files)) p.a.files = [];
+          p.a.files.push(entry);
+          done++;
+        }, function(e) {
+          var why = e && e.message === 'type' ? T('no es una foto ni un PDF', 'not a photo or a PDF') : e && e.message === 'size' ? T('más de 25 MB', 'over 25 MB') : T('no se pudo subir', 'could not be uploaded');
+          failed.push(String(file.name || '?').slice(0, 40) + ': ' + why);
+        });
+      });
+    });
+    chain.then(function() { return done ? saveTree() : true; }).then(function() {
+      st.fup = failed.length ? { err: 1, msg: (done ? T(done + ' guardados. ', done + ' saved. ') : '') + failed.join(' · ') } : { msg: T(done + ' guardado' + (done > 1 ? 's' : '') + '.', done + ' saved.') };
+      if (done) log('Family files added');
+      render();
+    });
+  }
+  function deleteFile(id, fid) {
+    var p = tree.P[id], list = p && p.a && Array.isArray(p.a.files) ? p.a.files : [], f = list.filter(function(x) { return x.id === fid; })[0];
+    if (!f || typeof ZsDialog === 'undefined') return;
+    ZsDialog.confirm({ title: T('¿Borrar este archivo?', 'Delete this file?'), message: (f.t ? f.t + ' · ' : '') + T('Se borra del servidor de la familia.', 'It is deleted from the family server.'), confirmLabel: T('Borrar', 'Delete') }).then(function(yes) {
+      if (!yes) return;
+      Files.remove(f).then(function() {
+        p.a.files = p.a.files.filter(function(x) { return x.id !== fid; });
+        if (st.fview === fid) st.fview = null;
+        saveTree().then(render);
+      });
+    });
   }
 
   function chip(id, label) {
@@ -839,7 +936,7 @@ var Arbol = (function() {
       '<li>' + esc(T('Usa un programa de árbol genealógico compatible con FamilySearch (por ejemplo RootsMagic, Family Tree Maker o Legacy; la lista está en la Galería de soluciones). Conéctalo a tu cuenta, baja tu árbol al programa y luego guarda un archivo GEDCOM con su opción de exportar.', 'Use a family-tree program that works with FamilySearch (for example RootsMagic, Family Tree Maker or Legacy; the list is in the Solutions Gallery). Connect it to your account, bring your tree down into the program, then save a GEDCOM file with its export option.')) + ' <span class="ar-url">' + esc(FS_GALLERY) + '</span></li>' +
       '<li>' + esc(T('Se aceptan archivos GEDCOM 5.5.1 y 7.0. Las fotos no vienen en el archivo. FamilySearch puede cambiar estos pasos.', 'GEDCOM 5.5.1 and 7.0 files both work. Photos are not included in the file. FamilySearch can change these steps.')) + '</li></ol>' +
       '<h4>Ancestry, MyHeritage ' + esc(T('y otros', 'and others')) + '</h4><p>' + esc(T('Exporta un archivo GEDCOM desde la configuración del árbol.', 'Export a GEDCOM file from the tree’s settings.')) + '</p>' +
-      '<p class="ar-note">' + esc(T('El archivo se lee en este aparato. Solo el árbol se guarda en el servidor de la familia. Las fotos y las notas de voz se agregarán más adelante.', 'The file is read on this device. Only the tree is saved to the family server. Photos and voice notes will come later.')) + '</p>' +
+      '<p class="ar-note">' + esc(T('El archivo se lee en este aparato. Solo el árbol se guarda en el servidor de la familia. Las fotos y documentos de cada persona (actas, bautizos, retratos) se agregan desde su página, con el botón 🔒.', 'The file is read on this device. Only the tree is saved to the family server. Photos and documents for each person (records, baptisms, portraits) are added from their page, with the 🔒 button.')) + '</p>' +
       '</div></details>';
   }
 
@@ -1021,6 +1118,11 @@ var Arbol = (function() {
       case 'link': tree.cfg.map[el.getAttribute('data-key')] = id; st.pq[el.getAttribute('data-key')] = ''; saveTree(); render(); toast(T('Guardado', 'Saved')); break;
       case 'unlink': delete tree.cfg.map[el.getAttribute('data-key')]; saveTree(); render(); break;
       case 'doimport': doImport(); break;
+      case 'fileview': st.fview = el.getAttribute('data-fid'); render(); break;
+      case 'fileclose': st.fview = null; render(); break;
+      case 'parentdone': parentOk = false; st.fup = null; st.fview = null; render(); break;
+      case 'fileunlock': askParent(function() { st.fup = null; render(); }); break;
+      case 'filedel': deleteFile(st.pid, el.getAttribute('data-fid')); break;
       case 'removetree':
         if (typeof ZsDialog === 'undefined') break;
         ZsDialog.confirm({ title: T('¿Borrar el árbol?', 'Delete the tree?'), message: T('Se borra de este aparato y del servidor de la familia. Se puede volver a importar el archivo.', 'It is deleted from this device and the family server. You can import the file again.'), confirmLabel: T('Borrar', 'Delete') }).then(function(yes) {
@@ -1073,6 +1175,15 @@ var Arbol = (function() {
     root.addEventListener('click', onClick);
     root.addEventListener('keydown', onKey);
     root.addEventListener('input', onInput);
+    root.addEventListener('change', function(ev) {
+      var t = ev.target;
+      if (!t || !tree || st.view !== 'person' || !parentOk) return;
+      if (t.id === 'ar-fup') uploadFiles(st.pid, t.files);
+      else if (t.classList && t.classList.contains('ar-fkids')) {
+        var f = Files.list(tree, st.pid).filter(function(x) { return x.id === t.getAttribute('data-fid'); })[0];
+        if (f) { f.kids = t.checked ? 1 : 0; saveTree(); toast(T('Guardado', 'Saved')); }
+      }
+    });
     window.addEventListener('pagehide', stopSpeech);
     window.addEventListener('zs:household-synced', function() { if (ready) syncTree(); });
     render();

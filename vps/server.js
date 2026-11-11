@@ -10,6 +10,7 @@ const ical = require('./ical');
 const wcScores = require('./wc-scores');
 const wcMatch = require('./wc-match');
 const market = require('./market');
+const familyFiles = require('./family-files');
 
 const mergeRoutines = require('./routines-merge');
 const omr = require('./omr');
@@ -54,6 +55,9 @@ wcMatch.init(app);
 
 // S&P 500 daily closes for Banco Familia (Stooq / Yahoo, cached on disk)
 market.init(app, DATA_DIR);
+
+// Photos and documents attached to people in the family tree (Árbol familiar)
+familyFiles.init(app, DATA_DIR);
 
 app.get('/api/kids', (req, res) => {
   try {
