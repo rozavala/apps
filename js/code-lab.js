@@ -149,11 +149,16 @@ var CodeLab = (function() {
     this.gutter = h('div', { class: 'cl-gutter', 'aria-hidden': 'true' });
     this.hl = h('pre', { class: 'cl-hl', 'aria-hidden': 'true' });
     this.errBar = h('div', { class: 'cl-errbar', 'aria-hidden': 'true' });
+    // Our own caret and current-line band, drawn on the coloured text. The textarea above
+    // them is see-through, and on an iPad its own caret can sit off the letters or not
+    // show at all; this one is placed from the line and column, so it is always on them.
+    this.curLine = h('div', { class: 'cl-curline', 'aria-hidden': 'true' });
+    this.caret = h('div', { class: 'cl-caret', 'aria-hidden': 'true' });
     this.ta = h('textarea', {
       class: 'cl-ta', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off', autocomplete: 'off', wrap: 'off',
       'aria-label': T('Escribe tu código aquí', 'Type your code here'), placeholder: opts.placeholder || '', enterkeyhint: 'enter'
     });
-    this.code = h('div', { class: 'cl-code' }, [this.errBar, this.hl, this.ta]);
+    this.code = h('div', { class: 'cl-code' }, [this.curLine, this.errBar, this.hl, this.caret, this.ta]);
     this.scroll = h('div', { class: 'cl-scroll' }, [this.gutter, this.code]);
     this.el = h('div', { class: 'cl-editor' }, [this.scroll]);
     this.ta.value = opts.value || '';
@@ -162,6 +167,12 @@ var CodeLab = (function() {
     this.ta.addEventListener('keydown', function(e) { self.keyDown(e); });
     this.ta.addEventListener('keyup', function() { self.reveal(); });
     this.ta.addEventListener('click', function() { self.reveal(); });
+    this.ta.addEventListener('focus', function() { self.reveal(); self.keepVisible(true); });
+    this.ta.addEventListener('blur', function() { self.placeCaret(); document.body.style.paddingBottom = ''; });
+    // the caret moves without an input event too: arrow keys, taps, the iPad's own cursor drag
+    document.addEventListener('selectionchange', function() { if (document.activeElement === self.ta) { self.placeCaret(); self.keepVisible(); } });
+    // the on-screen keyboard opening or closing changes the visible area
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', function() { if (document.activeElement === self.ta) self.keepVisible(true); });
     this.setKeyboard(opts.keyboard !== false);
     this.refresh();
   }
@@ -182,8 +193,8 @@ var CodeLab = (function() {
     this.code.appendChild(probe);
     var w = probe.getBoundingClientRect().width / 10;
     this.code.removeChild(probe);
-    var cs = getComputedStyle(this.ta);
-    this._m = { ch: w || 9.6, lh: parseFloat(cs.lineHeight) || 24, pad: parseFloat(cs.paddingTop) || 10 };
+    var cs = getComputedStyle(this.hl);
+    this._m = { ch: w || 9.6, lh: parseFloat(cs.lineHeight) || 24, pad: parseFloat(cs.paddingTop) || 10, padL: parseFloat(cs.paddingLeft) || 12 };
     return this._m;
   };
   Editor.prototype.refresh = function() {
@@ -214,8 +225,46 @@ var CodeLab = (function() {
     var mt = this.metrics(), top = mt.pad + (line - 1) * mt.lh, sc = this.scroll;
     if (top < sc.scrollTop || top + mt.lh > sc.scrollTop + sc.clientHeight) sc.scrollTop = Math.max(0, top - sc.clientHeight / 3);
   };
+  // Line and column of the caret (a tab counts as two columns, as tab-size shows it).
+  Editor.prototype.caretPos = function() {
+    var v = this.ta.value, s = this.ta.selectionEnd, before = v.slice(0, s), nl = before.lastIndexOf('\n');
+    var line = before.split('\n').length - 1, text = before.slice(nl + 1), col = 0, i;
+    for (i = 0; i < text.length; i++) col += text[i] === '\t' ? 2 - (col % 2) : 1;
+    return { line: line, col: col };
+  };
+  Editor.prototype.placeCaret = function() {
+    var on = document.activeElement === this.ta;
+    this.caret.style.display = on && this.ta.selectionStart === this.ta.selectionEnd ? 'block' : 'none';
+    this.curLine.style.display = on ? 'block' : 'none';
+    if (!on) return;
+    var mt = this.metrics(), p = this.caretPos(), top = mt.pad + p.line * mt.lh;
+    this.caret.style.top = top + 'px';
+    this.caret.style.left = (mt.padL + p.col * mt.ch - 1) + 'px';
+    this.caret.style.height = mt.lh + 'px';
+    this.curLine.style.top = top + 'px';
+    this.curLine.style.height = mt.lh + 'px';
+    // restart the blink so the caret is solid right after it moves
+    this.caret.classList.remove('cl-blink'); void this.caret.offsetWidth; this.caret.classList.add('cl-blink');
+  };
+  // Keep the caret's line above the on-screen keyboard and below the fixed top buttons,
+  // by scrolling the page (reveal() only scrolls inside the editor).
+  Editor.prototype.keepVisible = function(soon) {
+    var self = this;
+    if (soon) { setTimeout(function() { self.keepVisible(); }, 350); }     // after the keyboard has slid up
+    if (document.activeElement !== this.ta || this.caret.style.display === 'none' && this.curLine.style.display === 'none') return;
+    var vv = window.visualViewport;
+    // A short page cannot scroll the editor up above the keyboard: while the keyboard
+    // covers the bottom of the screen, give the page that much room underneath.
+    var covered = vv ? Math.max(0, Math.round(window.innerHeight - (vv.offsetTop + vv.height))) : 0;
+    if ((parseInt(document.body.style.paddingBottom, 10) || 0) !== covered) document.body.style.paddingBottom = covered ? covered + 'px' : '';
+    var r = this.curLine.getBoundingClientRect();
+    var topLimit = (vv ? vv.offsetTop : 0) + 80, bottomLimit = (vv ? vv.offsetTop + vv.height : window.innerHeight) - 16;
+    if (r.bottom > bottomLimit) window.scrollBy(0, r.bottom - bottomLimit + 8);
+    else if (r.top < topLimit) window.scrollBy(0, r.top - topLimit - 8);
+  };
   // Keep the caret on screen inside the scroller.
   Editor.prototype.reveal = function() {
+    this.placeCaret();
     if (document.activeElement !== this.ta) return;
     var mt = this.metrics(), v = this.ta.value, s = this.ta.selectionEnd, before = v.slice(0, s), line = before.split('\n').length - 1;
     var col = s - (before.lastIndexOf('\n') + 1), sc = this.scroll;

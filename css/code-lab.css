@@ -154,13 +154,19 @@
 .cl-hl { position: absolute; inset: 0; color: var(--cl-ed-fg); pointer-events: none; }
 .cl-ta {
   position: absolute; inset: 0; width: 100%; height: 100%; resize: none; background: transparent; color: transparent; -webkit-text-fill-color: transparent;
-  caret-color: #ffd84d; outline: none; overflow: hidden; -webkit-appearance: none; appearance: none; border-radius: 0;
+  caret-color: transparent; outline: none; overflow: hidden; -webkit-appearance: none; appearance: none; border-radius: 0;
 }
 .cl-ta::placeholder { color: var(--cl-ed-dim); -webkit-text-fill-color: var(--cl-ed-dim); }
 .cl-ta::selection { background: rgba(125, 211, 252, .35); -webkit-text-fill-color: transparent; }
+/* The caret and the line it is on, drawn by code-lab.js on the coloured text (the textarea's own caret is hidden) */
+.cl-caret { position: absolute; width: 3px; border-radius: 2px; background: #ffd84d; box-shadow: 0 0 6px rgba(255, 216, 77, .7); display: none; pointer-events: none; z-index: 2; }
+.cl-caret.cl-blink { animation: cl-blink 1.06s steps(1) .5s infinite; }
+@keyframes cl-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cl-caret.cl-blink { animation: none; } }
+.cl-curline { position: absolute; left: 0; right: 0; background: rgba(255, 255, 255, .07); border-left: 3px solid rgba(255, 216, 77, .55); display: none; pointer-events: none; }
 .cl-errbar { position: absolute; left: 0; right: 0; height: 24px; background: rgba(192, 57, 43, .38); border-left: 4px solid #ff6b5b; display: none; pointer-events: none; }
 .cl-probe { position: absolute; visibility: hidden; font-family: var(--cl-mono); font-size: 16px; white-space: pre; }
-.cl-t-kw { color: #ff9ec1; font-weight: 700; }
+.cl-t-kw { color: #ff9ec1; }       /* no bold: every letter stays exactly one column wide */
 .cl-t-fn { color: #7dd3fc; }
 .cl-t-str { color: #a7e8a0; }
 .cl-t-num { color: #ffd166; }
@@ -254,3 +260,8 @@
 }
 .zs-a11y-reduce-motion .cl-btn.cl-primary:active { transform: none; }
 @media (min-width: 600px) { .cl-bridge-arrow { display: block; } }
+
+/* The editor shows focus with its own caret and line band; the see-through textarea's
+   outline only showed as a stray line under the code. The frame lights up instead. */
+#cl-wrap .cl-ta:focus, #cl-wrap .cl-ta:focus-visible { outline: none; }
+.cl-editor:focus-within { border-color: #ffd84d; }
