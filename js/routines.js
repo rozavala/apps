@@ -66,6 +66,7 @@ var Routines = (function() {
       { id: 'dinner',   label: 'Dinner 🍽️' },
       { id: 'table',    label: 'Clear the table 🧽' },
       { id: 'shower',   label: 'Shower 🚿' },
+      { id: 'hair_dry', label: 'Dry hair 💨', only: ['Emilia', 'Isabel'], days: [4, 0] },
       { id: 'laundry',  label: 'Laundry basket 🧺' },
       { id: 'towel',    label: 'Towel on chair 🪑' },
       { id: 'teeth_pm', label: 'Teeth + floss 🦷' },
@@ -81,6 +82,8 @@ var Routines = (function() {
   //   when: 'football'  → only on days that kid has football on the
   //                       family calendar
   //   only: ['Rodrigo'] → only for the kid(s) whose name matches
+  //   days: [4, 0]      → only on those days of the week (0 = Sunday,
+  //                       4 = Thursday, as Date.getDay() counts them)
   // A hidden task is not shown, not tickable, and not counted, so a
   // rainy day's routine is complete without the sunscreen chip.
 
@@ -329,17 +332,25 @@ var Routines = (function() {
     });
   }
 
+  function _isFor(item, userName) {
+    if (!Array.isArray(item.only) || !item.only.length) return true;
+    var tokens = _kidTokens(userName);
+    return item.only.some(function(n) {
+      return _kidTokens(n).some(function(want) {
+        return want && tokens.indexOf(want) !== -1;
+      });
+    });
+  }
+
+  function _onToday(item) {
+    if (!Array.isArray(item.days) || !item.days.length) return true;
+    return item.days.indexOf(new Date().getDay()) !== -1;
+  }
+
   function _taskVisible(item, userName) {
     if (!item) return false;
-    if (Array.isArray(item.only) && item.only.length) {
-      var tokens = _kidTokens(userName);
-      var mine = item.only.some(function(n) {
-        return _kidTokens(n).some(function(want) {
-          return want && tokens.indexOf(want) !== -1;
-        });
-      });
-      if (!mine) return false;
-    }
+    if (!_isFor(item, userName)) return false;
+    if (!_onToday(item)) return false;
     if (item.when === 'sunny') return _sunnyEnough();
     if (item.when === 'football') return _hasFootballToday(userName);
     if (item.when === 'school') return _isSchoolDay(userName);
@@ -355,6 +366,12 @@ var Routines = (function() {
     }
     if (item.when === 'sunny') bits.push('🌡 hot or sunny days');
     if (item.when === 'football') bits.push('📅 football days');
+    if (Array.isArray(item.days) && item.days.length) {
+      var DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      // Monday first, the way the family's week reads.
+      var days = item.days.slice().sort(function(a, b) { return ((a + 6) % 7) - ((b + 6) % 7); });
+      bits.push('📅 ' + days.map(function(d) { return DAY[d]; }).join(', ') + ' only');
+    }
     return bits.join(' · ');
   }
 
@@ -431,7 +448,36 @@ var Routines = (function() {
     if (!data.days) data.days = {};
     if (typeof data.streak !== 'number') data.streak = 0;
     if (typeof data.bestStreak !== 'number') data.bestStreak = 0;
+    _addNewDefaults(data, String(key).slice(STORAGE_PREFIX.length).replace(/_/g, ' '));
     return data;
+  }
+
+  // Tasks added to DEFAULTS after kids already had lists of their own.
+  // A kid on the default list gets them anyway; a kid with an edited
+  // list gets each one put in once, next to `after`, and the id is
+  // remembered in data.addedDefaults so a parent who removes it doesn't
+  // see it come back. Done in memory on every read and saved by the
+  // next write (a tick or an edit): reading never writes by itself, so
+  // a device with an old copy can't push that copy over newer edits.
+  var ADDED_DEFAULTS = [
+    { which: 'evening', id: 'hair_dry', after: 'shower' }
+  ];
+  function _addNewDefaults(data, userName) {
+    if (!data.templates) return;
+    ADDED_DEFAULTS.forEach(function(a) {
+      var list = data.templates[a.which];
+      if (!Array.isArray(list) || !list.length) return;   // on the defaults: already there
+      var seen = Array.isArray(data.addedDefaults) ? data.addedDefaults : [];
+      if (seen.indexOf(a.id) !== -1) return;
+      var item = (DEFAULTS[a.which] || []).filter(function(it) { return it.id === a.id; })[0];
+      if (!item || !_isFor(item, userName)) return;
+      if (!list.some(function(it) { return it && it.id === a.id; })) {
+        var at = -1;
+        list.forEach(function(it, i) { if (it && it.id === a.after) at = i; });
+        list.splice(at === -1 ? list.length : at + 1, 0, _copyItem(item));
+      }
+      data.addedDefaults = seen.concat([a.id]);
+    });
   }
 
   // Caches that can be thrown away and rebuilt from the network. When
@@ -557,6 +603,7 @@ var Routines = (function() {
     var out = { id: it.id, label: it.label };
     if (it.when) out.when = it.when;
     if (Array.isArray(it.only) && it.only.length) out.only = it.only.slice();
+    if (Array.isArray(it.days) && it.days.length) out.days = it.days.slice();
     return out;
   }
 
@@ -639,6 +686,10 @@ var Routines = (function() {
       // Keep "sunny days only" / "Pablo only" through a label edit.
       if (it && it.when) out.when = String(it.when);
       if (it && Array.isArray(it.only) && it.only.length) out.only = it.only.map(String);
+      if (it && Array.isArray(it.days)) {
+        var days = it.days.map(Number).filter(function(d) { return d >= 0 && d <= 6 && d === Math.floor(d); });
+        if (days.length) out.days = days;
+      }
       return out;
     }).filter(function(it) { return it.label.length > 0; });
     _write(k, data);
