@@ -396,7 +396,7 @@ var LMArt = (function () {
       container.classList.remove('lma-map--path', 'lma-map--mybook', 'lma-map--library');
       container.classList.add('lma-map');
       if (tab === 'mybook') { container.classList.add('lma-map--mybook'); return; }
-      if (tab === 'library') { container.classList.add('lma-map--library'); return; }
+      if (tab === 'library' || tab === 'christmas') { container.classList.add('lma-map--library'); return; }
       container.classList.add('lma-map--path');
       _decoratePath(container, tab);
       _observe(container);
