@@ -81,6 +81,8 @@ var LM_SONGS = [
     difficulty: 4,
     alwaysUnlocked: false,
     isBonus: false,
+    titleEs: 'Cascabel',
+    christmas: true,
     funFact: 'Jingle Bells was published in 1857 and never mentions Christmas. In 1965 two astronauts played it in space on a tiny harmonica and some sleigh bells — the first song ever played in space.',
     concept: 'Three chords: C (5-3-1), F (5-2-1) and G7 (5-2-1). Your left hand barely moves!',
     bpm: { turtle: 60, normal: 96, rabbit: 116, rocket: 136 },
@@ -421,6 +423,7 @@ var LM_SONGS = [
     difficulty: 5,
     alwaysUnlocked: false,
     isBonus: false,
+    christmas: true,
     funFact: 'The tune is an old Welsh New Year\'s song called "Nos Galan". The English Christmas words were added in the 1800s.',
     concept: 'Key of F — every B is B-flat, until the natural sign in bar 11 — and thumb-under.',
     bpm: { turtle: 66, normal: 96, rabbit: 116, rocket: 132 },
@@ -444,6 +447,7 @@ var LM_SONGS = [
     difficulty: 5,
     alwaysUnlocked: false,
     isBonus: false,
+    christmas: true,
     funFact: 'John Henry Hopkins Jr. wrote both the words and the tune in 1857 for a Christmas pageant in New York.',
     concept: 'E minor — F-sharp in the key signature, and D-sharp in the left hand\'s B chord.',
     bpm: { turtle: 66, normal: 96, rabbit: 116, rocket: 132 },
@@ -463,6 +467,7 @@ var LM_SONGS = [
     difficulty: 5,
     alwaysUnlocked: false,
     isBonus: false,
+    christmas: true,
     funFact: 'This English carol is so old that "rest ye merry" meant "stay happy". People were singing it in the 1700s, and probably long before.',
     concept: 'E minor with an upbeat, and a small hand shift down to D.',
     bpm: { turtle: 66, normal: 100, rabbit: 120, rocket: 138 },
@@ -616,19 +621,25 @@ var LM_SONGS = [
     difficulty: 5,
     alwaysUnlocked: false,
     isBonus: false,
+    titleEs: 'Noche de paz',
+    christmas: true,
     funFact: 'It was first sung on Christmas Eve 1818 in a small Austrian village, with just a guitar. In Spanish it is called "Noche de paz".',
     concept: '3/4 with a reach: the right hand climbs from G up to high F — keep the left-hand chords soft.',
     bpm: { turtle: 54, normal: 72, rabbit: 90, rocket: 108 },
     score: {
       time: '3/4', key: 'C',
-      rh: 'G4q.:3 A4e:4 G4q:3 | E4h.:1 | G4q.:3 A4e:4 G4q:3 | E4h.:1 | ' +
-          'D5h:5 D5q:5 | B4h.:3 | C5h:4 C5q:4 | G4h.:1 | ' +
-          'D5h:5 D5q:5 | F5q.:5 D5e:3 B4q:1 | C5h.:2 | E5h.:4 | ' +
-          'C5q:5 G4q:3 E4q:1 | G4q.:5 F4e:4 D4q:2 | C4h.~:1 | C4h.',
-      lh: 'C3+G3h.:5,1 | C3+G3h.:5,1 | C3+G3h.:5,1 | C3+G3h.:5,1 | ' +
+      rh: 'G4q. A4e G4q | E4h. | G4q. A4e G4q | E4h. | ' +
+          'D5h D5q | B4h. | C5h C5q | G4h. | ' +
+          'A4h A4q | C5q. B4e A4q | G4q. A4e G4q | E4h. | ' +
+          'A4h A4q | C5q. B4e A4q | G4q. A4e G4q | E4h. | ' +
+          'D5h D5q | F5q. D5e B4q | C5h. | E5h. | ' +
+          'C5q. G4e E4q | G4q. F4e D4q | C4h.~ | C4h.',
+      lh: 'C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | ' +
           'B2+F3+G3h.:5,2,1 | B2+F3+G3h.:5,2,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | ' +
+          'C3+F3+A3h.:5,2,1 | C3+F3+A3h.:5,2,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | ' +
+          'C3+F3+A3h.:5,2,1 | C3+F3+A3h.:5,2,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | ' +
           'B2+F3+G3h.:5,2,1 | B2+F3+G3h.:5,2,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1 | ' +
-          'C3+G3h.:5,1 | B2+F3+G3h.:5,2,1 | C3+E3+G3h.:5,3,1 | C3+G3h.:5,1',
+          'B2+F3+G3h.:5,2,1 | B2+F3+G3h.:5,2,1 | C3+E3+G3h.:5,3,1 | C3+E3+G3h.:5,3,1',
     },
   },
   {
@@ -694,6 +705,258 @@ var LM_SONGS = [
           'G2h:5 B2+D3h:3,1 | A2h:5 C#3+G3h:3,1 | D2h:5 F#2+C3h:3,1 | G2+B2+D3w:5,3,1 | ' +
           'G2h:5 B2+D3h:3,1 | B2h:5 D#3+A3h:3,1 | E2h:5 G2+B2h:3,1 | G2h:5 B2+F3h:3,1 | ' +
           'C3h:5 E3+G3h:3,1 | A2h:5 C#3+G3h:3,1 | D2h:5 F#2+C3h:3,1 | G2+B2+D3w:5,3,1',
+    },
+  },
+
+  // ── Christmas Special (Navidad) ───────────────────────────────────
+  // Melodies and bass lines from public-domain hymnals, as engraved by
+  // the Mutopia Project (mutopiaproject.org); the bass becomes the left
+  // hand. Off the paths (world 30), so they are always open; the
+  // Christmas tab shows them from Nov 15 to Jan 6.
+  {
+    id: 500,
+    title: 'Joy to the World',
+    titleEs: 'Al mundo paz',
+    composer: 'Lowell Mason, after G. F. Handel (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 6,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'Isaac Watts wrote the words in 1719, based on Psalm 98. Lowell Mason set them to this tune in 1839, borrowing ideas from Handel\'s "Messiah". In Spanish it is sung as "Al mundo paz".',
+    concept: 'D major: F-sharp and C-sharp. The first phrase walks down the whole D scale, one step at a time.',
+    bpm: { turtle: 52, normal: 76, rabbit: 96, rocket: 116 },
+    score: {
+      time: '2/4', key: 'D',
+      rh: 'D5q C#5e. B4s | A4q. G4e | F#4q E4q | D4q. A4e | ' +
+          'B4q. B4e | C#5q. C#5e | D5q. D5e | D5e C#5e B4e A4e | ' +
+          'A4e. G4s A4e D5e | D5e C#5e B4e A4e | A4e. G4s F#4e F#4e | F#4e F#4e F#4e F#4s G4s | ' +
+          'A4q. G4s F#4s | E4e E4e E4e E4s F#4s | G4q. F#4s E4s | D4e D5q B4e | ' +
+          'A4e. G4s F#4e G4e | F#4q E4q | D4h',
+      lh: 'D3q D3e. D3s | D3q. G2e | A2h | D3q. F#3e | ' +
+          'G3q. G3e | A3q. A3e | D3q. D3e | D3q D3q | ' +
+          'D3q. D3e | D3q D3q | D3q. Re | Rq. D3e | ' +
+          'D3e D3e D3e D3e | A3q. A2e~ | A2q A2e A2e | D3q. D3e | ' +
+          'D3q. G2e | A2q A2q | D3h',
+    },
+  },
+  {
+    id: 501,
+    title: 'O Come, All Ye Faithful',
+    titleEs: 'Venid, fieles todos (Adeste Fideles)',
+    composer: 'John Francis Wade (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 6,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'It was first written in Latin, "Adeste Fideles", in the 1740s. It is sung all over the world, in Spanish as "Venid, fieles todos".',
+    concept: 'A major (three sharps) with an upbeat. The refrain "O come, let us adore Him" climbs a little higher each time.',
+    bpm: { turtle: 52, normal: 76, rabbit: 92, rocket: 108 },
+    score: {
+      time: '4/4', key: 'A', pickup: 1,
+      rh: 'A4q | A4h E4q A4q | B4h E4h | C#5q B4q C#5q D5q | ' +
+          'C#5h B4q A4q | A4h G#4q F#4q | G#4q A4q B4q C#5q | G#4h F#4q. E4e | ' +
+          'E4w | E5h D5q C#5q | D5h C#5h | B4q C#5q A4q B4q | ' +
+          'G#4q. F#4e E4q A4q | A4q G#4q A4q B4q | A4h E4q C#5q | C#5q B4q C#5q D5q | ' +
+          'C#5h B4q C#5q | D5q C#5q B4q A4q | G#4h A4q D5q | C#5h B4q. A4e | ' +
+          'A4h.',
+      lh: 'A2q | A2h C#3q A2q | E3h G#3h | A3q G#3q A3q D3q | ' +
+          'E3h E3q F#3q | F#3h E3q B2q | B2q A2q G#2q A2q | B2h~ B2q. E3e | ' +
+          'E3w | C#4h B3q A3q | B3h A3h | G#3q A3q F#3q D3q | ' +
+          'E3h E3q A2q | A2q E3q A2q E3q | A2h A2h | A2q E3q A2q D3q | ' +
+          'A2h E3q A3q | B3q A3q G#3q F#3q | E3q D3q C#3q D3q | E3h~ E3q. A2e | ' +
+          'A2h.',
+    },
+  },
+  {
+    id: 502,
+    title: 'Away in a Manger',
+    titleEs: 'Allá en el pesebre',
+    composer: 'James R. Murray (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 4,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'James R. Murray published this tune in 1887 in the United States. For years people thought Martin Luther wrote the words, but they first appeared in America. In Spanish it is "Allá en el pesebre".',
+    concept: '3/4 with an upbeat, in F major — every B is B-flat.',
+    bpm: { turtle: 52, normal: 72, rabbit: 88, rocket: 104 },
+    score: {
+      time: '3/4', key: 'F', pickup: 1,
+      rh: 'C5q | C5q. Bb4e A4q | A4q G4q F4q | F4q E4q D4q | ' +
+          'C4h C4q | C4q. D4e C4q | C4q G4q E4q | D4q C4q F4q | ' +
+          'A4h C5q | C5q. Bb4e A4q | A4q G4q F4q | F4q E4q D4q | ' +
+          'C4h C4q | Bb4q. A4e G4q | A4q G4q F4q | G4q D4q E4q | ' +
+          'F4h',
+      lh: 'F3q | F3q. F3e F3q | F3q F3q F3q | Bb2q Bb2q Bb2q | ' +
+          'F2h F2q | C3q. C3e C3q | C3q C3q C3q | F3q F3q F3q | ' +
+          'F3h F3q | F3q. F3e F3q | F3q F3q F3q | Bb2q Bb2q Bb2q | ' +
+          'F2h A2q | C3q. C3e C3q | F3q F3q F3q | Bb2q G2q C3q | ' +
+          'F3h',
+    },
+  },
+  {
+    id: 503,
+    title: 'O Little Town of Bethlehem',
+    titleEs: 'Oh, pueblecito de Belén',
+    composer: 'Lewis H. Redner (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 5,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'Phillips Brooks wrote the words in 1868, after visiting Bethlehem on Christmas Eve. His church organist, Lewis Redner, wrote the tune for the children of their Sunday school.',
+    concept: 'F major with an upbeat — and a G-sharp in the very first bar.',
+    bpm: { turtle: 52, normal: 72, rabbit: 88, rocket: 104 },
+    score: {
+      time: '4/4', key: 'F', pickup: 1,
+      rh: 'A4q | A4q A4q G#4q A4q | C5q Bb4q D4q G4q | F4q E4e F4e G4q C4q | ' +
+          'A4h. A4q | A4q A4q D5q C5q | C5q Bb4q D4q G4q | F4q E4e F4e A4q. G4e | ' +
+          'F4h. A4q | A4q A4q G4q F4q | E4h E4q E4q | D4q E4q F4q G4q | ' +
+          'A4h. A4q | A4q A4q G#4q A4q | C5q Bb4q D4q D5q | C5q F4q A4q. G4e | ' +
+          'F4h.',
+      lh: 'F3q | F3q F3q F3q F3q | Bb2q Bb2q Bb2q Bb2q | C3q C3q C3q C3q | ' +
+          'F3h. F3q | F3q Eb3q D3q D3q | G3q G3q G2q Bb2q | C3q. C3e C3q. C3e | ' +
+          'F3h. F3q | F3q F3q G3q G#3q | A3h A3q A2q | D3q E3q F3q Bb3q | ' +
+          'A3h. F3q | F3q F3q F3q F3q | Bb2q Bb2q Bb2q Bb2q | C3q D3q C3q. C3e | ' +
+          'F2h.',
+    },
+  },
+  {
+    id: 504,
+    title: 'The First Noel',
+    titleEs: 'El primer Noel',
+    composer: 'Traditional English (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 5,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: '"Noel" comes from the French word for Christmas, "Noël". This old English carol was first printed in the 1820s, but people sang it long before that.',
+    concept: '3/4 with a two-eighth-note upbeat. The same tune comes back again and again — learn the first eight bars well.',
+    bpm: { turtle: 56, normal: 80, rabbit: 100, rocket: 120 },
+    score: {
+      time: '3/4', key: 'D', pickup: 1,
+      rh: 'F#4e E4e | D4q. E4e F#4e G4e | A4h B4e C#5e | D5q C#5q B4q | ' +
+          'A4h B4e C#5e | D5q C#5q B4q | A4q B4q C#5q | D5q A4q G4q | ' +
+          'F#4h F#4e E4e | D4q. E4e F#4e G4e | A4h B4e C#5e | D5q C#5q B4q | ' +
+          'A4h B4e C#5e | D5q C#5q B4q | A4q B4q C#5q | D5q A4q G4q | ' +
+          'F#4h F#4e E4e | D4q. E4e F#4e G4e | A4h D5e C#5e | B4h B4q | ' +
+          'A4h A4q | D5q C#5q B4q | A4q B4q C#5q | D5q A4q G4q | ' +
+          'F#4h',
+      lh: 'D3q | D3h B2q | A2q A3q G3q | F#3q F#3q G3q | ' +
+          'D3h G3e G3e | F#3q D3q E3q | F#3q G3q E3q | F#3e G3e A3q A3q | ' +
+          'D3h A2q | D3h B2e B2e | A2q A3q G3q | F#3q F#3q G3q | ' +
+          'D3h G3e G3e | F#3q D3q E3q | F#3q G3q E3q | F#3e G3e A3q A2q | ' +
+          'D3h A2q | D3h B2q | F#3h D3q | G3q. A3e B3e C#4e | ' +
+          'D4h C#4q | B3q A3q G3q | D4q D3q E3q | F#3e G3e A3q A2q | ' +
+          'D3h',
+    },
+  },
+  {
+    id: 505,
+    title: 'Good King Wenceslas',
+    composer: 'Piae Cantiones, 1582 (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 4,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'Wenceslas was a real duke of Bohemia in the 900s, remembered for helping the poor. He is Saint Wenceslaus, patron of the Czech Republic. The tune comes from a songbook printed in 1582.',
+    concept: 'A major (three sharps). The first four bars come back three times — spot them!',
+    bpm: { turtle: 60, normal: 84, rabbit: 104, rocket: 120 },
+    score: {
+      time: '4/4', key: 'A',
+      rh: 'A4q A4q A4q B4q | A4q A4q E4h | F#4q E4q F#4q G#4q | A4h A4h | ' +
+          'A4q A4q A4q B4q | A4q A4q E4h | F#4q E4q F#4q G#4q | A4h A4h | ' +
+          'E5q D5q C#5q B4q | C#5q B4q A4h | F#4q E4q F#4q G#4q | A4h A4h | ' +
+          'E4q E4q F#4q G#4q | A4q A4q B4h | E5q D5q C#5q B4q | A4h D5h | ' +
+          'A4w',
+      lh: 'A3q A3q F#3q G#3q | A3q D3q E3h | D3q C#3q D3q B2q | A2h A2h | ' +
+          'A3q A3q F#3q G#3q | A3q D3q E3h | D3q C#3q D3q B2q | A2h A2h | ' +
+          'C#3q D3q E3q E3q | A3q E3q F#3h | D3q C#3q D3q B2q | A2h A2h | ' +
+          'C#3q C#3q D3q B2q | F#3q F#3q E3h | C#3q D3q E3q E3q | F#3h D3h | ' +
+          'A3w',
+    },
+  },
+  {
+    id: 506,
+    title: 'It Came Upon the Midnight Clear',
+    composer: 'Richard Storrs Willis (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 7,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'Edmund Sears wrote the words in Massachusetts in 1849. Richard Storrs Willis wrote the tune a year later.',
+    concept: '6/8: two big beats in every bar, each split into three. B-flat major has two flats, B-flat and E-flat.',
+    bpm: { turtle: 44, normal: 60, rabbit: 76, rocket: 92 },
+    score: {
+      time: '6/8', key: 'Bb', pickup: 0.5,
+      rh: 'F4e | D5q A4e C5e Bb4e G4e | F4q G4e F4q F4e | G4e A4e Bb4e Bb4e C5e D5e | ' +
+          'C5q.~ C5q F4e | D5q A4e C5e Bb4e G4e | F4q G4e F4q F4e | G4q G4e A4e G4e F4e | ' +
+          'Bb4q.~ Bb4q D5e | D5q D4e D4e E4e F#4e | G4e G4e A4e Bb4q D5e | C5e Bb4e A4e G4e A4e G4e | ' +
+          'F4q.~ F4q F4e | D5q A4e C5e Bb4e G4e | F4q G4e F4q F4e | G4q G4e A4e G4e F4e | ' +
+          'Bb4q.~ Bb4q',
+      lh: 'Bb2e | Bb2q Bb2e Bb2q Bb2e | Bb2q A2e Bb2q Bb2e | Eb3e F3e G3e G3q C3e | ' +
+          'F3q.~ F3q Bb2e | Bb2q Bb2e Bb2q Bb2e | Bb2q A2e Bb2q D3e | Eb3q C3e F3q F3e | ' +
+          'Bb2q.~ Bb2q D3e | D3q D3e D3q C3e | Bb2q D3e G3q Bb2e | C3q C3e C3q C3e | ' +
+          'F3q.~ F3q F3e | Bb2q Bb2e Bb2q Bb2e | Bb2q A2e Bb2q D3e | Eb3q C3e F3q F3e | ' +
+          'Bb2q.~ Bb2q',
+    },
+  },
+  {
+    id: 507,
+    title: 'In the Bleak Midwinter',
+    composer: 'Gustav Holst (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 5,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'Christina Rossetti wrote the poem in 1872. Gustav Holst — who also wrote "The Planets" — gave it this tune in 1906.',
+    concept: 'Rests at the end of some phrases: lift your hands and count the silent beat.',
+    bpm: { turtle: 48, normal: 66, rabbit: 80, rocket: 96 },
+    score: {
+      time: '4/4', key: 'F', pickup: 1,
+      rh: 'A4q | A4q. Bb4e C5q A4q | G4h F4h | G4q. A4e G4q D4q | ' +
+          'G4h. Rq | A4q. Bb4e C5q A4q | G4h F4h | G4q A4q G4q. F4e | ' +
+          'F4h. Rq | Bb4q. A4e Bb4q C5q | D5q D5q A4h | C5q A4q G4q F4q | ' +
+          'E4h. A4q | A4q. Bb4e C5q A4q | G4h F4h | G4q A4q G4q. F4e | ' +
+          'F4h.',
+      lh: 'F3q | F3q. G3e A3q F3q | D3h D3h | Bb2q. C3e Bb2q A2q | ' +
+          'G2h C3q Rq | F3q. G3e A3q F3q | D3h D3h | Bb2q Bb2q C3q. F3e | ' +
+          'F3h. Rq | D3q. F3e D3q C3q | Bb2q Bb2q D3h | A2q A2q Bb2q Bb2q | ' +
+          'C3h. F3q | F3q. G3e A3q F3q | D3h D3h | Bb2h C3q. F3e | ' +
+          'F3h.',
+    },
+  },
+  {
+    id: 508,
+    title: 'We Wish You a Merry Christmas',
+    titleEs: 'Les deseamos feliz Navidad',
+    composer: 'Traditional English (arr.)',
+    world: 30,
+    christmas: true,
+    difficulty: 4,
+    alwaysUnlocked: true,
+    isBonus: false,
+    funFact: 'An old carol from the West of England. Carolers sang it at the door, hoping for a treat — in the old words, "figgy pudding".',
+    concept: 'G major (F-sharp) with an upbeat. Quick eighth notes on "you a mer-ry".',
+    bpm: { turtle: 60, normal: 88, rabbit: 108, rocket: 126 },
+    score: {
+      time: '3/4', key: 'G', pickup: 1,
+      rh: 'D4q | G4q G4e A4e G4e F#4e | E4q E4q E4q | A4q A4e B4e A4e G4e | ' +
+          'F#4q D4q D4q | B4q B4e C5e B4e A4e | G4q E4q D4e D4e | E4q A4q F#4q | ' +
+          'G4h D4q | G4q G4q G4q | F#4h F#4q | G4q F#4q E4q | ' +
+          'D4h A4q | B4q A4q G4q | D5q D4q D4e D4e | E4q A4q F#4q | ' +
+          'G4h',
+      lh: 'Rq | G2h. | C3h. | A2h. | ' +
+          'D3h. | B2h. | E3h. | C3q D3h | ' +
+          'G2h Rq | G2h. | D3h. | E3h. | ' +
+          'D3h. | G2h. | D3h. | C3q D3h | ' +
+          'G2h',
     },
   },
 ];
