@@ -454,6 +454,7 @@ var ProgressAdmin = (function() {
   // Examen y Virtudes keeps a journal, not a ladder: it can only be cleared.
   APPS.push({ id: 'examen', label: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', prefix: 'zs_examen_', mode: 'reset' });
   // Árbol familiar has no ladder to set: its quiz stars, pages seen and map can only be cleared.
+  APPS.push({ id: 'huerto', label: 'Huerto', icon: '🌱', href: 'huerto.html', prefix: 'zs_huerto_', mode: 'reset' });
   APPS.push({ id: 'arbol', label: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', prefix: 'zs_arbol_', mode: 'reset' });
 
   var _byId = {};

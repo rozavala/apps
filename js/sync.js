@@ -90,6 +90,7 @@ var CloudSync = (function() {
     'zs_codelab_': 'codelab',
     'zs_logica_': 'logica',
     'zs_typing_': 'typing',
+    'zs_huerto_': 'huerto',
     'zs_calculo_': 'calculo',
     'zs_arbol_': 'arbol',
     'zs_challenge_': 'challenge',
