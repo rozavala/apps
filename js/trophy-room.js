@@ -47,6 +47,7 @@ var TrophyRoom = (function() {
     { id: 'mapa', name: 'Misiones de Mapa', emoji: '🧭', color: '#17365D', threshold: 1, href: 'misiones-mapa.html' },
     { id: 'linea', name: 'Línea del Tiempo', emoji: '🏛️', color: '#64748B', threshold: 1, href: 'linea-del-tiempo.html' },
     { id: 'arbol', name: 'Árbol familiar', emoji: '🌳', color: '#2C6B41', threshold: 1, href: 'arbol-familiar.html' },
+    { id: 'escritura', name: 'Escritura', emoji: '✒️', color: '#C2410C', threshold: 1, href: 'escritura.html' },
     { id: 'typing', name: 'Type Quest', emoji: '⌨️', color: '#1E3A8A', threshold: 1, href: 'type-quest.html', tiers: [10, 30] },
     { id: 'codelab', name: 'Code Lab', emoji: '🐢', color: '#177A40', threshold: 1, href: 'code-lab.html' },
     { id: 'logica', name: 'Lógica', emoji: '🧩', color: '#5B3FA8', threshold: 1, href: 'logica.html' },

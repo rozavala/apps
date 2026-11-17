@@ -57,6 +57,7 @@ var HubPlan = (function() {
     { id: 'lector',     href: 'lector.html',             group: 'reading', minAge: 4,  beginner: true, names: ['lector'] },
     { id: 'vocab',      href: 'vocabulario-vivo.html',   group: 'reading', minAge: 7,  names: ['vocabulario vivo'] },
     { id: 'dictado',    href: 'dictado.html',            group: 'reading', minAge: 6,  names: ['dictado'] },
+    { id: 'escritura',  href: 'escritura.html',          group: 'reading', minAge: 4,  names: ['escritura'] },
     { id: 'world',      href: 'world-explorer.html',     group: 'world',   minAge: 5,  names: ['world explorer'] },
     { id: 'arbol',      href: 'arbol-familiar.html',     group: 'world',   minAge: 4,  names: ['arbol familiar'] },
     { id: 'quest',      href: 'quest-adventure.html',    group: 'world',   minAge: 5,  names: ['quest adventure', 'summer quest'] },

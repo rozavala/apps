@@ -46,6 +46,7 @@ var AppSchedule = (function() {
   ALL_APPS.push({ id: 'mapa', card: '.card-mapa' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
+  ALL_APPS.push({ id: 'escritura', card: '.card-escritura' });
   ALL_APPS.push({ id: 'logica', card: '.card-logica' });
   // Examen y Virtudes is an evening reflection: shown from 18:00 (Off Hours
   // still puts the apps to sleep later on school nights).
@@ -73,6 +74,8 @@ var AppSchedule = (function() {
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
   // Árbol familiar (the family tree) is a Sunday and Wednesday visit.
   [0, 3].forEach(function(d) { SMART_SCHEDULE[d].push('arbol'); });
+  // Escritura (handwriting): a little and often, Monday, Wednesday and Friday.
+  [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('escritura'); });
 
   // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
   [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });

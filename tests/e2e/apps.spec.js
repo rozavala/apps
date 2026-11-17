@@ -35,6 +35,7 @@ const MAJOR_APPS = [
   'misiones-mapa.html',
   'arbol-familiar.html',
   'code-lab.html',
+  'escritura.html',
   'logica.html',
   'examen.html',
   'type-quest.html'
