@@ -540,6 +540,24 @@ var APP_STAR_CONFIGS = [
       for (k in (d.books || {})) { q = d.books[k] || {}; n += (q.l ? 1 : 0) + (q.r ? 1 : 0) + (q.p ? 1 : 0); }
       return n;
     } },
+  // Escritura: each letter of each style is starred out of 3 (traced,
+  // traced with less help, written alone), each word out of 3 (traced,
+  // copied, copied well), and each letter dictation by its best round.
+  { id: 'escritura', prefix: 'zs_escritura_', stars: function(d) {
+      var n = 0, k, parts = [d.L, d.W, d.dict];
+      for (var i = 0; i < parts.length; i++) for (k in (parts[i] || {})) n += Math.min(3, Math.max(0, Number(parts[i][k]) || 0));
+      return n;
+    } },
+  // Misiones de Mapa: the best of each mission (0 to 3 stars: mystery
+  // places, each trip, each map skill and each Chile mission), one star
+  // for every 5 different mystery places found (up to 6) and one per trip
+  // saved in the free planner (up to 3).
+  { id: 'mapa', prefix: 'zs_mapa_', stars: function(d) {
+      var n = 0, k, found = 0, b = d.best || {};
+      for (k in b) n += Math.min(3, Math.max(0, b[k] | 0));
+      for (k in (d.found || {})) found++;
+      return n + Math.min(6, Math.floor(found / 5)) + Math.min(3, Math.max(0, d.plans | 0));
+    } },
   // Línea del Tiempo: one star for every 10 events opened (up to 15) and
   // the best round (0 to 3 stars) of each game: put in order (one per
   // number of cards), who lived at the same time, before or after, and
@@ -549,6 +567,33 @@ var APP_STAR_CONFIGS = [
       for (k in (d.seen || {})) seen++;
       n += Math.min(15, Math.floor(seen / 10));
       for (k in g) n += Math.min(3, Math.max(0, g[k] | 0));
+      return n;
+    } },
+  // Huerto: for each plant (up to 10) one star for marking it sprouted, one
+  // for 3 journal entries and one for flowers or a harvest; one for every 7
+  // days with a watering (up to 10); one for each close guess in "predict,
+  // then measure" (within 1 cm or 20 %, up to 10); and for each experiment one
+  // for the hypothesis, one for 3 observations and one for finishing it.
+  // (The same rule as HuertoEngine.stars; a test checks they agree.)
+  { id: 'huerto', prefix: 'zs_huerto_', stars: function(d) {
+      var n = 0, wd = {}, close = 0, k, i, pls = Array.isArray(d.plants) ? d.plants : [];
+      for (i = 0; i < pls.length; i++) {
+        var pl = pls[i];
+        if (!pl) continue;
+        if (i < 10) {
+          var logs = (pl.log || []).filter(function(e) { return e && (typeof e.h === 'number' || e.n || e.ph || e.dr || e.w || e.lv); }).length;
+          n += (pl.sprouted ? 1 : 0) + (logs >= 3 ? 1 : 0) + (pl.flowered || pl.harvested ? 1 : 0);
+        }
+        (pl.water || []).forEach(function(x) { wd[x] = 1; });
+        (pl.pred || []).forEach(function(p) {
+          if (p && typeof p.got === 'number' && p.got >= 0 && typeof p.h === 'number' && Math.abs(p.h - p.got) <= Math.max(1, p.got * 0.2)) close++;
+        });
+      }
+      n += Math.min(10, Math.floor(Object.keys(wd).length / 7)) + Math.min(10, close);
+      for (k in (d.exp || {})) {
+        var e = d.exp[k];
+        if (e && typeof e === 'object') n += (e.guess ? 1 : 0) + ((e.obs || []).length >= 3 ? 1 : 0) + (e.done ? 1 : 0);
+      }
       return n;
     } },
   // Árbol familiar: each family game is starred by its best score out of 5
@@ -564,6 +609,16 @@ var APP_STAR_CONFIGS = [
       n += d.map ? 1 : 0;
       return n;
     } },
+  // Taller de Máquinas: one star for each simple machine, the gear lab and
+  // the bicycle tried (seen: { lever: 1, … }), plus the best 0–3 of every
+  // challenge (ch) and every chain-reaction level (cr).
+  { id: 'taller', prefix: 'zs_taller_', stars: function(d) {
+      var n = 0, k, seen = d.seen || {}, ids = ['lever', 'pulley', 'incline', 'wedge', 'wheel', 'screw', 'gears', 'bike'];
+      for (k = 0; k < ids.length; k++) if (seen[ids[k]]) n++;
+      for (k in (d.ch || {})) n += Math.min(3, Math.max(0, d.ch[k] | 0));
+      for (k in (d.cr || {})) n += Math.min(3, Math.max(0, d.cr[k] | 0));
+      return n;
+    } },
   // Code Lab: each mission is worth up to 3 stars (solved, no hints, a
   // short program), kept in { m: { '<missionId>': { s: 0..3, ... } } }.
   { id: 'codelab', prefix: 'zs_codelab_', stars: function(d) {
@@ -571,12 +626,33 @@ var APP_STAR_CONFIGS = [
       for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
       return n;
     } },
+  // Lógica: the best stars (0 to 3) of each puzzle level, plus one star for
+  // every 3 daily puzzles solved (up to 10).
+  { id: 'logica', prefix: 'zs_logica_', stars: function(d) {
+      var n = 0, lv = d.lv && typeof d.lv === 'object' ? d.lv : {};
+      for (var k in lv) n += Math.min(3, Math.max(0, lv[k] | 0));
+      var dd = d.daily && typeof d.daily === 'object' ? d.daily : {};
+      return n + Math.min(10, Math.floor(Math.max(0, dd.n | 0) / 3));
+    } },
   // Examen y Virtudes: one star for each evening with a finished
   // reflection ({ entries: { 'YYYY-MM-DD': { done: true, ... } } }), so at
   // most one a day. What the kid wrote never scores.
   { id: 'examen', prefix: 'zs_examen_', stars: function(d) {
       var n = 0, e = d.entries && typeof d.entries === 'object' ? d.entries : {};
       for (var k in e) if (/^\d{4}-\d\d-\d\d$/.test(k) && e[k] && e[k].done) n++;
+      return n;
+    } },
+  // Type Quest: each key lesson and each passage scores its best run (up to
+  // 3), Letter Hunt up to 3, Words 1 star per 10 words a minute (at 90%+,
+  // up to 3 per language), and one star per typing rank reached (up to 7).
+  { id: 'typing', prefix: 'zs_typing_', stars: function(d) {
+      var n = 0, k, o = function(x) { return x && typeof x === 'object' && !Array.isArray(x) ? x : {}; };
+      var ls = o(d.ls), ps = o(d.ps), wd = o(d.wd);
+      for (k in ls) n += Math.max(0, Math.min(3, o(ls[k]).s | 0));
+      for (k in ps) n += Math.max(0, Math.min(3, o(ps[k]).s | 0));
+      for (k in wd) n += Math.max(0, Math.min(3, Math.floor((+o(wd[k]).w || 0) / 10)));
+      n += Math.max(0, Math.min(3, o(d.hunt).s | 0));
+      n += Math.max(0, Math.min(7, d.rk | 0));
       return n;
     } },
   // Sibling challenges: one star for each challenge solved, to the kid who

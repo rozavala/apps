@@ -1079,7 +1079,7 @@ const ArtStudio = (() => {
       (key ? blob(MIX_PAINTS[key].hex) : '<span class="mx-empty">?</span>') + '</button>';
     body.innerHTML =
       '<div class="mxc-target"><div class="mxc-swatch">' + blob(T.hex, 'huge') + '</div>' +
-        '<div><span class="mxc-ask">Mix this colour</span><b class="mxc-name">' + esc(T.name) + '</b>' +
+        '<div class="mxc-q"><span class="mxc-ask">Mix this colour</span><b class="mxc-name">' + esc(T.name) + '</b>' +
         '<span class="mxc-hint">' + (M.little || M.tries > 0 ? 'Hint: ' + MIX_PAINTS[T.a].name + ' + ' + MIX_PAINTS[T.b].name : 'Which two paints make it?') + '</span></div></div>' +
       '<div class="mxc-board">' +
         '<div class="mxc-wells" role="group" aria-label="Paints">' + Object.keys(MIX_PAINTS).map(k =>

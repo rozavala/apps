@@ -43,11 +43,17 @@ var AppSchedule = (function() {
   ];
   ALL_APPS.push({ id: 'lector', card: '.card-lector' });
   ALL_APPS.push({ id: 'linea', card: '.card-linea' });
+  ALL_APPS.push({ id: 'mapa', card: '.card-mapa' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
+  ALL_APPS.push({ id: 'escritura', card: '.card-escritura' });
+  ALL_APPS.push({ id: 'logica', card: '.card-logica' });
   // Examen y Virtudes is an evening reflection: shown from 18:00 (Off Hours
   // still puts the apps to sleep later on school nights).
   ALL_APPS.push({ id: 'examen', card: '.card-examen', fromHour: 18 });
+  ALL_APPS.push({ id: 'typing', card: '.card-typing' });
+  ALL_APPS.push({ id: 'huerto', card: '.card-huerto' });
+  ALL_APPS.push({ id: 'taller', card: '.card-taller' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -70,12 +76,25 @@ var AppSchedule = (function() {
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
   // Árbol familiar (the family tree) is a Sunday and Wednesday visit.
   [0, 3].forEach(function(d) { SMART_SCHEDULE[d].push('arbol'); });
+  // Escritura (handwriting): a little and often, Monday, Wednesday and Friday.
+  [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('escritura'); });
 
   // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
   [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });
 
+  // Lógica (puzzles, with a daily puzzle) on Monday, Wednesday, Friday and Sunday.
+  [0, 1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('logica'); });
+
   // Línea del Tiempo (history) rides along with the history and world days.
   [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });
+
+  // Type Quest (touch typing): short, frequent practice works best, so Monday, Wednesday and Friday.
+  [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('typing'); });
+  // Misiones de Mapa (geography) on Tuesday, Friday and Sunday.
+  [0, 2, 5].forEach(function(d) { SMART_SCHEDULE[d].push('mapa'); });
+
+  // Taller de Máquinas (simple machines and gears) on the science days, next to Lab Explorer: Monday and Thursday, plus Saturday.
+  [1, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('taller'); });
 
   // Examen y Virtudes (the evening reflection) is offered every day.
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('examen'); });
@@ -87,6 +106,8 @@ var AppSchedule = (function() {
     }
     return false;
   }
+  // Huerto (a real garden) every day: plants need their water check daily.
+  Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('huerto'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
@@ -117,7 +138,7 @@ var AppSchedule = (function() {
   var LEGACY_KNOWN = ['math', 'chile', 'chess', 'piano', 'guitar', 'art', 'lab', 'world', 'atlas',
     'story', 'quest', 'guess', 'money', 'bmcheck', 'trophy', 'move', 'bank', 'circuit', 'engineer',
     'negocio', 'euclid', 'cocina', 'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo',
-    'lector', 'linea', 'arbol', 'codelab', 'examen'];
+    'lector', 'linea', 'arbol', 'codelab'];   // as of Nov 16, 2026: Examen and later apps flow into edited days
 
   function _overrideApps(day, saved) {
     if (!saved) return null;

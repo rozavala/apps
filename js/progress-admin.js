@@ -342,6 +342,25 @@ var ProgressAdmin = (function() {
     { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
   APPS.push({ id: 'codelab', label: 'Code Lab', icon: '🐢', href: 'code-lab.html', prefix: 'zs_codelab_', mode: 'reset' });
+  // Lógica keeps the best stars per puzzle level and the daily streak; it can only be cleared.
+  APPS.push({ id: 'logica', label: 'Lógica', icon: '🧩', href: 'logica.html', prefix: 'zs_logica_', mode: 'reset' });
+  // Type Quest: the key lessons are a ladder (zs_typing_<kid>: ls:{ id:{ s, w, a, n } }).
+  // Setting a position marks the lessons before it done; passages, words and the rank stay.
+  APPS.push({
+    id: 'typing', label: 'Type Quest', icon: '⌨️', href: 'type-quest.html',
+    prefix: 'zs_typing_', catalog: 'typing', mode: 'sequence', noun: 'lesson',
+    done: function(data, u) { var l = (data.ls || {})[u.i]; return !!(l && l.s > 0); },
+    apply: function(data, units, count) {
+      data.ls = data.ls || {};
+      units.forEach(function(u, idx) {
+        if (idx < count) { var l = data.ls[u.i] = data.ls[u.i] || {}; if (!(l.s > 0)) { l.s = 2; l.n = l.n || 1; } }
+        else delete data.ls[u.i];
+      });
+      data.v = 1;
+      return data;
+    },
+    clear: function(data) { data.ls = {}; return data; }
+  });
 
   // Lector keeps a ladder of levels for each language in one saved blob
   // (zs_lector_<kid>: lv:{ es2:{sounds,syll,build,read}, … }, books:{…}).
@@ -375,10 +394,67 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+  // Taller de Máquinas keeps the best stars of each challenge (ch) and
+  // chain-reaction level (cr); the machines a kid has tried (seen) and
+  // their saved designs are left alone.
+  APPS.push({
+    id: 'taller', label: 'Taller de Máquinas', icon: '⚙️', href: 'taller-maquinas.html',
+    prefix: 'zs_taller_', catalog: 'taller', mode: 'sequence', noun: 'challenge',
+    done: function(data, u) { var box = (u.k === 'cr' ? data.cr : data.ch) || {}; return (box[u.i] | 0) > 0; },
+    apply: function(data, units, count) {
+      data.ch = data.ch && typeof data.ch === 'object' ? data.ch : {};
+      data.cr = data.cr && typeof data.cr === 'object' ? data.cr : {};
+      units.forEach(function(u, idx) {
+        var box = u.k === 'cr' ? data.cr : data.ch;
+        if (idx < count) { if (!((box[u.i] | 0) > 0)) box[u.i] = 3; }
+        else delete box[u.i];
+      });
+      data.v = 1;
+      return data;
+    }
+  });
+
+  // Escritura keeps a ladder of letter sets for each style in one blob
+  // (zs_escritura_<kid>: L:{ 'print:A': 0..3, 'cursive:a': … }, W:{…}, dict:{…}).
+  // A set counts as done when every letter in it has 2+ stars.
+  function _escrituraApp(style, label) {
+    function letters(u) { return String(u.k || '').split(',').filter(Boolean); }
+    return {
+      id: 'escritura-' + style, label: 'Escritura — ' + label, icon: '✒️', href: 'escritura.html',
+      prefix: 'zs_escritura_', catalog: 'escritura_' + style, mode: 'sequence', noun: 'set',
+      done: function(data, u) {
+        var L = data.L || {};
+        return letters(u).every(function(c) { return (L[style + ':' + c] | 0) >= 2; });
+      },
+      apply: function(data, units, count) {
+        data.L = data.L || {};
+        units.forEach(function(u, idx) {
+          letters(u).forEach(function(c) {
+            var k = style + ':' + c;
+            if (idx < count) { if ((data.L[k] | 0) < 2) data.L[k] = 2; }
+            else delete data.L[k];
+          });
+        });
+        return data;                 // words and dictation are left alone
+      },
+      clear: function(data) {
+        var out = { v: 1, L: {}, W: {}, dict: {}, rounds: data.rounds || 0 }, k;
+        if (data.style) out.style = data.style;
+        if (data.last) out.last = data.last;
+        ['L', 'W', 'dict'].forEach(function(part) {
+          for (k in (data[part] || {})) if (k.indexOf(style + ':') !== 0) out[part][k] = data[part][k];
+        });
+        return out;
+      }
+    };
+  }
+  APPS.push(_escrituraApp('print', 'Imprenta (print)'), _escrituraApp('cursive', 'Cursiva (cursive)'));
+  APPS.push({ id: 'mapa', label: 'Misiones de Mapa', icon: '🧭', href: 'misiones-mapa.html', prefix: 'zs_mapa_', mode: 'reset' });
   APPS.push({ id: 'linea', label: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', prefix: 'zs_linea_', mode: 'reset' });
   // Examen y Virtudes keeps a journal, not a ladder: it can only be cleared.
   APPS.push({ id: 'examen', label: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', prefix: 'zs_examen_', mode: 'reset' });
   // Árbol familiar has no ladder to set: its quiz stars, pages seen and map can only be cleared.
+  APPS.push({ id: 'huerto', label: 'Huerto', icon: '🌱', href: 'huerto.html', prefix: 'zs_huerto_', mode: 'reset' });
   APPS.push({ id: 'arbol', label: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', prefix: 'zs_arbol_', mode: 'reset' });
 
   var _byId = {};

@@ -151,11 +151,35 @@ const BUILDERS = {
       .map((p, idx) => unit(idx + 1, p.name, _title(p.tier)));
   },
 
+  // Type Quest: the key lessons in order (js/type-quest-data.js).
+  typing() {
+    const D = require(path.join(ROOT, 'js', 'type-quest-data.js'));
+    const groups = {};
+    D.GROUPS.forEach(g => { groups[g.id] = g.t[1]; });
+    return D.LESSONS.map((l, i) => unit(l.id, (i + 1) + '. ' + l.t[1], groups[l.grp] || l.grp));
+  },
+
   // Lector keeps one level ladder for each language. A level is done when
   // every practice in it has 2+ stars; the unit carries its practices in
   // `k` so Progress Manager can tell (see lectorLevels in progress-admin.js).
   lector_es() { return lectorLevels('es', 'Español'); },
   lector_en() { return lectorLevels('en', 'English'); },
+
+  // Taller de Máquinas: the challenges, then the chain-reaction levels.
+  // Both keep a best-stars map (ch / cr), so each unit says which one.
+  taller() {
+    const ch = arr('js/taller-data.js', 'CHALLENGES')
+      .map(c => unit(c.id, c.title[1], 'Challenges', 'ch'));
+    const cr = arr('js/taller-data.js', 'LEVELS')
+      .map(l => unit(l.id, l.name[1], 'Chain reaction', 'cr'));
+    return ch.concat(cr);
+  },
+
+  // Escritura keeps a ladder of letter sets for each handwriting style.
+  // A set is done when each of its letters has 2+ stars; the unit carries
+  // its letters in `k` (see _escrituraApp in progress-admin.js).
+  escritura_print() { return escrituraSets('print', 'Imprenta (print)'); },
+  escritura_cursive() { return escrituraSets('cursive', 'Cursiva (cursive)'); },
 
   world() {
     const out = [];
@@ -167,6 +191,11 @@ const BUILDERS = {
     return out;
   },
 };
+
+function escrituraSets(style, group) {
+  const D = require(path.join(ROOT, 'js', 'escritura-data.js'));
+  return D.SETS[style].map(s => unit(s.id, s.t[0] + ' · ' + s.ch, group, s.ch.split('').join(',')));
+}
 
 function lectorLevels(lang, group) {
   const D = require(path.join(ROOT, 'js', 'lector-data.js'));

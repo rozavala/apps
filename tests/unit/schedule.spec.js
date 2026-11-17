@@ -6,7 +6,7 @@ const { injectMockProfile } = require('../helpers/utils');
 // matches nothing silently never hides its app (Descubre Chile shipped
 // that way once), and an app missing from every day is never offered.
 const LEARN_BY_DOING = ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-  'marinero', 'naturaleza', 'secretos', 'clock', 'calculo', 'linea', 'examen'];
+  'marinero', 'naturaleza', 'secretos', 'clock', 'calculo', 'linea', 'examen', 'logica', 'mapa', 'typing', 'taller'];
 
 test.describe('Smart Schedule', () => {
 
@@ -112,9 +112,16 @@ test.describe('Weekly schedule editor (Parents Corner)', () => {
       const before = S.ALL_APPS.map(a => a.id).filter(id => id !== 'newapp');
       localStorage.setItem('zs_schedule_override', JSON.stringify({ 2: { apps: ['piano'], known: before } }));
       const older = S.getScheduleForDay(2);
-      return { legacy, saved, older };
+      // An older plain list knew only the apps from before Examen y Virtudes,
+      // so the roadmap apps scheduled on Tuesday join it too.
+      const roadmap = S.SMART_SCHEDULE[2].filter(id => ['examen', 'logica', 'mapa', 'typing', 'escritura', 'huerto', 'taller', 'trivia', 'newapp'].includes(id));
+      return { legacy, saved, older, roadmap };
     });
-    expect(out.legacy).toEqual({ mode: 'manual', apps: ['piano', 'chess', 'newapp'] });
+    expect(out.legacy.mode).toBe('manual');
+    expect(out.legacy.apps.slice(0, 2)).toEqual(['piano', 'chess']);
+    expect(out.legacy.apps.slice(2).sort()).toEqual(out.roadmap.slice().sort());
+    expect(out.legacy.apps).toContain('examen');
+    expect(out.legacy.apps).toContain('newapp');
     expect(out.saved.apps).toEqual(['piano']);
     expect(out.older.apps).toEqual(['piano', 'newapp']);
   });
