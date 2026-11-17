@@ -235,7 +235,7 @@ test.describe('Árbol familiar: photos and documents', () => {
     await person(page, DEAD);
     await unlock(page);
     await page.setInputFiles('#ar-fup', [{ name: 'page.html', mimeType: 'text/html', buffer: Buffer.from('<b>x</b>') }]);
-    await expect(page.locator('.ar-fpanel .ar-warn')).toContainText('not a photo or a PDF');
+    await expect(page.locator('.ar-fpanel .ar-warn')).toContainText('not a photo, a PDF or a recording');
     expect(Object.keys(server.files)).toHaveLength(0);
     await page.evaluate(() => { Object.defineProperty(/** @type {any} */ (window).CloudSync, 'online', { configurable: true, writable: true, value: false }); });
     await page.setInputFiles('#ar-fup', [{ name: 'acta.png', mimeType: 'image/png', buffer: PNG }]);
