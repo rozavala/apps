@@ -499,7 +499,7 @@ test.describe('Read-aloud coverage', () => {
     for (const h of notForKids) expect(read(h)).not.toContain('js/speak.js');
   });
 
-  test('every kid app says its instructions: rules in speak.js, or data-speak / ZsSpeak in its own code', async ({ page }) => {
+  test('every kid app says its instructions: rules in speak.js, data-speak / ZsSpeak, or its own ZsTTS buttons', async ({ page }) => {
     await open(page);
     const rules = await page.evaluate(() => Object.keys(/** @type {any} */ (ZsSpeak)._rules));
     const hub = read('js/lang.js');
@@ -511,7 +511,8 @@ test.describe('Read-aloud coverage', () => {
       if (rules.includes(name)) return false;
       const html = read(h);
       const src = html + [...html.matchAll(/src="(js\/[^"?]+\.js)/g)].filter(m => !/\/(speak|tts|auth|sync|pwa)\.js$/.test(m[1])).map(m => read(m[1])).join('\n');
-      return !/data-speak|ZsSpeak\.(watch|button|say)/.test(src);
+      // ...or its own 🔊 buttons on ZsTTS (Examen, Story Explorer).
+      return !/data-speak|ZsSpeak\.(watch|button|say)|ZsTTS\.speak\(/.test(src);
     });
     expect(missing).toEqual([]);
   });
