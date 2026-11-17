@@ -8,8 +8,16 @@
    as text (textContent / createTextNode), never as HTML, and the engine
    cuts it to 120 characters again when it is read.
 
-   Hub: Challenges.renderHub(user) (called by index.js after Today's 3).
+   Hub: Challenges.renderHub(user) (called by index.js after Today's 3);
+   Challenges.todayItem(user) is the card hub-plan.js puts in Today's 3.
    Parents Corner: Challenges.renderParents('element-id').
+   In an app: Challenges.openCreate(user, { kind, answer }) opens the form
+   with that country or chess puzzle already picked (World Explorer and
+   Chess Quest). A chess challenge is played on the Chess Quest board:
+   chess-quest.html?challenge=<id>, which reports back with recordMiss()
+   and recordSolve().
+   A question the receiver got wrong goes to Repaso (review.js) for the
+   next day, and leaves it again if a parent deletes the challenge.
    Fires 'zs:challenges-changed' on window when a star was earned.
    ================================================================ */
 
@@ -18,7 +26,8 @@ var Challenges = (function () {
 
   var E = typeof ChallengeEngine !== 'undefined' ? ChallengeEngine : null;
   var KEY = 'zs_challenges';
-  var ICON = { q: '❓', spell: '🔤', map: '🗺️' };
+  var ICON = { q: '❓', spell: '🔤', map: '🗺️', chess: '♟️' };
+  var CATALOG_SRC = 'js/progress-catalog.js?v=3';   // the hub loads the same file
   var _loaded = {};          // script files already added to the page
 
   function tr(es, en) { return typeof zsT === 'function' ? zsT(es, en) : en; }
@@ -63,7 +72,9 @@ var Challenges = (function () {
   // A parent deleting one: the removal is logged, and the words go from this
   // device's copy at once (other devices drop them when they next merge).
   function remove(id) {
+    var c0 = find(id);
     if (!add(E.makeRemove(id))) return false;
+    if (c0) dropReview(c0);
     var d = load();
     d.events = E.scrub(d.events);
     try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
@@ -89,6 +100,7 @@ var Challenges = (function () {
   // Adds what is missing; never removes one.
   function reconcileStars() {
     if (!E) return false;
+    cleanReview();
     var want = E.starsByKid(load().events), changed = false;
     Object.keys(want).forEach(function (k) {
       var key = E.STARS_PREFIX + k, rec = null;
@@ -110,6 +122,53 @@ var Challenges = (function () {
     });
     return changed;
   }
+
+  // ── Repaso: a question the receiver got wrong comes back tomorrow ──
+  function reviewId(c) { return 'challenge:' + c.id; }
+  function addReview(c, kid) {
+    if (typeof Review === 'undefined' || !Review.add || c.kind !== 'q') return;
+    try {
+      Review.add(kid, { app: 'challenge', id: reviewId(c), prompt: c.from + ': ' + c.text, answer: c.options[c.answer], choices: c.options });
+    } catch (e) {}
+  }
+  function dropReview(c) {
+    if (typeof Review === 'undefined' || !Review.drop || !c || c.kind !== 'q') return;
+    try { Review.drop(c.to, reviewId(c)); } catch (e) {}
+  }
+  // A parent may have deleted one on another device: its words leave Repaso too.
+  function cleanReview() {
+    if (typeof Review === 'undefined' || !Review.drop || !Review.get) return;
+    try {
+      view().challenges.forEach(function (c) {
+        if (c.removed && c.kind === 'q' && Review.get(c.to, reviewId(c))) Review.drop(c.to, reviewId(c));
+      });
+    } catch (e) {}
+  }
+
+  // ── chess puzzles: Chess Quest's own list on its page, the progress
+  // catalog (names in the same order) everywhere else ──
+  var TIER_NAME = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', expert: 'Expert' };
+  function puzzleList() {
+    try {
+      if (typeof PUZZLES !== 'undefined' && Array.isArray(PUZZLES) && typeof CQPuzzle !== 'undefined') {
+        return PUZZLES.map(function (p, i) { return { i: i, name: String(p.name || ''), group: TIER_NAME[p.tier] || '' }; });
+      }
+    } catch (e) {}
+    var cat = typeof window !== 'undefined' && window.ZSProgressCatalog && window.ZSProgressCatalog.chess;
+    if (!Array.isArray(cat)) return null;
+    return cat.map(function (u) { return { i: (u.i | 0) - 1, name: String(u.l || ''), group: String(u.g || '') }; })
+      .filter(function (p) { return p.i >= 0; });
+  }
+  function loadPuzzles(cb) {
+    if (puzzleList()) { cb(true); return; }
+    loadScript(CATALOG_SRC, function (ok) { cb(ok && !!puzzleList()); });
+  }
+  function puzzleName(c) {
+    var list = puzzleList() || [];
+    for (var i = 0; i < list.length; i++) if (list[i].i === c.answer) return list[i].name;
+    return c.text || tr('Puzzle ', 'Puzzle ') + (c.answer + 1);
+  }
+  function puzzleUrl(id) { return 'chess-quest.html?challenge=' + encodeURIComponent(id); }
 
   // ── map data (loaded only when a map challenge needs it) ──
   function loadScript(src, cb) {
@@ -170,6 +229,25 @@ var Challenges = (function () {
     } catch (e) { return false; }
   }
 
+  // A small drawn board corner with a knight, for chess challenges. Chess
+  // Quest's own piece art is used when it is on the page.
+  var KNIGHT_SVG = '<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true" focusable="false">' +
+    '<rect x="2" y="2" width="44" height="44" rx="6" fill="#b5835a"/>' +
+    '<rect x="2" y="2" width="22" height="22" rx="6" fill="#f0d9b5"/><rect x="24" y="24" width="22" height="22" rx="6" fill="#f0d9b5"/>' +
+    '<rect x="13" y="2" width="11" height="22" fill="#f0d9b5"/><rect x="24" y="35" width="11" height="11" fill="#f0d9b5"/>' +
+    '<path d="M15 40h19l-1.5-4.5c-.6-4.6.4-8.8 2.4-12.8 1.5-3 1.3-7.1-1.5-10.1-2.6-2.8-6.3-3.9-9.9-3.4l-1.6-2.7-1.9 3.6' +
+    'c-2.2 1.2-3.9 3.1-5 5.4l-3.3 6.8c-.6 1.3.3 2.8 1.7 2.8h1.6c1.4 0 2.7-.6 3.7-1.6l2.6-2.6c.2 3.5-1.4 6.6-3.9 9.4-1.6 1.8-2.4 4-2.7 6.4z" ' +
+    'fill="#fbfaf6" stroke="#2b2420" stroke-width="2" stroke-linejoin="round"/>' +
+    '<circle cx="22.5" cy="15.5" r="1.4" fill="#2b2420"/><path d="M13 40h23" stroke="#2b2420" stroke-width="3" stroke-linecap="round"/></svg>';
+  function pieceArt() {
+    var span = document.createElement('span');
+    span.className = 'chl-piece';
+    var art = '';
+    try { if (window.CQArt && CQArt.pieceSVG) art = CQArt.pieceSVG('wN'); } catch (e) { art = ''; }
+    span.innerHTML = art || KNIGHT_SVG;   // trusted: built only from fixed art
+    return span;
+  }
+
   function isLittle(user) {
     return typeof HubPlan !== 'undefined' && HubPlan.isLittle && HubPlan.isLittle(user);
   }
@@ -223,13 +301,15 @@ var Challenges = (function () {
         else if (c.kind === 'map') {
           var ct = country(c.answer);
           text = ct ? tr('Está en ' + ct.regionEs + '.', 'It is in ' + ct.region + '.') : '';
-        } else text = tr('Quité una respuesta que no es.', 'One wrong answer is crossed out.');
+        } else if (c.kind === 'chess') text = '';
+        else text = tr('Quité una respuesta que no es.', 'One wrong answer is crossed out.');
       }
       return text ? h('p', { class: 'chl-hint' }, [h('strong', { text: '💡 ' + tr('Pista', 'Hint') + ': ' }), text]) : null;
     }
 
     function miss(c) {
       add(E.makeMiss(c.id, user.name));
+      addReview(c, user.name);
       justMissed = true;
       render();
     }
@@ -316,6 +396,20 @@ var Challenges = (function () {
         body.push(h('div', { class: 'chl-actions' }, [h('button', { type: 'button', class: 'chl-btn primary', id: 'chl-check', text: tr('Revisar', 'Check'), onclick: go })]));
         focusEl = inp;
         if (!justMissed) setTimeout(function () { if (dlg.modal.isConnected) sayWord(c.answer, c.lang); }, 300);
+      } else if (c.kind === 'chess') {
+        body.push(h('p', { class: 'chl-q', text: tr('Resuelve este puzzle de ajedrez:', 'Solve this chess puzzle:') }));
+        body.push(h('p', { class: 'chl-puzzle' }, [
+          h('span', { class: 'chl-puzzle-ico', 'aria-hidden': 'true' }, [pieceArt()]),
+          h('span', {}, [h('strong', { text: tr('Puzzle ', 'Puzzle ') + (c.answer + 1) }), h('br'), puzzleName(c)])
+        ]));
+        if (c.misses) body.push(note(tr('Intentos: ', 'Tries so far: ') + c.misses));
+        var open = h('button', { type: 'button', class: 'chl-btn primary', id: 'chl-chess-go', text: '♟️ ' + tr('Abrir el tablero', 'Open the board'), onclick: function () {
+          if (typeof openChallengePuzzle === 'function') { dlg.close(); openChallengePuzzle(c.id); }
+          else location.href = puzzleUrl(c.id);
+        } });
+        body.push(h('div', { class: 'chl-actions' }, [open]));
+        focusEl = open;
+        if (!puzzleList()) loadPuzzles(function (ok) { if (ok && dlg.modal.isConnected) render(); });
       } else if (c.kind === 'map') {
         var mapReady = haveMap();
         body.push(h('p', { class: 'chl-q', id: 'chl-map-q', text: mapReady ? tr('Encuentra ', 'Find ') + countryName(c.answer) + tr(' en el mapa.', ' on the map.') : tr('Cargando el mapa…', 'Loading the map…') }));
@@ -398,16 +492,20 @@ var Challenges = (function () {
     options: ['Escribe de 2 a 4 respuestas distintas.', 'Write 2 to 4 different answers.'],
     answer: ['Marca cuál es la respuesta correcta.', 'Mark the right answer.'],
     word: ['Escribe una palabra (sin números ni espacios).', 'Write one word (no numbers or spaces).'],
-    country: ['Elige un país.', 'Pick a country.']
+    country: ['Elige un país.', 'Pick a country.'],
+    puzzle: ['Elige un puzzle de ajedrez.', 'Pick a chess puzzle.']
   };
 
-  function openCreate(user) {
+  // preset: { kind, answer } from an app (a country id, a puzzle index),
+  // so the form opens with it already picked.
+  function openCreate(user, preset) {
     user = user || (typeof getActiveUser === 'function' ? getActiveUser() : null);
     if (!E || !user || user.isGuest) return null;
     var v = view();
     var kids = E.receivers(people(), user, v.anyone);
     if (!kids.length) return null;
-    var st = { to: kids.length === 1 ? kids[0].name : null, kind: null, lang: typeof getKidLang === 'function' && getKidLang() === 'es' ? 'es' : 'en', right: 0 };
+    preset = preset && E.KINDS.indexOf(preset.kind) >= 0 ? preset : null;
+    var st = { to: kids.length === 1 ? kids[0].name : null, kind: preset ? preset.kind : null, lang: typeof getKidLang === 'function' && getKidLang() === 'es' ? 'es' : 'en', right: 0 };
     var dlg;
 
     function counter(input) {
@@ -435,11 +533,12 @@ var Challenges = (function () {
       return fs;
     }
 
-    var fieldsHost, errEl, qText, rows = [], wordIn, countrySel, hintIn;
+    var fieldsHost, errEl, qText, rows = [], wordIn, countrySel, puzzleSel, hintIn;
+    function presetFor(kind) { return preset && preset.kind === kind ? preset.answer : null; }
 
     function renderFields() {
       fieldsHost.textContent = '';
-      rows = []; qText = wordIn = countrySel = null;
+      rows = []; qText = wordIn = countrySel = puzzleSel = null;
       if (st.kind === 'q') {
         var f = field('chl-text', tr('Tu pregunta', 'Your question'));
         qText = f.input;
@@ -496,6 +595,33 @@ var Challenges = (function () {
             .map(function (a) { return { id: a.id, name: tr(a.nameEs, a.name) }; })
             .sort(function (a, b) { return a.name.localeCompare(b.name); })
             .forEach(function (a) { sel.appendChild(h('option', { value: a.id, text: a.name })); });
+          var want = presetFor('map');
+          if (want) {
+            var pc = country(String(want).toLowerCase());
+            if (pc && !sel.querySelector('option[value="' + pc.id + '"]')) sel.appendChild(h('option', { value: pc.id, text: tr(pc.nameEs, pc.name) }));
+            if (pc) sel.value = pc.id;
+          }
+        });
+      } else if (st.kind === 'chess') {
+        fieldsHost.appendChild(h('label', { class: 'chl-label', for: 'chl-puzzle', text: tr('El puzzle de Chess Quest', 'The Chess Quest puzzle') }));
+        puzzleSel = h('select', { id: 'chl-puzzle', class: 'chl-input' }, [h('option', { value: '', text: tr('Cargando…', 'Loading…') })]);
+        fieldsHost.appendChild(puzzleSel);
+        fieldsHost.appendChild(note(tr('Lo resolverá en el tablero de Chess Quest. Elige uno que tú ya sepas resolver, para poder explicarlo.', 'They solve it on the Chess Quest board. Pick one you can solve yourself, so you can explain it.')));
+        var psel = puzzleSel;
+        loadPuzzles(function (ok) {
+          if (psel !== puzzleSel) return;
+          psel.textContent = '';
+          if (!ok) { psel.appendChild(h('option', { value: '', text: tr('Abre Chess Quest una vez para cargar los puzzles', 'Open Chess Quest once to load the puzzles') })); return; }
+          psel.appendChild(h('option', { value: '', text: tr('Elige un puzzle', 'Pick a puzzle') }));
+          var groups = {}, order = [];
+          puzzleList().forEach(function (pz) {
+            var g = pz.group || tr('Puzzles', 'Puzzles');
+            if (!groups[g]) { groups[g] = h('optgroup', { label: g }); order.push(g); }
+            groups[g].appendChild(h('option', { value: String(pz.i), text: (pz.i + 1) + '. ' + pz.name }));
+          });
+          order.forEach(function (g) { psel.appendChild(groups[g]); });
+          var want = E.puzzleIndex(presetFor('chess'));
+          if (want >= 0) psel.value = String(want);
         });
       }
     }
@@ -507,6 +633,12 @@ var Challenges = (function () {
         f.text = qText.value; f.options = rows.map(function (r) { return r.value; }); f.answer = st.right;
       } else if (st.kind === 'spell') { f.answer = wordIn.value; f.lang = st.lang; }
       else if (st.kind === 'map') f.answer = countrySel ? countrySel.value : '';
+      else if (st.kind === 'chess') {
+        f.answer = puzzleSel ? puzzleSel.value : '';
+        var opt = puzzleSel && puzzleSel.selectedOptions && puzzleSel.selectedOptions[0];
+        var pz = (puzzleList() || []).filter(function (p) { return String(p.i) === f.answer; })[0];
+        f.text = pz ? pz.name : (opt ? opt.textContent : '');
+      }
       var r = E.make(f);
       if (!r.ok) { var m = ERRORS[r.error] || ERRORS.kind; errEl.textContent = tr(m[0], m[1]); return; }
       if (!add(r.event)) { errEl.textContent = tr('No se pudo guardar. Pídele ayuda a un adulto.', 'Could not save. Ask a grown-up for help.'); return; }
@@ -524,10 +656,12 @@ var Challenges = (function () {
       m.appendChild(choiceGroup(tr('¿Qué tipo?', 'What kind?'), [
         { value: 'q', label: '❓ ' + tr('Pregunta', 'Question') },
         { value: 'spell', label: '🔤 ' + tr('Deletrear', 'Spelling') },
-        { value: 'map', label: '🗺️ ' + tr('Mapa', 'Find on the map') }
+        { value: 'map', label: '🗺️ ' + tr('Mapa', 'Find on the map') },
+        { value: 'chess', label: '♟️ ' + tr('Ajedrez', 'Chess puzzle') }
       ], st.kind, function (x) { st.kind = x; renderFields(); }));
       fieldsHost = h('div', { id: 'chl-fields' });
       m.appendChild(fieldsHost);
+      if (st.kind) renderFields();
       var hf = field('chl-hint', tr('Una pista (opcional)', 'A hint (optional)'));
       hintIn = hf.input;
       m.appendChild(hf.node);
@@ -584,7 +718,8 @@ var Challenges = (function () {
       var who = profileOf(c.from);
       var label = tr(c.from + ' te mandó un desafío', c.from + ' sent you a challenge');
       var card = h('button', { type: 'button', class: 'chl-card', 'data-ch': c.id }, [
-        h('span', { class: 'chl-card-ico', 'aria-hidden': 'true', text: ICON[c.kind] }),
+        c.kind === 'chess' ? h('span', { class: 'chl-card-ico', 'aria-hidden': 'true' }, [pieceArt()])
+          : h('span', { class: 'chl-card-ico', 'aria-hidden': 'true', text: ICON[c.kind] }),
         h('span', { class: 'chl-card-main' }, [
           h('span', { text: label }),
           h('span', { class: 'chl-card-sub', text: (who && who.avatar ? who.avatar + ' ' : '') + tr('Toca para jugar', 'Tap to play') })
@@ -626,7 +761,7 @@ var Challenges = (function () {
     var live = v.challenges.filter(function (c) { return !c.removed; });
     var det = h('details', { class: 'chl-parents', id: 'chl-parents' });
     det.appendChild(h('summary', { text: '🤝 Sibling challenges (' + live.length + ')' }));
-    det.appendChild(h('p', { class: 'chl-note', text: 'Older kids set a question, a spelling word or a map country for a younger sibling. When it is solved, both earn a star (up to 3 a day). Everything a kid wrote is shown here; delete any you do not want.' }));
+    det.appendChild(h('p', { class: 'chl-note', text: 'Older kids set a question, a spelling word, a map country or a chess puzzle for a younger sibling. When it is solved, both earn a star (up to 3 a day). Everything a kid wrote is shown here; delete any you do not want.' }));
     var any = h('input', { type: 'checkbox', id: 'chl-anyone' });
     any.checked = !!v.anyone;
     any.addEventListener('change', function () { add(E.makeConfig(any.checked)); renderParents(hostId); changed(); });
@@ -638,6 +773,7 @@ var Challenges = (function () {
     live.slice().reverse().forEach(function (c) {
       var what = c.kind === 'q' ? c.text + '  [' + c.options.map(function (o, i) { return (i === c.answer ? '✓ ' : '') + o; }).join(' | ') + ']'
         : c.kind === 'spell' ? 'Spell: ' + c.answer + ' (' + c.lang + ')'
+        : c.kind === 'chess' ? 'Chess puzzle ' + (c.answer + 1) + ': ' + puzzleName(c)
         : 'Find on the map: ' + (country(c.answer) ? country(c.answer).name : c.answer.toUpperCase());
       var status = c.solved ? 'solved ✓' : (c.misses ? 'waiting, ' + c.misses + ' wrong ' + (c.misses === 1 ? 'try' : 'tries') : 'waiting');
       var del = h('button', { type: 'button', class: 'chl-del', 'data-ch': c.id, 'aria-label': 'Delete this challenge from ' + c.from + ' to ' + c.to, text: '🗑 Delete' });
@@ -660,6 +796,51 @@ var Challenges = (function () {
     det.addEventListener('toggle', function () { host.__chlOpen = det.open; });
   }
 
+  // ================================================================
+  // For other pages: apps, Today's 3 and the Chess Quest board
+  // ================================================================
+  function canSend(user) {
+    user = user || (typeof getActiveUser === 'function' ? getActiveUser() : null);
+    return !!(E && user && !user.isGuest && E.receivers(people(), user, view().anyone).length);
+  }
+  // The challenge if this kid may still answer it, else null.
+  function waitingFor(id, user) {
+    user = user || (typeof getActiveUser === 'function' ? getActiveUser() : null);
+    var c = find(id);
+    if (!E || !user || !c || c.removed || c.solved || !E.sameName(c.to, user.name)) return null;
+    return c;
+  }
+  // A wrong try made outside the dialog (the chess board). Returns the
+  // challenge as it is now (misses counted), or null.
+  function recordMiss(id, user) {
+    user = user || getActiveUser();
+    var c = waitingFor(id, user);
+    if (!c || !add(E.makeMiss(c.id, user.name))) return null;
+    addReview(c, user.name);
+    return find(id);
+  }
+  // response: what was solved (a puzzle index for chess). Returns
+  // { ok: true, c } when it counted and both stars were given.
+  function recordSolve(id, user, response) {
+    user = user || getActiveUser();
+    var c = waitingFor(id, user);
+    if (!c || !E.check(c, response)) return { ok: false };
+    if (!add(E.makeSolve(c.id, user.name, c.misses + 1))) return { ok: false };
+    reconcileStars();
+    changed();
+    return { ok: true, c: find(id) };
+  }
+  // The Today's 3 card: { id, kind, icon, label, done } or null.
+  function todayItem(user) {
+    if (!E || !user || user.isGuest) return null;
+    var t = E.forToday(view(), user.name);
+    if (!t) return null;
+    return {
+      id: t.c.id, kind: t.c.kind, icon: ICON[t.c.kind] || '🤝', done: t.done,
+      label: tr('Desafío de ' + t.c.from, 'Challenge from ' + t.c.from)
+    };
+  }
+
   // A challenge arriving from another device: look again.
   window.addEventListener('zs:household-synced', function () {
     var u = typeof getActiveUser === 'function' ? getActiveUser() : null;
@@ -669,6 +850,8 @@ var Challenges = (function () {
 
   return {
     renderHub: renderHub, renderParents: renderParents, openCreate: openCreate, openSolve: openSolve,
-    reconcileStars: reconcileStars, load: load, view: view
+    reconcileStars: reconcileStars, load: load, view: view, find: find,
+    canSend: canSend, waitingFor: waitingFor, recordMiss: recordMiss, recordSolve: recordSolve,
+    todayItem: todayItem, puzzleName: puzzleName, puzzleUrl: puzzleUrl, pieceArt: pieceArt
   };
 })();
