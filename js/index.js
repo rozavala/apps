@@ -325,8 +325,11 @@
     prefixes.push('zs_mapa_');
     prefixes.push('zs_arbol_');
     prefixes.push('zs_codelab_');
+    prefixes.push('zs_escritura_');
     prefixes.push('zs_logica_');
     prefixes.push('zs_examen_');
+    prefixes.push('zs_typing_');
+    prefixes.push('zs_huerto_');
     prefixes.push('zs_trivia_');
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
@@ -574,8 +577,11 @@
     apps.push({ name: 'Lector', icon: '📖', href: 'lector.html', key: 'zs_lector_' + key, schedId: 'lector' });
     apps.push({ name: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', key: 'zs_arbol_' + key, schedId: 'arbol' });
     apps.push({ name: 'Code Lab', icon: '🐢', href: 'code-lab.html', key: 'zs_codelab_' + key, schedId: 'codelab' });
+    apps.push({ name: 'Escritura', icon: '✒️', href: 'escritura.html', key: 'zs_escritura_' + key, schedId: 'escritura' });
     apps.push({ name: 'Lógica', icon: '🧩', href: 'logica.html', key: 'zs_logica_' + key, schedId: 'logica' });
     apps.push({ name: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', key: 'zs_examen_' + key, schedId: 'examen' });
+    apps.push({ name: 'Type Quest', icon: '⌨️', href: 'type-quest.html', key: 'zs_typing_' + key, schedId: 'typing' });
+    apps.push({ name: 'Huerto', icon: '🌱', href: 'huerto.html', key: 'zs_huerto_' + key, schedId: 'huerto' });
     apps.push({ name: 'Trivia Familiar', icon: '🎲', href: 'trivia-familiar.html', key: 'zs_trivia_' + key, schedId: 'trivia' });
 
     // Only apps this kid can see: by age, and what a parent has hidden.
@@ -889,7 +895,7 @@
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea', 'examen', 'logica', 'mapa', 'trivia'].forEach(function(id) {
+       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea', 'examen', 'logica', 'mapa', 'typing', 'escritura', 'huerto', 'trivia'].forEach(function(id) {
         try {
           var el = document.getElementById('stats-' + id);
           if (!el || typeof getAppStars !== 'function') return;

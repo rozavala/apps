@@ -217,6 +217,26 @@ window.ZSProgressCatalog = {
     {"i":"w10-6","l":"Sensor Bug","g":"World 10"}
   ],
 
+  escritura_cursive: [
+    {"i":"c1","l":"Vocales ligadas · aeiou","g":"Cursiva (cursive)","k":"a,e,i,o,u"},
+    {"i":"c2","l":"Óvalos · cdgqs","g":"Cursiva (cursive)","k":"c,d,g,q,s"},
+    {"i":"c3","l":"Lazos altos · ltfkhb","g":"Cursiva (cursive)","k":"l,t,f,k,h,b"},
+    {"i":"c4","l":"Puentes y picos · nmrñvwx","g":"Cursiva (cursive)","k":"n,m,r,ñ,v,w,x"},
+    {"i":"c5","l":"Lazos abajo · pjyz","g":"Cursiva (cursive)","k":"p,j,y,z"},
+    {"i":"c6","l":"Tildes y diéresis · áéíóúü","g":"Cursiva (cursive)","k":"á,é,í,ó,ú,ü"}
+  ],
+
+  escritura_print: [
+    {"i":"p1","l":"Vocales mayúsculas · AEIOU","g":"Imprenta (print)","k":"A,E,I,O,U"},
+    {"i":"p2","l":"Mayúsculas con rectas · LTFHKNMVWXYZ","g":"Imprenta (print)","k":"L,T,F,H,K,N,M,V,W,X,Y,Z"},
+    {"i":"p3","l":"Mayúsculas con curvas · CGSJDPBRQÑ","g":"Imprenta (print)","k":"C,G,S,J,D,P,B,R,Q,Ñ"},
+    {"i":"p4","l":"Vocales minúsculas · aeiou","g":"Imprenta (print)","k":"a,e,i,o,u"},
+    {"i":"p5","l":"La familia de la c · cdgqs","g":"Imprenta (print)","k":"c,d,g,q,s"},
+    {"i":"p6","l":"Palitos y puentes · ltfkhnmrñ","g":"Imprenta (print)","k":"l,t,f,k,h,n,m,r,ñ"},
+    {"i":"p7","l":"Más minúsculas · bpjvwxyz","g":"Imprenta (print)","k":"b,p,j,v,w,x,y,z"},
+    {"i":"p8","l":"Tildes y diéresis · áéíóúüÁÉÍÓÚ","g":"Imprenta (print)","k":"á,é,í,ó,ú,ü,Á,É,Í,Ó,Ú"}
+  ],
+
   guitar: [
     {"i":"clementine","l":"Oh My Clementine","g":"Beginner"},
     {"i":"twinkle","l":"Twinkle Twinkle","g":"Beginner"},
@@ -417,6 +437,26 @@ window.ZSProgressCatalog = {
     {"i":"empanadas","l":"🥟 Empanadas for the Fiesta","g":"Cadet"},
     {"i":"miners_33","l":"⛑️ The Rescue of the 33","g":"Pilot"},
     {"i":"rapa_nui","l":"🗿 The Moai of Rapa Nui","g":"Commander"}
+  ],
+
+  typing: [
+    {"i":"fj","l":"1. F and J: the keys with bumps","g":"Home row"},
+    {"i":"dk","l":"2. D and K: middle fingers","g":"Home row"},
+    {"i":"sl","l":"3. S and L: ring fingers","g":"Home row"},
+    {"i":"apin","l":"4. A and the right little finger","g":"Home row"},
+    {"i":"gh","l":"5. G and H: pointer fingers reach","g":"Home row"},
+    {"i":"ei","l":"6. E and I: up one row","g":"Top row"},
+    {"i":"ru","l":"7. R and U","g":"Top row"},
+    {"i":"ty","l":"8. T and Y","g":"Top row"},
+    {"i":"wo","l":"9. W and O","g":"Top row"},
+    {"i":"qp","l":"10. Q and P: little fingers up","g":"Top row"},
+    {"i":"cm","l":"11. C, M and the comma","g":"Bottom row"},
+    {"i":"vn","l":"12. V, B and N","g":"Bottom row"},
+    {"i":"xz","l":"13. X, Z and the period","g":"Bottom row"},
+    {"i":"caps","l":"14. Capitals with Shift","g":"Capitals, numbers and signs"},
+    {"i":"nums","l":"15. Numbers","g":"Capitals, numbers and signs"},
+    {"i":"punct","l":"16. Punctuation: ? ! : ; \" ' -","g":"Capitals, numbers and signs"},
+    {"i":"acc","l":"17. Accents, ñ, ¿ and ¡","g":"Spanish"}
   ],
 
   vocab: [

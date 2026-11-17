@@ -98,6 +98,10 @@ const CASES = [
             books: { 'es-mi-mama': { l: 1, r: 1, p: 1 }, 'en-pip-ant': { l: 1 } } },
     stars: 19, note: 'activities cap at 3; a book is one star each for listening, reading and reading aloud' },
   { id: 'lector', prefix: 'zs_lector_', data: { v: 1, lv: {}, books: {} }, stars: 0, note: 'nothing yet' },
+  { id: 'escritura', prefix: 'zs_escritura_',
+    data: { v: 1, style: 'print', L: { 'print:A': 3, 'print:a': 1, 'cursive:a': 9 }, W: { 'print:es:hola': 2, 'print:name': 3 }, dict: { 'print:lower': 2 }, rounds: 7 },
+    stars: 3 + 1 + 3 + 2 + 3 + 2, note: 'letters, words and dictation rounds each cap at 3; rounds do not score' },
+  { id: 'escritura', prefix: 'zs_escritura_', data: { v: 1, L: {}, W: {}, dict: {} }, stars: 0, note: 'nothing yet' },
   { id: 'linea', prefix: 'zs_linea_',
     data: { v: 1, seen: Object.fromEntries(Array.from({ length: 25 }, (_, i) => ['e' + i, 1])), g: { order3: 3, order4: 1, same: 2, ba: 9, t_all: 0 } },
     stars: 2 + 3 + 1 + 2 + 3 + 0, note: 'one star per 10 events opened, plus each game best (up to 3)' },
@@ -113,6 +117,14 @@ const CASES = [
     stars: 3 + 2 + 3 + 0 + 2, note: 'best stars per level (capped at 3) + one per 3 daily puzzles' },
   { id: 'logica', prefix: 'zs_logica_', data: { v: 1, lv: {}, daily: { n: 100 } }, stars: 10, note: 'daily stars cap at 10' },
   { id: 'logica', prefix: 'zs_logica_', data: { v: 1 }, stars: 0, note: 'nothing yet' },
+  { id: 'huerto', prefix: 'zs_huerto_',
+    data: { v: 1, plants: [
+      { sp: 'poroto', sprouted: '2026-11-01', flowered: '', harvested: '', water: ['2026-11-01', '2026-11-02', '2026-11-03', '2026-11-04'],
+        log: [{ d: '2026-11-02', h: 1 }, { d: '2026-11-05', h: 3 }, { d: '2026-11-08', n: 'two leaves' }], pred: [{ h: 6, got: 6.8 }, { h: 2, got: 9 }] },
+      { sp: 'tomate', sprouted: '2026-10-01', harvested: '2026-11-10', water: ['2026-11-01', '2026-11-05', '2026-11-06', '2026-11-07'], log: [{ d: '2026-11-01', h: null }], pred: [] }],
+      exp: { sol: { guess: 'a', obs: [{ d: 'x' }, { d: 'y' }, { d: 'z' }], done: '2026-11-10' }, agua: { guess: 'b', obs: [] } } },
+    stars: (1 + 1 + 0) + (1 + 0 + 1) + 1 + 1 + 3 + 1, note: 'sprouted/3 entries/harvest per plant, 7 watering days (shared dates count once), one close guess, experiments' },
+  { id: 'huerto', prefix: 'zs_huerto_', data: { v: 1, plants: [], exp: {} }, stars: 0, note: 'nothing yet' },
   { id: 'arbol', prefix: 'zs_arbol_',
     data: { v: 1, q: { grand: 5, who: 4, where: 3, term: 2, older: 0 }, seen: { I1: 1, I2: 1, I3: 1, I4: 1, I5: 1, I6: 1, I7: 1 }, rel: 5, map: 1 },
     stars: 3 + 2 + 1 + 0 + 0 + 2 + 2 + 1, note: 'quiz best scores 3/2/1/0 stars + 7 pages seen (2) + 5 relations asked (2) + the map (1)' },
@@ -148,7 +160,13 @@ const CASES = [
     stars: 3, note: 'one per solved challenge' },
   { id: 'challenge', prefix: 'zs_challenge_',
     data: { v: 1, stars: { a: '2026-11-10', b: '2026-11-10', c: '2026-11-10', d: '2026-11-10', e: '2026-11-11' } },
-    stars: 4, note: 'at most 3 a day' }
+    stars: 4, note: 'at most 3 a day' },
+  { id: 'typing', prefix: 'zs_typing_',
+    data: { v: 1, ls: { fj: { s: 3, w: 12 }, dk: { s: 2 }, sl: { s: 9 } }, ps: { 'story-x': { s: 1 } },
+            wd: { es: { w: 24.5 }, en: { w: 55 } }, hunt: { s: 2 }, rk: 3, runs: [{ w: 99, a: 1, c: 500 }], keys: { a: [9, 1] } },
+    stars: 19, note: 'lessons 3+2+3 (capped) + passage 1 + words 2+3 (capped) + hunt 2 + rank 3' },
+  { id: 'typing', prefix: 'zs_typing_', data: { v: 1, rk: 40, ls: { fj: 'junk' }, wd: null }, stars: 7, note: 'rank stars cap at 7; junk scores 0' },
+  { id: 'typing', prefix: 'zs_typing_', data: { v: 1 }, stars: 0, note: 'nothing typed yet' }
 ];
 
 test.describe('per-app star rules', () => {
