@@ -109,6 +109,51 @@ var AppSchedule = (function() {
     localStorage.setItem(OVERRIDE_KEY, JSON.stringify(o));
   }
 
+  // A parent's edited day keeps the apps that existed when it was saved
+  // ({ apps, known }). Apps added to the suite later are not in `known`,
+  // so they still show up on their Smart Schedule days instead of staying
+  // hidden for good. Days saved before this (a plain array) knew only the
+  // apps below.
+  var LEGACY_KNOWN = ['math', 'chile', 'chess', 'piano', 'guitar', 'art', 'lab', 'world', 'atlas',
+    'story', 'quest', 'guess', 'money', 'bmcheck', 'trophy', 'move', 'bank', 'circuit', 'engineer',
+    'negocio', 'euclid', 'cocina', 'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo',
+    'lector', 'linea', 'arbol', 'codelab', 'examen'];
+
+  function _overrideApps(day, saved) {
+    if (!saved) return null;
+    var apps = Array.isArray(saved) ? saved : (Array.isArray(saved.apps) ? saved.apps : null);
+    if (!apps) return null;
+    var known = Array.isArray(saved) ? LEGACY_KNOWN : (Array.isArray(saved.known) ? saved.known : LEGACY_KNOWN);
+    var out = apps.slice();
+    (SMART_SCHEDULE[day] || []).forEach(function(id) {
+      if (known.indexOf(id) === -1 && out.indexOf(id) === -1) out.push(id);
+    });
+    return out;
+  }
+
+  // What a parent sees for an app in the schedule: its icon and hub name.
+  function appLabel(id) {
+    var name = '', icon = '';
+    try {
+      if (typeof HubPlan !== 'undefined') {
+        HubPlan.APPS.forEach(function(a) {
+          if (a.id !== id) return;
+          var card = document.querySelector('a.app-card[href="' + a.href + '"]');
+          var t = card && card.querySelector('.card-title');
+          var ic = card && card.querySelector('.card-icon');
+          if (t) name = t.textContent.trim();
+          if (ic) icon = ic.textContent.trim();
+        });
+      }
+    } catch (e) {}
+    if (!name) name = id.charAt(0).toUpperCase() + id.slice(1);
+    return (icon ? icon + ' ' : '') + name;
+  }
+
+  function _esc(s) {
+    return String(s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+
   function getTodayApps() {
     var now = new Date();
     var day = now.getDay(); // 0–6
@@ -116,7 +161,8 @@ var AppSchedule = (function() {
     var overrides = getOverrides();
     var list;
 
-    if (overrides[day]) list = overrides[day];
+    var manual = _overrideApps(day, overrides[day]);
+    if (manual) list = manual;
     else if (mode === 'all') list = ALL_APPS.map(function(a) { return a.id; });
     else list = SMART_SCHEDULE[day] || [];
     return list.filter(function(id) { return !_tooEarly(id, now); });
@@ -124,7 +170,8 @@ var AppSchedule = (function() {
 
   function getScheduleForDay(dayIndex) {
     var overrides = getOverrides();
-    if (overrides[dayIndex]) return { mode: 'manual', apps: overrides[dayIndex] };
+    var manual = _overrideApps(dayIndex, overrides[dayIndex]);
+    if (manual) return { mode: 'manual', apps: manual };
     return { mode: 'smart', apps: SMART_SCHEDULE[dayIndex] || [] };
   }
 
@@ -191,13 +238,13 @@ var AppSchedule = (function() {
       var appNames = sched.apps.map(function(id) {
         var app = null;
         for(var j=0; j<ALL_APPS.length; j++) { if(ALL_APPS[j].id === id) { app = ALL_APPS[j]; break; } }
-        return app ? app.id : id;
+        return app ? appLabel(app.id) : id;
       });
 
       html += '<div onclick="AppSchedule.editDay(' + i + ')" style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(255,255,255,0.03); border-radius:10px; cursor:pointer; border:1.5px solid ' + (isToday ? 'var(--purple)' : 'transparent') + '">' +
         '<div>' +
           '<div style="font-weight:800; font-size:0.85rem;">' + dayName + (isToday ? ' (Today)' : '') + '</div>' +
-          '<div style="font-size:0.75rem; color:var(--text-muted);">' + appNames.join(', ') + '</div>' +
+          '<div style="font-size:0.75rem; color:var(--text-muted);">' + _esc(appNames.join(', ')) + '</div>' +
         '</div>' +
         '<span style="opacity:0.5;">✏️</span>' +
       '</div>';
@@ -213,13 +260,14 @@ var AppSchedule = (function() {
     var selected = sched.apps;
     
     // Editable apps (filter out faith/sports/quest as they have special rules)
-    var editableApps = ALL_APPS.filter(function(a) { return a.id !== 'faith' && a.id !== 'sports' && a.id !== 'quest' && a.id !== 'move'; });
+    // (always-visible apps are left out: ticking them would change nothing)
+    var editableApps = ALL_APPS.filter(function(a) { return !a.alwaysVisible && a.id !== 'faith' && a.id !== 'sports' && a.id !== 'quest' && a.id !== 'move'; });
 
     var checkboxes = editableApps.map(function(app) {
       var checked = selected.indexOf(app.id) !== -1;
       return '<label style="display:flex; align-items:center; gap:10px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px; cursor:pointer;">' +
         '<input type="checkbox" value="' + app.id + '" ' + (checked ? 'checked' : '') + '> ' +
-        app.id.charAt(0).toUpperCase() + app.id.slice(1) +
+        '<span>' + _esc(appLabel(app.id)) + '</span>' +
       '</label>';
     }).join('');
 
@@ -227,7 +275,7 @@ var AppSchedule = (function() {
     overlay.id = 'schedule-day-overlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);z-index:11000;display:flex;align-items:center;justify-content:center;padding:20px;';
     overlay.innerHTML = 
-      '<div class="dash-panel" style="max-width:400px; width:100%;">' +
+      '<div class="dash-panel" style="max-width:520px; width:100%; max-height:90vh; overflow-y:auto;">' +
         '<h2>Edit ' + DAYS[dayIndex] + '</h2>' +
         '<div id="schedule-day-checkboxes" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:20px 0;">' +
           checkboxes +
@@ -248,7 +296,7 @@ var AppSchedule = (function() {
     for(var i=0; i<boxes.length; i++) { selected.push(boxes[i].value); }
     
     var overrides = getOverrides();
-    overrides[dayIndex] = selected;
+    overrides[dayIndex] = { apps: selected, known: ALL_APPS.map(function(a) { return a.id; }) };
     saveOverrides(overrides);
     
     var overlay = document.getElementById('schedule-day-overlay');
@@ -264,6 +312,9 @@ var AppSchedule = (function() {
     getTodayMessage: getTodayMessage,
     renderScheduleConfig: renderScheduleConfig,
     editDay: editDay,
-    saveDay: saveDay
+    saveDay: saveDay,
+    appLabel: appLabel,
+    ALL_APPS: ALL_APPS,
+    SMART_SCHEDULE: SMART_SCHEDULE
   };
 })();

@@ -13,7 +13,7 @@
 
 'use strict';
 
-const CACHE_VERSION = 'zs-suite-v37';
+const CACHE_VERSION = 'zs-suite-v38';
 const CORE_CACHE = CACHE_VERSION + '-core';
 const ASSETS_CACHE = CACHE_VERSION + '-assets';
 const FONTS_CACHE = CACHE_VERSION + '-fonts';

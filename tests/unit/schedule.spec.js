@@ -86,3 +86,79 @@ test.describe('Smart Schedule', () => {
   });
 
 });
+
+test.describe('Weekly schedule editor (Parents Corner)', () => {
+
+  test('an edited day still gets apps added to the suite later', async ({ page }) => {
+    await page.route(/tail57521e\.ts\.net/, r => r.abort());
+    await injectMockProfile(page);
+    await page.addInitScript(() => {
+      // Tuesday was edited by a parent before (an older plain list).
+      localStorage.setItem('zs_schedule_override', JSON.stringify({ 2: ['piano', 'chess'] }));
+    });
+    await page.goto('/');
+    await page.waitForFunction(() => typeof window.AppSchedule !== 'undefined');
+    const out = await page.evaluate(() => {
+      // @ts-ignore
+      const S = window.AppSchedule;
+      // A new app arrives and is scheduled on Tuesdays.
+      S.ALL_APPS.push({ id: 'newapp', card: '.card-newapp' });
+      S.SMART_SCHEDULE[2].push('newapp');
+      const legacy = S.getScheduleForDay(2);
+      // The parent saves Tuesday again, now unticking it: it stays off.
+      localStorage.setItem('zs_schedule_override', JSON.stringify({ 2: { apps: ['piano'], known: S.ALL_APPS.map(a => a.id) } }));
+      const saved = S.getScheduleForDay(2);
+      // A day saved before the app existed gets it.
+      const before = S.ALL_APPS.map(a => a.id).filter(id => id !== 'newapp');
+      localStorage.setItem('zs_schedule_override', JSON.stringify({ 2: { apps: ['piano'], known: before } }));
+      const older = S.getScheduleForDay(2);
+      return { legacy, saved, older };
+    });
+    expect(out.legacy).toEqual({ mode: 'manual', apps: ['piano', 'chess', 'newapp'] });
+    expect(out.saved.apps).toEqual(['piano']);
+    expect(out.older.apps).toEqual(['piano', 'newapp']);
+  });
+
+  test('the editor shows app names and saves the apps it knew', async ({ page }) => {
+    await page.route(/tail57521e\.ts\.net/, r => r.abort());
+    await injectMockProfile(page);
+    await page.addInitScript(() => localStorage.removeItem('zs_schedule_override'));
+    await page.goto('/');
+    await page.waitForFunction(() => typeof window.AppSchedule !== 'undefined');
+    // @ts-ignore
+    await expect.poll(() => page.evaluate(() => window.AppSchedule.renderScheduleConfig())).toContain('Code Lab');
+    // @ts-ignore
+    await page.evaluate(() => window.AppSchedule.editDay(1));
+    const labels = page.locator('#schedule-day-checkboxes label');
+    await expect(labels.filter({ hasText: 'Math Galaxy' })).toHaveCount(1);
+    await expect(labels.filter({ hasText: 'Circuit Lab' })).toHaveCount(1);
+    // Always-visible pages are not offered (ticking them changes nothing).
+    await expect(labels.filter({ hasText: 'Trophy' })).toHaveCount(0);
+    await page.locator('#schedule-day-checkboxes input[value="chess"]').check();
+    // @ts-ignore
+    await page.evaluate(() => window.AppSchedule.saveDay(1));
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_schedule_override') || '{}')[1]);
+    expect(saved.apps).toContain('chess');
+    expect(saved.known).toContain('examen');
+  });
+});
+
+test.describe('Parent Dashboard', () => {
+  test('shows a row for every app the kid has stars in, new apps included', async ({ page }) => {
+    await page.route(/tail57521e\.ts\.net/, r => r.abort());
+    await injectMockProfile(page);
+    await page.addInitScript(() => {
+      localStorage.setItem('zs_circuit_test', JSON.stringify({ levels: { 1: { stars: 3 }, 2: { stars: 2 } }, totalStars: 5 }));
+    });
+    await page.goto('/');
+    await page.waitForFunction(() => typeof window.openDashboard === 'function' && typeof getAppStars === 'function');
+    // @ts-ignore
+    const n = await page.evaluate(() => getAppStars('circuit', JSON.parse(localStorage.getItem('zs_circuit_test'))));
+    expect(n).toBeGreaterThan(0);
+    // @ts-ignore
+    await page.evaluate(() => window.openDashboard());
+    const row = page.locator('#dash-content .dash-app-row', { hasText: 'Circuit Lab' });
+    await expect(row).toHaveCount(1);
+    await expect(row).toContainText('⭐ ' + n);
+  });
+});
