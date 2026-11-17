@@ -253,3 +253,165 @@ test.describe('Sibling challenges', () => {
     await expect(page.locator('#hub-challenges')).toHaveCount(0);
   });
 });
+
+// A Chess Quest puzzle as the challenge, the "Challenge a sibling" buttons
+// inside World Explorer and Chess Quest, Today's 3 and Repaso.
+test.describe('Sibling challenges in the apps', () => {
+  // Puzzle 1 of the ladder: "Checkmate in 1 #1" (4k3/R7/8/8/8/8/8/4K2Q w), Qh8#.
+  // Board rows run from rank 8 (row 0) to rank 1 (row 7).
+  const move = (page, fr, fc, tr, tc) => page.evaluate(async ([a, b, c, d]) => {
+    // @ts-ignore
+    await puzzleClick(a, b); await puzzleClick(c, d);
+  }, [fr, fc, tr, tc]);
+  // @ts-ignore
+  const idle = (page) => page.waitForFunction(() => typeof PZ !== 'undefined' && PZ && !PZ.busy, null, { timeout: 8000 });
+
+  test('Ana sets a chess puzzle; Ben plays it on the Chess Quest board from Today\'s 3, and both get the star', async ({ page }) => {
+    await openHub(page, ANA);
+    await page.locator('#chl-open').click();
+    await page.locator('.chl-modal .chl-pick', { hasText: 'Ben' }).click();
+    await page.locator('.chl-modal .chl-pick', { hasText: 'Chess puzzle' }).click();
+    await expect(page.locator('#chl-puzzle option[value="0"]')).toHaveText('1. Checkmate in 1 #1');
+    await page.selectOption('#chl-puzzle', '0');
+    await page.fill('#chl-hint', 'Use the queen in the corner.');
+    await page.locator('#chl-send').click();
+    await expect(page.locator('.chl-modal')).toHaveCount(0);
+    const created = (await log(page)).find(e => e.type === 'create');
+    expect(created).toMatchObject({ kind: 'chess', answer: 0, text: 'Checkmate in 1 #1', to: 'Ben' });
+
+    // Ben: the challenge takes a place in Today's 3 (still 3 cards).
+    await switchTo(page, BEN);
+    const today = page.locator('#hub-today .hub-today-challenge');
+    await expect(today).toContainText('Challenge from Ana');
+    expect(await page.locator('#hub-today .hub-today-card').count()).toBeLessThanOrEqual(3);
+    await today.click();
+    const modal = page.locator('.chl-modal');
+    await expect(modal.locator('.chl-puzzle')).toContainText('Checkmate in 1 #1');
+    await modal.locator('#chl-chess-go').click();
+
+    // The Chess Quest board, on that puzzle, with who sent it.
+    await page.waitForURL(/chess-quest\.html/);
+    await expect(page.locator('#screen-puzzle')).toHaveClass(/active/);
+    await expect(page.locator('#pzChallenge')).toContainText('A challenge from Ana');
+    await expect(page.locator('#pzChallengeBtn'), 'no challenging back from inside a challenge').toBeHidden();
+    await expect(page.locator('#pzChallenge .chl-banner-hint')).toHaveCount(0);
+    expect(page.url(), 'the link is used once').not.toContain('challenge=');
+    await idle(page);
+
+    // Two wrong moves are two tries, and open Ana's hint.
+    await move(page, 7, 4, 6, 4);   // Ke2
+    await idle(page);
+    await move(page, 7, 4, 7, 3);   // Kd1 (the board went back to the start)
+    await idle(page);
+    await expect(page.locator('#pzChallenge .chl-banner-hint')).toContainText('Use the queen in the corner.');
+    expect((await log(page)).filter(e => e.type === 'miss')).toHaveLength(2);
+
+    await move(page, 7, 7, 0, 7);   // Qh8#
+    await expect(page.locator('#pzChallenge')).toContainText('You both earn a star');
+    await expect(page.locator('#nextPuzzleBtn')).toHaveText('Back to the hub');
+    expect((await log(page)).filter(e => e.type === 'solve')).toHaveLength(1);
+    await page.locator('#nextPuzzleBtn').click();
+    await page.waitForURL(/index\.html/);
+    await page.waitForFunction(() => !!document.getElementById('hub-screen') && document.getElementById('hub-screen').classList.contains('active') && !!document.getElementById('hub-today'));
+    // Ben's challenge star (Chess Quest gives its own puzzle star as well).
+    const benRec = await page.evaluate(() => JSON.parse(localStorage.getItem('zs_challenge_ben') || '{}'));
+    expect(Object.keys(benRec.stars || {})).toEqual([created.id]);
+    await expect(page.locator('#hub-today .hub-today-challenge.is-done')).toContainText('Challenge from Ana');
+    await switchTo(page, ANA);
+    expect(await stars(page, 'Ana')).toBe(1);
+  });
+
+  test('a locked puzzle opens for the challenge, and a stale link says so', async ({ page }) => {
+    const log0 = { v: 1, events: [
+      { id: 'c_chess', type: 'create', ts: Date.parse('2026-11-10T12:00:00'), from: 'Ana', to: 'Ben', kind: 'chess', answer: 21, text: 'Smothered Mate' }
+    ] };
+    await openHub(page, BEN, { zs_challenges: log0 });
+    await page.goto('/chess-quest.html?challenge=c_chess');
+    await expect(page.locator('#screen-puzzle')).toHaveClass(/active/);
+    await expect(page.locator('#puzzleLabel')).toContainText('Puzzle 22');
+    await expect(page.locator('#pzChallenge')).toContainText('A challenge from Ana');
+
+    await page.goto('/chess-quest.html?challenge=c_nope');
+    await expect(page.locator('.zsd-overlay')).toContainText('not waiting for you');
+    await expect(page.locator('#screen-puzzle')).not.toHaveClass(/active/);
+  });
+
+  test('Chess Quest: "Challenge a sibling" opens the form with this puzzle picked', async ({ page }) => {
+    await openHub(page, ANA);
+    await page.goto('/chess-quest.html');
+    // @ts-ignore
+    await page.waitForFunction(() => typeof openPuzzle === 'function' && typeof Challenges !== 'undefined');
+    // @ts-ignore
+    await page.evaluate(() => openPuzzle(0));
+    await expect(page.locator('#pzChallenge'), 'no challenge banner on an ordinary puzzle').toBeHidden();
+    await page.locator('#pzChallengeBtn').click();
+    const modal = page.locator('.chl-modal');
+    await expect(modal.locator('.chl-pick', { hasText: 'Chess puzzle' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(modal.locator('#chl-puzzle')).toHaveValue('0');
+    await modal.locator('.chl-pick', { hasText: 'Ben' }).click();
+    await modal.locator('#chl-send').click();
+    await expect(modal).toHaveCount(0);
+    expect((await log(page)).find(e => e.type === 'create')).toMatchObject({ kind: 'chess', answer: 0, from: 'Ana', to: 'Ben' });
+
+    // The youngest has nobody to challenge: no button.
+    await page.evaluate((k) => localStorage.setItem('zs_active_user', JSON.stringify(k)), CARLA);
+    await page.reload();
+    // @ts-ignore
+    await page.waitForFunction(() => typeof openPuzzle === 'function');
+    // @ts-ignore
+    await page.evaluate(() => openPuzzle(0));
+    await expect(page.locator('#pzChallengeBtn')).toBeHidden();
+  });
+
+  test('World Explorer: "Challenge a sibling" on a country sends a find-on-the-map challenge', async ({ page }) => {
+    await openHub(page, ANA);
+    await page.goto('/world-explorer.html');
+    // @ts-ignore
+    await page.waitForFunction(() => typeof WorldExplorer !== 'undefined' && typeof Challenges !== 'undefined');
+    // @ts-ignore
+    await page.evaluate(() => WorldExplorer.openCountry('chile'));
+    const btn = page.locator('#we-chl-btn');
+    await expect(btn).toBeVisible();
+    const box = await btn.boundingBox();
+    expect(box && box.height).toBeGreaterThanOrEqual(44);
+    await btn.click();
+    const modal = page.locator('.chl-modal');
+    await expect(modal.locator('.chl-pick', { hasText: 'Find on the map' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(modal.locator('#chl-country')).toHaveValue('chl');
+    await modal.locator('.chl-pick', { hasText: 'Carla' }).click();
+    await modal.locator('#chl-send').click();
+    await expect(modal).toHaveCount(0);
+    expect((await log(page)).find(e => e.type === 'create')).toMatchObject({ kind: 'map', answer: 'chl', to: 'Carla' });
+  });
+
+  test('a question Ben got wrong comes back in Repaso, and leaves it when a parent deletes the challenge', async ({ page }) => {
+    await openHub(page, ANA);
+    await sendQuestion(page, { text: 'Capital of Peru?', answers: ['Lima', 'Quito'], right: 0 });
+    await switchTo(page, BEN);
+    await page.locator('#hub-challenges .chl-card[data-ch]').click();
+    await page.locator('.chl-modal .chl-opt', { hasText: 'Quito' }).click();
+    await page.locator('.chl-modal .chl-opt', { hasText: 'Lima' }).click();
+    await page.locator('#chl-done').click();
+    const items = () => page.evaluate(() => Object.values(JSON.parse(localStorage.getItem('zs_review_ben') || '{"items":{}}').items));
+    const it = (await items())[0];
+    expect(it).toMatchObject({ app: 'challenge', prompt: 'Ana: Capital of Peru?', answer: 'Lima' });
+    expect(it.choices.slice().sort()).toEqual(['Lima', 'Quito']);
+
+    await page.evaluate(() => { /** @type {any} */ (window).openParentsCorner(); });
+    await page.locator('#chl-parents summary').click();
+    await page.locator('#chl-parents .chl-del').click();
+    await page.locator('.zsd-overlay').getByRole('button', { name: 'Delete' }).click();
+    expect(await items()).toEqual([]);
+  });
+
+  test('a removal synced from another device also clears Repaso', async ({ page }) => {
+    const ts = Date.parse('2026-11-10T12:00:00');
+    const log0 = { v: 1, events: [
+      { id: 'c_q1', type: 'create', ts, from: 'Ana', to: 'Ben', kind: 'q', text: 'gone', options: ['a', 'b'], answer: 0 },
+      { id: 'r_c_q1', type: 'remove', ts: ts + 5, ch: 'c_q1' }
+    ] };
+    const review = { v: 1, items: { 'challenge:c_q1': { id: 'challenge:c_q1', app: 'challenge', prompt: 'Ana: gone', answer: 'a', box: 1, due: 0, added: 0, misses: 1, hits: 0 } }, done: {}, retired: 0 };
+    await openHub(page, BEN, { zs_challenges: log0, zs_review_ben: review });
+    expect(await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('zs_review_ben')).items))).toEqual([]);
+  });
+});
