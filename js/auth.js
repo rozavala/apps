@@ -571,6 +571,19 @@ var APP_STAR_CONFIGS = [
       for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
       return n;
     } },
+  // Type Quest: each key lesson and each passage scores its best run (up to
+  // 3), Letter Hunt up to 3, Words 1 star per 10 words a minute (at 90%+,
+  // up to 3 per language), and one star per typing rank reached (up to 7).
+  { id: 'typing', prefix: 'zs_typing_', stars: function(d) {
+      var n = 0, k, o = function(x) { return x && typeof x === 'object' && !Array.isArray(x) ? x : {}; };
+      var ls = o(d.ls), ps = o(d.ps), wd = o(d.wd);
+      for (k in ls) n += Math.max(0, Math.min(3, o(ls[k]).s | 0));
+      for (k in ps) n += Math.max(0, Math.min(3, o(ps[k]).s | 0));
+      for (k in wd) n += Math.max(0, Math.min(3, Math.floor((+o(wd[k]).w || 0) / 10)));
+      n += Math.max(0, Math.min(3, o(d.hunt).s | 0));
+      n += Math.max(0, Math.min(7, d.rk | 0));
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a

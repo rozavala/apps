@@ -342,6 +342,23 @@ var ProgressAdmin = (function() {
     { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
   APPS.push({ id: 'codelab', label: 'Code Lab', icon: '🐢', href: 'code-lab.html', prefix: 'zs_codelab_', mode: 'reset' });
+  // Type Quest: the key lessons are a ladder (zs_typing_<kid>: ls:{ id:{ s, w, a, n } }).
+  // Setting a position marks the lessons before it done; passages, words and the rank stay.
+  APPS.push({
+    id: 'typing', label: 'Type Quest', icon: '⌨️', href: 'type-quest.html',
+    prefix: 'zs_typing_', catalog: 'typing', mode: 'sequence', noun: 'lesson',
+    done: function(data, u) { var l = (data.ls || {})[u.i]; return !!(l && l.s > 0); },
+    apply: function(data, units, count) {
+      data.ls = data.ls || {};
+      units.forEach(function(u, idx) {
+        if (idx < count) { var l = data.ls[u.i] = data.ls[u.i] || {}; if (!(l.s > 0)) { l.s = 2; l.n = l.n || 1; } }
+        else delete data.ls[u.i];
+      });
+      data.v = 1;
+      return data;
+    },
+    clear: function(data) { data.ls = {}; return data; }
+  });
 
   // Lector keeps a ladder of levels for each language in one saved blob
   // (zs_lector_<kid>: lv:{ es2:{sounds,syll,build,read}, … }, books:{…}).
