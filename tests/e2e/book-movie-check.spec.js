@@ -184,7 +184,13 @@ test('a slow review still shows up once the server has saved it', async ({ page 
   }, { canonical_id: CAUTION.canonical_id, title: CAUTION.title, type: 'book' });
   await page.clock.runFor(61000);
   await expect(page.locator('#bmc-result')).toContainText('Still checking');
-  for (let i = 0; i < 3; i++) await page.clock.runFor(8100);
+  // Each check is a real request: let it answer (and the next timer be
+  // set) before moving the clock on again.
+  for (let i = 1; i <= 3; i++) {
+    await page.clock.runFor(8100);
+    await expect.poll(() => cacheHits).toBe(i);
+    await page.waitForTimeout(50);
+  }
   await expect(page.locator('#bmc-result')).toContainText('The Lost Hero');
   expect(cacheHits).toBe(3);
 });
