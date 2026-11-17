@@ -135,6 +135,10 @@ const CASES = [
     data: { v: 1, m: { hello: { s: 3 }, name: { s: 2, code: 'print("x")' }, line: { s: 9 }, corner: { s: 0 }, bad: null }, free: [{ id: 'p1', name: 'x', code: '' }] },
     stars: 8, note: 'each mission counts up to 3 stars; saved workshop programs do not score' },
   { id: 'codelab', prefix: 'zs_codelab_', data: { v: 1, m: {}, free: [] }, stars: 0, note: 'nothing yet' },
+  { id: 'taller', prefix: 'zs_taller_',
+    data: { v: 1, seen: { lever: 1, pulley: 1, gears: 1, bike: 1, junk: 1 }, ch: { 'c-pulley': 3, 'g-double': 2, 'b-hill': 9 }, cr: { r1: 1, r2: 0 }, designs: { r1: 'plank,1400,850,-5' } },
+    stars: 4 + 3 + 2 + 3 + 1, note: 'one per machine/lab tried (unknown ids ignored) + each challenge and level best, at most 3; designs do not score' },
+  { id: 'taller', prefix: 'zs_taller_', data: { v: 1, seen: {}, ch: {}, cr: {} }, stars: 0, note: 'nothing yet' },
   { id: 'examen', prefix: 'zs_examen_',
     data: { v: 1, lang: 'es', entries: {
       '2026-11-14': { done: true, thanks: ['familia'], thanksText: 'hoy', virtue: 'paciencia', did: 'yes', didOn: '2026-11-15' },

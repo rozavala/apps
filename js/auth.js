@@ -609,6 +609,16 @@ var APP_STAR_CONFIGS = [
       n += d.map ? 1 : 0;
       return n;
     } },
+  // Taller de Máquinas: one star for each simple machine, the gear lab and
+  // the bicycle tried (seen: { lever: 1, … }), plus the best 0–3 of every
+  // challenge (ch) and every chain-reaction level (cr).
+  { id: 'taller', prefix: 'zs_taller_', stars: function(d) {
+      var n = 0, k, seen = d.seen || {}, ids = ['lever', 'pulley', 'incline', 'wedge', 'wheel', 'screw', 'gears', 'bike'];
+      for (k = 0; k < ids.length; k++) if (seen[ids[k]]) n++;
+      for (k in (d.ch || {})) n += Math.min(3, Math.max(0, d.ch[k] | 0));
+      for (k in (d.cr || {})) n += Math.min(3, Math.max(0, d.cr[k] | 0));
+      return n;
+    } },
   // Code Lab: each mission is worth up to 3 stars (solved, no hints, a
   // short program), kept in { m: { '<missionId>': { s: 0..3, ... } } }.
   { id: 'codelab', prefix: 'zs_codelab_', stars: function(d) {

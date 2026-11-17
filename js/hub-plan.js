@@ -48,6 +48,7 @@ var HubPlan = (function() {
     { id: 'cocina',     href: 'cocina-lab.html',         group: 'science', minAge: 6,  names: ['cocina lab'] },
     { id: 'circuit',    href: 'circuit-lab.html',        group: 'science', minAge: 7,  names: ['circuit lab'] },
     { id: 'engineer',   href: 'little-engineer.html',    group: 'science', minAge: 7,  names: ['little engineer'] },
+    { id: 'taller',     href: 'taller-maquinas.html',    group: 'science', minAge: 4,  names: ['taller de maquinas'] },
     { id: 'marinero',   href: 'marinero.html',           group: 'science', minAge: 7,  names: ['marinero'] },
     { id: 'secretos',   href: 'mensajes-secretos.html',  group: 'science', minAge: 7,  names: ['mensajes secretos'] },
     { id: 'code',       href: 'code-cadet.html',         group: 'science', minAge: 7,  names: ['code cadet'] },

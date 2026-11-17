@@ -53,6 +53,7 @@ var AppSchedule = (function() {
   ALL_APPS.push({ id: 'examen', card: '.card-examen', fromHour: 18 });
   ALL_APPS.push({ id: 'typing', card: '.card-typing' });
   ALL_APPS.push({ id: 'huerto', card: '.card-huerto' });
+  ALL_APPS.push({ id: 'taller', card: '.card-taller' });
   ALL_APPS.push({ id: 'trivia', card: '.card-trivia' });
 
   var SMART_SCHEDULE = {
@@ -92,6 +93,10 @@ var AppSchedule = (function() {
   [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('typing'); });
   // Misiones de Mapa (geography) on Tuesday, Friday and Sunday.
   [0, 2, 5].forEach(function(d) { SMART_SCHEDULE[d].push('mapa'); });
+
+  // Taller de Máquinas (simple machines and gears) on the science days, next to Lab Explorer: Monday and Thursday, plus Saturday.
+  [1, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('taller'); });
+
   // Examen y Virtudes (the evening reflection) is offered every day.
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('examen'); });
 

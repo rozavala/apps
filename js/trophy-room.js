@@ -36,6 +36,7 @@ var TrophyRoom = (function() {
     { id: 'vocab',   name: 'Vocabulario Vivo', emoji: '📚', color: '#FB923C', threshold: 1, href: 'vocabulario-vivo.html' },
     { id: 'circuit', name: 'Circuit Lab',     emoji: '⚡', color: '#F59E0B', threshold: 1, href: 'circuit-lab.html' },
     { id: 'engineer', name: 'Little Engineer', emoji: '🌉', color: '#D97706', threshold: 1, href: 'little-engineer.html' },
+    { id: 'taller', name: 'Taller de Máquinas', emoji: '⚙️', color: '#9A6534', threshold: 1, href: 'taller-maquinas.html' },
     { id: 'negocio', name: 'Mi Negocio', emoji: '🥟', color: '#D9480F', threshold: 1, href: 'mi-negocio.html' },
     { id: 'secretos', name: 'Mensajes Secretos', emoji: '🔐', color: '#B8862F', threshold: 1, href: 'mensajes-secretos.html' },
     { id: 'clock', name: '¿Qué Hora Es?', emoji: '🕰️', color: '#C8952F', threshold: 1, href: 'que-hora-es.html' },
