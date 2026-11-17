@@ -155,6 +155,12 @@ const BUILDERS = {
   // every practice in it has 2+ stars; the unit carries its practices in
   // `k` so Progress Manager can tell (see lectorLevels in progress-admin.js).
   lector_es() { return lectorLevels('es', 'Español'); },
+
+  // Escritura keeps a ladder of letter sets for each handwriting style.
+  // A set is done when each of its letters has 2+ stars; the unit carries
+  // its letters in `k` (see _escrituraApp in progress-admin.js).
+  escritura_print() { return escrituraSets('print', 'Imprenta (print)'); },
+  escritura_cursive() { return escrituraSets('cursive', 'Cursiva (cursive)'); },
   lector_en() { return lectorLevels('en', 'English'); },
 
   world() {
@@ -167,6 +173,11 @@ const BUILDERS = {
     return out;
   },
 };
+
+function escrituraSets(style, group) {
+  const D = require(path.join(ROOT, 'js', 'escritura-data.js'));
+  return D.SETS[style].map(s => unit(s.id, s.t[0] + ' · ' + s.ch, group, s.ch.split('').join(',')));
+}
 
 function lectorLevels(lang, group) {
   const D = require(path.join(ROOT, 'js', 'lector-data.js'));

@@ -45,6 +45,7 @@ var AppSchedule = (function() {
   ALL_APPS.push({ id: 'linea', card: '.card-linea' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
+  ALL_APPS.push({ id: 'escritura', card: '.card-escritura' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -67,6 +68,8 @@ var AppSchedule = (function() {
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('lector'); });
   // Árbol familiar (the family tree) is a Sunday and Wednesday visit.
   [0, 3].forEach(function(d) { SMART_SCHEDULE[d].push('arbol'); });
+  // Escritura (handwriting): a little and often, Monday, Wednesday and Friday.
+  [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('escritura'); });
 
   // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
   [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });

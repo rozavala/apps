@@ -540,6 +540,14 @@ var APP_STAR_CONFIGS = [
       for (k in (d.books || {})) { q = d.books[k] || {}; n += (q.l ? 1 : 0) + (q.r ? 1 : 0) + (q.p ? 1 : 0); }
       return n;
     } },
+  // Escritura: each letter of each style is starred out of 3 (traced,
+  // traced with less help, written alone), each word out of 3 (traced,
+  // copied, copied well), and each letter dictation by its best round.
+  { id: 'escritura', prefix: 'zs_escritura_', stars: function(d) {
+      var n = 0, k, parts = [d.L, d.W, d.dict];
+      for (var i = 0; i < parts.length; i++) for (k in (parts[i] || {})) n += Math.min(3, Math.max(0, Number(parts[i][k]) || 0));
+      return n;
+    } },
   // Línea del Tiempo: one star for every 10 events opened (up to 15) and
   // the best round (0 to 3 stars) of each game: put in order (one per
   // number of cards), who lived at the same time, before or after, and

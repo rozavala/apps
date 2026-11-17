@@ -375,6 +375,41 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+
+  // Escritura keeps a ladder of letter sets for each style in one blob
+  // (zs_escritura_<kid>: L:{ 'print:A': 0..3, 'cursive:a': … }, W:{…}, dict:{…}).
+  // A set counts as done when every letter in it has 2+ stars.
+  function _escrituraApp(style, label) {
+    function letters(u) { return String(u.k || '').split(',').filter(Boolean); }
+    return {
+      id: 'escritura-' + style, label: 'Escritura — ' + label, icon: '✒️', href: 'escritura.html',
+      prefix: 'zs_escritura_', catalog: 'escritura_' + style, mode: 'sequence', noun: 'set',
+      done: function(data, u) {
+        var L = data.L || {};
+        return letters(u).every(function(c) { return (L[style + ':' + c] | 0) >= 2; });
+      },
+      apply: function(data, units, count) {
+        data.L = data.L || {};
+        units.forEach(function(u, idx) {
+          letters(u).forEach(function(c) {
+            var k = style + ':' + c;
+            if (idx < count) { if ((data.L[k] | 0) < 2) data.L[k] = 3; }
+            else delete data.L[k];
+          });
+        });
+        return data;                 // words and dictation are left alone
+      },
+      clear: function(data) {
+        var out = { v: 1, L: {}, W: {}, dict: {}, rounds: data.rounds || 0 }, k;
+        if (data.style) out.style = data.style;
+        ['L', 'W', 'dict'].forEach(function(part) {
+          for (k in (data[part] || {})) if (k.indexOf(style + ':') !== 0) out[part][k] = data[part][k];
+        });
+        return out;
+      }
+    };
+  }
+  APPS.push(_escrituraApp('print', 'Imprenta (print)'), _escrituraApp('cursive', 'Cursiva (cursive)'));
   APPS.push({ id: 'linea', label: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', prefix: 'zs_linea_', mode: 'reset' });
   // Árbol familiar has no ladder to set: its quiz stars, pages seen and map can only be cleared.
   APPS.push({ id: 'arbol', label: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', prefix: 'zs_arbol_', mode: 'reset' });
