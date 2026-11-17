@@ -259,17 +259,20 @@ test.describe('Read-aloud', () => {
     ]);
   });
 
-  test('a status line or toast (a live region) gets no 🔊', async ({ page }) => {
+  test('a status line or toast gets no 🔊; a question inside a polite wrapper keeps it', async ({ page }) => {
     await open(page);
     await page.evaluate(() => {
       const d = document.createElement('div');
-      d.innerHTML = '<p class="t-st" role="status">Saved!</p><div aria-live="polite"><p class="t-st">Try again</p></div><p class="t-st" id="plain">Pick a paint</p>';
+      d.innerHTML = '<p class="t-st" role="status">Saved!</p><p class="t-st" aria-live="polite">Try again</p>' +
+        '<div role="alert"><p class="t-st">Oops</p></div><p class="t-st" id="plain">Pick a paint</p>' +
+        '<div aria-live="polite"><p class="t-st" id="q">What is 2 + 3?</p></div>';
       document.body.appendChild(d);
       // @ts-ignore
       ZsSpeak.watch({ prompt: '.t-st' });
     });
     await expect(page.locator('#plain .zs-say')).toHaveCount(1);
-    await expect(page.locator('.t-st .zs-say')).toHaveCount(1);
+    await expect(page.locator('#q .zs-say')).toHaveCount(1);        // a question in a polite wrapper keeps it
+    await expect(page.locator('.t-st .zs-say')).toHaveCount(2);
   });
 
   test('an instruction with nothing in it gets no 🔊, and a 🔊 never goes inside a button', async ({ page }) => {

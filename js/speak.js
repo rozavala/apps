@@ -247,9 +247,11 @@ var ZsSpeak = (function() {
     // A rule never puts a 🔊 inside another button or link (data-speak
     // on a card title is the app asking for one, so that one is kept).
     if (cfg && el.closest('button, a[href], [role="button"], label')) return false;
-    // Nor inside a live region: a screen reader would announce "Read
-    // aloud" with every status update, and toasts fade away anyway.
-    if (cfg && el.closest('[aria-live], [role="status"], [role="alert"]')) return false;
+    // Nor in a status line or toast (a live region itself, or inside a
+    // status/alert): a screen reader would announce "Read aloud" with
+    // every update, and toasts fade away. A question that merely sits in
+    // a polite wrapper (Cálculo Rápido's #cr-qwrap) keeps its 🔊.
+    if (cfg && (el.hasAttribute('aria-live') || el.closest('[role="status"], [role="alert"]'))) return false;
     var old = null;
     Array.prototype.forEach.call(el.children, function(c) { if (c.classList.contains('zs-say')) old = c; });
     var text = el.getAttribute('data-speak') || _textOf(el);
