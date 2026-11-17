@@ -393,7 +393,7 @@ var ProgressAdmin = (function() {
         units.forEach(function(u, idx) {
           letters(u).forEach(function(c) {
             var k = style + ':' + c;
-            if (idx < count) { if ((data.L[k] | 0) < 2) data.L[k] = 3; }
+            if (idx < count) { if ((data.L[k] | 0) < 2) data.L[k] = 2; }
             else delete data.L[k];
           });
         });
@@ -402,6 +402,7 @@ var ProgressAdmin = (function() {
       clear: function(data) {
         var out = { v: 1, L: {}, W: {}, dict: {}, rounds: data.rounds || 0 }, k;
         if (data.style) out.style = data.style;
+        if (data.last) out.last = data.last;
         ['L', 'W', 'dict'].forEach(function(part) {
           for (k in (data[part] || {})) if (k.indexOf(style + ':') !== 0) out[part][k] = data[part][k];
         });

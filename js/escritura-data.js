@@ -149,7 +149,7 @@ var EscrituraData = (function() {
       { id: 'p5', t: ['La familia de la c', 'The c family'], ch: 'cdgqs' },
       { id: 'p6', t: ['Palitos y puentes', 'Sticks and bridges'], ch: 'ltfkhnmrñ' },
       { id: 'p7', t: ['Más minúsculas', 'More small letters'], ch: 'bpjvwxyz' },
-      { id: 'p8', t: ['Tildes y diéresis', 'Accents'], ch: 'áéíóúü' }
+      { id: 'p8', t: ['Tildes y diéresis', 'Accents'], ch: 'áéíóúüÁÉÍÓÚ' }
     ],
     cursive: [
       { id: 'c1', t: ['Vocales ligadas', 'Cursive vowels'], ch: 'aeiou' },

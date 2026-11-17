@@ -234,7 +234,7 @@ window.ZSProgressCatalog = {
     {"i":"p5","l":"La familia de la c · cdgqs","g":"Imprenta (print)","k":"c,d,g,q,s"},
     {"i":"p6","l":"Palitos y puentes · ltfkhnmrñ","g":"Imprenta (print)","k":"l,t,f,k,h,n,m,r,ñ"},
     {"i":"p7","l":"Más minúsculas · bpjvwxyz","g":"Imprenta (print)","k":"b,p,j,v,w,x,y,z"},
-    {"i":"p8","l":"Tildes y diéresis · áéíóúü","g":"Imprenta (print)","k":"á,é,í,ó,ú,ü"}
+    {"i":"p8","l":"Tildes y diéresis · áéíóúüÁÉÍÓÚ","g":"Imprenta (print)","k":"á,é,í,ó,ú,ü,Á,É,Í,Ó,Ú"}
   ],
 
   guitar: [

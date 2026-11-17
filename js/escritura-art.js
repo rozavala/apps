@@ -34,7 +34,7 @@ var EscrituraArt = (function() {
     o = o || {};
     var L = E.layout(t, D.font(style), { margin: 10, maxRow: o.maxRow || 1e9 });
     var W = Math.max(L.width, 40), H = L.rows * E.ROW_H;
-    var top = o.tight ? 112 : E.ROW_TOP, h = o.tight ? 180 : H;
+    var top = o.tight ? 128 : E.ROW_TOP, h = o.tight ? 196 : H;
     var s = '<svg class="es-txt" viewBox="0 ' + (-top) + ' ' + W + ' ' + (o.tight ? h : H) + '" role="img" aria-label="' + String(o.label || t).replace(/"/g, '') + '">';
     if (o.lines) for (var r = 0; r < L.rows; r++) s += lines(0, W, r * E.ROW_H);
     var col = o.color || '#3a3d48', wt = o.weight || 6;

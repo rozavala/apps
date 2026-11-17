@@ -484,6 +484,8 @@
         (stage === 2 ? '<div class="es-model" aria-hidden="true">' + A.text(w.t, S.style, { lines: true, weight: 6, maxRow: maxRow }) + '</div>' : '') +
         '<div class="es-pad" id="es-pad"></div>' +
         '<p class="es-fb" id="es-fb" role="status" aria-live="polite"></p>' +
+        (isName && S.style === 'cursive' && /[A-ZÁÉÍÓÚÑ]/.test(String(USER.name || '')) ?
+          '<p class="es-note es-name-note">' + esc(T('En cursiva tu nombre va con minúscula, porque las mayúsculas cursivas todavía no están en la app.', 'In cursive your name is in small letters, because cursive capitals are not in the app yet.')) + '</p>' : '') +
         '<div class="es-tools">' +
           (stage === 1 ? '<button type="button" class="es-tool" id="es-watch">' + A.icon('play') + '<span>' + esc(T('Mira cómo', 'Watch')) + '</span></button>' : '') +
           '<button type="button" class="es-tool" id="es-undo">' + A.icon('undo') + '<span>' + esc(T('Deshacer', 'Undo')) + '</span></button>' +

@@ -111,34 +111,51 @@ test.describe('Escritura', () => {
     await expect(page.locator('.es-style.on')).toContainText(/Print|Imprenta/);
   });
 
-  test('a word: trace it, then copy it on your own; your own name too', async ({ page }) => {
+  const wordStage = (page) => page.evaluate(() => (/** @type {any} */ (window)).Escritura.word().stage);
+  const layOf = (page) => page.evaluate(() => (/** @type {any} */ (window)).Escritura.word().lay.strokes);
+  // Draw, wait until every stroke has reached the pad, then press Done.
+  async function writeAndDone(page, strokes, opts) {
+    const before = await inkCount(page);
+    await draw(page, strokes, opts);
+    await expect.poll(() => inkCount(page)).toBe(before + strokes.length);
+    await page.locator('#es-done').click();
+  }
+
+  test('a word: trace it, then copy it on your own', async ({ page }) => {
+    test.setTimeout(60000);
     await open(page, { age: 8 });
     await page.locator('#es-go-words').click();
     await page.locator('.es-segb[data-lang="es"]').click();
     await page.locator('.es-word[data-id="sol"]').click();
-    const lay = () => page.evaluate(() => (/** @type {any} */ (window)).Escritura.word().lay.strokes);
     await page.locator('#es-done').click();
     await expect(page.locator('#es-fb')).toContainText(/first|Primero/);                  // nothing written yet
-    await draw(page, (await lay()).slice(0, 1));
-    await page.locator('#es-done').click();
+    await writeAndDone(page, (await layOf(page)).slice(0, 1));
     await expect(page.locator('#es-fb')).toHaveClass(/warn/);                             // only the s
     await page.locator('#es-clear').click();
-    await draw(page, await lay());
-    await page.locator('#es-done').click();
+    await expect.poll(() => inkCount(page)).toBe(0);
+    await writeAndDone(page, await layOf(page));
+    await expect.poll(() => wordStage(page), { timeout: 15000 }).toBe(2);
     await expect(page.locator('.es-steps li.on')).toContainText(/Copy|Cópiala/);
     await expect(page.locator('.es-model svg')).toBeVisible();
-    await draw(page, await lay(), { dx: 12 });
-    await page.locator('#es-done').click();
-    await expect(page.locator('.es-done-t')).toBeVisible();
+    await writeAndDone(page, await layOf(page), { dx: 12 });
+    await expect(page.locator('.es-done-t')).toBeVisible({ timeout: 15000 });
     expect((await saved(page)).W['print:es:sol']).toBe(3);
+  });
 
-    await page.locator('#es-home').click();
+  test('my name: the profile name is written, and in cursive the screen says why it is in small letters', async ({ page }) => {
+    test.setTimeout(60000);
+    await open(page, { age: 8 });
     await page.locator('#es-go-name').click();
     expect(await page.evaluate(() => (/** @type {any} */ (window)).Escritura.word().w.t)).toBe('Test');
-    await draw(page, await lay());
-    await page.locator('#es-done').click();
-    await expect(page.locator('.es-steps li.on')).toContainText(/Copy|Cópiala/);
+    await expect(page.locator('.es-name-note')).toHaveCount(0);
+    await writeAndDone(page, await layOf(page));
+    await expect.poll(() => wordStage(page), { timeout: 15000 }).toBe(2);
     expect((await saved(page)).W['print:name']).toBe(1);
+    await page.locator('#es-back').click();
+    await page.locator('.es-style[data-style="cursive"]').click();
+    await page.locator('#es-go-name').click();
+    expect(await page.evaluate(() => (/** @type {any} */ (window)).Escritura.word().w.t)).toBe('test');
+    await expect(page.locator('.es-name-note')).toContainText(/small letters|minúscula/);
   });
 
   test('letter dictation: the app says a letter and reads what was written', async ({ page }) => {
