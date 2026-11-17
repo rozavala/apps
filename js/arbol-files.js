@@ -145,6 +145,6 @@ var ArbolFiles = (function() {
     }).then(function(id) { return { id: id, src: entry.id, kids: entry.kids ? 1 : 0 }; });
   }
 
-  return { newId: newId, url: url, typeOf: typeOf, prepare: prepare, upload: upload, remove: remove, list: list, isImage: isImage, makeFace: makeFace, MAX: MAX };
+  return { newId: newId, url: url, put: put, typeOf: typeOf, prepare: prepare, upload: upload, remove: remove, list: list, isImage: isImage, makeFace: makeFace, MAX: MAX };
 })();
 if (typeof window !== 'undefined') window.ArbolFiles = ArbolFiles;

@@ -28,7 +28,7 @@
 var Arbol = (function() {
   'use strict';
 
-  var Store = ArbolStore, Kin = ArbolKin, Art = ArbolArt, Quiz = ArbolQuiz, Places = ArbolPlaces, G = Gedcom, Files = ArbolFiles;
+  var Store = ArbolStore, Kin = ArbolKin, Art = ArbolArt, Quiz = ArbolQuiz, Places = ArbolPlaces, G = Gedcom, Files = ArbolFiles, Voice = ArbolVoice;
   var PREFIX = 'zs_arbol_';
 
   var root = null, user = null, age = 8, tier = 'intermediate', kidKey = '';
@@ -115,7 +115,7 @@ var Arbol = (function() {
   }
   function refreshFromStore(t) {
     // never swap the tree out from under a parent's screen or a quiz in progress
-    if (st.view === 'parents' || st.q) { staleTree = true; return; }
+    if (st.view === 'parents' || st.q || st.rec) { staleTree = true; return; }
     applyTree(t); render();
   }
 
@@ -192,6 +192,8 @@ var Arbol = (function() {
   function snap() { return { view: st.view, pid: st.pid, depth: st.depth, root: st.root }; }
   function go(view, o) {
     stopSpeech();
+    if (st.rec) closeRecorder();
+    Voice.Player.stop();
     if (st.view !== view || (o && o.pid && o.pid !== st.pid)) {
       if (!(o && o.noHist)) { st.hist.push(snap()); if (st.hist.length > 40) st.hist.shift(); }
     }
@@ -203,6 +205,8 @@ var Arbol = (function() {
     window.scrollTo(0, 0);
   }
   function back() {
+    if (st.rec) closeRecorder();
+    Voice.Player.stop();
     var h = st.hist.pop();
     if (!h) { st.view = 'home'; render(); return; }
     st.view = h.view; st.pid = h.pid; st.depth = h.depth; st.root = h.root;
@@ -228,8 +232,9 @@ var Arbol = (function() {
 
   function render() {
     if (!root) return;
-    if (staleTree && st.view !== 'parents' && !st.q) { staleTree = false; loadTree().then(render); return; }
+    if (staleTree && st.view !== 'parents' && !st.q && !st.rec) { staleTree = false; loadTree().then(render); return; }
     clearPan();
+    if (typeof ZsCanvas !== 'undefined') ZsCanvas.releaseIn(root);
     var html = '';
     if (st.view === 'parents') html = viewParents();
     else if (!ready) html = '<div class="ar-empty"><p>' + esc(T('Cargando el árbol…', 'Loading the tree…')) + '</p></div>';
@@ -243,6 +248,7 @@ var Arbol = (function() {
         case 'related': html = viewRelated(); break;
         case 'map': html = viewMap(); break;
         case 'quiz': html = viewQuiz(); break;
+        case 'voices': html = viewVoices(); break;
         default: html = viewHome();
       }
     }
@@ -254,6 +260,13 @@ var Arbol = (function() {
     if (st.view === 'tree' && tree && meId()) mountTree();
     if (st.view === 'parents') mountParents();
     if (st.crop) mountCrop();
+    if (st.rec && st.rec.phase === 'rec') drawMeter();
+    // the recorder is a dialog: move the focus into it when its step changes
+    if (st.rec && st.rec.focused !== st.rec.phase) {
+      st.rec.focused = st.rec.phase;
+      var f = root.querySelector('.ar-vrec .ar-vbig, .ar-vrec [data-act=vsave]:not([disabled])');
+      if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
+    }
   }
 
   // ---------------------------------------------------------------
@@ -288,6 +301,7 @@ var Arbol = (function() {
       cards.push(card('related', '🔗', T('¿Cómo somos parientes?', 'How are we related?'), T('Elige a dos personas', 'Pick any two people'), '#3d6fb3'));
       cards.push(card('map', '🗺️', T('¿De dónde venimos?', 'Where did we come from?'), T('Los lugares de la familia', 'The places of our family'), '#1f8a85'));
     }
+    if (!little || anyVoices()) cards.push(card('voices', '🎙️', T('Voces de la familia', 'Family voices'), little ? T('Escucha a tus abuelos', 'Listen to your grandparents') : T('Escucha y graba sus historias', 'Listen to and record their stories'), '#a0522d'));
     cards.push(card('quiz', '⭐', T('Juego de la familia', 'Family game'), little ? T('Toca a tu abuela', 'Tap your grandmother') : T('Preguntas sobre tu familia', 'Questions about your family'), '#c9892b'));
     return head() + '<section class="ar-hello">' + Art.hero(420) +
       '<h2>' + esc(T('Hola, ' + me.first + '. Este es el árbol de tu familia.', 'Hi, ' + me.first + '. This is your family tree.')) + '</h2>' +
@@ -387,8 +401,9 @@ var Arbol = (function() {
     function big(id, ph) {
       if (!id) return ph ? '<div class="ar-big ghost" aria-hidden="true">' + Art.portrait('unknown', '#9a917c', 84) + '<b>?</b></div>' : '';
       var v = V(id), code = cc(id);
-      return '<button class="ar-big" data-act="person" data-id="' + esc(id) + '" aria-label="' + esc(v.name) + '">' +
-        pp(id, kindOf(v), '#3f8f5a', 96) + '<b>' + esc(v.first) + '</b>' +
+      var hasV = voices(id).length > 0;
+      return '<button class="ar-big" data-act="person" data-id="' + esc(id) + '" aria-label="' + esc(v.name + (hasV ? T(', tiene grabaciones', ', has recordings') : '')) + '">' +
+        pp(id, kindOf(v), '#3f8f5a', 96) + (hasV ? '<span class="ar-vbadge" aria-hidden="true">' + speakerBadge() + '</span>' : '') + '<b>' + esc(v.first) + '</b>' +
         '<small>' + esc(id === me ? T('Yo', 'Me') : termFor(id, me)) + '</small>' + (code ? '<span class="ar-bigflag">' + flagHtml(code, 34) + '</span>' : '') + '</button>';
     }
     return head() + backBar(T('Inicio', 'Home')) + '<h2 class="ar-h2">' + esc(T('Mi familia', 'My family')) + '</h2>' +
@@ -552,7 +567,7 @@ var Arbol = (function() {
       (isLittle() ? '' : (tl ? '<h3 class="ar-h3">' + esc(T('Su vida', 'Their life')) + '</h3><ol class="ar-tl">' + tl + '</ol>' : '')) +
       (!isLittle() && map ? '<h3 class="ar-h3">' + esc(T('Sus lugares', 'Their places')) + '</h3>' + map : '') +
       (notes ? '<h3 class="ar-h3">' + esc(T('Historias', 'Stories')) + '</h3><div class="ar-notes">' + notes + '</div>' : '') +
-      filesSection(id) + familyChips(id) + parentFiles(id) + parentBtn() + lightbox(id) + cropView(id);
+      voiceSection(id) + filesSection(id) + familyChips(id) + parentFiles(id) + parentBtn() + lightbox(id) + cropView(id) + recView(id);
   }
 
   // ---------------------------------------------------------------
@@ -616,16 +631,17 @@ var Arbol = (function() {
     var face = tree.P[id] && tree.P[id].a && tree.P[id].a.face;
     if (face) rows += '<li class="ar-faceRow"><img class="ar-portrait ar-face" src="' + esc(Files.url(face.id)) + '" width="44" height="44" alt=""><span class="ar-fname">' + esc(T('Su cara en el árbol', 'Their face in the tree')) + '</span>' +
       '<button class="ar-link" data-act="facedel">' + esc(T('Quitar la cara', 'Remove the face')) + '</button></li>';
-    return '<section class="ar-psec ar-fpanel"><h3>🔒 ' + esc(T('Fotos y documentos (papás)', 'Photos and documents (parents)')) + '</h3>' +
-      (rows ? '<ul class="ar-flist">' + rows + '</ul>' : '') +
+    return '<section class="ar-psec ar-fpanel"><h3>🔒 ' + esc(T('Fotos, documentos y grabaciones (papás)', 'Photos, documents and recordings (parents)')) + '</h3>' +
+      (rows ? '<ul class="ar-flist">' + rows + '</ul>' : '') + parentVoices(id) +
       '<label class="ar-lbl" for="ar-ftitle">' + esc(T('Título (por ejemplo: Acta de matrimonio, Bautizo 1932)', 'Title (for example: Marriage record, Baptism 1932)')) + '</label>' +
       '<input id="ar-ftitle" type="text" maxlength="80" autocomplete="off">' +
       '<label class="ar-chk"><input type="checkbox" id="ar-fkidsnew" checked> <span>' + esc(T('Los niños pueden verlo', 'Kids can see it')) + '</span></label>' +
       (livingSet[id] && !(tree.cfg && tree.cfg.living) ? '<p class="ar-note">' + esc(T('Esta persona parece estar viva: los niños no ven sus archivos mientras los datos de personas vivas estén protegidos.', 'This person looks to be living: the kids do not see their files while living relatives are protected.')) + '</p>' : '') +
       '<label class="ar-file"><span class="ar-btn"' + (U.busy ? ' aria-disabled="true"' : '') + '>📎 ' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '</span>' +
-      '<input id="ar-fup" type="file" multiple accept="image/*,.heic,.heif,application/pdf,.pdf"' + (U.busy ? ' disabled' : '') + ' aria-label="' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '"></label>' +
+      '<input id="ar-fup" type="file" multiple accept="image/*,.heic,.heif,application/pdf,.pdf,audio/*,.m4a,.mp3"' + (U.busy ? ' disabled' : '') + ' aria-label="' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '"></label>' +
       (U.msg ? '<p class="' + (U.err ? 'ar-warn' : 'ar-ok') + '" role="status">' + esc(U.msg) + '</p>' : '') +
       '<p class="ar-note">' + esc(T('Fotos (JPEG, PNG, HEIC) y documentos PDF, hasta 25 MB cada uno. Se guardan en el servidor de la familia.', 'Photos (JPEG, PNG, HEIC) and PDF documents, up to 25 MB each. They are kept on the family server.')) + '</p>' +
+      '<p class="ar-note">' + esc(T('También puedes subir una grabación que ya tengas (Notas de Voz del iPhone, .m4a o .mp3): queda en «Su voz».', 'You can also upload a recording you already have (iPhone Voice Memos, .m4a or .mp3): it goes to “Their voice”.')) + '</p>' +
       '<p class="ar-note">' + esc(T('¿Las fotos están en Google Fotos? En la app de Google Fotos, abre la foto, toca Compartir y luego «Guardar en el dispositivo». Después elígela aquí desde la fototeca.', 'Photos in Google Photos? In the Google Photos app, open the photo, tap Share, then “Save to device”. Then choose it here from the photo library.')) + '</p>' +
       '<p class="ar-note">' + esc(T('Para mostrar su cara en el árbol: sube una foto y toca «Usar para la cara».', 'To show their face in the tree: upload a photo and tap “Use for the face”.')) + '</p>' +
       '<button class="ar-link" data-act="parentdone">🔓 ' + esc(T('Listo: salir del modo papás', 'Done: leave parent mode')) + '</button>' +
@@ -702,6 +718,13 @@ var Arbol = (function() {
       chain = chain.then(function() {
         st.fup = { busy: 1, msg: T('Subiendo ' + (i + 1) + ' de ' + files.length + '…', 'Uploading ' + (i + 1) + ' of ' + files.length + '…') }; render();
         var t = title ? (files.length > 1 ? title + ' (' + (i + 1) + ')' : title) : String(file.name || '').replace(/\.[a-z0-9]{2,5}$/i, '');
+        if (!Files.typeOf(file) && Voice.typeOf(file)) {
+          return Voice.fromFile(file).then(function(take) { return Voice.upload(take, { t: t, kids: kids ? 1 : 0 }); }).then(function(entry) {
+            if (addVoice(id, entry)) done++;
+          }, function(e) {
+            failed.push(String(file.name || '?').slice(0, 40) + ': ' + (e && e.message === 'size' ? T('más de 25 MB', 'over 25 MB') : T('no se pudo subir', 'could not be uploaded')));
+          });
+        }
         return Files.upload(file, t, kids).then(function(entry) {
           var p = tree.P[id];
           if (!p) return;
@@ -710,7 +733,7 @@ var Arbol = (function() {
           p.a.files.push(entry);
           done++;
         }, function(e) {
-          var why = e && e.message === 'type' ? T('no es una foto ni un PDF', 'not a photo or a PDF') : e && e.message === 'size' ? T('más de 25 MB', 'over 25 MB') : T('no se pudo subir', 'could not be uploaded');
+          var why = e && e.message === 'type' ? T('no es una foto, un PDF ni una grabación', 'not a photo, a PDF or a recording') : e && e.message === 'size' ? T('más de 25 MB', 'over 25 MB') : T('no se pudo subir', 'could not be uploaded');
           failed.push(String(file.name || '?').slice(0, 40) + ': ' + why);
         });
       });
@@ -733,6 +756,388 @@ var Arbol = (function() {
         saveTree().then(render);
       });
     });
+  }
+
+  // ---------------------------------------------------------------
+  // Voice notes (js/arbol-voice.js; stored on the family server)
+  // ---------------------------------------------------------------
+  // The kids hear every note a parent has not marked "parents only". A note is
+  // a grandparent telling their own story, so (unlike photos and documents) it
+  // stays audible for living relatives too: it shows no name or date beyond
+  // what the person page already shows.
+  function voices(id) {
+    var all = Voice.list(tree, id);
+    return parentOk ? all : all.filter(function(e) { return e.kids !== 0; });
+  }
+  function notePid(el) { var c = el.closest('.ar-vnote'); return (c && c.getAttribute('data-pid')) || st.pid; }
+  function voiceEntry(id, vid) { return Voice.list(tree, id).filter(function(e) { return e.id === vid; })[0] || null; }
+  function canRecord() { return !!user && (parentOk || !isLittle()); }
+  function mayDelete(e) { return parentOk || (!!e.by && e.by === kidKey); }
+  function shortDate(ts) {
+    var d = new Date(ts || 0);
+    if (!ts || isNaN(d.getTime())) return '';
+    try { return d.toLocaleDateString(dl() === 'es' ? 'es-CL' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d.getFullYear() + ''; }
+  }
+  // A waveform: 48 rounded bars; the played part is drawn over it in the person's colour.
+  function waveSvg(w, cls) {
+    var b = Voice.bars(w), out = '', i;
+    for (i = 0; i < b.length; i++) {
+      var h = Math.max(3, Math.round(b[i] * 34));
+      out += '<rect x="' + (i * 4 + 0.7) + '" y="' + ((40 - h) / 2) + '" width="2.6" height="' + h + '" rx="1.3"/>';
+    }
+    return '<svg class="' + (cls || '') + '" viewBox="0 0 192 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">' + out + '</svg>';
+  }
+  function playIcon() {
+    return '<svg class="ar-vico play" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M15 11.5v17a1.4 1.4 0 0 0 2.1 1.2l13.6-8.5a1.4 1.4 0 0 0 0-2.4L17.1 10.3A1.4 1.4 0 0 0 15 11.5z" fill="currentColor"/></svg>' +
+      '<svg class="ar-vico pause" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect x="12.5" y="11" width="5.5" height="18" rx="1.6" fill="currentColor"/><rect x="22" y="11" width="5.5" height="18" rx="1.6" fill="currentColor"/></svg>' +
+      '<svg class="ar-vico wait" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="3.2" stroke-dasharray="40 18" stroke-linecap="round"/></svg>';
+  }
+  // A hand-drawn studio microphone (the recorder's picture).
+  function micArt(px) {
+    return '<svg class="ar-micart" width="' + px + '" height="' + px + '" viewBox="0 0 120 120" aria-hidden="true" focusable="false">' +
+      '<defs><linearGradient id="arMicG" x1="0" x2="1"><stop offset="0" stop-color="#5d6470"/><stop offset=".45" stop-color="#c9ced6"/><stop offset=".7" stop-color="#eef1f5"/><stop offset="1" stop-color="#7c838f"/></linearGradient>' +
+      '<linearGradient id="arMicW" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a56a3f"/><stop offset="1" stop-color="#6e4325"/></linearGradient>' +
+      '<pattern id="arMicM" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.05" fill="#3b414b" opacity=".55"/></pattern></defs>' +
+      '<ellipse cx="60" cy="110" rx="30" ry="5" fill="#2b2b2b" opacity=".12"/>' +
+      '<path d="M44 106h32" stroke="url(#arMicW)" stroke-width="7" stroke-linecap="round"/>' +
+      '<path d="M60 84v22" stroke="#6b717c" stroke-width="5"/>' +
+      '<path d="M36 52v6a24 24 0 0 0 48 0v-6" fill="none" stroke="#7c838f" stroke-width="4.5" stroke-linecap="round"/>' +
+      '<rect x="42" y="12" width="36" height="62" rx="18" fill="url(#arMicG)" stroke="#4b515b" stroke-width="1.6"/>' +
+      '<rect x="44.5" y="14.5" width="31" height="34" rx="15.5" fill="url(#arMicM)"/>' +
+      '<rect x="42" y="47" width="36" height="5" fill="#4b515b" opacity=".55"/>' +
+      '<path d="M50 20c-2 6-2 18 0 24" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".55" fill="none"/>' +
+      '<circle cx="60" cy="63" r="3" fill="#c0392b"/></svg>';
+  }
+  function speakerBadge() {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z" fill="#fff"/><path d="M15.2 9a4.2 4.2 0 0 1 0 6M17.6 6.6a7.6 7.6 0 0 1 0 10.8" stroke="#fff" stroke-width="1.9" fill="none" stroke-linecap="round"/></svg>';
+  }
+
+  function voiceCard(id, e, big) {
+    var V0 = V(id), title = e.t || (V0 ? T('La voz de ' + V0.first, V0.first + '’s voice') : T('Grabación', 'Recording'));
+    var meta = [Voice.fmt(e.dur)];
+    if (!isLittle()) {
+      meta.push(e.who ? T('grabó ' + e.who, 'recorded by ' + e.who) : T('grabaron los papás', 'recorded by a parent'));
+      if (shortDate(e.ts)) meta.push(shortDate(e.ts));
+    }
+    var lock = parentOk && e.kids === 0 ? '<i class="ar-flock" title="' + esc(T('Solo papás', 'Parents only')) + '">🔒</i>' : '';
+    var playing = Voice.Player.current() === e.id;
+    return '<div class="ar-vnote' + (big ? ' big' : '') + (playing ? ' playing' : '') + '" data-vid="' + esc(e.id) + '" data-pid="' + esc(id) + '" style="--p:0">' +
+      '<button class="ar-vplay" data-act="vplay" data-vid="' + esc(e.id) + '" aria-pressed="' + (playing ? 'true' : 'false') + '" aria-label="' + esc(T('Escuchar: ', 'Listen: ') + title) + '">' + playIcon() + '</button>' +
+      '<div class="ar-vbody"><b>' + esc(title) + lock + '</b>' +
+      '<span class="ar-vwave">' + waveSvg(e.w, 'base') + waveSvg(e.w, 'on') + '</span>' +
+      '<small>' + esc(meta.join(' · ')) + '</small></div>' +
+      (mayDelete(e) && !isLittle() ? '<button class="ar-vdel" data-act="vdel" data-vid="' + esc(e.id) + '" aria-label="' + esc(T('Borrar la grabación: ', 'Delete the recording: ') + title) + '">' +
+        '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' : '') +
+      '</div>';
+  }
+
+  function voiceSection(id) {
+    var v = V(id), list = voices(id), rec = canRecord();
+    if (!list.length && !rec) return '';
+    var living = v && v.living;
+    var heading = list.length ? (living ? T('Su voz', 'Their voice') : T('Recuerdos grabados', 'Recorded memories')) : T('Grabar su historia', 'Record their story');
+    var html = '<h3 class="ar-h3">' + esc(heading) + '</h3>';
+    if (list.length) html += '<div class="ar-voices">' + list.map(function(e) { return voiceCard(id, e, isLittle()); }).join('') + '</div>';
+    if (rec) {
+      var label = living ? T('Grabar una historia de ' + v.first, 'Record a story from ' + v.first) : T('Grabar un recuerdo de ' + v.first, 'Record a memory of ' + v.first);
+      html += '<div class="ar-vrecrow">' + (Voice.supported()
+        ? '<button class="ar-btn rec" data-act="vrec" data-id="' + esc(id) + '"><span class="ar-recdot" aria-hidden="true"></span>' + esc(label) + '</button>' +
+          (!list.length ? '<p class="ar-note">' + esc(living ? T('Pídele a ' + v.first + ' que te cuente algo de cuando era ' + (v.z === 'F' ? 'niña' : 'niño') + '. Queda guardado aquí para toda la familia.', 'Ask ' + v.first + ' to tell you about when they were little. It is kept here for the whole family.')
+                                                     : T('¿Alguien de la familia recuerda a ' + v.first + '? Graba lo que cuenta.', 'Does someone in the family remember ' + v.first + '? Record what they tell.')) + '</p>' : '')
+        : '<p class="ar-note">' + esc(T('Este navegador no puede grabar. En el iPad, abre la app en Safari.', 'This browser cannot record. On the iPad, open the app in Safari.')) + '</p>') + '</div>';
+    }
+    return html;
+  }
+
+  // Story starters: questions a kid can ask a grandparent (or, for someone
+  // who has died, prompts for whoever remembers them).
+  function prompts(id) {
+    var v = V(id) || { first: '?' }, f = v.first, girl = v.z === 'F', out;
+    if (v.living) {
+      out = [
+        [girl ? '¿Cómo era tu casa cuando eras niña?' : '¿Cómo era tu casa cuando eras niño?', 'What was your home like when you were little?'],
+        [girl ? '¿A qué jugabas cuando eras chica?' : '¿A qué jugabas cuando eras chico?', 'What games did you play as a child?'],
+        ['¿Cómo era tu colegio?', 'What was your school like?'],
+        ['¿Cómo celebraban la Navidad en tu familia?', 'How did your family celebrate Christmas?'],
+        ['¿Qué recuerdas de tus abuelos?', 'What do you remember about your grandparents?'],
+        ['¿Qué recuerdas de tu Primera Comunión?', 'What do you remember about your First Communion?'],
+        ['¿Cuál fue tu primer trabajo?', 'What was your first job?']
+      ];
+      var sp = idx && idx.sp[id] && idx.sp[id][0] && V(idx.sp[id][0]);
+      if (sp) out.splice(3, 0, ['¿Cómo conociste a ' + sp.first + '?', 'How did you meet ' + sp.first + '?']);
+    } else {
+      out = [
+        ['Un recuerdo de ' + f, 'A memory of ' + f],
+        ['¿Cómo era ' + f + '?', 'What was ' + f + ' like?'],
+        ['Una historia que contaba ' + f, 'A story ' + f + ' used to tell'],
+        ['¿Qué le gustaba hacer a ' + f + '?', 'What did ' + f + ' like to do?']
+      ];
+    }
+    return out.map(function(p) { return T(p[0], p[1]); });
+  }
+
+  var recorder = null, meterLv = [];
+  function recView(id) {
+    var R = st.rec;
+    if (!R || R.pid !== id) return '';
+    var v = V(id) || { first: '?' }, P = prompts(id), body = '';
+    var close = '<button class="ar-lbx" data-act="vcancel" aria-label="' + esc(T('Cerrar sin guardar', 'Close without saving')) + '">✕</button>';
+    if (R.phase === 'ready') {
+      body = '<div class="ar-vhero">' + micArt(isLittle() ? 96 : 84) + '<div><h2>' + esc(v.living ? T('Una historia de ' + v.first, 'A story from ' + v.first) : T('Un recuerdo de ' + v.first, 'A memory of ' + v.first)) + '</h2>' +
+        '<p>' + esc(v.living ? T('Elige una pregunta y házsela. Pídele permiso antes de grabar.', 'Pick a question and ask it. Ask first if it is OK to record.') : T('Elige de qué se trata y cuéntalo.', 'Pick what it is about, then tell it.')) + '</p></div></div>' +
+        '<div class="ar-vprompts" role="radiogroup" aria-label="' + esc(T('Preguntas', 'Questions')) + '">' + P.map(function(p, i) {
+          return '<button class="ar-vprompt' + (R.q === i ? ' on' : '') + '" role="radio" aria-checked="' + (R.q === i ? 'true' : 'false') + '" data-act="vprompt" data-i="' + i + '">' + esc(p) + '</button>';
+        }).join('') + '</div>' +
+        (R.q != null ? '<p class="ar-vask">' + esc(P[R.q]) + ' ' + sayBtn(P[R.q]) + '</p>' : '') +
+        '<div class="ar-vctl"><button class="ar-vbig start" data-act="vstart" aria-label="' + esc(T('Empezar a grabar', 'Start recording')) + '"><span></span></button>' +
+        '<small>' + esc(T('Hasta ' + (Voice.MAX_SEC / 60) + ' minutos', 'Up to ' + (Voice.MAX_SEC / 60) + ' minutes')) + '</small></div>';
+    } else if (R.phase === 'rec') {
+      body = '<div class="ar-vlive"><span class="ar-recdot on" aria-hidden="true"></span><b id="ar-vtime" aria-live="off">0:00</b><span>/ ' + Voice.fmt(Voice.MAX_SEC) + '</span></div>' +
+        (R.q != null ? '<p class="ar-vask">' + esc(P[R.q]) + '</p>' : '') +
+        '<canvas id="ar-vmeter" class="ar-vmeter" aria-hidden="true"></canvas>' +
+        '<div class="ar-vctl"><button class="ar-vbig stop" data-act="vstop" aria-label="' + esc(T('Terminar la grabación', 'Stop recording')) + '"><span></span></button>' +
+        '<small>' + esc(T('Toca para terminar', 'Tap to finish')) + '</small></div>';
+    } else {
+      var tk = R.take || {}, busy = R.phase === 'saving';
+      var title = R.title != null ? R.title : (R.q != null ? P[R.q] : '');
+      body = '<h2>' + esc(T('¡Grabado!', 'Recorded!')) + ' <small>' + esc(Voice.fmt(tk.dur)) + '</small></h2>' +
+        '<div class="ar-vnote take' + (R.playing ? ' playing' : '') + '" data-vid="_take" style="--p:0"><button class="ar-vplay" data-act="vpreview" aria-pressed="' + (R.playing ? 'true' : 'false') + '" aria-label="' + esc(T('Escuchar lo grabado', 'Listen to it')) + '">' + playIcon() + '</button>' +
+        '<div class="ar-vbody"><span class="ar-vwave">' + waveSvg(tk.w, 'base') + waveSvg(tk.w, 'on') + '</span></div></div>' +
+        '<label class="ar-lbl" for="ar-vtitle">' + esc(T('Título', 'Title')) + '</label>' +
+        '<input id="ar-vtitle" type="text" maxlength="80" autocomplete="off" value="' + esc(title) + '"' + (busy ? ' disabled' : '') + '>' +
+        (parentOk ? '<label class="ar-chk"><input type="checkbox" id="ar-vkidsnew"' + (R.kids === 0 ? '' : ' checked') + '> <span>' + esc(T('Los niños pueden escucharlo', 'Kids can listen to it')) + '</span></label>' : '') +
+        '<div class="ar-actions"><button class="ar-btn" data-act="vsave"' + (busy ? ' disabled' : '') + '>' + esc(busy ? T('Guardando…', 'Saving…') : T('Guardar', 'Save')) + '</button>' +
+        '<button class="ar-btn alt" data-act="vredo"' + (busy ? ' disabled' : '') + '>' + esc(T('Grabar otra vez', 'Record again')) + '</button></div>';
+    }
+    return '<div class="ar-lightbox ar-vrec" role="dialog" aria-modal="true" aria-label="' + esc(T('Grabar una historia', 'Record a story')) + '">' +
+      '<div class="ar-vpanel">' + close + body + (R.err ? '<p class="ar-warn" role="alert">' + esc(R.err) + '</p>' : '') + '</div></div>';
+  }
+
+  function openRecorder(id) {
+    if (!canRecord() || !tree || !tree.P[id]) return;
+    Voice.Player.stop(); stopSpeech();
+    st.rec = { pid: id, phase: 'ready', q: null, take: null, err: null, title: null, kids: 1 };
+    render();
+  }
+  function closeRecorder() {
+    if (recorder) { recorder.cancel(); recorder = null; }
+    Voice.Player.stop();
+    st.rec = null;
+  }
+  function micError(code) {
+    if (code === 'denied') return T('El micrófono está bloqueado. En el iPad: Ajustes › Safari › Micrófono › Permitir. Luego vuelve a intentarlo.', 'The microphone is blocked. On the iPad: Settings › Safari › Microphone › Allow. Then try again.');
+    if (code === 'nomic') return T('No se encontró un micrófono.', 'No microphone was found.');
+    if (code === 'unsupported') return T('Este navegador no puede grabar.', 'This browser cannot record.');
+    return T('No se pudo empezar a grabar.', 'The recording could not start.');
+  }
+  function startRecording() {
+    var R = st.rec;
+    if (!R || R.phase !== 'ready') return;
+    if (!ArbolSync.online()) { R.err = T('Primero conecta este aparato al servidor de la familia: ahí se guarda la grabación.', 'Connect this device to the family server first: that is where the recording is kept.'); render(); return; }
+    R.err = null; R.phase = 'rec'; meterLv = [];
+    recorder = new Voice.Recorder({ onTick: meterTick });
+    render();
+    recorder.start().then(function() { sfx('click'); }, function(e) {
+      recorder = null;
+      if (!st.rec) return;
+      st.rec.phase = 'ready'; st.rec.err = micError(e && e.message); render();
+    });
+  }
+  function stopRecording() {
+    var R = st.rec;
+    if (!R || R.phase !== 'rec' || !recorder) return;
+    var r = recorder; recorder = null;
+    r.stop().then(function(take) {
+      if (!st.rec) return;
+      st.rec.take = take; st.rec.phase = 'done'; st.rec.err = null;
+      if (take.dur < 1) st.rec.err = T('Quedó muy corta. Puedes grabar otra vez.', 'That was very short. You can record again.');
+      render();
+    }, function(e) {
+      if (!st.rec || (e && e.message === 'cancelled')) return;
+      st.rec.phase = 'ready'; st.rec.err = T('No se grabó nada. Revisa el micrófono e inténtalo otra vez.', 'Nothing was recorded. Check the microphone and try again.'); render();
+    });
+  }
+  function meterTick(o) {
+    var t = $('#ar-vtime');
+    if (t) t.textContent = Voice.fmt(Math.floor(o.sec));
+    meterLv.push(o.level);
+    if (meterLv.length > 400) meterLv.splice(0, meterLv.length - 400);
+    drawMeter();
+    // auto-stopped at the limit: show the take
+    if (o.sec >= Voice.MAX_SEC && st.rec && st.rec.phase === 'rec') stopRecording();
+  }
+  function drawMeter() {
+    var c = $('#ar-vmeter');
+    if (!c || typeof ZsCanvas === 'undefined') return;
+    var k = ZsCanvas.dpr(), w = Math.max(1, Math.round(c.clientWidth * k)), h = Math.max(1, Math.round(c.clientHeight * k));
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    var g = ZsCanvas.get2d(c);
+    if (!g) return;
+    g.clearRect(0, 0, w, h);
+    var step = 6 * k, bw = 3.4 * k, n = Math.floor(w / step), i, mid = h / 2;
+    g.fillStyle = '#e5ddd0';
+    g.fillRect(0, mid - k / 2, w, k);
+    for (i = 0; i < n; i++) {
+      var lv = meterLv[meterLv.length - n + i];
+      if (lv == null) continue;
+      var bh = Math.max(2 * k, Math.min(1, lv) * (h - 6 * k));
+      var x = i * step + (step - bw) / 2;
+      g.fillStyle = i > n - 4 ? '#c0392b' : '#3f8f5a';
+      if (g.roundRect) { g.beginPath(); g.roundRect(x, mid - bh / 2, bw, bh, bw / 2); g.fill(); } else g.fillRect(x, mid - bh / 2, bw, bh);
+    }
+  }
+
+  // Before adding a note, take the server's newer tree if there is one, so a
+  // note recorded on this iPad never undoes what another device saved.
+  function freshTree() {
+    // a sync while the recorder was open saved a newer tree here but left the old one on screen
+    var local = !staleTree ? Promise.resolve() : ArbolDB.get().then(function(rec) {
+      staleTree = false;
+      if (rec) { treeTs = rec.ts; applyTree(rec.tree); }
+    }, function() {});
+    if (!ArbolSync.online()) return local;
+    return local.then(function() { return ArbolSync.pull(treeTs); }).then(function(r) {
+      if (!r || r.same || r.empty || !r.tree) return;
+      return ArbolDB.put(r.tree, r.ts).then(function() { treeTs = r.ts; applyTree(r.tree); });
+    }).catch(function() {});
+  }
+  function addVoice(pid, entry) {
+    var p = tree && tree.P[pid];
+    if (!p) return false;
+    if (!p.a || typeof p.a !== 'object') p.a = {};
+    if (!Array.isArray(p.a.voice)) p.a.voice = [];
+    p.a.voice.push(entry);
+    return true;
+  }
+  function saveRecording() {
+    var R = st.rec;
+    if (!R || !R.take || R.phase === 'saving') return;
+    var ti = $('#ar-vtitle'), kc = $('#ar-vkidsnew');
+    R.title = ti ? ti.value : R.title;
+    if (kc) R.kids = kc.checked ? 1 : 0;
+    if (!ArbolSync.online()) { R.err = T('Este aparato no está conectado al servidor de la familia. La grabación sigue aquí: conéctalo y toca Guardar.', 'This device is not connected to the family server. The recording is still here: connect it, then tap Save.'); render(); return; }
+    Voice.Player.stop();
+    R.phase = 'saving'; R.err = null; R.playing = false; render();
+    var me = kidKey && !parentOk ? kidKey : '', who = me && user ? String(user.name || '').split(' ')[0] : '';
+    Voice.upload(R.take, { t: R.title, by: me, who: who, kids: parentOk ? R.kids : 1 }).then(function(entry) {
+      return freshTree().then(function() {
+        if (!addVoice(R.pid, entry)) throw new Error('gone');
+        return saveTree();
+      }).then(function(ok) {
+        if (!ok) throw new Error('local');
+        st.rec = null;
+        sfx('success');
+        toast(T('Guardado. ¡Gracias por grabarlo!', 'Saved. Thank you for recording it!'));
+        log('Voice note recorded');
+        render();
+      });
+    }).catch(function() {
+      if (!st.rec) return;
+      st.rec.phase = 'done';
+      st.rec.err = T('No se pudo guardar. La grabación sigue aquí: inténtalo otra vez.', 'It could not be saved. The recording is still here: try again.');
+      render();
+    });
+  }
+  function cancelRecording() {
+    var R = st.rec;
+    if (R && R.take && R.phase !== 'saving' && typeof ZsDialog !== 'undefined') {
+      ZsDialog.confirm({ title: T('¿Salir sin guardar?', 'Leave without saving?'), message: T('La grabación se pierde.', 'The recording will be lost.'), confirmLabel: T('Salir', 'Leave') }).then(function(yes) {
+        if (yes) { closeRecorder(); render(); }
+      });
+      return;
+    }
+    if (R && R.phase === 'saving') return;
+    closeRecorder(); render();
+  }
+  function redoRecording() {
+    var R = st.rec;
+    if (!R || R.phase === 'saving') return;
+    Voice.Player.stop();
+    R.take = null; R.phase = 'ready'; R.err = null; R.playing = false;
+    var ti = $('#ar-vtitle'); if (ti) R.title = ti.value || null;
+    render();
+  }
+  function previewTake() {
+    var R = st.rec;
+    if (!R || !R.take) return;
+    if (Voice.Player.current() === '_take') { Voice.Player.stop(); return; }
+    var u = Voice.Player.playBlob(R.take.blob, onPlay);
+    R.url = u;
+  }
+  function onPlay(o) {
+    var card = root && root.querySelector('.ar-vnote[data-vid="' + o.id + '"]');
+    if (o.id === '_take' && st.rec) st.rec.playing = !!o.playing;
+    if (card) {
+      card.classList.toggle('playing', !!o.playing);
+      card.classList.toggle('loading', !!o.loading);
+      card.style.setProperty('--p', String(Math.max(0, Math.min(1, o.p || 0))));
+      var b = card.querySelector('.ar-vplay');
+      if (b) b.setAttribute('aria-pressed', o.playing ? 'true' : 'false');
+    }
+    if (o.err) toast(o.err === 'missing' ? T('Esta grabación ya no está en el servidor.', 'This recording is no longer on the server.') : o.err === 'play' && !ArbolSync.online() ? T('Para escuchar hay que estar conectado al servidor de la familia.', 'To listen, this device must be connected to the family server.') : T('Este aparato no puede reproducir esta grabación.', 'This device cannot play this recording.'));
+    if (o.playing && !o.paused && o.id !== '_take' && data) {
+      if (!data.vh || typeof data.vh !== 'object') data.vh = {};
+      if (!data.vh[o.id]) { data.vh[o.id] = 1; saveData(); log('Listened to a family voice note'); }
+    }
+  }
+  function playVoice(pid, vid) {
+    var e = voiceEntry(pid, vid);
+    if (!e || (!parentOk && e.kids === 0)) return;
+    stopSpeech();
+    Voice.Player.toggle(e, onPlay);
+  }
+  function deleteVoice(pid, vid) {
+    var p = tree.P[pid], e = voiceEntry(pid, vid);
+    if (!p || !e || !mayDelete(e) || typeof ZsDialog === 'undefined') return;
+    ZsDialog.confirm({ title: T('¿Borrar esta grabación?', 'Delete this recording?'), message: (e.t ? e.t + ' · ' : '') + T('Se borra del servidor de la familia para todos.', 'It is deleted from the family server for everyone.'), confirmLabel: T('Borrar', 'Delete') }).then(function(yes) {
+      if (!yes) return;
+      if (Voice.Player.current() === vid) Voice.Player.stop();
+      Files.remove({ id: vid }).then(function() {
+        return freshTree();
+      }).then(function() {
+        var q = tree && tree.P[pid];
+        if (q && q.a && Array.isArray(q.a.voice)) q.a.voice = q.a.voice.filter(function(x) { return x.id !== vid; });
+        return saveTree();
+      }).then(function() { toast(T('Grabación borrada.', 'Recording deleted.')); render(); });
+    });
+  }
+  // The parents' list of a person's voice notes, in the photos and documents panel.
+  function parentVoices(id) {
+    var list = Voice.list(tree, id);
+    if (!list.length) return '';
+    return '<h4 class="ar-h4">' + esc(T('Grabaciones', 'Recordings')) + '</h4><ul class="ar-flist">' + list.map(function(e) {
+      return '<li><span class="ar-fname">🎙️ ' + esc(e.t || T('(sin título)', '(no title)')) + ' <small>' + esc(Voice.fmt(e.dur)) + (e.who ? ' · ' + esc(e.who) : '') + '</small></span>' +
+        '<label class="ar-chk sm"><input type="checkbox" class="ar-vkids" data-vid="' + esc(e.id) + '"' + (e.kids !== 0 ? ' checked' : '') + '> <span>' + esc(T('Los niños lo escuchan', 'Kids can hear it')) + '</span></label>' +
+        '<button class="ar-link" data-act="vdel" data-vid="' + esc(e.id) + '">' + esc(T('Borrar', 'Delete')) + '</button></li>';
+    }).join('') + '</ul>';
+  }
+
+  // Home > Family voices: every recording, grouped by person.
+  function viewVoices() {
+    var me = meId(), who = [], id;
+    for (id in tree.P) { if (!tree.P[id].gone && voices(id).length) who.push(id); }
+    var near = Kin.up(idx, me, 3);
+    who.sort(function(a, b) { return (near[a] || 9) - (near[b] || 9) || (V(a).first < V(b).first ? -1 : 1); });
+    var html = head() + backBar(T('Inicio', 'Home')) +
+      '<section class="ar-vintro">' + micArt(isLittle() ? 92 : 76) + '<div><h2 class="ar-h2">' + esc(T('Voces de la familia', 'Family voices')) + '</h2>' +
+      '<p>' + esc(who.length ? T('Historias contadas por la familia, con su propia voz.', 'Stories told by the family, in their own voices.') : T('Todavía no hay grabaciones.', 'No recordings yet.')) + '</p></div></section>';
+    who.forEach(function(pid) {
+      var rel = me && pid !== me ? termFor(pid, me) : '';
+      html += '<section class="ar-vgroup"><div class="ar-vwho">' + chip(pid, rel) + '</div><div class="ar-voices">' +
+        voices(pid).map(function(e) { return voiceCard(pid, e, isLittle()); }).join('') + '</div></section>';
+    });
+    if (canRecord() && me) {
+      var rows = Kin.pedigree(idx, me, 2), pick = (rows[2] || []).concat(rows[1] || []).filter(Boolean);
+      if (pick.length) {
+        html += '<h3 class="ar-h3">' + esc(T('Grabar una historia', 'Record a story')) + '</h3><p class="ar-note">' + esc(T('¿Quién la cuenta?', 'Who is telling it?')) + '</p>' +
+          '<div class="ar-chips">' + pick.map(function(x) { return chip(x, termFor(x, me)).replace('data-act="person"', 'data-act="vrecfor"'); }).join('') + '</div>';
+      }
+    }
+    return html + parentBtn();
+  }
+  function anyVoices() {
+    for (var id in tree.P) { if (!tree.P[id].gone && voices(id).length) return true; }
+    return false;
   }
 
   function chip(id, label) {
@@ -1022,6 +1427,8 @@ var Arbol = (function() {
       '<li>' + esc(T('Se aceptan archivos GEDCOM 5.5.1 y 7.0. Las fotos no vienen en el archivo. FamilySearch puede cambiar estos pasos.', 'GEDCOM 5.5.1 and 7.0 files both work. Photos are not included in the file. FamilySearch can change these steps.')) + '</li></ol>' +
       '<h4>Ancestry, MyHeritage ' + esc(T('y otros', 'and others')) + '</h4><p>' + esc(T('Exporta un archivo GEDCOM desde la configuración del árbol.', 'Export a GEDCOM file from the tree’s settings.')) + '</p>' +
       '<p class="ar-note">' + esc(T('El archivo se lee en este aparato. Solo el árbol se guarda en el servidor de la familia. Las fotos y documentos de cada persona (actas, bautizos, retratos) se agregan desde su página, con el botón 🔒.', 'The file is read on this device. Only the tree is saved to the family server. Photos and documents for each person (records, baptisms, portraits) are added from their page, with the 🔒 button.')) + '</p>' +
+      '</div></details><details class="ar-help"><summary>' + esc(T('Grabaciones de voz: ¿dónde quedan y quién las ve?', 'Voice recordings: where are they kept, and who hears them?')) + '</summary><div class="ar-helpb"><p>' + esc(T('En la página de una persona, los niños (desde los 6 años) y los papás pueden grabar una historia: por ejemplo, la abuela contando cómo era su casa. Se guarda en el servidor de la familia, no en este aparato ni en internet. Los niños pueden borrar lo que grabaron ellos; los papás pueden borrar cualquier grabación o dejarla «solo papás» desde el panel 🔒 de esa persona. También se puede subir una nota de voz del teléfono (.m4a o .mp3).', 'On a person’s page, the kids (from age 6) and the parents can record a story: for example, Grandma telling what her house was like. It is kept on the family server, not on this device or the internet. The kids can delete what they recorded; the parents can delete any recording, or make it “parents only”, from that person’s 🔒 panel. A voice memo from a phone (.m4a or .mp3) can be uploaded too.')) + '</p>' +
+      '<p class="ar-note">' + esc(T('Si el iPad no deja usar el micrófono: Ajustes › Safari › Micrófono › Permitir (o Ajustes › Apps › Safari, según la versión).', 'If the iPad will not let the app use the microphone: Settings › Safari › Microphone › Allow (or Settings › Apps › Safari, depending on the version).')) + '</p>' +
       '</div></details>';
   }
 
@@ -1212,6 +1619,17 @@ var Arbol = (function() {
       case 'parentdone': parentOk = false; st.fup = null; st.fview = null; render(); break;
       case 'fileunlock': askParent(function() { st.fup = null; render(); }); break;
       case 'filedel': deleteFile(st.pid, el.getAttribute('data-fid')); break;
+      case 'vplay': playVoice(notePid(el), el.getAttribute('data-vid')); break;
+      case 'vdel': deleteVoice(notePid(el), el.getAttribute('data-vid')); break;
+      case 'vrec': openRecorder(id || st.pid); break;
+      case 'vrecfor': go('person', { pid: id }); openRecorder(id); break;
+      case 'vprompt': if (st.rec) { st.rec.q = parseInt(el.getAttribute('data-i'), 10); st.rec.title = null; render(); } break;
+      case 'vstart': startRecording(); break;
+      case 'vstop': stopRecording(); break;
+      case 'vsave': saveRecording(); break;
+      case 'vredo': redoRecording(); break;
+      case 'vcancel': cancelRecording(); break;
+      case 'vpreview': previewTake(); break;
       case 'removetree':
         if (typeof ZsDialog === 'undefined') break;
         ZsDialog.confirm({ title: T('¿Borrar el árbol?', 'Delete the tree?'), message: T('Se borra de este aparato y del servidor de la familia. Se puede volver a importar el archivo.', 'It is deleted from this device and the family server. You can import the file again.'), confirmLabel: T('Borrar', 'Delete') }).then(function(yes) {
@@ -1235,6 +1653,7 @@ var Arbol = (function() {
   }
 
   function onKey(ev) {
+    if (ev.key === 'Escape' && st.rec) { ev.preventDefault(); cancelRecording(); return; }
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.classList && (ev.target.classList.contains('ar-pcard') || ev.target.classList.contains('ar-dot'))) {
       ev.preventDefault(); ev.target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     }
@@ -1268,6 +1687,13 @@ var Arbol = (function() {
       var t = ev.target;
       if (!t || !tree || st.view !== 'person' || !parentOk) return;
       if (t.id === 'ar-fup') uploadFiles(st.pid, t.files);
+      else if (t.classList && t.classList.contains('ar-vkids')) {
+        var ve = voiceEntry(st.pid, t.getAttribute('data-vid'));
+        if (ve) {
+          var raw = (tree.P[st.pid].a.voice || []).filter(function(x) { return x.id === ve.id; })[0];
+          if (raw) { raw.kids = t.checked ? 1 : 0; saveTree(); toast(T('Guardado', 'Saved')); }
+        }
+      }
       else if (t.classList && t.classList.contains('ar-fkids')) {
         var f = Files.list(tree, st.pid).filter(function(x) { return x.id === t.getAttribute('data-fid'); })[0];
         if (f) {
@@ -1278,7 +1704,7 @@ var Arbol = (function() {
         }
       }
     });
-    window.addEventListener('pagehide', stopSpeech);
+    window.addEventListener('pagehide', function() { stopSpeech(); if (recorder) { recorder.cancel(); recorder = null; } Voice.Player.forget(); });
     window.addEventListener('zs:household-synced', function() { if (ready) syncTree(); });
     render();
     loadTree().then(function() {

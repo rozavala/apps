@@ -15,6 +15,12 @@ const PDF = Buffer.from('%PDF-1.4\n% fictional test document\n%%EOF\n');
 const HEIC = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from('ftypheic'), Buffer.alloc(40, 3)]);
 const HTML = Buffer.from('<html><script>alert(1)</script></html>');
 const SVG = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>');
+// voice notes: only the first bytes matter to the server (fictional, silent)
+const WEBM = Buffer.concat([Buffer.from([0x1A, 0x45, 0xDF, 0xA3]), Buffer.alloc(60, 4)]);
+const M4A = Buffer.concat([Buffer.from([0, 0, 0, 28]), Buffer.from('ftypM4A '), Buffer.alloc(40, 5)]);
+const MP4ISO = Buffer.concat([Buffer.from([0, 0, 0, 28]), Buffer.from('ftypiso5'), Buffer.alloc(40, 5)]);
+const OGG = Buffer.concat([Buffer.from('OggS'), Buffer.alloc(60, 6)]);
+const MP3 = Buffer.concat([Buffer.from('ID3'), Buffer.alloc(60, 7)]);
 const id = (n) => n.toString(16).padStart(32, '0');
 
 let dir, server, base;
@@ -57,6 +63,28 @@ test('a photo and a PDF are stored, served back byte for byte, and deleted', asy
   expect((await (await fetch(base + id(1), { method: 'DELETE' })).json()).status).toBe('deleted');
   expect((await fetch(base + id(1))).status).toBe(404);
   expect((await (await fetch(base + id(1), { method: 'DELETE' })).json()).status).toBe('absent');
+});
+
+test('voice notes (WebM, MP4/M4A, Ogg, MP3) are stored and served back with their type', async () => {
+  for (const [n, type, body, ext] of [[30, 'audio/webm', WEBM, 'webm'], [31, 'audio/mp4', M4A, 'm4a'], [32, 'audio/mp4', MP4ISO, 'm4a'], [33, 'audio/ogg', OGG, 'ogg'], [34, 'audio/mpeg', MP3, 'mp3'], [35, 'audio/webm;codecs=opus', WEBM, 'webm']]) {
+    const r = await put(id(n), type, body);
+    expect(r.status, type).toBe(200);
+    const g = await fetch(base + id(n));
+    expect(g.headers.get('content-type')).toBe(type.split(';')[0]);
+    expect(g.headers.get('content-security-policy')).toContain('sandbox');
+    expect(Buffer.from(await g.arrayBuffer()).equals(body)).toBe(true);
+    expect(fs.existsSync(path.join(dir, '_household', 'files', id(n) + '.' + ext))).toBe(true);
+  }
+});
+
+test('a recording that is really something else is refused', async () => {
+  expect((await put(id(40), 'audio/webm', HTML)).status).toBe(415);
+  expect((await put(id(41), 'audio/mp4', HEIC)).status).toBe(415);       // a HEIC photo is not an audio file
+  expect((await put(id(42), 'audio/mpeg', JPEG)).status).toBe(415);      // a JPEG calling itself an MP3
+  expect((await put(id(43), 'audio/ogg', SVG)).status).toBe(415);
+  expect((await put(id(44), 'audio/wav', Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WAVE'), Buffer.alloc(40)]))).status).toBe(415);
+  expect((await put(id(45), 'video/mp4', MP4ISO)).status).toBe(415);
+  expect((await fetch(base + id(40))).status).toBe(404);
 });
 
 test('anything that is not a photo or a PDF is refused, even when it claims to be one', async () => {

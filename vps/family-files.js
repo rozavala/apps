@@ -3,7 +3,8 @@
    family tree (Árbol familiar).
 
    A parent attaches pictures or scanned documents (a marriage or
-   baptism record, a letter) to a person. The tree itself only keeps a
+   baptism record, a letter) to a person, and the family records voice
+   notes (a grandparent telling a story). The tree itself only keeps a
    list of { id, type, title, ... } per person (synced like the rest of
    the tree); the files live here, one file per id, under
      data/_household/files/<id>.<ext>
@@ -17,13 +18,14 @@
    Safety:
      - ids are 32 lowercase hex characters made by the client, so a path
        can never be built from anything else;
-     - only JPEG, PNG, WebP, HEIC/HEIF and PDF are accepted, and the first
+     - only JPEG, PNG, WebP, HEIC/HEIF, PDF and audio (WebM, MP4/M4A, Ogg,
+       MP3: voice notes) are accepted, and the first
        bytes must match the declared type (an HTML or SVG file can never
        be stored, so nothing stored can run script);
      - each file is at most 25 MB, and the folder at most 5 GB;
      - a file is never overwritten (ids are random; a repeat is a 409);
      - files are served with nosniff and a sandbox CSP, as attachments
-       for anything but images and PDFs (which is all there is).
+       for anything but images, PDFs and audio (which is all there is).
    Like the rest of this server, it is reachable only over the tailnet.
    ================================================================ */
 'use strict';
@@ -40,7 +42,13 @@ const TYPES = {
   'image/webp': 'webp',
   'image/heic': 'heic',
   'image/heif': 'heif',
-  'application/pdf': 'pdf'
+  'application/pdf': 'pdf',
+  // voice notes: grandparents telling a story (recorded in the browser:
+  // WebM/Opus in Chrome, MP4/AAC in Safari; or a Voice Memos / MP3 file)
+  'audio/webm': 'webm',
+  'audio/mp4': 'm4a',
+  'audio/ogg': 'ogg',
+  'audio/mpeg': 'mp3'
 };
 const EXT_TYPE = Object.fromEntries(Object.entries(TYPES).map(([t, e]) => [e, t]));
 
@@ -55,6 +63,10 @@ function sniff(type, buf) {
     case 'image/heic':
     case 'image/heif': return ascii(4, 8) === 'ftyp' && /^(heic|heix|hevc|hevx|heim|heis|mif1|msf1|avif)$/.test(ascii(8, 12));
     case 'application/pdf': return ascii(0, 5) === '%PDF-';
+    case 'audio/webm': return buf[0] === 0x1A && buf[1] === 0x45 && buf[2] === 0xDF && buf[3] === 0xA3;   // EBML
+    case 'audio/mp4': return ascii(4, 8) === 'ftyp' && /^(M4A |M4B |mp4[12]|isom|iso[2-9]|dash|3gp[4-6])$/.test(ascii(8, 12));
+    case 'audio/ogg': return ascii(0, 4) === 'OggS';
+    case 'audio/mpeg': return ascii(0, 3) === 'ID3' || (buf[0] === 0xFF && (buf[1] & 0xE0) === 0xE0);
     default: return false;
   }
 }
@@ -80,7 +92,7 @@ function create(dataDir) {
   function save(id, type, buf) {
     type = String(type || '').split(';')[0].trim().toLowerCase();
     if (!ID_RE.test(String(id))) return { status: 400, body: { error: 'bad id' } };
-    if (!TYPES[type]) return { status: 415, body: { error: 'only photos (JPEG, PNG, WebP, HEIC) and PDF documents' } };
+    if (!TYPES[type]) return { status: 415, body: { error: 'only photos (JPEG, PNG, WebP, HEIC), PDF documents and voice recordings' } };
     if (!buf || !buf.length) return { status: 400, body: { error: 'empty file' } };
     if (buf.length > MAX_BYTES) return { status: 413, body: { error: 'file too large' } };
     if (!sniff(type, buf)) return { status: 415, body: { error: 'the file does not match its type' } };
