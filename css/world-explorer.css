@@ -330,6 +330,7 @@ body {
 .btn-primary { background: linear-gradient(135deg, #4338CA, #6366F1); color: #fff; box-shadow: 0 4px 0 #312e81; }
 .btn-quiz { background: linear-gradient(135deg, #2563EB, #06B6D4); color: #fff; box-shadow: 0 4px 0 #1e40af; }
 .btn-secondary { background: #fff; color: var(--text-primary); border: 1px solid var(--border-subtle); }
+.we-chl-btn { width: 100%; margin-bottom: 10px; min-height: 52px; font-size: 1.05rem; }
 
 /* Feedback pop */
 .feedback { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.5); z-index: 10000; pointer-events: none; opacity: 0; transition: all .3s cubic-bezier(.175, .885, .32, 1.275); }

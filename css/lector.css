@@ -288,6 +288,22 @@ html.zs-little .lx-bk-text { font-size: clamp(2.2rem, 9vw, 3.1rem); }
   .lx-pic svg { max-width: 160px; margin: auto; }
   .lx-map { max-width: 520px; margin: 0 auto; }
 }
+/* An iPad on its side (or a laptop): the picture on the left, the words and
+   buttons on the right, so a whole page fits without scrolling. */
+@media (min-width: 900px) and (orientation: landscape) {
+  body.lx-reading .app.lx-app { max-width: 1060px; }
+  body.lx-reading .lx-book {
+    display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); column-gap: 20px; row-gap: 12px;
+    grid-template-rows: auto 1fr auto auto auto auto auto 1fr; align-items: center;
+  }
+  body.lx-reading .lx-bk-title { grid-column: 1 / -1; grid-row: 1; }
+  body.lx-reading .lx-bk-art { grid-column: 1; grid-row: 2 / 9; }
+  body.lx-reading .lx-bk-text { grid-column: 2; grid-row: 3; min-height: 150px; }
+  body.lx-reading .lx-bk-dots { grid-column: 2; grid-row: 4; }
+  body.lx-reading .lx-modes { grid-column: 2; grid-row: 5; }
+  body.lx-reading .lx-bk-ctl { grid-column: 2; grid-row: 6; }
+  body.lx-reading .lx-bk-stars { grid-column: 2; grid-row: 7; }
+}
 @media (prefers-reduced-motion: reduce) {
   .lx-w.next, .lx-round-btn.pulse, .lx-stars.big .lx-star.on { animation: none; }
 }
