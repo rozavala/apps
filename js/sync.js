@@ -75,6 +75,7 @@ var CloudSync = (function() {
     'zs_vacquiz_': 'vacquiz',
     'zs_circuit_': 'circuit',
     'zs_engineer_': 'engineer',
+    'zs_taller_': 'taller',
     'zs_negocio_': 'negocio',
     'zs_euclid_': 'euclid',
     'zs_cocina_': 'cocina',

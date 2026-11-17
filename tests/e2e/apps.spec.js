@@ -32,6 +32,7 @@ const MAJOR_APPS = [
   'calculo-rapido.html',
   'lector.html',
   'linea-del-tiempo.html',
+  'taller-maquinas.html',
   'arbol-familiar.html',
   'code-lab.html'
 ];

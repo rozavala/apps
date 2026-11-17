@@ -45,6 +45,7 @@ var AppSchedule = (function() {
   ALL_APPS.push({ id: 'linea', card: '.card-linea' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
+  ALL_APPS.push({ id: 'taller', card: '.card-taller' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -73,6 +74,9 @@ var AppSchedule = (function() {
 
   // Línea del Tiempo (history) rides along with the history and world days.
   [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });
+
+  // Taller de Máquinas (simple machines and gears) on the science days, next to Lab Explorer: Monday and Thursday, plus Saturday.
+  [1, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('taller'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
