@@ -119,6 +119,7 @@ var ZsSpeak = (function() {
     t = t.replace(/×/g, es ? ' por ' : ' times ')
          .replace(/÷/g, es ? ' dividido por ' : ' divided by ')
          .replace(/−/g, es ? ' menos ' : ' minus ')
+         .replace(/(\d)\s*\+\s*(?=\d)/g, es ? '$1 más ' : '$1 plus ')
          .replace(/\s*=\s*\?/g, es ? ' es igual a cuánto' : ' equals what')
          .replace(/\s*=\s*/g, es ? ' es igual a ' : ' equals ');
     return t.replace(/\s+/g, ' ').trim();
@@ -245,8 +246,9 @@ var ZsSpeak = (function() {
   // Put a 🔊 in el. True when this is a new question: the element is new,
   // or an app that sets its text wiped the button and wrote another one.
   function _decorate(el, cfg) {
-    // A 🔊 cannot go inside another button or link.
-    if (el.closest('button, a[href], [role="button"], label')) return false;
+    // A rule never puts a 🔊 inside another button or link (data-speak
+    // on a card title is the app asking for one, so that one is kept).
+    if (cfg && el.closest('button, a[href], [role="button"], label')) return false;
     var old = null;
     Array.prototype.forEach.call(el.children, function(c) { if (c.classList.contains('zs-say')) old = c; });
     var text = el.getAttribute('data-speak') || _textOf(el);
