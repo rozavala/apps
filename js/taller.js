@@ -240,7 +240,8 @@ var Taller = (function() {
     stage('tm-hero', 2.4, 190, 380);
     var t0 = 0;
     S.draw = function() { heroDraw(t0); };
-    S.tick = function(dt) { t0 += dt; return S.screen === 'home' && !document.hidden; };
+    // the hero gears turn for a while after the page opens, then rest
+    S.tick = function(dt) { t0 += dt; return S.screen === 'home' && !document.hidden && t0 < 20; };
     kick();
   }
 
@@ -319,7 +320,8 @@ var Taller = (function() {
   // Inputs (sliders and choices) per machine.
   function controlsFor(st) {
     var ch = st.ch, P = st.lever, k = st.kind, c = [];
-    function fixed(key) { return ch && ch.setup && ch.setup[key] != null && (key === 'mass' || ch.setup['fix' + key.charAt(0).toUpperCase() + key.slice(1)]); }
+    // a challenge can lock an input: setup.fixHeight, setup.fixAxle …
+    function fixed(flag) { return !!(ch && ch.setup && ch.setup[flag]); }
     if (k === 'lever') {
       if (P.fulcrum.move) c.push({ key: 'fulcrum', label: ['Punto de apoyo', 'Fulcrum'], min: P.fulcrum.min, max: P.fulcrum.max, step: 0.01, unit: 'm' });
       if (P.load.move) c.push({ key: 'loadPos', label: [P.id === 'barrow' ? 'Dónde va la carga' : 'Carga', 'Where the load sits'], min: P.load.lo, max: P.load.hi, step: 0.01, unit: 'm' });
@@ -329,7 +331,7 @@ var Taller = (function() {
       c.push({ key: 'n', label: ['Cuerdas que sostienen', 'Ropes holding the load'], choices: [1, 2, 3, 4, 6] });
       if (!ch) c.push({ key: 'mass', label: ['Peso de la caja', 'Crate'], min: 10, max: 200, step: 5, unit: 'kg' });
     } else if (k === 'incline') {
-      if (!fixed('height')) c.push({ key: 'height', label: ['Altura', 'Height'], min: 0.4, max: 1.5, step: 0.05, unit: 'm' });
+      if (!fixed('fixHeight')) c.push({ key: 'height', label: ['Altura', 'Height'], min: 0.4, max: 1.5, step: 0.05, unit: 'm' });
       c.push({ key: 'length', label: ['Largo de la rampa', 'Ramp length'], min: 1, max: 5, step: 0.1, unit: 'm' });
       if (!ch) c.push({ key: 'mass', label: ['Peso de la caja', 'Crate'], min: 10, max: 150, step: 5, unit: 'kg' });
     } else if (k === 'wedge') {
@@ -337,7 +339,7 @@ var Taller = (function() {
       c.push({ key: 'thickness', label: ['Grosor de la cuña', 'Wedge thickness'], min: 0.02, max: 0.12, step: 0.005, unit: 'm' });
     } else if (k === 'wheel') {
       c.push({ key: 'wheelR', label: ['Radio de la rueda (manivela)', 'Wheel (crank) radius'], min: 0.1, max: 0.45, step: 0.01, unit: 'm' });
-      if (!fixed('axle')) c.push({ key: 'axleR', label: ['Radio del eje', 'Axle radius'], min: 0.03, max: 0.12, step: 0.005, unit: 'm' });
+      if (!fixed('fixAxle')) c.push({ key: 'axleR', label: ['Radio del eje', 'Axle radius'], min: 0.03, max: 0.12, step: 0.005, unit: 'm' });
       if (!ch) c.push({ key: 'mass', label: ['Peso del balde', 'Bucket'], min: 4, max: 40, step: 1, unit: 'kg' });
     } else if (k === 'screw') {
       c.push({ key: 'pitch', label: ['Paso de la rosca', 'Thread pitch'], choices: [0.002, 0.004, 0.006, 0.008, 0.01], unit: 'mm' });
@@ -782,7 +784,7 @@ var Taller = (function() {
     autoSay(ch ? one(ch.goal) : T('Toca una rueda y cambia su tamaño.', 'Tap a gear and change its size.'));
     stage('tm-cv', 1.7, 240, 480);
     S.draw = function() { drawGears(st); };
-    S.tick = function(dt) { if (st.run) st.t += dt; return S.screen === 'gears' && !document.hidden; };
+    S.tick = function(dt) { if (st.run) st.t += dt; return S.screen === 'gears' && st.run && !document.hidden; };
     function sync() { syncGearUI(st); gearNumbers(st); redraw(); }
     Array.prototype.forEach.call(root().querySelectorAll('[data-z]'), function(b) {
       b.addEventListener('click', function() {
@@ -1170,7 +1172,7 @@ var Taller = (function() {
     p.x = Math.max(0.05, Math.min(st.L.w - 0.05, Math.round(p.x / 0.01) * 0.01));
     if (P.static) { p.y = Math.max(0.05, Math.min(st.L.h - 0.05, Math.round(p.y / 0.01) * 0.01)); return; }
     var half = P.r ? P.r : p.type === 'seesaw' ? 0.18 : P.h / 2;
-    var top = Ph.surfaceBelow(st.L, st.placed, p.x, p.y, idx);
+    var top = Ph.surfaceBelow(st.L, st.placed, p.x, p.y, idx, p.type === 'seesaw' ? 0.03 : (P.r || P.w / 2));
     p.y = Math.round((top + half + (P.r ? 0.001 : 0.0005)) * 1000) / 1000;
     if (p.type === 'seesaw' && !p.a) p.a = -18;
   }
@@ -1271,7 +1273,12 @@ var Taller = (function() {
     var W = st.world;
     st.acc += dt;
     var steps = 0;
-    while (st.acc >= Ph.DT && steps < 3) { W.step(Ph.DT); st.acc -= Ph.DT; steps++; }
+    // at most two physics steps a frame, and only one when a step is slow
+    // (a big pile on an old iPad): the run goes slow-motion instead of
+    // freezing the page
+    var budget = st.slow ? 1 : 2, t0 = Date.now();
+    while (st.acc >= Ph.DT && steps < budget) { W.step(Ph.DT); st.acc -= Ph.DT; steps++; }
+    if (steps) st.slow = (Date.now() - t0) / steps > 12;
     if (st.acc > Ph.DT) st.acc = 0;
     if (W.touched.bell && !st.ringT) { st.ringT = 0.001; bellSound(); }
     if (st.ringT) st.ringT += dt;
@@ -1377,6 +1384,11 @@ var Taller = (function() {
     if (h === 'gears') gears(); else if (h === 'bike') bike(); else if (h === 'challenges') challenges(); else if (h === 'chain') chainList();
     else if (machineDef(h)) machine(h); else home();
   }
+  // pause every loop while the tab is hidden, and pick it up again on return
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) { if (S.raf) cancelAnimationFrame(S.raf); S.raf = 0; S.last = 0; }
+    else if (S.tick) kick();
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 

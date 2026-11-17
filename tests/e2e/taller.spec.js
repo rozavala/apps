@@ -115,6 +115,35 @@ test.describe('Taller de Máquinas', () => {
     await expect(page.locator('.tm-goal')).toBeVisible();
   });
 
+  test('the well challenge keeps its axle fixed: only the wheel can change', async ({ page }) => {
+    await open(page, { hash: '#challenges' });
+    await page.click('[data-ch="c-well"]');
+    await expect(page.locator('#tm-s-wheelR')).toBeVisible();
+    await expect(page.locator('#tm-s-axleR')).toHaveCount(0);
+    await expect(page.locator('#tm-s-mass')).toHaveCount(0);
+    // the ramp challenge keeps its height
+    // @ts-ignore
+    await page.evaluate(() => window.Taller.machine('incline', 'c-ramp'));
+    await expect(page.locator('#tm-s-length')).toBeVisible();
+    await expect(page.locator('#tm-s-height')).toHaveCount(0);
+  });
+
+  test('the home gears rest after a while, and the gear lab stops drawing when paused', async ({ page }) => {
+    await open(page);
+    // @ts-ignore
+    await page.waitForFunction(() => window.Taller._state.raf === 0, null, { timeout: 25000 });
+    // @ts-ignore
+    await page.evaluate(() => window.Taller.gears());
+    // @ts-ignore
+    expect(await page.evaluate(() => window.Taller._state.raf !== 0)).toBe(true);
+    await page.click('#tm-run');
+    // @ts-ignore
+    await page.waitForFunction(() => window.Taller._state.raf === 0);
+    await page.click('#tm-run');
+    // @ts-ignore
+    expect(await page.evaluate(() => window.Taller._state.raf !== 0)).toBe(true);
+  });
+
   test('older kids predict the force first; the right choice is confirmed', async ({ page }) => {
     await open(page, { age: 10 });
     // @ts-ignore

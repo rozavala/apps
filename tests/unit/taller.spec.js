@@ -272,6 +272,51 @@ test.describe('Taller: chain-reaction levels', () => {
     expect(a.t).toBe(b.t);
   });
 
+  test('balls dropped on the very same spot stay on screen and slow (2 and 4 of them)', () => {
+    const L = { w: 3, h: 1.8, statics: [], fixed: [] };
+    for (const n of [2, 4]) {
+      const W = P.buildWorld(L, Array.from({ length: n }, () => ({ type: 'ball', x: 1.5, y: 0.05 })));
+      let maxV = 0, maxY = 0;
+      for (let f = 0; f < 300; f++) {
+        W.step();
+        W.balls.forEach(b => { maxV = Math.max(maxV, Math.hypot(W.vx[b.p], W.vy[b.p])); maxY = Math.max(maxY, W.y[b.p]); });
+      }
+      expect(maxY, n + ' balls stay on the wall').toBeLessThan(L.h);
+      expect(maxV, n + ' balls stay slow').toBeLessThan(1);
+      W.balls.forEach(b => { expect(W.x[b.p]).toBeGreaterThan(0); expect(W.x[b.p]).toBeLessThan(L.w); });
+    }
+  });
+
+  test('a speed from a bad overlap is capped (nothing leaves the wall)', () => {
+    const L = { w: 3, h: 1.8, statics: [], fixed: [] };
+    const W = P.buildWorld(L, [{ type: 'crate', x: 1.5, y: 0.1 }, { type: 'ball', x: 1.5, y: 0.1 }, { type: 'domino', x: 1.5, y: 0.1 }]);
+    let maxV = 0;
+    for (let f = 0; f < 240; f++) { W.step(); for (let i = 0; i < W.x.length; i++) maxV = Math.max(maxV, Math.hypot(W.vx[i], W.vy[i])); }
+    expect(maxV).toBeLessThanOrEqual(10 + 1e-9);
+    for (let i = 0; i < W.x.length; i++) expect(W.y[i]).toBeLessThan(L.h);
+  });
+
+  test('the rubber ball bounces; the steel ball does not', () => {
+    const L = { w: 3, h: 1.8, statics: [], fixed: [] };
+    const peak = (type) => {
+      const W = P.buildWorld(L, [{ type, x: 1, y: 1 }]);
+      let up = false, top = 0;
+      for (let f = 0; f < 120; f++) { W.step(); if (W.vy[0] > 0.3) up = true; if (up) top = Math.max(top, W.y[0]); }
+      return top;
+    };
+    expect(peak('rubber')).toBeGreaterThan(0.25);
+    expect(peak('ball')).toBe(0);
+  });
+
+  test('a part dropped where another stands lands on top of it', () => {
+    const L = { w: 3, h: 1.8, statics: [], fixed: [{ type: 'ball', x: 0.3, y: 1 }] };
+    const placed = [{ type: 'ball', x: 1.5, y: 0.05 }, { type: 'ball', x: 1.5, y: 1.2 }];
+    expect(P.surfaceBelow(L, placed, 1.5, 1.2, 1, 0.05)).toBeCloseTo(0.1, 9);      // on the first ball
+    expect(P.surfaceBelow(L, placed, 1.5, 1.2, 1)).toBe(0);                         // without a width: floor only
+    expect(P.surfaceBelow(L, placed, 1.7, 1.2, 1, 0.05)).toBe(0);                  // beside it: the floor
+    expect(P.surfaceBelow(L, [{ type: 'crate', x: 1, y: 0.1 }], 1, 0.6, 1, 0.0225)).toBeCloseTo(0.2, 9);
+  });
+
   test('a ball dropped into a cup counts; a ball beside it does not', () => {
     const L = { w: 3, h: 1.8, statics: [], fixed: [], goal: { type: 'cup', x: 2, y: 0, w: 0.3, h: 0.2 } };
     expect(P.runLevel(L, [{ type: 'ball', x: 2, y: 0.6 }], 3).ok).toBe(true);

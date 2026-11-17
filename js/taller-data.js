@@ -180,7 +180,7 @@ var TallerData = (function() {
 
   // Free build: every part, no goal.
   var SANDBOX = { id: 'free', name: ['Taller libre', 'Free build'], w: 3, h: 1.8, statics: [], fixed: [],
-    parts: { plank: 6, long: 2, domino: 16, ball: 4, rubber: 2, crate: 3, seesaw: 2 } };
+    parts: { plank: 4, long: 2, domino: 12, ball: 3, rubber: 2, crate: 2, seesaw: 1 } };
 
   var PART_NAMES = {
     plank: ['Tabla', 'Plank'], long: ['Tabla larga', 'Long plank'], domino: ['Dominó', 'Domino'],

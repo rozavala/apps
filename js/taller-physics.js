@@ -194,7 +194,9 @@ var TallerPhysics = (function() {
     crate:  { mu: 0.6,  density: 300 },
     // a rolling ball barely rubs: rolling is drawn, the contact is
     // nearly frictionless
-    ball:   { mu: 0.004, density: 7800 }
+    ball:   { mu: 0.004, density: 7800 },
+    // a rubber ball: rolls like the steel one, but bounces
+    bouncy: { mu: 0.004, density: 1100, e: 0.65 }
   };
 
   function World() {
@@ -223,7 +225,8 @@ var TallerPhysics = (function() {
     var M = MATS[mat] || MATS.steel;
     var mass = (opts && opts.mass) || M.density * Math.PI * r * r * 0.05;   // a 5 cm-thick disc
     var p = this.addParticle(x, y, mass);
-    var b = { p: p, r: r, mu: M.mu, mat: mat, id: opts && opts.id, tag: opts && opts.tag, mass: mass, roll: 0 };
+    var b = { p: p, r: r, mu: M.mu, mat: mat, id: opts && opts.id, tag: opts && opts.tag, mass: mass, roll: 0, e: M.e || 0 };
+    if (b.e > 0) { this._bouncy = this._bouncy || {}; this._bouncy[p] = b; }
     this.balls.push(b);
     return b;
   };
@@ -322,6 +325,7 @@ var TallerPhysics = (function() {
       this.x[ia] -= wa * lam * (1 - t) * nx; this.y[ia] -= wa * lam * (1 - t) * ny;
       this.x[ib] -= wb * lam * t * nx; this.y[ib] -= wb * lam * t * ny;
     }
+    if (this._bouncy && this._bouncy[p]) { this._bouncy[p].nx += nx; this._bouncy[p].ny += ny; }
     // friction: cancel (some of) the sliding along the surface this sub-step
     var m = Math.sqrt(mu * (mu2 == null ? mu : mu2));
     var dx = this.x[p] - this.px[p], dy = this.y[p] - this.py[p];
@@ -376,12 +380,14 @@ var TallerPhysics = (function() {
       for (k = 0; k < this.boxes.length; k++) {
         var bb = quads[k].bb;
         if (bx < bb[0] - B.r || bx > bb[2] + B.r || by < bb[1] - B.r || by > bb[3] + B.r) continue;
-        this._contact(p, B.r, B.mu, this._quadOf(this.boxes[k]), this.boxes[k].k, this.boxes[k].tag, this.boxes[k].mu);
+        this._contact(p, B.r, B.mu, quads[k].q, this.boxes[k].k, this.boxes[k].tag, this.boxes[k].mu);
       }
       for (j = i + 1; j < this.balls.length; j++) {
         var C = this.balls[j], q = C.p;
         var dx = this.x[q] - this.x[p], dy = this.y[q] - this.y[p], d = Math.sqrt(dx * dx + dy * dy), rr = B.r + C.r;
-        if (d >= rr || d < 1e-9) continue;
+        if (d >= rr) continue;
+        // two balls on exactly the same spot: push the later one straight up
+        if (d < 1e-9) { dx = 0; dy = 1e-9; d = 1e-9; }
         var W = this.w[p] + this.w[q], lam = (rr - d) / (d * W);
         this.x[p] -= this.w[p] * lam * dx; this.y[p] -= this.w[p] * lam * dy;
         this.x[q] += this.w[q] * lam * dx; this.y[q] += this.w[q] * lam * dy;
@@ -401,16 +407,21 @@ var TallerPhysics = (function() {
           if (j === i) continue;
           var bb2 = quads[j].bb;
           if (cx < bb2[0] || cx > bb2[2] || cy < bb2[1] || cy > bb2[3]) continue;
-          this._contact(pc, CORNER_R, X.mu, this._quadOf(this.boxes[j]), this.boxes[j].k, this.boxes[j].tag, this.boxes[j].mu);
+          this._contact(pc, CORNER_R, X.mu, quads[j].q, this.boxes[j].k, this.boxes[j].tag, this.boxes[j].mu);
         }
       }
     }
   };
 
+  // Nothing on a 1.8 m wall falls faster than about 6 m/s, so a speed
+  // well above that can only come from a bad overlap: cap it.
+  var MAX_V = 10;
   World.prototype.step = function(dt) {
-    var h = (dt || DT) / SUB, n = this.x.length, i, it;
+    var h = (dt || DT) / SUB, n = this.x.length, i, it, k;
     this._h = h;
+    var bouncy = this.balls.filter(function(b) { return b.e > 0; });
     for (var s = 0; s < SUB; s++) {
+      for (k = 0; k < bouncy.length; k++) { var bb = bouncy[k]; bb.v0x = this.vx[bb.p]; bb.v0y = this.vy[bb.p]; bb.nx = 0; bb.ny = 0; }
       for (i = 0; i < n; i++) {
         if (this.w[i] === 0) continue;
         this.vy[i] -= G * h;
@@ -420,8 +431,18 @@ var TallerPhysics = (function() {
       for (it = 0; it < ITER; it++) { this._solveCons(); this._solveContacts(); }
       for (i = 0; i < n; i++) {
         if (this.w[i] === 0) continue;
-        this.vx[i] = (this.x[i] - this.px[i]) / h;
-        this.vy[i] = (this.y[i] - this.py[i]) / h;
+        var vx = (this.x[i] - this.px[i]) / h, vy = (this.y[i] - this.py[i]) / h, sp = vx * vx + vy * vy;
+        if (sp > MAX_V * MAX_V) { var f = MAX_V / Math.sqrt(sp); vx *= f; vy *= f; }
+        this.vx[i] = vx; this.vy[i] = vy;
+      }
+      // a rubber ball bounces: give back part of the speed it hit with
+      for (k = 0; k < bouncy.length; k++) {
+        var b = bouncy[k], nl = Math.sqrt(b.nx * b.nx + b.ny * b.ny);
+        if (nl < 1e-9) continue;
+        var nx = b.nx / nl, ny = b.ny / nl, vin = b.v0x * nx + b.v0y * ny;
+        if (vin > -0.4) continue;
+        var vn = this.vx[b.p] * nx + this.vy[b.p] * ny, add = -b.e * vin - vn;
+        if (add > 0) { this.vx[b.p] += add * nx; this.vy[b.p] += add * ny; }
       }
       this.t += h;
     }
@@ -437,6 +458,9 @@ var TallerPhysics = (function() {
       for (var i = 0; i < this.x.length; i++) { this.px[i] = this.x[i]; this.py[i] = this.y[i]; }
       this._solveCons();
       this._solveContacts();
+      var moved = 0;
+      for (i = 0; i < this.x.length; i++) moved = Math.max(moved, Math.abs(this.x[i] - this.px[i]), Math.abs(this.y[i] - this.py[i]));
+      if (moved < 1e-6) break;
     }
     for (var j = 0; j < this.x.length; j++) { this.vx[j] = 0; this.vy[j] = 0; this.px[j] = this.x[j]; this.py[j] = this.y[j]; }
     this.touched = {};
@@ -460,7 +484,7 @@ var TallerPhysics = (function() {
     long:   { w: 1.00, h: 0.04, static: true,  mat: 'wood' },
     domino: { w: 0.045, h: 0.20, mat: 'wood', mass: 0.12 },
     ball:   { r: 0.05, mat: 'ball', mass: 0.5 },
-    rubber: { r: 0.06, mat: 'ball', mass: 0.12 },
+    rubber: { r: 0.06, mat: 'bouncy', mass: 0.12 },
     crate:  { w: 0.20, h: 0.20, mat: 'crate', mass: 2.0 },
     seesaw: { w: 0.90, h: 0.04, mat: 'wood', mass: 0.5 },
     block:  { w: 0.30, h: 0.30, static: true, mat: 'wood' }
@@ -540,8 +564,11 @@ var TallerPhysics = (function() {
     return { ok: false, t: W.t, world: W };
   }
 
-  // Where a dropped part comes to rest: the highest surface under x.
-  function surfaceBelow(level, placed, x, yTop, skip) {
+  // Where a dropped part comes to rest: the highest surface under x —
+  // a shelf, a plank, or (when halfW is given) the top of a ball, domino
+  // or crate already placed there, so parts dropped on one spot stack.
+  // `skip` is the index in `placed` of the part being dropped.
+  function surfaceBelow(level, placed, x, yTop, skip, halfW) {
     var best = 0;
     function test(s) {
       var ang = (s.a || 0) * Math.PI / 180, ca = Math.cos(ang), sa = Math.sin(ang);
@@ -553,10 +580,15 @@ var TallerPhysics = (function() {
       if (top <= yTop + 1e-6 && top > best) best = top;
     }
     (level.statics || []).forEach(test);
+    var nFixed = (level.fixed || []).length;
     (level.fixed || []).concat(placed || []).forEach(function(p, i) {
-      if (i === skip) return;
+      if (i - nFixed === skip) return;
       var P = PARTS[p.type];
-      if (P && P.static) test({ x: p.x, y: p.y, w: P.w, h: P.h, a: p.a });
+      if (!P) return;
+      if (P.static) { test({ x: p.x, y: p.y, w: P.w, h: P.h, a: p.a }); return; }
+      if (halfW == null || p.y >= yTop) return;
+      var qw = P.r || P.w / 2, qtop = p.y + (P.r || P.h / 2);
+      if (Math.abs(x - p.x) < qw + halfW && qtop > best) best = qtop;
     });
     return best;
   }
