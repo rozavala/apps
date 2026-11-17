@@ -200,6 +200,25 @@ test.describe('Lector curriculum', () => {
     });
   });
 
+  test('book ids and order are kept; new books join the end of their level', () => {
+    // Saved stars are keyed by book id, so a shipped id must never change or move.
+    const SHIPPED = ['es-mi-mama', 'es-el-sapo', 'es-papa-mapa', 'es-pato-lalo', 'es-sopa-tomate', 'es-rana-luna', 'es-pepe-pera',
+      'es-vaca-rosa', 'es-la-misa', 'es-la-foca', 'en-pip-ant', 'en-tap-tap', 'en-red-hen', 'en-dads-hat', 'en-mud-fun', 'en-red-bus',
+      'en-duck-chick', 'en-the-ship'];
+    const ids = Data.BOOKS.map(b => b.id);
+    expect(ids.filter(id => SHIPPED.includes(id))).toEqual(SHIPPED);
+    ['es', 'en'].forEach(lang => {
+      const lvs = Data.books(lang).map(b => b.lv);
+      expect(lvs, lang + ' books are grouped by level').toEqual([...lvs].sort((x, y) => x - y));
+    });
+    expect(Data.book('en-pam-cat').lv).toBe(2);
+    expect(Data.book('en-fox-bug').lv).toBe(3);
+    // the short-vowel levels now have three books each after level 1
+    expect(Data.books('en').filter(b => b.lv === 2).length).toBeGreaterThanOrEqual(3);
+    expect(Data.books('en').filter(b => b.lv === 3).length).toBeGreaterThanOrEqual(3);
+    Data.BOOKS.forEach(b => expect(b.pages[b.cover || 0], b.id + ' cover page').toBeTruthy());
+  });
+
   test('picture words in one game round never share a picture (so one answer is right)', () => {
     ['es', 'en'].forEach(lang => {
       Data.levels(lang).forEach(l => {
@@ -523,6 +542,41 @@ test.describe('Lector app', () => {
       expect(head.x + head.width).toBeLessThanOrEqual(badge.x + 1);
     });
   }
+
+  test('on an iPad on its side a whole book page fits: picture left, words and buttons right', async ({ page }) => {
+    const blob = { v: 1, lv: ALL_DONE(['en1', 'en2', 'en3'], ['sounds', 'blend', 'build', 'read']) };
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await open(page, { blob, lang: 'en', age: 4 });
+    await page.locator('.lx-seg-b[data-tab="books"]').click();
+    await page.locator('.lx-book-card[data-book="en-fox-bug"]').click();
+    await expect(page.locator('.lx-bk-text')).toContainText('A fox sat on a log.');
+    const art = await page.locator('.lx-bk-art').boundingBox();
+    const text = await page.locator('.lx-bk-text').boundingBox();
+    const ctl = await page.locator('#lx-bn').boundingBox();
+    expect(text.x).toBeGreaterThan(art.x + art.width - 1);
+    expect(ctl.y + ctl.height).toBeLessThanOrEqual(768);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+    expect(ctl.height).toBeGreaterThanOrEqual(44);
+    // leaving the book puts the page back to its normal width
+    await page.locator('.lx-back').click();
+    expect(await page.evaluate(() => document.body.classList.contains('lx-reading'))).toBe(false);
+  });
+
+  test('the new books open and read to the end: Pam and the Cat, Fox and Bug', async ({ page }) => {
+    const blob = { v: 1, lv: ALL_DONE(['en1', 'en2', 'en3'], ['sounds', 'blend', 'build', 'read']) };
+    await open(page, { blob, lang: 'en', age: 6, width: 390 });
+    for (const [id, n] of [['en-pam-cat', 8], ['en-fox-bug', 7]]) {
+      await page.locator('.lx-seg-b[data-tab="books"]').click();
+      await page.locator('.lx-book-card[data-book="' + id + '"]').click();
+      for (let i = 0; i < n; i++) {
+        await expect(page.locator('.lx-bk-art svg')).toHaveCount(1);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        await page.locator('#lx-bn').click();
+      }
+      await expect(page.locator('.lx-finish')).toHaveCount(1);
+      await page.locator('#lx-fb').click();
+    }
+  });
 
   test('the hub shows the Lector card with stars', async ({ page }) => {
     await page.route(/tail57521e\.ts\.net/, r => r.abort());

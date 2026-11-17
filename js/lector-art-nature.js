@@ -257,6 +257,21 @@
     c.shine('M20 44 Q40 41 58 42 Q38 45 22 50Z', 0.35);
   });
 
+  // ── a mud splash: the front lip of a muddy spot and the flying drops.
+  //    Drawn after something sitting in the mud, it hides that thing's feet.
+  LectorArt.add('splash', function (c) {
+    // ripples behind, then a soft lip of mud the colour of a muddy pool
+    c.line('M10 74 Q50 62 90 74', '#A57448', 1.6, { op: 0.55 });
+    c.line('M22 70 Q50 62 78 70', '#A57448', 1.2, { op: 0.4 });
+    c.path('M2 78 Q50 66 98 78 Q50 88 2 78Z', '#6F4A2B', { flat: true, stroke: false });
+    c.path('M6 77.5 Q50 67 94 77.5 Q50 71.5 6 77.5Z', '#A57448', { flat: true, stroke: false, op: 0.8 });
+    c.path('M18 76 Q21 64 25 74.5Z M75 74.5 Q80 62 85 76Z M46 71 Q50 62 54 71Z', '#80562F', { stroke: '#5E3E22', sw: 0.7 });
+    [[12, 50, 3.4], [22, 38, 2.4], [86, 46, 3.2], [78, 34, 2.2], [94, 60, 2], [5, 62, 2.2]].forEach(function (d) {
+      c.circ(d[0], d[1], d[2], '#7A5030', { rad: true, sw: 0.7 });
+    });
+    c.line('M20 62 q-4 -6 -2 -12 M82 60 q5 -6 3 -13', '#7A5030', 1.4, { op: 0.6 });
+  });
+
   // ── lighthouse ──────────────────────────────────────────────
   LectorArt.add('lighthouse', function (c) {
     c.shadow(50, 92, 44, 4);
