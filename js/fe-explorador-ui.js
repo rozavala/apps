@@ -870,6 +870,13 @@
       if (u) CloudSync.pull('zs_fe_' + u.name.toLowerCase().replace(/\s+/g, '_'));
     }
     document.addEventListener('click', onClick);
+    // fe-explorador.html?saint=<id> opens that saint's window (used by
+    // Examen y Virtudes, which links each virtue to a saint).
+    try {
+      const want = new URLSearchParams(window.location.search).get('saint');
+      const i = want ? FM.SAINTS.findIndex(x => x.id === want) : -1;
+      if (i >= 0) { S.tab = 'saint'; S.saintIndex = i; }
+    } catch (e) {}
     renderChrome();
     renderMySaint();
     render();
