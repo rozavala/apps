@@ -84,12 +84,16 @@ var CloudSync = (function() {
     'zs_clock_': 'clock',
     'zs_lector_': 'lector',
     'zs_linea_': 'linea',
+    'zs_mapa_': 'mapa',
     'zs_codelab_': 'codelab',
+    'zs_logica_': 'logica',
+    'zs_typing_': 'typing',
     'zs_calculo_': 'calculo',
     'zs_arbol_': 'arbol',
     'zs_challenge_': 'challenge',
     'zs_review_': 'review',
     'zs_dictado_': 'dictado',
+    'zs_examen_': 'examen',
     'littlemaestro_': 'littlemaestro',
   };
 

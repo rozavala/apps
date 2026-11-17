@@ -43,8 +43,14 @@ var AppSchedule = (function() {
   ];
   ALL_APPS.push({ id: 'lector', card: '.card-lector' });
   ALL_APPS.push({ id: 'linea', card: '.card-linea' });
+  ALL_APPS.push({ id: 'mapa', card: '.card-mapa' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
+  ALL_APPS.push({ id: 'logica', card: '.card-logica' });
+  // Examen y Virtudes is an evening reflection: shown from 18:00 (Off Hours
+  // still puts the apps to sleep later on school nights).
+  ALL_APPS.push({ id: 'examen', card: '.card-examen', fromHour: 18 });
+  ALL_APPS.push({ id: 'typing', card: '.card-typing' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -71,8 +77,26 @@ var AppSchedule = (function() {
   // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
   [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });
 
+  // Lógica (puzzles, with a daily puzzle) on Monday, Wednesday, Friday and Sunday.
+  [0, 1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('logica'); });
+
   // Línea del Tiempo (history) rides along with the history and world days.
   [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });
+
+  // Type Quest (touch typing): short, frequent practice works best, so Monday, Wednesday and Friday.
+  [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('typing'); });
+  // Misiones de Mapa (geography) on Tuesday, Friday and Sunday.
+  [0, 2, 5].forEach(function(d) { SMART_SCHEDULE[d].push('mapa'); });
+  // Examen y Virtudes (the evening reflection) is offered every day.
+  Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('examen'); });
+
+  // Apps with fromHour are only shown from that hour of the day.
+  function _tooEarly(id, now) {
+    for (var i = 0; i < ALL_APPS.length; i++) {
+      if (ALL_APPS[i].id === id) return !!ALL_APPS[i].fromHour && (now || new Date()).getHours() < ALL_APPS[i].fromHour;
+    }
+    return false;
+  }
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
@@ -96,13 +120,16 @@ var AppSchedule = (function() {
   }
 
   function getTodayApps() {
-    var day = new Date().getDay(); // 0–6
+    var now = new Date();
+    var day = now.getDay(); // 0–6
     var mode = getMode();
     var overrides = getOverrides();
+    var list;
 
-    if (overrides[day]) return overrides[day];
-    if (mode === 'all') return ALL_APPS.map(function(a) { return a.id; });
-    return SMART_SCHEDULE[day] || [];
+    if (overrides[day]) list = overrides[day];
+    else if (mode === 'all') list = ALL_APPS.map(function(a) { return a.id; });
+    else list = SMART_SCHEDULE[day] || [];
+    return list.filter(function(id) { return !_tooEarly(id, now); });
   }
 
   function getScheduleForDay(dayIndex) {
@@ -118,7 +145,7 @@ var AppSchedule = (function() {
       if (!el) return;
       var isVisible = !!app.alwaysVisible || visibleIds.indexOf(app.id) !== -1;
       // Faith follows its own per-kid faithVisible toggle (set elsewhere).
-      if (app.id === 'faith' && user && user.faithVisible === false) isVisible = false;
+      if ((app.id === 'faith' || app.id === 'examen') && user && user.faithVisible === false) isVisible = false;
       // Quest is the always-on world map and Sports is the outdoor logger;
       // keep them visible regardless of the rotation.
       if (app.id === 'sports' || app.id === 'quest' || app.id === 'move') isVisible = true;
