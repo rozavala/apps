@@ -439,6 +439,26 @@ window.ZSProgressCatalog = {
     {"i":"rapa_nui","l":"🗿 The Moai of Rapa Nui","g":"Commander"}
   ],
 
+  typing: [
+    {"i":"fj","l":"1. F and J: the keys with bumps","g":"Home row"},
+    {"i":"dk","l":"2. D and K: middle fingers","g":"Home row"},
+    {"i":"sl","l":"3. S and L: ring fingers","g":"Home row"},
+    {"i":"apin","l":"4. A and the right little finger","g":"Home row"},
+    {"i":"gh","l":"5. G and H: pointer fingers reach","g":"Home row"},
+    {"i":"ei","l":"6. E and I: up one row","g":"Top row"},
+    {"i":"ru","l":"7. R and U","g":"Top row"},
+    {"i":"ty","l":"8. T and Y","g":"Top row"},
+    {"i":"wo","l":"9. W and O","g":"Top row"},
+    {"i":"qp","l":"10. Q and P: little fingers up","g":"Top row"},
+    {"i":"cm","l":"11. C, M and the comma","g":"Bottom row"},
+    {"i":"vn","l":"12. V, B and N","g":"Bottom row"},
+    {"i":"xz","l":"13. X, Z and the period","g":"Bottom row"},
+    {"i":"caps","l":"14. Capitals with Shift","g":"Capitals, numbers and signs"},
+    {"i":"nums","l":"15. Numbers","g":"Capitals, numbers and signs"},
+    {"i":"punct","l":"16. Punctuation: ? ! : ; \" ' -","g":"Capitals, numbers and signs"},
+    {"i":"acc","l":"17. Accents, ñ, ¿ and ¡","g":"Spanish"}
+  ],
+
   vocab: [
     {"i":"aqua","l":"aqua- · water","g":"Tier 1"},
     {"i":"terra","l":"terra- · earth, land","g":"Tier 1"},
