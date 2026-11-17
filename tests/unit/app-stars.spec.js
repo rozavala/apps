@@ -145,7 +145,13 @@ const CASES = [
     stars: 3, note: 'one per solved challenge' },
   { id: 'challenge', prefix: 'zs_challenge_',
     data: { v: 1, stars: { a: '2026-11-10', b: '2026-11-10', c: '2026-11-10', d: '2026-11-10', e: '2026-11-11' } },
-    stars: 4, note: 'at most 3 a day' }
+    stars: 4, note: 'at most 3 a day' },
+  { id: 'typing', prefix: 'zs_typing_',
+    data: { v: 1, ls: { fj: { s: 3, w: 12 }, dk: { s: 2 }, sl: { s: 9 } }, ps: { 'story-x': { s: 1 } },
+            wd: { es: { w: 24.5 }, en: { w: 55 } }, hunt: { s: 2 }, rk: 3, runs: [{ w: 99, a: 1, c: 500 }], keys: { a: [9, 1] } },
+    stars: 19, note: 'lessons 3+2+3 (capped) + passage 1 + words 2+3 (capped) + hunt 2 + rank 3' },
+  { id: 'typing', prefix: 'zs_typing_', data: { v: 1, rk: 40, ls: { fj: 'junk' }, wd: null }, stars: 7, note: 'rank stars cap at 7; junk scores 0' },
+  { id: 'typing', prefix: 'zs_typing_', data: { v: 1 }, stars: 0, note: 'nothing typed yet' }
 ];
 
 test.describe('per-app star rules', () => {

@@ -50,6 +50,7 @@ var AppSchedule = (function() {
   // Examen y Virtudes is an evening reflection: shown from 18:00 (Off Hours
   // still puts the apps to sleep later on school nights).
   ALL_APPS.push({ id: 'examen', card: '.card-examen', fromHour: 18 });
+  ALL_APPS.push({ id: 'typing', card: '.card-typing' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -82,6 +83,8 @@ var AppSchedule = (function() {
   // Línea del Tiempo (history) rides along with the history and world days.
   [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });
 
+  // Type Quest (touch typing): short, frequent practice works best, so Monday, Wednesday and Friday.
+  [1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('typing'); });
   // Misiones de Mapa (geography) on Tuesday, Friday and Sunday.
   [0, 2, 5].forEach(function(d) { SMART_SCHEDULE[d].push('mapa'); });
   // Examen y Virtudes (the evening reflection) is offered every day.
