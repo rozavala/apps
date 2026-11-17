@@ -4,8 +4,9 @@
    Parents Corner list and the tests all read a challenge the same way.
 
    Older kids set a small challenge for a younger sibling: a question
-   with 2 to 4 answers, a word to spell (read aloud), or a country to
-   find on the map. When it is solved, both kids earn a star.
+   with 2 to 4 answers, a word to spell (read aloud), a country to
+   find on the map, or a Chess Quest puzzle. When it is solved, both
+   kids earn a star.
 
    Storage is one household key, zs_challenges: { v: 1, events: [...] },
    an append-only log merged by id (see _mergeChallenges in sync.js),
@@ -15,6 +16,11 @@
                             answer = index of the right one
                kind 'spell' answer = the word, lang = 'es' | 'en'
                kind 'map'   answer = country id (ISO alpha-3, lowercase)
+               kind 'chess' answer = the puzzle's place in Chess Quest's
+                            PUZZLES (0-based; new puzzles only go at the
+                            end, so it keeps pointing at the same one),
+                            text = its name, for screens without the list.
+                            Solved on the Chess Quest board.
      miss    { ch, by }      a wrong try (the 3rd shows the hint)
      solve   { ch, by, tries }   id is 's_' + ch, so two devices that
                                  both saw it solved agree on one event
@@ -42,7 +48,8 @@
   var MAX_WORD = 30;         // a spelling word
   var MIN_OPTIONS = 2, MAX_OPTIONS = 4;
   var TRIES_BEFORE_HINT = 2;
-  var KINDS = ['q', 'spell', 'map'];
+  var KINDS = ['q', 'spell', 'map', 'chess'];
+  var MAX_PUZZLE = 999;      // a chess puzzle's index is 0..MAX_PUZZLE
 
   // ── text ──
   // Control characters, line/paragraph separators, zero-width and direction marks.
@@ -73,7 +80,7 @@
   // ── making events ──
   // fields: { from, to, kind, text, options: [..], answer, hint, lang }
   // -> { ok: true, event } or { ok: false, error: 'who' | 'kind' | 'text' |
-  //      'options' | 'answer' | 'word' | 'country' }
+  //      'options' | 'answer' | 'word' | 'country' | 'puzzle' }
   function make(fields) {
     var f = fields || {};
     var from = clean(f.from, 40), to = clean(f.to, 40);
@@ -108,12 +115,25 @@
       if (!/^[^\s\d]{2,30}$/u.test(word)) return { ok: false, error: 'word' };
       ev.answer = word;
       ev.lang = f.lang === 'es' ? 'es' : 'en';
+    } else if (f.kind === 'chess') {
+      var n = puzzleIndex(f.answer);
+      if (n < 0) return { ok: false, error: 'puzzle' };
+      ev.answer = n;
+      var name = clean(f.text, MAX_TEXT);
+      if (name) ev.text = name;
     } else {
       var code = String(f.answer || '').toLowerCase();
       if (!/^[a-z]{3}$/.test(code)) return { ok: false, error: 'country' };
       ev.answer = code;
     }
     return { ok: true, event: ev };
+  }
+
+  // A puzzle index (0..MAX_PUZZLE, a whole number) or -1.
+  function puzzleIndex(v) {
+    if (v === '' || v === null || v === undefined || typeof v === 'boolean') return -1;
+    var n = Number(v);
+    return n >= 0 && n <= MAX_PUZZLE && n % 1 === 0 ? n : -1;
   }
 
   function makeMiss(ch, by) { return { id: uid('m'), type: 'miss', ts: Date.now(), ch: ch, by: clean(by, 40) }; }
@@ -144,6 +164,10 @@
       c.answer = clean(e.answer, MAX_WORD);
       c.lang = e.lang === 'es' ? 'es' : 'en';
       if (c.answer.length < 2) return null;
+    } else if (e.kind === 'chess') {
+      c.answer = puzzleIndex(e.answer);
+      c.text = clean(e.text, MAX_TEXT);
+      if (c.answer < 0) return null;
     } else {
       c.answer = String(e.answer || '').toLowerCase();
       if (!/^[a-z]{3}$/.test(c.answer)) return null;
@@ -225,15 +249,28 @@
       return !c.removed && c.solved && sameName(c.from, name) && c.solved.ts >= (sinceTs || 0);
     });
   }
+  // The one for the hub's "Today's 3": the oldest still waiting for this
+  // kid, or else one the kid solved today (shown with a ✓). null if none.
+  function forToday(v, name, now) {
+    var box = inbox(v, name);
+    if (box.length) return { c: box[0], done: false };
+    var day = dateOf(now || Date.now()), done = null;
+    v.challenges.forEach(function (c) {
+      if (!c.removed && c.solved && sameName(c.to, name) && dateOf(c.solved.ts) === day) done = c;
+    });
+    return done ? { c: done, done: true } : null;
+  }
   function sent(v, name) { return v.challenges.filter(function (c) { return !c.removed && sameName(c.from, name); }); }
 
   // ── answering ──
-  // q: response is the option index; spell: the typed word; map: country id.
+  // q: response is the option index; spell: the typed word; map: country
+  // id; chess: the index of the puzzle that was just solved.
   function check(c, response) {
     if (!c || c.removed) return false;
     if (c.kind === 'q') return Number(response) === c.answer && response !== '' && response !== null;
     if (c.kind === 'spell') return normWord(response) === normWord(c.answer);
     if (c.kind === 'map') return String(response || '').toLowerCase() === c.answer;
+    if (c.kind === 'chess') return puzzleIndex(response) === c.answer;
     return false;
   }
   // After this many wrong tries the hint shows.
@@ -270,10 +307,10 @@
   var api = {
     KEY: KEY, STARS_PREFIX: STARS_PREFIX, MAX_TEXT: MAX_TEXT, MAX_WORD: MAX_WORD,
     MIN_OPTIONS: MIN_OPTIONS, MAX_OPTIONS: MAX_OPTIONS, TRIES_BEFORE_HINT: TRIES_BEFORE_HINT,
-    KINDS: KINDS,
-    clean: clean, normWord: normWord, kidKey: kidKey, sameName: sameName, uid: uid,
+    KINDS: KINDS, MAX_PUZZLE: MAX_PUZZLE,
+    clean: clean, puzzleIndex: puzzleIndex, normWord: normWord, kidKey: kidKey, sameName: sameName, uid: uid,
     make: make, makeMiss: makeMiss, makeSolve: makeSolve, makeRemove: makeRemove, makeConfig: makeConfig,
-    view: view, scrub: scrub, receivers: receivers, inbox: inbox, solvedSent: solvedSent, sent: sent,
+    view: view, scrub: scrub, receivers: receivers, inbox: inbox, forToday: forToday, solvedSent: solvedSent, sent: sent,
     check: check, hintOpen: hintOpen, shuffled: shuffled, starsByKid: starsByKid
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
