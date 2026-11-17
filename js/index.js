@@ -332,6 +332,11 @@
     prefixes.push('zs_huerto_');
     prefixes.push('zs_taller_');
     prefixes.push('zs_trivia_');
+    // Every app with a star rule keeps its progress under its prefix, so a
+    // guest session leaves nothing behind in apps added later either.
+    if (typeof APP_STAR_CONFIGS !== 'undefined') {
+      APP_STAR_CONFIGS.forEach(function(c) { if (c.prefix && prefixes.indexOf(c.prefix) === -1) prefixes.push(c.prefix); });
+    }
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
     });
@@ -1141,6 +1146,37 @@
     return '<div style="margin-bottom:8px;">' + tiles + charts + kids + apps + '</div>';
   }
 
+  // Dashboard: one row per other app this kid has stars in, so every app
+  // (including new ones) shows up without a hand-written row. Math Galaxy,
+  // Descubre Chile, Chess Quest and Little Maestro keep their own rows above.
+  var _DASH_OWN_ROWS = ['math', 'chile', 'chess', 'piano'];
+  var _DASH_STAR_ID = { code: 'codecadet' };   // hub id → star-rule id where they differ
+  function _dashOtherAppRows(p, appStats) {
+    if (typeof HubPlan === 'undefined' || typeof getAppStars !== 'function') return '';
+    var rows = [];
+    HubPlan.APPS.forEach(function(a) {
+      if (a.list === false || _DASH_OWN_ROWS.indexOf(a.id) !== -1) return;
+      var n = 0;
+      var sid = _DASH_STAR_ID[a.id] || a.id;
+      try { n = getAppStars(sid, appStats[sid] || {}); } catch (e) {}
+      if (!(n > 0)) return;
+      var card = document.querySelector('a.app-card[href="' + a.href + '"]');
+      var ic = card && card.querySelector('.card-icon');
+      rows.push({ name: HubPlan.nameOf(a), icon: ic ? ic.textContent.trim() : '⭐', stars: n });
+    });
+    if (!rows.length) return '';
+    rows.sort(function(x, y) { return y.stars - x.stars; });
+    var max = rows[0].stars;
+    return rows.map(function(r) {
+      return '<div class="dash-app-row">' +
+        '<span class="dash-app-icon">' + escHtml(r.icon) + '</span>' +
+        '<span class="dash-app-name">' + escHtml(r.name) + '</span>' +
+        '<div class="dash-bar-wrap"><div class="dash-bar" style="width:' + Math.max(6, Math.round(r.stars / max * 100)) + '%;background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div></div>' +
+        '<span class="dash-app-stat">⭐ ' + r.stars + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
   function _openDashboard() {
     if (typeof Debug !== 'undefined') Debug.log('Opening Dashboard...');
     var content = document.getElementById('dash-content');
@@ -1287,6 +1323,8 @@
           '</div>';
         }
 
+        appRows += _dashOtherAppRows(p, appStats);
+
         var rank = typeof getExplorerRank === 'function' ? getExplorerRank(p.name, stats) : { icon: '🛸', name: 'Cadet' };
 
         return '<div class="dash-profile">' +
@@ -1364,11 +1402,22 @@
     habit:          { label: 'Habits',   color: '#047857', apps: ['Routines'] }
   };
 
+  // Apps not named above are sorted by their hub group, so new apps count
+  // in the week's balance too.
+  var _GROUP_TO_CATEGORY = {
+    math: 'math', science: 'science', reading: 'language', world: 'culture', faith: 'culture',
+    arts: 'creative', money: 'strategy', move: 'physical', more: 'adventure'
+  };
+
   function _classifyApp(appName) {
     if (!appName) return null;
     for (var k in _INSIGHT_CATEGORIES) {
       if (_INSIGHT_CATEGORIES[k].apps.indexOf(appName) !== -1) return k;
     }
+    try {
+      var a = (typeof HubPlan !== 'undefined' && HubPlan.appForLogName) ? HubPlan.appForLogName(appName) : null;
+      if (a && _GROUP_TO_CATEGORY[a.group]) return _GROUP_TO_CATEGORY[a.group];
+    } catch (e) {}
     return null;
   }
 
