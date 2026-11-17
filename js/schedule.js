@@ -45,6 +45,7 @@ var AppSchedule = (function() {
   ALL_APPS.push({ id: 'linea', card: '.card-linea' });
   ALL_APPS.push({ id: 'arbol', card: '.card-arbol' });
   ALL_APPS.push({ id: 'codelab', card: '.card-codelab' });
+  ALL_APPS.push({ id: 'logica', card: '.card-logica' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -70,6 +71,9 @@ var AppSchedule = (function() {
 
   // Code Lab (typed coding, age 9 and up) on three days: Tuesday, Thursday and Saturday.
   [2, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('codelab'); });
+
+  // Lógica (puzzles, with a daily puzzle) on Monday, Wednesday, Friday and Sunday.
+  [0, 1, 3, 5].forEach(function(d) { SMART_SCHEDULE[d].push('logica'); });
 
   // Línea del Tiempo (history) rides along with the history and world days.
   [1, 3, 4, 6].forEach(function(d) { SMART_SCHEDULE[d].push('linea'); });

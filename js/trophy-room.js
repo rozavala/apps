@@ -47,6 +47,7 @@ var TrophyRoom = (function() {
     { id: 'linea', name: 'Línea del Tiempo', emoji: '🏛️', color: '#64748B', threshold: 1, href: 'linea-del-tiempo.html' },
     { id: 'arbol', name: 'Árbol familiar', emoji: '🌳', color: '#2C6B41', threshold: 1, href: 'arbol-familiar.html' },
     { id: 'codelab', name: 'Code Lab', emoji: '🐢', color: '#177A40', threshold: 1, href: 'code-lab.html' },
+    { id: 'logica', name: 'Lógica', emoji: '🧩', color: '#5B3FA8', threshold: 1, href: 'logica.html' },
     { id: 'lector', name: 'Lector', emoji: '📖', color: '#0E8F86', threshold: 1, href: 'lector.html' },
     { id: 'review', name: 'Repaso', emoji: '🔁', color: '#0D9488', threshold: 1, href: 'repaso.html' },
     { id: 'dictado', name: 'Dictado', emoji: '✍️', color: '#4F46E5', threshold: 1, href: 'dictado.html' },
