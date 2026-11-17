@@ -330,6 +330,7 @@
     prefixes.push('zs_examen_');
     prefixes.push('zs_typing_');
     prefixes.push('zs_huerto_');
+    prefixes.push('zs_taller_');
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
     });
@@ -581,6 +582,7 @@
     apps.push({ name: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', key: 'zs_examen_' + key, schedId: 'examen' });
     apps.push({ name: 'Type Quest', icon: '⌨️', href: 'type-quest.html', key: 'zs_typing_' + key, schedId: 'typing' });
     apps.push({ name: 'Huerto', icon: '🌱', href: 'huerto.html', key: 'zs_huerto_' + key, schedId: 'huerto' });
+    apps.push({ name: 'Taller de Máquinas', icon: '⚙️', href: 'taller-maquinas.html', key: 'zs_taller_' + key, schedId: 'taller' });
 
     // Only apps this kid can see: by age, and what a parent has hidden.
     apps = apps.filter(function(app) {
@@ -893,7 +895,7 @@
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea', 'examen', 'logica', 'mapa', 'typing', 'escritura', 'huerto'].forEach(function(id) {
+       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea', 'examen', 'logica', 'mapa', 'typing', 'escritura', 'huerto', 'taller'].forEach(function(id) {
         try {
           var el = document.getElementById('stats-' + id);
           if (!el || typeof getAppStars !== 'function') return;

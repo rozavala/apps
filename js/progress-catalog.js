@@ -439,6 +439,27 @@ window.ZSProgressCatalog = {
     {"i":"rapa_nui","l":"🗿 The Moai of Rapa Nui","g":"Commander"}
   ],
 
+  taller: [
+    {"i":"c-pulley","l":"The 100 kg crate","g":"Challenges","k":"ch"},
+    {"i":"c-crowbar","l":"The garden rock","g":"Challenges","k":"ch"},
+    {"i":"c-ramp","l":"Onto the truck","g":"Challenges","k":"ch"},
+    {"i":"c-well","l":"Water from the well","g":"Challenges","k":"ch"},
+    {"i":"c-barrow","l":"The wheelbarrow","g":"Challenges","k":"ch"},
+    {"i":"c-wedge","l":"Firewood","g":"Challenges","k":"ch"},
+    {"i":"c-jack","l":"Changing a tyre","g":"Challenges","k":"ch"},
+    {"i":"g-double","l":"Twice as fast","g":"Challenges","k":"ch"},
+    {"i":"g-slow","l":"Three times slower","g":"Challenges","k":"ch"},
+    {"i":"g-idler","l":"The idler","g":"Challenges","k":"ch"},
+    {"i":"g-six","l":"Six times faster","g":"Challenges","k":"ch"},
+    {"i":"b-hill","l":"The hill","g":"Challenges","k":"ch"},
+    {"i":"b-two","l":"Two turns","g":"Challenges","k":"ch"},
+    {"i":"r1","l":"The bridge","g":"Chain reaction","k":"cr"},
+    {"i":"r2","l":"Dominoes","g":"Chain reaction","k":"cr"},
+    {"i":"r3","l":"The seesaw","g":"Chain reaction","k":"cr"},
+    {"i":"r4","l":"Over the bin","g":"Chain reaction","k":"cr"},
+    {"i":"r5","l":"The wall","g":"Chain reaction","k":"cr"}
+  ],
+
   typing: [
     {"i":"fj","l":"1. F and J: the keys with bumps","g":"Home row"},
     {"i":"dk","l":"2. D and K: middle fingers","g":"Home row"},

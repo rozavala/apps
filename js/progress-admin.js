@@ -394,6 +394,25 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+  // Taller de Máquinas keeps the best stars of each challenge (ch) and
+  // chain-reaction level (cr); the machines a kid has tried (seen) and
+  // their saved designs are left alone.
+  APPS.push({
+    id: 'taller', label: 'Taller de Máquinas', icon: '⚙️', href: 'taller-maquinas.html',
+    prefix: 'zs_taller_', catalog: 'taller', mode: 'sequence', noun: 'challenge',
+    done: function(data, u) { var box = (u.k === 'cr' ? data.cr : data.ch) || {}; return (box[u.i] | 0) > 0; },
+    apply: function(data, units, count) {
+      data.ch = data.ch && typeof data.ch === 'object' ? data.ch : {};
+      data.cr = data.cr && typeof data.cr === 'object' ? data.cr : {};
+      units.forEach(function(u, idx) {
+        var box = u.k === 'cr' ? data.cr : data.ch;
+        if (idx < count) { if (!((box[u.i] | 0) > 0)) box[u.i] = 3; }
+        else delete box[u.i];
+      });
+      data.v = 1;
+      return data;
+    }
+  });
 
   // Escritura keeps a ladder of letter sets for each style in one blob
   // (zs_escritura_<kid>: L:{ 'print:A': 0..3, 'cursive:a': … }, W:{…}, dict:{…}).
