@@ -3,6 +3,26 @@
    Shared text-to-speech helper on top of the Web Speech API.
    No external calls; uses the OS-provided voices.
 
+   ADDING READ-ALOUD TO AN APP (most apps never call ZsTTS directly):
+     1. Load, in this order:  js/auth.js, js/tts.js, js/speak.js
+        (speak.js is the suite-wide 🔊 / little-kid-mode layer).
+     2. Mark what a kid needs to hear, with no other code:
+          <p class="my-goal" data-speak>Build a circuit that lights the bulb</p>
+          <h2 data-speak="Seven times eight">7 × 8</h2>   (say this, not the text)
+          data-speak-auto     also read it by itself in little-kid mode
+          data-speak-lang="es" | "en"  when the words don't make it obvious
+          class="zs-extra"   hidden in little-kid mode (less text for 4–5s)
+        or add the page to RULES at the top of js/speak.js, or call
+          ZsSpeak.watch({ prompt: '.q', group: '.opts', choice: '.opt' })
+        Text in the "Español · English" shape zsT() makes is said in
+        two voices, Spanish first, then English.
+     3. In code: ZsSpeak.say(text, lang), ZsSpeak.button(text, lang)
+        (HTML string), ZsSpeak.stop(); call ZsSpeak.refresh() after you
+        redraw if the page changes without adding elements.
+     Everything is a no-op (no buttons, no errors) when the device has
+     no speech or a parent set read-aloud to Off. Tests: stub
+     window.speechSynthesis (see tests/unit/read-aloud.spec.js).
+
    Stores per-kid preferences under localStorage key `zs_tts` so any
    app in the suite can check `ZsTTS.getSettings().enabled` before
    rendering a read-aloud button.
@@ -17,7 +37,9 @@
      ZsTTS.setSettings(patch, user?)→ persist partial update
      ZsTTS.pickVoice(lang)          → the best installed voice, or null
      ZsTTS.speak(text, opts)        → SpeechSynthesisUtterance | null
-        opts = { lang, rate, onBoundary(charIndex), onEnd, onError }
+        opts = { lang, rate, onBoundary(charIndex), onEnd, onError,
+                 queue }  queue: say it after what is being said now,
+                 instead of cutting that off
      ZsTTS.stop()
      ZsTTS.isSpeaking()             → bool
    ================================================================ */
@@ -158,8 +180,8 @@ var ZsTTS = (function() {
     var s = getSettings();
     if (!s.enabled) return null;
 
-    stop();
     opts = opts || {};
+    if (!opts.queue) stop();
 
     var utterance = new window.SpeechSynthesisUtterance(text);
     // Callers that know the language pass it; otherwise the kid's own.

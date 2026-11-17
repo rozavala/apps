@@ -20,14 +20,24 @@
      prompt  the question or instruction (when omitted: the element
              just before the group)
      lang    'es' | 'en' (when omitted: guessed from the text)
+     auto    false: a 🔊 only, never read by itself in little-kid mode
+     extra   text hidden in little-kid mode (less to look at for a
+             kid who cannot read it anyway); class="zs-extra" does the same
    Any element with data-speak gets a 🔊 as well (its value, if any,
-   is what is said instead of its text).
+   is what is said instead of its text). data-speak-auto: also read it
+   by itself in little-kid mode. data-speak-lang="es"|"en" when the
+   words don't make the language obvious.
+
+   Bilingual text: "Español · English" (what zsT() shows a kid who has
+   both languages) is said twice, Spanish in a Spanish voice, then
+   English in an English one.
 
    API:
      ZsSpeak.say(text, lang)     speak now (false when read-aloud is off)
      ZsSpeak.button(text, lang)  HTML for a 🔊 button that says text
      ZsSpeak.watch(rule | [rules])
      ZsSpeak.stop()
+     ZsSpeak.refresh()           look at the page again after a redraw
    ================================================================ */
 
 var ZsSpeak = (function() {
@@ -48,7 +58,36 @@ var ZsSpeak = (function() {
     'descubre-chile':   [{ group: '.quiz-opts', choice: '.quiz-opt-btn', prompt: '.quiz-q-text', lang: 'es' }],
     'fe-explorador':    [{ group: '.fe-quiz-opts', choice: '.fe-opt', prompt: '.fe-quiz-q', lang: 'es' }],
     'guitar-jam':       [{ prompt: '#ear-prompt' }],
-    'math-galaxy':      [{ prompt: '.sprint-q-text' }]
+    'math-galaxy':      [{ prompt: '.sprint-q-text' }],
+    'world-cup':        [{ group: '.wc-quiz-opts', choice: '.wc-quiz-opt', prompt: '.wc-quiz-q' }],
+    'cocina-lab':       [{ group: '.ck-choices', choice: '.ck-choice', prompt: '.ck-q' }, { prompt: '.ck-lab-prompt' },
+                         { prompt: '.ck-why, .ck-cook-tip, .ck-sub', auto: false }, { choice: '.ck-card, .ck-task' }],
+
+    // Apps with no quiz list: their instructions, and long-press (or, in
+    // little-kid mode, a first tap) on the cards that open things.
+    'art-studio':       [{ prompt: '.lp-text, .mxc-q' }, { prompt: '.lp-howto, .mx-hint, .mxc-msg, .kit-tip', auto: false },
+                         { choice: '.ll-card', extra: '.ll-desc' }],
+    'banco':            [{ prompt: '.bk-empty' }, { prompt: '.bk-small, .bk-note, .bk-story li', auto: false }],
+    'chess-quest':      [{ prompt: '#lessonInfo p, #puzzleGoal' }, { prompt: '#lessonInfo .tip, .coach', auto: false },
+                         { choice: '.mode-card, .level-card, .piece-card', extra: '.m-desc' }],
+    'circuit-lab':      [{ prompt: '.cl-goal-text, .cl-fact p' }, { prompt: '.cl-hint-line, .cl-status, .cl-sub', auto: false },
+                         { choice: '.cl-mode, .cl-level', extra: '.cl-mode-d' }],
+    'code-cadet':       [{ prompt: '#cc-goal, #cc-win-msg' }, { prompt: '.cc-sub, .cc-fact, #cc-feedback', auto: false }],
+    'dictado':          [{ prompt: '.dk-note, .dk-hint, .dk-fb-msg', auto: false }],
+    'euclid-workshop':  [{ prompt: '.ew-goal' }, { prompt: '.ew-sub', auto: false }, { choice: '.ew-level' }],
+    'guess-quest':      [{ prompt: '#gq-sub, #gq-guess-sub, .clue-empty' }, { choice: '.q-btn' }],
+    'lector':           [{ prompt: '.lx-hint, .lx-lead', auto: false }],
+    'little-engineer':  [{ prompt: '#le-tip > span' }, { prompt: '.le-lead, .le-sub', auto: false },
+                         { choice: '.le-home-card', extra: '.le-home-desc' }],
+    'mensajes-secretos':[{ prompt: '.ms-dos-brief' }, { prompt: '.ms-tip, .ms-hint, .ms-result', auto: false },
+                         { choice: '.ms-mission, .ms-tool-card', extra: '.ms-tool-desc' }],
+    'move-quest':       [{ choice: '.mode-card', extra: '.m-desc' }],
+    'naturaleza':       [{ prompt: '.nat-hero-sub', auto: false }, { choice: '.nat-mcard, .nat-mode' }],
+    'que-hora-es':      [{ prompt: '.qhe-tip, .qhe-sub', auto: false }, { choice: '.qhe-mode', extra: '.qhe-mode-desc' }],
+    'quest-adventure':  [{ prompt: '.qa-sub' }, { prompt: '.qa-next-sub, .qa-sheet-desc, .quest-tour-desc', auto: false }, { choice: '.qa-q' }],
+    'sports-arena':     [{ prompt: '#weekly-streak', auto: false }, { choice: '.mode-card', extra: '.m-desc' }],
+    'story-explorer':   [{ prompt: '#se-sub, .se-choice-note', auto: false }, { choice: '.story-card' }],
+    'trophy-room':      [{ prompt: '#tr-subtitle' }, { prompt: '.tr-next-desc', auto: false }, { choice: '.tr-badge' }]
   };
 
   var LONG_PRESS_MS = 600;
@@ -76,6 +115,7 @@ var ZsSpeak = (function() {
     try { t = t.replace(/\p{Extended_Pictographic}|[️‍]/gu, ' '); }
     catch (e) { t = t.replace(/[←-⯿\uD83C-\uD83E][\uDC00-\uDFFF]?|️/g, ' '); }
     var es = String(lang || '').slice(0, 2) === 'es';
+    t = t.replace(/[★☆✓✗]/g, ' ');
     t = t.replace(/×/g, es ? ' por ' : ' times ')
          .replace(/÷/g, es ? ' dividido por ' : ' divided by ')
          .replace(/−/g, es ? ' menos ' : ' minus ')
@@ -93,7 +133,39 @@ var ZsSpeak = (function() {
     if (!el) return '';
     var copy = el.cloneNode(true);
     Array.prototype.forEach.call(copy.querySelectorAll('.zs-say'), function(b) { b.remove(); });
+    // Parts of a card ("Challenges" + "16 puzzles") are separate words.
+    Array.prototype.forEach.call(copy.querySelectorAll('*'), function(c) {
+      if (!/^(B|I|EM|STRONG|U|SUP|SUB|MARK|ABBR|CODE|SMALL)$/.test(c.tagName)) c.after(' ');
+    });
     return (copy.textContent || '').replace(/\s+/g, ' ').trim();
+  }
+
+  var ES_WORDS = /\b(el|la|los|las|de|del|que|qué|cuál|cuánto|es|son|un|una|por|con|para|en|y|se|tu|tus|al|lo|su|toca|haz|elige|arrastra|cuando|como|cómo|más|muy|hay)\b/g;
+  var EN_WORDS = /\b(the|and|to|of|is|are|an|you|your|what|which|how|it|on|in|with|for|this|that|tap|drag|pick|choose|find|make|can|when|each|all|its|from|will|then|has|have|there)\b/g;
+
+  // A firm guess from the words alone, or null.
+  function _guess(text) {
+    var t = String(text).toLowerCase();
+    if (/[¿¡ñáéíóú]/.test(t)) return 'es';
+    var es = (t.match(ES_WORDS) || []).length, en = (t.match(EN_WORDS) || []).length;
+    if (es >= 2 && es > en) return 'es';
+    if (en >= 2 && en > es) return 'en';
+    return null;
+  }
+
+  // "Español · English" → two parts, each in its language. Anything else
+  // → one part.
+  function _parts(text, hint) {
+    var bits = String(text).split(/\s+·\s+/);
+    if (bits.length === 2 && bits[0] && bits[1]) {
+      var a = _guess(bits[0]), b = _guess(bits[1]);
+      var both = typeof getKidLang === 'function' && getKidLang() === 'both';
+      if (!a && !b && both) { a = 'es'; b = 'en'; }
+      else if (!a && b) a = b === 'es' ? 'en' : 'es';
+      else if (a && !b) b = a === 'es' ? 'en' : 'es';
+      if (a && b && a !== b) return [{ text: bits[0], lang: a }, { text: bits[1], lang: b }];
+    }
+    return [{ text: text, lang: _langOf(text, hint) }];
   }
 
   // Spanish or English? The rule says; failing that the words do; failing
@@ -111,11 +183,24 @@ var ZsSpeak = (function() {
   // ── Speaking ──
   function say(text, lang) {
     if (!enabled()) return false;
-    var l = _langOf(text, lang);
-    var t = _clean(text, l);
-    if (!t) return false;
-    _spokenText = t;
-    return !!ZsTTS.speak(t, { lang: _voiceLang(l) });
+    var parts = _parts(text, lang).map(function(p) {
+      return { text: _clean(p.text, p.lang), lang: p.lang };
+    }).filter(function(p) { return p.text; });
+    if (!parts.length) return false;
+    _spokenText = parts.map(function(p) { return p.text; }).join(' · ');
+    var ok = false;
+    parts.forEach(function(p, i) {
+      if (ZsTTS.speak(p.text, { lang: _voiceLang(p.lang), queue: i > 0 })) ok = true;
+    });
+    return ok;
+  }
+
+  // What an element says: its data-speak value, or its words.
+  function _sayEl(el, lang) {
+    if (!el) return false;
+    var b = el.querySelector && el.querySelector(':scope > .zs-say');
+    var l = lang || el.getAttribute('data-speak-lang') || (b && b.__zsLang);
+    return say(el.getAttribute('data-speak') || _textOf(el), l);
   }
 
   function stop() {
@@ -160,8 +245,14 @@ var ZsSpeak = (function() {
   // Put a 🔊 in el. True when this is a new question: the element is new,
   // or an app that sets its text wiped the button and wrote another one.
   function _decorate(el, cfg) {
-    var had = Array.prototype.some.call(el.children, function(c) { return c.classList.contains('zs-say'); });
-    if (!had) {
+    // A 🔊 cannot go inside another button or link.
+    if (el.closest('button, a[href], [role="button"], label')) return false;
+    var old = null;
+    Array.prototype.forEach.call(el.children, function(c) { if (c.classList.contains('zs-say')) old = c; });
+    var text = el.getAttribute('data-speak') || _textOf(el);
+    // Nothing to say (yet): no 🔊.
+    if (!text) { if (old) old.remove(); el.__zsText = ''; return false; }
+    if (!old) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'zs-say';
@@ -171,10 +262,9 @@ var ZsSpeak = (function() {
       b.__zsLang = cfg && cfg.lang;
       el.appendChild(b);
     }
-    var text = _textOf(el);
     var changed = el.__zsText !== text;
     el.__zsText = text;
-    return (!had || changed) && !!text;
+    return !old || changed;
   }
 
   function scan() {
@@ -185,7 +275,7 @@ var ZsSpeak = (function() {
       var prompts = [];
       if (cfg.prompt) prompts = _all(cfg.prompt);
       else _all(cfg.group).forEach(function(g) { var p = _promptBefore(g); if (p) prompts.push(p); });
-      prompts.forEach(function(p) { if (_decorate(p, cfg)) fresh.push(p); });
+      prompts.forEach(function(p) { if (_decorate(p, cfg) && cfg.auto !== false) fresh.push(p); });
 
       _all(cfg.choice).forEach(function(c) {
         c.setAttribute('data-zs-choice', '1');
@@ -193,7 +283,14 @@ var ZsSpeak = (function() {
       });
     });
 
-    _all('[data-speak]').forEach(function(el) { _decorate(el, null); });
+    _all('[data-speak]').forEach(function(el) {
+      if (_decorate(el, null) && el.hasAttribute('data-speak-auto')) fresh.push(el);
+    });
+
+    // Less text for little kids.
+    if (little()) _cfgs.forEach(function(cfg) {
+      _all(cfg.extra).forEach(function(el) { el.setAttribute('data-zs-extra', '1'); });
+    });
 
     if (little() && fresh.length) _autoRead(fresh[fresh.length - 1]);
   }
@@ -206,8 +303,7 @@ var ZsSpeak = (function() {
       if (!_visible(el) || document.hidden) return;
       var ua = navigator.userActivation;
       if (ua && !ua.hasBeenActive) { _pending = el; return; }
-      var b = el.querySelector('.zs-say');
-      say(_textOf(el), b && b.__zsLang);
+      _sayEl(el);
     }, 450);
   }
 
@@ -228,9 +324,8 @@ var ZsSpeak = (function() {
       e.preventDefault();
       e.stopPropagation();
       var tgt = say_.__zsTarget;
-      var text = say_.hasAttribute('data-say') ? say_.getAttribute('data-say')
-        : (tgt && tgt.getAttribute('data-speak')) || _textOf(tgt);
-      say(text, say_.getAttribute('data-say-lang') || say_.__zsLang);
+      if (say_.hasAttribute('data-say')) say(say_.getAttribute('data-say'), say_.getAttribute('data-say-lang'));
+      else _sayEl(tgt, say_.__zsLang);
       return;
     }
 
@@ -262,7 +357,7 @@ var ZsSpeak = (function() {
     // A touch is the first thing an iPad will let us speak after.
     if (_pending) {
       var p = _pending; _pending = null;
-      if (_visible(p)) { var b = p.querySelector('.zs-say'); say(_textOf(p), b && b.__zsLang); }
+      if (_visible(p)) _sayEl(p);
     }
     var c = _closest(e.target, '[data-zs-choice]');
     if (!c || !enabled()) return;
@@ -292,6 +387,7 @@ var ZsSpeak = (function() {
       '[data-zs-choice]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}' +
       '[data-zs-armed="1"]{outline:4px solid #f59e0b;outline-offset:2px}' +
       'html.zs-little{font-size:112.5%}' +
+      'html.zs-little [data-zs-extra],html.zs-little .zs-extra{display:none!important}' +
       'html.zs-little :where(button,[role="button"],select){min-height:56px}' +
       'html.zs-little .zs-say,html.zs-little [data-zs-choice]{min-width:56px;min-height:56px}' +
       'html.zs-little .zs-say{font-size:1.4rem}';
@@ -350,5 +446,5 @@ var ZsSpeak = (function() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  return { say: say, stop: stop, button: button, watch: watch, scan: scan, enabled: enabled, little: little, init: init, _rules: RULES };
+  return { say: say, stop: stop, button: button, watch: watch, scan: scan, refresh: scan, enabled: enabled, little: little, init: init, _rules: RULES };
 })();

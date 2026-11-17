@@ -228,6 +228,73 @@ test.describe('Read-aloud', () => {
     expect((await said(page))[0].text).toBe('3 times 4 equals what');
   });
 
+  test('"Español · English" text is said twice: Spanish voice first, then English', async ({ page }) => {
+    await open(page);
+    await page.evaluate(() => { /* @ts-ignore */ ZsSpeak.say('¿Cuál es el río más largo de Chile? · Which is the longest river in Chile?'); });
+    const out = await said(page);
+    expect(out.map(s => [s.text, s.lang])).toEqual([
+      ['¿Cuál es el río más largo de Chile?', 'es-CL'],
+      ['Which is the longest river in Chile?', 'en-US']
+    ]);
+    // The English half waits for the Spanish one instead of cutting it off.
+    const cancels = await page.evaluate(() => /** @type {any} */ (window).__cancels);
+    await page.evaluate(() => { /* @ts-ignore */ ZsSpeak.say('Tap the bulb to light it up · Toca la ampolleta para encenderla'); });
+    expect(await page.evaluate(() => /** @type {any} */ (window).__cancels)).toBe(cancels + 1);
+    expect((await said(page)).slice(2).map(s => s.lang)).toEqual(['en-US', 'es-CL']);
+  });
+
+  test('a "·" that does not split two languages stays one sentence', async ({ page }) => {
+    await open(page);
+    await page.evaluate(() => { /* @ts-ignore */ ZsSpeak.say('Level 2 · 9 moves'); });
+    expect((await said(page)).map(s => s.text)).toEqual(['Level 2 · 9 moves']);
+  });
+
+  test('an instruction with nothing in it gets no 🔊, and a 🔊 never goes inside a button', async ({ page }) => {
+    await open(page);
+    await page.evaluate(() => {
+      const d = document.createElement('div');
+      d.innerHTML = '<p id="tip" class="t-tip"></p><button type="button" class="t-card"><span class="t-tip">Inside a card</span></button>';
+      document.body.appendChild(d);
+      // @ts-ignore
+      ZsSpeak.watch({ prompt: '.t-tip', choice: '.t-card' });
+    });
+    await expect(page.locator('.t-tip .zs-say')).toHaveCount(0);
+    await page.evaluate(() => { /** @type {any} */ (document.getElementById('tip')).textContent = 'Pick a paint'; });
+    await expect(page.locator('#tip .zs-say')).toHaveCount(1);
+    await expect(page.locator('.t-card .zs-say')).toHaveCount(0);
+    await page.evaluate(() => { /** @type {any} */ (document.getElementById('tip')).textContent = ''; });
+    await expect(page.locator('#tip .zs-say')).toHaveCount(0);
+    expect(await page.evaluate(() => typeof /** @type {any} */ (ZsSpeak).refresh)).toBe('function');
+  });
+
+  test('little-kid mode: data-speak-auto is read by itself, auto: false is not, and extra text is hidden', async ({ page }) => {
+    await open(page, { age: 4 });
+    await page.evaluate(() => {
+      const d = document.createElement('div');
+      d.innerHTML = '<p class="t-side">A tip nobody asked for</p><p class="t-more">Long story for readers</p>' +
+        '<p id="goal" data-speak="Light the bulb" data-speak-auto>💡 Light it</p>';
+      document.body.appendChild(d);
+      // @ts-ignore
+      ZsSpeak.watch({ prompt: '.t-side', auto: false, extra: '.t-more' });
+    });
+    await expect.poll(async () => (await said(page)).map(s => s.text)).toEqual(['Light the bulb']);
+    await expect(page.locator('.t-side .zs-say')).toHaveCount(1);
+    await expect(page.locator('.t-more')).toBeHidden();
+  });
+
+  test('extra text stays for a kid who reads', async ({ page }) => {
+    await open(page, { age: 9 });
+    await page.evaluate(() => {
+      const d = document.createElement('div');
+      d.innerHTML = '<p class="t-more">Long story for readers</p><p class="zs-extra">More</p>';
+      document.body.appendChild(d);
+      // @ts-ignore
+      ZsSpeak.watch({ prompt: '.t-none', extra: '.t-more' });
+    });
+    await expect(page.locator('.t-more')).toBeVisible();
+    await expect(page.locator('.zs-extra')).toBeVisible();
+  });
+
   test('speech stops when the page goes away', async ({ page }) => {
     await open(page);
     const before = await page.evaluate(() => /** @type {any} */ (window).__cancels);
@@ -272,6 +339,55 @@ test.describe('Read-aloud in a real app', () => {
     await expect(page.locator('#wa-quiz .wa-option.correct')).toHaveCount(1);
     await page.locator('#wa-quiz .wa-q-text .zs-say').click();
     expect((await said(page)).length).toBe(1);
+  });
+});
+
+test.describe('Read-aloud for instructions', () => {
+  test('Circuit Lab: a 4-year-old hears the cards and then the challenge goal by itself', async ({ page }) => {
+    await open(page, { age: 4 });
+    await page.goto('/circuit-lab.html');
+    await page.waitForFunction(() => typeof window.ZsSpeak !== 'undefined' && document.querySelector('.cl-mode'));
+    // Little-kid mode: the first tap on a card says it, the second opens it.
+    const card = page.locator('.cl-mode[data-go="levels"]');
+    await card.click();
+    await expect(page.locator('.cl-level').first()).toHaveCount(0);
+    expect((await said(page)).map(s => s.text)).toContain('Challenges 16 circuit puzzles, from "light a bulb" to a two-way stair switch.');
+    await card.click();
+    await page.locator('.cl-level').first().click();
+    await page.locator('.cl-level').first().click();
+    const goal = page.locator('.cl-goal-text');
+    await expect(goal.locator('.zs-say')).toHaveCount(1);
+    const want = (await goal.evaluate(el => el.textContent || '')).replace('🔊', '').trim();
+    await expect.poll(async () => (await said(page)).map(s => s.text)).toContain(want);
+    await expect(page.locator('.cl-status .zs-say')).toHaveCount(1);
+  });
+
+  test('Chess Quest: a kid who reads opens a menu card with one tap, and a long press says it', async ({ page }) => {
+    await open(page, { age: 9 });
+    await page.goto('/chess-quest.html');
+    await page.waitForFunction(() => typeof window.ZsSpeak !== 'undefined');
+    const card = page.locator('.mode-card').first();
+    const box = await card.boundingBox();
+    if (!box) throw new Error('no card');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(800);
+    await page.mouse.up();
+    expect((await said(page)).map(s => s.text).join(' ')).toContain('Learn the Pieces');
+    await expect(page.locator('.piece-card').first()).toBeHidden();          // the long press did not open it
+    await card.click();
+    await page.locator('.piece-card').nth(1).click();
+    await expect(page.locator('#lessonInfo p .zs-say')).toHaveCount(1);
+    expect(await said(page)).toHaveLength(1);                                // nothing read by itself at 9
+  });
+
+  test('World Cup quiz: the question and its answers are covered', async ({ page }) => {
+    await open(page, { age: 9 });
+    await page.goto('/world-cup.html');
+    await page.waitForFunction(() => typeof window.ZsSpeak !== 'undefined' && typeof window.WC !== 'undefined');
+    await page.evaluate(() => { /* @ts-ignore */ WC.showTab ? WC.showTab('quiz') : null; /* @ts-ignore */ WC.startQuiz(); });
+    await expect(page.locator('.wc-quiz-q .zs-say')).toHaveCount(1);
+    await expect(page.locator('.wc-quiz-opt[data-zs-choice]').first()).toBeAttached();
   });
 });
 
@@ -335,8 +451,10 @@ test.describe('Read-aloud coverage', () => {
       for (const r of list) {
         for (const sel of [r.group, r.choice, r.prompt].filter(Boolean)) {
           for (const tok of sel.split(',').map(t => t.trim())) {
-            const id = tok.replace(/^[.#]/, '');
-            if (!src.includes(id)) problems.push(name + ': ' + tok + ' is not in the page or its scripts');
+            // Every class and id the selector names (".a > b.c" → a, c).
+            for (const m of tok.matchAll(/[.#]([\w-]+)/g)) {
+              if (!src.includes(m[1])) problems.push(name + ': ' + tok + ' (' + m[1] + ') is not in the page or its scripts');
+            }
           }
         }
       }
@@ -353,5 +471,22 @@ test.describe('Read-aloud coverage', () => {
     const misordered = hrefs.filter(h => { const html = read(h); return html.includes('js/speak.js') && html.indexOf('js/tts.js') > html.indexOf('js/speak.js'); });
     expect(misordered, 'speak.js needs tts.js (and auth.js) loaded first').toEqual([]);
     for (const h of notForKids) expect(read(h)).not.toContain('js/speak.js');
+  });
+
+  test('every kid app says its instructions: rules in speak.js, or data-speak / ZsSpeak in its own code', async ({ page }) => {
+    await open(page);
+    const rules = await page.evaluate(() => Object.keys(/** @type {any} */ (ZsSpeak)._rules));
+    const hub = read('js/lang.js');
+    const hrefs = [...hub.matchAll(/'([a-z\-]+\.html)':\s*\{ d:/g)].map(m => m[1]);
+    const notForKids = ['little-maestro.html', 'patron-lancha.html', 'book-movie-check.html'];
+    const missing = hrefs.filter(h => {
+      if (notForKids.includes(h)) return false;
+      const name = h.replace(/\.html$/, '');
+      if (rules.includes(name)) return false;
+      const html = read(h);
+      const src = html + [...html.matchAll(/src="(js\/[^"?]+\.js)/g)].filter(m => !/\/(speak|tts|auth|sync|pwa)\.js$/.test(m[1])).map(m => read(m[1])).join('\n');
+      return !/data-speak|ZsSpeak\.(watch|button|say)/.test(src);
+    });
+    expect(missing).toEqual([]);
   });
 });
