@@ -51,7 +51,36 @@ var Trivia = (function () {
     d.v = 1;
     ['games', 'wins', 'right', 'asked', 'best'].forEach(function (k) { d[k] = d[k] | 0; });
     d.hist = obj(d.hist);
-    d.g = obj(d.g);   // finished games by id: [right, asked, won (1/0), score]
+    d.g = obj(d.g);   // finished games by id: [right, asked, won (1/0), score, time]
+    // A record from before games were kept by id: keep its totals in
+    // `old`, so counting from g never loses a game.
+    if (!d.old) {
+      var n = { games: 0, wins: 0, right: 0, asked: 0 };
+      Object.keys(d.g).forEach(function (id) { var r = Array.isArray(d.g[id]) ? d.g[id] : []; n.games++; n.right += r[0] | 0; n.asked += r[1] | 0; n.wins += r[2] ? 1 : 0; });
+      if (d.games > n.games) d.old = { games: d.games - n.games, wins: Math.max(0, d.wins - n.wins), right: Math.max(0, d.right - n.right), asked: Math.max(0, d.asked - n.asked), best: d.best };
+    }
+    return d;
+  }
+  // Totals are counted from the games (g) plus what the newest-500 cap
+  // folded into `old`; the same rule as _mergeTrivia in sync.js.
+  var GAMES_MAX = 500;
+  function tally(d) {
+    var ids = Object.keys(d.g);
+    if (ids.length > GAMES_MAX) {
+      ids.sort(function (a, b) { return ((d.g[a] || [])[4] || 0) - ((d.g[b] || [])[4] || 0) || (a < b ? -1 : 1); });
+      var o = d.old = Object.assign({ games: 0, wins: 0, right: 0, asked: 0, best: 0 }, d.old || {});
+      ids.slice(0, ids.length - GAMES_MAX).forEach(function (id) {
+        var r = Array.isArray(d.g[id]) ? d.g[id] : [];
+        o.games++; o.right += r[0] | 0; o.asked += r[1] | 0; o.wins += r[2] ? 1 : 0; o.best = Math.max(o.best, r[3] | 0);
+        delete d.g[id];
+      });
+    }
+    var old = d.old || {}, t = { games: old.games | 0, wins: old.wins | 0, right: old.right | 0, asked: old.asked | 0 }, best = old.best | 0;
+    Object.keys(d.g).forEach(function (id) {
+      var r = Array.isArray(d.g[id]) ? d.g[id] : [];
+      t.games++; t.right += r[0] | 0; t.asked += r[1] | 0; t.wins += r[2] ? 1 : 0; best = Math.max(best, r[3] | 0);
+    });
+    d.games = t.games; d.wins = t.wins; d.right = t.right; d.asked = t.asked; d.best = best;
     return d;
   }
   function saveKid(name, d) {
@@ -655,12 +684,8 @@ var Trivia = (function () {
         var d = loadKid(p.name);
         // Kept by game id, so sync can merge two devices' copies without
         // losing a game (see _mergeTrivia in sync.js).
-        d.g[game.id] = [side ? side.right : 0, side ? side.asked : 0, side && side.place === 1 ? 1 : 0, side ? side.score : 0];
-        d.games++;
-        d.right += side ? side.right : 0;
-        d.asked += side ? side.asked : 0;
-        if (side && side.place === 1) d.wins++;
-        if (side && side.score > d.best) d.best = side.score;
+        d.g[game.id] = [side ? side.right : 0, side ? side.asked : 0, side && side.place === 1 ? 1 : 0, side ? side.score : 0, Date.now()];
+        tally(d);
         var h = game.hist[p.id] || {};
         for (var k in d.hist) if (!(k in h)) h[k] = d.hist[k];
         d.hist = h;

@@ -27,7 +27,7 @@ async function fakeServer(page, kid, initial) {
   }, [kid, initial]);
 }
 
-const games = (n, from = 0) => Object.fromEntries(Array.from({ length: n }, (_, i) => ['g' + (from + i), [3, 4, i % 2, 40]]));
+const games = (n, from = 0) => Object.fromEntries(Array.from({ length: n }, (_, i) => ['g' + (from + i), [3, 4, (from + i) % 2, 40, 1000 + from + i]]));
 const KIDS = [{ name: 'Tomás', age: 7, avatar: '🦁' }, { name: 'Clara', age: 10, avatar: '🐼' }];
 
 test.describe('Trivia Familiar sync', () => {
@@ -40,18 +40,16 @@ test.describe('Trivia Familiar sync', () => {
     }, KIDS);
   });
 
-  test('the merge keeps every game from both sides and only lets totals go up', async ({ page }) => {
+  test('the merge keeps every game from both sides and counts totals from the games', async ({ page }) => {
     await page.goto('/');
     await page.waitForFunction(() => !!(/** @type {any} */ (window).CloudSync));
     const out = await page.evaluate(([a, b]) => /** @type {any} */ (window).CloudSync._mergeTrivia(
-      { _syncedAt: 5, v: 1, games: 10, wins: 4, right: 30, asked: 40, best: 90, g: a, hist: { x: 9, y: 2 }, last: '2026-12-20' },
-      { v: 1, games: 2, wins: 1, right: 5, asked: 8, best: 120, g: b, hist: { y: 7, z: 1 }, last: '2026-12-24' }), [games(10), games(2, 9)]);
+      { _syncedAt: 5, v: 1, games: 10, g: a, hist: { x: 9, y: 2 }, last: '2026-12-20' },
+      { v: 1, games: 2, g: b, hist: { y: 7, z: 1 }, last: '2026-12-24' }), [games(10), { ...games(1, 9), g10: [5, 5, 1, 120, 3000] }]);
     expect(Object.keys(out.g).length).toBe(11);       // g9 is on both sides
-    expect(out.games).toBe(11);
-    expect(out.best).toBe(120);
+    expect([out.games, out.right, out.asked, out.wins, out.best]).toEqual([11, 35, 45, 6, 120]);
     expect(out.hist).toEqual({ x: 9, y: 7, z: 1 });
     expect(out.last).toBe('2026-12-24');
-    expect(out.right).toBeGreaterThanOrEqual(30);
     // The question history stays capped.
     const big = await page.evaluate(() => {
       const h1 = {}, h2 = {};
@@ -61,6 +59,55 @@ test.describe('Trivia Familiar sync', () => {
     expect(big.length).toBe(700);
     expect(big).toContain('b0');
     expect(big).not.toContain('a0');
+  });
+
+  test('at most 500 games are kept, and the totals still count them all', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForFunction(() => !!(/** @type {any} */ (window).CloudSync));
+    const out = await page.evaluate(([a, b]) => {
+      const m = /** @type {any} */ (window).CloudSync._mergeTrivia;
+      const once = m({ g: a }, { g: b });
+      // Merging the capped record again changes nothing.
+      return { once, twice: m(once, JSON.parse(JSON.stringify(once))) };
+    }, [games(400), games(250, 400)]);
+    for (const r of [out.once, out.twice]) {
+      expect(Object.keys(r.g).length).toBe(500);
+      expect(r.games).toBe(650);
+      expect(r.right).toBe(650 * 3);
+      expect(r.g.g0).toBeUndefined();                  // the oldest were folded away
+      expect(r.g.g649).toBeTruthy();
+    }
+  });
+
+  test('a Progress Manager reset sticks: 10 games on the server become 0, then 1 after a game', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForFunction(() => !!(/** @type {any} */ (window).ProgressAdmin) && !!(/** @type {any} */ (window).CloudSync));
+    await fakeServer(page, 'clara', { _syncedAt: '2026-12-01T00:00:00Z', v: 1, games: 10, g: games(10), hist: { 'ge-05': 4 } });
+    const res = await page.evaluate(async () => {
+      const w = /** @type {any} */ (window);
+      localStorage.setItem('zs_trivia_clara', JSON.stringify(w.__srv.data));
+      w.ProgressAdmin.reset('Clara', 'trivia');
+      await new Promise(r => setTimeout(r, 50));
+      await w.CloudSync.push('zs_trivia_clara');
+      const afterReset = { server: JSON.parse(JSON.stringify(w.__srv.data)), local: JSON.parse(localStorage.getItem('zs_trivia_clara') || '{}') };
+      // A device that never saw the reset pushes its old copy: still 0.
+      const stale = { v: 1, games: 10, g: JSON.parse(JSON.stringify(afterReset.server.g || {})), hist: { 'ge-05': 4 } };
+      for (let i = 0; i < 10; i++) stale.g['g' + i] = [3, 4, 0, 40, 1000 + i];
+      const merged = w.CloudSync._mergeTrivia(afterReset.server, stale);
+      // One game played after the reset.
+      const d = JSON.parse(localStorage.getItem('zs_trivia_clara'));
+      d.g = d.g || {}; d.g.after = [4, 5, 1, 60, Date.now() + 1000];
+      localStorage.setItem('zs_trivia_clara', JSON.stringify(d));
+      await w.CloudSync.push('zs_trivia_clara');
+      return { afterReset, merged, after: w.__srv.data };
+    });
+    expect(res.afterReset.server.games).toBe(0);
+    expect(res.afterReset.server.hist).toEqual({});
+    expect(res.afterReset.local.games).toBe(0);
+    expect(res.merged.games).toBe(0);
+    expect(res.after.games).toBe(1);
+    expect(Object.keys(res.after.g)).toEqual(['after']);
+    expect(await page.evaluate(s => /** @type {any} */ (window).getAppStars('trivia', s), res.after)).toBe(1);
   });
 
   test('a game night with a stale local copy of a sibling: 10 games on the server become 11', async ({ page }) => {

@@ -342,7 +342,10 @@ var ProgressAdmin = (function() {
     { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
   APPS.push({ id: 'codelab', label: 'Code Lab', icon: '🐢', href: 'code-lab.html', prefix: 'zs_codelab_', mode: 'reset' });
-  APPS.push({ id: 'trivia', label: 'Trivia Familiar', icon: '🎲', href: 'trivia-familiar.html', prefix: 'zs_trivia_', mode: 'reset' });
+  // A reset stamps r (the time), so sync drops the older games instead of
+  // merging them back in (see _mergeTrivia in sync.js).
+  APPS.push({ id: 'trivia', label: 'Trivia Familiar', icon: '🎲', href: 'trivia-familiar.html', prefix: 'zs_trivia_', mode: 'reset',
+    clear: function() { return { v: 1, r: Date.now() }; } });
 
   // Lector keeps a ladder of levels for each language in one saved blob
   // (zs_lector_<kid>: lv:{ es2:{sounds,syll,build,read}, … }, books:{…}).

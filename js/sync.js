@@ -626,31 +626,61 @@ var CloudSync = (function() {
   // One game night saves a record for every kid who played, not only
   // the one signed in, so a device's copy of a sibling's record can be
   // old. Each finished game is kept by its id in g: { id: [right, asked,
-  // won, score] }; the merge is the union of games, the larger of each
-  // running total, and each question's latest "seen" mark (the 700
-  // most recent), so neither side can take games away from the other.
-  var TRIVIA_HIST_MAX = 700;
+  // won, score, time] }, and the totals are always counted from g (plus
+  // `old`, what the newest-500 cap has folded away), so the merge is the
+  // union of games and can never take one away.
+  // A Progress Manager reset writes r: <time>. The newest r wins: from a
+  // copy that has not seen it, only games played after it survive, and its
+  // question history and old totals are dropped, so a reset sticks.
+  var TRIVIA_HIST_MAX = 700, TRIVIA_GAMES_MAX = 500;
+  function _triviaTally(d) {
+    var o = d.old || {}, t = { games: o.games | 0, wins: o.wins | 0, right: o.right | 0, asked: o.asked | 0 }, best = o.best | 0;
+    Object.keys(d.g).forEach(function(id) {
+      var r = Array.isArray(d.g[id]) ? d.g[id] : [];
+      t.games++; t.right += r[0] | 0; t.asked += r[1] | 0; t.wins += r[2] ? 1 : 0; best = Math.max(best, r[3] | 0);
+    });
+    d.games = t.games; d.wins = t.wins; d.right = t.right; d.asked = t.asked; d.best = best;
+    return d;
+  }
+  function _triviaCap(d) {
+    var ids = Object.keys(d.g);
+    if (ids.length <= TRIVIA_GAMES_MAX) return d;
+    ids.sort(function(a, b) { return ((d.g[a] || [])[4] || 0) - ((d.g[b] || [])[4] || 0) || (a < b ? -1 : 1); });
+    var o = d.old = Object.assign({ games: 0, wins: 0, right: 0, asked: 0, best: 0 }, d.old || {});
+    ids.slice(0, ids.length - TRIVIA_GAMES_MAX).forEach(function(id) {
+      var r = Array.isArray(d.g[id]) ? d.g[id] : [];
+      o.games++; o.right += r[0] | 0; o.asked += r[1] | 0; o.wins += r[2] ? 1 : 0; o.best = Math.max(o.best, r[3] | 0);
+      delete d.g[id];
+    });
+    return d;
+  }
   function _mergeTrivia(server, local) {
     var s = server || {}, l = local || {};
+    var R = Math.max(s.r || 0, l.r || 0);
+    function side(x) {
+      var stale = (x.r || 0) < R, g = {}, src = x.g && typeof x.g === 'object' ? x.g : {};
+      Object.keys(src).forEach(function(id) {
+        var t = Array.isArray(src[id]) ? src[id][4] || 0 : 0;
+        if (!stale || t > R) g[id] = src[id];
+      });
+      return { g: g, hist: stale ? {} : (x.hist || {}), old: stale ? {} : (x.old || {}) };
+    }
+    var A = side(s), B = side(l);
     var out = Object.assign({}, s, l);
-    var g = Object.assign({}, s.g && typeof s.g === 'object' ? s.g : {}, l.g && typeof l.g === 'object' ? l.g : {});
-    out.g = g;
-    var sum = { games: 0, wins: 0, right: 0, asked: 0 }, best = 0;
-    Object.keys(g).forEach(function(id) {
-      var r = Array.isArray(g[id]) ? g[id] : [];
-      sum.games++; sum.right += r[0] | 0; sum.asked += r[1] | 0; sum.wins += r[2] ? 1 : 0;
-      best = Math.max(best, r[3] | 0);
-    });
-    ['games', 'wins', 'right', 'asked'].forEach(function(k) { out[k] = Math.max(s[k] | 0, l[k] | 0, sum[k]); });
-    out.best = Math.max(s.best | 0, l.best | 0, best);
-    var h = {}, sh = s.hist || {}, lh = l.hist || {};
-    Object.keys(sh).concat(Object.keys(lh)).forEach(function(id) { h[id] = Math.max(sh[id] | 0, lh[id] | 0); });
+    out.g = Object.assign({}, A.g, B.g);
+    var old = {};
+    ['games', 'wins', 'right', 'asked', 'best'].forEach(function(k) { var v = Math.max(A.old[k] | 0, B.old[k] | 0); if (v) old[k] = v; });
+    if (Object.keys(old).length) out.old = old; else delete out.old;
+    var h = {};
+    Object.keys(A.hist).concat(Object.keys(B.hist)).forEach(function(id) { h[id] = Math.max(A.hist[id] | 0, B.hist[id] | 0); });
     var ids = Object.keys(h);
     if (ids.length > TRIVIA_HIST_MAX) {
       ids.sort(function(a, b) { return h[b] - h[a]; });
       ids.slice(TRIVIA_HIST_MAX).forEach(function(id) { delete h[id]; });
     }
     out.hist = h;
+    _triviaTally(_triviaCap(out));
+    if (R) out.r = R; else delete out.r;
     out.last = String(s.last || '') > String(l.last || '') ? s.last : l.last;
     if (!out.last) delete out.last;
     out.v = 1;
