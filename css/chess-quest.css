@@ -137,6 +137,7 @@ button { font-family: inherit; color: inherit; }
 .tool { min-width: 48px; min-height: 46px; padding: 8px 12px; border-radius: 14px; border: 1px solid #dcd3c4; background: #fff; font-weight: 800; font-size: 0.85rem; color: var(--cq-ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 0 #e4dccd; }
 .tool:hover { border-color: var(--cq-honey); }
 .tool[disabled] { opacity: 0.45; cursor: default; }
+.tool[hidden] { display: none; }
 .tool .ti { font-size: 1.1rem; line-height: 1; }
 
 /* Coach bubble */

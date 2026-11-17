@@ -8,8 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/chess-quest.css?v=2">
+  <link rel="stylesheet" href="css/chess-quest.css?v=3">
   <link rel="stylesheet" href="css/zs-theme.css">
+  <link rel="stylesheet" href="css/challenges.css?v=2">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#7C3AED">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
@@ -146,6 +147,7 @@
     <div class="cq-head"><button type="button" class="back-btn" aria-label="Back to the puzzle ladder" onclick="openPuzzleMenu()">←</button><h2 id="puzzleLabel"></h2><span class="pill" id="puzzleTag"></span></div>
     <div class="split">
       <div>
+        <div class="chl-banner" id="pzChallenge" role="status" hidden></div>
         <div class="pz-goal" id="puzzleGoal"></div>
         <div class="board-wrap"><div class="board" id="puzzleBoard"></div></div>
       </div>
@@ -156,6 +158,7 @@
           <button type="button" class="tool" id="pzHintBtn" onclick="puzzleHint()"><span class="ti" aria-hidden="true">💡</span>Hint</button>
           <button type="button" class="tool" onclick="resetPuzzle()"><span class="ti" aria-hidden="true">↺</span>Restart</button>
           <button type="button" class="tool" onclick="flipPuzzle()" aria-label="Flip the board"><span class="ti" aria-hidden="true">⇅</span>Flip</button>
+          <button type="button" class="tool" id="pzChallengeBtn" onclick="challengeSiblingPuzzle()" aria-label="Challenge a sibling with this puzzle" hidden><span class="ti" aria-hidden="true">🤝</span>Challenge a sibling</button>
         </div>
         <div class="btn-row"><button type="button" class="btn btn-outline" onclick="openPuzzleMenu()">Ladder</button><button type="button" class="btn btn-gold" id="nextPuzzleBtn" onclick="nextPuzzle()" style="display:none">Next puzzle →</button></div>
       </div>
@@ -213,9 +216,11 @@
 <script src="js/speak.js?v=3"></script>
 <script src="js/chess-quest-art.js?v=1"></script>
 <script src="js/chess-quest-data.js?v=1"></script>
-  <script src="js/review.js?v=1"></script>
-<script src="js/chess-quest.js?v=5"></script>
+  <script src="js/review.js?v=2"></script>
+<script src="js/chess-quest.js?v=6"></script>
 <script src="js/chess-extras.js?v=2"></script>
+<script src="js/challenge-engine.js?v=2"></script>
+<script src="js/challenges.js?v=2"></script>
   <script src="js/pwa.js"></script>
 
 </body>

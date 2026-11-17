@@ -578,6 +578,14 @@ function init(){
   const greetEl=document.getElementById('greeting');
   if(user&&greetEl)greetEl.textContent="Let's play, "+user.name+"!";
   updateMenuBadges();
+  // A sibling challenge link from the hub: chess-quest.html?challenge=<id>
+  try{
+    const chId=new URLSearchParams(location.search).get('challenge');
+    if(chId){
+      history.replaceState(null,'',location.pathname+location.hash);
+      openChallengePuzzle(chId);
+    }
+  }catch(e){}
 }
 
 function updateMenuBadges(){
@@ -855,9 +863,12 @@ function openPuzzleMenu(){
   showScreen('puzzle-menu');
 }
 
-function openPuzzle(i){
+// opts.challenge: the id of a sibling challenge (challenges.js) for this
+// puzzle. It opens even if the ladder has not reached it yet.
+function openPuzzle(i,opts){
   const solved=puzzleSolvedCount();
-  if(i>solved){
+  const chId=opts&&opts.challenge||null;
+  if(i>solved&&!chId){
     if(typeof ZsDialog!=='undefined')ZsDialog.alert({title:'Locked 🔒',message:'Solve puzzle '+(solved+1)+' first — the ladder opens one step at a time.'});
     return;
   }
@@ -865,7 +876,7 @@ function openPuzzle(i){
   const pz=PUZZLES[i];
   const pos=CQPuzzle.setup(pz);
   PZ={i,pz,start:CQE.toFEN(pos),pos,line:CQPuzzle.line(pz),ply:0,onLine:true,wdone:0,need:CQPuzzle.whiteMoves(pz,pos),
-      wrong:0,hint:0,busy:false,selected:null,last:null,arrows:null,hintSq:null,solved:false,flipped:false,replay:i<solved};
+      wrong:0,hint:0,busy:false,selected:null,last:null,arrows:null,hintSq:null,solved:false,flipped:false,replay:i<solved,ch:chId,chWon:false};
   const el=document.getElementById('puzzleBoard');if(el)el._cqPrev=null;
   const lab=document.getElementById('puzzleLabel');
   if(lab)lab.innerHTML='Puzzle '+(i+1)+' <span class="cq-sub">'+_esc(pz.name)+'</span>';
@@ -875,12 +886,57 @@ function openPuzzle(i){
   if(goal){const g=CQPuzzle.goal(pz,pos);goal.innerHTML='<span class="turn-dot" aria-hidden="true"></span>White to move — '+(g==='mate'?'checkmate in 1!':g==='mate2'?'checkmate in 2 moves!':({fork:'win material with a fork!',pin:'use a pin to win material!',skewer:'win material with a skewer!',discovered:'win material with a discovered attack!'}[pz.theme]||'win material!'))}
   setCoach('puzzleCoach',_esc(pz.hint),'',null,'Hint');
   document.getElementById('nextPuzzleBtn').style.display='none';
+  if(chId){const c=_chNow();if(c&&typeof ChallengeEngine!=='undefined'&&ChallengeEngine.hintOpen(c))PZ.hint=1}
+  _chBanner();
   updatePuzzleTools();
   renderPuzzle({animate:false});
   showScreen('puzzle');
+  if(chId&&PZ.hint)_later(showPuzzleHint,300);
 }
 function updatePuzzleTools(){
   const h=document.getElementById('pzHintBtn');if(h)h.disabled=!PZ||PZ.solved||PZ.hint>=2;
+  const cb=document.getElementById('pzChallengeBtn');
+  if(cb)cb.hidden=!PZ||!!PZ.ch||typeof Challenges==='undefined'||!Challenges.canSend();
+}
+
+/* ── Sibling challenges (js/challenges.js): a puzzle an older sibling
+   picked. Wrong moves are tries, after 2 the hint shows, and solving it
+   gives both kids a star. ── */
+function _chNow(){return PZ&&PZ.ch&&typeof Challenges!=='undefined'?Challenges.find(PZ.ch):null}
+function _chBanner(){
+  const el=document.getElementById('pzChallenge');if(!el)return;
+  const c=_chNow();
+  if(!c){el.hidden=true;el.textContent='';el.classList.remove('is-won');return}
+  el.hidden=false;el.textContent='';
+  el.classList.toggle('is-won',!!PZ.chWon);
+  if(Challenges.pieceArt)el.appendChild(Challenges.pieceArt());
+  const box=document.createElement('span');
+  const zs=(es,en)=>typeof zsT==='function'?zsT(es,en):en;
+  if(PZ.chWon){
+    box.appendChild(document.createTextNode('⭐ '+zs('¡Resolviste el desafío de '+c.from+'! Los dos ganan una estrella.','You solved '+c.from+'\'s challenge! You both earn a star.')));
+  }else{
+    // Kid-written words: only ever set as text.
+    box.appendChild(document.createTextNode('🤝 '+zs('Un desafío de '+c.from,'A challenge from '+c.from)));
+    if(c.hint&&typeof ChallengeEngine!=='undefined'&&ChallengeEngine.hintOpen(c)){
+      const hn=document.createElement('span');hn.className='chl-banner-hint';
+      hn.textContent='💡 '+zs('Pista de '+c.from+': ','Hint from '+c.from+': ')+c.hint;
+      box.appendChild(hn);
+    }
+  }
+  el.appendChild(box);
+}
+function openChallengePuzzle(id){
+  const c=typeof Challenges!=='undefined'?Challenges.waitingFor(id):null;
+  if(!c||c.kind!=='chess'||c.answer>=PUZZLES.length){
+    if(typeof ZsDialog!=='undefined')ZsDialog.alert({title:'Challenge',message:c?'This puzzle is not in this version of Chess Quest yet. Ask a grown-up to update the app.':'This challenge is not waiting for you any more. It may be solved already.'});
+    return false;
+  }
+  openPuzzle(c.answer,{challenge:c.id});
+  return true;
+}
+function challengeSiblingPuzzle(){
+  if(!PZ||typeof Challenges==='undefined')return;
+  Challenges.openCreate(typeof getActiveUser==='function'?getActiveUser():null,{kind:'chess',answer:PZ.i});
 }
 function expectedMove(){
   if(!PZ)return 0;
@@ -918,7 +974,7 @@ function showPuzzleHint(){
   updatePuzzleTools();renderPuzzle();
 }
 function flipPuzzle(){if(!PZ)return;PZ.flipped=!PZ.flipped;const el=document.getElementById('puzzleBoard');if(el)el._cqPrev=null;renderPuzzle({animate:false})}
-function resetPuzzle(){if(PZ)openPuzzle(PZ.i)}
+function resetPuzzle(){if(PZ)openPuzzle(PZ.i,PZ.ch&&!PZ.chWon?{challenge:PZ.ch}:null)}
 
 async function puzzleClick(r,c){
   if(!PZ||PZ.busy||PZ.solved)return;
@@ -981,6 +1037,11 @@ function _reviewPuzzle(ok){
 function puzzleWrong(m){
   PZ.wrong++;
   _reviewPuzzle(false);
+  if(PZ.ch){
+    const c=Challenges.recordMiss(PZ.ch);
+    if(c&&ChallengeEngine.hintOpen(c)&&PZ.hint<1)PZ.hint=1;
+    _chBanner();
+  }
   const why=Coach.whyWrong(PZ.pz,PZ.pos,m);
   const before=CQE.toFEN(PZ.pos),keepLast=PZ.last;
   setCoach('puzzleCoach','Not quite. '+why.text,'bad',null,'Coach');
@@ -1018,14 +1079,16 @@ function puzzleSolvedNow(alt){
   if(PZ.i===solvedBefore)upd.puzzlesSolved=solvedBefore+1;   // next rung of the ladder
   saveProgress(upd);
   if(typeof ActivityLog!=='undefined')ActivityLog.log('Chess Quest','♟️','Solved a chess puzzle');
+  if(PZ.ch){const r=Challenges.recordSolve(PZ.ch,null,PZ.i);PZ.chWon=!!r.ok;if(!r.ok)PZ.ch=null;_chBanner()}
   setCoach('puzzleCoach','<b>'+'★'.repeat(mark)+'☆'.repeat(3-mark)+'</b> '+(alt?'Great — that works too! ':'')+_esc(PZ.pz.after),'good',null,'Solved!');
   showFeedback('🎉');_sfx('correct');
   renderPuzzle({onClick:null});
   updatePuzzleTools();
   const nb=document.getElementById('nextPuzzleBtn');
-  if(nb){nb.style.display='';nb.textContent=PZ.i+1<PUZZLES.length?'Next puzzle →':'Back to ladder'}
+  if(nb){nb.style.display='';nb.textContent=PZ.chWon?'Back to the hub':PZ.i+1<PUZZLES.length?'Next puzzle →':'Back to ladder'}
 }
 function nextPuzzle(){
+  if(PZ&&PZ.chWon){location.href='index.html';return}
   const go=()=>{if(PZ&&PZ.i+1<PUZZLES.length&&PZ.i+1<=puzzleSolvedCount())openPuzzle(PZ.i+1);else openPuzzleMenu()};
   if (typeof LearningCheck !== 'undefined') LearningCheck.maybePrompt('chess', go);
   else go();
