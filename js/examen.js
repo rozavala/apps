@@ -147,8 +147,15 @@
   function ideaFor(v) { var n = E.total(d); return v.ideas[n % v.ideas.length]; }
 
   // A gentle count line: only ever good news.
-  function weekLine(dd, now) {
-    var w = E.thisWeek(dd, now || today());
+  function weekLine(dd, parent) {
+    var w = E.thisWeek(dd, today());
+    if (parent) {
+      // Read by a grown-up: plain counts, no "you".
+      if (!w.evenings && !w.top) return '';
+      var parts = [T('Esta semana: ' + w.evenings + (w.evenings === 1 ? ' noche' : ' noches') + ' de examen', 'This week: ' + w.evenings + (w.evenings === 1 ? ' evening' : ' evenings') + ' of reflection')];
+      if (w.top) parts.push(T('practicó ' + vName(w.top.id).toLowerCase() + ' ' + w.top.n + (w.top.n === 1 ? ' vez' : ' veces') + ' 🌟', 'practised ' + vName(w.top.id).toLowerCase() + ' ' + w.top.n + (w.top.n === 1 ? ' time' : ' times') + ' 🌟'));
+      return parts.join(' · ');
+    }
     if (w.top) return T('Esta semana practicaste ' + vName(w.top.id).toLowerCase() + ' ' + w.top.n + (w.top.n === 1 ? ' vez' : ' veces') + ' 🌟',
       'This week you practised ' + vName(w.top.id).toLowerCase() + ' ' + w.top.n + (w.top.n === 1 ? ' time' : ' times') + ' 🌟');
     if (w.evenings) return T('Esta semana hiciste el examen ' + w.evenings + (w.evenings === 1 ? ' vez' : ' veces') + '.', 'This week you did the examen ' + w.evenings + (w.evenings === 1 ? ' time' : ' times') + '.');
@@ -467,10 +474,10 @@
     var dl = dateLabel(k, true);
     return '<article class="ex-entry"><h3 class="ex-h3">' + esc(dl.charAt(0).toUpperCase() + dl.slice(1)) + '</h3>' + parts + '</article>';
   }
-  function journalBody(dd, showAll) {
+  function journalBody(dd, showAll, parent) {
     var keys = E.days(dd).filter(function(k) { return dd.entries[k].done; }).reverse();
     var h = '';
-    var wl = weekLine(dd), sl = '';
+    var wl = weekLine(dd, parent), sl = '';
     var n = E.streak(dd, today()), t = E.total(dd);
     sl = n >= 2 ? T(n + ' noches seguidas', n + ' evenings in a row') : '';
     h += '<div class="ex-jstats">' +
@@ -549,7 +556,7 @@
       '<p class="ex-note ex-pad-x">' + esc(T('Los cuadernos de los niños, solo para leer. El informe del domingo muestra solo cuántas noches y qué virtudes, nunca lo que escribieron.', 'The kids\' journals, read only. The Sunday Report shows only how many evenings and which virtues, never what they wrote.')) + '</p>' +
       '<div class="ex-seg ex-seg-wide" role="group" aria-label="' + esc(T('Niño', 'Kid')) + '">' +
         kids.map(function(k) { return '<button type="button" class="ex-segb' + (k.name === S.parentKid ? ' on' : '') + '" data-kid="' + esc(k.name) + '" aria-pressed="' + (k.name === S.parentKid) + '">' + esc(k.name) + '</button>'; }).join('') +
-      '</div><div class="ex-journal">' + journalBody(kidBlob(S.parentKid), true) + '</div>';
+      '</div><div class="ex-journal">' + journalBody(kidBlob(S.parentKid), true, true) + '</div>';
     render(h);
   }
 
