@@ -55,6 +55,7 @@ var HubPlan = (function() {
     { id: 'codelab',    href: 'code-lab.html',           group: 'science', minAge: 9,  names: ['code lab'] },
     { id: 'logica',     href: 'logica.html',             group: 'science', minAge: 4,  names: ['logica'] },
     { id: 'typing',     href: 'type-quest.html',         group: 'reading', minAge: 5,  names: ['type quest'] },
+    { id: 'trivia',     href: 'trivia-familiar.html',    group: 'world',   minAge: 4,  names: ['trivia familiar', 'trivia'] },
     { id: 'story',      href: 'story-explorer.html',     group: 'reading', minAge: 4,  beginner: true, names: ['story explorer'] },
     { id: 'lector',     href: 'lector.html',             group: 'reading', minAge: 4,  beginner: true, names: ['lector'] },
     { id: 'vocab',      href: 'vocabulario-vivo.html',   group: 'reading', minAge: 7,  names: ['vocabulario vivo'] },

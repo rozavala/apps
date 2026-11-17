@@ -53,6 +53,7 @@ var TrophyRoom = (function() {
     { id: 'huerto', name: 'Huerto', emoji: '🌱', color: '#4D7C0F', threshold: 1, href: 'huerto.html' },
     { id: 'codelab', name: 'Code Lab', emoji: '🐢', color: '#177A40', threshold: 1, href: 'code-lab.html' },
     { id: 'logica', name: 'Lógica', emoji: '🧩', color: '#5B3FA8', threshold: 1, href: 'logica.html' },
+    { id: 'trivia', name: 'Trivia Familiar', emoji: '🎲', color: '#6D28D9', threshold: 1, href: 'trivia-familiar.html' },
     { id: 'lector', name: 'Lector', emoji: '📖', color: '#0E8F86', threshold: 1, href: 'lector.html' },
     { id: 'examen', name: 'Examen y Virtudes', emoji: '🙏', color: '#6D28D9', threshold: 1, href: 'examen.html', tiers: [7, 30] },
     { id: 'review', name: 'Repaso', emoji: '🔁', color: '#0D9488', threshold: 1, href: 'repaso.html' },
