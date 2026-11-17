@@ -159,3 +159,38 @@ test.describe('Book & Movie Check — Library for parents', () => {
     await expect(page.getByRole('button', { name: '👪 Everyone' })).toHaveCount(0);
   });
 });
+
+// A review that takes over a minute: the phone stops waiting at 60 s
+// (it used to show "timed out" here), keeps checking the saved reviews,
+// and shows the review once the server has saved it.
+test('a slow review still shows up once the server has saved it', async ({ page }) => {
+  await page.clock.install();
+  // sync.js refuses requests to the family server under test; every one
+  // here is answered by a route below (or aborted by open()'s route).
+  await page.addInitScript(() => { /** @type {any} */ (window).ZS_ALLOW_LIVE_SERVER = true; });
+  await open(page);
+  let cacheHits = 0;
+  await page.route(/\/api\/media\/evaluate/, () => { /* never answers */ });
+  await page.route(/\/api\/media\/cache\//, route => {
+    cacheHits++;
+    if (cacheHits < 3) return route.fulfill({ status: 404, contentType: 'application/json', body: '{"error":"Not cached"}' });
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CAUTION) });
+  });
+  await page.evaluate((c) => {
+    // @ts-ignore
+    BMC._lastCandidates = { [c.canonical_id]: c };
+    // @ts-ignore
+    BMC.pickCandidate(c.canonical_id);
+  }, { canonical_id: CAUTION.canonical_id, title: CAUTION.title, type: 'book' });
+  await page.clock.runFor(61000);
+  await expect(page.locator('#bmc-result')).toContainText('Still checking');
+  // Each check is a real request: let it answer (and the next timer be
+  // set) before moving the clock on again.
+  for (let i = 1; i <= 3; i++) {
+    await page.clock.runFor(8100);
+    await expect.poll(() => cacheHits).toBe(i);
+    await page.waitForTimeout(50);
+  }
+  await expect(page.locator('#bmc-result')).toContainText('The Lost Hero');
+  expect(cacheHits).toBe(3);
+});

@@ -53,6 +53,9 @@ function _putCacheEntry(id, entry) {
   _saveCache(cache);
 }
 
+// canonical_id -> Promise of the evaluation being made for it right now
+const _inflight = new Map();
+
 function _rateOk(ip) {
   const now = Date.now();
   const arr = (rateMap.get(ip) || []).filter(t => now - t < 3600 * 1000);
@@ -474,7 +477,9 @@ async function _fetchWikipediaPlot(metadata) {
     const title = metadata.title;
     if (!title) { debug.reason = 'no title'; return { extract: null, debug: debug }; }
     const author = metadata.author_or_director || '';
-    const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (rozavala@gmail.com)' };
+    // Wikipedia asks API clients for a contact: the project's page, not a
+    // personal address (this file is public).
+    const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (https://github.com/rozavala/apps)' };
 
     const searchTerms = author ? (title + ' ' + author) : title;
     const searchUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch'
@@ -760,28 +765,42 @@ function init(app, dataDir) {
         return res.json(cache[canonical_id]);
       }
 
-      const evaluation = await _evaluate(metadata);
-      // Ensure required fields
-      evaluation.canonical_id = canonical_id;
-      evaluation.cover_url = _httpsCover(metadata.cover_url || null);
-      evaluation.evaluated_at = now;
-      evaluation.prompt_version = PROMPT_VERSION;
-      if (typeof evaluation.parent_reviewed !== 'boolean') evaluation.parent_reviewed = false;
-      if (!evaluation.type) evaluation.type = metadata.type || 'book';
-      if (!evaluation.title) evaluation.title = metadata.title;
-      if (!evaluation.author_or_director) evaluation.author_or_director = metadata.author_or_director;
-      if (!evaluation.year && metadata.year) evaluation.year = metadata.year;
+      // One evaluation per title at a time. A slow one (over a minute
+      // with search grounding) used to time out on the phone; the kid
+      // tapped again and a second, identical evaluation started from
+      // scratch. A repeat request now waits for the one already running.
+      let job = _inflight.get(canonical_id);
+      if (!job) {
+        job = (async () => {
+          const evaluation = await _evaluate(metadata);
+          // Ensure required fields
+          evaluation.canonical_id = canonical_id;
+          evaluation.cover_url = _httpsCover(metadata.cover_url || null);
+          evaluation.evaluated_at = now;
+          evaluation.prompt_version = PROMPT_VERSION;
+          if (typeof evaluation.parent_reviewed !== 'boolean') evaluation.parent_reviewed = false;
+          if (!evaluation.type) evaluation.type = metadata.type || 'book';
+          if (!evaluation.title) evaluation.title = metadata.title;
+          if (!evaluation.author_or_director) evaluation.author_or_director = metadata.author_or_director;
+          if (!evaluation.year && metadata.year) evaluation.year = metadata.year;
 
-      // For movies/series, attach a YouTube trailer embed URL when available.
-      // Books never get trailers — the summary is the preview.
-      if ((evaluation.type === 'movie' || evaluation.type === 'series') &&
-          (metadata.tmdb_id || String(canonical_id).startsWith('tmdb:'))) {
-        const tmdbId = metadata.tmdb_id
-                    || parseInt(String(canonical_id).replace(/^tmdb:/, ''), 10);
-        evaluation.trailer_url = await _trailerForTmdbId(tmdbId);
+          // For movies/series, attach a YouTube trailer embed URL when available.
+          // Books never get trailers — the summary is the preview.
+          if ((evaluation.type === 'movie' || evaluation.type === 'series') &&
+              (metadata.tmdb_id || String(canonical_id).startsWith('tmdb:'))) {
+            const tmdbId = metadata.tmdb_id
+                        || parseInt(String(canonical_id).replace(/^tmdb:/, ''), 10);
+            evaluation.trailer_url = await _trailerForTmdbId(tmdbId);
+          }
+
+          _putCacheEntry(canonical_id, evaluation);
+          return evaluation;
+        })();
+        _inflight.set(canonical_id, job);
+        const done = () => { if (_inflight.get(canonical_id) === job) _inflight.delete(canonical_id); };
+        job.then(done, done);
       }
-
-      _putCacheEntry(canonical_id, evaluation);
+      const evaluation = await job;
       res.json(evaluation);
     } catch (err) {
       console.error('[media/evaluate]', err.message);
