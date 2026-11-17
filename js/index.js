@@ -325,6 +325,7 @@
     prefixes.push('zs_arbol_');
     prefixes.push('zs_codelab_');
     prefixes.push('zs_logica_');
+    prefixes.push('zs_examen_');
     prefixes.forEach(function(p) {
       try { localStorage.removeItem(p + key); } catch (e) {}
     });
@@ -571,6 +572,7 @@
     apps.push({ name: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', key: 'zs_arbol_' + key, schedId: 'arbol' });
     apps.push({ name: 'Code Lab', icon: '🐢', href: 'code-lab.html', key: 'zs_codelab_' + key, schedId: 'codelab' });
     apps.push({ name: 'Lógica', icon: '🧩', href: 'logica.html', key: 'zs_logica_' + key, schedId: 'logica' });
+    apps.push({ name: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', key: 'zs_examen_' + key, schedId: 'examen' });
 
     // Only apps this kid can see: by age, and what a parent has hidden.
     apps = apps.filter(function(app) {
@@ -580,6 +582,7 @@
     });
 
     var visibleApps = apps.filter(function(app) {
+      if (app.schedId === 'examen' && user.faithVisible === false) return false;
       return todayAppIds.indexOf(app.schedId) !== -1 ||
              alwaysVisible.indexOf(app.schedId) !== -1 ||
              (app.schedId === 'faith' && user.faithVisible !== false);
@@ -882,7 +885,7 @@
       // Learn-by-doing apps: one star count each, from the shared rule
       // in auth.js, so the card and the Explorer Rank always agree.
       ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea', 'logica'].forEach(function(id) {
+       'marinero', 'naturaleza', 'secretos', 'clock', 'dictado', 'calculo', 'lector', 'arbol', 'codelab', 'linea', 'examen', 'logica'].forEach(function(id) {
         try {
           var el = document.getElementById('stats-' + id);
           if (!el || typeof getAppStars !== 'function') return;
