@@ -342,6 +342,8 @@ var ProgressAdmin = (function() {
     { id: 'calculo',    label: 'Cálculo Rápido',    icon: '🧮',  href: 'calculo-rapido.html',    prefix: 'zs_calculo_',    mode: 'reset' }
   ];
   APPS.push({ id: 'codelab', label: 'Code Lab', icon: '🐢', href: 'code-lab.html', prefix: 'zs_codelab_', mode: 'reset' });
+  // Lógica keeps the best stars per puzzle level and the daily streak; it can only be cleared.
+  APPS.push({ id: 'logica', label: 'Lógica', icon: '🧩', href: 'logica.html', prefix: 'zs_logica_', mode: 'reset' });
 
   // Lector keeps a ladder of levels for each language in one saved blob
   // (zs_lector_<kid>: lv:{ es2:{sounds,syll,build,read}, … }, books:{…}).
@@ -395,6 +397,8 @@ var ProgressAdmin = (function() {
     }
   });
   APPS.push({ id: 'linea', label: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', prefix: 'zs_linea_', mode: 'reset' });
+  // Examen y Virtudes keeps a journal, not a ladder: it can only be cleared.
+  APPS.push({ id: 'examen', label: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', prefix: 'zs_examen_', mode: 'reset' });
   // Árbol familiar has no ladder to set: its quiz stars, pages seen and map can only be cleared.
   APPS.push({ id: 'arbol', label: 'Árbol familiar', icon: '🌳', href: 'arbol-familiar.html', prefix: 'zs_arbol_', mode: 'reset' });
 

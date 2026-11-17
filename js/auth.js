@@ -581,6 +581,22 @@ var APP_STAR_CONFIGS = [
       for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
       return n;
     } },
+  // Lógica: the best stars (0 to 3) of each puzzle level, plus one star for
+  // every 3 daily puzzles solved (up to 10).
+  { id: 'logica', prefix: 'zs_logica_', stars: function(d) {
+      var n = 0, lv = d.lv && typeof d.lv === 'object' ? d.lv : {};
+      for (var k in lv) n += Math.min(3, Math.max(0, lv[k] | 0));
+      var dd = d.daily && typeof d.daily === 'object' ? d.daily : {};
+      return n + Math.min(10, Math.floor(Math.max(0, dd.n | 0) / 3));
+    } },
+  // Examen y Virtudes: one star for each evening with a finished
+  // reflection ({ entries: { 'YYYY-MM-DD': { done: true, ... } } }), so at
+  // most one a day. What the kid wrote never scores.
+  { id: 'examen', prefix: 'zs_examen_', stars: function(d) {
+      var n = 0, e = d.entries && typeof d.entries === 'object' ? d.entries : {};
+      for (var k in e) if (/^\d{4}-\d\d-\d\d$/.test(k) && e[k] && e[k].done) n++;
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a
