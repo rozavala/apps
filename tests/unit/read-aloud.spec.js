@@ -18,11 +18,12 @@ const VOICES = [
 const PAGE = '/marinero.html';
 
 async function open(page, o = {}) {
-  const { age = 8, mode, voices = true, speech = true, activated = true } = o;
+  const { age = 8, mode, voices = true, speech = true, activated = true, lang = null } = o;
   await page.route(/tail57521e\.ts\.net/, r => r.abort());
-  await page.addInitScript(([age, mode, voices, speech, activated, VOICES]) => {
+  await page.addInitScript(([age, mode, voices, speech, activated, VOICES, lang]) => {
     if (!localStorage.getItem('zs_profiles')) {
       const p = { name: 'Test', color: 'blue', age, avatar: '🦊' };
+      if (lang) p.lang = lang;
       localStorage.setItem('zs_profiles', JSON.stringify([p]));
       localStorage.setItem('zs_active_user', JSON.stringify(p));
       if (mode) localStorage.setItem('zs_tts', JSON.stringify({ test: { mode, enabled: mode !== 'off', rate: 0.85 } }));
@@ -45,7 +46,7 @@ async function open(page, o = {}) {
     // @ts-ignore
     window.SpeechSynthesisUtterance = function (t) { this.text = t; };
     Object.defineProperty(navigator, 'userActivation', { value: activated ? { hasBeenActive: true } : { hasBeenActive: false }, configurable: true });
-  }, [age, mode || null, voices, speech, activated, VOICES]);
+  }, [age, mode || null, voices, speech, activated, VOICES, lang]);
   await page.goto(PAGE);
   await page.waitForFunction(() => typeof window.ZsSpeak !== 'undefined');
 }
@@ -243,10 +244,32 @@ test.describe('Read-aloud', () => {
     expect((await said(page)).slice(2).map(s => s.lang)).toEqual(['en-US', 'es-CL']);
   });
 
-  test('a "·" that does not split two languages stays one sentence', async ({ page }) => {
+  test('a "·" that does not split two languages stays one sentence, even for a kid with both', async ({ page }) => {
+    await open(page, { lang: 'both' });
+    expect(await page.evaluate(() => /** @type {any} */ (window).getKidLang())).toBe('both');
+    await page.evaluate(() => {
+      // @ts-ignore
+      ZsSpeak.say('Level 2 · 9 moves');
+      // @ts-ignore  (Sports Arena's weekly streak)
+      ZsSpeak.say('🔥 3 active days this week · 5 activities');
+    });
+    expect((await said(page)).map(s => [s.text, s.lang])).toEqual([
+      ['Level 2 · 9 moves', 'en-US'],
+      ['3 active days this week · 5 activities', 'en-US']
+    ]);
+  });
+
+  test('a status line or toast (a live region) gets no 🔊', async ({ page }) => {
     await open(page);
-    await page.evaluate(() => { /* @ts-ignore */ ZsSpeak.say('Level 2 · 9 moves'); });
-    expect((await said(page)).map(s => s.text)).toEqual(['Level 2 · 9 moves']);
+    await page.evaluate(() => {
+      const d = document.createElement('div');
+      d.innerHTML = '<p class="t-st" role="status">Saved!</p><div aria-live="polite"><p class="t-st">Try again</p></div><p class="t-st" id="plain">Pick a paint</p>';
+      document.body.appendChild(d);
+      // @ts-ignore
+      ZsSpeak.watch({ prompt: '.t-st' });
+    });
+    await expect(page.locator('#plain .zs-say')).toHaveCount(1);
+    await expect(page.locator('.t-st .zs-say')).toHaveCount(1);
   });
 
   test('an instruction with nothing in it gets no 🔊, and a 🔊 never goes inside a button', async ({ page }) => {
@@ -359,7 +382,7 @@ test.describe('Read-aloud for instructions', () => {
     await expect(goal.locator('.zs-say')).toHaveCount(1);
     const want = (await goal.evaluate(el => el.textContent || '')).replace('🔊', '').trim();
     await expect.poll(async () => (await said(page)).map(s => s.text)).toContain(want);
-    await expect(page.locator('.cl-status .zs-say')).toHaveCount(1);
+    await expect(page.locator('.cl-status .zs-say')).toHaveCount(0);   // a live region: no 🔊
   });
 
   test('Chess Quest: a kid who reads opens a menu card with one tap, and a long press says it', async ({ page }) => {

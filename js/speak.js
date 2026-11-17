@@ -65,21 +65,21 @@ var ZsSpeak = (function() {
 
     // Apps with no quiz list: their instructions, and long-press (or, in
     // little-kid mode, a first tap) on the cards that open things.
-    'art-studio':       [{ prompt: '.lp-text, .mxc-q' }, { prompt: '.lp-howto, .mx-hint, .mxc-msg, .kit-tip', auto: false },
+    'art-studio':       [{ prompt: '.lp-text, .mxc-q' }, { prompt: '.lp-howto, .mx-hint', auto: false },
                          { choice: '.ll-card', extra: '.ll-desc' }],
     'banco':            [{ prompt: '.bk-empty' }, { prompt: '.bk-small, .bk-note, .bk-story li', auto: false }],
-    'chess-quest':      [{ prompt: '#lessonInfo p, #puzzleGoal' }, { prompt: '#lessonInfo .tip, .coach', auto: false },
+    'chess-quest':      [{ prompt: '#lessonInfo p, #puzzleGoal' }, { prompt: '#lessonInfo .tip', auto: false },
                          { choice: '.mode-card, .level-card, .piece-card', extra: '.m-desc' }],
-    'circuit-lab':      [{ prompt: '.cl-goal-text, .cl-fact p' }, { prompt: '.cl-hint-line, .cl-status, .cl-sub', auto: false },
+    'circuit-lab':      [{ prompt: '.cl-goal-text, .cl-fact p' }, { prompt: '.cl-hint-line, .cl-sub', auto: false },
                          { choice: '.cl-mode, .cl-level', extra: '.cl-mode-d' }],
-    'code-cadet':       [{ prompt: '#cc-goal, #cc-win-msg' }, { prompt: '.cc-sub, .cc-fact, #cc-feedback', auto: false }],
+    'code-cadet':       [{ prompt: '#cc-goal, #cc-win-msg' }, { prompt: '.cc-sub, .cc-fact', auto: false }],
     'dictado':          [{ prompt: '.dk-note, .dk-hint, .dk-fb-msg', auto: false }],
     'euclid-workshop':  [{ prompt: '.ew-goal' }, { prompt: '.ew-sub', auto: false }, { choice: '.ew-level' }],
-    'guess-quest':      [{ prompt: '#gq-sub, #gq-guess-sub, .clue-empty' }, { choice: '.q-btn' }],
+    'guess-quest':      [{ prompt: '#gq-sub, #gq-guess-sub' }, { choice: '.q-btn' }],
     'lector':           [{ prompt: '.lx-hint, .lx-lead', auto: false }],
     'little-engineer':  [{ prompt: '#le-tip > span' }, { prompt: '.le-lead, .le-sub', auto: false },
                          { choice: '.le-home-card', extra: '.le-home-desc' }],
-    'mensajes-secretos':[{ prompt: '.ms-dos-brief' }, { prompt: '.ms-tip, .ms-hint, .ms-result', auto: false },
+    'mensajes-secretos':[{ prompt: '.ms-dos-brief' }, { prompt: '.ms-tip', auto: false },
                          { choice: '.ms-mission, .ms-tool-card', extra: '.ms-tool-desc' }],
     'move-quest':       [{ choice: '.mode-card', extra: '.m-desc' }],
     'naturaleza':       [{ prompt: '.nat-hero-sub', auto: false }, { choice: '.nat-mcard, .nat-mode' }],
@@ -159,11 +159,9 @@ var ZsSpeak = (function() {
   function _parts(text, hint) {
     var bits = String(text).split(/\s+·\s+/);
     if (bits.length === 2 && bits[0] && bits[1]) {
+      // Only when the words make both halves clear: "3 active days this
+      // week · 5 activities" or "Level 2 · 9 moves" stay one sentence.
       var a = _guess(bits[0]), b = _guess(bits[1]);
-      var both = typeof getKidLang === 'function' && getKidLang() === 'both';
-      if (!a && !b && both) { a = 'es'; b = 'en'; }
-      else if (!a && b) a = b === 'es' ? 'en' : 'es';
-      else if (a && !b) b = a === 'es' ? 'en' : 'es';
       if (a && b && a !== b) return [{ text: bits[0], lang: a }, { text: bits[1], lang: b }];
     }
     return [{ text: text, lang: _langOf(text, hint) }];
@@ -249,6 +247,9 @@ var ZsSpeak = (function() {
     // A rule never puts a 🔊 inside another button or link (data-speak
     // on a card title is the app asking for one, so that one is kept).
     if (cfg && el.closest('button, a[href], [role="button"], label')) return false;
+    // Nor inside a live region: a screen reader would announce "Read
+    // aloud" with every status update, and toasts fade away anyway.
+    if (cfg && el.closest('[aria-live], [role="status"], [role="alert"]')) return false;
     var old = null;
     Array.prototype.forEach.call(el.children, function(c) { if (c.classList.contains('zs-say')) old = c; });
     var text = el.getAttribute('data-speak') || _textOf(el);
