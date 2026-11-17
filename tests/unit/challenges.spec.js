@@ -182,6 +182,51 @@ test.describe('challenge engine: stars', () => {
   });
 });
 
+test.describe('challenge engine: chess puzzles and Today\'s 3', () => {
+
+  test('a chess challenge keeps the puzzle\'s place in the ladder and its name', () => {
+    const r = E.make({ from: 'Ana', to: 'Ben', kind: 'chess', answer: '21', text: 'Smothered Mate', hint: 'Which piece can jump?' });
+    expect(r.ok).toBe(true);
+    expect(r.event).toMatchObject({ kind: 'chess', answer: 21, text: 'Smothered Mate', hint: 'Which piece can jump?' });
+    for (const bad of ['', null, undefined, -1, 1.5, 'x', true, E.MAX_PUZZLE + 1]) {
+      expect(E.make({ from: 'Ana', to: 'Ben', kind: 'chess', answer: bad }).error, String(bad)).toBe('puzzle');
+    }
+    expect(E.make({ from: 'Ana', to: 'Ben', kind: 'chess', answer: 0 }).ok, 'the first puzzle is 0').toBe(true);
+    expect(Array.from(E.make({ from: 'Ana', to: 'Ben', kind: 'chess', answer: 0, text: 'n'.repeat(300) }).event.text)).toHaveLength(120);
+  });
+
+  test('reading a chess challenge: a bad index from the log is skipped, solving means that puzzle', () => {
+    const ok = { id: 'c1', type: 'create', ts: 1, from: 'Ana', to: 'Ben', kind: 'chess', answer: 3, text: 'x'.repeat(200) };
+    const bad = { id: 'c2', type: 'create', ts: 2, from: 'Ana', to: 'Ben', kind: 'chess', answer: 'e2e4' };
+    const v = E.view([ok, bad]);
+    expect(v.challenges.map(c => c.id)).toEqual(['c1']);
+    const c = v.challenges[0];
+    expect(Array.from(c.text)).toHaveLength(120);
+    expect(E.check(c, 3)).toBe(true);
+    expect(E.check(c, '3')).toBe(true);
+    expect(E.check(c, 4)).toBe(false);
+    expect(E.check(c, '')).toBe(false);
+    expect(E.check(c, null)).toBe(false);
+  });
+
+  test('Today\'s 3 gets the oldest waiting challenge, then the one solved today', () => {
+    const day = (h) => new Date(2026, 10, 11, h).getTime();
+    const a = Object.assign(q().event, { id: 'c_a', ts: day(8) });
+    const b = Object.assign(E.make({ from: 'Ana', to: 'Ben', kind: 'chess', answer: 0 }).event, { id: 'c_b', ts: day(9) });
+    expect(E.forToday(E.view([b, a]), 'Ben').c.id).toBe('c_a');
+    expect(E.forToday(E.view([a, b]), 'Ben').done).toBe(false);
+    expect(E.forToday(E.view([a, b]), 'Ana'), 'not the sender\'s').toBeNull();
+
+    const solvedA = Object.assign(E.makeSolve('c_a', 'Ben', 1), { ts: day(10) });
+    const solvedB = Object.assign(E.makeSolve('c_b', 'Ben', 1), { ts: day(11) });
+    expect(E.forToday(E.view([a, b, solvedA]), 'Ben', day(12)).c.id, 'still one waiting').toBe('c_b');
+    const both = E.view([a, b, solvedA, solvedB]);
+    expect(E.forToday(both, 'Ben', day(12))).toMatchObject({ done: true });
+    expect(E.forToday(both, 'Ben', day(12) + 86400000), 'tomorrow it is gone').toBeNull();
+    expect(E.forToday(E.view([a, E.makeRemove('c_a')]), 'Ben'), 'a removed one is not offered').toBeNull();
+  });
+});
+
 test.describe('challenges sync', () => {
 
   test.beforeEach(async ({ page }) => {
@@ -221,6 +266,25 @@ test.describe('challenges sync', () => {
     expect(out[0].events.map(/** @param {any} e */ e => e.id)).toEqual(['c1', 'r_c1']);
     expect(out[0].events[0]).toMatchObject({ id: 'c1', from: 'Ana', to: 'Ben', gone: true });
     expect(JSON.stringify(out[2]), 'with no removal it is kept').toContain('secret words');
+  });
+
+  test('a chess challenge made on one device and solved on another keeps both events, and both stars', async ({ page }) => {
+    const create = E.make({ from: 'Ana', to: 'Ben', kind: 'chess', answer: 0, text: 'Checkmate in 1 #1' }).event;
+    create.ts = new Date(2026, 10, 11, 9).getTime();
+    const miss = Object.assign(E.makeMiss(create.id, 'Ben'), { ts: create.ts + 1000 });
+    const solve = Object.assign(E.makeSolve(create.id, 'Ben', 2), { ts: create.ts + 2000 });
+    const anaPhone = { v: 1, events: [create] };
+    const benIpad = { v: 1, events: [create, miss, solve] };
+    const out = await page.evaluate(([a, b]) => {
+      const m = /** @type {any} */ (window).CloudSync._mergeChallenges;
+      return [m(a, b), m(b, a)];
+    }, [anaPhone, benIpad]);
+    expect(out[0]).toEqual(out[1]);
+    expect(out[0].events.map(e => e.type)).toEqual(['create', 'miss', 'solve']);
+    expect(out[0].events[0]).toEqual(create);
+    const v = E.view(out[0].events);
+    expect(v.challenges[0]).toMatchObject({ kind: 'chess', answer: 0, misses: 1 });
+    expect(E.starsByKid(out[0].events)).toEqual({ ana: { [create.id]: '2026-11-11' }, ben: { [create.id]: '2026-11-11' } });
   });
 
   test('the engine\'s scrub and the sync merge drop the same words', async ({ page }) => {

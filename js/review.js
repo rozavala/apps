@@ -6,6 +6,7 @@
      Review.add(kid, { app, id?, prompt, answer, choices? })
    and, when the same thing comes back and is answered:
      Review.hit(kid, id)   /   Review.miss(kid, id)
+   and, when what it came from is gone:   Review.drop(kid, id)
    `kid` is the profile name, or omit it (pass null) for the active kid.
 
    Each item stands on its own: plain text for the prompt, the right
@@ -175,6 +176,16 @@ var Review = (function() {
     return { was: was, now: 1, retired: false };
   }
 
+  // Takes an item out for good (its source is gone, e.g. a parent deleted
+  // a sibling challenge). Not counted as retired. Returns true if it was there.
+  function drop(kid, id) {
+    var d = _load(kid);
+    if (!d.items[id]) return false;
+    delete d.items[id];
+    _save(kid, d);
+    return true;
+  }
+
   // The id add() gives an item with no id of its own, so an app can find it again.
   function idFor(app, prompt, answer) {
     app = _txt(app, LIM.app).toLowerCase().replace(/[^a-z0-9_-]/g, '');
@@ -242,7 +253,7 @@ var Review = (function() {
   }
 
   return {
-    add: add, idFor: idFor, hit: hit, miss: miss, get: get, all: all, due: due, dueCount: dueCount,
+    add: add, idFor: idFor, hit: hit, miss: miss, drop: drop, get: get, all: all, due: due, dueCount: dueCount,
     complete: complete, doneToday: doneToday, streak: streak, counts: counts,
     GAPS: GAPS, dayNum: dayNum, dateKey: dateKey, PREFIX: PREFIX
   };

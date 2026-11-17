@@ -373,19 +373,38 @@ var HubPlan = (function() {
     card.setAttribute('data-say-text', _title(card));
   }
 
+  // A sibling challenge waiting for this kid (or solved today) takes one
+  // of the 3 places: the last app not done yet gives way.
+  function _challengeToday(user) {
+    try { return typeof Challenges !== 'undefined' && Challenges.todayItem ? Challenges.todayItem(user) : null; }
+    catch (e) { return null; }
+  }
+
   function _renderToday(user, grid, mine, eligible, little) {
     var ids = todays3(user, eligible);
-    if (!ids.length) return;
+    var ch = _challengeToday(user);
+    if (!ids.length && !ch) return;
     var done = _activity(user.name, new Date()).today;
     var byId = {};
     mine.forEach(function(c) { byId[c.__app.id] = c; });
-    var allDone = ids.every(function(id) { return done[id]; });
+    if (ch && ids.length >= 3) {
+      var drop = ids.length - 1;
+      for (var i = ids.length - 1; i >= 0; i--) if (!done[ids[i]]) { drop = i; break; }
+      ids = ids.slice(0, drop).concat(ids.slice(drop + 1));
+    }
+    var allDone = ids.every(function(id) { return done[id]; }) && (!ch || ch.done);
     var sec = document.createElement('section');
     sec.id = 'hub-today';
     sec.className = 'hub-today' + (little ? ' hub-today-little' : '');
     sec.innerHTML =
       '<h2 class="hub-today-title">⭐ ' + _esc(_tr('Los 3 de hoy', 'Today\'s 3')) + '</h2>' +
-      '<div class="hub-today-row">' + ids.map(function(id) {
+      '<div class="hub-today-row">' + (ch ?
+        '<button type="button" class="hub-today-card hub-today-challenge' + (ch.done ? ' is-done' : '') + '" data-ch="' + _esc(ch.id) + '"' +
+          (ch.done ? ' disabled' : '') + (little ? ' data-zs-choice="1" data-say-text="' + _esc(ch.label) + '"' : '') + '>' +
+          '<span class="hub-today-icon" aria-hidden="true">' + _esc(ch.icon) + '</span>' +
+          '<span class="hub-today-name">' + _esc(ch.label) + '</span>' +
+          (ch.done ? '<span class="hub-today-check" aria-label="' + _esc(_tr('Hecho', 'Done')) + '">✓</span>' : '') +
+        '</button>' : '') + ids.map(function(id) {
         var c = byId[id];
         if (!c) return '';
         return '<a class="hub-today-card' + (done[id] ? ' is-done' : '') + '" href="' + _esc(c.getAttribute('href')) + '" data-app="' + _esc(id) + '"' +
@@ -397,6 +416,8 @@ var HubPlan = (function() {
       }).join('') + '</div>' +
       (allDone ? '<p class="hub-today-done">🎉 ' + _esc(_tr('¡Los 3 de hoy están listos!', 'All 3 done today!')) + '</p>' : '');
     grid.parentNode.insertBefore(sec, grid);
+    var chBtn = sec.querySelector('.hub-today-challenge');
+    if (chBtn && !ch.done) chBtn.addEventListener('click', function() { Challenges.openSolve(ch.id, user); });
   }
 
   return {
