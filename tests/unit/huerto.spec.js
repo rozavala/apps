@@ -168,19 +168,26 @@ test.describe('Huerto engine', () => {
     expect(E.stars(samples[2])).toBe(10 * 2 + 5 + 10 + 10);
   });
 
-  test('clean keeps everything it can, fixes what it must, and drops unknown plants', () => {
-    const d = E.clean({ plants: [{ sp: 'poroto', where: 'moon', planted: 'nope', water: ['2026-11-01', 'bad'], log: [{ d: '2026-11-02', h: '3', n: 5, ph: { id: '../x' } }, { d: 'x' }], extra: 1 }, { sp: 'unknown' }], region: 'cl' }, D);
-    expect(d.plants.length).toBe(1);
+  test('clean never drops a plant or an entry: unknown kinds and odd entries are kept, missing fields filled', () => {
+    const many = Array.from({ length: 300 }, (_, i) => ({ d: '2026-11-01', h: i }));
+    const future = { sp: 'calabaza-nueva', id: 'z9', where: 'roof', custom: [1, 2] };
+    const d = E.clean({ plants: [{ sp: 'poroto', where: 'moon', planted: 'nope', water: ['2026-11-01', 'bad'], log: [{ d: '2026-11-02', h: '3', n: 5, ph: { id: 'abc' } }, { d: 'x' }, ...many], extra: 1 }, future, 'junk', ...Array.from({ length: 45 }, () => ({ sp: 'rabano' }))], region: 'cl' }, D);
+    expect(d.plants.length).toBe(47);                       // only the non-object is gone
     const pl = d.plants[0];
     expect(pl.where).toBe('pot');
     expect(E.isDate(pl.planted)).toBe(true);
-    expect(pl.water).toEqual(['2026-11-01']);
-    expect(pl.log.length).toBe(1);
-    expect(pl.log[0].h).toBe(null);
-    expect(pl.log[0].ph).toBeUndefined();
+    expect(pl.water).toEqual(['2026-11-01', 'bad']);
+    expect(pl.log.length).toBe(302);
+    expect(pl.log[0].h).toBe(3);
+    expect(pl.log[0].ph).toEqual({ id: 'abc' });
     expect(pl.extra).toBe(1);
     expect(d.region).toBe('cl');
     expect(pl.ev).toBe(2);
+    // a kind from a newer version of the app is left exactly as it was, and not shown
+    expect(d.plants[1]).toMatchObject({ sp: 'calabaza-nueva', id: 'z9', where: 'roof', custom: [1, 2] });
+    expect(E.known(d, D).map(x => x.sp)).not.toContain('calabaza-nueva');
+    expect(E.entries(pl).length).toBe(301);
+    expect(E.clean({ trash: ['a'.repeat(32), '../x'] }, D).trash).toEqual(['a'.repeat(32)]);
   });
 });
 

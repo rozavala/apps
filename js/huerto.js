@@ -86,7 +86,8 @@ var Huerto = (function() {
     return (isEs() ? s.replace('.', ',') : s) + ' cm';
   }
   function plantOf(sp) { return D.plant(sp); }
-  function mine(id) { for (var i = 0; i < data.plants.length; i++) if (data.plants[i].id === id) return data.plants[i]; return null; }
+  function plants() { return E.known(data, D); }       // kinds this copy knows; others are kept, not shown
+  function mine(id) { var l = plants(); for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
   function nameOf(pl) { var p = plantOf(pl.sp); return pl.name || (p ? ot(p) : ''); }
   function region() { return data.region === 'cl' ? 'cl' : 'ca'; }
   function monthsFor(p, r) { return r === 'cl' ? D.chileMonths(p) : p.months.slice(); }
@@ -125,7 +126,7 @@ var Huerto = (function() {
 
   // ---------------- home ----------------
   function viewHome() {
-    var active = data.plants.filter(function(pl) { return !pl.done; });
+    var active = plants().filter(function(pl) { return !pl.done; });
     var due = active.filter(function(pl) { return E.needsWater(pl); });
     var t = today(), streak = E.waterStreak(data);
     var h = head(A.icon('sprout') + ' Huerto', bi('Mi diario de plantas', 'My plant journal'), '', stars(starCount()));
@@ -153,9 +154,9 @@ var Huerto = (function() {
     h += '</section>';
 
     // My plants
-    if (data.plants.length) {
+    if (plants().length) {
       h += '<section aria-labelledby="hu-mine-h"><h2 id="hu-mine-h" class="hu-h2">' + bi('Mis plantas', 'My plants') + '</h2><div class="hu-grid">';
-      data.plants.slice().sort(function(a, b) { return (a.done ? 1 : 0) - (b.done ? 1 : 0) || (b.planted > a.planted ? 1 : -1); }).forEach(function(pl) {
+      plants().slice().sort(function(a, b) { return (a.done ? 1 : 0) - (b.done ? 1 : 0) || (b.planted > a.planted ? 1 : -1); }).forEach(function(pl) {
         var p = plantOf(pl.sp), st = E.stage(pl, p), age = E.days(pl.planted, t), news = E.sproutNews(pl, p);
         h += '<a class="hu-card' + (pl.done ? ' is-done' : '') + '" href="#p/' + esc(pl.id) + '">' +
           '<div class="hu-card-art">' + A.plant(pl.sp, st, { where: pl.where, seed: pl.id, fit: true }) + '</div>' +
@@ -300,7 +301,7 @@ var Huerto = (function() {
     root.innerHTML = h;
     document.getElementById('hu-add').addEventListener('submit', function(e) {
       e.preventDefault();
-      if (data.plants.length >= E.MAX_PLANTS) { toast(tx('Ya tienes muchas plantas: termina alguna primero.', 'You have lots of plants already: finish one first.')); return; }
+      if (data.plants.filter(function(x) { return !x.done; }).length >= E.MAX_PLANTS) { toast(tx('Ya cuidas ' + E.MAX_PLANTS + ' plantas: termina o borra alguna primero.', 'You are caring for ' + E.MAX_PLANTS + ' plants: finish or delete one first.')); return; }
       var d = document.getElementById('hu-date').value;
       if (!E.isDate(d) || d > today()) d = today();
       var where = document.getElementById('hu-where').value;
@@ -352,7 +353,7 @@ var Huerto = (function() {
     if (!little() && !pl.done) h += predictBox(pl);
     // the journal
     h += '<section class="hu-box"><h3>📔 ' + bi('Diario', 'Journal') + '</h3>';
-    var log = pl.log.slice().sort(function(a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
+    var log = E.entries(pl).sort(function(a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
     if (!log.length) h += '<p class="hu-muted">' + bi('Todavía no hay entradas.', 'No entries yet.') + '</p>';
     h += '<ol class="hu-log">';
     log.forEach(function(e) { h += entryRow(pl, e); });
@@ -589,7 +590,10 @@ var Huerto = (function() {
     var go = function() {
       mark();
       pl.log.push(e);
-      if (pl.log.length > E.MAX_LOG) pl.log = pl.log.slice(-E.MAX_LOG);
+      if (pl.log.length > E.MAX_LOG) {
+        pl.log.slice(0, pl.log.length - E.MAX_LOG).forEach(function(x) { if (x && x.ph) forgetPhoto(x.ph); });
+        pl.log = pl.log.slice(-E.MAX_LOG);
+      }
       if (e.w) E.addWater(pl, d);
       var res = e.h !== null ? E.settle(pl, d, e.h) : null;
       logAct('📔', 'Journal: ' + nameOf(pl) + (e.h !== null ? ', ' + e.h + ' cm' : '') + (e.ph ? ' (photo)' : ''));
@@ -703,9 +707,30 @@ var Huerto = (function() {
     document.body.appendChild(ov);
     ov.querySelector('.hu-lb-x').focus();
   }
+  // A photo whose entry is gone: delete it on the family server. Kept on a
+  // to-delete list in the kid's data until the server says it is gone, so a
+  // delete made offline (or with a dropped connection) happens later.
   function forgetPhoto(ph) {
-    if (!ph || typeof ArbolFiles === 'undefined' || typeof CloudSync === 'undefined' || !CloudSync.online) return;
-    try { ArbolFiles.remove({ id: ph.id, th: ph.th }); } catch (e) {}
+    if (!ph) return;
+    [ph.id, ph.th].forEach(function(id) { if (/^[a-f0-9]{32}$/.test(String(id)) && data.trash.indexOf(id) < 0) data.trash.push(id); });
+    flushTrash();
+  }
+  var flushing = false;
+  function flushTrash() {
+    if (flushing || !data || !data.trash.length || typeof ArbolFiles === 'undefined' || typeof fetch !== 'function') return;
+    flushing = true;
+    var ids = data.trash.slice();
+    Promise.all(ids.map(function(id) {
+      var u = ArbolFiles.url(id);
+      if (!u) return id;
+      return fetch(u, { method: 'DELETE' }).then(function(r) { return r.ok || r.status === 404 ? id : null; }, function() { return null; });
+    })).then(function(done) {
+      flushing = false;
+      done = done.filter(Boolean);
+      if (!done.length) return;
+      data.trash = data.trash.filter(function(id) { return done.indexOf(id) < 0; });
+      _save();
+    });
   }
 
   // ---------------- experiments ----------------
@@ -952,9 +977,9 @@ var Huerto = (function() {
         var p2 = mine(id), eid = b.getAttribute('data-e');
         confirmBox('¿Borrar esta entrada del diario?', 'Delete this journal entry?').then(function(ok) {
           if (!ok || !p2) return;
-          var gone = p2.log.filter(function(x) { return x.id === eid; })[0];
+          var gone = p2.log.filter(function(x) { return x && x.id === eid; })[0];
           if (gone && gone.ph) forgetPhoto(gone.ph);
-          p2.log = p2.log.filter(function(x) { return x.id !== eid; });
+          p2.log = p2.log.filter(function(x) { return !x || x.id !== eid; });
           _save(); refreshStars(); route();
         });
         break;
@@ -964,7 +989,7 @@ var Huerto = (function() {
         var p4 = mine(id);
         confirmBox('¿Borrar esta planta y todo su diario? No se puede deshacer.', 'Delete this plant and its whole journal? This cannot be undone.').then(function(ok) {
           if (!ok || !p4) return;
-          p4.log.forEach(function(x) { if (x.ph) forgetPhoto(x.ph); });
+          p4.log.forEach(function(x) { if (x && x.ph) forgetPhoto(x.ph); });
           data.plants = data.plants.filter(function(x) { return x.id !== p4.id; });
           _save(); refreshStars(); location.hash = 'home';
         });
@@ -1010,6 +1035,8 @@ var Huerto = (function() {
     tier = typeof getAgeTier === 'function' ? getAgeTier(user && user.age) : 'intermediate';
     data = _load();
     document.documentElement.lang = isEs() ? 'es' : 'en';
+    flushTrash();
+    if (typeof CloudSync !== 'undefined') setTimeout(flushTrash, 15000);   // once the sync has had a chance to connect
     root.addEventListener('click', onClick);
     root.addEventListener('submit', onSubmit);
     root.addEventListener('input', onInput);

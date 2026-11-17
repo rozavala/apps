@@ -22,7 +22,7 @@ var HuertoEngine = (function() {
   'use strict';
 
   var DAY = 86400000;
-  var MAX_PLANTS = 40, MAX_LOG = 120, MAX_NOTE = 240;
+  var MAX_PLANTS = 40, MAX_LOG = 1000, MAX_NOTE = 240;   // MAX_PLANTS: plants being cared for at once
 
   // ---------- dates ----------
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -225,40 +225,49 @@ var HuertoEngine = (function() {
     for (var i = 0; i < 8; i++) s += Math.floor(r() * 36).toString(36);
     return s;
   }
-  // Make any saved blob safe to use, keeping everything in it.
+  // Make any saved blob safe to use. Nothing is ever dropped on load: a
+  // plant of a kind this copy of the app does not know (added by a newer
+  // version) is kept as it is and only left out of the screens, and every
+  // journal entry is kept. Missing fields are filled in.
   function clean(d, D) {
     d = obj(d);
     d.v = 1;
-    d.plants = (Array.isArray(d.plants) ? d.plants : []).filter(function(pl) { return pl && typeof pl === 'object' && (!D || D.plant(pl.sp)); }).slice(0, MAX_PLANTS);
+    d.plants = (Array.isArray(d.plants) ? d.plants : []).filter(function(pl) { return pl && typeof pl === 'object' && !Array.isArray(pl); });
     d.plants.forEach(function(pl) {
-      pl.id = str(pl.id, 16) || newId();
-      pl.name = str(pl.name, 30);
+      if (typeof pl.id !== 'string' || !pl.id) pl.id = newId();
+      if (typeof pl.name !== 'string') pl.name = '';
+      if (!Array.isArray(pl.water)) pl.water = [];
+      if (!Array.isArray(pl.log)) pl.log = [];
+      if (!Array.isArray(pl.pred)) pl.pred = [];
+      if (D && !D.plant(pl.sp)) return;                // unknown kind: leave it untouched
       if (['cup', 'pot', 'bed'].indexOf(pl.where) < 0) pl.where = 'pot';
       if (!isDate(pl.planted)) pl.planted = today();
       ['sprouted', 'flowered', 'harvested'].forEach(function(k) { if (!isDate(pl[k])) pl[k] = ''; });
-      if (!Array.isArray(pl.water)) pl.water = [];
-      pl.water = pl.water.filter(isDate);
-      if (!Array.isArray(pl.log)) pl.log = [];
-      pl.log = pl.log.filter(function(e) { return e && isDate(e.d); }).slice(-MAX_LOG);
       pl.log.forEach(function(e) {
-        e.id = str(e.id, 16) || newId();
-        e.h = num(e.h);
-        e.n = str(e.n, MAX_NOTE);
-        if (e.ph && !(/^[a-f0-9]{32}$/.test(String(e.ph.id)))) delete e.ph;
+        if (!e || typeof e !== 'object') return;
+        if (typeof e.id !== 'string' || !e.id) e.id = newId();
+        if (typeof e.h === 'string' && isFinite(parseFloat(e.h))) e.h = parseFloat(e.h);
+        if (typeof e.h !== 'number' || !isFinite(e.h)) e.h = null;
+        if (e.n != null && typeof e.n !== 'string') e.n = String(e.n);
       });
-      if (!Array.isArray(pl.pred)) pl.pred = [];
       if (!(pl.ev >= 1)) pl.ev = D ? everyDays(D.plant(pl.sp), pl.where) : 2;
     });
     d.exp = obj(d.exp);
+    // photos waiting to be deleted on the family server (made while offline)
+    d.trash = (Array.isArray(d.trash) ? d.trash : []).filter(function(id) { return /^[a-f0-9]{32}$/.test(String(id)); });
     return d;
   }
+  // The plants this copy of the app can show (the others are kept, not shown).
+  function known(d, D) { return (d.plants || []).filter(function(pl) { return !!D.plant(pl.sp); }); }
+  // Entries that can be listed: an object with a real date.
+  function entries(pl) { return (pl.log || []).filter(function(e) { return e && typeof e === 'object' && isDate(e.d); }); }
 
   return {
     DAY: DAY, MAX_PLANTS: MAX_PLANTS, MAX_LOG: MAX_LOG, MAX_NOTE: MAX_NOTE,
     iso: iso, parse: parse, isDate: isDate, days: days, addDays: addDays, today: today,
     everyDays: everyDays, lastWater: lastWater, needsWater: needsWater, wateredOn: wateredOn, addWater: addWater, waterStreak: waterStreak,
     stage: stage, expect: expect, sproutNews: sproutNews, series: series, rate: rate, projection: projection,
-    close: close, openPred: openPred, settle: settle, expStatus: expStatus, stars: stars, clean: clean, newId: newId
+    close: close, openPred: openPred, settle: settle, expStatus: expStatus, stars: stars, clean: clean, newId: newId, known: known, entries: entries
   };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = HuertoEngine;

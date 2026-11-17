@@ -41,7 +41,10 @@ async function open(page, o = {}) {
   await page.goto('/huerto.html' + (hash ? '#' + hash : ''));
   await page.waitForSelector('.hu-head h1');
   if (server) {
-    await page.evaluate((url) => { /** @type {any} */ const c = window.CloudSync; c.server = url; c.online = true; }, FAKE);
+    // sync.js's reconnect ping is refused under automation and would set online back
+    // to false (see arbol-big.spec.js), so pin it while the test runs
+    await page.evaluate((url) => { /** @type {any} */ const c = window.CloudSync; c.server = url;
+      Object.defineProperty(c, 'online', { configurable: true, get: () => true, set: () => {} }); }, FAKE);
   }
   return fake;
 }
@@ -111,6 +114,13 @@ test.describe('Huerto', () => {
     expect(out.due).toBe(true);
     expect(out.dueLater).toBe(false);
     expect(out.withDue[0]).toBe('huerto');
+    // a kid with no plants gets no schedule bonus for Huerto
+    const none = await page.evaluate(() => {
+      /** @type {any} */ const H = window.HubPlan;
+      const user = { name: 'Test', age: 9 }, eligible = ['math', 'huerto', 'lab', 'story', 'art'];
+      return H.pickToday(user, eligible, { scheduled: eligible, activity: { last: {}, today: {} }, stats: { appStats: {} }, reviewDue: 0, now: new Date(2026, 10, 17, 10), huertoHas: false });
+    });
+    expect(none).not.toContain('huerto');
     await expect(page.locator('.card-huerto')).toHaveCount(1);
   });
 
@@ -177,6 +187,27 @@ test.describe('Huerto', () => {
     await page.click('.zsd-ok');
     await expect(page.locator('.hu-log-row')).toHaveCount(0);
     await expect.poll(() => fake.deleted.includes(e.ph.id)).toBe(true);
+  });
+
+  test('a photo deleted while offline is deleted on the server later, and never forgotten', async ({ page }) => {
+    const id = 'c'.repeat(32), th = 'd'.repeat(32);
+    const saved = bean({ log: [{ id: 'e1', d: '2026-11-16', n: 'with photo', ph: { id, th } }] });
+    const fake = await open(page, { saved, hash: 'p/b1' });   // no server: deletes cannot go through yet
+    await page.click('[data-act=delentry]');
+    await page.click('.zsd-ok');
+    await expect(page.locator('.hu-log-row')).toHaveCount(0);
+    await expect.poll(async () => (await stored(page)).trash).toEqual([id, th]);
+    // back at home: the next visit deletes them on the family server and empties the list
+    const deleted = [];
+    await page.route(FAKE + '/**', route => { if (route.request().method() === 'DELETE') deleted.push(new URL(route.request().url()).pathname); return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"deleted"}' }); });
+    await page.addInitScript((url) => {
+      document.addEventListener('DOMContentLoaded', () => { /** @type {any} */ const c = window.CloudSync; if (c) c.server = url; });
+    }, FAKE);
+    await page.evaluate((url) => { /** @type {any} */ (window).CloudSync.server = url; }, FAKE);
+    await page.reload();
+    await expect.poll(async () => (await stored(page)).trash).toEqual([]);
+    expect(deleted.sort()).toEqual(['/api/files/arbol/' + id, '/api/files/arbol/' + th].sort());
+    void fake;
   });
 
   test('without the family server there is no photo button, only a note', async ({ page }) => {

@@ -204,6 +204,15 @@ var HubPlan = (function() {
     return out;
   }
 
+  // Huerto: is this kid caring for any plant? (With none, a daily schedule
+  // slot is no reason to suggest it.)
+  function huertoHas(userName) {
+    try {
+      var d = JSON.parse(localStorage.getItem('zs_huerto_' + String(userName).toLowerCase().replace(/\s+/g, '_')));
+      return ((d && d.plants) || []).some(function(pl) { return pl && !pl.done; });
+    } catch (e) { return false; }
+  }
+
   // Huerto: does one of this kid's plants need its water check today?
   // (Its last watering, or the planting day, is at least `ev` days ago.)
   function huertoDue(userName, now) {
@@ -242,7 +251,10 @@ var HubPlan = (function() {
       score[a.id] = (scheduled[a.id] ? 3 : 0) + (days / 14) * 3 + (weak[a.group] || 0) +
         (_hash(dateKey + '|' + user.name + '|' + a.id) % 100) / 100;
       if (a.id === 'review') score[a.id] += 5;   // what slipped by comes first
-      if (a.id === 'huerto' && (opts.huertoDue != null ? opts.huertoDue : huertoDue(user.name, now))) score[a.id] += 4;   // a plant is thirsty
+      if (a.id === 'huerto') {
+        if (!(opts.huertoHas != null ? opts.huertoHas : huertoHas(user.name))) score[a.id] -= scheduled[a.id] ? 3 : 0;   // no plants: no schedule bonus
+        else if (opts.huertoDue != null ? opts.huertoDue : huertoDue(user.name, now)) score[a.id] += 4;                 // a plant is thirsty
+      }
     });
     cands.sort(function(a, b) { return score[b.id] - score[a.id]; });
 
@@ -418,7 +430,7 @@ var HubPlan = (function() {
   }
 
   return {
-    GROUPS: GROUPS, APPS: APPS, huertoDue: huertoDue,
+    GROUPS: GROUPS, APPS: APPS, huertoDue: huertoDue, huertoHas: huertoHas,
     minAge: minAge, setMinAge: setMinAge, allowed: allowed, hiddenIds: hiddenIds, moreLocked: moreLocked,
     isLittle: isLittle, pickToday: pickToday, todays3: todays3, render: render,
     appForLogName: _appForLogName, appForHref: _byHref, nameOf: nameOf
