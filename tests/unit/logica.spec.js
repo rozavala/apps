@@ -257,6 +257,21 @@ test.describe('Lógica engine', () => {
     expect(Math.abs(facts * 2 - D.THINK.fo.length)).toBeLessThanOrEqual(2);
   });
 
+  test('the weak step: only one listed flaw fits each argument (no close pairs offered together)', () => {
+    const F = D.FLAWS;
+    D.THINK.arg.forEach(it => {
+      expect(it.o).toHaveLength(4);
+      expect(it.o[it.a]).toEqual(F[it.k]);
+      const keys = it.o.map(o => Object.keys(F).find(k => F[k] === o));
+      expect(new Set(keys).size).toBe(4);
+      (D.CLOSE_FLAWS[it.k] || []).forEach(k => expect(keys, it.id).not.toContain(k));
+    });
+    // the "it happened after" items never offer "one example"
+    const after = D.THINK.arg.filter(i => i.k === 'after');
+    expect(after.length).toBeGreaterThanOrEqual(3);
+    after.forEach(i => expect(i.o).not.toContainEqual(F.one));
+  });
+
   test('every word the app shows from data passes the restricted-word grep', () => {
     const text = JSON.stringify(D);
     expect(text).not.toMatch(RESTRICTED);

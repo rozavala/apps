@@ -189,7 +189,7 @@ var LogicaData = (function () {
     arg('ar8', 'one', 'Probé un mango y estaba ácido. Todos los mangos son ácidos.', 'I tried a mango and it was sour. All mangoes are sour.'),
     arg('ar9', 'everyone', 'Muchos niños se acuestan tarde, así que no importa si yo también lo hago.', 'Lots of kids go to bed late, so it doesn’t matter if I do too.'),
     arg('ar10', 'after', 'Llegó el perro nuevo y después empezó a llover más. El perro trae la lluvia.', 'The new dog arrived and then it rained more. The dog brings the rain.'),
-    arg('ar11', 'two', 'Si no te gusta el fútbol, entonces no te gusta ningún deporte.', 'If you don’t like soccer, then you don’t like any sport.'),
+    arg('ar11', 'two', 'O juegas en el equipo de fútbol, o no haces ningún deporte.', 'Either you play on the soccer team, or you don’t do any sport at all.'),
     arg('ar12', 'person', 'No le creas a Sofía que la Tierra gira alrededor del Sol: ella siempre llega tarde.', 'Don’t believe Sofía that the Earth goes around the Sun: she is always late.'),
     arg('ar13', 'famous', 'Una actriz famosa dice que este jugo te hace mejor para las matemáticas, así que es verdad.', 'A famous actress says this juice makes you better at maths, so it’s true.'),
     arg('ar14', 'circle', 'El equipo azul es el mejor porque ningún equipo es mejor que él.', 'The blue team is the best because no team is better than it.'),
@@ -199,11 +199,19 @@ var LogicaData = (function () {
     arg('ar18', 'two', 'O eres el mejor del equipo, o no sirves para jugar.', 'Either you are the best on the team, or you are no good at playing.')
   ];
   var FLAW_KEYS = Object.keys(FLAWS);
-  // Each argument gets its own flaw plus the next three (in a fixed
-  // order) as the wrong options; the round shuffles them.
+  // Flaws that can also describe an argument of the other kind: a
+  // "happened after, so it caused it" argument usually rests on a single
+  // case too, so "one example" is never offered as a wrong option next to
+  // "after" (and the other way round).
+  var CLOSE = { after: ['one'], one: ['after'] };
+  // Each argument gets its own flaw plus three others (in a fixed order,
+  // skipping close ones) as the wrong options; the round shuffles them.
   var THINK_ARG = ARGS.map(function (x) {
-    var i = FLAW_KEYS.indexOf(x.k), keys = [x.k];
-    for (var j = 1; keys.length < 4; j++) keys.push(FLAW_KEYS[(i + j * 2) % FLAW_KEYS.length]);
+    var i = FLAW_KEYS.indexOf(x.k), keys = [x.k], skip = CLOSE[x.k] || [];
+    for (var j = 1; keys.length < 4 && j < 40; j++) {
+      var k = FLAW_KEYS[(i + j * 2) % FLAW_KEYS.length];
+      if (keys.indexOf(k) < 0 && skip.indexOf(k) < 0) keys.push(k);
+    }
     return { id: x.id, k: x.k, q: x.q, o: keys.map(function (k) { return FLAWS[k]; }), a: 0, why: FLAW_WHY[x.k] };
   });
 
@@ -211,7 +219,7 @@ var LogicaData = (function () {
 
   return {
     GRID_PEOPLE: GRID_PEOPLE, GRID_CATS: GRID_CATS, ISLANDERS: ISLANDERS, BAL_OBJECTS: BAL_OBJECTS,
-    NONOGRAMS: NONOGRAMS, THINK: THINK, FLAWS: FLAWS
+    NONOGRAMS: NONOGRAMS, THINK: THINK, FLAWS: FLAWS, CLOSE_FLAWS: CLOSE
   };
 })();
 
