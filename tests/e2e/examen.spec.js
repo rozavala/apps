@@ -173,8 +173,8 @@ test.describe('Examen y Virtudes', () => {
     await next(page);
     await page.locator('[data-finish]').click();
     const draw = (await saved(page)).entries['2026-11-17'].draw;
-    expect(draw).toMatch(/^data:image\/png;base64,/);
-    expect(draw.length).toBeLessThan(120000);
+    expect(draw).toMatch(/^data:image\/jpeg;base64,/);
+    expect(draw.length).toBeLessThan(40000);
   });
 
   test('private: a kid sees only their own journal; parents read any journal behind the PIN', async ({ page }) => {
@@ -196,6 +196,32 @@ test.describe('Examen y Virtudes', () => {
     await page.locator('[data-kid="Sib"]').click();
     await expect(page.locator('.ex-journal')).toContainText('SIBLING-SECRET');
     await expect(page.locator('.ex-journal')).toContainText(/Humildad|Humility/);
+  });
+
+  test('the PIN unlock does not linger: leaving the parents\' view or reloading asks for it again', async ({ page }) => {
+    const sib = { v: 1, entries: { '2026-11-16': { done: true, thanksText: 'SIBLING-SECRET', virtue: 'humildad' } } };
+    await open(page, { sibling: sib });
+    const unlock = async () => {
+      await page.locator('[data-go="parents"]').click();
+      await page.locator('.zsd-input').fill('1234');
+      await page.keyboard.press('Enter');
+      await expect(page.locator('#ex-wrap')).toHaveAttribute('data-view', 'parents');
+    };
+    await unlock();
+    // leave, then try to come back: the PIN is asked again
+    await page.locator('.ex-head [data-go="home"]').click();
+    await page.locator('[data-go="parents"]').click();
+    await expect(page.locator('.zsd-input')).toBeVisible();
+    await page.locator('.zsd-cancel').click();
+    await expect(page.locator('#ex-wrap')).toHaveAttribute('data-view', 'home');
+    await expect(page.locator('#ex-wrap')).not.toContainText('SIBLING-SECRET');
+    // a reload in the same tab (the next kid on a shared iPad) starts locked too
+    await unlock();
+    await page.reload();
+    await page.waitForSelector('.ex-hero');
+    expect(await page.evaluate(() => sessionStorage.getItem('zs_examen_pin_ok'))).toBe(null);
+    await page.locator('[data-go="parents"]').click();
+    await expect(page.locator('.zsd-input')).toBeVisible();
   });
 
   test('before 6 pm it says the examen is for the evening, but can still be done', async ({ page }) => {

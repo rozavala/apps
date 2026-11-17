@@ -142,6 +142,8 @@ test.describe('Examen y Virtudes: journal rules', () => {
     expect(e.draw).toBeUndefined();
     E.saveEntry(d, '2026-11-16', entry({ draw: 'data:image/png;base64,AAAA' }));
     expect(d.entries['2026-11-16'].draw).toBe('data:image/png;base64,AAAA');
+    E.saveEntry(d, '2026-11-17', entry({ draw: 'data:image/jpeg;base64,' + 'A'.repeat(E.MAX_DRAWING) }));
+    expect(d.entries['2026-11-17'].draw).toBeUndefined();                    // too big to keep in the synced blob
   });
 
   test('only the newest drawings are kept; the words stay', () => {
@@ -149,7 +151,7 @@ test.describe('Examen y Virtudes: journal rules', () => {
     for (let i = 1; i <= 25; i++) E.saveEntry(d, '2026-10-' + String(i).padStart(2, '0'), entry({ draw: 'data:image/png;base64,AA', thanksText: 'día ' + i }));
     const withDraw = E.days(d).filter(k => d.entries[k].draw);
     expect(withDraw).toHaveLength(E.KEEP_DRAWINGS);
-    expect(withDraw[0]).toBe('2026-10-06');
+    expect(withDraw[0]).toBe('2026-10-16');
     expect(d.entries['2026-10-01'].thanksText).toBe('día 1');
   });
 

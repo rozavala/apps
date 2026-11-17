@@ -8,7 +8,7 @@
        entries: {
          'YYYY-MM-DD': {
            done: true, t: <ms finished>,
-           thanks: ['familia', …], thanksText: '…', draw: 'data:image/png…',
+           thanks: ['familia', …], thanksText: '…', draw: 'data:image/jpeg…',
            happy:  ['jugar', …],   happyText: '…',
            better: ['turno', …],   betterText: '…',
            virtue: 'paciencia', prayer: 'avemaria',
@@ -27,7 +27,8 @@ var ExamenEngine = (function() {
 
   var PREFIX = 'zs_examen_';
   var MAX_TEXT = 280;          // the longest answer an older kid can write
-  var KEEP_DRAWINGS = 20;      // drawings kept (newest), to keep the synced blob small
+  var KEEP_DRAWINGS = 10;      // drawings kept (newest), to keep the synced blob small
+  var MAX_DRAWING = 40000;     // characters in one stored drawing (a 240 × 144 JPEG is ~10 000)
   var CHECK_DAYS = 3;          // how far back "did you practise it?" looks
   var PRACTISED = { yes: true, little: true };
 
@@ -92,7 +93,7 @@ var ExamenEngine = (function() {
     if (e.betterNone) out.betterNone = true; else delete out.betterNone;
     out.virtue = typeof e.virtue === 'string' ? e.virtue : '';
     out.prayer = typeof e.prayer === 'string' ? e.prayer : '';
-    if (typeof e.draw === 'string' && /^data:image\/(png|jpeg);base64,/.test(e.draw) && e.draw.length < 120000) out.draw = e.draw;
+    if (typeof e.draw === 'string' && /^data:image\/(png|jpeg);base64,/.test(e.draw) && e.draw.length <= MAX_DRAWING) out.draw = e.draw;
     else if (e.draw === null) delete out.draw;
     d.entries[k] = out;
     prune(d);
@@ -194,7 +195,7 @@ var ExamenEngine = (function() {
   }
 
   return {
-    PREFIX: PREFIX, MAX_TEXT: MAX_TEXT, KEEP_DRAWINGS: KEEP_DRAWINGS,
+    PREFIX: PREFIX, MAX_TEXT: MAX_TEXT, KEEP_DRAWINGS: KEEP_DRAWINGS, MAX_DRAWING: MAX_DRAWING,
     dayKey: dayKey, addDays: addDays, mondayOf: mondayOf,
     migrate: migrate, days: days, entry: entry, isDone: isDone, saveEntry: saveEntry, prune: prune,
     pendingCheck: pendingCheck, answerCheck: answerCheck,

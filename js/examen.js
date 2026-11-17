@@ -32,7 +32,6 @@
 
   var EVENING_HOUR = 18;
   var PICKS = 3;                // pictures per step
-  var PIN_OK = 'zs_examen_pin_ok';
 
   // ── helpers ──────────────────────────────────────────────────
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -69,7 +68,7 @@
   var d = load();
   var S = {
     lang: 'es', view: 'home', step: 0, flow: [],
-    draft: null, checkDone: false, picked: null, browse: null, parentKid: null
+    draft: null, unlocked: false, checkDone: false, picked: null, browse: null, parentKid: null
   };
   S.lang = (typeof zsAppLang === 'function') ? (zsAppLang(d.lang) === 'en' ? 'en' : 'es') : d.lang;
 
@@ -122,7 +121,7 @@
     var h = $('h1, h2', root());
     if (h && S.view !== 'home') { h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (e) {} }
   }
-  function go(view) { S.view = view; draw(); }
+  function go(view) { if (view !== 'parents') lock(); S.view = view; draw(); }
   function draw() {
     if (S.view === 'flow') return renderFlow();
     if (S.view === 'journal') return renderJournal();
@@ -171,6 +170,7 @@
   // ── home ─────────────────────────────────────────────────────
   function renderHome() {
     S.view = 'home';
+    lock();
     var done = E.isDone(d, today());
     var hour = new Date().getHours();
     var greet = hour >= EVENING_HOUR || hour < 4 ? T('Buenas noches', 'Good evening') : hour >= 12 ? T('Buenas tardes', 'Good afternoon') : T('Buenos días', 'Good morning');
@@ -348,7 +348,7 @@
     // Stored small (240 × 144) so the synced journal stays light.
     var out = document.createElement('canvas'); out.width = 240; out.height = 144;
     var o = (typeof ZsCanvas !== 'undefined') ? ZsCanvas.get2d(out) : out.getContext('2d');
-    if (o) { o.fillStyle = '#fffdf7'; o.fillRect(0, 0, 240, 144); o.drawImage(pad.c, 0, 0, 240, 144); S.draft.draw = out.toDataURL('image/png'); }
+    if (o) { o.fillStyle = '#fffdf7'; o.fillRect(0, 0, 240, 144); o.drawImage(pad.c, 0, 0, 240, 144); S.draft.draw = out.toDataURL('image/jpeg', 0.7); }
     if (typeof ZsCanvas !== 'undefined') ZsCanvas.release(out);
     sfx('click'); toast(T('Dibujo guardado', 'Drawing saved'));
     pad = null;
@@ -520,7 +520,11 @@
   }
 
   // ── parents (behind the PIN) ─────────────────────────────────
-  function pinOk() { try { return sessionStorage.getItem(PIN_OK) === '1'; } catch (e) { return false; } }
+  // The PIN opens the parents' view once. The unlock lives in memory only and
+  // ends when the view is left or the page goes away, so on a shared iPad the
+  // next kid in the same tab is asked for the PIN again.
+  function pinOk() { return S.unlocked === true; }
+  function lock() { S.unlocked = false; }
   function askPin() {
     if (pinOk()) return go('parents');
     if (typeof ZsDialog === 'undefined' || !ZsDialog.prompt) return;
@@ -529,7 +533,7 @@
       if (val == null) return;
       var pin = (typeof getParentPin === 'function') ? getParentPin() : null;
       if (pin && String(val).trim() === String(pin)) {
-        try { sessionStorage.setItem(PIN_OK, '1'); } catch (e) {}
+        S.unlocked = true;
         go('parents');
         // Fetch the other kids' journals from the family server, if it is there.
         try {
@@ -612,6 +616,9 @@
       } catch (e) {}
     }
     root().addEventListener('click', onClick);
+    window.addEventListener('pagehide', lock);
+    document.addEventListener('visibilitychange', function() { if (document.hidden && S.view === 'parents') { lock(); go('home'); } });
+    try { sessionStorage.removeItem('zs_examen_pin_ok'); } catch (e) {}   // an unlock an older version kept
     renderHome();
   }
 

@@ -109,7 +109,7 @@ var ExamenData = (function() {
       little: ['Hacer bien mis tareas.', 'Doing my jobs well.'],
       desc: ['Es hacer mis tareas bien y hasta el final, sin dejarlas para después.', 'Doing my jobs well and to the end, without leaving them for later.'],
       saint: 'benito',
-      why: ['San Benito enseñó a sus monjes "Ora et labora": reza y trabaja.', 'Saint Benedict taught his monks "Ora et labora": pray and work.'],
+      why: ['San Benito escribió una Regla para sus monjes: rezar y trabajar bien cada día. Los benedictinos la resumen en «Ora et labora».', 'Saint Benedict wrote a Rule for his monks: pray and work well every day. Benedictines sum it up as "Ora et labora".'],
       ideas: [
         ['Terminar mi tarea antes de jugar.', 'Finish my homework before playing.'],
         ['Ordenar mi pieza.', 'Tidy my room.'],
