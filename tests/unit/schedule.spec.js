@@ -6,7 +6,7 @@ const { injectMockProfile } = require('../helpers/utils');
 // matches nothing silently never hides its app (Descubre Chile shipped
 // that way once), and an app missing from every day is never offered.
 const LEARN_BY_DOING = ['circuit', 'engineer', 'negocio', 'euclid', 'cocina',
-  'marinero', 'naturaleza', 'secretos', 'clock', 'calculo', 'linea', 'trivia'];
+  'marinero', 'naturaleza', 'secretos', 'clock', 'calculo', 'linea', 'examen', 'logica', 'mapa', 'trivia'];
 
 test.describe('Smart Schedule', () => {
 
@@ -56,6 +56,33 @@ test.describe('Smart Schedule', () => {
     });
 
     expect(shown).toEqual({ circuit: true, clock: true, cocina: false, euclid: false, move: true });
+  });
+
+  test('Examen y Virtudes is offered every evening, from 18:00, and not in the morning', async ({ page }) => {
+    await injectMockProfile(page);
+    await page.addInitScript(() => {
+      localStorage.removeItem('zs_schedule_override');
+      localStorage.setItem('zs_schedule_mode', 'smart');
+    });
+    // Monday 2 November 2026 in the suite's time zone (America/Los_Angeles).
+    const at = async (h) => {
+      await page.clock.setFixedTime(new Date('2026-11-02T' + String(h).padStart(2, '0') + ':00:00-08:00'));
+      await page.goto('/');
+      await page.waitForFunction(() => typeof window.AppSchedule !== 'undefined');
+      return page.evaluate(() => {
+        // @ts-ignore
+        window.AppSchedule.applyToHub(window.getActiveUser());
+        const el = document.querySelector('.card-examen');
+        // @ts-ignore
+        return { today: window.AppSchedule.getTodayApps().includes('examen'), shown: !!el && getComputedStyle(el).display !== 'none',
+          // @ts-ignore
+          days: [0, 1, 2, 3, 4, 5, 6].filter(d => window.AppSchedule.getScheduleForDay(d).apps.includes('examen')).length };
+      });
+    };
+    expect(await at(10)).toEqual({ today: false, shown: false, days: 7 });
+    expect(await at(17)).toEqual({ today: false, shown: false, days: 7 });
+    expect(await at(18)).toEqual({ today: true, shown: true, days: 7 });
+    expect(await at(20)).toEqual({ today: true, shown: true, days: 7 });
   });
 
 });

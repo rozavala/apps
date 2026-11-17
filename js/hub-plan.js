@@ -51,6 +51,7 @@ var HubPlan = (function() {
     { id: 'secretos',   href: 'mensajes-secretos.html',  group: 'science', minAge: 7,  names: ['mensajes secretos'] },
     { id: 'code',       href: 'code-cadet.html',         group: 'science', minAge: 7,  names: ['code cadet'] },
     { id: 'codelab',    href: 'code-lab.html',           group: 'science', minAge: 9,  names: ['code lab'] },
+    { id: 'logica',     href: 'logica.html',             group: 'science', minAge: 4,  names: ['logica'] },
     { id: 'trivia',     href: 'trivia-familiar.html',    group: 'world',   minAge: 4,  names: ['trivia familiar', 'trivia'] },
     { id: 'story',      href: 'story-explorer.html',     group: 'reading', minAge: 4,  beginner: true, names: ['story explorer'] },
     { id: 'lector',     href: 'lector.html',             group: 'reading', minAge: 4,  beginner: true, names: ['lector'] },
@@ -60,11 +61,13 @@ var HubPlan = (function() {
     { id: 'arbol',      href: 'arbol-familiar.html',     group: 'world',   minAge: 4,  names: ['arbol familiar'] },
     { id: 'quest',      href: 'quest-adventure.html',    group: 'world',   minAge: 5,  names: ['quest adventure', 'summer quest'] },
     { id: 'linea',      href: 'linea-del-tiempo.html',   group: 'world',   minAge: 5,  names: ['linea del tiempo'] },
+    { id: 'mapa',       href: 'misiones-mapa.html',      group: 'world',   minAge: 4,  names: ['misiones de mapa'] },
     { id: 'chile',      href: 'descubre-chile.html',     group: 'world',   minAge: 6,  names: ['descubre chile'] },
     { id: 'atlas',      href: 'world-atlas.html',        group: 'world',   minAge: 6,  names: ['world atlas'] },
     { id: 'civics',     href: 'civics-lab.html',         group: 'world',   minAge: 8,  names: ['civics lab'] },
     { id: 'faith',      href: 'fe-explorador.html',      group: 'faith',   minAge: 4,  names: ['fe explorador'] },
     { id: 'bible',      href: 'bible-explorer.html',     group: 'faith',   minAge: 7,  names: ['bible explorer'] },
+    { id: 'examen',     href: 'examen.html',             group: 'faith',   minAge: 4,  names: ['examen y virtudes'] },
     { id: 'piano',      href: 'little-maestro.html',     group: 'arts',    minAge: 4,  beginner: true, names: ['little maestro'] },
     { id: 'art',        href: 'art-studio.html',         group: 'arts',    minAge: 4,  beginner: true, names: ['art studio'] },
     { id: 'guitar',     href: 'guitar-jam.html',         group: 'arts',    minAge: 6,  names: ['guitar jam'] },
@@ -309,7 +312,7 @@ var HubPlan = (function() {
       card.__app = app;
       var ok = allowed(user, app);
       // Faith keeps its own per-kid switch.
-      if (app.id === 'faith' && user.faithVisible === false) ok = false;
+      if ((app.id === 'faith' || app.id === 'examen') && user.faithVisible === false) ok = false;
       if (ok && _shown(card)) mine.push(card);
       else _holder.appendChild(card);
     });
