@@ -203,7 +203,8 @@ test.describe('Type Quest', () => {
   test('older saves keep their data; junk does not break the app', async ({ page }) => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await open(page, { saved: { ls: { fj: { s: 2, w: 9 } }, extra: 'kept', runs: 'junk', keys: [] } });
+    await open(page, { saved: { ls: { fj: { s: 2, w: 9 } }, extra: 'kept', runs: 'junk', keys: [], rk: 99 } });
+    await expect(page.locator('.tq-rank-name')).toHaveText(/Gran Maestro/);
     await page.click('.tq-tab[data-go="lessons"]');
     await page.click('.tq-lesson[data-arg="1"]');
     await typeAll(page);

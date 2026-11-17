@@ -53,7 +53,7 @@ var TypeQuest = (function() {
     if (d.acc !== 'exact' && d.acc !== 'loose') d.acc = 'exact';
     if (d.kb !== 'hw' && d.kb !== 'screen') d.kb = null;
     d.hints = d.hints === 0 ? 0 : 1;
-    d.rk = Math.max(0, d.rk | 0);
+    d.rk = Math.max(0, Math.min(D.RANKS.length - 1, d.rk | 0));
     d.v = 1;
     return d;
   }
@@ -268,7 +268,7 @@ var TypeQuest = (function() {
     if (data.lay === 'latam') {
       return '<ul class="tq-list"><li>' + bi('á é í ó ú: presiona ´ (al lado de la P), suéltala y luego la vocal.', 'á é í ó ú: press ´ (next to P), let go, then the vowel.') + '</li>' +
         '<li>' + bi('ñ tiene su propia tecla, al lado de la L.', 'ñ has its own key, next to L.') + '</li>' +
-        '<li>' + bi('¿ y ¡ están en la tecla al lado del 0 (¡ con Shift).', '¿ and ¡ are on the key after 0 (¡ with Shift).') + '</li></ul>';
+        '<li>' + bi('¿ y ¡ están dos teclas después del 0 (¡ con Shift).', '¿ and ¡ are two keys after 0 (¡ with Shift).') + '</li></ul>';
     }
     return '<ul class="tq-list"><li>' + bi('En iPad y Mac: ⌥ Option + E, suelta, y luego la vocal → á.', 'On iPad and Mac: ⌥ Option + E, let go, then the vowel → á.') + '</li>' +
       '<li>' + bi('⌥ Option + N, suelta, y luego N → ñ.', '⌥ Option + N, let go, then N → ñ.') + '</li>' +
@@ -758,6 +758,9 @@ var TypeQuest = (function() {
     }
     if (view !== 'run' || !run || !run.active) return;
     var sink = $('#tq-sink');
+    // another field has the focus (a parent PIN prompt, a dialog): leave its keys alone
+    var ae = document.activeElement;
+    if (ae && ae !== sink && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable || (ae.closest && ae.closest('dialog, [role="dialog"], [aria-modal="true"]')))) return;
     if (e.key === 'Backspace' || e.key === 'Enter' || e.key === 'Tab') { if (e.key !== 'Tab' || document.activeElement === sink) e.preventDefault(); return; }
     if (e.key === ' ' && document.activeElement !== sink) { e.preventDefault(); feed(' '); focusSink(); return; }
     if (sink && document.activeElement !== sink && e.key && e.key.length === 1 && !e.altKey) {

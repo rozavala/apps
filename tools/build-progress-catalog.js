@@ -151,9 +151,6 @@ const BUILDERS = {
       .map((p, idx) => unit(idx + 1, p.name, _title(p.tier)));
   },
 
-  // Lector keeps one level ladder for each language. A level is done when
-  // every practice in it has 2+ stars; the unit carries its practices in
-  // `k` so Progress Manager can tell (see lectorLevels in progress-admin.js).
   // Type Quest: the key lessons in order (js/type-quest-data.js).
   typing() {
     const D = require(path.join(ROOT, 'js', 'type-quest-data.js'));
@@ -161,6 +158,10 @@ const BUILDERS = {
     D.GROUPS.forEach(g => { groups[g.id] = g.t[1]; });
     return D.LESSONS.map((l, i) => unit(l.id, (i + 1) + '. ' + l.t[1], groups[l.grp] || l.grp));
   },
+
+  // Lector keeps one level ladder for each language. A level is done when
+  // every practice in it has 2+ stars; the unit carries its practices in
+  // `k` so Progress Manager can tell (see lectorLevels in progress-admin.js).
   lector_es() { return lectorLevels('es', 'Español'); },
   lector_en() { return lectorLevels('en', 'English'); },
 
