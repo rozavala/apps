@@ -34,7 +34,9 @@ const MAJOR_APPS = [
   'linea-del-tiempo.html',
   'misiones-mapa.html',
   'arbol-familiar.html',
-  'code-lab.html'
+  'code-lab.html',
+  'logica.html',
+  'examen.html'
 ];
 
 test.describe('Major Apps Critical Path', () => {
