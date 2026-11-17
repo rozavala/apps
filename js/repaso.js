@@ -29,7 +29,7 @@
   }
   function little() { return (typeof getAgeTier === 'function') && getAgeTier(USER.age) === 'beginner'; }
   function sessionSize() { return little() ? 5 : 10; }
-  function appName(a) { return APP_NAMES[a] || a; }
+  function appName(a) { return a === 'challenge' ? T('Desafío de un hermano', 'Sibling challenge') : (APP_NAMES[a] || a); }
 
   // ── art (hand-built SVG) ─────────────────────────────────────
   function boxArt() {

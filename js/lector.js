@@ -70,7 +70,7 @@ var Lector = (function() {
 
   var pending = [];                       // timers that belong to the screen on show
   function vlater(fn, ms) { var id = setTimeout(fn, ms); pending.push(id); return id; }
-  function clearView() { pending.forEach(clearTimeout); pending = []; stopSpeech(); }
+  function clearView() { pending.forEach(clearTimeout); pending = []; stopSpeech(); document.body.classList.remove('lx-reading'); }
 
   // ---------------------------------------------------------------
   // Voice: the device's own, via ZsTTS for the voice and the pace
@@ -799,6 +799,7 @@ var Lector = (function() {
       return '<button type="button" class="' + cls + '" data-i="' + i + '">' + esc(w) + '</button>';
     }).join(' ');
     var st_ = bookState(b.id);
+    document.body.classList.add('lx-reading');          // a wide screen lays the page out side by side (css)
     root.innerHTML = head() +
       '<div class="lx-bk-bar">' + backBtn(T('Libros', 'Books')) +
       '<button type="button" class="lx-adult" id="lx-adult" aria-label="' + esc(T('Para un adulto', 'For a grown-up')) + '">' + ICON.adult + '</button></div>' +
