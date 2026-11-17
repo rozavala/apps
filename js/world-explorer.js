@@ -1447,9 +1447,22 @@ const WorldExplorer = (() => {
         ${isVisited ? '✅ ' + esc(t('Visited', 'Visitado')) : '🗺️ ' + esc(t('Mark as Visited', 'Marcar como Visitado'))}
       </button>
       ${(k.quiz && k.quiz.length) ? `<button class="action-btn btn-quiz" onclick="WorldExplorer.startQuiz('${id}')">❓ ${esc(t('Take Quiz', 'Tomar Quiz'))}</button>` : ''}
+      ${_canChallenge(id) ? `<button type="button" class="chl-app-btn we-chl-btn" id="we-chl-btn" onclick="WorldExplorer.challengeSibling('${id}')">🤝 ${esc(t('Challenge a sibling to find it', 'Desafía a un hermano a encontrarlo'))}</button>` : ''}
       <button class="action-btn btn-secondary" onclick="WorldExplorer.backToContinent()">${esc(t('Back to Map', 'Volver al Mapa'))}</button>
     `;
     _showScreen('country');
+  }
+
+  // Sibling challenges (js/challenges.js): "find this country on the map",
+  // for a younger sibling. Only for countries the challenge map can draw.
+  function _canChallenge(id) {
+    const g = GEO[id];
+    return !!(g && hasMap() && WorldMap.info(g.iso) && typeof Challenges !== 'undefined' && Challenges.canSend());
+  }
+  function challengeSibling(id) {
+    const g = GEO[id];
+    if (!g || typeof Challenges === 'undefined') return;
+    Challenges.openCreate(typeof getActiveUser === 'function' ? getActiveUser() : null, { kind: 'map', answer: g.iso });
   }
 
   function markVisited(id) {
@@ -2037,5 +2050,5 @@ const WorldExplorer = (() => {
   document.addEventListener('DOMContentLoaded', init);
 
   return { init, openContinent, openCountry, markVisited, toggleLanguage, backToSelect, backToContinent, startQuiz, backToCountry, getStats,
-    startChallenge, quitChallenge, _geo: GEO, _flights: FLIGHTS, _ch: () => ch };
+    startChallenge, quitChallenge, challengeSibling, _geo: GEO, _flights: FLIGHTS, _ch: () => ch };
 })();

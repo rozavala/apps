@@ -347,6 +347,31 @@
     c.shine('M68 38 Q72 44 70 52 Q68 46 66 40Z', 0.3);
   });
 
+  // ── ladybug (a story character: the bug from the side, with a face) ──
+  function ladybug(c, oh) {
+    c.shadow(52, 91, 38, 4);
+    c.line('M30 76 L24 90 M44 78 L42 91 M60 78 L62 91 M74 76 L82 90', '#2A1608', 2.4);
+    c.ell(54, 76, 36, 7, '#2E2A28', { flat: true, sw: 0.8 });
+    c.path('M18 76 Q16 34 56 30 Q92 32 92 76Z', '#D8352B', { rad: true, sw: 1.3 });
+    c.line('M56 30 Q52 52 56 76', '#7A1812', 1.6);
+    [[36, 50, 6], [44, 66, 4.6], [70, 46, 6.4], [80, 64, 5], [62, 64, 4.4], [28, 66, 3.8]].forEach(function (p) {
+      c.circ(p[0], p[1], p[2], '#2E2A28', { rad: true, sw: 0.7 });
+    });
+    c.line('M14 52 Q8 36 2 34 M22 50 Q20 34 16 28', '#2A1608', 1.3);
+    c.circ(2, 34, 2, '#2E2A28', { flat: true, stroke: false }); c.circ(16, 28, 2, '#2E2A28', { flat: true, stroke: false });
+    c.circ(17, 64, 13, '#2E2A28', { rad: true });
+    c.circ(11.5, 61, 3.6, '#fff', { flat: true, sw: 0.6 }); c.circ(21.5, 61, 3.6, '#fff', { flat: true, sw: 0.6 });
+    c.circ(10.6, 61.6, 1.7, '#1a120c', { flat: true, stroke: false }); c.circ(20.6, 61.6, 1.7, '#1a120c', { flat: true, stroke: false });
+    if (oh) {                                   // worried: raised brows and an open mouth
+      c.ell(16.5, 70, 2.6, 3, '#F4F1EA', { flat: true, stroke: false });
+      c.line('M8 56.5 L14 54.5 M25 56.5 L19 54.5', '#F4F1EA', 1.1);
+    } else c.line('M11 69 Q16 73 22 69', '#F4F1EA', 1.2);
+    c.shine('M28 44 Q34 34 48 33 Q36 38 32 50Z', 0.55);
+    c.shine('M8 58 Q11 54 16 54 Q12 56 10 60Z', 0.4);
+  }
+  LectorArt.add('ladybug', function (c) { ladybug(c, false); });
+  LectorArt.add('ladybug-oh', function (c) { ladybug(c, true); });
+
   // ── ant ─────────────────────────────────────────────────────
   LectorArt.add('ant', function (c) {
     var L = '#3A2218';

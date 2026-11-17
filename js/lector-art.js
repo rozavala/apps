@@ -284,6 +284,35 @@ var LectorArt = (function() {
     c.raw(s);
     c.raw('<path d="M0 130 H320" stroke="#7B5A33" stroke-width="2" opacity=".5"/>');
   };
+  BG.woods = function(c) {
+    // the edge of a wood: far pines, two near trees at the sides, a clearing
+    sky(c, '#A3DAF2', '#EEF9FC', 132);
+    cloud(c, 150, 28, 0.85); cloud(c, 262, 44, 0.6);
+    var t = '';
+    for (var i = 0; i < 13; i++) {
+      var x = i * 26 - 10 + (i % 3) * 4, h = 40 + (i * 17) % 26;
+      t += '<path d="M' + x + ' 130 L' + (x + 14) + ' ' + (130 - h) + ' L' + (x + 28) + ' 130Z" fill="' + (i % 2 ? '#7FAF93' : '#6C9F86') + '"/>';
+    }
+    c.raw('<g opacity=".8">' + t + '</g>');
+    hills(c, 124, '#93CB6E', '#62A54B');
+    grass(c, 130, '#97D168', '#4E9A3A');
+    c.raw('<path d="M96 200 Q130 166 150 140 L176 140 Q182 168 236 200Z" fill="' + c.bandGrad('#D8BC8E', '#B99462') + '" opacity=".85"/>');
+    function tree(x, y, r, col) {
+      c.path('M' + (x - 5) + ' ' + y + ' Q' + (x - 3) + ' ' + (y - r) + ' ' + (x - 4) + ' ' + (y - r * 1.6) + ' H' + (x + 4) + ' Q' + (x + 3) + ' ' + (y - r) + ' ' + (x + 6) + ' ' + y + 'Z', '#7A4E2A', { mode: 'h', sw: 0.9 });
+      c.circ(x - r * 0.55, y - r * 1.7, r * 0.7, dark(col, 0.12), { rad: true, sw: 0.9 });
+      c.circ(x + r * 0.6, y - r * 1.75, r * 0.72, dark(col, 0.06), { rad: true, sw: 0.9 });
+      c.circ(x, y - r * 2.2, r * 0.85, col, { rad: true, sw: 0.9 });
+      c.ell(x, y + 1, r * 0.9, 3, '#3a2410', { flat: true, stroke: false, op: 0.18 });
+    }
+    tree(26, 150, 30, '#5DA54A'); tree(298, 146, 27, '#6BB052');
+    var f = '', cols = ['#F7C8D4', '#FFE27A', '#fff', '#C9B6F2'];
+    for (var k = 0; k < 10; k++) {
+      var fx = (k * 67 + 31) % 300 + 10, fy = 148 + ((k * 23) % 46);
+      if (fx > 120 && fx < 220) continue;
+      f += '<circle cx="' + fx + '" cy="' + fy + '" r="2.4" fill="' + cols[k % 4] + '"/><circle cx="' + fx + '" cy="' + fy + '" r=".9" fill="#E7A21C"/>';
+    }
+    c.raw(f);
+  };
   BG.plain = function(c) {
     c.raw('<rect width="320" height="200" fill="' + c.bandGrad('#FFF6E2', '#F2E2BE') + '"/>');
     c.raw('<ellipse cx="160" cy="176" rx="150" ry="16" fill="#D9BE8A" opacity=".5"/>');
@@ -380,6 +409,23 @@ var LectorArt = (function() {
     c.shine('M34 26 Q42 16 54 16 Q44 20 38 32Z', 0.35);
   });
 
+  // The cat looking out of a doorway: only its head and front paws show.
+  add('peek', function(c) {
+    c.ell(38, 89, 9, 4.5, '#F3E3C8'); c.ell(62, 89, 9, 4.5, '#F3E3C8');
+    c.line('M35 88 v2 M39 88 v2 M59 88 v2 M63 88 v2', '#B9A27A', 0.8);
+    c.path('M28 46 L32 22 L47 36Z', '#E49B4F'); c.path('M72 46 L68 22 L53 36Z', '#E49B4F');
+    c.path('M32 40 L34 27 L43 35Z', '#F0A9A0', { stroke: false }); c.path('M68 40 L66 27 L57 35Z', '#F0A9A0', { stroke: false });
+    c.ell(50, 56, 25, 23, '#E8A257', { rad: true });
+    c.line('M43 35 v6 M50 33 v7 M57 35 v6', '#B9692A', 2, { op: 0.55 });
+    c.ell(40, 54, 4.2, 5.4, '#6FA84A', { flat: true, sw: 0.8 }); c.ell(60, 54, 4.2, 5.4, '#6FA84A', { flat: true, sw: 0.8 });
+    c.ell(40, 54, 1.5, 4.6, '#2a1608', { flat: true, stroke: false }); c.ell(60, 54, 1.5, 4.6, '#2a1608', { flat: true, stroke: false });
+    c.circ(41.4, 52, 1, '#fff', { flat: true, stroke: false }); c.circ(61.4, 52, 1, '#fff', { flat: true, stroke: false });
+    c.path('M46.5 63 h7 l-3.5 4.5Z', '#E88A8A', { sw: 0.7 });
+    c.line('M50 67.5 v2 M50 69.5 q-3.5 3 -7 1 M50 69.5 q3.5 3 7 1', '#7a3d2a', 1);
+    c.line('M27 62 l-16 -3 M27 66 l-16 3 M73 62 l16 -3 M73 66 l16 3', '#fff', 1, { op: 0.9 });
+    c.shine('M33 44 Q41 34 54 34 Q43 38 37 50Z', 0.35);
+  });
+
   add('table', function(c) {
     c.shadow(50, 91, 42, 5);
     c.path('M20 40 L24 90 H31 L33 48Z', '#8E5F31'); c.path('M80 40 L76 90 H69 L67 48Z', '#8E5F31');
@@ -448,6 +494,29 @@ var LectorArt = (function() {
     c.path('M35 29 Q36 13 50 13 Q64 13 65 29 Q60 21 52 21 Q44 22 35 29Z', '#7A4A2A', { sw: 0.8 });
     face(c, 50, 33, 14);
     c.shine('M38 54 Q37 64 40 72 Q39 62 40 56Z', 0.3);
+  });
+
+  // Pam, a girl with pigtails, in the kid's size and pose.
+  add('girl', function(c) {
+    c.shadow(50, 91, 20, 4);
+    c.path('M43 76 L42.5 90 H48 L48 76Z', SKIN, { sw: 0.8 }); c.path('M52 76 L52 90 H57.5 L57 76Z', SKIN, { sw: 0.8 });
+    c.rect(42, 84, 6.5, 4, '#fff', { sw: 0.6, r: 1 }); c.rect(51.5, 84, 6.5, 4, '#fff', { sw: 0.6, r: 1 });
+    c.ell(45, 91, 6.2, 2.4, '#C94A3A'); c.ell(55, 91, 6.2, 2.4, '#C94A3A');
+    // pigtails sit behind the head
+    c.path('M33 30 Q22 34 25 50 Q27 56 31 54 Q30 42 37 36Z', '#5A3418', { sw: 0.9 });
+    c.path('M67 30 Q78 34 75 50 Q73 56 69 54 Q70 42 63 36Z', '#5A3418', { sw: 0.9 });
+    // dress with a white collar and dots
+    c.path('M38 50 Q50 45 62 50 L69 80 Q50 86 31 80Z', '#D9577A');
+    c.path('M38 52 L28.5 68 Q29.5 71 33.5 70 L42 58Z', '#D9577A', { sw: 0.9 }); c.path('M62 52 L71.5 68 Q70.5 71 66.5 70 L58 58Z', '#D9577A', { sw: 0.9 });
+    c.circ(30.5, 70, 3.8, SKIN, { rad: true, sw: 0.8 }); c.circ(69.5, 70, 3.8, SKIN, { rad: true, sw: 0.8 });
+    [[42, 62], [55, 60], [48, 70], [38, 74], [61, 72], [53, 78], [44, 79]].forEach(function(d) { c.circ(d[0], d[1], 1.3, '#FFE3EA', { flat: true, stroke: false }); });
+    c.rect(45, 43, 10, 8, SKIN, { r: 3, sw: 0.8 });
+    c.path('M42 49 Q46 54 50 50 Q54 54 58 49 Q54 47 50 48 Q46 47 42 49Z', '#fff', { sw: 0.7 });
+    c.circ(50, 31, 15, SKIN, { rad: true, sw: 1 });
+    c.path('M35 30 Q35 13 50 13 Q65 13 65 30 Q62 22 56 20 Q50 25 42 22 Q37 25 35 30Z', '#6A3E1E', { sw: 0.8 });
+    c.circ(33.5, 31, 2.8, '#F2C94C', { sw: 0.7 }); c.circ(66.5, 31, 2.8, '#F2C94C', { sw: 0.7 });
+    face(c, 50, 33, 14);
+    c.shine('M38 54 Q36 64 37 74 Q38 64 40 56Z', 0.3);
   });
 
   add('map', function(c) {
