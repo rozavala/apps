@@ -84,6 +84,7 @@ var CloudSync = (function() {
     'zs_clock_': 'clock',
     'zs_lector_': 'lector',
     'zs_linea_': 'linea',
+    'zs_mapa_': 'mapa',
     'zs_codelab_': 'codelab',
     'zs_logica_': 'logica',
     'zs_calculo_': 'calculo',

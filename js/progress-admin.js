@@ -377,6 +377,7 @@ var ProgressAdmin = (function() {
     };
   }
   APPS.push(_lectorApp('es', 'Español'), _lectorApp('en', 'English'));
+  APPS.push({ id: 'mapa', label: 'Misiones de Mapa', icon: '🧭', href: 'misiones-mapa.html', prefix: 'zs_mapa_', mode: 'reset' });
   APPS.push({ id: 'linea', label: 'Línea del Tiempo', icon: '🏛️', href: 'linea-del-tiempo.html', prefix: 'zs_linea_', mode: 'reset' });
   // Examen y Virtudes keeps a journal, not a ladder: it can only be cleared.
   APPS.push({ id: 'examen', label: 'Examen y Virtudes', icon: '🙏', href: 'examen.html', prefix: 'zs_examen_', mode: 'reset' });
