@@ -90,6 +90,7 @@ var CloudSync = (function() {
     'zs_challenge_': 'challenge',
     'zs_review_': 'review',
     'zs_dictado_': 'dictado',
+    'zs_examen_': 'examen',
     'littlemaestro_': 'littlemaestro',
   };
 
