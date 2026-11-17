@@ -571,6 +571,14 @@ var APP_STAR_CONFIGS = [
       for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
       return n;
     } },
+  // Examen y Virtudes: one star for each evening with a finished
+  // reflection ({ entries: { 'YYYY-MM-DD': { done: true, ... } } }), so at
+  // most one a day. What the kid wrote never scores.
+  { id: 'examen', prefix: 'zs_examen_', stars: function(d) {
+      var n = 0, e = d.entries && typeof d.entries === 'object' ? d.entries : {};
+      for (var k in e) if (/^\d{4}-\d\d-\d\d$/.test(k) && e[k] && e[k].done) n++;
+      return n;
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a

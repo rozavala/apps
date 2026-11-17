@@ -64,6 +64,7 @@ var HubPlan = (function() {
     { id: 'civics',     href: 'civics-lab.html',         group: 'world',   minAge: 8,  names: ['civics lab'] },
     { id: 'faith',      href: 'fe-explorador.html',      group: 'faith',   minAge: 4,  names: ['fe explorador'] },
     { id: 'bible',      href: 'bible-explorer.html',     group: 'faith',   minAge: 7,  names: ['bible explorer'] },
+    { id: 'examen',     href: 'examen.html',             group: 'faith',   minAge: 4,  names: ['examen y virtudes'] },
     { id: 'piano',      href: 'little-maestro.html',     group: 'arts',    minAge: 4,  beginner: true, names: ['little maestro'] },
     { id: 'art',        href: 'art-studio.html',         group: 'arts',    minAge: 4,  beginner: true, names: ['art studio'] },
     { id: 'guitar',     href: 'guitar-jam.html',         group: 'arts',    minAge: 6,  names: ['guitar jam'] },
@@ -308,7 +309,7 @@ var HubPlan = (function() {
       card.__app = app;
       var ok = allowed(user, app);
       // Faith keeps its own per-kid switch.
-      if (app.id === 'faith' && user.faithVisible === false) ok = false;
+      if ((app.id === 'faith' || app.id === 'examen') && user.faithVisible === false) ok = false;
       if (ok && _shown(card)) mine.push(card);
       else _holder.appendChild(card);
     });
