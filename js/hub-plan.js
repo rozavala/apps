@@ -44,6 +44,7 @@ var HubPlan = (function() {
     { id: 'euclid',     href: 'euclid-workshop.html',    group: 'math',    minAge: 8,  names: ['euclid'] },
     { id: 'lab',        href: 'lab-explorer.html',       group: 'science', minAge: 4,  beginner: true, names: ['lab explorer'] },
     { id: 'naturaleza', href: 'naturaleza.html',         group: 'science', minAge: 4,  beginner: true, names: ['naturaleza', 'explorador de naturaleza'] },
+    { id: 'huerto',     href: 'huerto.html',             group: 'science', minAge: 4,  names: ['huerto'] },
     { id: 'cocina',     href: 'cocina-lab.html',         group: 'science', minAge: 6,  names: ['cocina lab'] },
     { id: 'circuit',    href: 'circuit-lab.html',        group: 'science', minAge: 7,  names: ['circuit lab'] },
     { id: 'engineer',   href: 'little-engineer.html',    group: 'science', minAge: 7,  names: ['little engineer'] },
@@ -203,6 +204,22 @@ var HubPlan = (function() {
     return out;
   }
 
+  // Huerto: does one of this kid's plants need its water check today?
+  // (Its last watering, or the planting day, is at least `ev` days ago.)
+  function huertoDue(userName, now) {
+    try {
+      var d = JSON.parse(localStorage.getItem('zs_huerto_' + String(userName).toLowerCase().replace(/\s+/g, '_')));
+      var t = new Date(now || new Date()); t.setHours(12, 0, 0, 0);
+      return ((d && d.plants) || []).some(function(pl) {
+        if (!pl || pl.done) return false;
+        var last = (pl.water || []).concat([pl.planted]).filter(function(x) { return /^\d{4}-\d{2}-\d{2}$/.test(x); }).sort().pop();
+        if (!last) return false;
+        var m = last.split('-'), when = new Date(+m[0], +m[1] - 1, +m[2], 12);
+        return Math.round((t - when) / DAY) >= Math.max(1, pl.ev || 2);
+      });
+    } catch (e) { return false; }
+  }
+
   // Three app ids for today. `eligible` are the ids the kid can see today.
   function pickToday(user, eligible, opts) {
     opts = opts || {};
@@ -225,6 +242,7 @@ var HubPlan = (function() {
       score[a.id] = (scheduled[a.id] ? 3 : 0) + (days / 14) * 3 + (weak[a.group] || 0) +
         (_hash(dateKey + '|' + user.name + '|' + a.id) % 100) / 100;
       if (a.id === 'review') score[a.id] += 5;   // what slipped by comes first
+      if (a.id === 'huerto' && (opts.huertoDue != null ? opts.huertoDue : huertoDue(user.name, now))) score[a.id] += 4;   // a plant is thirsty
     });
     cands.sort(function(a, b) { return score[b.id] - score[a.id]; });
 
@@ -400,7 +418,7 @@ var HubPlan = (function() {
   }
 
   return {
-    GROUPS: GROUPS, APPS: APPS,
+    GROUPS: GROUPS, APPS: APPS, huertoDue: huertoDue,
     minAge: minAge, setMinAge: setMinAge, allowed: allowed, hiddenIds: hiddenIds, moreLocked: moreLocked,
     isLittle: isLittle, pickToday: pickToday, todays3: todays3, render: render,
     appForLogName: _appForLogName, appForHref: _byHref, nameOf: nameOf

@@ -551,6 +551,33 @@ var APP_STAR_CONFIGS = [
       for (k in g) n += Math.min(3, Math.max(0, g[k] | 0));
       return n;
     } },
+  // Huerto: for each plant (up to 10) one star for marking it sprouted, one
+  // for 3 journal entries and one for flowers or a harvest; one for every 7
+  // days with a watering (up to 10); one for each close guess in "predict,
+  // then measure" (within 1 cm or 20 %, up to 10); and for each experiment one
+  // for the hypothesis, one for 3 observations and one for finishing it.
+  // (The same rule as HuertoEngine.stars; a test checks they agree.)
+  { id: 'huerto', prefix: 'zs_huerto_', stars: function(d) {
+      var n = 0, wd = {}, close = 0, k, i, pls = Array.isArray(d.plants) ? d.plants : [];
+      for (i = 0; i < pls.length; i++) {
+        var pl = pls[i];
+        if (!pl) continue;
+        if (i < 10) {
+          var logs = (pl.log || []).filter(function(e) { return e && (typeof e.h === 'number' || e.n || e.ph || e.dr || e.w || e.lv); }).length;
+          n += (pl.sprouted ? 1 : 0) + (logs >= 3 ? 1 : 0) + (pl.flowered || pl.harvested ? 1 : 0);
+        }
+        (pl.water || []).forEach(function(x) { wd[x] = 1; });
+        (pl.pred || []).forEach(function(p) {
+          if (p && typeof p.got === 'number' && p.got >= 0 && typeof p.h === 'number' && Math.abs(p.h - p.got) <= Math.max(1, p.got * 0.2)) close++;
+        });
+      }
+      n += Math.min(10, Math.floor(Object.keys(wd).length / 7)) + Math.min(10, close);
+      for (k in (d.exp || {})) {
+        var e = d.exp[k];
+        if (e && typeof e === 'object') n += (e.guess ? 1 : 0) + ((e.obs || []).length >= 3 ? 1 : 0) + (e.done ? 1 : 0);
+      }
+      return n;
+    } },
   // Árbol familiar: each family game is starred by its best score out of 5
   // (3 right = 1 star, 4 = 2, 5 = 3), one star for every 3 relatives whose page
   // was opened (up to 3), one for 1, 5 and 10 "How are we related?" answers, and
