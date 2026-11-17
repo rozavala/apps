@@ -332,7 +332,8 @@ var Misiones = (function () {
   function clueHtml(m, k) {
     if (k === 'nb') {
       var names = m.nb.map(countryName);
-      var txt = tx('Sus vecinos: ' + names.join(', ') + '.', 'Its neighbours: ' + names.join(', ') + '.');
+      // The lists are partial (the best-known neighbours), so the clue says "some".
+      var txt = tx('Algunos de sus vecinos: ' + names.join(', ') + '.', 'Some of its neighbours: ' + names.join(', ') + '.');
       return { html: esc(txt), text: txt };
     }
     var p = m[k];
@@ -597,7 +598,10 @@ var Misiones = (function () {
 
   var TR = null;
   function viewTrip(id) {
-    var t = D.BY_TRIP[id] || D.TRIPS[0], r = nextRand(), tq = tripQuestions(t, r);
+    var t = D.BY_TRIP[id];
+    // little kids only fly to the cities on their picture map
+    if (!t || tripsFor().indexOf(t) < 0) return viewTrips();
+    var r = nextRand(), tq = tripQuestions(t, r);
     TR = { t: t, T: tq.T, qs: tq.qs, i: 0, right: 0, flown: false, r: r };
     drawTripQ();
   }

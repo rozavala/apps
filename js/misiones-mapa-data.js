@@ -82,7 +82,7 @@ var MapaData = (function () {
   // ---------------------------------------------------------------
   var MYSTERY = [
     { c: 'arg', reg: 'sa', cl: ['Hace calor en el norte y mucho frío en la Patagonia, al sur.', 'It is hot in the north and very cold in Patagonia, in the south.'],
-      lm: ['Las cataratas del Iguazú y el cerro Aconcagua, la montaña más alta de América, están aquí o en su frontera.', 'The Iguazú Falls and Mount Aconcagua, the highest mountain in the Americas, are here.'],
+      lm: ['Las cataratas del Iguazú y el cerro Aconcagua, la montaña más alta de América, están aquí o en su frontera.', 'The Iguazú Falls (on its border) and Mount Aconcagua, the highest mountain in the Americas, are here.'],
       fl: ['Su bandera es celeste y blanca, con un sol en el medio.', 'Its flag is light blue and white, with a sun in the middle.'],
       nb: ['chl', 'bol', 'pry', 'bra', 'ury'], rv: ['El río de la Plata separa su capital de Uruguay.', 'The Río de la Plata separates its capital from Uruguay.'] },
     { c: 'per', reg: 'sa', cl: ['Tiene costa con desierto, montañas altísimas y selva amazónica.', 'It has a desert coast, very high mountains and Amazon rainforest.'],
@@ -202,7 +202,7 @@ var MapaData = (function () {
     { c: 'mng', reg: 'as', cl: ['Tiene inviernos muy fríos y el desierto de Gobi.', 'It has very cold winters and the Gobi Desert.'],
       lm: ['Muchas familias viven en gers: tiendas redondas que se pueden mover.', 'Many families live in gers: round tents that can be moved.'],
       fl: ['Su bandera es roja, azul y roja, con un símbolo dorado.', 'Its flag is red, blue and red, with a golden symbol.'],
-      nb: ['chn'], rv: ['No tiene costa y está entre solo dos países: China y Rusia.', 'It has no coast and lies between just two countries: China and Russia.'] },
+      nb: ['chn', 'rus'], rv: ['No tiene costa y está entre solo dos países: China y Rusia.', 'It has no coast and lies between just two countries: China and Russia.'] },
     { c: 'jpn', reg: 'as', cl: ['Tiene cuatro estaciones, con cerezos en flor en primavera.', 'It has four seasons, with cherry blossom in spring.'],
       lm: ['El monte Fuji, un volcán con nieve en la cumbre, está aquí.', 'Mount Fuji, a volcano with snow on top, is here.'],
       fl: ['Su bandera es blanca con un círculo rojo.', 'Its flag is white with a red circle.'],

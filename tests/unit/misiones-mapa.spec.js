@@ -60,9 +60,12 @@ test.describe('Misiones de Mapa — content', () => {
     }
   });
 
+  // Borders the simplified map data leaves out (the long Russian border
+  // crosses the date line in the source and loses some neighbours).
+  const MISSING_IN_MAP = { mng: ['rus'], rus: ['mng', 'nor', 'chn', 'kaz'], nor: ['rus'] };
   test('neighbour clues only name countries that really share a border', () => {
     for (const m of D.MYSTERY) {
-      const real = WM.info(m.c).n;
+      const real = WM.info(m.c).n.concat(MISSING_IN_MAP[m.c] || []);
       for (const nb of m.nb) expect(real, m.c + ' is not next to ' + nb).toContain(nb);
     }
     // the clue never names the answer itself

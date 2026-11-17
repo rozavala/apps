@@ -157,6 +157,20 @@ test.describe('Misiones de Mapa', () => {
     expect((await saved(page)).best.trip_mad).toBe(2);                   // one missed tap costs a little
   });
 
+  test('a 5-year-old following a link to a far trip lands on the trip list instead', async ({ page }) => {
+    await open(page, { age: 5, query: '&m=trip&a=sfo' });
+    expect((await state(page)).view).toBe('trips');
+    await expect(page.locator('.mm-trip[data-arg="sfo"]')).toHaveCount(0);
+  });
+
+  test('neighbour clues say they are only some of the neighbours', async ({ page }) => {
+    await open(page, { age: 9, lang: 'en', seed: 1 });
+    await page.click('.mm-tab[data-go="mystery"]');
+    for (let i = 0; i < 4; i++) { const b = page.locator('#mm-more'); if (await b.count()) await b.click(); }
+    const txt = await page.locator('.mm-clues').innerText();
+    if (/neighbours/.test(txt)) expect(txt).toContain('Some of its neighbours');
+  });
+
   test('the free planner adds stops, shows each leg with local times, and saves a trip once', async ({ page }) => {
     await page.clock.setFixedTime(new Date('2026-01-15T10:00:00'));
     await open(page, { age: 10, query: '&m=plan' });
