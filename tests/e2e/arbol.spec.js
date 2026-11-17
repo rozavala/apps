@@ -353,13 +353,19 @@ test.describe('Árbol familiar', () => {
       await page.check('#ar-notes');
       await page.check('#ar-live');
       await expect.poll(async () => (await stored(page)).cfg).toMatchObject({ notes: 1, living: 1 });
-      await page.locator('.ar-help summary').click();
-      const help = await page.locator('.ar-helpb').innerText();
+      const gedHelp = page.locator('.ar-help', { hasText: 'GEDCOM file out of my tree' });
+      await gedHelp.locator('summary').click();
+      const help = await gedHelp.locator('.ar-helpb').innerText();
       expect(help).toContain('https://www.familysearch.org/innovate/export');
       expect(help).toContain('https://www.familysearch.org/en/wiki/GEDCOM');
       expect(help).toContain('https://www.familysearch.org/en/innovate/solutions-gallery/');
       expect(help).toMatch(/RootsMagic/);
       expect(help).toMatch(/Ancestry/);
+      // and where voice recordings are kept, and how to allow the microphone
+      const voiceHelp = page.locator('.ar-help', { hasText: 'Voice recordings' });
+      await voiceHelp.locator('summary').click();
+      await expect(voiceHelp.locator('.ar-helpb')).toContainText('family server');
+      await expect(voiceHelp.locator('.ar-helpb')).toContainText('Settings › Safari › Microphone');
     });
 
     test('the tree can be deleted from the device', async ({ page }) => {
