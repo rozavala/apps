@@ -477,7 +477,9 @@ async function _fetchWikipediaPlot(metadata) {
     const title = metadata.title;
     if (!title) { debug.reason = 'no title'; return { extract: null, debug: debug }; }
     const author = metadata.author_or_director || '';
-    const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (rozavala@gmail.com)' };
+    // Wikipedia asks API clients for a contact: the project's page, not a
+    // personal address (this file is public).
+    const ua = { 'User-Agent': 'ZavalaFamilyApps/1.0 (https://github.com/rozavala/apps)' };
 
     const searchTerms = author ? (title + ' ' + author) : title;
     const searchUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch'
