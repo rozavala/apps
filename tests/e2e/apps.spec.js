@@ -34,6 +34,7 @@ const MAJOR_APPS = [
   'linea-del-tiempo.html',
   'arbol-familiar.html',
   'code-lab.html',
+  'logica.html',
   'examen.html'
 ];
 
