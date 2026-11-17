@@ -44,9 +44,11 @@ var HubPlan = (function() {
     { id: 'euclid',     href: 'euclid-workshop.html',    group: 'math',    minAge: 8,  names: ['euclid'] },
     { id: 'lab',        href: 'lab-explorer.html',       group: 'science', minAge: 4,  beginner: true, names: ['lab explorer'] },
     { id: 'naturaleza', href: 'naturaleza.html',         group: 'science', minAge: 4,  beginner: true, names: ['naturaleza', 'explorador de naturaleza'] },
+    { id: 'huerto',     href: 'huerto.html',             group: 'science', minAge: 4,  names: ['huerto'] },
     { id: 'cocina',     href: 'cocina-lab.html',         group: 'science', minAge: 6,  names: ['cocina lab'] },
     { id: 'circuit',    href: 'circuit-lab.html',        group: 'science', minAge: 7,  names: ['circuit lab'] },
     { id: 'engineer',   href: 'little-engineer.html',    group: 'science', minAge: 7,  names: ['little engineer'] },
+    { id: 'taller',     href: 'taller-maquinas.html',    group: 'science', minAge: 4,  names: ['taller de maquinas'] },
     { id: 'marinero',   href: 'marinero.html',           group: 'science', minAge: 7,  names: ['marinero'] },
     { id: 'secretos',   href: 'mensajes-secretos.html',  group: 'science', minAge: 7,  names: ['mensajes secretos'] },
     { id: 'code',       href: 'code-cadet.html',         group: 'science', minAge: 7,  names: ['code cadet'] },
@@ -57,6 +59,7 @@ var HubPlan = (function() {
     { id: 'lector',     href: 'lector.html',             group: 'reading', minAge: 4,  beginner: true, names: ['lector'] },
     { id: 'vocab',      href: 'vocabulario-vivo.html',   group: 'reading', minAge: 7,  names: ['vocabulario vivo'] },
     { id: 'dictado',    href: 'dictado.html',            group: 'reading', minAge: 6,  names: ['dictado'] },
+    { id: 'escritura',  href: 'escritura.html',          group: 'reading', minAge: 4,  names: ['escritura'] },
     { id: 'world',      href: 'world-explorer.html',     group: 'world',   minAge: 5,  names: ['world explorer'] },
     { id: 'arbol',      href: 'arbol-familiar.html',     group: 'world',   minAge: 4,  names: ['arbol familiar'] },
     { id: 'quest',      href: 'quest-adventure.html',    group: 'world',   minAge: 5,  names: ['quest adventure', 'summer quest'] },
@@ -207,6 +210,31 @@ var HubPlan = (function() {
     return out;
   }
 
+  // Huerto: is this kid caring for any plant? (With none, a daily schedule
+  // slot is no reason to suggest it.)
+  function huertoHas(userName) {
+    try {
+      var d = JSON.parse(localStorage.getItem('zs_huerto_' + String(userName).toLowerCase().replace(/\s+/g, '_')));
+      return ((d && d.plants) || []).some(function(pl) { return pl && !pl.done; });
+    } catch (e) { return false; }
+  }
+
+  // Huerto: does one of this kid's plants need its water check today?
+  // (Its last watering, or the planting day, is at least `ev` days ago.)
+  function huertoDue(userName, now) {
+    try {
+      var d = JSON.parse(localStorage.getItem('zs_huerto_' + String(userName).toLowerCase().replace(/\s+/g, '_')));
+      var t = new Date(now || new Date()); t.setHours(12, 0, 0, 0);
+      return ((d && d.plants) || []).some(function(pl) {
+        if (!pl || pl.done) return false;
+        var last = (pl.water || []).concat([pl.planted]).filter(function(x) { return /^\d{4}-\d{2}-\d{2}$/.test(x); }).sort().pop();
+        if (!last) return false;
+        var m = last.split('-'), when = new Date(+m[0], +m[1] - 1, +m[2], 12);
+        return Math.round((t - when) / DAY) >= Math.max(1, pl.ev || 2);
+      });
+    } catch (e) { return false; }
+  }
+
   // Three app ids for today. `eligible` are the ids the kid can see today.
   function pickToday(user, eligible, opts) {
     opts = opts || {};
@@ -229,6 +257,10 @@ var HubPlan = (function() {
       score[a.id] = (scheduled[a.id] ? 3 : 0) + (days / 14) * 3 + (weak[a.group] || 0) +
         (_hash(dateKey + '|' + user.name + '|' + a.id) % 100) / 100;
       if (a.id === 'review') score[a.id] += 5;   // what slipped by comes first
+      if (a.id === 'huerto') {
+        if (!(opts.huertoHas != null ? opts.huertoHas : huertoHas(user.name))) score[a.id] -= scheduled[a.id] ? 3 : 0;   // no plants: no schedule bonus
+        else if (opts.huertoDue != null ? opts.huertoDue : huertoDue(user.name, now)) score[a.id] += 4;                 // a plant is thirsty
+      }
     });
     cands.sort(function(a, b) { return score[b.id] - score[a.id]; });
 
@@ -425,7 +457,7 @@ var HubPlan = (function() {
   }
 
   return {
-    GROUPS: GROUPS, APPS: APPS,
+    GROUPS: GROUPS, APPS: APPS, huertoDue: huertoDue, huertoHas: huertoHas,
     minAge: minAge, setMinAge: setMinAge, allowed: allowed, hiddenIds: hiddenIds, moreLocked: moreLocked,
     isLittle: isLittle, pickToday: pickToday, todays3: todays3, render: render,
     appForLogName: _appForLogName, appForHref: _byHref, nameOf: nameOf

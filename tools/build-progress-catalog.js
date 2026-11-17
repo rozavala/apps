@@ -165,6 +165,22 @@ const BUILDERS = {
   lector_es() { return lectorLevels('es', 'Español'); },
   lector_en() { return lectorLevels('en', 'English'); },
 
+  // Taller de Máquinas: the challenges, then the chain-reaction levels.
+  // Both keep a best-stars map (ch / cr), so each unit says which one.
+  taller() {
+    const ch = arr('js/taller-data.js', 'CHALLENGES')
+      .map(c => unit(c.id, c.title[1], 'Challenges', 'ch'));
+    const cr = arr('js/taller-data.js', 'LEVELS')
+      .map(l => unit(l.id, l.name[1], 'Chain reaction', 'cr'));
+    return ch.concat(cr);
+  },
+
+  // Escritura keeps a ladder of letter sets for each handwriting style.
+  // A set is done when each of its letters has 2+ stars; the unit carries
+  // its letters in `k` (see _escrituraApp in progress-admin.js).
+  escritura_print() { return escrituraSets('print', 'Imprenta (print)'); },
+  escritura_cursive() { return escrituraSets('cursive', 'Cursiva (cursive)'); },
+
   world() {
     const out = [];
     arr('js/world-explorer.js', 'CONTINENTS').forEach(c => {
@@ -175,6 +191,11 @@ const BUILDERS = {
     return out;
   },
 };
+
+function escrituraSets(style, group) {
+  const D = require(path.join(ROOT, 'js', 'escritura-data.js'));
+  return D.SETS[style].map(s => unit(s.id, s.t[0] + ' · ' + s.ch, group, s.ch.split('').join(',')));
+}
 
 function lectorLevels(lang, group) {
   const D = require(path.join(ROOT, 'js', 'lector-data.js'));

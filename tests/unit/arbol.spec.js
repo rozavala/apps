@@ -587,3 +587,43 @@ test.describe('Quiz questions', () => {
     expect(Q.round('older', ctx, 5, 1)).toEqual([]);
   });
 });
+
+test.describe('Voice notes (js/arbol-voice.js)', () => {
+  const V = require('../../js/arbol-voice.js');
+  test('the loudness is kept as 48 digits, scaled to the loudest moment', () => {
+    const lv = Array.from({ length: 300 }, (_, i) => (i < 150 ? 0.1 : 0.4));
+    const w = V.pack(lv);
+    expect(w).toMatch(/^[0-9]{48}$/);
+    expect(w.slice(0, 20)).toBe('2'.repeat(20));
+    expect(w.slice(-20)).toBe('9'.repeat(20));
+    expect(V.pack([])).toBe('');
+    expect(V.pack([0.5, 0.5]).length).toBe(48);       // a very short take still gives 48 bars
+  });
+  test('the bars are drawn from the digits, or as a flat line when there are none (or they are junk)', () => {
+    expect(V.bars('9'.repeat(48))).toEqual(Array(48).fill(1));
+    expect(V.bars('0'.repeat(48))[0]).toBeCloseTo(0.12);
+    for (const bad of ['', null, 'abc', '<svg>'.repeat(10), '1'.repeat(200)]) expect(V.bars(bad)).toEqual(Array(48).fill(0.18));
+  });
+  test('durations read as minutes and seconds', () => {
+    expect(V.fmt(0)).toBe('0:00');
+    expect(V.fmt(65)).toBe('1:05');
+    expect(V.fmt(600)).toBe('10:00');
+    expect(V.fmt('x')).toBe('0:00');
+  });
+  test('audio types: the browsers’ names for an .m4a, codecs dropped, and nothing that is not audio', () => {
+    expect(V.typeOf({ type: 'audio/x-m4a', name: 'Recording.m4a' })).toBe('audio/mp4');
+    expect(V.typeOf({ type: '', name: 'Nueva grabación 3.M4A' })).toBe('audio/mp4');
+    expect(V.typeOf({ type: 'audio/mpeg', name: 'a.mp3' })).toBe('audio/mpeg');
+    expect(V.typeOf({ type: '', name: 'a.opus' })).toBe('audio/ogg');
+    expect(V.baseType('audio/webm;codecs=opus')).toBe('audio/webm');
+    expect(V.baseType('audio/mp4;codecs=mp4a.40.2')).toBe('audio/mp4');
+    for (const f of [{ type: 'audio/wav', name: 'a.wav' }, { type: 'image/png', name: 'a.png' }, { type: 'text/html', name: 'a.html' }, { type: '', name: 'a' }]) expect(V.typeOf(f)).toBe('');
+  });
+  test('a list keeps only valid ids, newest first', () => {
+    const id = (n) => String(n).padStart(32, '0');
+    const tree = { P: { I1: { a: { voice: [{ id: id(1), ts: 1 }, { id: '../x', ts: 9 }, null, { id: id(2), ts: 5 }] } }, I2: {} } };
+    expect(V.list(tree, 'I1').map(x => x.id)).toEqual([id(2), id(1)]);
+    expect(V.list(tree, 'I2')).toEqual([]);
+    expect(V.list(tree, 'nobody')).toEqual([]);
+  });
+});

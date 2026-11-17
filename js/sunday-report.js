@@ -170,11 +170,11 @@ var SundayReport = (function() {
   var APP_NAMES = {
     math: 'Math Galaxy', guess: 'Guess Quest', chess: 'Chess Quest', clock: '¿Qué Hora Es?', euclid: "Euclid's Workshop",
     lab: 'Lab Explorer', naturaleza: 'Explorador de Naturaleza', cocina: 'Cocina Lab', circuit: 'Circuit Lab',
-    engineer: 'Little Engineer', marinero: 'Marinero', calculo: 'Cálculo Rápido', secretos: 'Mensajes Secretos', code: 'Code Cadet',
+    engineer: 'Little Engineer', taller: 'Taller de Máquinas', marinero: 'Marinero', calculo: 'Cálculo Rápido', secretos: 'Mensajes Secretos', code: 'Code Cadet',
     story: 'Story Explorer', vocab: 'Vocabulario Vivo', world: 'World Explorer', quest: 'Quest Adventure',
     chile: 'Descubre Chile', atlas: 'World Atlas', civics: 'Civics Lab', faith: 'Fe Explorador', bible: 'Bible Explorer',
     piano: 'Little Maestro', art: 'Art Studio', guitar: 'Guitar Jam', bank: 'Banco Familia', money: 'Money Master',
-    negocio: 'Mi Negocio', invest: 'Invest Quest', move: 'Move Quest', sports: 'Sports Arena', worldcup: 'World Cup 2026', review: 'Repaso', dictado: 'Dictado', lector: 'Lector', arbol: 'Árbol familiar', codelab: 'Code Lab', linea: 'Línea del Tiempo', examen: 'Examen y Virtudes', logica: 'Lógica', mapa: 'Misiones de Mapa', typing: 'Type Quest'
+    negocio: 'Mi Negocio', invest: 'Invest Quest', move: 'Move Quest', sports: 'Sports Arena', worldcup: 'World Cup 2026', review: 'Repaso', dictado: 'Dictado', lector: 'Lector', arbol: 'Árbol familiar', codelab: 'Code Lab', linea: 'Línea del Tiempo', examen: 'Examen y Virtudes', logica: 'Lógica', mapa: 'Misiones de Mapa', typing: 'Type Quest', escritura: 'Escritura', huerto: 'Huerto'
   };
   function _appName(app) { return app ? (APP_NAMES[app.id] || app.id) : ''; }
 
