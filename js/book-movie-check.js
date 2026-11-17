@@ -888,12 +888,40 @@ var BMC = (function() {
         }
       })
       .catch(function(err) {
+        // A slow review (over a minute) keeps running on the server and is
+        // saved when it's done, so after our own time limit, keep checking
+        // the saved reviews for a while instead of giving up.
+        if (err && err.name === 'AbortError') {
+          if (wrap) wrap.innerHTML = '<div class="bmc-empty">Still checking — some titles take a little longer… ⏳</div>';
+          _waitForSavedReview(candidate, 0, wrap);
+          return;
+        }
         console.warn('[BMC] Evaluate failed:', err);
         if (wrap) {
           wrap.innerHTML = '<div class="bmc-empty">' + _userMsgForFetchErr(err, 'review') + '</div>';
         }
         _setStatus('');
       });
+  }
+
+  var SAVED_POLL_MS = 8000, SAVED_POLL_TRIES = 15;   // about two more minutes
+  function _waitForSavedReview(candidate, tries, wrap) {
+    setTimeout(function() {
+      _fetchJson(VPS + '/api/media/cache/' + encodeURIComponent(candidate.canonical_id))
+        .then(function(evaluation) {
+          _familyLibrary[candidate.canonical_id] = evaluation;
+          _recordLookup(evaluation);
+          _setStatus('');
+          showResult(evaluation);
+        })
+        .catch(function(err) {
+          // 404 = not saved yet; keep waiting until the tries run out.
+          if (tries + 1 < SAVED_POLL_TRIES) { _waitForSavedReview(candidate, tries + 1, wrap); return; }
+          console.warn('[BMC] Evaluate failed: no review after waiting', err);
+          if (wrap) wrap.innerHTML = '<div class="bmc-empty">This one is taking too long. Try again in a few minutes — it may be ready by then.</div>';
+          _setStatus('');
+        });
+    }, SAVED_POLL_MS);
   }
 
   function _recordLookup(evaluation) {

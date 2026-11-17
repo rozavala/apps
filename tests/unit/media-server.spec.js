@@ -70,6 +70,38 @@ test('evaluations use Argon and read a reply split into thought and answer parts
   }
 });
 
+test('asking again while a title is still being evaluated waits for that evaluation', async () => {
+  const { routes } = loadMedia();
+  let release, llmCalls = 0;
+  const gate = new Promise(r => { release = r; });
+  const realFetch = global.fetch;
+  // @ts-ignore
+  global.fetch = async (url) => {
+    if (String(url).includes('wikipedia.org')) return { ok: false, status: 404, json: async () => ({}) };
+    llmCalls++;
+    await gate;
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(EVALUATION) }] } }] }) };
+  };
+  try {
+    const body = {
+      canonical_id: 'title:the-lost-hero-2010-rick-riordan',
+      metadata: { title: 'The Lost Hero', author_or_director: 'Rick Riordan', year: 2010, type: 'book' },
+    };
+    const first = call(routes['POST /api/media/evaluate'], body);
+    await new Promise(r => setTimeout(r, 50));
+    const second = call(routes['POST /api/media/evaluate'], body);   // the phone gave up and asked again
+    await new Promise(r => setTimeout(r, 50));
+    release();
+    const [a, b] = await Promise.all([first, second]);
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+    expect(b.body.title).toBe('The Lost Hero');
+    expect(llmCalls).toBe(1);
+  } finally {
+    global.fetch = realFetch;
+  }
+});
+
 test('a slow evaluation does not undo cache writes made while it ran', async () => {
   const { routes, dir } = loadMedia();
   const file = path.join(dir, 'media-cache.json');
