@@ -384,7 +384,8 @@ test.describe('Cálculo Rápido', () => {
       await page.click('#cr-start');
       await expect.poll(() => page.evaluate(() => /** @type {any} */ (window).__said.length)).toBeGreaterThan(0);
       const said = await page.evaluate(() => /** @type {any} */ (window).__said[0]);
-      expect(said).toMatch(/\d \+ \d equals what|\d . \d equals what|\d − \d equals what/);
+      // What the app put in data-speak ("2 + 3"), with the sign said as a word.
+      expect(said).toMatch(/^\d+ (plus|minus|times|divided by) \d+$|equals what/);
       const s = await state(page);
       await page.click(`.cr-opt[data-v="${s.sprint.answer}"]`);
       expect((await state(page)).sprint.answered).toBe(0);              // the first tap only says it

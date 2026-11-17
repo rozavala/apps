@@ -5164,8 +5164,8 @@
           <span class="muted" style="font-size:0.85rem;">Question ${quizState.current+1} of ${quizState.questions.length}</span>
           <span style="font-weight:800;color:var(--wc-gold);">Score: ${quizState.score}</span>
         </div>
-        <h2 style="margin-bottom:14px;">${q.q}</h2>
-        <div style="display:grid;gap:8px;">
+        <h2 class="wc-quiz-q" style="margin-bottom:14px;">${q.q}</h2>
+        <div class="wc-quiz-opts" style="display:grid;gap:8px;">
           ${q.options.map((o, i) => {
             let cls = 'btn ghost';
             let extra = '';
@@ -5173,7 +5173,7 @@
               if (o.correct) { cls = 'btn'; extra = 'background:var(--wc-green);'; }
               else cls = 'btn ghost';
             }
-            return `<button class="${cls}" style="text-align:left;padding:12px 14px;font-size:0.95rem;${extra}" onclick="WC.answerQuiz(${i})">${o.label} ${quizState.answered && o.correct ? '✓' : ''}</button>`;
+            return `<button class="${cls} wc-quiz-opt" style="text-align:left;padding:12px 14px;font-size:0.95rem;${extra}" onclick="WC.answerQuiz(${i})">${o.label} ${quizState.answered && o.correct ? '✓' : ''}</button>`;
           }).join('')}
         </div>
         ${quizState.answered ? `<div style="text-align:right;margin-top:14px;"><button class="btn gold" onclick="WC.nextQuestion()">${quizState.current < quizState.questions.length-1 ? 'Next →' : 'See results →'}</button></div>` : ''}
