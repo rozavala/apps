@@ -54,6 +54,7 @@ var AppSchedule = (function() {
   ALL_APPS.push({ id: 'typing', card: '.card-typing' });
   ALL_APPS.push({ id: 'huerto', card: '.card-huerto' });
   ALL_APPS.push({ id: 'taller', card: '.card-taller' });
+  ALL_APPS.push({ id: 'trivia', card: '.card-trivia' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -108,6 +109,8 @@ var AppSchedule = (function() {
   }
   // Huerto (a real garden) every day: plants need their water check daily.
   Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('huerto'); });
+  // Trivia Familiar (family game night) on Friday and Saturday evenings.
+  [5, 6].forEach(function(d) { SMART_SCHEDULE[d].push('trivia'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
