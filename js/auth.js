@@ -571,6 +571,12 @@ var APP_STAR_CONFIGS = [
       for (var k in m) if (m[k] && typeof m[k] === 'object') n += Math.min(3, Math.max(0, m[k].s | 0));
       return n;
     } },
+  // Trivia Familiar: one star for every full game night a kid plays (to the
+  // end of the final round), up to 40. Winning earns nothing extra, so the
+  // youngest are never behind. Kept in { games: n, ... }.
+  { id: 'trivia', prefix: 'zs_trivia_', stars: function(d) {
+      return Math.min(40, Math.max(0, d.games | 0));
+    } },
   // Sibling challenges: one star for each challenge solved, to the kid who
   // set it and the kid who solved it. The record is { stars: { id: 'YYYY-MM-DD' } }
   // (a cache of the household log, see challenge-engine.js); at most 3 a
