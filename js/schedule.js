@@ -52,6 +52,7 @@ var AppSchedule = (function() {
   // still puts the apps to sleep later on school nights).
   ALL_APPS.push({ id: 'examen', card: '.card-examen', fromHour: 18 });
   ALL_APPS.push({ id: 'typing', card: '.card-typing' });
+  ALL_APPS.push({ id: 'huerto', card: '.card-huerto' });
 
   var SMART_SCHEDULE = {
     0: ['piano', 'math', 'art', 'world', 'atlas', 'guess',
@@ -100,6 +101,8 @@ var AppSchedule = (function() {
     }
     return false;
   }
+  // Huerto (a real garden) every day: plants need their water check daily.
+  Object.keys(SMART_SCHEDULE).forEach(function(d) { SMART_SCHEDULE[d].push('huerto'); });
 
   var OVERRIDE_KEY  = 'zs_schedule_override';
   var MODE_KEY      = 'zs_schedule_mode';
