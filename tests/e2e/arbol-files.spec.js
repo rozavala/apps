@@ -42,7 +42,9 @@ async function open(page, o = {}) {
     const r = ArbolStore.merge(null, Gedcom.parse(t), { file: 'sample.ged' }); r.store.cfg.map = { lucia: 'I24' };
     // @ts-ignore
     await ArbolDB.put(r.store, Date.now());
-    /** @type {any} */ const c = window.CloudSync; c.server = url; c.online = true;
+    /** @type {any} */ const c = window.CloudSync; c.server = url;
+    // stays "connected": sync.js's retry pings (refused under automation) would set it back to false (see arbol-big.spec.js)
+    Object.defineProperty(c, 'online', { configurable: true, get: () => true, set: () => {} });
     // @ts-ignore
     await Arbol.reload();
   }, [H.sample(), FAKE]);
@@ -235,7 +237,7 @@ test.describe('Árbol familiar: photos and documents', () => {
     await page.setInputFiles('#ar-fup', [{ name: 'page.html', mimeType: 'text/html', buffer: Buffer.from('<b>x</b>') }]);
     await expect(page.locator('.ar-fpanel .ar-warn')).toContainText('not a photo or a PDF');
     expect(Object.keys(server.files)).toHaveLength(0);
-    await page.evaluate(() => { /** @type {any} */ (window).CloudSync.online = false; });
+    await page.evaluate(() => { Object.defineProperty(/** @type {any} */ (window).CloudSync, 'online', { configurable: true, writable: true, value: false }); });
     await page.setInputFiles('#ar-fup', [{ name: 'acta.png', mimeType: 'image/png', buffer: PNG }]);
     await expect(page.locator('.ar-fpanel .ar-warn')).toContainText('connected to the family server');
     expect(Object.keys(server.files)).toHaveLength(0);

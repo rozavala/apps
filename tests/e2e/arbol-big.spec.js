@@ -36,8 +36,15 @@ async function open(page, o = {}) {
   return server;
 }
 async function goOnline(page) {
-  // point the page at the fake server
-  await page.evaluate((url) => { /** @type {any} */ const c = window.CloudSync; c.server = url; c.online = true; }, FAKE);
+  // Point the page at the fake server, and keep it "connected". sync.js keeps
+  // pinging the real server (2 s, 5 s, 10 s... after a failed ping), and under
+  // automation that ping is refused, so each retry set CloudSync.online back to
+  // false. A plain `online = true` lasted only until the next retry: the 10 MB
+  // import takes longer than that, and its upload was skipped as "offline".
+  await page.evaluate((url) => {
+    /** @type {any} */ const c = window.CloudSync; c.server = url;
+    Object.defineProperty(c, 'online', { configurable: true, get: () => true, set: () => {} });
+  }, FAKE);
 }
 // @ts-ignore
 const stored = (page) => page.evaluate(() => ArbolDB.get().then(r => r && { people: Object.keys(r.tree.P).length, trim: r.tree.imp && r.tree.imp.trim, ts: r.ts, json: JSON.stringify(r.tree).length }));

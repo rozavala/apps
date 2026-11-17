@@ -97,6 +97,16 @@ test.describe('Review engine', () => {
     expect(out.stars).toBe(2);
   });
 
+  test('drop() takes an item out for good, without counting it as mastered', async ({ page }) => {
+    const out = await page.evaluate(() => {
+      const R = /** @type {any} */ (window).Review;
+      R.add(null, { app: 'challenge', id: 'challenge:c1', prompt: 'Ana: 2 + 2?', answer: '4', choices: ['3', '4'] });
+      R.add(null, { app: 'math', prompt: '3 + 3', answer: '6' });
+      return { dropped: R.drop(null, 'challenge:c1'), again: R.drop(null, 'challenge:c1'), left: R.all(null).map(i => i.app), retired: R.counts(null).retired };
+    });
+    expect(out).toEqual({ dropped: true, again: false, left: ['math'], retired: 0 });
+  });
+
   test('the key is synced like any app key', async ({ page }) => {
     const src = await (await page.request.get('/js/sync.js')).text();
     expect(src).toContain("'zs_review_': 'review'");
