@@ -637,8 +637,8 @@ var Arbol = (function() {
       '<input id="ar-ftitle" type="text" maxlength="80" autocomplete="off">' +
       '<label class="ar-chk"><input type="checkbox" id="ar-fkidsnew" checked> <span>' + esc(T('Los niños pueden verlo', 'Kids can see it')) + '</span></label>' +
       (livingSet[id] && !(tree.cfg && tree.cfg.living) ? '<p class="ar-note">' + esc(T('Esta persona parece estar viva: los niños no ven sus archivos mientras los datos de personas vivas estén protegidos.', 'This person looks to be living: the kids do not see their files while living relatives are protected.')) + '</p>' : '') +
-      '<label class="ar-file"><span class="ar-btn"' + (U.busy ? ' aria-disabled="true"' : '') + '>📎 ' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '</span>' +
-      '<input id="ar-fup" type="file" multiple accept="image/*,.heic,.heif,application/pdf,.pdf,audio/*,.m4a,.mp3"' + (U.busy ? ' disabled' : '') + ' aria-label="' + esc(T('Elegir fotos o PDF', 'Choose photos or PDFs')) + '"></label>' +
+      '<label class="ar-file"><span class="ar-btn"' + (U.busy ? ' aria-disabled="true"' : '') + '>📎 ' + esc(T('Elegir fotos, PDF o audio', 'Choose photos, PDFs or audio')) + '</span>' +
+      '<input id="ar-fup" type="file" multiple accept="image/*,.heic,.heif,application/pdf,.pdf,audio/*,.m4a,.mp3"' + (U.busy ? ' disabled' : '') + ' aria-label="' + esc(T('Elegir fotos, PDF o audio', 'Choose photos, PDFs or audio')) + '"></label>' +
       (U.msg ? '<p class="' + (U.err ? 'ar-warn' : 'ar-ok') + '" role="status">' + esc(U.msg) + '</p>' : '') +
       '<p class="ar-note">' + esc(T('Fotos (JPEG, PNG, HEIC) y documentos PDF, hasta 25 MB cada uno. Se guardan en el servidor de la familia.', 'Photos (JPEG, PNG, HEIC) and PDF documents, up to 25 MB each. They are kept on the family server.')) + '</p>' +
       '<p class="ar-note">' + esc(T('También puedes subir una grabación que ya tengas (Notas de Voz del iPhone, .m4a o .mp3): queda en «Su voz».', 'You can also upload a recording you already have (iPhone Voice Memos, .m4a or .mp3): it goes to “Their voice”.')) + '</p>' +
@@ -921,6 +921,7 @@ var Arbol = (function() {
   }
   function closeRecorder() {
     if (recorder) { recorder.cancel(); recorder = null; }
+    if (st.rec && st.rec.uploaded) Files.remove({ id: st.rec.uploaded.id });     // uploaded, never saved to the tree
     Voice.Player.stop();
     st.rec = null;
   }
@@ -996,10 +997,16 @@ var Arbol = (function() {
       if (rec) { treeTs = rec.ts; applyTree(rec.tree); }
     }, function() {});
     if (!ArbolSync.online()) return local;
+    // resolves 'empty' when a parent deleted the tree on another device: nothing may be saved onto it then
     return local.then(function() { return ArbolSync.pull(treeTs); }).then(function(r) {
+      if (r && r.empty && r.ts > treeTs) return 'empty';
       if (!r || r.same || r.empty || !r.tree) return;
       return ArbolDB.put(r.tree, r.ts).then(function() { treeTs = r.ts; applyTree(r.tree); });
-    }).catch(function() {});
+    }, function() {});
+  }
+  // the tree was deleted elsewhere while this screen was open: follow it, as a sync would
+  function treeGone() {
+    return ArbolDB.clear().then(function() { treeTs = 0; st.rec = null; applyTree(null); render(); toast(T('Los papás borraron el árbol en otro aparato.', 'A parent deleted the tree on another device.')); });
   }
   function addVoice(pid, entry) {
     var p = tree && tree.P[pid];
@@ -1019,11 +1026,24 @@ var Arbol = (function() {
     Voice.Player.stop();
     R.phase = 'saving'; R.err = null; R.playing = false; render();
     var me = kidKey && !parentOk ? kidKey : '', who = me && user ? String(user.name || '').split(' ')[0] : '';
-    Voice.upload(R.take, { t: R.title, by: me, who: who, kids: parentOk ? R.kids : 1 }).then(function(entry) {
-      return freshTree().then(function() {
+    var kids = parentOk ? R.kids : 1;
+    // the file goes up once: a retry after a failed tree update reuses it (no orphan files on the server)
+    var up = R.uploaded ? Promise.resolve(R.uploaded) : Voice.upload(R.take, { t: R.title, by: me, who: who, kids: kids }).then(function(e) { R.uploaded = e; return e; });
+    up.then(function(entry) {
+      entry.t = String(R.title || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+      entry.kids = kids;
+      return freshTree().then(function(f) {
+        if (f === 'empty') { Files.remove({ id: entry.id }); return treeGone().then(function() { return 'gone'; }); }
         if (!addVoice(R.pid, entry)) throw new Error('gone');
-        return saveTree();
+        return saveTree().then(function(ok) {
+          if (!ok) {            // not saved here: take the note back out, so a retry does not add it twice
+            var q = tree && tree.P[R.pid];
+            if (q && q.a && Array.isArray(q.a.voice)) q.a.voice = q.a.voice.filter(function(x) { return x !== entry; });
+          }
+          return ok;
+        });
       }).then(function(ok) {
+        if (ok === 'gone') return;
         if (!ok) throw new Error('local');
         st.rec = null;
         sfx('success');
@@ -1053,6 +1073,7 @@ var Arbol = (function() {
     var R = st.rec;
     if (!R || R.phase === 'saving') return;
     Voice.Player.stop();
+    if (R.uploaded) { Files.remove({ id: R.uploaded.id }); R.uploaded = null; }
     R.take = null; R.phase = 'ready'; R.err = null; R.playing = false;
     var ti = $('#ar-vtitle'); if (ti) R.title = ti.value || null;
     render();
@@ -1092,13 +1113,22 @@ var Arbol = (function() {
     ZsDialog.confirm({ title: T('¿Borrar esta grabación?', 'Delete this recording?'), message: (e.t ? e.t + ' · ' : '') + T('Se borra del servidor de la familia para todos.', 'It is deleted from the family server for everyone.'), confirmLabel: T('Borrar', 'Delete') }).then(function(yes) {
       if (!yes) return;
       if (Voice.Player.current() === vid) Voice.Player.stop();
-      Files.remove({ id: vid }).then(function() {
+      var fail = T('No se pudo borrar. Revisa la conexión con el servidor de la familia e inténtalo otra vez.', 'It could not be deleted. Check the connection to the family server and try again.');
+      if (!ArbolSync.online()) { toast(fail); return; }
+      // the note leaves the tree only once the file is really gone from the server (no orphan files)
+      fetch(Files.url(vid), { method: 'DELETE' }).then(function(res) {
+        if (!res.ok) throw new Error('http ' + res.status);
         return freshTree();
-      }).then(function() {
+      }).then(function(f) {
+        if (f === 'empty') return treeGone().then(function() { return 'gone'; });
         var q = tree && tree.P[pid];
         if (q && q.a && Array.isArray(q.a.voice)) q.a.voice = q.a.voice.filter(function(x) { return x.id !== vid; });
         return saveTree();
-      }).then(function() { toast(T('Grabación borrada.', 'Recording deleted.')); render(); });
+      }).then(function(ok) {
+        if (ok === 'gone') return;
+        if (!ok) throw new Error('local');
+        toast(T('Grabación borrada.', 'Recording deleted.')); render();
+      }).catch(function() { toast(fail); render(); });
     });
   }
   // The parents' list of a person's voice notes, in the photos and documents panel.

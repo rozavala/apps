@@ -30,7 +30,10 @@ async function open(page, o = {}) {
         server.files[id] = { type: req.headers()['content-type'], body: req.postDataBuffer() };
         return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"saved"}' });
       }
-      if (req.method() === 'DELETE') { delete server.files[id]; return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"deleted"}' }); }
+      if (req.method() === 'DELETE') {
+        if (server.failDelete) return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"x"}' });
+        delete server.files[id]; return route.fulfill({ status: 200, contentType: 'application/json', body: '{"status":"deleted"}' });
+      }
       const f = server.files[id];
       return f ? route.fulfill({ status: 200, contentType: f.type.split(';')[0], body: f.body, headers: { 'Access-Control-Allow-Origin': '*' } }) : route.fulfill({ status: 404, body: '' });
     }
@@ -213,6 +216,88 @@ test.describe('Árbol familiar: voice notes', () => {
     // (the upload runs after the save; until it is done the pieces do not match yet)
     await expect.poll(() => page.evaluate(() => ArbolSync.pull(0).then(r => [r.tree.P.I12.a.voice.length, r.tree.P.I11.a.voice.length], () => null))).toEqual([1, 1]);
     expect(server.refused || 0).toBe(0);
+  });
+
+  test('when the tree cannot be saved, a retry reuses the uploaded recording: one file on the server, one note', async ({ page }) => {
+    const server = await open(page);
+    await person(page, GRANDMA);
+    await page.click('[data-act=vrec]');
+    await record(page, 700);
+    // this device's store refuses the first save
+    await page.evaluate(() => {
+      // @ts-ignore
+      const real = ArbolDB.put; let n = 0;
+      // @ts-ignore
+      ArbolDB.put = function() { return n++ === 0 ? Promise.reject(new Error('quota')) : real.apply(this, arguments); };
+    });
+    await page.click('[data-act=vsave]');
+    await expect(page.locator('.ar-vrec .ar-warn')).toContainText('The recording is still here');
+    expect(await voiceOf(page, GRANDMA)).toHaveLength(0);
+    expect(server.puts).toBe(1);
+    await page.fill('#ar-vtitle', 'Second try');
+    await page.click('[data-act=vsave]');
+    await expect(page.locator('.ar-vrec')).toHaveCount(0);
+    const v = await voiceOf(page, GRANDMA);
+    expect(v).toHaveLength(1);
+    expect(v[0].t).toBe('Second try');
+    expect(server.puts).toBe(1);                                    // uploaded once
+    expect(Object.keys(server.files)).toEqual([v[0].id]);
+  });
+
+  test('a recording thrown away after a failed save leaves no file behind', async ({ page }) => {
+    const server = await open(page);
+    await person(page, GRANDMA);
+    await page.click('[data-act=vrec]');
+    await record(page, 600);
+    // @ts-ignore
+    await page.evaluate(() => { ArbolDB.put = () => Promise.reject(new Error('quota')); });
+    await page.click('[data-act=vsave]');
+    await expect(page.locator('.ar-vrec .ar-warn')).toContainText('The recording is still here');
+    expect(Object.keys(server.files)).toHaveLength(1);
+    await page.click('[data-act=vredo]');
+    await expect.poll(() => Object.keys(server.files).length).toBe(0);
+  });
+
+  test('if a parent deleted the tree on another device, saving a note does not bring the tree back', async ({ page }) => {
+    const server = await open(page);
+    await person(page, GRANDMA);
+    await page.click('[data-act=vrec]');
+    await record(page, 600);
+    // another device deletes the tree: an "empty" manifest, newer than this one
+    // @ts-ignore
+    await page.evaluate(() => ArbolDB.get().then(r => ArbolSync.push(null, r.ts + 5000)));
+    await page.click('[data-act=vsave]');
+    await expect(page.locator('.ar-vrec')).toHaveCount(0);
+    await expect(page.locator('#ar-wrap')).toContainText('Ask a grown-up');
+    expect((server.items['_household/family_tree'] || {}).empty).toBe(1);   // still deleted on the server
+    // @ts-ignore
+    expect(await page.evaluate(() => ArbolDB.get())).toBeNull();
+    await expect.poll(() => Object.keys(server.files).length).toBe(0);       // and the uploaded file is gone too
+  });
+
+  test('a note whose file cannot be deleted from the server stays, with a message', async ({ page }) => {
+    const server = await open(page, { voice: { [GRANDMA]: [note('e1', { t: 'Mine', by: 'lucia', who: 'Lucia' })] } });
+    const fid = 'e1'.padStart(32, '0');
+    server.files[fid] = { type: 'audio/webm', body: Buffer.from([0x1A, 0x45, 0xDF, 0xA3, 0]) };
+    await person(page, GRANDMA);
+    server.failDelete = true;
+    await page.locator('.ar-vnote [data-act=vdel]').click();
+    await page.click('.zsd-ok');
+    await expect(page.locator('.zsd-toast')).toContainText('could not be deleted');
+    expect(await voiceOf(page, GRANDMA)).toHaveLength(1);
+    await expect(page.locator('.ar-vnote')).toHaveCount(1);
+    // offline: refused at once, nothing changes
+    await page.evaluate(() => { /** @type {any} */ (window).__offline = true; });
+    await page.locator('.ar-vnote [data-act=vdel]').click();
+    await page.click('.zsd-ok');
+    expect(await voiceOf(page, GRANDMA)).toHaveLength(1);
+    // back online, the server answers: deleted from both
+    await page.evaluate(() => { /** @type {any} */ (window).__offline = false; });
+    server.failDelete = false;
+    await page.locator('.ar-vnote [data-act=vdel]').click();
+    await page.click('.zsd-ok');
+    await expect.poll(async () => (await voiceOf(page, GRANDMA)).length).toBe(0);
+    expect(server.files[fid]).toBeUndefined();
   });
 
   test('a blocked microphone says how to allow it', async ({ page }) => {

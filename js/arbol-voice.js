@@ -124,7 +124,7 @@ var ArbolVoice = (function() {
       var sec = (Date.now() - t0) / 1000, l = level();
       levels.push(l);
       if (opts.onTick) { try { opts.onTick({ sec: sec, level: l }); } catch (e) {} }
-      if (sec >= MAX_SEC) self.stop();
+      if (sec >= MAX_SEC) self.stop().catch(function() {});   // the caller's own stop() gets the take
     }
     function release() {
       if (timer) { clearInterval(timer); timer = null; }
@@ -159,12 +159,14 @@ var ArbolVoice = (function() {
         throw new Error(n === 'NotAllowedError' || n === 'SecurityError' ? 'denied' : n === 'NotFoundError' ? 'nomic' : 'failed');
       });
     };
+    var stopping = null;
     this.stop = function() {
       if (!rec) return Promise.reject(new Error('not started'));
+      if (stopping) return stopping;          // once only: the 10-minute limit and the Stop button can both ask
       var dur = (Date.now() - t0) / 1000;
       if (timer) { clearInterval(timer); timer = null; }
       if (rec.state !== 'inactive') { try { rec.stop(); } catch (e) {} }
-      return done.then(function() {
+      stopping = done.then(function() {
         release();
         if (cancelled) throw new Error('cancelled');
         var t = baseType(rec.mimeType || type) || baseType(chunks[0] && chunks[0].type) || 'audio/webm';
@@ -172,6 +174,7 @@ var ArbolVoice = (function() {
         if (!blob.size) throw new Error('empty');
         return { blob: blob, type: t, dur: Math.round(Math.min(MAX_SEC, dur)), w: pack(levels) };
       });
+      return stopping;
     };
     this.cancel = function() {
       cancelled = true;
