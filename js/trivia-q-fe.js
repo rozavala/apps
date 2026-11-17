@@ -208,7 +208,7 @@
     'Así lo explica el Evangelio de San Mateo (Mateo 1, 23).', 'That is how the Gospel of Saint Matthew explains it (Matthew 1:23).'],
   ['nv-33', 4, 'mc', '¿De qué color se viste el sacerdote en Adviento?', 'What colour does the priest wear during Advent?', [['Morado', 'Violet'], ['Verde', 'Green'], ['Rojo', 'Red'], ['Negro', 'Black']],
     'El tercer domingo, llamado Gaudete ("alégrense"), se puede usar el color rosado.', 'On the third Sunday, called Gaudete ("rejoice"), rose may be worn.', { s: 'Instrucción General del Misal Romano, 346' }],
-  ['nv-34', 4, 'mc', '¿Quién era rey de Judea cuando nació Jesús?', 'Who was king of Judea when Jesus was born?', ['Herodes', 'David', 'Salomón', 'Saúl'],
+  ['nv-34', 4, 'mc', '¿Quién era rey de Judea cuando nació Jesús?', 'Who was king of Judea when Jesus was born?', [['Herodes', 'Herod'], 'David', ['Salomón', 'Solomon'], ['Saúl', 'Saul']],
     'Los Reyes Magos llegaron a Jerusalén y le preguntaron a Herodes dónde había nacido el rey de los judíos (Mateo 2, 1–2).', 'The Wise Men came to Jerusalem and asked Herod where the king of the Jews had been born (Matthew 2:1–2).'],
   ['nv-35', 4, 'mc', '¿Desde qué año la Navidad es feriado nacional en Estados Unidos?', 'Since what year has Christmas been a federal holiday in the United States?', ['1870', '1776', '1920', '1955'],
     'El Congreso la declaró feriado junto con el Año Nuevo, el 4 de julio y el Día de Acción de Gracias.', 'Congress made it a holiday together with New Year’s Day, the Fourth of July and Thanksgiving.', { s: 'U.S. Office of Personnel Management: federal holidays' }],

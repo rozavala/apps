@@ -103,6 +103,44 @@ test.describe('Trivia Familiar: the question bank', () => {
     });
   });
 
+  test('answers written as one string are not Spanish-only names', () => {
+    // A name that is different in English must be an [es, en] pair, or the
+    // English game shows the Spanish word ("Atenas", "Miguel Ángel").
+    const esOnly = new Set();
+    G.WORLD_ATLAS_DATA.forEach(c => {
+      if (c.nameEs !== c.name) esOnly.add(c.nameEs);
+      if (c.capitalEs && c.capitalEs !== c.capital) esOnly.add(c.capitalEs);
+    });
+    ['Miguel Ángel', 'Rafael', 'Pompeya', 'Herodes', 'Salomón', 'Saúl', 'Moisés', 'Noé', 'Nicolás Copérnico', 'Cristóbal Colón',
+     'Fernando de Magallanes', 'Julio César', 'César Augusto', 'Nerón', 'Constantino', 'Ptolomeo', 'Aristóteles', 'Pitágoras',
+     'Arquímedes', 'Euclides', 'Juan', 'Pedro', 'Pablo', 'Mateo', 'Marcos', 'Lucas', 'José', 'María', 'Jesús'].forEach(n => esOnly.add(n));
+    const bad = [];
+    ROWS.forEach(r => {
+      if (!Array.isArray(r[5])) return;
+      r[5].forEach(a => { if (typeof a === 'string' && esOnly.has(a)) bad.push(r[0] + ': ' + a); });
+    });
+    expect(bad).toEqual([]);
+  });
+
+  test('generated "did you know?" lines read well and never claim a full list of borders', () => {
+    const bad = [];
+    GEN.forEach(r => {
+      [r[6], r[7]].forEach(t => {
+        if (/\.\./.test(t)) bad.push(r[0] + ' double full stop: ' + t);
+        if (/of Chile of|Chile de Chile|chilena de Chile/.test(t)) bad.push(r[0] + ': ' + t);
+      });
+      if (/limita con (?!países como)/.test(r[6]) || /borders (?!countries such as)/.test(r[7])) bad.push(r[0] + ' border list: ' + r[7]);
+    });
+    expect(bad).toEqual([]);
+    // France is not said to border Brazil (that is French Guiana, overseas).
+    const fra = GEN.find(r => r[0] === 'ge-map-fra');
+    expect(fra[7]).not.toContain('Brazil');
+    expect(fra[8].o).not.toContain('bra');
+    // A country with more than one capital uses the atlas's note.
+    const zaf = GEN.find(r => r[0] === 'ge-map-zaf');
+    expect(zaf[7]).toContain('Cape Town');
+  });
+
   test('less obvious facts for the older players carry a source', () => {
     // Tier-4 questions cite a source, or the passage they quote
     // ("Lucas 2, 1"); pure arithmetic needs neither.

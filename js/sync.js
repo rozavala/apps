@@ -622,8 +622,46 @@ var CloudSync = (function() {
     return out;
   }
 
+  // ── Trivia Familiar merge ─────────────────────────────────────
+  // One game night saves a record for every kid who played, not only
+  // the one signed in, so a device's copy of a sibling's record can be
+  // old. Each finished game is kept by its id in g: { id: [right, asked,
+  // won, score] }; the merge is the union of games, the larger of each
+  // running total, and each question's latest "seen" mark (the 700
+  // most recent), so neither side can take games away from the other.
+  var TRIVIA_HIST_MAX = 700;
+  function _mergeTrivia(server, local) {
+    var s = server || {}, l = local || {};
+    var out = Object.assign({}, s, l);
+    var g = Object.assign({}, s.g && typeof s.g === 'object' ? s.g : {}, l.g && typeof l.g === 'object' ? l.g : {});
+    out.g = g;
+    var sum = { games: 0, wins: 0, right: 0, asked: 0 }, best = 0;
+    Object.keys(g).forEach(function(id) {
+      var r = Array.isArray(g[id]) ? g[id] : [];
+      sum.games++; sum.right += r[0] | 0; sum.asked += r[1] | 0; sum.wins += r[2] ? 1 : 0;
+      best = Math.max(best, r[3] | 0);
+    });
+    ['games', 'wins', 'right', 'asked'].forEach(function(k) { out[k] = Math.max(s[k] | 0, l[k] | 0, sum[k]); });
+    out.best = Math.max(s.best | 0, l.best | 0, best);
+    var h = {}, sh = s.hist || {}, lh = l.hist || {};
+    Object.keys(sh).concat(Object.keys(lh)).forEach(function(id) { h[id] = Math.max(sh[id] | 0, lh[id] | 0); });
+    var ids = Object.keys(h);
+    if (ids.length > TRIVIA_HIST_MAX) {
+      ids.sort(function(a, b) { return h[b] - h[a]; });
+      ids.slice(TRIVIA_HIST_MAX).forEach(function(id) { delete h[id]; });
+    }
+    out.hist = h;
+    out.last = String(s.last || '') > String(l.last || '') ? s.last : l.last;
+    if (!out.last) delete out.last;
+    out.v = 1;
+    var st = s._syncedAt || l._syncedAt;
+    if (st) out._syncedAt = st; else delete out._syncedAt;
+    return out;
+  }
+
   // The household event logs, by sync name: each is merged read-before-write.
-  var EVENT_LOGS = { bank: _mergeBank, challenges: _mergeChallenges };
+  // Trivia Familiar is merged the same way (see above).
+  var EVENT_LOGS = { bank: _mergeBank, challenges: _mergeChallenges, trivia: _mergeTrivia };
 
   // Content only, key order and bookkeeping aside
   function _canon(v) {
@@ -933,6 +971,16 @@ var CloudSync = (function() {
               } catch (e) {
                 if (typeof Debug !== 'undefined') Debug.warn('[Sync] routines merge failed for ' + key);
               }
+              continue;
+            }
+
+            if (appName === 'trivia') {
+              var tvMerged = _mergeTrivia(serverData, localMissing ? null : localData);
+              if (localMissing || _canon(tvMerged) !== _canon(localData)) {
+                try { localStorage.setItem(key, JSON.stringify(tvMerged)); changed = true; }
+                catch (e) { if (typeof Debug !== 'undefined') Debug.warn('[Sync] Quota Exceeded for ' + key + ' skipping pull.'); }
+              }
+              if (_canon(tvMerged) !== _canon(serverData)) promises.push(state.push(key));
               continue;
             }
 
@@ -1296,5 +1344,6 @@ var CloudSync = (function() {
   state._mergeLM = _mergeLM;
   state._mergeBank = _mergeBank;
   state._mergeChallenges = _mergeChallenges;
+  state._mergeTrivia = _mergeTrivia;
   return state;
 })();

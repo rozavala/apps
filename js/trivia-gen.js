@@ -65,6 +65,13 @@ var TriviaGen = (function () {
     (A || []).forEach(function (c) { out[c.id] = c; });
     return A ? out : null;
   }
+  // "Su capital es X." — or the atlas's note for countries with more than
+  // one capital (South Africa, Bolivia, the Netherlands). No ".." after "D.C.".
+  function stop(t) { return /\.$/.test(t) ? t : t + '.'; }
+  function capSentence(c) {
+    if (c.capitalNote) return [stop(c.capitalNote.es), stop(c.capitalNote.en)];
+    return [stop('Su capital es ' + c.capitalEs), stop('Its capital is ' + c.capital)];
+  }
   function factOf(c) {
     var p = popPair(c.population);
     var es = capEs(esName(c)) + (p ? ' tiene unos ' + p[0] + ' de habitantes' : '') + ' y su moneda es el ' + c.currencyNameEs + '.';
@@ -118,8 +125,8 @@ var TriviaGen = (function () {
         var wrong = others(all, id, 3, function (x) { return WM.continentOf(x) === cont; });
         rows.push(['ge-flag-' + id, +t, 'pic', '¿De qué país es esta bandera?', 'Which country does this flag belong to?',
           [[c.nameEs, c.name]].concat(wrong.map(function (x) { return [A[x].nameEs, A[x].name]; })),
-          'Es la bandera ' + deEs(c) + ', en ' + CONT[cont][0] + '. Su capital es ' + c.capitalEs + '.',
-          'It is the flag of ' + (id === 'usa' || id === 'gbr' || id === 'nld' || id === 'phl' ? 'the ' : '') + c.name + ', in ' + CONT[cont][1] + '. Its capital is ' + c.capital + '.',
+          'Es la bandera ' + deEs(c) + ', en ' + CONT[cont][0] + '. ' + capSentence(c)[0],
+          'It is the flag of ' + (id === 'usa' || id === 'gbr' || id === 'nld' || id === 'phl' ? 'the ' : '') + c.name + ', in ' + CONT[cont][1] + '. ' + capSentence(c)[1],
           { art: 'flag-' + id, s: 'World Atlas' }]);
       });
     });
@@ -138,9 +145,11 @@ var TriviaGen = (function () {
         if (!c || !inf) return;
         // Three neighbours (or, for islands, the nearest big countries of
         // the same continent) so the four sit together on one map.
-        var near = (inf.n || []).filter(function (x) { return A[x] && WM.info(x) && WM.info(x).a > 40; });
+        var home = WM.continentOf(id);
+        var land = (inf.n || []).filter(function (x) { return WM.continentOf(x) === home; });
+        var near = land.filter(function (x) { return A[x] && WM.info(x) && WM.info(x).a > 40; });
         if (near.length < 3) {
-          var cont = WM.continentOf(id);
+          var cont = home;
           var pool = WM.codes().filter(function (x) { return x !== id && near.indexOf(x) < 0 && A[x] && WM.continentOf(x) === cont && WM.info(x) && WM.info(x).a > 120; });
           pool.sort(function (a, b) { return dist(WM.info(a).c, inf.c) - dist(WM.info(b).c, inf.c); });
           near = near.concat(pool).slice(0, 3);
@@ -150,13 +159,14 @@ var TriviaGen = (function () {
         }
         if (near.length < 3) return;
         var codes = [id].concat(near), cont = CONT[WM.continentOf(id)] || ['', ''];
-        var bord = near.filter(function (x) { return (inf.n || []).indexOf(x) >= 0; });
-        var en = id === 'usa' ? 'the United States' : c.name;
-        var more = (inf.n || []).length > bord.length;
-        var fEs = bord.length ? capEs(esName(c)) + ' limita' + (more ? ', entre otros,' : '') + ' con ' + list(bord.map(function (x) { return esName(A[x]); }), 'y') + '. Su capital es ' + c.capitalEs + '.'
-                              : capEs(esName(c)) + ' está en ' + cont[0] + ' y su capital es ' + c.capitalEs + '.';
-        var fEn = bord.length ? capEs(en) + ' borders ' + (more ? 'several countries, among them ' : '') + list(bord.map(function (x) { return A[x].name; }), 'and') + '. Its capital is ' + c.capital + '.'
-                              : capEs(en) + ' is in ' + cont[1] + ' and its capital is ' + c.capital + '.';
+        // The map's neighbour lists are not complete, so a border fact
+        // only ever says "countries such as", never the whole list.
+        var bord = near.filter(function (x) { return land.indexOf(x) >= 0; });
+        var en = id === 'usa' ? 'the United States' : c.name, cs = capSentence(c);
+        var fEs = (bord.length ? capEs(esName(c)) + ' limita con países como ' + list(bord.map(function (x) { return esName(A[x]); }), 'y') + '. '
+                               : capEs(esName(c)) + ' está en ' + cont[0] + '. ') + cs[0];
+        var fEn = (bord.length ? capEs(en) + ' borders countries such as ' + list(bord.map(function (x) { return A[x].name; }), 'and') + '. '
+                               : capEs(en) + ' is in ' + cont[1] + '. ') + cs[1];
         rows.push(['ge-map-' + id, +t, 'map', '¿Dónde está ' + esName(c) + '? Toca su letra.', 'Where is ' + en + '? Tap its letter.',
           codes.map(function (x) { return [A[x].nameEs, A[x].name]; }), fEs, fEn, { map: 'world', o: codes, s: 'World Atlas' }]);
       });
@@ -205,7 +215,7 @@ var TriviaGen = (function () {
       var wrong = others(['as', 'eu', 'af', 'na', 'sa', 'oc'], cont, 3);
       rows.push(['ge-in-' + p[0], p[1], 'mc', '¿En qué continente está ' + esName(c) + '?', 'Which continent is ' + (p[0] === 'phl' ? 'the Philippines' : c.name) + ' in?',
         [CONT[cont]].concat(wrong.map(function (x) { return CONT[x]; })),
-        'Su capital es ' + c.capitalEs + '.', 'Its capital is ' + c.capital + '.', { s: 'World Atlas' }]);
+        capSentence(c)[0], capSentence(c)[1], { s: 'World Atlas' }]);
     });
     var names = MONEY.map(function (m) { return A[m[0]]; }).filter(Boolean);
     MONEY.forEach(function (m) {
@@ -225,7 +235,8 @@ var TriviaGen = (function () {
   }
 
   // ── Chile's regions ─────────────────────────────────────────────
-  var ZONE = { norte: ['el Norte', 'the North'], centro: ['la zona central', 'central Chile'], sur: ['el Sur', 'the South'], patagonia: ['la Patagonia', 'Patagonia'] };
+  var ZONE = { norte: ['el Norte de Chile', 'northern Chile'], centro: ['la zona central de Chile', 'central Chile'],
+               sur: ['el Sur de Chile', 'southern Chile'], patagonia: ['la Patagonia chilena', 'Chilean Patagonia'] };
   var REG_TIER = { RM: 3, VS: 3, MA: 3, AN: 3, LL: 3, BI: 3, CO: 3, AR: 3, AP: 3 };
   function regionName(r) {
     if (r.id === 'RM') return ['la Región Metropolitana', 'the Metropolitan Region'];
@@ -245,7 +256,7 @@ var TriviaGen = (function () {
       var o = [r].concat(near);
       rows.push(['cl-reg-' + r.id.toLowerCase(), tier, 'map', '¿Dónde está ' + nm[0] + '? Toca su letra.', 'Where is ' + nm[1] + '? Tap its letter.',
         o.map(function (x) { var n = regionName(x); return [capEs(n[0]), capEs(n[1])]; }),
-        capEs(nm[0]) + ' está en ' + z[0] + ' de Chile y su capital es ' + r.capital + '.',
+        capEs(nm[0]) + ' está en ' + z[0] + ' y su capital es ' + r.capital + '.',
         capEs(nm[1]) + ' is in ' + z[1] + ' and its capital is ' + r.capital + '.',
         { map: 'chile', o: o.map(function (x) { return x.id; }), s: 'Descubre Chile' }]);
       // Capital of the region (Santiago is too easy to ask about).
@@ -254,8 +265,8 @@ var TriviaGen = (function () {
       [3, -3, 5, -5, 7, -7, 2, -2].forEach(function (d) { var j = i + d; if (wrong.length < 3 && j >= 0 && j < R.length && R[j].capital !== r.capital) wrong.push(R[j].capital); });
       rows.push(['cl-cap-' + r.id.toLowerCase(), tier === 3 ? 3 : 4, 'mc', '¿Cuál es la capital de ' + nm[0] + '?', 'What is the capital of ' + nm[1] + '?',
         [r.capital].concat(wrong),
-        r.capital + ' es la capital de ' + nm[0] + ', en ' + z[0] + ' de Chile.',
-        r.capital + ' is the capital of ' + nm[1] + ', in ' + z[1] + ' of Chile.', { s: 'Descubre Chile' }]);
+        r.capital + ' es la capital de ' + nm[0] + ', en ' + z[0] + '.',
+        r.capital + ' is the capital of ' + nm[1] + ', in ' + z[1] + '.', { s: 'Descubre Chile' }]);
     });
     return rows;
   }

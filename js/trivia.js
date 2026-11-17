@@ -51,6 +51,7 @@ var Trivia = (function () {
     d.v = 1;
     ['games', 'wins', 'right', 'asked', 'best'].forEach(function (k) { d[k] = d[k] | 0; });
     d.hist = obj(d.hist);
+    d.g = obj(d.g);   // finished games by id: [right, asked, won (1/0), score]
     return d;
   }
   function saveKid(name, d) {
@@ -336,10 +337,17 @@ var Trivia = (function () {
       p.team = setup.teams ? (setup.team[p.id] || '') : '';
       hist[p.id] = p.kid ? loadKid(p.name).hist : obj(fam.hist[p.id]);
     });
+    // Before the game, fetch the other kids' records from the family
+    // server, so this device starts from their real history and the save
+    // at the end merges onto the latest copy.
+    if (typeof CloudSync !== 'undefined' && CloudSync.online && CloudSync.pull) {
+      players.forEach(function (p) { if (p.kid) { try { CloudSync.pull(kidKey(p.name)); } catch (e) {} } });
+    }
     game = E.createGame(bank, players, {
       cats: setup.cats, rounds: setup.rounds, teams: setup.teams, headStart: setup.headStart, timers: setup.timers,
       seed: seed || Date.now(), hist: hist, canPlay: playable
     });
+    game.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     sound('click');
     viewPass();
   }
@@ -645,12 +653,17 @@ var Trivia = (function () {
       game.sides.forEach(function (s) { if (s.members.indexOf(p.id) >= 0) side = s; });
       if (p.kid) {
         var d = loadKid(p.name);
+        // Kept by game id, so sync can merge two devices' copies without
+        // losing a game (see _mergeTrivia in sync.js).
+        d.g[game.id] = [side ? side.right : 0, side ? side.asked : 0, side && side.place === 1 ? 1 : 0, side ? side.score : 0];
         d.games++;
         d.right += side ? side.right : 0;
         d.asked += side ? side.asked : 0;
         if (side && side.place === 1) d.wins++;
         if (side && side.score > d.best) d.best = side.score;
-        d.hist = game.hist[p.id] || d.hist;
+        var h = game.hist[p.id] || {};
+        for (var k in d.hist) if (!(k in h)) h[k] = d.hist[k];
+        d.hist = h;
         saveKid(p.name, d);
       } else {
         fam.hist[p.id] = game.hist[p.id] || {};

@@ -60,7 +60,7 @@
     'Las celdas del panel están hechas de silicio, que produce corriente eléctrica cuando le llega la luz.', 'The panel’s cells are made of silicon, which makes electric current when light hits it.'],
   ['ci-25', 3, 'mc', '¿Cuántos huesos tiene el cuerpo de un adulto?', 'How many bones are in an adult’s body?', ['206', '106', '306', '56'],
     'Un bebé nace con unos 300 huesos; varios se unen al crecer y quedan 206.', 'A baby is born with about 300 bones; several join together while growing, leaving 206.', { s: 'Britannica: human skeleton' }],
-  ['ci-26', 3, 'mc', '¿Quién explicó la gravitación universal en 1687?', 'Who explained universal gravitation in 1687?', ['Isaac Newton', 'Galileo Galilei', 'Albert Einstein', 'Nicolás Copérnico'],
+  ['ci-26', 3, 'mc', '¿Quién explicó la gravitación universal en 1687?', 'Who explained universal gravitation in 1687?', ['Isaac Newton', 'Galileo Galilei', 'Albert Einstein', ['Nicolás Copérnico', 'Nicolaus Copernicus']],
     'Newton publicó sus leyes del movimiento y de la gravitación en su libro "Principia".', 'Newton published his laws of motion and of gravitation in his book "Principia".', { s: 'Britannica: Isaac Newton' }],
   ['ci-27', 3, 'mc', '¿Qué parte de la planta hace la mayor parte de la fotosíntesis?', 'Which part of a plant does most of the photosynthesis?', [['Las hojas', 'The leaves'], ['Las raíces', 'The roots'], ['Las flores', 'The flowers'], ['Las semillas', 'The seeds']],
     'Las hojas tienen clorofila, el pigmento verde que capta la luz del Sol.', 'Leaves have chlorophyll, the green pigment that captures sunlight.'],
