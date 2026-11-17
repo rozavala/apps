@@ -106,11 +106,11 @@ var LectorData = (function() {
     { id: 'en2', lang: 'en', letters: ['c', 'e', 'h', 'r', 'm', 'd'], acts: ['sounds', 'blend', 'build', 'read'], icon: 'cat',
       title: ['c e h r m d', 'c e h r m d'],
       pics: P('cat|c.a.t|cat cap|c.a.p|cap hen|h.e.n|hen hat|h.a.t|hat ham|h.a.m|ham rat|r.a.t|rat net|n.e.t|net pen|p.e.n|pen map|m.a.p|map dad|d.a.d|dad'),
-      more: 'red ran and am can ha sad mad had set met men ten den did dip hid hit him mat man pad rip rim tim pam dan ted sam' },
+      more: 'red ran and am can ha sad mad had set met men ten den did dip hid hit him mat man pad rip rim tim pam dan ted sam has pets tent' },
     { id: 'en3', lang: 'en', letters: ['g', 'o', 'u', 'l', 'f', 'b', 'x'], acts: ['sounds', 'blend', 'build', 'read'], icon: 'dog',
       title: ['g o u l f b x', 'g o u l f b x'],
       pics: P('dog|d.o.g|dog log|l.o.g|log pot|p.o.t|pot mop|m.o.p|mop fox|f.o.x|fox box|b.o.x|box sun|s.u.n|sun bus|b.u.s|bus bug|b.u.g|bug cup|c.u.p|cup rug|r.u.g|rug bed|b.e.d|bed pig|p.i.g|pig leg|l.e.g|leg bag|b.a.g|bag'),
-      more: 'got up on mom dig mud fun hug run hop top hot not dot lot gum hum bun nut cut but us big bit bat fan fat fit fin fig lip lap lid tug dug mmm' },
+      more: 'got up on mom dig mud fun hug run hop top hot not dot lot gum hum bun nut cut but us big bit bat fan fat fit fin fig lip lap lid tug dug mmm fell help' },
     { id: 'en4', lang: 'en', letters: ['sh', 'ch', 'th', 'ck', 'j', 'w', 'v'], acts: ['sounds', 'blend', 'build', 'read'], icon: 'ship',
       title: ['sh ch th ck j w v', 'sh ch th ck j w v'],
       pics: P('ship|sh.i.p|ship fish|f.i.sh|fish chick|ch.i.ck|chick duck|d.u.ck|duck sock|s.o.ck|sock rock|r.o.ck|rock jam|j.a.m|jam van|v.a.n|van web|w.e.b|web jet|j.e.t|jet'),
@@ -239,6 +239,16 @@ var LectorData = (function() {
       ['Ha, ha, ha!', 'field', [['dad', 100, 190, 125], ['hat', 215, 186, 85], ['hen', 215, 146, 48]]],
       ['Dad is mad? No, no, no!', 'field', [['dad', 105, 190, 130], ['hat', 225, 186, 85], ['hen', 225, 146, 48]]]
     ] },
+    { id: 'en-pam-cat', lang: 'en', lv: 2, title: 'Pam and the Cat', cover: 6, pages: [
+      ['Pam has a cat.', 'garden', [['girl', 105, 190, 145], ['cat', 222, 190, 92]]],
+      ['The cat hid!', 'garden', [['tent', 262, 176, 92], ['girl', 130, 190, 150]]],
+      ['Is the cat in the hat?', 'garden', [['girl', 92, 190, 140], ['hat', 218, 186, 110]]],
+      ['No. Is the cat in the pan?', 'kitchen', [['girl', 92, 190, 140], ['pan', 222, 180, 115]]],
+      ['No. Is the cat in the tent?', 'garden', [['girl', 82, 190, 135], ['tent', 220, 190, 160]]],
+      ['The cat is in the tent!', 'garden', [['tent', 182, 190, 175], ['peek', 182, 188, 58], ['girl', 64, 190, 120]]],
+      ['Pam pets the cat.', 'room', [['girl', 125, 190, 150], ['cat', 210, 190, 88, true]]],
+      ['The cat naps.', 'room', [['nap', 160, 188, 140]]]
+    ] },
     { id: 'en-mud-fun', lang: 'en', lv: 3, title: 'Mud Fun', cover: 0, pages: [
       ['A big pig.', 'field', [['pig', 160, 188, 140]]],
       ['The pig got in the mud.', 'mud', [['pig', 165, 170, 120]]],
@@ -255,6 +265,15 @@ var LectorData = (function() {
       ['The bus ran and ran.', 'road', [['bus', 160, 172, 160]]],
       ['Up, up, up!', 'road', [['bus', 160, 172, 150], ['sun', 265, 55, 60]]],
       ['Fun, fun, fun!', 'road', [['bus', 150, 172, 120], ['mom', 245, 190, 80], ['dad', 285, 190, 84], ['kid', 40, 190, 70]]]
+    ] },
+    { id: 'en-fox-bug', lang: 'en', lv: 3, title: 'Fox and Bug', cover: 6, pages: [
+      ['A fox sat on a log.', 'woods', [['log', 165, 192, 150], ['fox', 150, 122, 96]]],
+      ['A bug sat on the log.', 'woods', [['log', 165, 192, 150], ['fox', 136, 122, 96], ['ladybug', 206, 120, 38, true]]],
+      ['The bug fell in the mud!', 'mud', [['fox', 70, 190, 100], ['ladybug-oh', 210, 160, 44, true], ['splash', 210, 170, 76]]],
+      ['Help! Help!', 'mud', [['ladybug-oh', 165, 158, 96, true], ['splash', 165, 178, 160]]],
+      ['The fox ran to the mud.', 'mud', [['fox', 110, 180, 112], ['ladybug-oh', 236, 160, 40, true], ['splash', 236, 170, 70]]],
+      ['The fox got the bug up.', 'mud', [['fox', 160, 180, 128], ['ladybug', 156, 92, 34]]],
+      ['The fox and the bug sit in the sun.', 'woods', [['log', 165, 192, 150], ['fox', 136, 122, 96], ['ladybug', 204, 120, 38, true], ['sun', 270, 46, 58]]]
     ] },
     { id: 'en-duck-chick', lang: 'en', lv: 4, title: 'Duck and Chick', cover: 0, pages: [
       ['A duck and a chick.', 'pond', [['duck', 115, 176, 105], ['chick', 225, 182, 80]]],
