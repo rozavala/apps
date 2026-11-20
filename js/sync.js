@@ -400,11 +400,18 @@ var CloudSync = (function() {
     var localNewer = _parseTs(l._syncedAt) > _parseTs(s._syncedAt);
     var out = Object.assign({}, s, l);
 
-    // Parent-edited checklists: newer side wins as a unit, so removing
-    // an item doesn't come back from the other device.
+    // Parent-edited checklists: the last EDITED side wins as a unit, so
+    // removing an item doesn't come back from the other device. The edit
+    // stamps templatesTs; _syncedAt can't decide this, because a device's
+    // own edit doesn't move it, and the server's copy won every tie and
+    // undid the edit. Old copies without templatesTs fall back to it.
     var sT = s.templates, lT = l.templates;
-    out.templates = (sT && lT) ? (localNewer ? lT : sT) : (lT || sT);
+    var sE = _parseTs(s.templatesTs), lE = _parseTs(l.templatesTs);
+    var takeL = (sT && lT) ? (sE !== lE ? lE > sE : localNewer) : !!lT;
+    out.templates = takeL ? lT : sT;
+    out.templatesTs = takeL ? l.templatesTs : s.templatesTs;
     if (!out.templates) delete out.templates;
+    if (!out.templatesTs) delete out.templatesTs;
 
     var sDays = s.days || {}, lDays = l.days || {};
     var routines = _routineIds(sDays, lDays);
@@ -1379,6 +1386,7 @@ var CloudSync = (function() {
   });
 
   state._mergeLM = _mergeLM;
+  state._mergeRoutines = _mergeRoutines;
   state._mergeBank = _mergeBank;
   state._mergeChallenges = _mergeChallenges;
   state._mergeTrivia = _mergeTrivia;

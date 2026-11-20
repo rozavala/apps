@@ -66,7 +66,7 @@ var Routines = (function() {
       { id: 'dinner',   label: 'Dinner 🍽️' },
       { id: 'table',    label: 'Clear the table 🧽' },
       { id: 'shower',   label: 'Shower 🚿' },
-      { id: 'hair_dry', label: 'Dry hair 💨', only: ['Emilia', 'Isabel'], days: [4, 0] },
+      { id: 'hair_dry', label: 'Wash + dry hair 💨', only: ['Emilia', 'Isabel'], days: [4, 0] },
       { id: 'laundry',  label: 'Laundry basket 🧺' },
       { id: 'towel',    label: 'Towel on chair 🪑' },
       { id: 'teeth_pm', label: 'Teeth + floss 🦷' },
@@ -454,11 +454,13 @@ var Routines = (function() {
 
   // Tasks added to DEFAULTS after kids already had lists of their own.
   // A kid on the default list gets them anyway; a kid with an edited
-  // list gets each one put in once, next to `after`, and the id is
-  // remembered in data.addedDefaults so a parent who removes it doesn't
-  // see it come back. Done in memory on every read and saved by the
-  // next write (a tick or an edit): reading never writes by itself, so
-  // a device with an old copy can't push that copy over newer edits.
+  // list gets each one put in, next to `after`, every time the list is
+  // read, until a parent edits the list. The id is then remembered in
+  // templates._added, so a parent who removes it doesn't see it come
+  // back. The mark lives INSIDE templates on purpose: sync moves the
+  // lists as one unit, and a mark kept beside them (the first version,
+  // data.addedDefaults) survived when the list it described lost the
+  // merge, which hid the task for good. Reading never writes by itself.
   var ADDED_DEFAULTS = [
     { which: 'evening', id: 'hair_dry', after: 'shower' }
   ];
@@ -467,17 +469,26 @@ var Routines = (function() {
     ADDED_DEFAULTS.forEach(function(a) {
       var list = data.templates[a.which];
       if (!Array.isArray(list) || !list.length) return;   // on the defaults: already there
-      var seen = Array.isArray(data.addedDefaults) ? data.addedDefaults : [];
+      var seen = Array.isArray(data.templates._added) ? data.templates._added : [];
       if (seen.indexOf(a.id) !== -1) return;
       var item = (DEFAULTS[a.which] || []).filter(function(it) { return it.id === a.id; })[0];
       if (!item || !_isFor(item, userName)) return;
-      if (!list.some(function(it) { return it && it.id === a.id; })) {
-        var at = -1;
-        list.forEach(function(it, i) { if (it && it.id === a.after) at = i; });
-        list.splice(at === -1 ? list.length : at + 1, 0, _copyItem(item));
-      }
-      data.addedDefaults = seen.concat([a.id]);
+      if (list.some(function(it) { return it && it.id === a.id; })) return;
+      var at = -1;
+      list.forEach(function(it, i) { if (it && it.id === a.after) at = i; });
+      list.splice(at === -1 ? list.length : at + 1, 0, _copyItem(item));
     });
+  }
+
+  // A parent edit: everything new on show is now part of the list (or
+  // was removed on purpose), and the edit time decides sync merges.
+  function _markEdited(data) {
+    if (!data.templates) data.templates = {};
+    var seen = Array.isArray(data.templates._added) ? data.templates._added.slice() : [];
+    ADDED_DEFAULTS.forEach(function(a) { if (seen.indexOf(a.id) === -1) seen.push(a.id); });
+    data.templates._added = seen;
+    data.templatesTs = Date.now();
+    delete data.addedDefaults;   // the first version's mark, see _addNewDefaults
   }
 
   // Caches that can be thrown away and rebuilt from the network. When
@@ -677,7 +688,7 @@ var Routines = (function() {
     var k = userName ? _keyForName(userName) : _storageKey();
     if (!k) return;
     var data = _read(k);
-    if (!data.templates) data.templates = {};
+    _markEdited(data);
     data.templates[which] = items.map(function(it, i) {
       var out = {
         id: it && it.id ? String(it.id) : 'custom_' + i + '_' + Date.now().toString(36),
@@ -700,7 +711,8 @@ var Routines = (function() {
     var k = userName ? _keyForName(userName) : _storageKey();
     if (!k) return;
     var data = _read(k);
-    if (data.templates) delete data.templates[which];
+    _markEdited(data);
+    delete data.templates[which];
     _write(k, data);
   }
 
