@@ -63,10 +63,18 @@ function mergeRoutines(existing, incoming) {
   const incomingNewer = parseTs(b._syncedAt) >= parseTs(a._syncedAt);
   const out = Object.assign({}, a, b);
 
-  // Parent-edited checklists move as a unit, newest wins.
+  // Parent-edited checklists move as a unit, the last EDITED wins.
+  // templatesTs is stamped by the edit itself; _syncedAt only says when
+  // a copy last reached the server, and a tick restamps it, so it can't
+  // tell an edited list from a stale one. Old copies without templatesTs
+  // fall back to _syncedAt.
   const aT = a.templates, bT = b.templates;
-  out.templates = (aT && bT) ? (incomingNewer ? bT : aT) : (bT || aT);
+  const aE = parseTs(a.templatesTs), bE = parseTs(b.templatesTs);
+  const takeB = (aT && bT) ? (aE !== bE ? bE > aE : incomingNewer) : !!bT;
+  out.templates = takeB ? bT : aT;
+  out.templatesTs = takeB ? b.templatesTs : a.templatesTs;
   if (!out.templates) delete out.templates;
+  if (!out.templatesTs) delete out.templatesTs;
 
   const aDays = a.days || {}, bDays = b.days || {};
   const routines = routineIds(aDays, bDays);
