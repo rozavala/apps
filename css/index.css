@@ -152,10 +152,14 @@
     .profile-card:nth-child(4) { animation-delay: 0.25s; }
     .profile-card:nth-child(5) { animation-delay: 0.3s; }
 
-    .profile-card:hover {
-      transform: translateY(-6px) scale(1.05);
-      border-color: var(--purple);
-      box-shadow: 0 16px 48px -12px var(--purple-glow);
+    /* Hover effects only for a real mouse: on an iPad, Safari keeps :hover on after a tap,
+       which left a profile card with a long shadow below it until the next tap. */
+    @media (hover: hover) and (pointer: fine) {
+      .profile-card:hover {
+        transform: translateY(-6px) scale(1.05);
+        border-color: var(--purple);
+        box-shadow: 0 16px 48px -12px var(--purple-glow);
+      }
     }
 
     /* Guest card */
@@ -164,9 +168,11 @@
       border-color: rgba(96,165,250,0.25) !important;
       background: rgba(96,165,250,0.03) !important;
     }
-    .guest-card:hover {
-      border-color: #60A5FA !important;
-      box-shadow: 0 16px 48px -12px rgba(59,130,246,0.3) !important;
+    @media (hover: hover) and (pointer: fine) {
+      .guest-card:hover {
+        border-color: #60A5FA !important;
+        box-shadow: 0 16px 48px -12px rgba(59,130,246,0.3) !important;
+      }
     }
     .guest-card .profile-name {
       color: #60A5FA;
@@ -184,7 +190,9 @@
       border: 3px solid;
       transition: transform 0.3s ease;
     }
-    .profile-card:hover .profile-avatar { transform: scale(1.1) rotate(-5deg); }
+    @media (hover: hover) and (pointer: fine) {
+      .profile-card:hover .profile-avatar { transform: scale(1.1) rotate(-5deg); }
+    }
 
     .profile-name {
       font-family: var(--font-display);
@@ -207,10 +215,12 @@
       border-color: rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.02);
     }
-    .profile-card.add-card:hover {
-      border-color: rgba(167,139,250,0.5);
-      background: rgba(167,139,250,0.05);
-      box-shadow: 0 12px 36px -12px rgba(167,139,250,0.2);
+    @media (hover: hover) and (pointer: fine) {
+      .profile-card.add-card:hover {
+        border-color: rgba(167,139,250,0.5);
+        background: rgba(167,139,250,0.05);
+        box-shadow: 0 12px 36px -12px rgba(167,139,250,0.2);
+      }
     }
     .add-icon {
       width: 64px;
@@ -1253,14 +1263,18 @@
       z-index: 2;
       padding: 0;
     }
-    .profile-card:hover .profile-edit-btn {
-      opacity: 1;
-      transform: scale(1);
+    @media (hover: hover) and (pointer: fine) {
+      .profile-card:hover .profile-edit-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
-    .profile-edit-btn:hover {
-      background: rgba(167,139,250,0.25);
-      border-color: rgba(167,139,250,0.5);
-      transform: scale(1.1) !important;
+    @media (hover: hover) and (pointer: fine) {
+      .profile-edit-btn:hover {
+        background: rgba(167,139,250,0.25);
+        border-color: rgba(167,139,250,0.5);
+        transform: scale(1.1) !important;
+      }
     }
     /* Always show on touch devices */
     @media (hover: none) {
